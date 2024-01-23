@@ -250,7 +250,7 @@ void NavigationModelImpl::SetNavigationStack()
     return;
 }
 
-void NavigationModelImpl::SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack)
+void NavigationModelImpl::SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack)
 {
     return;
 }

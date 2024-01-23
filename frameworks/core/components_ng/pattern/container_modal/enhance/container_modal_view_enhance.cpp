@@ -27,6 +27,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components/theme/advanced_pattern_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/gestures/pan_gesture.h"
@@ -564,6 +565,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItemIcon(InternalResource:
     auto iconLayoutProperty = icon->GetLayoutProperty<ImageLayoutProperty>();
     ImageSourceInfo sourceInfo;
     sourceInfo.SetResourceId(resourceId);
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<AdvancedPatternTheme>();
+    if (theme) {
+        sourceInfo.SetFillColor(theme->GetPrimaryColor());
+    } else {
+        LOGI("BuildMenuItemIcon AdvancedPatternTheme is null");
+    }
     iconLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     iconLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(TITLE_BUTTON_SIZE), CalcLength(TITLE_BUTTON_SIZE)));

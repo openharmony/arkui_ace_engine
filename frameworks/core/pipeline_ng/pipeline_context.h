@@ -57,6 +57,7 @@ public:
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using FoldStatusChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldStatus)>>;
+    using FoldDisplayModeChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldDisplayMode)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -68,6 +69,8 @@ public:
     ~PipelineContext() override = default;
 
     static RefPtr<PipelineContext> GetCurrentContext();
+
+    static RefPtr<PipelineContext> GetCurrentContextWithoutScope();
 
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
@@ -437,6 +440,20 @@ public:
         foldStatusChangedCallbackMap_.erase(callbackId);
     }
 
+    int32_t RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback)
+    {
+        if (callback) {
+            foldDisplayModeChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnRegisterFoldDisplayModeChangedCallback(int32_t callbackId)
+    {
+        foldDisplayModeChangedCallbackMap_.erase(callbackId);
+    }
+
     int32_t RegisterSurfacePositionChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
     {
         if (callback) {
@@ -549,6 +566,7 @@ public:
     void RestoreDefault() override;
 
     void OnFoldStatusChange(FoldStatus foldStatus) override;
+    void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) override;
 
     // for frontend animation interface.
     void OpenFrontendAnimation(
@@ -577,6 +595,8 @@ protected:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     void StartWindowMaximizeAnimation(
         int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    void StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
@@ -675,7 +695,7 @@ private:
 
     RefPtr<FrameNode> rootNode_;
 
-    RefPtr<FrameNode> curFocusNode_;
+    int32_t curFocusNodeId_ = -1;
 
     std::set<RefPtr<FrameNode>> needRenderNode_;
 
@@ -683,6 +703,7 @@ private:
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
     FoldStatusChangedCallbackMap foldStatusChangedCallbackMap_;
+    FoldDisplayModeChangedCallbackMap foldDisplayModeChangedCallbackMap_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;

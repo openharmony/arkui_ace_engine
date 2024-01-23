@@ -796,7 +796,7 @@ void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
 {
     auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
         JSRef<JSFunc>::Cast(info[0]));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](int32_t key,
                        NG::TextFieldCommonEvent& event) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

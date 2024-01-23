@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,13 +157,15 @@ void ScrollablePattern::ProcessNavBarReactOnEnd()
 
 bool ScrollablePattern::OnScrollPosition(double& offset, int32_t source)
 {
-    auto isAtTop = (IsAtTop() && Positive(offset));
-    auto refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
-    auto navigationInCoordination = CoordinateWithNavigation(offset, source, isAtTop);
-    auto modalSheetCoordinationMode = CoordinateWithSheet(offset, source, isAtTop);
-    if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination ||
-        (modalSheetCoordinationMode == ModalSheetCoordinationMode::SHEET_SCROLL)) {
-        return false;
+    if (needLinked_) {
+        auto isAtTop = (IsAtTop() && Positive(offset));
+        auto refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
+        auto navigationInCoordination = CoordinateWithNavigation(offset, source, isAtTop);
+        auto modalSheetCoordinationMode = CoordinateWithSheet(offset, source, isAtTop);
+        if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination ||
+            (modalSheetCoordinationMode == ModalSheetCoordinationMode::SHEET_SCROLL)) {
+            return false;
+        }
     }
 
     if (source == SCROLL_FROM_START) {
@@ -448,6 +450,7 @@ void ScrollablePattern::AddScrollEvent()
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
     InitTouchEvent(gestureHub);
+    RegisterWindowStateChangedCallback();
 }
 
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -480,6 +483,30 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
     }
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void ScrollablePattern::RegisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddWindowStateChangedCallback(host->GetId());
+}
+
+void ScrollablePattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveWindowStateChangedCallback(frameNode->GetId());
+}
+
+void ScrollablePattern::OnWindowHide()
+{
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    scrollable->StopFrictionAnimation();
 }
 
 void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
@@ -990,8 +1017,7 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
     FireOnScrollStart();
 }
 
-void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness,
-    float damping)
+void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping)
 {
     if (!springOffsetProperty_) {
         InitSpringOffsetProperty();
@@ -1003,7 +1029,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     });
 
     AnimationOption option;
-    auto curve = AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
+    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
     InitOption(option, CUSTOM_ANIMATION_DURATION, curve);
     isAnimationStop_ = false;
     springOffsetProperty_->Set(GetTotalOffset());
@@ -1141,7 +1167,7 @@ void ScrollablePattern::OnAttachToFrameNode()
 
 void ScrollablePattern::UninitMouseEvent()
 {
-    if (!boxSelectPanEvent_ || !mouseEvent_) {
+    if (!boxSelectPanEvent_) {
         return;
     }
     auto host = GetHost();
@@ -1150,10 +1176,6 @@ void ScrollablePattern::UninitMouseEvent()
     CHECK_NULL_VOID(gestureHub);
     gestureHub->RemovePanEvent(boxSelectPanEvent_);
     boxSelectPanEvent_.Reset();
-
-    auto mouseEventHub = host->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(mouseEventHub);
-    mouseEventHub->RemoveOnMouseEvent(mouseEvent_);
     ClearMultiSelect();
     ClearInvisibleItemsSelectedStatus();
     isMouseEventInit_ = false;
@@ -1163,21 +1185,6 @@ void ScrollablePattern::InitMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // use MouseEvent to obtain press position.
-    auto mouseEventHub = host->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(mouseEventHub);
-    if (!mouseEvent_) {
-        auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
-            auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->HandleMouseEventWithoutKeyboard(info);
-            }
-        };
-        mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    }
-    mouseEventHub->AddOnMouseEvent(mouseEvent_);
-
-    // use PanGesture to handle mouse box selection.
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (!boxSelectPanEvent_) {
@@ -1218,12 +1225,15 @@ void ScrollablePattern::InitMouseEvent()
 
 void ScrollablePattern::HandleDragStart(const GestureEvent& info)
 {
-    if (!IsItemSelected()) {
+    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    if (!IsItemSelected(info)) {
         ClearMultiSelect();
         ClearInvisibleItemsSelectedStatus();
+        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         lastMouseStart_ = mouseStartOffset_;
-        mouseEndOffset_ = mouseStartOffset_;
-        mousePressOffset_ = mouseStartOffset_;
+        mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         totalOffsetOfMousePressed_ = mousePressOffset_.GetMainOffset(axis_) + GetTotalOffset();
         canMultiSelect_ = true;
     }
@@ -1235,6 +1245,10 @@ void ScrollablePattern::HandleDragUpdate(const GestureEvent& info)
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
     if (!mousePressed_ || !canMultiSelect_) {
+        return;
+    }
+    if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON) {
+        HandleDragEnd(info);
         return;
     }
     lastMouseMove_ = info;
@@ -1261,25 +1275,6 @@ void ScrollablePattern::HandleDragEnd(const GestureEvent& info)
     itemToBeSelected_.clear();
     lastMouseMove_.SetLocalLocation(Offset::Zero());
 }
-
-void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
-{
-    if (info.GetButton() != MouseButton::LEFT_BUTTON) {
-        return;
-    }
-    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
-    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-    auto mouseOffsetGlobalX = static_cast<float>(info.GetGlobalLocation().GetX());
-    auto mouseOffsetGlobalY = static_cast<float>(info.GetGlobalLocation().GetY());
-    if (info.GetAction() == MouseAction::PRESS) {
-        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-        mouseStartOffsetGlobal_ = OffsetF(mouseOffsetGlobalX, mouseOffsetGlobalY);
-    } else if (info.GetAction() == MouseAction::RELEASE) {
-        mouseStartOffset_.Reset();
-        mouseStartOffsetGlobal_.Reset();
-    }
-}
-
 void ScrollablePattern::ClearInvisibleItemsSelectedStatus()
 {
     for (auto& item : itemToBeSelected_) {
@@ -1972,6 +1967,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
             StartScrollBarAnimatorByProxy();
         }
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::TRAILING_ANIMATION, false);
         scrollStop_ = false;
         SetScrollAbort(false);
     }
@@ -2099,7 +2095,9 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
         // Variable speed rolling
         // When the drag point is in the hot zone, and the hot zone offset changes.
         // Then need to modify the offset percent
-        velocityMotion_->Reset(offsetPct);
+        if (velocityMotion_) {
+            velocityMotion_->Reset(offsetPct);
+        }
         return;
     }
 

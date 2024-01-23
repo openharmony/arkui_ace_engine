@@ -45,8 +45,7 @@
 
 namespace OHOS::Ace::NG {
 UIExtensionPattern::UIExtensionPattern(bool isTransferringCaller, bool isModal, bool isAsyncModalBinding)
-    : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
-      isAsyncModalBinding_(isAsyncModalBinding)
+    : isTransferringCaller_(isTransferringCaller), isModal_(isModal), isAsyncModalBinding_(isAsyncModalBinding)
 {
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
         SessionTye::UI_EXTENSION_ABILITY, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
@@ -63,8 +62,10 @@ UIExtensionPattern::~UIExtensionPattern()
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension with id = %{public}d is destroyed.", uiExtensionId_);
     NotifyDestroy();
-    CHECK_NULL_VOID(sessionWrapper_);
-    sessionWrapper_->DestroySession();
+    // Release the session.
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
     FireModalOnDestroy();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -165,15 +166,15 @@ void UIExtensionPattern::OnConnect()
     if (isFocused || isModal_) {
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
     }
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "The UIExtensionComponent is connected, id = %{public}d.", uiExtensionId_);
+    TAG_LOGI(
+        AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The UIExtensionComponent is connected, id = %{public}d.", uiExtensionId_);
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
     const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset)
 {
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "The accessibility event is reported, id = %{public}d.", uiExtensionId_);
+    TAG_LOGI(
+        AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The accessibility event is reported, id = %{public}d.", uiExtensionId_);
     ContainerScope scope(instanceId_);
     auto ngPipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(ngPipeline);
@@ -190,9 +191,10 @@ void UIExtensionPattern::OnDisconnect()
     CHECK_RUN_ON(UI);
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "The session is disconnected and state = %{public}d, id = %{public}d.", state_, uiExtensionId_);
-    state_ = AbilityState::DESTRUCTION;
-    if (onReleaseCallback_) {
-        onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
+    FireOnReleaseCallback(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
+    // Release the session.
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
     }
 }
 
@@ -205,29 +207,25 @@ void UIExtensionPattern::OnExtensionDied()
     CHECK_NULL_VOID(host);
     host->RemoveChild(contentNode_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    state_ = AbilityState::DESTRUCTION;
-    if (onReleaseCallback_) {
-        onReleaseCallback_(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
+    FireOnReleaseCallback(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
+    // Release the session.
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
     }
+}
+
+void UIExtensionPattern::OnAreaChangedInner()
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto displayArea = host->GetTransformRectRelativeToWindow();
+    sessionWrapper_->RefreshDisplayArea(displayArea);
 }
 
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (componentType_ == ComponentType::DYNAMIC) {
-        return OnDirtyLayoutWrapperSwapForDynamicComponent(dirty, config);
-    }
-
-    CHECK_NULL_RETURN(sessionWrapper_, false);
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto [globalOffsetWithTranslate, err] = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto frameRect = geometryNode->GetFrameRect();
-    sessionWrapper_->RefreshDisplayArea(
-        globalOffsetWithTranslate.GetX(), globalOffsetWithTranslate.GetY(), frameRect.Width(), frameRect.Height());
-    return false;
+    return (componentType_ == ComponentType::DYNAMIC) && OnDirtyLayoutWrapperSwapForDynamicComponent(dirty, config);
 }
 
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwapForDynamicComponent(
@@ -259,8 +257,7 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwapForDynamicComponent(
 void UIExtensionPattern::OnWindowShow()
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "Show window, state = %{public}d, visible = %{public}d, id = %{public}d.",
-        state_, isVisible_, uiExtensionId_);
+        "Show window, state = %{public}d, visible = %{public}d, id = %{public}d.", state_, isVisible_, uiExtensionId_);
     if (isVisible_) {
         NotifyForeground();
     }
@@ -269,8 +266,7 @@ void UIExtensionPattern::OnWindowShow()
 void UIExtensionPattern::OnWindowHide()
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "Hide window, state = %{public}d, visible = %{public}d, id = %{public}d.",
-        state_, isVisible_, uiExtensionId_);
+        "Hide window, state = %{public}d, visible = %{public}d, id = %{public}d.", state_, isVisible_, uiExtensionId_);
     if (isVisible_) {
         NotifyBackground();
     }
@@ -300,6 +296,22 @@ void UIExtensionPattern::NotifyDestroy()
     }
 }
 
+void UIExtensionPattern::OnAttachToFrameNode()
+{
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    pipeline->AddOnAreaChangeNode(host->GetId());
+    callbackId_ = pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->OnAreaChangedInner();
+        }
+    });
+}
+
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     if (componentType_ == ComponentType::DYNAMIC) {
@@ -310,9 +322,11 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     }
 
     auto id = frameNode->GetId();
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    pipeline->UnregisterSurfacePositionChangedCallback(callbackId_);
 }
 
 void UIExtensionPattern::OnModifyDone()
@@ -645,8 +659,8 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
 {
     // 1. As long as the error occurs, the host believes that UIExtensionAbility has been killed.
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "Error: Id = %{public}d, state = %{public}d, code=%{public}d, name=%{public}s",
-        uiExtensionId_, state_, code, name.c_str());
+        "Error: Id = %{public}d, state = %{public}d, code=%{public}d, name=%{public}s", uiExtensionId_, state_, code,
+        name.c_str());
     state_ = AbilityState::NONE;
     if (onErrorCallback_) {
         ContainerScope scope(instanceId_);
@@ -664,8 +678,8 @@ void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, c
 void UIExtensionPattern::FireOnResultCallback(int32_t code, const AAFwk::Want& want)
 {
     if (onResultCallback_ && (state_ != AbilityState::DESTRUCTION)) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "The onResult is called and state = %{public}d, id = %{public}d.", state_, uiExtensionId_);
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The onResult is called and state = %{public}d, id = %{public}d.",
+            state_, uiExtensionId_);
         ContainerScope scope(instanceId_);
         onResultCallback_(code, want);
     }
@@ -740,8 +754,8 @@ void UIExtensionPattern::FireBindModalCallback()
 void UIExtensionPattern::OnVisibleChange(bool visible)
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "The visual state of the window changes, state = %{public}d, visible = %{public}d, id = %{public}d.",
-        state_, isVisible_, uiExtensionId_);
+        "The visual state of the window changes, state = %{public}d, visible = %{public}d, id = %{public}d.", state_,
+        isVisible_, uiExtensionId_);
     isVisible_ = visible;
     if (visible) {
         NotifyForeground();
@@ -810,11 +824,6 @@ void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidAr
 {
     CHECK_NULL_VOID(sessionWrapper_);
     sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type);
-}
-
-bool UIExtensionPattern::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info)
-{
-    return sessionWrapper_ && sessionWrapper_->NotifyOccupiedAreaChangeInfo(info);
 }
 
 int64_t UIExtensionPattern::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)

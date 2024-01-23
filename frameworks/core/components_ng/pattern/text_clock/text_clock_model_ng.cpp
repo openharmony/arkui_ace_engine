@@ -58,7 +58,7 @@ void TextClockModelNG::SetFontFeature(const FONT_FEATURES_MAP& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFeature, value);
 }
 
-void TextClockModelNG::SetHoursWest(const int32_t& hoursWest)
+void TextClockModelNG::SetHoursWest(float hoursWest)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, HoursWest, hoursWest);
 }

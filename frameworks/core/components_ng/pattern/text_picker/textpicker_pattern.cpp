@@ -110,6 +110,11 @@ void TextPickerPattern::SetButtonIdeaSize()
 
 void TextPickerPattern::OnModifyDone()
 {
+    if (isFiredSelectsChange_) {
+        isFiredSelectsChange_ = false;
+        return;
+    }
+
     OnColumnsBuilding();
     FlushOptions();
     CalculateHeight();
@@ -155,12 +160,14 @@ void TextPickerPattern::FireChangeEvent(bool refresh)
     auto frameNodes = GetColumnNodes();
     std::vector<std::string> value;
     std::vector<double> index;
+    std::vector<uint32_t> selectedIdx;
     for (auto it : frameNodes) {
         CHECK_NULL_VOID(it.second);
         auto textPickerColumnPattern = it.second->GetPattern<TextPickerColumnPattern>();
         if (refresh) {
             auto currentIndex = textPickerColumnPattern->GetCurrentIndex();
             index.emplace_back(currentIndex);
+            selectedIdx.emplace_back(currentIndex);
             auto currentValue = textPickerColumnPattern->GetOption(currentIndex);
             value.emplace_back(currentValue);
         }
@@ -169,6 +176,9 @@ void TextPickerPattern::FireChangeEvent(bool refresh)
     CHECK_NULL_VOID(textPickerEventHub);
     textPickerEventHub->FireChangeEvent(value, index);
     textPickerEventHub->FireDialogChangeEvent(GetSelectedObject(true, 1));
+    std::string idx_str;
+    idx_str.assign(selectedIdx.begin(), selectedIdx.end());
+    firedSelectsStr_ = idx_str;
 }
 
 void TextPickerPattern::InitDisabled()
@@ -284,6 +294,10 @@ void TextPickerPattern::OnColumnsBuilding()
 
 void TextPickerPattern::SetSelecteds(const std::vector<uint32_t>& values)
 {
+    std::string values_str;
+    values_str.assign(values.begin(), values.end());
+    isFiredSelectsChange_ = firedSelectsStr_.has_value() && firedSelectsStr_.value() == values_str;
+    firedSelectsStr_.reset();
     selecteds_.clear();
     for (auto& value : values) {
         selecteds_.emplace_back(value);
@@ -877,7 +891,10 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     if (contentRowNode) {
         auto layoutRenderContext = contentRowNode->GetRenderContext();
         CHECK_NULL_VOID(layoutRenderContext);
-        layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+            !layoutRenderContext->IsUniRenderEnabled()) {
+            layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+        }
     }
     auto frameNode = DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(frameNode);
@@ -891,29 +908,33 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
     CHECK_NULL_VOID(host);
     auto pickerNode = DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(pickerNode);
+    auto stackNode = DynamicCast<FrameNode>(pickerNode->GetFirstChild());
+    CHECK_NULL_VOID(stackNode);
 
-    auto layoutProperty = pickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    auto pickerLayoutProperty = pickerNode->GetLayoutProperty();
+    CHECK_NULL_VOID(pickerLayoutProperty);
+    auto pickerLayoutConstraint = pickerLayoutProperty->GetLayoutConstraint();
 
-    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
-    auto layoutSize = layoutConstraint->selfIdealSize;
+    auto stackLayoutProperty = stackNode->GetLayoutProperty();
+    CHECK_NULL_VOID(stackLayoutProperty);
+    auto stackLayoutConstraint = stackLayoutProperty->GetLayoutConstraint();
 
-    PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
     auto childCount = static_cast<float>(pickerNode->GetChildren().size());
     auto pickerContentSize = SizeF(size.Width() * childCount, size.Height());
-    AddPaddingToSize(padding, pickerContentSize);
-
-    if (layoutSize.Width().has_value()) {
-        pickerContentSize.SetWidth(layoutSize.Width().value());
+    auto parentIdealSize = stackLayoutConstraint->parentIdealSize;
+    if (parentIdealSize.Width().has_value()) {
+        pickerContentSize.SetWidth(parentIdealSize.Width().value());
     }
-    if (layoutSize.Height().has_value()) {
-        pickerContentSize.SetHeight(layoutSize.Height().value());
+    if (parentIdealSize.Height().has_value()) {
+        pickerContentSize.SetHeight(parentIdealSize.Height().value());
     }
 
+    PaddingPropertyF padding = pickerLayoutProperty->CreatePaddingAndBorder();
+    auto minSize = SizeF(pickerLayoutConstraint->minSize.Width(), pickerLayoutConstraint->minSize.Height());
+    MinusPaddingToSize(padding, minSize);
     auto version10OrLarger =
         PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9;
-    pickerContentSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize, version10OrLarger);
-    MinusPaddingToSize(padding, pickerContentSize);
+    pickerContentSize.Constrain(minSize, stackLayoutConstraint->maxSize, version10OrLarger);
 
     size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
     size.SetHeight(pickerContentSize.Height());

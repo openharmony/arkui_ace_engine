@@ -40,7 +40,7 @@ protected:
     static void SetOnAnimationStart(const JSCallbackInfo& info);
     static void SetOnAnimationEnd(const JSCallbackInfo& info);
     static void SetOnGestureSwipe(const JSCallbackInfo& info);
-    static void SetAnimationDuration(float value);
+    static void SetAnimationDuration(const JSCallbackInfo& info);
     static void SetFadingEdge(const JSCallbackInfo& info);
     static void SetDivider(const JSCallbackInfo& info);
     static void SetBarOverlap(const JSCallbackInfo& info);
@@ -50,6 +50,7 @@ protected:
     static void SetBarGridAlign(const JSCallbackInfo& info);
     static void SetScrollableBarModeOptions(const JSRef<JSVal>& info);
     static void SetCustomContentTransition(const JSCallbackInfo& info);
+    static void SetOnContentWillChange(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

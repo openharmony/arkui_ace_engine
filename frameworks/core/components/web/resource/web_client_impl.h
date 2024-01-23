@@ -57,13 +57,13 @@ public:
 
     void OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType) override;
 
-    void SetWebDelegate(const RefPtr<WebDelegate>& delegate)
+    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;
     }
 
 private:
-    RefPtr<WebDelegate> webDelegate_;
+    WeakPtr<WebDelegate> webDelegate_;
     int32_t instanceId_ = -1;
 };
 

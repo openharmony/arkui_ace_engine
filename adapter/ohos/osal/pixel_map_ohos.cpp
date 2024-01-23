@@ -22,6 +22,7 @@
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#include "core/image/image_file_cache.h"
 
 namespace OHOS::Ace {
 
@@ -130,6 +131,12 @@ AlphaType PixelMapOhos::GetAlphaType() const
     return AlphaTypeConverter(pixmap_->GetAlphaType());
 }
 
+int32_t PixelMapOhos::GetRowStride() const
+{
+    CHECK_NULL_RETURN(pixmap_, 0);
+    return pixmap_->GetRowStride();
+}
+
 int32_t PixelMapOhos::GetRowBytes() const
 {
     CHECK_NULL_RETURN(pixmap_, 0);
@@ -220,6 +227,24 @@ RefPtr<PixelMap> PixelMap::ConvertSkImageToPixmap(
     CHECK_NULL_RETURN(pixmap, nullptr);
     std::shared_ptr<Media::PixelMap> sharedPixelmap(pixmap.release());
     return AceType::MakeRefPtr<PixelMapOhos>(sharedPixelmap);
+}
+
+void PixelMapOhos::SavePixelMapToFile(const std::string& dst) const
+{
+    int32_t w = pixmap_->GetWidth();
+    int32_t h = pixmap_->GetHeight();
+    int32_t totalSize = pixmap_->GetByteCount();
+    uint64_t nowTime = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count());
+    std::string filename = std::to_string(nowTime) + "_w" + std::to_string(w) + "_h" + std::to_string(h) + dst + ".dat";
+    auto path = ImageFileCache::GetInstance().ConstructCacheFilePath(filename);
+    std::ofstream outFile(path, std::fstream::out);
+    if (!outFile.is_open()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "write error, path=%{public}s", path.c_str());
+    }
+    outFile.write(reinterpret_cast<const char*>(pixmap_->GetPixels()), totalSize);
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "write success, path=%{public}s", path.c_str());
 }
 
 } // namespace OHOS::Ace

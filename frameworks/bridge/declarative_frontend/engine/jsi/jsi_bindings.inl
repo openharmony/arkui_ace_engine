@@ -567,12 +567,12 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalConstructor(panda::JsiRunti
     if (!newTarget->IsFunction()) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(runtimeCallInfo->GetVM()));
     }
-
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     C* instance = FunctionUtils::ConstructFromTuple<C>(tuple);
-    Local<ObjectRef>(thisObj)->SetNativePointerFieldCount(1);
-    panda::Local<panda::ObjectRef>(thisObj)->SetNativePointerField(0, static_cast<void*>(instance));
+    Local<ObjectRef>(thisObj)->SetNativePointerFieldCount(vm, 1);
+    panda::Local<panda::ObjectRef>(thisObj)->SetNativePointerField(vm, 0, static_cast<void*>(instance));
     return thisObj;
 }
 
@@ -608,10 +608,10 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::Jsi
         auto instance = std::get_if<void*>(&retVal);
         if (instance) {
             panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
-            Local<ObjectRef>(thisObj)->SetNativePointerFieldCount(1);
+            Local<ObjectRef>(thisObj)->SetNativePointerFieldCount(vm, 1);
             size_t nativeSize = info.GetSize();
             Local<ObjectRef>(thisObj)->SetNativePointerField(
-                0, *instance, &JsiClass<C>::DestructorInterceptor, nullptr, nativeSize);
+                vm, 0, *instance, &JsiClass<C>::DestructorInterceptor, nullptr, nativeSize);
             return thisObj;
         }
     }

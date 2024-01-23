@@ -758,7 +758,7 @@ void FrameNode::OnVisibleChange(bool isVisible)
 {
     pattern_->OnVisibleChange(isVisible);
     UpdateChildrenVisible(isVisible);
-    TriggerVisibleAreaChangeCallback(true);
+    TriggerVisibleAreaChangeCallback(!isVisible);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive)
@@ -766,6 +766,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
     if (auto focusHub = GetFocusHub()) {
         focusHub->RemoveSelf();
     }
+    pattern_->OnDetachFromMainTree();
     eventHub_->FireOnDisappear();
     renderContext_->OnNodeDisappear(recursive);
 }
@@ -972,20 +973,15 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     auto frameRect = GetTransformRectRelativeToWindow();
     auto visibleRect = frameRect;
     RectF parentRect;
-    auto parentUi = GetParent();
+    auto parentUi = GetAncestorNodeOfFrame(true);
     if (!parentUi) {
         visibleRect.SetWidth(0.0f);
         visibleRect.SetHeight(0.0f);
     }
     while (parentUi) {
-        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUi);
-        if (!parentFrame) {
-            parentUi = parentUi->GetParent();
-            continue;
-        }
-        parentRect = parentFrame->GetTransformRectRelativeToWindow();
+        parentRect = parentUi->GetTransformRectRelativeToWindow();
         visibleRect = visibleRect.Constrain(parentRect);
-        parentUi = parentUi->GetParent();
+        parentUi = parentUi->GetAncestorNodeOfFrame(true);
     }
 
     double currentVisibleRatio =
@@ -3142,9 +3138,6 @@ OnChildTouchTestFunc FrameNode::GetOnTouchTestFunc()
 void FrameNode::CollectTouchInfos(
     const PointF& globalPoint, const PointF& parentRevertPoint, std::vector<TouchTestInfo>& touchInfos)
 {
-    if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
-        return;
-    }
     if (GetOnTouchTestFunc() == nullptr) {
         return;
     }
@@ -3179,9 +3172,6 @@ void FrameNode::CollectTouchInfos(
 
 RefPtr<FrameNode> FrameNode::GetDispatchFrameNode(const TouchResult& touchRes)
 {
-    if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
-        return nullptr;
-    }
     if (touchRes.strategy != TouchTestStrategy::FORWARD_COMPETITION &&
         touchRes.strategy != TouchTestStrategy::FORWARD) {
         return nullptr;

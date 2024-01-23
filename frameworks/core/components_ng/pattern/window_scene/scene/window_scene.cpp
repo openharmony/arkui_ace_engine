@@ -50,7 +50,6 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "RSSurfaceNode buffer available callback");
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
         session->SetBufferAvailable(true);
@@ -65,9 +64,20 @@ WindowScene::~WindowScene()
 {
     CHECK_NULL_VOID(IsMainWindow());
     CHECK_NULL_VOID(session_);
+    session_->SetLeashWinSurfaceNode(nullptr);
     session_->SetShowRecent(false);
     session_->SetNeedSnapshot(false);
     UnregisterLifecycleListener();
+}
+
+std::shared_ptr<Rosen::RSSurfaceNode> WindowScene::CreateLeashWindowNode()
+{
+    auto name = session_->GetSessionInfo().bundleName_;
+    auto pos = name.find_last_of('.');
+    name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
+    Rosen::RSSurfaceNodeConfig config;
+    config.SurfaceNodeName = "WindowScene_" + name + std::to_string(session_->GetPersistentId());
+    return Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
 }
 
 void WindowScene::OnAttachToFrameNode()
@@ -76,7 +86,6 @@ void WindowScene::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(host->GetAccessibilityId());
-    session_->AttachToFrameNode(true);
     auto responseRegionCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](
         const std::vector<DimensionRect>& responseRegion) {
         auto self = weakThis.Upgrade();
@@ -107,10 +116,13 @@ void WindowScene::OnAttachToFrameNode()
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
         surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSSystem] id: %{public}d, type: %{public}d, name: %{public}s",
+            session_->GetPersistentId(), session_->GetWindowType(), session_->GetSessionInfo().bundleName_.c_str());
         return;
     }
 
-    auto surfaceNode = session_->GetLeashWinSurfaceNode();
+    auto surfaceNode = CreateLeashWindowNode();
+    session_->SetLeashWinSurfaceNode(surfaceNode);
     CHECK_NULL_VOID(surfaceNode);
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
@@ -125,7 +137,8 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(0);
-    session_->AttachToFrameNode(false);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain][WMSSystem] id: %{public}d, type: %{public}d, name: %{public}s",
+        session_->GetPersistentId(), session_->GetWindowType(), session_->GetSessionInfo().bundleName_.c_str());
 }
 
 void WindowScene::RegisterFocusCallback()
@@ -233,7 +246,8 @@ void WindowScene::BufferAvailableCallback()
         host->RemoveChild(self->startingNode_);
         self->startingNode_.Reset();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Remove starting window finished, id:%{public}d, name:%{public}s",
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "[WMSMain] Remove starting window finished, id: %{public}d, name: %{public}s",
             self->session_->GetPersistentId(), self->session_->GetSessionInfo().bundleName_.c_str());
     };
 
@@ -279,9 +293,6 @@ void WindowScene::OnActivation()
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
             host->AddChild(self->contentNode_, 0);
-            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnActivation add content node in recent finished "
-                "id:%{public}d name:%{public}s", self->session_->GetPersistentId(),
-                self->session_->GetSessionInfo().bundleName_.c_str());
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         }
@@ -312,9 +323,9 @@ void WindowScene::OnConnect()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         host->AddChild(self->contentNode_, 0);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnConnect add content node finished id:%{public}d name:%{public}s",
-            self->session_->GetPersistentId(), self->session_->GetSessionInfo().bundleName_.c_str());
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] Add app window finished, id: %{public}d, name: %{public}s",
+            self->session_->GetPersistentId(), self->session_->GetSessionInfo().bundleName_.c_str());
 
         surfaceNode->SetBufferAvailableCallback(self->callback_);
     };

@@ -49,7 +49,6 @@ if (ace_engine_feature_enable_web) {
 
 use_build_in_js_engine = true
 use_external_icu = "shared"
-use_curl_download = true
 ohos_standard_fontmgr = true
 sk_use_hilog = true
 rich_components_support = true

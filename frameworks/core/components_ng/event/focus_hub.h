@@ -33,12 +33,6 @@ constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
 constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 constexpr int32_t MASK_FOCUS_STEP_FORWARD = 0x10;
 constexpr int32_t MASK_FOCUS_STEP_TAB = 0x5;
-const std::list<int32_t> DEEPTH_OF_MENU_WRAPPER = { 0, 0, 0 };
-const std::list<int32_t> DEEPTH_OF_MENU = { 0, 0 };
-const std::list<int32_t> DEEPTH_OF_DIALOG = { 0, 0 };
-const std::list<int32_t> DEEPTH_OF_PAGE = { 0 };
-const std::list<int32_t> DEEPTH_OF_POPUP = { 0, 0 };
-const std::list<int32_t> DEEPTH_OF_SHEET_PAGE = { 1, 0 };
 
 enum class FocusType : int32_t {
     DISABLE = 0,

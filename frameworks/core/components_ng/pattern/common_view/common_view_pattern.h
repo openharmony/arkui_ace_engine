@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/common_view/common_view_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -31,6 +32,10 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return AceType::MakeRefPtr<CommonViewLayoutAlgorithm>();
     }
 };
 

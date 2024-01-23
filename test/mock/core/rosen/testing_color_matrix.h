@@ -21,12 +21,14 @@
 namespace OHOS::Ace::Testing {
 class TestingColorMatrix {
 public:
+    typedef float scalar;
     TestingColorMatrix() = default;
     virtual ~TestingColorMatrix() = default;
 
     constexpr static int MATRIX_SIZE = 20;
 
     virtual void SetArray(const float src[MATRIX_SIZE]) {}
+    virtual void SetScale(scalar sr, scalar sg, scalar sb, scalar sa) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_COLOR_MATRIX_H

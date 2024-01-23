@@ -34,7 +34,7 @@ public:
 
     static void JSBind(BindingTarget globalObj);
 
-    void OnStateChanged(const JSCallbackInfo& info)
+    void OnStateChanged()
     {
         if (onStateChangedCallback_) {
             onStateChangedCallback_();
@@ -46,6 +46,13 @@ public:
         onStateChangedCallback_ = callback;
     }
 
+    void OnPushDestination(const JSCallbackInfo& info);
+
+    void SetCheckNavDestinationExistsFunc(std::function<int32_t(JSRef<JSObject>)> checkFunc)
+    {
+        checkNavDestinationExistsFunc_ = checkFunc;
+    }
+
     static JSRef<JSObject> CreateNewNavPathStackJSObject();
     static void SetNativeNavPathStack(JSRef<JSObject> jsStack, JSRef<JSObject> nativeStack);
 
@@ -54,6 +61,7 @@ private:
     static void Destructor(JSNavPathStack* stack);
 
     std::function<void()> onStateChangedCallback_;
+    std::function<int32_t(JSRef<JSObject>)> checkNavDestinationExistsFunc_;
 };
 } // namespace OHOS::Ace::Framework
 

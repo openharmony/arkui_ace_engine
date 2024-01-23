@@ -25,20 +25,22 @@
 #include "base/utils/system_properties.h"
 
 #ifdef ACE_INSTANCE_LOG
-#define ACE_FMT_PREFIX "[%{public}s(%{public}s)-(%{public}d)] "
+#define ACE_FMT_PREFIX "[%{public}s(%{public}s)-(%{public}d:%{public}s)] "
 #define ACE_LOG_ID , OHOS::Ace::LogWrapper::GetId()
+#define ACE_GET_INSTANCE_METHOD , OHOS::Ace::LogWrapper::GetIdMethod()
 #else
 #define ACE_FMT_PREFIX "[%{private}s(%{private}s)] "
 #define ACE_LOG_ID
+#define ACE_GET_INSTANCE_METHOD
 #endif
 
-#define PRINT_LOG(level, tag, fmt, ...)                                                                         \
-    do {                                                                                                        \
-        if (OHOS::Ace::LogWrapper::JudgeLevel(OHOS::Ace::LogLevel::level)) {                                    \
-            OHOS::Ace::LogWrapper::PrintLog(OHOS::Ace::LogDomain::FRAMEWORK, OHOS::Ace::LogLevel::level, tag,   \
-                ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__), __FUNCTION__ ACE_LOG_ID, \
-                ##__VA_ARGS__);                                                                                 \
-        }                                                                                                       \
+#define PRINT_LOG(level, tag, fmt, ...)                                                                       \
+    do {                                                                                                      \
+        if (OHOS::Ace::LogWrapper::JudgeLevel(OHOS::Ace::LogLevel::level)) {                                  \
+            OHOS::Ace::LogWrapper::PrintLog(OHOS::Ace::LogDomain::FRAMEWORK, OHOS::Ace::LogLevel::level, tag, \
+                ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),                        \
+                __FUNCTION__ ACE_LOG_ID ACE_GET_INSTANCE_METHOD, ##__VA_ARGS__);                              \
+        }                                                                                                     \
     } while (0)
 
 #define LOGD(fmt, ...) TAG_LOGD(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
@@ -133,6 +135,7 @@ enum class AceLogTag : uint8_t {
     ACE_NATIVE_NODE,          // C0393D
     ACE_DYNAMIC_COMPONENT,    // C0393E
     ACE_MARQUEE,              // C0393F
+    ACE_OBSERVER,             // C03940
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use
@@ -206,6 +209,7 @@ public:
     static void PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, va_list args);
 #ifdef ACE_INSTANCE_LOG
     static int32_t GetId();
+    static const char* GetIdMethod();
 #endif
 
 private:

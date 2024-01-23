@@ -187,9 +187,9 @@ public:
         return spaceWidth_;
     }
 
-    std::optional<float> GetEstimateOffset() const
+    bool NeedEstimateOffset() const
     {
-        return estimateOffset_;
+        return needEstimateOffset_;
     }
 
     void SetContentStartOffset(float startOffset)
@@ -320,6 +320,8 @@ public:
         return childLayoutConstraint_;
     }
 
+    void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index);
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -338,6 +340,7 @@ protected:
     {
         return index;
     }
+    virtual void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount);
 
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index, float referencePos,
         bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout);
@@ -360,8 +363,6 @@ private:
     void MeasureList(LayoutWrapper* layoutWrapper);
     void CheckJumpToIndex();
 
-    void CalculateEstimateOffset(ScrollAlign align);
-
     std::pair<int32_t, float> RequestNewItemsForward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
@@ -383,7 +384,6 @@ private:
     int32_t FindPredictSnapEndIndexInItemPositions(float predictEndPos, V2::ScrollSnapAlign scrollSnapAlign);
     bool IsUniformHeightProbably();
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
-    void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index);
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
 
     std::optional<int32_t> jumpIndex_;
@@ -414,7 +414,7 @@ private:
 
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
-    std::optional<float> estimateOffset_;
+    bool needEstimateOffset_ = false;
 
     bool mainSizeIsDefined_ = false;
     bool crossMatchChild_ = false;

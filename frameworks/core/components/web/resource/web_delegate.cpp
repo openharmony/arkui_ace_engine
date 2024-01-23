@@ -2378,7 +2378,7 @@ void WebDelegate::InitWebViewWithWindow()
                 auto accessibilityEventListenerImpl =
                     std::make_shared<AccessibilityEventListenerImpl>(Container::CurrentId());
                 CHECK_NULL_VOID(accessibilityEventListenerImpl);
-                accessibilityEventListenerImpl->SetWebDelegate(delegate);
+                accessibilityEventListenerImpl->SetWebDelegate(weak);
                 delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
                 delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
             }
@@ -2673,7 +2673,7 @@ void WebDelegate::InitWebViewWithSurface()
                 auto accessibilityEventListenerImpl =
                     std::make_shared<AccessibilityEventListenerImpl>(Container::CurrentId());
                 CHECK_NULL_VOID(accessibilityEventListenerImpl);
-                accessibilityEventListenerImpl->SetWebDelegate(delegate);
+                accessibilityEventListenerImpl->SetWebDelegate(weak);
                 delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
                 delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
             }
@@ -5768,7 +5768,7 @@ void WebDelegate::SetAccessibilityState(bool state)
                 auto accessibilityEventListenerImpl =
                     std::make_shared<AccessibilityEventListenerImpl>(Container::CurrentId());
                 CHECK_NULL_VOID(accessibilityEventListenerImpl);
-                accessibilityEventListenerImpl->SetWebDelegate(delegate);
+                accessibilityEventListenerImpl->SetWebDelegate(weak);
                 delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
                 delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
             }

@@ -1492,11 +1492,12 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
     } else {
         x = HorizontalLayout(size, position_.GetX(), menuPattern->IsSelectMenu()) + positionOffset_.GetX();
         y = VerticalLayout(size, position_.GetY(), menuPattern->IsContextMenu()) + positionOffset_.GetY();
-        x = std::clamp(x, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
-        float yMinAvoid = wrapperRect_.Top() + paddingTop_;
-        float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
-        y = std::clamp(y, yMinAvoid, yMaxAvoid);
     }
+    x = std::clamp(static_cast<double>(x), static_cast<double>(paddingStart_),
+        static_cast<double>(wrapperRect_.Right() - size.Width() - paddingEnd_));
+    float yMinAvoid = wrapperRect_.Top() + paddingTop_;
+    float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
+    y = std::clamp(y, yMinAvoid, yMaxAvoid);
     return { x, y };
 }
 
@@ -1533,27 +1534,9 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
     auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
 
-    float maxAvailableHeight = 0;
-    if (hierarchicalParameters_) {
-        auto displayAvailableRect = pipelineContext->GetDisplayAvailableRect();
-        maxAvailableHeight = displayAvailableRect.Height();
-    } else {
-        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-        CHECK_NULL_VOID(safeAreaManager);
-        auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
-        auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-#if defined(PREVIEW)
-        if (menuPattern->IsSelectOverlayCustomMenu()) {
-            windowGlobalRect.SetHeight(constraint.maxSize.Height());
-        }
-#endif
-        maxAvailableHeight = windowGlobalRect.Height() - top - bottom;
-    }
-    float maxSpaceHeight = maxAvailableHeight;
+    float maxAvailableHeight = wrapperRect_.Height();
+    float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
-    
         if (menuPattern->IsHeightModifiedBySelect()) {
             auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
             auto selectModifiedHeight = menuLayoutProps->GetSelectModifiedHeight().value();

@@ -59,12 +59,15 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_DEL), [](tic* c) -> void { c->HandleOnDelete(true); } },
     { KeyComb(KeyCode::KEY_FORWARD_DEL), [](tic* c) -> void { c->HandleOnDelete(false); } },
     { KeyComb(KeyCode::KEY_INSERT, KEY_CTRL), &tic::HandleOnCopy },
-    { KeyComb(KeyCode::KEY_INSERT, KEY_CTRL), &tic::HandleOnPaste },
+    { KeyComb(KeyCode::KEY_INSERT, KEY_SHIFT), &tic::HandleOnPaste },
     { KeyComb(KeyCode::KEY_F10, KEY_SHIFT), &tic::HandleOnShowMenu },
     { KeyComb(KeyCode::KEY_MENU), &tic::HandleOnShowMenu },
     { KeyComb(KeyCode::KEY_ENTER), &tic::HandleOnEnter },
     { KeyComb(KeyCode::KEY_NUMPAD_ENTER), &tic::HandleOnEnter },
     { KeyComb(KeyCode::KEY_DPAD_CENTER), &tic::HandleOnEnter },
+    { KeyComb(KeyCode::KEY_ENTER, KEY_CTRL), &tic::HandleOnEnter },
+    { KeyComb(KeyCode::KEY_NUMPAD_ENTER, KEY_CTRL), &tic::HandleOnEnter },
+    { KeyComb(KeyCode::KEY_DPAD_CENTER, KEY_CTRL), &tic::HandleOnEnter },
     // caret move keys
     { KeyComb(KeyCode::KEY_DPAD_LEFT), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Left); } },
     { KeyComb(KeyCode::KEY_DPAD_RIGHT), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Right); } },
@@ -109,9 +112,12 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
         (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT) ? KEY_SHIFT : KEY_NULL) |
         (keyEvent.HasKey(KeyCode::KEY_CTRL_LEFT) || keyEvent.HasKey(KeyCode::KEY_CTRL_RIGHT) ? KEY_CTRL : KEY_NULL) |
         (keyEvent.HasKey(KeyCode::KEY_META_LEFT) || keyEvent.HasKey(KeyCode::KEY_META_RIGHT) ? KEY_META : KEY_NULL);
-    if ((modKeyFlags == KEY_NULL || modKeyFlags == KEY_SHIFT) && keyEvent.IsCharKey()) {
-        InsertValue(keyEvent.ConvertCodeToString());
-        return true;
+    if (modKeyFlags == KEY_NULL || modKeyFlags == KEY_SHIFT) {
+        auto value = keyEvent.ConvertCodeToString();
+        if (value != "") {
+            InsertValue(value);
+            return true;
+        }
     }
     auto iterFunctionKeys = functionKeys_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterFunctionKeys != functionKeys_.end()) {

@@ -188,7 +188,7 @@ void EventAdapter::RecognizePointerEvent(const TouchType type)
     pointerEvent_->size = sizeof(PointerEvent);
     pointerEvent_->force = 0;
     pointerEvent_->deviceId = 0;
-    pointerEvent_->sourceType = SourceType::TOUCH;
+    pointerEvent_->sourceType = static_cast<int32_t>(OHOS::MMI::SourceType::TOUCH);
     pointerEvent_->pointers = {};
 }
 

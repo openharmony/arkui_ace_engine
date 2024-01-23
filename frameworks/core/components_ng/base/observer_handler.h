@@ -21,6 +21,9 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/frontend.h"
+#include "core/common/container.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
 enum class NavDestinationState {
@@ -38,17 +41,56 @@ struct NavDestinationInfo {
     {}
 };
 
+struct RouterPageInfoNG {
+    napi_value context;
+    int index;
+    std::string name;
+    std::string path;
+    RouterPageState state;
+
+    RouterPageInfoNG(napi_value context, int index, std::string name, std::string path, RouterPageState state)
+        : context(context), index(index), name(std::move(name)), path(std::move(path)), state(state)
+    {}
+};
+
+struct AbilityContextInfo {
+    std::string name = "";
+    std::string bundleName = "";
+    std::string moduleName = "";
+
+    bool IsEqual(AbilityContextInfo& info)
+    {
+        if (info.name != name) {
+            return false;
+        }
+        if (info.bundleName != bundleName) {
+            return false;
+        }
+        if (info.moduleName != moduleName) {
+            return false;
+        }
+        return true;
+    }
+};
+
 class ACE_FORCE_EXPORT UIObserverHandler {
 public:
     UIObserverHandler() = default;
     ~UIObserverHandler() = default;
     static UIObserverHandler& GetInstance();
     void NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
+    void NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state);
     std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
-    using HandleFunc = void (*)(std::string, std::string, NavDestinationState);
-    void SetHandleNavigationChangeFunc(HandleFunc func);
+    std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
+    using NavigationHandleFunc = void (*)(const std::string&, const std::string&, NavDestinationState);
+    using RouterPageHandleFunc = void (*)(
+        AbilityContextInfo&, napi_value, int32_t, const std::string&, const std::string&, RouterPageState);
+    void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
+    void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
 private:
-    HandleFunc handleFunc_;
+    NavigationHandleFunc navigationHandleFunc_ = nullptr;
+    RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
+    napi_value GetUIContextValue();
 };
 } // namespace OHOS::Ace::NG
 

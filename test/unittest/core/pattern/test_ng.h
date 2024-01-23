@@ -35,8 +35,6 @@ namespace OHOS::Ace::NG {
 namespace {
 using namespace testing;
 using namespace testing::ext;
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
-constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
 constexpr Dimension FILL_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
 constexpr double DEFAULT_FRICTION = 0.6;
 constexpr double NEW_DEFAULT_FRICTION = 0.7;

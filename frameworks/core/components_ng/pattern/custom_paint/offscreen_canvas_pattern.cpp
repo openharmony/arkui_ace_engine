@@ -184,6 +184,12 @@ void OffscreenCanvasPattern::DrawImage(const Ace::CanvasImage& image, double wid
     offscreenPaintMethod_->DrawImage(nullptr, image, width, height);
 }
 
+void OffscreenCanvasPattern::DrawSvgImage(
+    RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& image, const ImageFit& imageFit)
+{
+    offscreenPaintMethod_->DrawSvgImage(nullptr, svgDom, image, imageFit);
+}
+
 void OffscreenCanvasPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image)
 {
     offscreenPaintMethod_->DrawPixelMap(pixelMap, image);

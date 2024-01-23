@@ -130,8 +130,8 @@ void SetTextAreaPlaceholderFont(NodeHandle node, const struct ArkUIResourceLengt
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
-    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(size->Uint);
-    if (size->Uint >= 0) {
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(size->unit);
+    if (size->unit >= 0) {
         if (unitEnum == DimensionUnit::CALC) {
             font.fontSize = CalcDimension(size->string, DimensionUnit::CALC);
         } else {
@@ -319,7 +319,7 @@ void SetTextAreaFontSize(NodeHandle node, const struct ArkUIResourceLength *size
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(size->Uint);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(size->unit);
     if (unitEnum == DimensionUnit::CALC) {
         TextFieldModelNG::SetFontSize(frameNode, CalcDimension(size->string, DimensionUnit::CALC));
     } else {

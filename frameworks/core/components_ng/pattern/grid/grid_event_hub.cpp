@@ -21,10 +21,14 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+#if defined(PIXEL_MAP_SUPPORTED)
+constexpr int32_t CREATE_PIXELMAP_TIME = 80;
+#endif
 
 void GridEventHub::InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
@@ -158,23 +162,53 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
 
     auto host = GetFrameNode();
     CHECK_NULL_VOID(host);
-    auto itemFrameNode = host->FindChildByPosition(globalX, globalY);
-    CHECK_NULL_VOID(itemFrameNode);
+    auto gridItem = host->FindChildByPosition(globalX, globalY);
+    CHECK_NULL_VOID(gridItem);
+    draggedIndex_ = GetGridItemIndex(gridItem);
 
-    draggedIndex_ = GetGridItemIndex(itemFrameNode);
     OHOS::Ace::ItemDragInfo itemDragInfo;
     itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
     auto customNode = FireOnItemDragStart(itemDragInfo, draggedIndex_);
     CHECK_NULL_VOID(customNode);
+#if defined(PIXEL_MAP_SUPPORTED)
+    auto callback = [id = Container::CurrentId(), pipeline, info, host, gridItem, weak = WeakClaim(this)](
+                        std::shared_ptr<Media::PixelMap> mediaPixelMap, int32_t /*arg*/,
+                        const std::function<void()>& /*unused*/) {
+        ContainerScope scope(id);
+        if (!mediaPixelMap) {
+            TAG_LOGE(AceLogTag::ACE_DRAG, "gridItem drag start failed, custom component screenshot is empty.");
+            return;
+        }
+        auto pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));
+        CHECK_NULL_VOID(pixelMap);
+        auto taskScheduler = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask(
+            [weak, pipeline, info, pixelMap, host, gridItem]() {
+                auto eventHub = weak.Upgrade();
+                CHECK_NULL_VOID(eventHub);
+                auto manager = pipeline->GetDragDropManager();
+                CHECK_NULL_VOID(manager);
+                eventHub->dragDropProxy_ = manager->CreateAndShowDragWindow(pixelMap, info);
+                CHECK_NULL_VOID(eventHub->dragDropProxy_);
+                eventHub->dragDropProxy_->OnItemDragStart(info, host);
+                gridItem->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                eventHub->draggingItem_ = gridItem;
+            },
+            TaskExecutor::TaskType::UI);
+    };
+    auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
+    NG::ComponentSnapshot::Create(frameNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+#else
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
-
     dragDropProxy_ = manager->CreateAndShowDragWindow(customNode, info);
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnItemDragStart(info, host);
-    itemFrameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-    draggingItem_ = itemFrameNode;
+    gridItem->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    draggingItem_ = gridItem;
+#endif
 }
 
 void GridEventHub::HandleOnItemDragUpdate(const GestureEvent& info)

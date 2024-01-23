@@ -958,7 +958,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionControlle003, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, ScrollBarAnimation001, TestSize.Level1)
 {
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
 
@@ -1025,7 +1025,7 @@ HWTEST_F(ScrollTestNg, ScrollBarAnimation001, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, ScrollBarAnimation002, TestSize.Level1)
 {
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
 
@@ -1082,7 +1082,7 @@ HWTEST_F(ScrollTestNg, ScrollBarAnimation002, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, ScrollBarAnimation003, TestSize.Level1)
 {
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
 
@@ -2123,7 +2123,7 @@ HWTEST_F(ScrollTestNg, ScrollBar005, TestSize.Level1)
 {
     CreateWithContent();
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    pipelineContext->SetMinPlatformVersion(PLATFORM_VERSION_TEN + 1);
+    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     auto scrollBar = pattern_->GetScrollBar();
 
     scrollBar->SetPositionMode(PositionMode::LEFT);

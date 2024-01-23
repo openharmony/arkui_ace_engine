@@ -57,7 +57,7 @@ constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr int32_t MINDDLE_CHILD_INDEX = 2;
 constexpr char MEASURE_SIZE_STRING[] = "TEST";
 constexpr float FONTWEIGHT = 0.5f;
-constexpr float FONT_SIZE_PERCENT = 0.9f;
+constexpr float FONT_SIZE_PERCENT = 1.0f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_CANDIDATE = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_DISAPPEAR = 4;
@@ -633,9 +633,6 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
 
 void DatePickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double scale)
 {
-    if (scale > 1) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     uint32_t showCount = GetShowCount();

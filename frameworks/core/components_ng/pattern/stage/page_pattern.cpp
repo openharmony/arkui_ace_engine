@@ -25,6 +25,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/base/observer_handler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -165,6 +166,18 @@ void PagePattern::ProcessShowState()
     parent->RebuildRenderContextTree();
 }
 
+void PagePattern::OnAttachToMainTree()
+{
+    state_ = RouterPageState::ABOUT_TO_APPEAR;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+}
+
+void PagePattern::OnDetachFromMainTree()
+{
+    state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+}
+
 void PagePattern::OnShow()
 {
     // Do not invoke onPageShow unless the initialRender function has been executed.
@@ -172,6 +185,8 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID(!isOnShow_);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    state_ = RouterPageState::ON_PAGE_SHOW;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
     }
@@ -210,6 +225,8 @@ void PagePattern::OnHide()
     JankFrameReport::GetInstance().FlushRecord();
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    state_ = RouterPageState::ON_PAGE_HIDE;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), false);
     }
@@ -236,6 +253,20 @@ void PagePattern::OnHide()
         }
         Recorder::EventRecorder::Get().OnPageHide(pageInfo_->GetPageUrl(), duration);
     }
+}
+
+bool PagePattern::OnBackPressed()
+{
+    if (isPageInTransition_) {
+        return true;
+    }
+    // if in page transition, do not set to ON_BACK_PRESS
+    state_ = RouterPageState::ON_BACK_PRESS;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    if (OnBackPressed_) {
+        return OnBackPressed_();
+    }
+    return false;
 }
 
 void PagePattern::BuildSharedTransitionMap()

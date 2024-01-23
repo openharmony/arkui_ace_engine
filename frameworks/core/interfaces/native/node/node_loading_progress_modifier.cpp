@@ -42,7 +42,7 @@ void ResetLoadingProgressColor(ArkUINodeHandle node)
     }
 }
 
-void SetEnableLoading(ArkUINodeHandle node, bool enableLoadingValue)
+void SetEnableLoading(ArkUINodeHandle node, ArkUI_Bool enableLoadingValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

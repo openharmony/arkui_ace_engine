@@ -250,6 +250,7 @@ protected:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromMainTree() override;
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;

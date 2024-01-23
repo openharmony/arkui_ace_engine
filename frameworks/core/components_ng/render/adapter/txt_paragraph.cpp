@@ -331,7 +331,7 @@ bool TxtParagraph::CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& ext
     for (auto placeholderIndex : placeholderPosition_) {
         if (placeholderIndex == static_cast<size_t>(index)) {
             return true;
-        } else if (placeholderIndex < static_cast<size_t>(extent)) {
+        } else if (placeholderIndex < static_cast<size_t>(index)) {
             extent--;
         }
     }
@@ -398,7 +398,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         return false;
     }
 
-    const auto& textBox = *boxes.begin();
+    const auto& textBox = boxes.back();
     // when text_ ends with a \n, return the top position of the next line.
     auto preIsPlaceholder = CalCulateAndCheckPreIsPlaceholder(extent - 1, extent);
     prevChar = text_[std::max(0, extent - 1)];

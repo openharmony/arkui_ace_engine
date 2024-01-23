@@ -106,7 +106,7 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    LOGI("Session id: %{public}d, state: %{public}u, bundle name: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] id: %{public}d, state: %{public}u, name: %{public}s",
         session_->GetPersistentId(), state, session_->GetSessionInfo().bundleName_.c_str());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         if (!HasStartingPage()) {

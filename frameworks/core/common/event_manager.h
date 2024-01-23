@@ -88,6 +88,7 @@ public:
     bool PostEventDispatchTouchEvent(const TouchEvent& point);
     void FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents);
     void FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents);
+    void PostEventFlushTouchEventEnd(const TouchEvent& touchEvent);
 
     // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
     // platform will handle it.
@@ -235,6 +236,8 @@ public:
     }
 
 private:
+    void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
+    void CleanGestureEventHub();
     bool innerEventWin_ = false;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
@@ -264,6 +267,7 @@ private:
     RefPtr<NG::ResponseCtrl> responseCtrl_;
     TimeStamp lastEventTime_;
     std::set<int32_t> downFingerIds_;
+    std::set<WeakPtr<NG::FrameNode>> hittedFrameNode_;
 };
 
 } // namespace OHOS::Ace

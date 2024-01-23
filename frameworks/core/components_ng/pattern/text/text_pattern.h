@@ -310,6 +310,7 @@ public:
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
     virtual std::function<void(Offset)> GetThumbnailCallback();
     std::list<ResultObject> dragResultObjects_;
+    std::list<ResultObject> recoverDragResultObjects_;
     void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
     void OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event);
     void CloseOperate();
@@ -512,6 +513,10 @@ public:
         selectionMenuMap_.clear();
     }
 
+    virtual const std::list<RefPtr<UINode>>& GetAllChildren() const;
+
+    void HandleSelectionChange(int32_t start, int32_t end);
+
 protected:
     void OnAfterModifyDone() override;
     virtual void HandleOnCopy();
@@ -531,6 +536,7 @@ protected:
     void HandleSpanSingleClickEvent(
         GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan, bool& isClickOnAISpan);
     void HandleDoubleClickEvent(GestureEvent& info);
+    void CheckOnClickEvent(GestureEvent& info);
     void InitTextDetect(int32_t startPos, std::string detectText);
     bool ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
@@ -548,8 +554,8 @@ protected:
     virtual void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
-    void ShowSelectOverlay(
-        const RectF& firstHandle, const RectF& secondHandle, bool animation, bool isUsingMouse = false);
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
+        bool animation, bool isUsingMouse = false, bool isShowMenu = true);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool IsSelectAll();
     virtual int32_t GetHandleIndex(const Offset& offset) const;
@@ -637,7 +643,6 @@ private:
     void HandleMouseLeftPressAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
-    void HandleSelectionChange(int32_t start, int32_t end);
     void InitSpanItem(std::stack<SpanNodeInfo> nodes);
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
@@ -674,6 +679,8 @@ private:
     std::optional<TextResponseType> textResponseType_;
     RefPtr<TextController> textController_;
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
+    mutable std::list<RefPtr<UINode>> childNodes_;
+    bool isShowMenu_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

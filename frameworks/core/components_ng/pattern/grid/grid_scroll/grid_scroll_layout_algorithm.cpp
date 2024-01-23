@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
-#include <cstdint>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -67,10 +66,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!NearEqual(mainSize, gridLayoutInfo_.lastMainSize_)) {
         gridLayoutInfo_.ResetPositionFlags();
         UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
-        // If only the height of the Grid is changed, keep the prevOffset_ and currentOffset_ equal.
-        if (scrollSource_ == SCROLL_FROM_NONE) {
-            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-        }
+        UpdateOffsetOnHeightChangeDuringAnimation(layoutWrapper, mainSize);
     }
     FillGridViewportAndMeasureChildren(mainSize, crossSize, layoutWrapper);
 
@@ -163,6 +159,21 @@ void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrappe
         }
         gridLayoutInfo_.lastMainSize_ = gridMainSize;
         TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
+    }
+}
+
+void GridScrollLayoutAlgorithm::UpdateOffsetOnHeightChangeDuringAnimation(LayoutWrapper* layoutWrapper, float mainSize)
+{
+    // If only the height of the Grid is changed, keep the prevOffset_ and currentOffset_ equal.
+    if (scrollSource_ == SCROLL_FROM_NONE) {
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->IsScrollableSpringMotionRunning()) {
+        gridLayoutInfo_.currentOffset_ += (mainSize - gridLayoutInfo_.lastMainSize_);
     }
 }
 
@@ -459,10 +470,15 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         if (layoutWrapper->GetTotalChildCount() > 0) {
             ReloadToStartIndex(mainSize, crossSize, layoutWrapper);
         }
+        if (IsScrollToEndLine()) {
+            gridLayoutInfo_.currentOffset_ =
+                mainSize - gridLayoutInfo_.lineHeightMap_[gridLayoutInfo_.endMainLineIndex_];
+            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+        }
     }
 
     if (gridLayoutInfo_.scrollAlign_ == ScrollAlign::CENTER || gridLayoutInfo_.scrollAlign_ == ScrollAlign::END) {
-        UpdateCurrentOffsetForJumpTo(layoutWrapper, mainSize);
+        UpdateCurrentOffsetForJumpTo(mainSize);
     }
     gridLayoutInfo_.jumpIndex_ = EMPTY_JUMP_INDEX;
     gridLayoutInfo_.scrollAlign_ = ScrollAlign::AUTO;
@@ -863,6 +879,18 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
     }
 }
 
+bool GridScrollLayoutAlgorithm::IsScrollToEndLine() const
+{
+    return moveToEndLineIndex_ > 0 && gridLayoutInfo_.endIndex_ >= moveToEndLineIndex_;
+}
+
+bool GridScrollLayoutAlgorithm::IsEndLineInScreenWithGap(
+    int32_t targetLine, float totalViewHeight, float mainSize) const
+{
+    return targetLine == gridLayoutInfo_.endMainLineIndex_ &&
+           LessOrEqual(totalViewHeight + gridLayoutInfo_.currentOffset_, mainSize);
+}
+
 void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex)
 {
     int32_t startLine = 0;
@@ -878,6 +906,9 @@ void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, 
 
         if (startLine >= gridLayoutInfo_.endMainLineIndex_) {
             auto totalViewHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
+            if (IsEndLineInScreenWithGap(startLine, totalViewHeight, mainSize)) {
+                return;
+            }
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ -= (totalViewHeight - mainSize + gridLayoutInfo_.currentOffset_);
             for (int32_t i = gridLayoutInfo_.endMainLineIndex_ + 1; i <= startLine; ++i) {
@@ -950,7 +981,7 @@ void GridScrollLayoutAlgorithm::ScrollToIndexStart(LayoutWrapper* layoutWrapper,
     GetTargetIndexInfoWithBenchMark(layoutWrapper, isTargetBackward, targetIndex);
 }
 
-void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(LayoutWrapper* layoutWrapper, float mainSize)
+void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(float mainSize)
 {
     int32_t startLine = 0;
     /* targetIndex is in the matrix */
@@ -1058,7 +1089,9 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     }
     if (!cacheValid) {
         info.ClearMapsToEnd(info.endMainLineIndex_ + 1);
-        info.ClearMapsFromStart(info.startMainLineIndex_);
+        // run out of reord, startMainLineIndex is larger by 1 than real start main line index, so reduce 1
+        info.ClearMapsFromStart(info.startMainLineIndex_ > info.endMainLineIndex_ ? info.startMainLineIndex_ - 1
+                                                                                  : info.startMainLineIndex_);
     }
     return runOutOfRecord;
 }
@@ -1324,7 +1357,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
     // 2. [lineHight] means width of a column when the Grid is horizontal;
     // Other params are also named according to this principle.
     cellAveLength_ = -1.0f;
-    if (moveToEndLineIndex_ > 0 && gridLayoutInfo_.endIndex_ >= moveToEndLineIndex_) {
+    if (IsScrollToEndLine()) {
         TAG_LOGI(AceLogTag::ACE_GRID, "scroll to end line with index:%{public}d", moveToEndLineIndex_);
         // scrollToIndex(AUTO) on first layout
         moveToEndLineIndex_ = -1;

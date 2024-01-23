@@ -396,15 +396,13 @@ void LayoutProperty::CheckSelfIdealSize(const LayoutConstraintF& parentConstrain
             layoutConstraint_->percentReference);
     }
     if (calcLayoutConstraint_->maxSize.has_value()) {
-        if (GreatNotEqual(maxSize.Width(), 0.0f) && GreatNotEqual(minSize.Width(), 0.0f) &&
-            GreatNotEqual(maxSize.Width(), minSize.Width())) {
+        if (GreatNotEqual(maxSize.Width(), 0.0f) && GreatOrEqual(maxSize.Width(), minSize.Width())) {
             layoutConstraint_->UpdateMaxWidthWithCheck(maxSize);
             layoutConstraint_->selfIdealSize.UpdateWidthWhenSmaller(maxSize);
         } else {
             layoutConstraint_->maxSize.SetWidth(originMax.Width());
         }
-        if (GreatNotEqual(maxSize.Height(), 0.0f) && GreatNotEqual(minSize.Height(), 0.0f) &&
-            GreatNotEqual(maxSize.Height(), minSize.Height())) {
+        if (GreatNotEqual(maxSize.Height(), 0.0f) && GreatOrEqual(maxSize.Height(), minSize.Height())) {
             layoutConstraint_->UpdateMaxHeightWithCheck(maxSize);
             layoutConstraint_->selfIdealSize.UpdateHeightWhenSmaller(maxSize);
         } else {

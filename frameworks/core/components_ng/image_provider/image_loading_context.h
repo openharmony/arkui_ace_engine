@@ -55,6 +55,7 @@ public:
     int32_t GetFrameCount() const;
 
     RefPtr<CanvasImage> MoveCanvasImage();
+    RefPtr<ImageObject> MoveImageObject();
 
     const ImageSourceInfo& GetSourceInfo() const;
     const SizeF& GetDstSize() const;

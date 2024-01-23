@@ -1203,30 +1203,6 @@ HWTEST_F(RichEditorTestNg, GetTextIndexAtCursor001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleTouchEvent002
- * @tc.desc: test handle touch event
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, HandleTouchEvent002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    TouchEventInfo info("INIT_VALUE_1");
-    richEditorPattern->isMousePressed_ = true;
-    info.touches_.front().touchType_ = TouchType::DOWN;
-    richEditorPattern->HandleTouchEvent(info);
-    EXPECT_TRUE(richEditorPattern->isMousePressed_);
-    info.touches_.front().touchType_ = TouchType::MOVE;
-    richEditorPattern->HandleTouchEvent(info);
-    EXPECT_TRUE(richEditorPattern->isMousePressed_);
-    info.touches_.front().touchType_ = TouchType::UP;
-    richEditorPattern->HandleTouchEvent(info);
-    EXPECT_FALSE(richEditorPattern->isMousePressed_);
-}
-
-/**
  * @tc.name: InitSelection001
  * @tc.desc: test InitSelection
  * @tc.type: FUNC
@@ -1261,7 +1237,7 @@ HWTEST_F(RichEditorTestNg, InitSelection002, TestSize.Level1)
     richEditorPattern->spans_.front()->position = 3;
     richEditorPattern->InitSelection(Offset(0, 1));
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
 }
 
 /**
@@ -1463,38 +1439,6 @@ HWTEST_F(RichEditorTestNg, GetChildByIndex002, TestSize.Level1)
     AddSpan(INIT_VALUE_1);
     auto ret = richEditorPattern->GetChildByIndex(0);
     EXPECT_EQ(*(richEditorNode_->GetChildren().begin()), ret);
-}
-
-/**
- * @tc.name: HandleTouchEvent001
- * @tc.desc: test HandleTouchEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, HandleTouchEvent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    richEditorPattern->textForDisplay_ = "tesol";
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo touchInfo("");
-    richEditorPattern->isMousePressed_ = true;
-    richEditorPattern->HandleTouchEvent(touchInfo);
-    EXPECT_TRUE(richEditorPattern->isMousePressed_);
-
-    richEditorPattern->HandleTouchEvent(touchInfo);
-    EXPECT_TRUE(richEditorPattern->isMousePressed_);
-
-    TouchLocationInfo touchLocationinfo(0);
-    touchLocationinfo.touchType_ = TouchType::UP;
-    touchInfo.touches_.push_front(touchLocationinfo);
-    richEditorPattern->HandleTouchEvent(touchInfo);
-    EXPECT_FALSE(richEditorPattern->isMousePressed_);
-
-    richEditorPattern->isMousePressed_ = true;
-    touchLocationinfo.touchType_ = TouchType::DOWN;
-    touchInfo.touches_.push_front(touchLocationinfo);
-    richEditorPattern->HandleTouchEvent(touchInfo);
-    EXPECT_TRUE(richEditorPattern->isMousePressed_);
 }
 
 /**
@@ -2634,14 +2578,14 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection003, TestSize.Level1)
     auto dragDistance = AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, dragDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
+    richEditorPattern->AutoScrollByEdgeDetection(
+        param, OffsetF(50, dragDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
     EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag move up but not reach top edge";
     richEditorPattern->StopAutoScroll();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, dragDistance - 10), EdgeDetectionStrategy::OUT_BOUNDARY);
+    richEditorPattern->AutoScrollByEdgeDetection(
+        param, OffsetF(50, dragDistance - 10), EdgeDetectionStrategy::OUT_BOUNDARY);
     EXPECT_TRUE(richEditorPattern->IsReachTop()) << "drag reach top edge";
     auto speed = richEditorPattern->CalcDragSpeed(dragDistance, 0, dragDistance - 10);
     EXPECT_EQ(richEditorPattern->currentScrollParam_.offset, speed) << "darg speed move up";
@@ -2684,8 +2628,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection004, TestSize.Level1)
     auto edgeDistance = AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(50, 50);
-    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE,
-        .handleRect = RectF(50, 50, 20, 20) };
+    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE, .handleRect = RectF(50, 50, 20, 20) };
     richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(50, 50), EdgeDetectionStrategy::OUT_BOUNDARY);
     EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "the touch point is the same as the last time";
     richEditorPattern->StopAutoScroll();
@@ -2779,7 +2722,7 @@ HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = -1;
     richEditorPattern->HandleDoubleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
 }
 
 /*
@@ -3257,7 +3200,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController015, TestSize.Level1)
 
     /**
      * @tc.steps: step4. test get span
-    */
+     */
     auto info1 = richEditorController->GetSpansInfo(0, 3);
     EXPECT_EQ(info1.selection_.resultObjects.size(), 2);
     auto info2 = richEditorController->GetSpansInfo(8, 9);
@@ -3265,7 +3208,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController015, TestSize.Level1)
 
     /**
      * @tc.steps: step5. test update span
-    */
+     */
     TextStyle textStyle;
     textStyle.SetFontSize(FONT_SIZE_VALUE_2);
     struct UpdateSpanStyle updateSpanStyle;
@@ -3281,7 +3224,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController015, TestSize.Level1)
 
     /**
      * @tc.steps: step6. test delete span
-    */
+     */
     RangeOptions option;
     option.start = 8;
     option.end = 15;

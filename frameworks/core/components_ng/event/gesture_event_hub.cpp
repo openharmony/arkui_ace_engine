@@ -18,11 +18,11 @@
 #include <cstdint>
 #include <list>
 
-#include "base/image/image_source.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/time_util.h"
+#include "base/image/image_source.h"
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
@@ -176,8 +176,8 @@ void GestureEventHub::OnModifyDone()
     }
 }
 
-RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(const Offset& offset,
-    std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
+RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
+    const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
     const RefPtr<TargetComponent>& targetComponent)
 {
     RefPtr<NGGestureRecognizer> current;
@@ -299,14 +299,6 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 current = *recognizers.begin();
             }
         }
-    }
-
-    if (exclusiveIndex != static_cast<int32_t>(externalExclusiveRecognizer_.size())) {
-        externalExclusiveRecognizer_.resize(exclusiveIndex);
-    }
-
-    if (parallelIndex != static_cast<int32_t>(externalParallelRecognizer_.size())) {
-        externalParallelRecognizer_.resize(parallelIndex);
     }
 
     if (current) {
@@ -697,17 +689,19 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     auto frameTag = frameNode->GetTag();
     auto hostPattern = frameNode->GetPattern<TextDragBase>();
     if (hostPattern && (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
-                           frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG)) {
+                        frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG)) {
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
         frameNodeSize_ = SizeF(0.0f, 0.0f);
     } else {
-        frameNodeOffset_ = frameNode->GetOffsetRelativeToWindow();
         auto geometryNode = frameNode->GetGeometryNode();
         if (geometryNode) {
             frameNodeSize_ = geometryNode->GetFrameSize();
         } else {
             frameNodeSize_ = SizeF(0.0f, 0.0f);
         }
+        auto rectCenter = frameNode->GetPaintRectCenter();
+        frameNodeOffset_ = OffsetF(rectCenter.GetX() - frameNodeSize_.Width() / 2.0f,
+            rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
     }
     /*
      * Users may remove frameNode in the js callback function "onDragStart "triggered below,

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_CONTAINER_MODEL_H
 
 #include <memory>
+#include <mutex>
 
 #include "base/utils/macros.h"
 #include "frameworks/core/components/common/layout/grid_container_info.h"
@@ -32,6 +33,7 @@ public:
 
 private:
     static std::unique_ptr<GridContainerModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

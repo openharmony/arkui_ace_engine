@@ -521,15 +521,18 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId
 {
     SecCompClickEvent secEvent;
     secEvent.type = ClickEventType::POINT_EVENT_TYPE;
+#ifdef SECURITY_COMPONENT_ENABLE
     secEvent.point.touchX = event.GetDisplayX();
     secEvent.point.touchY = event.GetDisplayY();
-    secEvent.point.timestamp =
-        static_cast<uint64_t>(event.GetTimeStamp().time_since_epoch().count()) / SECOND_TO_MILLISECOND;
     auto data = event.GetEnhanceData();
     if (data.size() > 0) {
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
     }
+#endif
+    secEvent.point.timestamp =
+        static_cast<uint64_t>(event.GetTimeStamp().time_since_epoch().count()) / SECOND_TO_MILLISECOND;
+
     return ReportSecurityComponentClickEventInner(scId, node, secEvent);
 }
 

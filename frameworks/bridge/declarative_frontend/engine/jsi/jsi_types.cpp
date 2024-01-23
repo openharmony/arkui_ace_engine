@@ -197,6 +197,12 @@ size_t JsiArray::Length() const
     return length;
 }
 
+void JsiArray::SetLength(size_t length) const
+{
+    auto stringRef = panda::StringRef::NewFromUtf8(GetEcmaVM(), "length");
+    GetHandle()->Set(GetEcmaVM(), stringRef, JsiValueConvertor::toJsiValueWithVM<size_t>(GetEcmaVM(), length));
+}
+
 bool JsiArray::IsArray() const
 {
     if (GetHandle().IsEmpty()) {
@@ -362,13 +368,13 @@ JsiObjTemplate::JsiObjTemplate(panda::Local<panda::ObjectRef> val) : JsiObject(v
 
 void JsiObjTemplate::SetInternalFieldCount(int32_t count) const
 {
-    GetHandle()->SetNativePointerFieldCount(count);
+    GetHandle()->SetNativePointerFieldCount(GetEcmaVM(), count);
 }
 
 JsiRef<JsiObject> JsiObjTemplate::NewInstance() const
 {
     auto instance = panda::ObjectRef::New(GetEcmaVM());
-    instance->SetNativePointerFieldCount(1);
+    instance->SetNativePointerFieldCount(GetEcmaVM(), 1);
     return JsiRef<JsiObject>::Make(instance);
 }
 

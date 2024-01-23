@@ -11016,14 +11016,15 @@ class RadioPaddingModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (isLengthType(this.value) || isResource(this.value)) {
-      return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
-        !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
-        !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
-        !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.left === this.value.left &&
+        this.stageValue.right === this.value.right &&
+        this.stageValue.top === this.value.top &&
+        this.stageValue.bottom === this.value.bottom);
+    } else {
+      return true;
     }
   }
 }

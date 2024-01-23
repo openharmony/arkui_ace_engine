@@ -230,7 +230,7 @@ void JSTabContent::SetSelectedMode(const JSRef<JSVal>& info)
     }
 }
 
-void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyle)
+void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyle, bool isSubTabStyle)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
     JSRef<JSVal> size = obj->GetProperty("size");
@@ -242,7 +242,10 @@ void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyl
 
     JSRef<JSVal> weight = obj->GetProperty("weight");
     if (weight->IsString() || weight->IsNumber()) {
-        labelStyle.fontWeight = ConvertStrToFontWeight(weight->ToString());
+        auto parseResult = ParseFontWeight(weight->ToString());
+        if (parseResult.first || !isSubTabStyle) {
+            labelStyle.fontWeight = parseResult.second;
+        }
     }
 
     JSRef<JSVal> family = obj->GetProperty("family");
@@ -305,7 +308,7 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info, bool isSubTabStyle)
 
         JSRef<JSVal> font = obj->GetProperty("font");
         if (!font->IsNull() && font->IsObject()) {
-            GetFontContent(font, labelStyle);
+            GetFontContent(font, labelStyle, isSubTabStyle);
         }
     }
     CompleteParameters(labelStyle, isSubTabStyle);
@@ -396,12 +399,8 @@ void JSTabContent::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle
             labelStyle.fontSize = tabTheme->GetBottomTabTextSize();
         }
     }
-    if (!labelStyle.fontWeight.has_value()) {
-        if (isSubTabStyle) {
-            labelStyle.fontWeight = FontWeight::NORMAL;
-        } else {
-            labelStyle.fontWeight = FontWeight::MEDIUM;
-        }
+    if (!labelStyle.fontWeight.has_value() && !isSubTabStyle) {
+        labelStyle.fontWeight = FontWeight::MEDIUM;
     }
     if (!labelStyle.fontStyle.has_value()) {
         labelStyle.fontStyle = FontStyle::NORMAL;

@@ -242,6 +242,8 @@ GridItemRect GridLayoutAlgorithm::GetItemRect(const RefPtr<GridLayoutProperty>& 
         auto options = gridLayoutProperty->GetLayoutOptions().value();
         if (options.getRectByIndex) {
             rect = options.getRectByIndex(index);
+            rect.rowSpan = std::max(rect.rowSpan, 1);
+            rect.columnSpan = std::max(rect.columnSpan, 1);
         }
     } else {
         if (childLayoutProperty) {

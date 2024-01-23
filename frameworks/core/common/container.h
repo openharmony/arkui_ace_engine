@@ -264,7 +264,9 @@ public:
     virtual void UpdateResourceConfiguration(const std::string& jsonStr) {}
 
     static int32_t CurrentId();
+    static int32_t CurrentIdWithoutScope();
     static RefPtr<Container> Current();
+    static RefPtr<Container> CurrentWithoutScope();
     static RefPtr<Container> GetContainer(int32_t containerId);
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();

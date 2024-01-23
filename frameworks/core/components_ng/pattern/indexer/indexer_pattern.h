@@ -111,7 +111,6 @@ private:
     void OnSelect(bool changed = false);
     int32_t GetSkipChildIndex(int32_t step);
     int32_t GetFocusChildIndex(const std::string& searchStr);
-    void SetPositionOfPopupNode(RefPtr<FrameNode>& customNode);
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitInputEvent();
@@ -145,6 +144,8 @@ private:
     bool IfSelectIndexValid();
     int32_t GetSelectChildIndex(const Offset& offset);
     void StartBubbleAppearAnimation();
+    void StartDelayTask(uint32_t duration = INDEXER_BUBBLE_WAIT_DURATION);
+    void StartBubbleDisappearAnimation();
     void IndexerHoverInAnimation();
     void IndexerHoverOutAnimation();
     void IndexerPressInAnimation();
@@ -196,6 +197,7 @@ private:
     float actualIndexerHeight_ = 0.0f;
     bool isNewHeightCalculated_ = false;
     IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;
+    CancelableCallback<void()> delayTask_;
 };
 } // namespace OHOS::Ace::NG
 

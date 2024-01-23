@@ -116,10 +116,17 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return currentContainer->GetPipelineContext();
 }
 
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextWithoutScope()
+{
+    auto currentContainer = Container::CurrentWithoutScope();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    return currentContainer->GetPipelineContext();
+}
+
 double PipelineBase::GetCurrentDensity()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
+    auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+    if (!pipelineContext) {
         auto container = Container::GetActive();
         pipelineContext = container ? container->GetPipelineContext() : nullptr;
     }
@@ -723,6 +730,11 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
 void PipelineBase::OnFoldStatusChanged(FoldStatus foldStatus)
 {
     OnFoldStatusChange(foldStatus);
+}
+
+void PipelineBase::OnFoldDisplayModeChanged(FoldDisplayMode foldDisplayMode)
+{
+    OnFoldDisplayModeChange(foldDisplayMode);
 }
 
 double PipelineBase::ModifyKeyboardHeight(double keyboardHeight) const

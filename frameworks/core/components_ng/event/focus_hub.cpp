@@ -289,6 +289,11 @@ RefPtr<FocusHub> FocusHub::GetCurrentMainView()
 
 RefPtr<FocusHub> FocusHub::GetMainViewRootScope()
 {
+    static const std::list<int32_t> DEEPTH_OF_MENU = { 0, 0 };
+    static const std::list<int32_t> DEEPTH_OF_DIALOG = { 0, 0 };
+    static const std::list<int32_t> DEEPTH_OF_PAGE = { 0 };
+    static const std::list<int32_t> DEEPTH_OF_POPUP = { 0, 0 };
+    static const std::list<int32_t> DEEPTH_OF_SHEET_PAGE = { 1, 0 };
     auto frameName = GetFrameName();
     std::list<int32_t> rootScopeDeepth;
     if (frameName == V2::MENU_ETS_TAG) {
@@ -1192,6 +1197,8 @@ void FocusHub::OnFocusNode()
     if (frameNode->GetFocusType() == FocusType::NODE) {
         pipeline->SetFocusNode(frameNode);
     }
+
+    pipeline->RequestFrame();
 }
 
 void FocusHub::OnBlurNode()
@@ -1228,6 +1235,8 @@ void FocusHub::OnBlurNode()
     if (frameNode->GetFocusType() == FocusType::NODE && frameNode == pipeline->GetFocusNode()) {
         pipeline->SetFocusNode(nullptr);
     }
+
+    pipeline->RequestFrame();
 }
 
 void FocusHub::CheckFocusStateStyle(bool onFocus)

@@ -82,7 +82,7 @@ void ResetScrollNestedScroll(ArkUINodeHandle node)
     ScrollModelNG::SetNestedScroll(frameNode, nestedOpt);
 }
 
-void SetScrollEnableScroll(ArkUINodeHandle node, bool isEnabled)
+void SetScrollEnableScroll(ArkUINodeHandle node, ArkUI_Bool isEnabled)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -232,7 +232,7 @@ void ResetScrollScrollBarWidth(ArkUINodeHandle node)
     ScrollModelNG::SetScrollBarWidth(frameNode, width);
 }
 
-void SetScrollEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, bool alwaysEnabled)
+void SetScrollEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -246,7 +246,7 @@ void ResetScrollEdgeEffect(ArkUINodeHandle node)
     ScrollModelNG::SetEdgeEffect(frameNode, EdgeEffect::NONE, true);
 }
 
-void SetEnableScrollInteraction(ArkUINodeHandle node, bool enableScrollInteraction)
+void SetEnableScrollInteraction(ArkUINodeHandle node, ArkUI_Bool enableScrollInteraction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

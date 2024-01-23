@@ -243,7 +243,7 @@ void PixelMapImage::DrawToRSCanvas(
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     std::vector<RSPoint> radius;
     for (int ii = 0; ii < 4; ii++) {
-        RSPoint point(radiusXY[ii].GetX(), radiusXY[ii].GetY());
+        RSPoint point(radii[ii].GetX(), radii[ii].GetY());
         radius.emplace_back(point);
     }
     recordingCanvas.ClipAdaptiveRoundRect(radius);
@@ -258,6 +258,11 @@ void PixelMapImage::DrawToRSCanvas(
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
         1.0, 0, 0, 0 };
     recordingCanvas.AttachBrush(brush);
+    if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, width=%{public}d * height=%{public}d", pixmap->GetWidth(),
+            pixmap->GetHeight());
+        pixmap->SavePixelMapToFile("_ToRS_");
+    }
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
 #endif

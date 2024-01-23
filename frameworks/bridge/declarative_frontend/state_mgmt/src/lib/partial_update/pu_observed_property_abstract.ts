@@ -76,7 +76,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
 
   public debugInfoOwningView() : string {
-    return `${this.owningView_ ? this.owningView_.debugInfo() : "owning @Component UNKNOWN"}`;
+    return `${this.owningView_ ? this.owningView_.debugInfo__() : "owning @Component UNKNOWN"}`;
   }
 
   // dump info about owning view and subscribers (PU ones only)
@@ -366,8 +366,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
   
   public purgeDependencyOnElmtId(rmElmtId: number): void {
-    stateMgmtConsole.debug(`${this.debugInfo()}: purgeDependencyOnElmtId ${rmElmtId}`);
-    this.dependentElmtIdsByProperty_.purgeDependenciesForElmtId(rmElmtId);
+    this.dependentElmtIdsByProperty_?.purgeDependenciesForElmtId(rmElmtId);
   }
 
   public SetPropertyUnchanged(): void {

@@ -118,40 +118,58 @@ void NavDestinationPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
-    if (navDestinationPattern->GetName().empty()) {
-        if (hostNode->GetInspectorId().has_value()) {
-            navDestinationPattern->SetName(hostNode->GetInspectorIdValue());
-        } else {
-            auto id = GetHost()->GetId();
-            navDestinationPattern->SetName(std::to_string(id));
-        }
+    UpdateNameIfNeeded(hostNode);
+    UpdateBackgroundColorIfNeeded(hostNode);
+    UpdateTitlebarVisibility(hostNode);
+}
+
+void NavDestinationPattern::UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode)
+{
+    if (!name_.empty()) {
+        return;
     }
+
+    if (hostNode->GetInspectorId().has_value()) {
+        name_ = hostNode->GetInspectorIdValue();
+    } else {
+        name_ = std::to_string(GetHost()->GetId());
+    }
+    auto pathInfo = GetNavPathInfo();
+    if (pathInfo) {
+        pathInfo->SetName(name_);
+    }
+}
+
+void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode)
+{
     auto renderContext = hostNode->GetRenderContext();
-    do {
-        if (renderContext->GetBackgroundColor().has_value()) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Background already has color: %{public}s",
-                renderContext->GetBackgroundColor()->ColorToString().c_str());
-            break;
-        }
-        if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
-            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set dialog background color: %{public}s",
-                renderContext->GetBackgroundColor()->ColorToString().c_str());
-            break;
-        }
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        if (!pipelineContext) {
-            break;
-        }
-        auto theme = pipelineContext->GetTheme<AppTheme>();
-        if (!theme) {
-            break;
-        }
-        renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set default background color: %{public}s",
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetBackgroundColor().has_value()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Background already has color: %{public}s",
             renderContext->GetBackgroundColor()->ColorToString().c_str());
-    } while (false);
+        return;
+    }
+    if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set dialog background color: %{public}s",
+            renderContext->GetBackgroundColor()->ColorToString().c_str());
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        return;
+    }
+    auto theme = pipelineContext->GetTheme<AppTheme>();
+    if (!theme) {
+        return;
+    }
+    renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set default background color: %{public}s",
+        renderContext->GetBackgroundColor()->ColorToString().c_str());
+}
+
+void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode)
+{
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());

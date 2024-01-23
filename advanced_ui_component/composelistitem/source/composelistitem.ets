@@ -177,6 +177,7 @@ struct ContentItemStruct {
           .draggable(false)
       }
     }
+    .flexShrink(1)
     .margin({
       top: TEXT_SAFE_MARGIN,
       bottom: TEXT_SAFE_MARGIN
@@ -189,6 +190,9 @@ struct ContentItemStruct {
       this.createIcon()
       this.createText()
     }
+    .margin({ right: 16 })
+    .width("calc(66% - 16vp)")
+    .flexShrink(1)
   }
 }
 
@@ -332,6 +336,7 @@ struct OperateItemStruct {
       .fontColor($r('sys.color.ohos_id_color_text_secondary'))
       .focusable(true)
       .draggable(false)
+      .flexShrink(1)
   }
 
   @Builder
@@ -572,6 +577,9 @@ struct OperateItemStruct {
         }
       }
     }
+    .width("34%")
+    .flexShrink(1)
+    .justifyContent(FlexAlign.End)
   }
 }
 

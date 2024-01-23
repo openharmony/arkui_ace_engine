@@ -57,8 +57,8 @@ class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
 
 public:
-    explicit UIExtensionPattern(bool isTransferringCaller = false, bool isModal = false,
-        bool isAsyncModalBinding = false);
+    explicit UIExtensionPattern(
+        bool isTransferringCaller = false, bool isModal = false, bool isAsyncModalBinding = false);
     ~UIExtensionPattern() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
@@ -70,6 +70,7 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
+    void OnAreaChangedInner() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     // for DynamicComponent
@@ -87,12 +88,6 @@ public:
     void SetOnSizeChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
     {
         onSizeChanged_ = std::move(callback);
-    }
-
-    // The uiextension needs inputmethod by default, and is processed by its internal actual focus node.
-    bool NeedSoftKeyboard() const override
-    {
-        return true;
     }
 
     void OnConnect();
@@ -131,7 +126,6 @@ public:
     int32_t GetUiExtensionId() override;
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
-    bool NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info);
 
     virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
@@ -143,8 +137,7 @@ public:
         Accessibility::AccessibilityElementInfo& output) override;
     virtual bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t offset) override;
-    void OnAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
+    void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
 
 private:
     enum class ReleaseCode {
@@ -165,11 +158,9 @@ private:
         std::string message;
     };
 
-    enum class ComponentType {
-        DYNAMIC,
-        UI_EXTENSION
-    };
+    enum class ComponentType { DYNAMIC, UI_EXTENSION };
 
+    void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnLanguageConfigurationUpdate() override;
     void OnColorConfigurationUpdate() override;
@@ -221,6 +212,7 @@ private:
     bool isModal_ = false;
     bool isAsyncModalBinding_ = false;
     int32_t uiExtensionId_ = 0;
+    int32_t callbackId_ = 0;
 
     // for DynamicComponent
     ComponentType componentType_ = ComponentType::UI_EXTENSION;

@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navrouter/navdestination_context.h"
 
 namespace OHOS::Ace {
 class NavDestinationModel {
@@ -27,7 +28,8 @@ public:
     virtual ~NavDestinationModel() = default;
 
     virtual void Create() = 0;
-    virtual void Create(std::function<void()>&& deepRenderFunc) = 0;
+    virtual void Create(std::function<void()>&& deepRenderFunc,
+        RefPtr<NG::NavDestinationContext> context = nullptr) = 0;
     virtual void SetHideTitleBar(bool hideTitleBar) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle) = 0;
     virtual void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
@@ -39,6 +41,7 @@ public:
     virtual void SetOnShown(std::function<void()>&& onShow) = 0;
     virtual void SetOnHidden(std::function<void()>&& onHidden) = 0;
     virtual void SetOnBackPressed(std::function<bool()>&& onBackPressed) = 0;
+    virtual void SetOnReady(std::function<void(RefPtr<NG::NavDestinationContext>)>&& onReady) = 0;
     virtual void SetNavDestinationMode(NG::NavDestinationMode mode);
     virtual RefPtr<AceType> CreateEmpty()
     {

@@ -88,6 +88,10 @@ constexpr int32_t ERROR_CODE_PAGE_STACK_FULL = 100003;     // The pages are push
 constexpr int32_t ERROR_CODE_NAMED_ROUTE_ERROR = 100004;           // Named route error.
 constexpr int32_t ERROR_CODE_URI_ERROR_LITE = 200002;      // Uri error for lite.
 
+// push destination error code
+constexpr int32_t ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED = 100005; // builder function not registered
+constexpr int32_t ERROR_CODE_DESTINATION_NOT_FOUND = 100006; // navDestination not found
+
 // Send synchronous message error code
 // No callback has been registered to process synchronous data transferring.
 constexpr int32_t ERROR_CODE_UIEXTENSION_NOT_REGISTER_SYNC_CALLBACK = 100011;
@@ -233,6 +237,12 @@ inline ImageRepeat ConvertStrToImageRepeat(const std::string& repeat)
 
     auto index = BinarySearchFindIndex(imageRepeatTable, ArraySize(imageRepeatTable), repeat.c_str());
     return index < 0 ? ImageRepeat::NO_REPEAT : imageRepeatTable[index].value;
+}
+
+inline std::pair<bool, FontWeight> ParseFontWeight(const std::string& weight,
+    FontWeight defaultFontWeight = FontWeight::NORMAL)
+{
+    return StringUtils::ParseFontWeight(weight, defaultFontWeight);
 }
 
 inline FontWeight ConvertStrToFontWeight(const std::string& weight, FontWeight defaultFontWeight = FontWeight::NORMAL)

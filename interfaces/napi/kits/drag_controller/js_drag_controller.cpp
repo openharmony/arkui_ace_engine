@@ -90,6 +90,7 @@ struct DragControllerAsyncCtx {
     int32_t globalY = -1;
     uint64_t displayId = 0;
     int32_t sourceType = 0;
+    float windowScale = 1.0f;
     int parseBuilderCount = 0;
     std::mutex dragStateMutex;
     DragState dragState = DragState::PENDING;
@@ -174,7 +175,7 @@ public:
     static napi_value On(napi_env env, napi_callback_info info)
     {
         LOGI("NAPI DragAction On called");
-        auto jsEngine = EngineHelper::GetCurrentEngine();
+        auto jsEngine = EngineHelper::GetCurrentEngineWithoutScope();
         CHECK_NULL_RETURN(jsEngine, nullptr);
 
         napi_handle_scope scope = nullptr;
@@ -240,7 +241,7 @@ public:
     static napi_value StartDrag(napi_env env, napi_callback_info info)
     {
         LOGI("NAPI DragAction StartDrag called");
-        auto jsEngine = EngineHelper::GetCurrentEngine();
+        auto jsEngine = EngineHelper::GetCurrentEngineWithoutScope();
         CHECK_NULL_RETURN(jsEngine, nullptr);
 
         napi_escapable_handle_scope scope = nullptr;
@@ -574,7 +575,7 @@ void HandleFail(DragControllerAsyncCtx* asyncCtx, int32_t errorCode, const std::
 void HandleOnDragStart(DragControllerAsyncCtx* asyncCtx)
 {
     ContainerScope scope(asyncCtx->instanceId);
-    auto container = Container::Current();
+    auto container = Container::CurrentWithoutScope();
     if (!container) {
         LOGW("container is null");
         return;
@@ -600,6 +601,7 @@ void GetShadowInfoArray(DragControllerAsyncCtx* asyncCtx,
     std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos)
 {
     for (const auto& pixelMap: asyncCtx->pixelMapList) {
+        pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
         int32_t width = pixelMap->GetWidth();
         int32_t height = pixelMap->GetHeight();
         double x = ConvertToPx(asyncCtx, asyncCtx->touchPoint.GetX(), width);
@@ -642,6 +644,11 @@ bool JudgeCoordinateCanDrag(Msdp::DeviceStatus::ShadowInfo& shadowInfo)
 
 void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::DeviceStatus::DragData>& dragData)
 {
+    auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    asyncCtx->displayId = displayInfo->GetDisplayId();
     std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
     GetShadowInfoArray(asyncCtx, shadowInfos);
     if (shadowInfos.empty()) {
@@ -669,8 +676,8 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, "", asyncCtx->sourceType,
-        dataSize != 0 ? dataSize : shadowInfos.size(), pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, false,
-        summary };
+        dataSize != 0 ? dataSize : shadowInfos.size(), pointerId, asyncCtx->globalX, asyncCtx->globalY,
+        asyncCtx->displayId, true, false, summary };
 }
 
 void StartDragService(DragControllerAsyncCtx* asyncCtx)
@@ -723,6 +730,8 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    auto windowScale = container->GetWindowScale();
+    asyncCtx->windowScale = windowScale;
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
@@ -752,7 +761,11 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    asyncCtx->displayId = container->GetDisplayInfo()->GetDisplayId();
+    auto windowScale = container->GetWindowScale();
+    asyncCtx->windowScale = windowScale;
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    asyncCtx->displayId = displayInfo->GetDisplayId();
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
@@ -788,6 +801,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 }
                 dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
             }
+            asyncCtx->pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
             int32_t width = asyncCtx->pixelMap->GetWidth();
             int32_t height = asyncCtx->pixelMap->GetHeight();
             double x = ConvertToPx(asyncCtx, asyncCtx->touchPoint.GetX(), width);
@@ -921,7 +935,7 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx)
     CHECK_NULL_RETURN(asyncCtx, false);
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(asyncCtx->env, &scope);
-    auto delegate = EngineHelper::GetCurrentDelegate();
+    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
         NapiThrow(asyncCtx->env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(asyncCtx->env, scope);
@@ -952,7 +966,7 @@ bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value custo
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(asyncCtx->env, &scope);
 
-    auto delegate = EngineHelper::GetCurrentDelegate();
+    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
         NapiThrow(asyncCtx->env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(asyncCtx->env, scope);
@@ -1200,7 +1214,7 @@ void InitializeDragControllerCtx(napi_env env, napi_callback_info info, DragCont
     CHECK_NULL_VOID(asyncCtx);
     napi_value thisVar = nullptr;
     void* data = nullptr;
-    asyncCtx->instanceId = Container::CurrentId();
+    asyncCtx->instanceId = Container::CurrentIdWithoutScope();
     asyncCtx->env = env;
     // get arguments from JS
     napi_get_cb_info(asyncCtx->env, info, &(asyncCtx->argc), asyncCtx->argv, &thisVar, &data);

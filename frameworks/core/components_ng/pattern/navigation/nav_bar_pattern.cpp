@@ -686,11 +686,6 @@ void NavBarPattern::OnModifyDone()
     isHideToolbar_ = navBarLayoutProperty->GetHideToolBarValue(false);
     isHideTitlebar_ = navBarLayoutProperty->GetHideTitleBarValue(false);
     titleMode_ = navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-
-    // drag navbar to update title bar height.
-    auto gesture = hostNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    InitPanEvent(gesture);
 }
 
 void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)

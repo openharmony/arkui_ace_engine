@@ -86,6 +86,11 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return MockPipelineContext::GetCurrent();
 }
 
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextWithoutScope()
+{
+    return MockPipelineContext::GetCurrent();
+}
+
 RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
 {
     return MockPipelineContext::GetCurrent();
@@ -217,6 +222,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 
 void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus) {}
 
+void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
+
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
@@ -304,6 +311,8 @@ void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}
+
+UITaskScheduler::UITaskScheduler() {}
 
 UITaskScheduler::~UITaskScheduler() = default;
 
@@ -514,6 +523,11 @@ void PipelineBase::OnActionEvent(const std::string& action) {}
 void PipelineBase::SetRootSize(double density, int32_t width, int32_t height) {}
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
+{
+    return NG::MockPipelineContext::GetCurrent();
+}
+
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextWithoutScope()
 {
     return NG::MockPipelineContext::GetCurrent();
 }

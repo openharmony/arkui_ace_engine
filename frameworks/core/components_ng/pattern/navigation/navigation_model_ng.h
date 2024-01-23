@@ -25,11 +25,14 @@ class ACE_EXPORT NavigationModelNG : public OHOS::Ace::NavigationModel {
 public:
     void Create() override;
     void SetNavigationStack() override;
-    void SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack) override;
+    void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) override;
+    void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
+        std::function<void(RefPtr<NG::NavigationStack>)> updater) override;
     void SetNavigationStackProvided(bool provided) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title) override;
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
+    void SetTitlebarOptions(NavigationTitlebarOptions&& opt) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& height, bool isValid = true) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
@@ -45,6 +48,7 @@ public:
 
     void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
+    void SetToolbarOptions(NavigationToolbarOptions&& opt) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,

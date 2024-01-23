@@ -36,6 +36,9 @@ public:
     void SetFooter(std::function<void()>&& footer) override;
 
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
+    static void SetFooter(FrameNode* frameNode, FrameNode* footerNode);
 };
 
 } // namespace OHOS::Ace::NG

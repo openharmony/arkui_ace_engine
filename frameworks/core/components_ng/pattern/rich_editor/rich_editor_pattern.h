@@ -227,6 +227,8 @@ public:
     void FireOnDeleteComplete(const RichEditorDeleteValue& info);
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
+    bool SymbolSpanUpdateStyle(
+        RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
     void UpdateParagraphStyle(int32_t start, int32_t end, const UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
@@ -397,6 +399,13 @@ public:
         showSelect_ = isShowSelect;
     }
 
+    const std::list<RefPtr<UINode>>& GetAllChildren() const override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, TextPattern::GetAllChildren());
+        return host->GetChildren();
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -449,6 +458,7 @@ private:
     void onDragDropAndLeave();
     void ClearDragDropEvent();
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
@@ -539,7 +549,7 @@ private:
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
     void AdjustCursorPosition(int32_t& pos);
-    void AdjustImageSelection(int32_t& start, int32_t& end, const Offset& pos);
+    void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
     bool IsClickBoundary(const int32_t position);
 
@@ -613,6 +623,7 @@ private:
     TimeStamp lastAiPosTimeStamp_;
     bool adjusted_ = false;
     Offset touchDownOffset_;
+    bool isShowMenu_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

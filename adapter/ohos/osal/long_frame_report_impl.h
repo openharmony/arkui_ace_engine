@@ -17,17 +17,17 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_LONG_FRAME_REPORT_IMPL_H
 
 #include "base/longframe/long_frame_report.h"
-#include "ffrt.h"
+#include "ffrt_inner.h"
 
 namespace OHOS::Ace {
 class LongFrameReportImpl {
 public:
-    LongFrameReportImpl();
+    LongFrameReportImpl() = default;
     ~LongFrameReportImpl() = default;
     void SubmitEvent();
     void CancelEvent();
 
-    std::unique_ptr<ffrt::queue> ffrtTaskQueue = nullptr;
+private:
     ffrt::task_handle ffrtTask;
 };
 } // namespace OHOS::Ace

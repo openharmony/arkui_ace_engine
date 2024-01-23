@@ -134,12 +134,20 @@ void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId, bool animatio
     }
 }
 
-void SelectOverlayManager::DestroySelectOverlay(bool animation)
+bool SelectOverlayManager::DestroySelectOverlay(bool animation)
 {
     auto current = selectOverlayItem_.Upgrade();
     if (current) {
         DestroyHelper(current, animation);
+        return true;
     }
+    return false;
+}
+
+bool SelectOverlayManager::ResetSelectionAndDestroySelectOverlay(bool animation)
+{
+    NotifyOverlayClosed(true);
+    return DestroySelectOverlay(animation);
 }
 
 void SelectOverlayManager::DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation)

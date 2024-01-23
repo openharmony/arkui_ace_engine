@@ -36,13 +36,31 @@ public:
         std::string navigationId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterNavigationCallback(napi_value cb);
     static void UnRegisterNavigationCallback(std::string navigationId, napi_value cb);
+    static void HandleNavigationStateChange(
+        const std::string& navigationId, const std::string& navDestinationName, NG::NavDestinationState state);
 
-    static void HandleNavigationStateChange(std::string navigationId, std::string navDestinationName,
-                                            NG::NavDestinationState state);
+    static void RegisterRouterPageCallback(
+        napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterRouterPageCallback(
+        int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterRouterPageCallback(napi_env env, napi_value uiAbilityContext, napi_value callback);
+    static void UnRegisterRouterPageCallback(int32_t uiContextInstanceId, napi_value callback);
+    static void HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_value context, int32_t index,
+        const std::string& name, const std::string& path, NG::RouterPageState state);
+    static bool ParseStringFromNapi(napi_env env, napi_value val, std::string& str);
+    static bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType);
 private:
+    static void GetAbilityInfos(napi_env env, napi_value abilityContext, NG::AbilityContextInfo& info);
+    static napi_env GetCurrentNapiEnv();
+
     static std::list<std::shared_ptr<UIObserverListener>> unspecifiedNavigationListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedCNavigationListeners_;
+    static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
+        abilityContextRouterPageListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedRouterPageListeners_;
+    static std::unordered_map<napi_ref, NG::AbilityContextInfo> infos_;
 };
 } // namespace OHOS::Ace::Napi
 #endif // FOUNDATION_ACE_INTERFACES_OBSERVER_H

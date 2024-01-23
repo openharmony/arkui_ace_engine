@@ -1385,7 +1385,7 @@ class Pattern final : std::enable_shared_from_this<Pattern> {
 public:
     bool IsValid() const
     {
-        return !imgSrc_.empty();
+        return (!imgSrc_.empty() || pixelMap_);
     }
 
     const std::string& GetImgSrc() const
@@ -1499,6 +1499,16 @@ public:
         return transformable_;
     }
 
+    void SetPixelMap(const RefPtr<PixelMap>& pixelMap)
+    {
+        pixelMap_ = pixelMap;
+    }
+
+    RefPtr<PixelMap> GetPixelMap() const
+    {
+        return pixelMap_;
+    }
+
 private:
     double imageWidth_ = 0.0;
     double imageHeight_ = 0.0;
@@ -1511,6 +1521,7 @@ private:
     bool transformable_ = false;
     std::string imgSrc_;
     std::string repetition_;
+    RefPtr<PixelMap> pixelMap_;
 };
 
 enum class PathCmd {

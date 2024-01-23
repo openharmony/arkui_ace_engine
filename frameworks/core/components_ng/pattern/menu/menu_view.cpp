@@ -537,6 +537,9 @@ RefPtr<FrameNode> MenuView::Create(
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuProperty, nullptr);
+    menuProperty->UpdateShowInSubWindow(false);
     for (size_t i = 0; i < params.size(); ++i) {
         auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, i);
         auto optionPattern = optionNode->GetPattern<OptionPattern>();
@@ -599,9 +602,9 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         BorderColorProperty outerColorProp;
         outerColorProp.SetColor(menuTheme->GetOuterBorderColor());
         BorderRadiusProperty outerRadiusProp;
-        outerRadiusProp.SetRadius(menuTheme->GetOuterBorderRadius());
+        outerRadiusProp.SetRadius(Dimension(menuTheme->GetOuterBorderRadius()));
         BorderWidthProperty outerWidthProp;
-        outerWidthProp.SetBorderWidth(menuTheme->GetOuterBorderWidth());
+        outerWidthProp.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
         renderContext->SetOuterBorderStyle(styleProp);
         renderContext->SetOuterBorderColor(outerColorProp);
         renderContext->SetOuterBorderRadius(outerRadiusProp);
@@ -611,7 +614,7 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         BorderRadiusProperty innerRadiusProp;
         innerRadiusProp.SetRadius(menuTheme->GetInnerBorderRadius());
         BorderWidthProperty innerWidthProp;
-        innerWidthProp.SetBorderWidth(menuTheme->GetInnerBorderWidth());
+        innerWidthProp.SetBorderWidth(Dimension(menuTheme->GetInnerBorderWidth()));
         renderContext->SetBorderStyle(styleProp);
         renderContext->SetBorderColor(innerColorProp);
         renderContext->SetBorderRadius(innerRadiusProp);

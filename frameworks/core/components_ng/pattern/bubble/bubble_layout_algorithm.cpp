@@ -514,13 +514,13 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
-    auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
+    top_ = safeAreaManager->GetSystemSafeArea().top_.Length();
+    bottom_ = safeAreaManager->GetSystemSafeArea().bottom_.Length();
     paddingStart_ = DRAW_EDGES_SPACE.ConvertToPx();
     paddingEnd_ = DRAW_EDGES_SPACE.ConvertToPx();
-    paddingTop_ = top + DRAW_EDGES_SPACE.ConvertToPx();
+    paddingTop_ = top_ + DRAW_EDGES_SPACE.ConvertToPx();
     if (showInSubWindow) {
-        paddingBottom_ = bottom + DRAW_EDGES_SPACE.ConvertToPx();
+        paddingBottom_ = bottom_ + DRAW_EDGES_SPACE.ConvertToPx();
     } else {
         paddingBottom_ = DRAW_EDGES_SPACE.ConvertToPx();
     }
@@ -2293,7 +2293,7 @@ BubbleLayoutAlgorithm::ErrorPositionType BubbleLayoutAlgorithm::GetErrorPosition
 {
     auto horizonSpacing = static_cast<float>(HORIZON_SPACING_WITH_SCREEN.ConvertToPx());
     RectF validRegion =
-        RectF(OffsetF(horizonSpacing, 0.0), OffsetF(selfSize_.Width() - horizonSpacing, selfSize_.Height()));
+        RectF(OffsetF(horizonSpacing, top_), OffsetF(selfSize_.Width() - horizonSpacing, selfSize_.Height() - bottom_));
     PointF childPoint(childOffset.GetX(), childOffset.GetY());
     if (!validRegion.IsInRegion(childPoint)) {
         return ErrorPositionType::TOP_LEFT_ERROR;

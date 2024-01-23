@@ -430,9 +430,9 @@ void DateTimeAnimationController::SetDatePicker(const RefPtr<FrameNode>& value)
     iter++;
     auto day = *iter;
     CHECK_NULL_VOID(day);
-    year_ = DynamicCast<FrameNode>(year->GetChildAtIndex(1));
-    month_ = DynamicCast<FrameNode>(month->GetChildAtIndex(1));
-    day_ = DynamicCast<FrameNode>(day->GetChildAtIndex(1));
+    year_ = DynamicCast<FrameNode>(year);
+    month_ = DynamicCast<FrameNode>(month);
+    day_ = DynamicCast<FrameNode>(day);
 }
 
 void DateTimeAnimationController::Play(bool isIn)

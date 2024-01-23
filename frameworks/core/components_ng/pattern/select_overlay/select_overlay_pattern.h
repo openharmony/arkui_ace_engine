@@ -38,7 +38,9 @@ class ACE_EXPORT SelectOverlayPattern : public MenuWrapperPattern {
 public:
     explicit SelectOverlayPattern(std::shared_ptr<SelectOverlayInfo> info)
         : MenuWrapperPattern(-1), info_(std::move(info))
-    {}
+    {
+        CheckHandleReverse();
+    }
     ~SelectOverlayPattern() override = default;
 
     bool IsMeasureBoundary() const override

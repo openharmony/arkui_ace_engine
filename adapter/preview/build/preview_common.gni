@@ -16,7 +16,6 @@ form_components_support = false
 remote_window_support = false
 effect_component_support = false
 use_external_icu = "shared"
-use_curl_download = true
 accessibility_support = true
 rich_components_support = true
 ohos_standard_fontmgr = true

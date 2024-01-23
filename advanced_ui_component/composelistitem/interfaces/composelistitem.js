@@ -163,6 +163,7 @@ class ContentItemStruct extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Column.create({ space: 4 });
+      Column.flexShrink(1);
       Column.margin({ top: 8, bottom: 8 });
       Column.alignItems(HorizontalAlign.Start);
       t || Column.pop();
@@ -269,6 +270,9 @@ class ContentItemStruct extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Row.create({ space: this.itemRowSpace });
+      Row.margin({ right: 16 });
+      Row.width("calc(66% - 16vp)");
+      Row.flexShrink(1);
       t || Row.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -582,6 +586,7 @@ class OperateItemStruct extends ViewPU {
       });
       Text.focusable(!0);
       Text.draggable(!1);
+      Text.flexShrink(1);
       o || Text.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -823,6 +828,9 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Row.create({ space: this.rowSpace });
+      Row.width("34%");
+      Row.flexShrink(1);
+      Row.justifyContent(FlexAlign.End);
       t || Row.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));

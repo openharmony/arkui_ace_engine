@@ -76,7 +76,7 @@ public:
         paintMethod->SetAxis(swiperPattern->GetDirection());
         paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
-        paintMethod->SetItemCount(swiperPattern->TotalCount());
+        paintMethod->SetItemCount(swiperPattern->RealTotalCount());
         paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
         paintMethod->SetGestureState(swiperPattern->GetGestureState());
         paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());

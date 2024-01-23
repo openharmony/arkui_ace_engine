@@ -37,6 +37,12 @@ public:
 
     sptr<Rosen::Session> GetSession();
 
+    void OnVisibleChange(bool visible) override
+    {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "system window scene will change visible to %{public}s",
+            visible ? "true" : "false");
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnBoundsChanged(const Rosen::Vector4f& bounds);

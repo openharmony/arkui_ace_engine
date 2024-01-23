@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,6 +127,7 @@ private:
     void UpdateOffsetOnVirtualKeyboardHeightChange(LayoutWrapper* layoutWrapper, float mainSize);
     void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
         float mainSize, const SizeF& idealSize);
+    void UpdateOffsetOnHeightChangeDuringAnimation(LayoutWrapper* layoutWrapper, float mainSize);
 
     int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex);
 
@@ -143,7 +144,9 @@ private:
         std::map<int32_t, std::map<int32_t, int32_t>>::iterator gridMatrixIter, LayoutWrapper* layoutWrapper);
     void ScrollToIndexStart(LayoutWrapper* layoutWrapper, int32_t targetIndex);
     void ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
-    void UpdateCurrentOffsetForJumpTo(LayoutWrapper* layoutWrapper, float mainSize);
+    bool IsScrollToEndLine() const;
+    bool IsEndLineInScreenWithGap(int32_t targetLine, float totalViewHeight, float mainSize) const;
+    void UpdateCurrentOffsetForJumpTo(float mainSize);
     void SkipRegularLines(bool forward);
     void SupplyAllData2ZeroIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 

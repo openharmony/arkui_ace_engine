@@ -357,11 +357,13 @@ void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
         CalcDimension y;
         JSRef<JSVal> xVal = obj->GetProperty("x");
         JSRef<JSVal> yVal = obj->GetProperty("y");
-        if (JSViewAbstract::ParseJsDimensionVp(xVal, x)) {
+        if ((xVal->IsString() && StringUtils::StringToCalcDimensionNG(xVal->ToString(), x, false)) ||
+            (!xVal->IsString() && JSViewAbstract::ParseJsDimensionVp(xVal, x))) {
             xOpt = x;
         }
         IndexerModel::GetInstance()->SetPopupPositionX(xOpt);
-        if (JSViewAbstract::ParseJsDimensionVp(yVal, y)) {
+        if ((yVal->IsString() && StringUtils::StringToCalcDimensionNG(yVal->ToString(), y, false)) ||
+            (!yVal->IsString() && JSViewAbstract::ParseJsDimensionVp(yVal, y))) {
             yOpt = y;
         }
         IndexerModel::GetInstance()->SetPopupPositionY(yOpt);

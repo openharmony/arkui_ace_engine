@@ -84,7 +84,6 @@ public:
 
 void IndexerTestNg::SetUpTestSuite()
 {
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
@@ -94,7 +93,6 @@ void IndexerTestNg::SetUpTestSuite()
 void IndexerTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
-    MockParagraph::TearDown();
 }
 
 void IndexerTestNg::SetUp() {}
@@ -288,7 +286,7 @@ HWTEST_F(IndexerTestNg, IndexerTouch001, TestSize.Level1)
      * @tc.steps: step2. OnTouchUp, differrnt location.
      * @tc.expected: Selected index is correct.
      */
-    EXPECT_TRUE(Touch(TouchType::UP, 20.f, static_cast<int32_t>(20.f / pattern_->itemSizeRender_)));
+    EXPECT_TRUE(Touch(TouchType::UP, 20.f, static_cast<int32_t>(50.f / pattern_->itemSizeRender_)));
 }
 
 /**
@@ -569,48 +567,10 @@ HWTEST_F(IndexerTestNg, IndexerPattern002, TestSize.Level1)
 
 /**
  * @tc.name: IndexerPattern003
- * @tc.desc: Test indexer pattern SetPositionOfPopupNode function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
-{
-    Create(
-        [](IndexerModelNG model) {
-            model.SetUsingPopup(true);
-            model.SetPopupHorizontalSpace(Dimension(50));
-            model.SetOnRequestPopupData(GetPopupData);
-        },
-        CREATE_ARRAY, 2);
-    pattern_->MoveIndexByStep(1);
-
-    ASSERT_NE(pattern_->popupNode_, nullptr);
-    auto renderContext = pattern_->popupNode_->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto rightValue = renderContext->GetPosition().value();
-
-    Create(
-        [](IndexerModelNG model) {
-            model.SetUsingPopup(true);
-            model.SetAlignStyle(0);
-            model.SetPopupHorizontalSpace(Dimension(50));
-            model.SetOnRequestPopupData(GetPopupData);
-        },
-        CREATE_ARRAY, 2);
-    pattern_->MoveIndexByStep(1);
-
-    ASSERT_NE(pattern_->popupNode_, nullptr);
-    auto renderContext2 = pattern_->popupNode_->GetRenderContext();
-    ASSERT_NE(renderContext2, nullptr);
-    auto leftValue = renderContext2->GetPosition().value();
-    EXPECT_NE(rightValue, leftValue);
-}
-
-/**
- * @tc.name: IndexerPattern004
  * @tc.desc: Test indexer pattern ChangeListItemsSelectedStyle function.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, IndexerPattern004, TestSize.Level1)
+HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
 {
     Create(
         [](IndexerModelNG model) {
@@ -748,20 +708,19 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create touchEventInfo, set TouchType::DOWN.
-     * @tc.expected: VisibleType is GONE.
+     * @tc.expected: isTouch_ is true.
      */
     TouchEventInfo touchEventInfo = CreateTouchEventInfo(TouchType::DOWN, 0.f);
     onPopupTouchDown(touchEventInfo); // trigger OnPopupTouchDown
-    auto columnLayoutProperty = pattern_->popupNode_->GetLayoutProperty<LinearLayoutProperty>();
-    EXPECT_EQ(columnLayoutProperty->GetVisibility(), VisibleType::GONE);
+    EXPECT_EQ(pattern_->isTouch_, true);
 
     /**
      * @tc.steps: step3. Create touchEventInfo, set TouchType::UP
-     * @tc.expected: VisibleType unchanged.
+     * @tc.expected: isTouch_ is false.
      */
     touchEventInfo = CreateTouchEventInfo(TouchType::UP, 0.f);
     onPopupTouchDown(touchEventInfo);
-    EXPECT_EQ(columnLayoutProperty->GetVisibility(), VisibleType::GONE);
+    EXPECT_EQ(pattern_->isTouch_, false);
 }
 
 /**
@@ -922,7 +881,7 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest002, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetUsingPopupValue(), true);
     EXPECT_EQ(layoutProperty_->GetItemSizeValue(), Dimension(24));
     EXPECT_EQ(layoutProperty_->GetAlignStyleValue(), AlignStyle::LEFT);
-    EXPECT_EQ(paintProperty_->GetPopupHorizontalSpaceValue(), Dimension(50));
+    EXPECT_EQ(layoutProperty_->GetPopupHorizontalSpaceValue(), Dimension(50));
     EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
     EXPECT_EQ(layoutProperty_->GetPopupPositionXValue(), Dimension(-96.f, DimensionUnit::VP));
     EXPECT_EQ(layoutProperty_->GetPopupPositionYValue(), Dimension(48.f, DimensionUnit::VP));
@@ -976,7 +935,7 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest003, TestSize.Level1)
     EXPECT_FALSE(paintProperty_->GetPopupSelectedColor().has_value());
     EXPECT_FALSE(paintProperty_->GetPopupUnselectedColor().has_value());
     EXPECT_FALSE(paintProperty_->GetPopupItemBackground().has_value());
-    EXPECT_FALSE(paintProperty_->GetPopupHorizontalSpace().has_value());
+    EXPECT_FALSE(layoutProperty_->GetPopupHorizontalSpace().has_value());
     EXPECT_FALSE(layoutProperty_->GetFontSize().has_value());
 }
 
@@ -1256,6 +1215,90 @@ HWTEST_F(IndexerTestNg, OnModifyDone008, TestSize.Level1)
         EXPECT_EQ(arrayValueRst[index].second, pattern_->arrayValue_[index].second);
     }
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
+}
+
+/**
+ * @tc.name: IndexerLayoutAlgorithm001
+ * @tc.desc: Test indexer layoutAlgorithm GetPositionOfPopupNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerLayoutAlgorithm001, TestSize.Level1)
+{
+    /**
+     * @tc.case: case1: popup position is default.
+     */
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
+
+    auto indexerLayoutAlgorithm = AceType::DynamicCast<IndexerLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(indexerLayoutAlgorithm, nullptr);
+    auto indexerLayoutProperty1 = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty1, nullptr);
+    auto offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, 40);
+    EXPECT_EQ(offset, OffsetT<Dimension>(Dimension(-96), Dimension(48)));
+
+    /**
+     * @tc.case: case2: popup position is custom.
+     */
+    Create(
+        [](IndexerModelNG model) {
+            std::optional<Dimension> xOpt = Dimension(30);
+            std::optional<Dimension> yOpt = Dimension(20);
+            model.SetUsingPopup(true);
+            model.SetPopupPositionX(xOpt);
+            model.SetPopupPositionY(yOpt);
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
+
+    auto indexerLayoutProperty2 = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty2, nullptr);
+    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty2, 40);
+    EXPECT_EQ(offset, OffsetT<Dimension>(Dimension(-66), Dimension(20)));
+
+    /**
+     * @tc.case: case3: popup horizontal space is custom.
+     */
+    Create(
+        [](IndexerModelNG model) {
+            std::optional<Dimension> xOpt = Dimension(30);
+            std::optional<Dimension> yOpt = Dimension(20);
+            model.SetPopupHorizontalSpace(Dimension(50));
+            model.SetUsingPopup(true);
+            model.SetPopupPositionX(xOpt);
+            model.SetPopupPositionY(yOpt);
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
+
+    auto indexerLayoutProperty3 = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty3, nullptr);
+    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty3, 40);
+    EXPECT_EQ(offset, OffsetT<Dimension>(Dimension(-106), Dimension(20)));
+
+    /**
+     * @tc.case: case4: align is left.
+     */
+    Create(
+        [](IndexerModelNG model) {
+            std::optional<Dimension> xOpt = Dimension(30);
+            std::optional<Dimension> yOpt = Dimension(-20);
+            model.SetAlignStyle(0);
+            model.SetUsingPopup(true);
+            model.SetPopupPositionX(xOpt);
+            model.SetPopupPositionY(yOpt);
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
+
+    auto indexerLayoutProperty4 = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty4, nullptr);
+    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty4, 40);
+    EXPECT_EQ(offset, OffsetT<Dimension>(Dimension(50), Dimension(-20)));
 }
 
 /**

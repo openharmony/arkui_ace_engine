@@ -303,7 +303,7 @@ public:
     {
         isPicker_ = isPicker;
     }
-    
+
     void CheckAndUpdateColumnSize(SizeF& size);
 
 private:
@@ -364,6 +364,8 @@ private:
 
     WeakPtr<NG::FrameNode> contentRowNode_;
     bool isPicker_ = true;
+    bool isFiredSelectsChange_ = false;
+    std::optional<std::string> firedSelectsStr_;
 };
 } // namespace OHOS::Ace::NG
 

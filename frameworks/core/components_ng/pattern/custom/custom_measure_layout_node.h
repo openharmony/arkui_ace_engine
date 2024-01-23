@@ -21,6 +21,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
@@ -60,11 +61,21 @@ public:
     }
     void SetCompleteReloadFunc(RenderFunction&& func) override {}
 
+    RefPtr<MeasureLayoutParam> GetMeasureLayoutParam() const
+    {
+        return measureLayoutParam_;
+    }
+    void SetMeasureLayoutParam(RefPtr<MeasureLayoutParam> param)
+    {
+        measureLayoutParam_ = param;
+    }
+
 private:
     void BuildChildren(const RefPtr<FrameNode>& child);
     std::function<void(LayoutWrapper* layoutWrapper)> layoutFunc_;
     std::function<void(LayoutWrapper* layoutWrapper)> measureFunc_;
     std::string viewKey_;
+    RefPtr<MeasureLayoutParam> measureLayoutParam_;
 };
 } // namespace OHOS::Ace::NG
 

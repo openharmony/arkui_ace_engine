@@ -69,6 +69,11 @@ RefPtr<Framework::JsEngine> EngineHelper::GetCurrentEngine()
     return GetEngine(Container::CurrentId());
 }
 
+RefPtr<Framework::JsEngine> EngineHelper::GetCurrentEngineWithoutScope()
+{
+    return GetEngine(Container::CurrentIdWithoutScope());
+}
+
 ScopedDelegate EngineHelper::GetCurrentDelegate()
 {
     auto engine = GetCurrentEngine();
@@ -76,11 +81,17 @@ ScopedDelegate EngineHelper::GetCurrentDelegate()
         return { engine->GetFrontend(), Container::CurrentId() };
     }
     auto container = Container::GetActive();
-    if (!container) {
-        return { nullptr, -1 };
+    return GetDelegateByContainer(container);
+}
+
+ScopedDelegate EngineHelper::GetCurrentDelegateWithoutScope()
+{
+    auto engine = GetCurrentEngineWithoutScope();
+    if (engine) {
+        return { engine->GetFrontend(), Container::CurrentIdWithoutScope() };
     }
-    engine = GetEngine(container->GetInstanceId());
-    return { engine ? engine->GetFrontend() : nullptr, container->GetInstanceId() };
+    auto container = Container::GetActive();
+    return GetDelegateByContainer(container);
 }
 
 ScopedDelegate EngineHelper::GetDefaultDelegate()
@@ -90,10 +101,15 @@ ScopedDelegate EngineHelper::GetDefaultDelegate()
         return { engine->GetFrontend(), Container::CurrentId() };
     }
     auto container = Container::GetDefault();
+    return GetDelegateByContainer(container);
+}
+
+ScopedDelegate EngineHelper::GetDelegateByContainer(RefPtr<Container> container)
+{
     if (!container) {
         return { nullptr, -1 };
     }
-    engine = GetEngine(container->GetInstanceId());
+    auto engine = GetEngine(container->GetInstanceId());
     return { engine ? engine->GetFrontend() : nullptr, container->GetInstanceId() };
 }
 

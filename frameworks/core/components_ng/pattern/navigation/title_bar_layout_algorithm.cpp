@@ -512,6 +512,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         }
         return;
     }
+    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
     if (isInitialTitle_) {
         // free mode
         if (isCustom) {
@@ -544,14 +545,12 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         initialTitleOffsetY_ = menuHeight_ + offsetY;
         isInitialTitle_ = false;
         auto titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
-        currentTitleOffsetY_ = initialTitleOffsetY_;
+        titlePattern->SetCurrentTitleOffsetY(initialTitleOffsetY_);
         geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();
         return;
     }
 
-    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
     if (NearZero(titlePattern->GetTempTitleOffsetY())) {
         initialTitleOffsetY_ = menuHeight_ + offsetY;
         auto titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
@@ -562,7 +561,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     auto overDragOffset = titlePattern->GetOverDragOffset();
     auto titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
         titlePattern->GetTempTitleOffsetY() + overDragOffset / 6.0f);
-    currentTitleOffsetY_ = titleOffset.GetY();
+    titlePattern->SetCurrentTitleOffsetY(titleOffset.GetY());
     geometryNode->SetMarginFrameOffset(titleOffset);
     titleWrapper->Layout();
 }
@@ -733,6 +732,7 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     const auto& constraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
+    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
@@ -753,7 +753,7 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto titleMaxWidth = GetTitleWidth(titleBarNode, layoutProperty, size);
     MeasureSubtitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
     MeasureTitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
-    currentTitleBarHeight_ = size.Height();
+    titlePattern->SetCurrentTitleBarHeight(size.Height());
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 

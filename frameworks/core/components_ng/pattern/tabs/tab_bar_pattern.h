@@ -180,7 +180,7 @@ public:
 
     void UpdateIndicator(int32_t indicator);
 
-    void UpdateTextColor(int32_t indicator);
+    void UpdateTextColorAndFontWeight(int32_t indicator);
 
     void UpdateImageColor(int32_t indicator);
 
@@ -266,6 +266,15 @@ public:
             bottomTabBarStyles_.emplace_back(bottomTabBarStyle);
         } else {
             bottomTabBarStyles_[position] = bottomTabBarStyle;
+        }
+    }
+
+    void SetLabelStyle(const LabelStyle& labelStyle, uint32_t position)
+    {
+        if (labelStyles_.size() == position) {
+            labelStyles_.emplace_back(labelStyle);
+        } else {
+            labelStyles_[position] = labelStyle;
         }
     }
 
@@ -358,6 +367,9 @@ public:
         surfaceChangedCallbackId_ = id;
     }
     
+    bool ContentWillChange(int32_t comingIndex);
+    bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -377,7 +389,9 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool OnKeyEventWithoutClick(const KeyEvent& event);
+    bool OnKeyEventWithoutClick(const RefPtr<FrameNode>& host, const KeyEvent& event);
     void HandleClick(const GestureEvent& info);
+    void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
     void HandleTouchEvent(const TouchLocationInfo& info);
     void HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index);
     void HandleBottomTabBarClick(int32_t selectedIndex, int32_t unselectedIndex);
@@ -426,6 +440,7 @@ private:
     void TriggerTranslateAnimation(
         const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index, int32_t indicator);
     void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
+    bool IsNeedUpdateFontWeight(int32_t index);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -468,6 +483,7 @@ private:
     std::vector<SelectedMode> selectedModes_;
     std::vector<IndicatorStyle> indicatorStyles_;
     std::vector<TabBarStyle> tabBarStyles_;
+    std::vector<LabelStyle> labelStyles_;
     bool isFirstFocus_ = true;
     bool isTouchingSwiper_ = false;
     float turnPageRate_ = 0.0f;

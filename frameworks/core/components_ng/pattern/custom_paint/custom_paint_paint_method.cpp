@@ -375,7 +375,12 @@ std::shared_ptr<RSImage> CustomPaintPaintMethod::GetImage(const std::string& src
 #ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint)
 {
-    auto image = GetImage(pattern.GetImgSrc());
+    auto pixelMap = pattern.GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
+    sk_sp<SkImage> image;
+    image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     CHECK_NULL_VOID(image);
     SkMatrix* matrix = nullptr;
     SkMatrix tempMatrix;
@@ -421,8 +426,14 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
 #else
 void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush)
 {
-    auto image = GetImage(pattern.GetImgSrc());
-    CHECK_NULL_VOID(image);
+    auto pixelMap = pattern.GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    auto rsBitmapFormat = Ace::ImageProvider::MakeRSBitmapFormatFromPixelMap(pixelMap);
+    auto rsBitmap = std::make_shared<RSBitmap>();
+    rsBitmap->Build(pixelMap->GetWidth(), pixelMap->GetHeight(), rsBitmapFormat);
+    rsBitmap->SetPixels(const_cast<void*>(reinterpret_cast<const void*>(pixelMap->GetPixels())));
+    auto image = std::make_shared<RSImage>();
+    CHECK_NULL_VOID(image->BuildFromBitmap(*rsBitmap));
     RSMatrix matrix;
     if (pattern.IsTransformable()) {
         matrix = GetMatrixFromPattern(pattern);
@@ -743,6 +754,50 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
     }
     rsCanvas->Restore();
 #endif
+}
+
+void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, RefPtr<SvgDomBase> svgDom,
+    const Ace::CanvasImage& canvasImage, const ImageFit& imageFit)
+{
+    CHECK_NULL_VOID(svgDom);
+    RSRect srcRect;
+    RSRect dstRect;
+    switch (canvasImage.flag) {
+        case 0:
+            srcRect = RSRect(0, 0, svgDom->GetContainerSize().Width(), svgDom->GetContainerSize().Height());
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, svgDom->GetContainerSize().Width() + canvasImage.dx,
+                svgDom->GetContainerSize().Height() + canvasImage.dy);
+            break;
+        case 1: {
+            srcRect = RSRect(0, 0, svgDom->GetContainerSize().Width(), svgDom->GetContainerSize().Height());
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            break;
+        }
+        case 2: {
+            srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
+                canvasImage.sHeight + canvasImage.sy);
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            break;
+        }
+        default:
+            break;
+    }
+    float scaleX = dstRect.GetWidth() / srcRect.GetWidth();
+    float scaleY = dstRect.GetHeight() / srcRect.GetHeight();
+    OffsetF offset = GetContentOffset(paintWrapper);
+    OffsetF startPoint = offset + OffsetF(dstRect.GetLeft(), dstRect.GetTop()) -
+                         OffsetF(srcRect.GetLeft() * scaleX, srcRect.GetTop() * scaleY);
+
+    RSCanvas* rsCanvas = GetRawPtrOfRSCanvas();
+    CHECK_NULL_VOID(rsCanvas);
+    rsCanvas->Save();
+    rsCanvas->ClipRect(dstRect, RSClipOp::INTERSECT);
+    rsCanvas->Translate(startPoint.GetX(), startPoint.GetY());
+    rsCanvas->Scale(scaleX, scaleY);
+    svgDom->DrawImage(*rsCanvas, imageFit, Size(srcRect.GetWidth(), srcRect.GetHeight()));
+    rsCanvas->Restore();
 }
 
 void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData)

@@ -47,6 +47,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension BAR_BLUR_RADIUS = 200.0_vp;
 constexpr Dimension BAR_SATURATE = 1.3_vp;
+const uint8_t PIXEL_ROUND = 18;
 } // namespace
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
@@ -101,6 +102,10 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(
         V2::TAB_BAR_ETS_TAG, tabBarId, [controller]() { return AceType::MakeRefPtr<TabBarPattern>(controller); });
 
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
+
     auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, selectedMaskId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
 
@@ -149,6 +154,14 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     }
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     auto preIndex = tabsLayoutProperty->GetIndexValue(0);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    if (tabsPattern->GetInterceptStatus()) {
+        auto ret = tabsPattern->OnContentWillChange(preIndex, index);
+        if (ret.has_value() && !ret.value()) {
+            return;
+        }
+    }
     if ((index != preIndex) && (index >= 0)) {
         SetIndex(index);
         auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
@@ -273,7 +286,7 @@ void TabsModelNG::SetIndex(int32_t index)
         index = 0;
     }
     tabBarLayoutProperty->UpdateIndicator(index);
-    tabBarPattern->UpdateTextColor(index);
+    tabBarPattern->UpdateTextColorAndFontWeight(index);
     swiperLayoutProperty->UpdateIndex(index);
     auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
     CHECK_NULL_VOID(tabsFrameNode);
@@ -512,7 +525,7 @@ void TabsModelNG::Pop()
         index = 0;
     }
     tabBarLayoutProperty->UpdateIndicator(index);
-    tabBarPattern->UpdateTextColor(index);
+    tabBarPattern->UpdateTextColorAndFontWeight(index);
     swiperLayoutProperty->UpdateIndex(index);
 
     tabBarNode->MarkModifyDone();
@@ -897,5 +910,15 @@ void TabsModelNG::SetClipEdge(FrameNode* frameNode, bool clipEdge)
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateClipEdge(clipEdge);
     }
+}
+
+void TabsModelNG::SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetInterceptStatus(true);
+    tabPattern->SetOnContentWillChange(std::move(callback));
 }
 } // namespace OHOS::Ace::NG

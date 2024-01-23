@@ -20,6 +20,8 @@
 
 #define private public
 #define protectd public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -33,7 +35,6 @@
 #include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -60,6 +61,7 @@ const float LAYOUT_WEIGHT_ONE = 1.0f;
 
 const float SMALLER_ITEM_HEIGHT = 45.0f;
 const float SMALL_ITEM_WIDTH = 150.0f;
+const float SMALL_ITEM_HEIGHT_BIG = 120.f;
 const float SMALL_ITEM_HEIGHT = 60.0f;
 
 const float BIG_ITEM_WIDTH = 180.0f;
@@ -1357,7 +1359,9 @@ HWTEST_F(FlexTestNg, FlexRowLayoutTest008, TestSize.Level1)
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(i);
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
         auto childOffset = childWrapper->GetGeometryNode()->GetFrameOffset();
-        EXPECT_EQ(childSize, SizeF(TWENTY_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
+        EXPECT_EQ(childSize, SizeF(TWENTY_PERCENT_WIDTH, SMALL_ITEM_HEIGHT_BIG))
+            << "actual: " + childSize.ToString() +
+                   ", expect: " + SizeF(TWENTY_PERCENT_WIDTH, SMALL_ITEM_HEIGHT_BIG).ToString();
         EXPECT_EQ(childOffset, OffsetF(i * (TWENTY_PERCENT_WIDTH + horizontalRemaining / 2), 0.0f));
     }
 }

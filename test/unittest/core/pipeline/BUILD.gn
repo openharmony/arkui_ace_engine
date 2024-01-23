@@ -30,7 +30,6 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/base/log/ace_tracker.cpp",
     "$ace_root/frameworks/base/ressched/ressched_report.cpp",
     "$ace_root/frameworks/core/animation/animation_util.cpp",
-    "$ace_root/frameworks/core/event/key_event.cpp",
     "$ace_root/frameworks/core/event/mouse_event.cpp",
     "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
@@ -49,7 +48,6 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
     "$ace_root/test/mock/base/mock_localization.cpp",
-    "$ace_root/test/mock/base/mock_long_frame_report.cpp",
     "$ace_root/test/mock/base/mock_mouse_style.cpp",
     "$ace_root/test/mock/base/mock_pixel_map.cpp",
     "$ace_root/test/mock/base/mock_socperf_client_impl.cpp",
@@ -89,4 +87,8 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "pipeline_context_test_ng.cpp",
   ]
+
+  if (defined(resourceschedule_ffrt_support) && resourceschedule_ffrt_support) {
+    sources += [ "$ace_root/test/mock/base/mock_long_frame_report.cpp" ]
+  }
 }

@@ -91,6 +91,11 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
 void DatePickerPattern::OnModifyDone()
 {
+    if (isFiredDateChange_) {
+        isFiredDateChange_ = false;
+        return;
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitDisabled();
@@ -226,7 +231,10 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(buttonTitleNode);
     auto titleLayoutRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_VOID(titleLayoutRenderContext);
-    titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+        !titleLayoutRenderContext->IsUniRenderEnabled()) {
+        titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    }
     auto childButton = buttonTitleNode->GetFirstChild();
     CHECK_NULL_VOID(childButton);
     auto ButtonNode = DynamicCast<FrameNode>(childButton);
@@ -506,7 +514,7 @@ void DatePickerPattern::FlushMonthDaysColumn()
     yearColumnPattern->FlushCurrentOptions();
 }
 
-void DatePickerPattern::FireChangeEvent(bool refresh) const
+void DatePickerPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
         auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
@@ -515,6 +523,7 @@ void DatePickerPattern::FireChangeEvent(bool refresh) const
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         datePickerEventHub->FireChangeEvent(info.get());
         datePickerEventHub->FireDialogChangeEvent(str);
+        firedDateStr_ = str;
     }
 }
 
@@ -1275,7 +1284,7 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
     auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_RETURN(monthDaysDatePickerColumnPattern, lunarResult);
     CHECK_NULL_RETURN(yearDatePickerColumnPattern, lunarResult);
-    
+
 
     uint32_t lunarLeapMonth = 0;
     bool hasLeapMonth = GetLunarLeapMonth(lunarYear, lunarLeapMonth);

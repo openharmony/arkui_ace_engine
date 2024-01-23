@@ -288,6 +288,7 @@ public:
     virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose) override;
+    bool CloseKeyboard(bool forceClose, bool isStopTwinkling);
 
     FocusPattern GetFocusPattern() const override
     {
@@ -795,7 +796,7 @@ public:
     bool HandleOnTab(bool backward) override;
     void HandleOnEnter() override
     {
-        PerformAction(GetTextInputActionValue(TextInputAction::DONE), false);
+        PerformAction(GetTextInputActionValue(GetDefaultTextInputAction()), false);
     }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
@@ -1119,7 +1120,7 @@ private:
     void InitDragDropEvent();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
-    void ShowSelectAfterDragDrop();
+    void ShowSelectAfterDragEvent();
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
     void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
@@ -1238,6 +1239,7 @@ private:
     void CleanNodeResponseKeyEvent();
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
+    void ProcNormalInlineStateInBlurEvent();
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1258,6 +1260,9 @@ private:
     void UpdateCancelNode();
     void RequestKeyboardAfterLongPress();
     void UpdatePasswordModeState();
+    void InitDragDropCallBack();
+    void InitDragDropEventWithOutDragStart();
+    void UpdateBlurReason();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1382,6 +1387,7 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
+    BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
     bool isFocusedBeforeClick_ = false;
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBuilder_;

@@ -88,18 +88,6 @@ template("ace_base_source_set") {
       external_deps += [ "graphic_2d:librender_service_client" ]
     }
 
-    # curl download manager
-    if (defined(config.use_curl_download) && config.use_curl_download) {
-      configs += [ "//third_party/curl:curl_config" ]
-      sources += [ "$ace_root/frameworks/base/network/download_manager.cpp" ]
-      deps += [ "$ace_root/frameworks/base/network:cacert.pem" ]
-      if (is_arkui_x) {
-        deps += [ "//third_party/curl:curl" ]
-      } else {
-        deps += [ "//third_party/curl:curl_shared" ]
-      }
-    }
-
     if (is_arkui_x || platform != "ohos") {
       deps += [ "//third_party/cJSON:cjson_static" ]
     } else {

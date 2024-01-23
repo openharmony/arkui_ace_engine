@@ -71,6 +71,13 @@ public:
     virtual void SetAlpha(uint32_t alpha) {}
     virtual void SetAlphaF(float a) {}
     virtual void SetARGB(int r, int g, int b, int a) {}
+    virtual void Reset() {}
+    const TestingFilter& GetFilter() const
+    {
+        return filer_;
+    }
+
+    TestingFilter filer_;
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_BRUSH_H

@@ -123,6 +123,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
             SetItemInfo(currentIndex - i, { id, startPos, endPos, isGroup });
         }
     }
+    float startIndex = GetLanesFloor(layoutWrapper, currentIndex);
+    OnItemPositionAddOrUpdate(layoutWrapper, startIndex);
     return cnt;
 }
 
@@ -181,7 +183,23 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
             SetItemInfo(currentIndex + i, { id, startPos, endPos, isGroup });
         }
     }
+    float startIndex = GetLanesFloor(layoutWrapper, currentIndex);
+    OnItemPositionAddOrUpdate(layoutWrapper, startIndex);
     return cnt;
+}
+
+void ListLanesLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
+{
+    bool hasGroup = false;
+    auto itemPosition = GetItemPosition();
+    for (auto &pos : itemPosition) {
+        if (pos.second.isGroup) {
+            hasGroup = true;
+            break;
+        }
+    }
+    int32_t count = hasGroup ? cacheCount : cacheCount * lanes_;
+    layoutWrapper->SetCacheCount(count);
 }
 
 int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minLaneLength,
@@ -263,9 +281,8 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
     }
     float laneGutter = 0.0f;
     if (layoutProperty->GetLaneGutter().has_value()) {
-        laneGutter = ConvertToPx(
-            layoutProperty->GetLaneGutter().value(), layoutConstraint.scaleProperty, crossSizeOptional.value_or(0.0))
-                .value();
+        laneGutter = ConvertToPx(layoutProperty->GetLaneGutter().value(),
+            layoutConstraint.scaleProperty, crossSizeOptional.value_or(0.0)).value();
         SetLaneGutter(laneGutter);
     }
     lanes_ = CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional, laneGutter);

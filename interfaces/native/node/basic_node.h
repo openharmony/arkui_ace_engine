@@ -92,6 +92,14 @@ typedef enum {
     ARKUI_NODE_REFRESH,
     /** XComponent */
     ARKUI_NODE_XCOMPONENT,
+    /** 列表item分组 */
+    ARKUI_NODE_LIST_ITEM_GROUP,
+    /** 日期选择器组件 */
+    ARKUI_NODE_DATE_PICKER,
+    /** 时间选择组件 */
+    ARKUI_NODE_TIME_PICKER,
+    /** 滑动选择文本内容的组件 */
+    ARKUI_NODE_TEXT_PICKER,
 } ArkUI_NodeType;
 
 #define MAX_NODE_SCOPE_NUM 1000
@@ -427,41 +435,85 @@ typedef enum {
      */
     NODE_BACKGROUND_BLUR_STYLE,
     /**
-     * @brief 通过<b>setAttribute</b>为当前组件设置转场时的透明度效果。
-     * @note 入参: value: number,value表示插入时的透明度起点值和删除时的透明度终点值。
+     * @brief 通过<b>setAttribute</b>为当前组件设置转场缩放或者旋转的中心点。
+     *
+     * @note 入参: centerX: number，centerY: number，centerZ: number表示旋转中心点。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_OPACITY_TRANSITION , "0.5");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSITION_CENTER , "20 20 0");
+     * @endcode
+     */
+    NODE_TRANSITION_CENTER,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前组件设置转场时的透明度效果。
+     *
+     * @note 入参: opacity: number, duration: number,
+     * curve: String("linear","ease","easein","easeout","easeinout","fastoutslowin","linearoutslowin",
+     * "fastoutlinearin", "extremedeceleration", "sharp", "rhythm", "smooth", "friction"), delay: number, iterations:
+     * number, playmode: String("normal", "alternate", "reverse", "alternate_reverse"), tempo: number
+     * opacity表示插入时的透明度起点值和删除时的透明度终点值。
+     * duration表示动画播放时长，单位毫秒。curve表示动画曲线。
+     * delay表示动画延迟播放时间，单位毫秒。
+     * iterations表示动画播放次数，默认1次。
+     * playmode表示动画播放模式，默认播放完从头开始播放。
+     * tempo表示动画播放速度，值越大播放越快，默认值1，0表示无动画。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_OPACITY_TRANSITION , "0.5 3000 ease");
      * @endcode
      */
     NODE_OPACITY_TRANSITION,
     /**
      * @brief 通过<b>setAttribute</b>为当前组件设置转场时的旋转效果。
-     * @note 入参: x: number,y: number,z: number,angle: number,centerX: number,centerY: number,centerZ:
-     * number,perspective: number,angle: number ,表示插入时的起点值和删除时的终点值。
+     *
+     * @note 入参: x: number, y: number, z: number, angle: number, perspective: number, duration: number,
+     * curve: String("linear", "ease", "easein", "easeout", "easeinout", "fastoutslowin", "linearoutslowin",
+     * "fastoutlinearin", "extremedeceleration", "sharp", "rhythm", "smooth", "friction"), delay: number, iterations:
+     * number, playmode: String("normal", "alternate", "reverse", "alternate_reverse"), tempo: number
+     * 表示插入时的起点值和删除时的终点值。
      * 其中x表示横向旋转分量，y表示纵向的旋转分量，z表示竖向的旋转分量。
-     * centerX，centerY，centerZ表示旋转中心点，中心点(0,0,0)表示组件左上角。
+     * duration表示动画播放时长，单位毫秒。curve表示动画曲线。
+     * delay表示动画延迟播放时间，单位毫秒。
+     * iterations表示动画播放次数，默认1次。
+     * playmode表示动画播放模式，默认播放完从头开始播放。
+     * tempo表示动画播放速度，值越大播放越快，默认值1，0表示无动画。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ROTATE_TRANSITION , "0 0 1 180 0 0 0 0 0");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSITION_CENTER , "20 20 0"); //设置旋转中心
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ROTATE_TRANSITION , "0 0 1 180 0 3000 ease");
      * @endcode
      */
     NODE_ROTATE_TRANSITION,
     /**
      * @brief 通过<b>setAttribute</b>为当前组件设置转场时的缩放效果。
-     * @note 入参: x: number,y: number,z: number,centerX: number,centerY: number
+     *
+     * @note 入参: x: number,y: number,z: number, duration: number,
+     * curve: String("linear","ease","easein","easeout","easeinout","fastoutslowin","linearoutslowin",
+     * "fastoutlinearin", "extremedeceleration", "sharp", "rhythm", "smooth", "friction"), delay: number, iterations:
+     * number, playmode: String("normal", "alternate", "reverse", "alternate_reverse"), tempo: number
      * 其中x表示横向放大倍数，y表示纵向的放大倍数，z表示竖向的放大倍数。
-     * centerX，centerY表示缩放中心点。
+     * duration表示动画播放时长，单位毫秒。curve表示动画曲线。
+     * delay表示动画延迟播放时间，单位毫秒。
+     * iterations表示动画播放次数，默认1次。
+     * playmode表示动画播放模式，默认播放完从头开始播放。
+     * tempo表示动画播放速度，值越大播放越快，默认值1，0表示无动画。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCALE_TRANSITION , "0 0 0 20 20");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCALE_TRANSITION , "0 0 0 3000 ease");
      * @endcode
      */
     NODE_SCALE_TRANSITION,
     /**
      * @brief 通过<b>setAttribute</b>为当前组件设置转场时的平移效果。
-     * @note 入参: x: number,y: number,z: number （默认单位vp）
-     * 表示插入时的起点值和删除时的终点值。
+     *
+     * @note 入参: x: number, y: number, z: number, duration: number,
+     * curve: String("linear", "ease", "easein", "easeout", "easeinout", "fastoutslowin", "linearoutslowin",
+     * "fastoutlinearin", "extremedeceleration", "sharp", "rhythm", "smooth", "friction"), delay: number, iterations:
+     * number, playmode: String("normal", "alternate", "reverse", "alternate_reverse"), tempo: number
      * x表示横向的平移距离，y表示纵向的平移距离，z表示竖向的平移距离。
+     * duration表示动画播放时长，单位毫秒。curve表示动画曲线。
+     * delay表示动画延迟播放时间，单位毫秒。
+     * iterations表示动画播放次数，默认1次。
+     * playmode表示动画播放模式，默认播放完从头开始播放。
+     * tempo表示动画播放速度，值越大播放越快，默认值1，0表示无动画。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION , "12 50 0");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION , "12 50 0 3000 ease");
      * @endcode
      */
     NODE_TRANSLATE_TRANSITION,
@@ -567,6 +619,16 @@ typedef enum {
      *
      */
     NODE_OVERLAY,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置背景图在组件中显示位置，即相对于组件左上角的坐标。
+     *
+     * @note 入参为xy坐标, 数字类型，单位vp，格式字符串，以空格间隔，如 "-500;-300" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_POSITION, "-500;-300");
+     * @endcode
+     */
+    NODE_BACKGROUND_IMAGE_POSITION,
 
     /**
      * @brief 通过<b>setAttribute</b>为当前text组件设置内容。
@@ -960,7 +1022,7 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条的宽度.
      *
-     * @note 入参 srcollBarWidth:double(单位vp) , 格式字符串，如 "2"
+     * @note 入参滚动条宽度，数字类型，单位vp，格式字符串，如 "2"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR_WIDTH, "2");
      * @endcode
@@ -970,7 +1032,7 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条的颜色.
      *
-     * @note 入参color: #argb类型，格式字符串，如"#ffffffff"
+     * @note 入参滚动条颜色，#argb类型，格式字符串，如"#ffffffff"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR_COLOR, "#ffffffff");
      * @endcode
@@ -993,7 +1055,7 @@ typedef enum {
      * @note 入参 edgeEffect:String("spring","fade","none") alwaysEnabled?:Boolean(默认值为true) ，格式字符串，
      *       如 "spring" 或者 "spring false"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_EDGE_EFFECT, "spring");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_EDGE_EFFECT, "spring");
      * @endcode
      *
      */
@@ -1085,25 +1147,47 @@ typedef enum {
     NODE_SCROLL_EDGE,
 
     /**
-     * @brief 通过<b>setAttribute</b>方法设置列表中ListItem/ListItemGroup的预加载数量，只在LazyForEach中生效.
+     * @brief 通过{@link setAttribute}方法设置是否支持滑动翻页
+     * 如果同时设置了划动翻页 enablePaging 和限位滚动 scrollSnap，则 scrollSnap 优先生效，enablePaging 不生效。
      *
-     * @note 入参cachedCount: int, 格式字符串，如"5"
+     * @note 入仓是否支持滑动翻页，波尔类型，默认值 false ，格式字符串，如 "true" 。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_CACHED_COUNT, "5");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_ENABLE_PAGING, "true");
      * @endcode
      *
      */
-    NODE_LIST_CACHED_COUNT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
+    NODE_SCROLL_ENABLE_PAGING,
+
     /**
-     * @brief 通过<b>setAttribute</b>方法设置滚动条状态.
+     * @brief 通过<b>setAttribute</b>方法设置列表中ListItem/ListItemGroup的预加载数量，只在LazyForEach中生效.
      *
-     * @note 入参 displayMode:String("off","auto","on") ，格式字符串，如 "on"
+     * @note 入参滚动条状态，类型字符串枚举("off","auto","on") ，格式字符串，如 "on" 。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR, "on");
      * @endcode
      *
      */
     NODE_LIST_SCROLL_BAR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
+    /**
+     * @brief 通过<b>setAttribute</b>方法设置列表滚动条的宽度。
+     *
+     * @note 入参滚动条宽度，数字类型，单位vp，格式字符串，如 "2" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_SCROLL_BAR_WIDTH, "2");
+     * @endcode
+     *
+     */
+    NODE_LIST_SCROLL_BAR_WIDTH,
+    /**
+     * @brief 通过<b>setAttribute</b>方法设置列表滚动条的颜色。
+     *
+     * @note 入参滚动条颜色，#argb类型，格式字符串，如 "#ffffffff" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_SCROLL_BAR_COLOR, "#ffffffff");
+     * @endcode
+     *
+     */
+    NODE_LIST_SCROLL_BAR_COLOR,
     /**
      * @brief 通过<b>setAttribute</b>方法设置List组件排列方向.
      *
@@ -1115,9 +1199,9 @@ typedef enum {
      */
     NODE_LIST_LIST_DIRECTION,
     /**
-     * @brief 通过<b>setAttribute</b>方法配合ListItemGroup组件使用，设置ListItemGroup中header和footer是否要吸顶或吸底.
+     * @brief 通过<b>setAttribute</b>方法配合ListItemGroup组件使用，设置 ListItemGroup 中 header 和 footer 是否要吸顶或吸底.
      *
-     * @note 入参 stickyStyle:String("none","header","footer","both")，格式字符串，如 "header"
+     * @note 入参是否要吸顶或吸底，类型字符串枚举("none","header","footer","both")，格式字符串，如 "header"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_STICKY, "header");
      * @endcode
@@ -1148,15 +1232,25 @@ typedef enum {
     NODE_LIST_ENABLE_SCROLL_INTERACTION,
     /**
      * @brief
-     * 通过<b>setAttribute</b>方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响.
+     * 通过<b>setAttribute</b>方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响。
      *
-     * @note 入参fiction: float, 格式为字符串，如"0.6"
+     * @note 入参摩擦系数，数字类型，单位vp，格式为字符串，如 "0.6"。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_FRICTION, "0.6");
      * @endcode
      *
      */
     NODE_LIST_FRICTION,
+    /**
+     * @brief 通过<b>setAttribute</b>方法设置列表项间距。
+     *
+     * @note 入参列表项间距，数字类型，单位vp，格式字符串，如 "20" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_SPACE, "20");
+     * @endcode
+     *
+     */
+    NODE_LIST_SPACE,
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置是否开启循环.
@@ -1382,6 +1476,256 @@ typedef enum {
      * @endcode
      */
     NODE_XCOMPONENT_SURFACE_SIZE,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置 ListItemGroup 头部组件。
+     *
+     * @note 入参头部组件地址，地址类型，格式字符串, 如
+     *       auto header = nodeAPI->createNode(ARKUI_NODE_TEXT);
+     *       std::to_string(reinterpret_cast<unsigned long long>(header)).c_str() 。
+     * @code {.c}
+     * auto header = nodeAPI->createNode(ARKUI_NODE_TEXT);
+     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE,
+     *     std::to_string(reinterpret_cast<unsigned long long>(header)).c_str());
+     * @endcode
+     */
+    NODE_LIST_ITEM_GROUP_SET_HEADER = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST_ITEM_GROUP,
+    /**
+     * @brief 通过{@link setAttribute}方法设置 ListItemGroup 尾部组件。
+     *
+     * @note 入参头部组件地址，地址类型，格式字符串, 如
+     *       auto footer = nodeAPI->createNode(ARKUI_NODE_TEXT);
+     *       std::to_string(reinterpret_cast<unsigned long long>(footer)).c_str() 。
+     * @code {.c}
+     * auto footer = nodeAPI->createNode(ARKUI_NODE_TEXT);
+     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE,
+     *     std::to_string(reinterpret_cast<unsigned long long>(footer)).c_str());
+     * @endcode
+     */
+    NODE_LIST_ITEM_GROUP_SET_FOOTER,
+    /**
+     * @brief 通过{@link setAttribute}方法设置ListItem分割线样式，默认无分割线。
+     *
+     * @note 入参4个，格式字符串，以空格分割：
+     *       入参1: 颜色，#argb类型；
+     *       入参2：分割线宽，数字类型，单位vp；
+     *       入参3：分割线距离列表侧边起始端的距离，数字类型，单位vp；
+     *       入参4：分割线距离列表侧边结束端的距离，数字类型，单位vp；
+     *       如 "#FF0000FF 1 0 0" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE, "#FF0000FF 1 0 0");
+     * @endcode
+     */
+    NODE_LIST_ITEM_GROUP_SET_DIVIDER,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件的日期是否显示农历。
+     *
+     * @note 入参是否显示农历，布尔类型，格式为字符串, 如 "true" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_LUNAR, "true");
+     * @endcode
+     */
+    NODE_DATE_PICKER_LUNAR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_DATE_PICKER,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件选择器的起始日期。
+     *
+     * @note 入参年月日，日期类型，默认值 1970-1-1 ，格式字符串，如 "1970-1-1" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_START, "1970-1-1");
+     * @endcode
+     */
+    NODE_DATE_PICKER_START,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件选择器的结束日期。
+     *
+     * @note 入参年月日，日期类型，默认值 2100-12-31 ，格式字符串，如 "2100-12-31" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_END, "2100-12-31");
+     * @endcode
+     */
+    NODE_DATE_PICKER_END,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件选中项的日期。
+     *
+     * @note 入参年月日，日期类型，默认值当前系统日期，格式字符串，如 "2024-1-16" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_SELECTED, "2024-1-16");
+     * @endcode
+     */
+    NODE_DATE_PICKER_SELECTED,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件的所有选项中最上和最下两个选项的文本颜色、字号、字体粗细。
+     *
+     * @note 入参5个，格式为字符串，以 ';' 分割：
+     *       入参1： 文本颜色，#argb类型
+     *       入参2： 文本大小，数字类型，单位fp
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")
+     *       入参4： 文本字体列表，使用 ',' 进行分割
+     *       入参5： 文本样式，字符串枚举("normal", "italic")
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE,
+     *     "#ff182431;14;normal;Arial,HarmonyOS Sans;normal");
+     * @endcode
+     */
+    NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件的所有选项中除了最上、最下及选中项以外的文本颜色、字号、字体粗细。
+     *
+     * @note 入参5个，格式为字符串，以 ';' 分割：
+     *       入参1： 文本颜色，#argb类型
+     *       入参2： 文本大小，数字类型，单位fp
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")
+     *       入参4： 文本字体列表，使用 ',' 进行分割
+     *       入参5： 文本样式，字符串枚举("normal", "italic")
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_TEXT_STYLE,
+     *     "#ff182431;14;normal;Arial,HarmonyOS Sans;normal");
+     * @endcode
+     */
+    NODE_DATE_PICKER_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件的选中项的文本颜色、字号、字体粗细。
+     *
+     * @note 入参5个，格式为字符串，以 ';' 分割：
+     *       入参1： 文本颜色，#argb类型
+     *       入参2： 文本大小，数字类型，单位fp
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")
+     *       入参4： 文本字体列表，使用 ',' 进行分割
+     *       入参5： 文本样式，字符串枚举("normal", "italic")
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_SELECTED_TEXT_STYLE,
+     *     "#ff182431;14;normal;Arial,HarmonyOS Sans;normal");
+     * @endcode
+     */
+    NODE_DATE_PICKER_SELECTED_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置时间选择组件选中项的时间。
+     *
+     * @note 入参时分，数字类型，以 '-' 衔接，默认值当前系统时间，格式字符串，如 "17-11" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TIME_PICKER_SELECTED, "17-11");
+     * @endcode
+     */
+
+    NODE_TIME_PICKER_SELECTED = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TIME_PICKER,
+    /**
+     * @brief 通过{@link setAttribute}方法设置时间选择组件展示时间是否为24小时制。
+     *
+     * @note 入参是否为24小时制，布尔类型，默认值 false，格式字符串，如 "true" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TIME_PICKER_USE_MILITARY_TIME, "true");
+     * @endcode
+     */
+    NODE_TIME_PICKER_USE_MILITARY_TIME,
+    /**
+     * @brief 通过{@link setAttribute}方法设置时间选择组件所有选项中最上和最下两个选项的文本颜色、字号、字体粗细。
+     *
+     * @note 入参5个，格式为字符串，以 ';' 分割：
+     *       入参1： 文本颜色，#argb类型
+     *       入参2： 文本大小，数字类型，单位fp
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")
+     *       入参4： 文本字体列表，使用 ',' 进行分割
+     *       入参5： 文本样式，字符串枚举("normal", "italic")
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE,
+     *     "#ff182431;14;normal;Arial,HarmonyOS Sans;normal");
+     * @endcode
+     */
+    NODE_TIME_PICKER_DISAPPEAR_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置时间选择组件所有选项中除了最上、最下及选中项以外的文本颜色、字号、字体粗细。
+     *
+     * @note 入参5个，格式为字符串，以 ';' 分割：
+     *       入参1： 文本颜色，#argb类型
+     *       入参2： 文本大小，数字类型，单位fp
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")
+     *       入参4： 文本字体列表，使用 ',' 进行分割
+     *       入参5： 文本样式，字符串枚举("normal", "italic")
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TIME_PICKER_TEXT_STYLE,
+     *     "#ff182431;14;normal;Arial,HarmonyOS Sans;normal");
+     * @endcode
+     */
+    NODE_TIME_PICKER_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置时间选择组件选中项的文本颜色、字号、字体粗细。
+     *
+     * @note 入参5个，格式为字符串，以 ';' 分割：
+     *       入参1： 文本颜色，#argb类型
+     *       入参2： 文本大小，数字类型，单位fp
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")
+     *       入参4： 文本字体列表，使用 ',' 进行分割
+     *       入参5： 文本样式，字符串枚举("normal", "italic")
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TIME_PICKER_SELECTED_TEXT_STYLE,
+     *     "#ff182431;14;normal;Arial,HarmonyOS Sans;normal");
+     * @endcode
+     */
+    NODE_TIME_PICKER_SELECTED_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件所有选项中最上和最下两个选项的文本颜色、字号、字体粗细。
+     *
+     * @note 入参5个，格式为字符串，以 ';' 分割：
+     *       入参1： 文本颜色，#argb类型
+     *       入参2： 文本大小，数字类型，单位fp
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")
+     *       入参4： 文本字体列表，使用 ',' 进行分割
+     *       入参5： 文本样式，字符串枚举("normal", "italic")
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_DISAPPEAR_TEXT_STYLE,
+     *     "#ff182431;14;normal;Arial,HarmonyOS Sans;normal");
+     * @endcode
+     */
+    NODE_TEXT_PICKER_DISAPPEAR_TEXT_STYLE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_PICKER,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件所有选项中除了最上、最下及选中项以外的文本颜色、字号、字体粗细。
+     *
+     * @note 入参5个，格式为字符串，以 ';' 分割：
+     *       入参1： 文本颜色，#argb类型
+     *       入参2： 文本大小，数字类型，单位fp
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")
+     *       入参4： 文本字体列表，使用 ',' 进行分割
+     *       入参5： 文本样式，字符串枚举("normal", "italic")
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_TEXT_STYLE,
+     *     "#ff182431;14;normal;Arial,HarmonyOS Sans;normal");
+     * @endcode
+     */
+    NODE_TEXT_PICKER_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件选中项的文本颜色、字号、字体粗细。
+     *
+     * @note 入参5个，格式为字符串，以 ';' 分割：
+     *       入参1： 文本颜色，#argb类型
+     *       入参2： 文本大小，数字类型，单位fp
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")
+     *       入参4： 文本字体列表，使用 ',' 进行分割
+     *       入参5： 文本样式，字符串枚举("normal", "italic")
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_SELECTED_TEXT_STYLE,
+     *     "#ff182431;14;normal;Arial,HarmonyOS Sans;normal);
+     * @endcode
+     */
+    NODE_TEXT_PICKER_SELECTED_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件默认选中项在数组中的索引值，优先级高于 options 中的选中值。
+     *
+     * @note 入参索引列表，数字类型数组，格式字符串，以空格分割，如 "0 1" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_SELECTED_INDEX, "0 1");
+     * @endcode
+     */
+    NODE_TEXT_PICKER_SELECTED_INDEX,
 } ArkUI_NodeAttributeType;
 
 /**
@@ -1432,7 +1776,35 @@ typedef enum {
      */
     NODE_TOUCH_EVENT = 0,
 
+    /**
+     * @brief 挂载事件
+     *
+     * 触发该事件的条件 ：组件挂载显示时触发此回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * @note <b>::ArkUI_NodeComponentEvent</b>中不包含参数\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>表示开关状态，为0代表状态从开切换为关，为1代表状态从关切换为开\n
+    */
     NODE_EVENT_ON_APPEAR,
+    /**
+     * @brief 组件区域变化事件
+     *
+     * 触发该事件的条件 ：组件区域变化时触发该回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * @note <b>::ArkUI_NodeComponentEvent</b>中包含12个参数\n
+     * <b>ArkUI_NodeComponent.data[0].f32</b>表示 old Area 目标元素的宽度，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[1].f32</b>表示 old Area 目标元素的高度，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[2].f32</b>表示 old Area 目标元素左上角相对父元素左上角的位置的x轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[3].f32</b>表示 old Area 目标元素左上角相对父元素左上角的位置的y轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[4].f32</b>表示 old Area 目标元素目标元素左上角相对页面左上角的位置的x轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[5].f32</b>表示 old Area 目标元素目标元素左上角相对页面左上角的位置的y轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[6].f32</b>表示 new Area 目标元素的宽度，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[7].f32</b>表示 new Area 目标元素的高度，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[8].f32</b>表示 new Area 目标元素左上角相对父元素左上角的位置的x轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[9].f32</b>表示 new Area 目标元素左上角相对父元素左上角的位置的y轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[10].f32</b>表示 new Area 目标元素目标元素左上角相对页面左上角的位置的x轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[11].f32</b>表示 new Area 目标元素目标元素左上角相对页面左上角的位置的y轴坐标，类型为number，单位vp。\n
+    */
+    NODE_EVENT_ON_ON_AREA_CHANGE,
     NODE_ON_FOCUS,
     NODE_ON_BLUR,
 
@@ -1444,20 +1816,91 @@ typedef enum {
     /**
      * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动事件枚举值。
      *
-     * 事件回调发生时，事件参数<b>::ArkUI_NodeEvent</b>对象中的联合体类型为<b>::ArkUI_NodeComponentEvent</b>。\n
+     * 触发该事件的条件 ：\n
+     * 1、滚动组件触发滚动时触发，支持键鼠操作等其他触发滚动的输入设置。\n
+     * 2、通过滚动控制器API接口调用。\n
+     * 3、越界回弹。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * @note <b>::ArkUI_NodeComponentEvent</b>中包含2个参数
      * <b>ArkUI_NodeComponent.data[0].f32</b>表示距离上一次事件触发的X轴增量。\n
      * <b>ArkUI_NodeComponent.data[1].f32</b>表示距离上一次事件触发的Y轴增量。\n
      */
     NODE_SCROLL_EVENT_ON_SCROLL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SCROLL,
+    /**
+     * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动帧始事件枚举值
+     *
+     * 触发该事件的条件 ：\n
+     * 1、滚动组件触发滚动时触发，包括键鼠操作等其他触发滚动的输入设置。\n
+     * 2、调用控制器接口时不触发。\n
+     * 3、越界回弹不触发。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * @note <b>::ArkUI_NodeComponentEvent</b>中包含2个参数\n
+     * <b>ArkUI_NodeComponent.data[0].f32</b>表示即将发生的滚动量。\n
+     * <b>ArkUI_NodeComponent.data[1].i32</b>表示当前滚动状态。\n
+     * @note <b>::ArkUI_NodeComponentEvent</b>中包含1个返回值\n
+     * <b>ArkUI_NodeComponent.data[0].f32</b>事件处理函数中可根据应用场景计算实际需要的滚动量并存于data[0].f32中，Scroll将按照返回值的实际滚动量进行滚动\n
+     */
     NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN,
+    /**
+     * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动开始事件枚举值。
+     *
+     * 触发该事件的条件 ：\n
+     * 1、滚动组件开始滚动时触发，支持键鼠操作等其他触发滚动的输入设置。\n
+     * 2、通过滚动控制器API接口调用后开始，带过渡动效。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * @note <b>::ArkUI_NodeComponentEvent</b>中不包含参数。\n
+     */
     NODE_SCROLL_EVENT_ON_SCROLL_START,
+    /**
+     * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动停止事件枚举值。
+     *
+     * 触发该事件的条件 ：\n
+     * 1、滚动组件触发滚动后停止，支持键鼠操作等其他触发滚动的输入设置。\n
+     * 2、通过滚动控制器API接口调用后停止，带过渡动效。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * @note <b>::ArkUI_NodeComponentEvent</b>中不包含参数。\n
+     */
     NODE_SCROLL_EVENT_ON_SCROLL_STOP,
-    NODE_SCROLL_EVENT_EDGE,
+    /**
+     * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动边缘事件枚举值。
+     *
+     * 触发该事件的条件 ：\n
+     * 1、滚动组件滚动到边缘时触发，支持键鼠操作等其他触发滚动的输入设置。\n
+     * 2、通过滚动控制器API接口调用。\n
+     * 3、越界回弹。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * @note <b>::ArkUI_NodeComponentEvent</b>中包含1个参数。\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>表示当前碰到的是上下左右哪个边。\n
+     */
+    NODE_SCROLL_EVENT_ON_SCROLL_EDGE,
 
     NODE_TEXT_AREA_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_AREA,
 
     NODE_REFRESH_STATE_CHANGE = 1000 * ARKUI_NODE_REFRESH + 1,
     NODE_REFRESH_ON_REFRESH,
+
+    /**
+     * @brief 定义ARKUI_NODE_DATE_PICKER 列表组件的滚动触摸事件枚举值。
+     *
+     * 触发该事件的条件 ：选择日期时触发该事件。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * @note <b>::ArkUI_NodeComponentEvent</b>中包含3个参数。\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>表示 选中时间的年。\n
+     * <b>ArkUI_NodeComponent.data[1].i32</b>表示 选中时间的月，取值范围：[0-11]。\n
+     * <b>ArkUI_NodeComponent.data[2].i32</b>表示 选中时间的天。\n
+     */
+    NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_DATE_PICKER,
+
+    /**
+     * @brief 定义ARKUI_NODE_TIME_PICKER 列表组件的滚动触摸事件枚举值。
+     *
+     * 触发该事件的条件 ：选择时间时触发该事件。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * @note <b>::ArkUI_NodeComponentEvent</b>中包含2个参数。\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>表示 选中时间的时，取值范围：[0-23]。\n
+     * <b>ArkUI_NodeComponent.data[1].i32</b>表示 选中时间的分，取值范围：[0-59]。\n
+     */
+    NODE_TIME_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TIME_PICKER,
 } ArkUI_NodeEventType;
 
 /**

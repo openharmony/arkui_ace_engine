@@ -18,6 +18,7 @@
 namespace OHOS::Ace {
 void ILongFrame::ReportStartEvent()
 {
+    reporter = nullptr;
 }
 
 void ILongFrame::ReportEndEvent()

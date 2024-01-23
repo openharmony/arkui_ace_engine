@@ -377,6 +377,31 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class FoldDisplayModeListener : public OHOS::Rosen::DisplayManager::IDisplayModeListener {
+public:
+    explicit FoldDisplayModeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~FoldDisplayModeListener() = default;
+    void OnDisplayModeChanged(OHOS::Rosen::FoldDisplayMode displayMode) override
+    {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        ContainerScope scope(instanceId_);
+        taskExecutor->PostTask(
+            [container, displayMode] {
+                auto context = container->GetPipelineContext();
+                CHECK_NULL_VOID(context);
+                auto aceDisplayMode = static_cast<FoldDisplayMode>(static_cast<uint32_t>(displayMode));
+                context->OnFoldDisplayModeChanged(aceDisplayMode);
+            },
+            TaskExecutor::TaskType::UI);
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
 class TouchOutsideListener : public OHOS::Rosen::ITouchOutsideListener {
 public:
     explicit TouchOutsideListener(int32_t instanceId) : instanceId_(instanceId) {}
@@ -1250,6 +1275,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
+    ContainerScope::AddCount();
+    if (ContainerScope::ContainerCount() == 1) {
+        ContainerScope::UpdateSingleton(instanceId_);
+    }
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
         container->SetSharedRuntime(runtime_);
@@ -1310,6 +1339,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
     foldStatusListener_ = new FoldScreenListener(instanceId_);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
+    foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_);
+    OHOS::Rosen::DisplayManager::GetInstance().RegisterDisplayModeListener(foldDisplayModeListener_);
 
     // create ace_view
     auto aceView =
@@ -1481,6 +1512,7 @@ void UIContentImpl::Focus()
 {
     LOGI("%{public}s window focus", bundleName_.c_str());
     Platform::AceContainer::OnActive(instanceId_);
+    ContainerScope::UpdateRecentActive(instanceId_);
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, instanceId_);
@@ -1490,6 +1522,9 @@ void UIContentImpl::UnFocus()
 {
     LOGI("%{public}s window unfocus", bundleName_.c_str());
     Platform::AceContainer::OnInactive(instanceId_);
+    if (ContainerScope::RecentActiveId() == instanceId_) {
+        ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    }
 }
 
 void UIContentImpl::Destroy()
@@ -1503,6 +1538,13 @@ void UIContentImpl::Destroy()
         Platform::DialogContainer::DestroyContainer(instanceId_);
     } else {
         Platform::AceContainer::DestroyContainer(instanceId_);
+    }
+    if (ContainerScope::RecentActiveId() == instanceId_) {
+        ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    }
+    ContainerScope::MinusCount();
+    if (ContainerScope::ContainerCount() == 1) {
+        ContainerScope::UpdateSingleton(AceEngine::Get().SingletonId());
     }
 }
 
@@ -1921,6 +1963,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
     foldStatusListener_ = new FoldScreenListener(instanceId_);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
+    foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_);
+    OHOS::Rosen::DisplayManager::GetInstance().RegisterDisplayModeListener(foldDisplayModeListener_);
 }
 
 void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)

@@ -75,9 +75,6 @@ public:
     {
         return DisplayMode::OFF;
     }
-
-private:
-    static std::unique_ptr<ListModel> instance_;
 };
 
 } // namespace OHOS::Ace

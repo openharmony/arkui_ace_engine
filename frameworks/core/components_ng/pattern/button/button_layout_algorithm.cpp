@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,6 +44,7 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
     PerformMeasureSelf(layoutWrapper);
+    MarkNeedFlushMouseEvent(layoutWrapper);
 }
 
 void ButtonLayoutAlgorithm::HandleChildLayoutConstraint(
@@ -261,5 +263,19 @@ float ButtonLayoutAlgorithm::GetDefaultHeight(RefPtr<ButtonLayoutProperty> layou
     CHECK_NULL_RETURN(buttonTheme, 0.0);
     ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
     return static_cast<float>(buttonTheme->GetHeight(controlSize).ConvertToPx());
+}
+
+void ButtonLayoutAlgorithm::MarkNeedFlushMouseEvent(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    if (frameSize != pattern->GetPreFrameSize()) {
+        pattern->SetPreFrameSize(frameSize);
+        auto context = PipelineContext::GetCurrentContext();
+        context->MarkNeedFlushMouseEvent();
+    }
 }
 } // namespace OHOS::Ace::NG

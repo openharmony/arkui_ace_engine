@@ -121,7 +121,7 @@ void TextPickerDialogView::OptionsCreateNode(const RefPtr<TextPickerPattern>& te
     if (textPickerNode->GetChildren().empty()) {
         for (size_t i = 0; i < columnCount; i++) {
             auto columnNode = CreateColumnNode(settingData.columnKind, showCount, pickerTheme);
-            auto stackNode = CreateStackNode();
+            auto stackNode = CreateStackNode(pickerTheme);
             auto buttonNode = CreateButtonNode();
             buttonNode->MountToParent(stackNode);
             columnNode->MountToParent(stackNode);
@@ -297,12 +297,6 @@ RefPtr<FrameNode> TextPickerDialogView::CreateColumnNode(
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
 
-    auto columnLayout = columnNode->GetLayoutProperty<LayoutProperty>();
-    MarginProperty marginProperty;
-    marginProperty.top = CalcLength(pickerTheme->GetContentMarginVertical());
-    marginProperty.bottom = CalcLength(pickerTheme->GetContentMarginVertical());
-    columnLayout->UpdateMargin(marginProperty);
-
     if (columnKind == ICON) {
         for (uint32_t index = 0; index < showCount; index++) {
             auto row = CreateIconItemNode(pickerTheme);
@@ -325,11 +319,18 @@ RefPtr<FrameNode> TextPickerDialogView::CreateColumnNode(
     return columnNode;
 }
 
-RefPtr<FrameNode> TextPickerDialogView::CreateStackNode()
+RefPtr<FrameNode> TextPickerDialogView::CreateStackNode(RefPtr<PickerTheme> pickerTheme)
 {
     auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
-    return FrameNode::GetOrCreateFrameNode(
+    auto stackNode = FrameNode::GetOrCreateFrameNode(
         V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+
+    auto stackLayout = stackNode->GetLayoutProperty<LayoutProperty>();
+    MarginProperty marginProperty;
+    marginProperty.top = CalcLength(pickerTheme->GetContentMarginVertical());
+    marginProperty.bottom = CalcLength(pickerTheme->GetContentMarginVertical());
+    stackLayout->UpdateMargin(marginProperty);
+    return stackNode;
 }
 
 RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode()

@@ -36,7 +36,9 @@ public:
         }
     }
     void OnNavigationStateChange(
-        std::string navigationId, std::string navDestinationName, NG::NavDestinationState state);
+        const std::string& navigationId, const std::string& navDestinationName, NG::NavDestinationState state);
+    void OnRouterPageStateChange(napi_value context, int32_t index,
+        const std::string& name, const std::string& path, NG::RouterPageState state);
     bool NapiEqual(napi_value cb);
 
 private:

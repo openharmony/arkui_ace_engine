@@ -101,11 +101,12 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_SIDEBAR, "AceSideBarContainer" },
     { AceLogTag::ACE_GEOMETRY_TRANSITION, "AceGeometryTransition" },
     { AceLogTag::ACE_DOWNLOAD_MANAGER, "DownloadManager" },
-    { AceLogTag::ACE_WINDOW_SCENE, "WMSCom" },
+    { AceLogTag::ACE_WINDOW_SCENE, "AceWindowScene" },
     { AceLogTag::ACE_NODE_CONTAINER, "AceNodeContainer" },
     { AceLogTag::ACE_NATIVE_NODE, "AceNativeNode" },
     { AceLogTag::ACE_DYNAMIC_COMPONENT, "AceDynamicComponent" },
     { AceLogTag::ACE_MARQUEE, "AceMarquee" },
+    { AceLogTag::ACE_OBSERVER, "AceObserver" },
 };
 
 const char* APP_DOMAIN_CONTENT = "JSApp";
@@ -149,6 +150,11 @@ void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const
 int32_t LogWrapper::GetId()
 {
     return ContainerScope::CurrentId();
+}
+
+const char* LogWrapper::GetIdMethod()
+{
+    return ContainerScope::CurrentIdGenerateMethod();
 }
 #endif
 

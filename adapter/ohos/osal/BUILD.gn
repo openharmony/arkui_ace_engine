@@ -62,6 +62,7 @@ template("ace_osal_ohos_source_set") {
       "app_bar_helper_impl.cpp",
       "data_detector_loader.cpp",
       "data_detector_mgr.cpp",
+      "download_manager_ohos.cpp",
       "event_report.cpp",
       "exception_handler.cpp",
       "frame_report.cpp",
@@ -69,7 +70,6 @@ template("ace_osal_ohos_source_set") {
       "image_analyzer_mgr.cpp",
       "layout_inspector.cpp",
       "log_wrapper.cpp",
-      "long_frame_report_impl.cpp",
       "modal_ui_extension_impl.cpp",
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
@@ -81,7 +81,6 @@ template("ace_osal_ohos_source_set") {
 
     external_deps += [
       "ability_runtime:app_manager",
-      "ffrt:libffrt",
       "i18n:intl_util",
       "init:libbegetutil",
     ]
@@ -101,6 +100,12 @@ template("ace_osal_ohos_source_set") {
         defines += [ "SOC_PERF_ENABLE" ]
       }
 
+      if (defined(resourceschedule_ffrt_support) &&
+          resourceschedule_ffrt_support) {
+        sources += [ "long_frame_report_impl.cpp" ]
+        external_deps += [ "ffrt:libffrt" ]
+      }
+
       external_deps += [
         "ability_base:view_data",
         "ability_base:want",
@@ -108,7 +113,6 @@ template("ace_osal_ohos_source_set") {
         "image_framework:image",
         "input:libmmi-client",
         "napi:ace_napi",
-        "netmanager_base:net_conn_manager_if",
         "resource_management:global_resmgr",
       ]
       if (defined(config.accessibility_support) &&
@@ -133,10 +137,9 @@ template("ace_osal_ohos_source_set") {
       external_deps += [ "multimedia_image:image" ]
     }
     sources += [
-      "download_manager_ohos.cpp",
-      "download_manager_ohos_v2.cpp",
       "file_uri_helper_ohos.cpp",
       "image_source_ohos.cpp",
+      "input_manager.cpp",
       "mouse_style_ohos.cpp",
       "page_url_checker_ohos.cpp",
       "pixel_map_ohos.cpp",
@@ -150,7 +153,6 @@ template("ace_osal_ohos_source_set") {
       "hicollie:libhicollie",
       "hisysevent:libhisysevent",
       "hitrace:libhitracechain",
-      "netstack:http_client",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
       "window_manager:libdm",

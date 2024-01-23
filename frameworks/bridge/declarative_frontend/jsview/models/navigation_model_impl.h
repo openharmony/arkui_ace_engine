@@ -23,7 +23,7 @@ class NavigationModelImpl : public NavigationModel {
 public:
     void Create() override;
     void SetNavigationStack() override;
-    void SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack) override;
+    void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) override;
     void SetNavigationStackProvided(bool provided) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title) override;

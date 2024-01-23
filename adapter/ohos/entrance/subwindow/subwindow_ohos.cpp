@@ -501,7 +501,7 @@ void SubwindowOhos::ClearMenu()
 bool SubwindowOhos::ShowPreviewNG()
 {
     CHECK_NULL_RETURN(window_, false);
-    ShowWindow();
+    ShowWindow(false);
     ResizeWindow();
     window_->SetTouchable(false);
     return true;
@@ -1371,5 +1371,20 @@ void SubwindowOhos::HideEventColumn()
     CHECK_NULL_VOID(manager);
     ContainerScope scope(parentContainerId_);
     manager->RemoveEventColumn();
+}
+
+void SubwindowOhos::ResizeWindowForFoldStatus()
+{
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplaySync();
+    CHECK_NULL_VOID(defaultDisplay);
+    auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    if (ret != Rosen::WMError::WM_OK) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
+            static_cast<int32_t>(ret));
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+        "SubwindowOhos window rect is resized to x: %{public}d, y: %{public}d, width: %{public}u, height: %{public}u",
+        window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
 }
 } // namespace OHOS::Ace

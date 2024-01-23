@@ -127,7 +127,7 @@ public:
 
     bool NonNegative() const
     {
-        return NonNegative(x_) && NonNegative(y_);
+        return GreatOrEqual(x_, 0) && GreatOrEqual(y_, 0);
     }
 
     bool NonOffset() const

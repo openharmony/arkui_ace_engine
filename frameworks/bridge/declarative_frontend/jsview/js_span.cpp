@@ -263,12 +263,14 @@ void JSSpan::JsRemoteMessage(const JSCallbackInfo& info)
 
 void JSSpan::SetLineHeight(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    CalcDimension value;
+    if (!ParseJsDimensionFpNG(info[0], value)) {
+        value.Reset();
+        SpanModel::GetInstance()->SetLineHeight(value);
         return;
     }
-    CalcDimension value;
-    if (!ParseJsDimensionFp(info[0], value)) {
-        return;
+    if (value.IsNegative()) {
+        value.Reset();
     }
     SpanModel::GetInstance()->SetLineHeight(value);
 }

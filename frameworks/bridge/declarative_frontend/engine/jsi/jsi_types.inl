@@ -150,7 +150,7 @@ T* JsiObject::Unwrap() const
 template<typename T>
 void JsiObject::Wrap(T* data) const
 {
-    GetHandle()->SetNativePointerField(INSTANCE, static_cast<void*>(data));
+    GetHandle()->SetNativePointerField(GetEcmaVM(), INSTANCE, static_cast<void*>(data));
 }
 
 template<typename T>

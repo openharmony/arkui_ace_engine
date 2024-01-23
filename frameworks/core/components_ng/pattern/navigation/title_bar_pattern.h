@@ -19,6 +19,7 @@
 #include "core/common/container.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/title_bar_accessibility_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
@@ -115,7 +116,7 @@ public:
     void ProcessTitleDragUpdate(float offset);
 
     void ProcessTitleDragEnd();
-    
+
     void OnColorConfigurationUpdate() override;
 
     float GetCurrentOffset()
@@ -132,7 +133,7 @@ public:
     {
         return overDragOffset_;
     }
-    
+
     bool IsTitleDraggedDown() const
     {
         if (NearZero(tempTitleBarHeight_)) {
@@ -196,9 +197,21 @@ public:
         isTitleScaleChange_ = isTitleScaleChange;
     }
 
+    void SetCurrentTitleOffsetY(float currentTitleOffsetY)
+    {
+        currentTitleOffsetY_ = currentTitleOffsetY;
+    }
+
+    void SetCurrentTitleBarHeight(float currentTitleBarHeight)
+    {
+        currentTitleBarHeight_ = currentTitleBarHeight;
+    }
+
     void OnCoordScrollStart();
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
+
+    void SetTitlebarOptions(NavigationTitlebarOptions&& opt);
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -236,8 +249,6 @@ private:
     float CalculateHandledOffsetMinTitle(float offset, float lastCordScrollOffset);
     float CalculateHandledOffsetMaxTitle(float offset, float lastCordScrollOffset);
     float CalculateHandledOffsetBetweenMinAndMaxTitle(float offset, float lastCordScrollOffset);
-
-    void SetBackgroundAndBlur();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<SpringMotion> springMotion_;
@@ -285,6 +296,8 @@ private:
     // the value before title bar expand safe area
     float currentTitleOffsetY_ = 0.0f;
     float currentTitleBarHeight_ = 0.0f;
+
+    NavigationTitlebarOptions options_;
 };
 
 } // namespace OHOS::Ace::NG

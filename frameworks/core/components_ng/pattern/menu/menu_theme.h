@@ -28,6 +28,7 @@ constexpr uint8_t GRADIENT_END_GRADIENT = 255;
 constexpr uint32_t DEFAULT_BACKGROUND_COLOR = 0xFFFFFFF;
 constexpr uint32_t MENU_MIN_GRID_COUNTS = 2;
 constexpr uint32_t MENU_MAX_GRID_COUNTS = 6;
+constexpr double OUTBORDER_RADIUS = 19.75; // Default value of outBorderRadius
 
 /**
  * MenuTheme defines styles of menu item. MenuTheme should be built
@@ -72,10 +73,10 @@ public:
             theme->bgEffectColor_ = pattern->GetAttr<Color>("menu_blur_effect_color", Color::TRANSPARENT);
             theme->doubleBorderEnable_ =
                 StringUtils::StringToInt(pattern->GetAttr<std::string>("menu_double_border_enable", "0"));
-            theme->outerBorderWidth_ = pattern->GetAttr<Dimension>("menu_outer_border_width", 0.0_vp);
-            theme->outerBorderRadius_ = pattern->GetAttr<Dimension>("menu_outer_border_radius", 0.0_vp);
+            theme->outerBorderWidth_ = pattern->GetAttr<double>("menu_outer_border_width", 1.0);
+            theme->outerBorderRadius_ = pattern->GetAttr<double>("menu_outer_border_radius", OUTBORDER_RADIUS);
             theme->outerBorderColor_ = pattern->GetAttr<Color>("menu_outer_border_color", Color::TRANSPARENT);
-            theme->innerBorderWidth_ = pattern->GetAttr<Dimension>("menu_inner_border_width", 0.0_vp);
+            theme->innerBorderWidth_ = pattern->GetAttr<double>("menu_inner_border_width", 1.0);
             theme->innerBorderRadius_ = pattern->GetAttr<Dimension>("menu_inner_border_radius", 0.0_vp);
             theme->innerBorderColor_ = pattern->GetAttr<Color>("menu_inner_border_color", Color::TRANSPARENT);
             theme->filterAnimationDuration_ = 250;
@@ -208,12 +209,12 @@ public:
         return doubleBorderEnable_;
     }
 
-    Dimension GetOuterBorderWidth() const
+    double GetOuterBorderWidth() const
     {
         return outerBorderWidth_;
     }
 
-    Dimension GetOuterBorderRadius() const
+    double GetOuterBorderRadius() const
     {
         return outerBorderRadius_;
     }
@@ -223,7 +224,7 @@ public:
         return outerBorderColor_;
     }
 
-    Dimension GetInnerBorderWidth() const
+    double GetInnerBorderWidth() const
     {
         return innerBorderWidth_;
     }
@@ -264,10 +265,10 @@ private:
     Dimension bgEffectRadius_;
     Color bgEffectColor_ = Color::TRANSPARENT;
     int32_t doubleBorderEnable_ = 0;
-    Dimension outerBorderWidth_;
-    Dimension outerBorderRadius_;
+    double outerBorderWidth_ = 1.0f;
+    double outerBorderRadius_ = 19.75f;
     Color outerBorderColor_ = Color::TRANSPARENT;
-    Dimension innerBorderWidth_;
+    double innerBorderWidth_ = 1.0f;
     Dimension innerBorderRadius_;
     Color innerBorderColor_ = Color::TRANSPARENT;
 };

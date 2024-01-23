@@ -33,7 +33,7 @@ RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& src, const 
     return obj;
 }
 
-const RefPtr<SvgDomBase>& SvgImageObject::GetSVGDom() const
+RefPtr<SvgDomBase> SvgImageObject::GetSVGDom() const
 {
     return svgDomBase_;
 }

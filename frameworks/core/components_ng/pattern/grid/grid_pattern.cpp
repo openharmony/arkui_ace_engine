@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -242,11 +242,11 @@ void GridPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool GridPattern::IsItemSelected()
+bool GridPattern::IsItemSelected(const GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto node = host->FindChildByPosition(mouseStartOffsetGlobal_.GetX(), mouseStartOffsetGlobal_.GetY());
+    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
     CHECK_NULL_RETURN(node, false);
     auto itemPattern = node->GetPattern<GridItemPattern>();
     CHECK_NULL_RETURN(itemPattern, false);
@@ -539,7 +539,8 @@ std::pair<bool, bool> GridPattern::IsFirstOrLastFocusableChild(int32_t curMainIn
         [curCrossIndex](int32_t crossIndex) { return curCrossIndex > crossIndex; });
     auto findGreater = std::find_if(crossIndexSet.begin(), crossIndexSet.end(),
         [curCrossIndex](int32_t crossIndex) { return curCrossIndex < crossIndex; });
-    return { findLesser == crossIndexSet.end(), findGreater == crossIndexSet.end() };
+    return { curCrossIndex == 0 || findLesser == crossIndexSet.end(),
+        curCrossIndex == gridLayoutInfo_.crossCount_ - 1 || findGreater == crossIndexSet.end() };
 }
 
 std::pair<FocusStep, FocusStep> GridPattern::GetFocusSteps(int32_t curMainIndex, int32_t curCrossIndex, FocusStep step)
@@ -1478,14 +1479,10 @@ void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
 
 bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
-    bool outOfStart = gridLayoutInfo_.reachStart_ && Positive(gridLayoutInfo_.currentOffset_);
-    float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
-    bool outOfEnd = (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) &&
-                    LessNotEqual(endPos, gridLayoutInfo_.lastMainSize_);
-    bool scrollable = GetAlwaysEnabled() || (gridLayoutInfo_.startIndex_ > 0) ||
+    auto scrollable = GetAlwaysEnabled() || (gridLayoutInfo_.startIndex_ > 0) ||
                       (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
                       GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
-    return (outOfStart || outOfEnd) && scrollable;
+    return scrollable && (gridLayoutInfo_.IsOutOfStart() || gridLayoutInfo_.IsOutOfEnd());
 }
 
 float GridPattern::GetEndOffset()

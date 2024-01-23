@@ -85,6 +85,11 @@ void TimePickerRowPattern::SetButtonIdeaSize()
 
 void TimePickerRowPattern::OnModifyDone()
 {
+    if (isFiredTimeChange_) {
+        isFiredTimeChange_ = false;
+        return;
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -262,6 +267,7 @@ void TimePickerRowPattern::FireChangeEvent(bool refresh)
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         timePickerEventHub->FireChangeEvent(info.get());
         timePickerEventHub->FireDialogChangeEvent(str);
+        firedTimeStr_ = str;
     }
 }
 
@@ -965,7 +971,9 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(contentRowNode);
     auto layoutRenderContext = contentRowNode->GetRenderContext();
     CHECK_NULL_VOID(layoutRenderContext);
-    layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !layoutRenderContext->IsUniRenderEnabled()) {
+        layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    }
     host->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

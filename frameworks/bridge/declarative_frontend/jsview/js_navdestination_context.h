@@ -32,6 +32,8 @@ class JSNavPathInfo : public NG::NavPathInfo {
 public:
     JSNavPathInfo() = default;
     JSNavPathInfo(const std::string& name, JSRef<JSVal> param) : NG::NavPathInfo(name), param_(param) {}
+    JSNavPathInfo(const std::string& name, JSRef<JSVal> param, JSRef<JSVal> onPop)
+        : NG::NavPathInfo(name), param_(param), onPop_(onPop) {}
     ~JSNavPathInfo() = default;
 
     void SetParam(const JSRef<JSVal>& param)
@@ -44,8 +46,19 @@ public:
         return param_;
     }
 
+    void SetOnPop(const JSRef<JSVal>& onPop)
+    {
+        onPop_ = onPop;
+    }
+
+    JSRef<JSVal> GetOnPop() const
+    {
+        return onPop_;
+    }
+
 private:
     JSRef<JSVal> param_;
+    JSRef<JSVal> onPop_;
 };
 
 class JSNavDestinationContext : public NG::NavDestinationContext {

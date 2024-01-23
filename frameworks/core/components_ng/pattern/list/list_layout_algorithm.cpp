@@ -155,7 +155,12 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 
     // set list cache info.
-    layoutWrapper->SetCacheCount(listLayoutProperty->GetCachedCountValue(1) * GetLanes());
+    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
+}
+
+void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
+{
+    layoutWrapper->SetCacheCount(cacheCount);
 }
 
 float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis) const
@@ -184,54 +189,6 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
         maxCrossSize = std::max(crossSize, maxCrossSize);
     }
     return maxCrossSize;
-}
-
-void ListLayoutAlgorithm::CalculateEstimateOffset(ScrollAlign align)
-{
-    if (itemPosition_.empty()) {
-        estimateOffset_ = 0.0f;
-        return;
-    }
-    float itemsHeight = (itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos) + spaceWidth_;
-    auto lines = static_cast<int32_t>(itemPosition_.size());
-    if (GetLanes() > 1) {
-        lines = (lines / GetLanes()) + (lines % GetLanes() > 0 ? 1 : 0);
-    }
-    if (lines > 0) {
-        float averageHeight = itemsHeight / static_cast<float>(lines);
-        switch (align) {
-            case ScrollAlign::START:
-            case ScrollAlign::NONE:
-                estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() / GetLanes()) -
-                    contentStartOffset_;
-                break;
-            case ScrollAlign::CENTER:
-                estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() / GetLanes()) -
-                    contentMainSize_ / 2.0f + (averageHeight - spaceWidth_) / 2.0f;
-                break;
-            case ScrollAlign::END:
-                estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() / GetLanes() + 1) -
-                    spaceWidth_ - contentMainSize_ + contentEndOffset_;
-                break;
-            case ScrollAlign::AUTO:
-                switch (scrollAutoType_) {
-                    case ScrollAutoType::NOT_CHANGE:
-                        estimateOffset_ = averageHeight * static_cast<float>(itemPosition_.begin()->first /
-                            GetLanes()) - itemPosition_.begin()->second.startPos;
-                        break;
-                    case ScrollAutoType::START:
-                        estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() / GetLanes());
-                        break;
-                    case ScrollAutoType::END:
-                        estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() / GetLanes() + 1) -
-                            spaceWidth_ - contentMainSize_;
-                        break;
-                }
-                break;
-        }
-    } else {
-        estimateOffset_ = 0.0f;
-    }
 }
 
 void ListLayoutAlgorithm::ClearAllItemPosition(LayoutWrapper* layoutWrapper)
@@ -686,7 +643,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     int32_t startIndex = 0;
     int32_t endIndex = 0;
     int32_t midIndex = 0;
-    float midItemMidPos = 0.0f;
+    float midItemMidPos = contentMainSize_ / 2.0f;
     float startPos = 0.0f;
     float endPos = 0.0f;
     float jumpIndexStartPos = 0.0f;
@@ -763,7 +720,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
                 HandleJumpAuto(layoutWrapper, startIndex, endIndex, startPos, endPos);
                 break;
         }
-        CalculateEstimateOffset(scrollAlign_);
+        needEstimateOffset_ = true;
     } else if (targetIndex_.has_value()) {
         if (LessOrEqual(startIndex, targetIndex_.value())) {
             LayoutForward(layoutWrapper, startIndex, startPos);
@@ -1326,13 +1283,21 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
     itemGroup->SetListLayoutProperty(layoutProperty);
     itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
-    if (jumpIndex_.has_value() && (!jumpIndexInGroup_.has_value())) {
-        if (forwardLayout&& (scrollAlign_ == ScrollAlign::START ||
-            (scrollAlign_ == ScrollAlign::AUTO && scrollAutoType_ == ScrollAutoType::START))) {
-            jumpIndexInGroup_ = 0;
-        } else if (!forwardLayout && (scrollAlign_ == ScrollAlign::END ||
-            (scrollAlign_ == ScrollAlign::AUTO && scrollAutoType_ == ScrollAutoType::END))) {
-            jumpIndexInGroup_ = LAST_ITEM;
+    if (jumpIndex_.has_value() && jumpIndex_.value() == index) {
+        if (!jumpIndexInGroup_.has_value()) {
+            if (forwardLayout && (scrollAlign_ == ScrollAlign::START ||
+                (scrollAlign_ == ScrollAlign::AUTO && scrollAutoType_ == ScrollAutoType::START))) {
+                jumpIndexInGroup_ = 0;
+            } else if (!forwardLayout && (scrollAlign_ == ScrollAlign::END ||
+                (scrollAlign_ == ScrollAlign::AUTO && scrollAutoType_ == ScrollAutoType::END))) {
+                jumpIndexInGroup_ = LAST_ITEM;
+            }
+        }
+
+        if (jumpIndexInGroup_.has_value()) {
+            itemGroup->SetJumpIndex(jumpIndexInGroup_.value());
+            itemGroup->SetScrollAlign(scrollAlign_);
+            jumpIndexInGroup_.reset();
         }
     }
 
@@ -1347,12 +1312,6 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
             groupItemPosition.begin()->first == 0))) {
             itemGroup->SetNeedAllLayout();
         }
-    }
-
-    if (jumpIndexInGroup_.has_value()) {
-        itemGroup->SetJumpIndex(jumpIndexInGroup_.value());
-        itemGroup->SetScrollAlign(scrollAlign_);
-        jumpIndexInGroup_.reset();
     }
     layoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
 }

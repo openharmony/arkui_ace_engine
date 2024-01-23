@@ -39,7 +39,7 @@ const Dimension FONT_SIZE = Dimension(2.0);
 const Dimension FOCUS_SIZE = Dimension(1.0);
 const float MOVE_DISTANCE = 5.0f;
 constexpr float FONTWEIGHT = 0.5f;
-constexpr float FONT_SIZE_PERCENT = 0.9f;
+constexpr float FONT_SIZE_PERCENT = 1.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 40;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr size_t MIXTURE_CHILD_COUNT = 2;
@@ -712,7 +712,7 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
 void TextPickerColumnPattern::AddAnimationTextProperties(
     uint32_t currentIndex, const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
-    TextProperties properties;
+    TextProperties properties{};
     if (textLayoutProperty->HasFontSize()) {
         MeasureContext measureContext;
         measureContext.textContent = MEASURE_STRING;
@@ -813,9 +813,6 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(
 
 void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double scale)
 {
-    if (scale > 1.0) {
-        return;
-    }
     if (columnkind_ == ICON) {
         return;
     }

@@ -19,6 +19,7 @@
 #include <mutex>
 #include <shared_mutex>
 
+#include "core/common/container.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -63,11 +64,17 @@ public:
 
     static RefPtr<Framework::JsEngine> GetCurrentEngine();
 
+    static RefPtr<Framework::JsEngine> GetCurrentEngineWithoutScope();
+
     static ScopedDelegate GetCurrentDelegate();
+
+    static ScopedDelegate GetCurrentDelegateWithoutScope();
 
     static ScopedDelegate GetDefaultDelegate();
 
     static std::pair<int32_t, int32_t> GetPositionOnJsCode();
+
+    static ScopedDelegate GetDelegateByContainer(RefPtr<Container> container);
 
 private:
     static std::pair<int32_t, int32_t> StringToPair(const std::string& match);

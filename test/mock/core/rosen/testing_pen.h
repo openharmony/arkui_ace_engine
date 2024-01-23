@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,7 @@ public:
     virtual void SetMiterLimit(float limit) {}
     virtual void SetAlpha(uint32_t alpha) {}
     virtual void SetAlphaF(float alpha) {}
+    virtual void Reset() {}
     virtual std::shared_ptr<TestingShaderEffect> GetShaderEffect()
     {
         return std::make_shared<TestingShaderEffect>();

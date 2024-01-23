@@ -121,7 +121,10 @@ class UnitResponseArea : public TextInputResponseArea {
 public:
     UnitResponseArea(const WeakPtr<Pattern>& hostPattern, const RefPtr<NG::UINode>& unitNode)
         : TextInputResponseArea(hostPattern), unitNode_(std::move(unitNode)) {}
-    ~UnitResponseArea() = default;
+    ~UnitResponseArea()
+    {
+        ClearArea();
+    }
 
     void InitResponseArea() override;
 

@@ -328,7 +328,8 @@ bool SvgBaseDeclaration::SetPresentationAttr(const std::pair<std::string, std::s
                 }
                 auto& attrs = declaration.MaybeResetAttribute<SvgBaseAttribute>(AttributeTag::SPECIALIZED_ATTR);
                 std::vector<double> lineDashVector;
-                StringUtils::StringSplitter(val, ' ', lineDashVector);
+                std::string handledStr = StringUtils::ReplaceChar(val, ',', ' ');
+                StringUtils::StringSplitter(handledStr, ' ', lineDashVector);
                 attrs.strokeState.SetLineDash(lineDashVector);
             } },
         { DOM_SVG_SRC_STROKE_DASHOFFSET,

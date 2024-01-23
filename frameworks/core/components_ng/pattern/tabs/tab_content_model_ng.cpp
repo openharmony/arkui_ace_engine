@@ -33,6 +33,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const uint8_t PIXEL_ROUND = 18;
+}
 
 void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
 {
@@ -133,6 +136,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
     linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     linearLayoutProperty->UpdateSpace(tabTheme->GetBottomTabBarSpace());
+    linearLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
     auto columnRenderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(columnRenderContext);
     columnRenderContext->UpdateClipEdge(true);
@@ -170,6 +174,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
 
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle(), myIndex);
     tabBarPattern->SetBottomTabBarStyle(bottomTabBarStyle, myIndex);
+    auto labelStyle = tabContentPattern->GetLabelStyle();
+    tabBarPattern->SetLabelStyle(labelStyle, myIndex);
     auto tabBarStyle = tabContentPattern->GetTabBarStyle();
     if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
         auto renderContext = columnNode->GetRenderContext();
@@ -290,8 +296,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
     if (tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE) {
         textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    } else if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
+        textLayoutProperty->UpdateFontWeight(myIndex == indicator ? FontWeight::MEDIUM : FontWeight::NORMAL);
     }
-    auto labelStyle = tabContentPattern->GetLabelStyle();
     UpdateLabelStyle(labelStyle, textLayoutProperty);
     ImageSourceInfo imageSourceInfo(tabBarParam.GetIcon());
     if (imageSourceInfo.IsSvg()) {

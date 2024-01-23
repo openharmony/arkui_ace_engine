@@ -49,7 +49,17 @@ RefPtr<Framework::JsEngine> EngineHelper::GetCurrentEngine()
     return nullptr;
 }
 
+RefPtr<Framework::JsEngine> EngineHelper::GetCurrentEngineWithoutScope()
+{
+    return nullptr;
+}
+
 ScopedDelegate EngineHelper::GetCurrentDelegate()
+{
+    return { nullptr, 0 };
+}
+
+ScopedDelegate EngineHelper::GetCurrentDelegateWithoutScope()
 {
     return { nullptr, 0 };
 }

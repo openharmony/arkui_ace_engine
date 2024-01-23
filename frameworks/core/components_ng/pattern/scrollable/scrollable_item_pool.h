@@ -41,11 +41,13 @@ private:
 
 template<class T>
 struct ObjectPoolDeleter {
-    ScrollableItemPool* allocator;
+    ScrollableItemPool* allocator = nullptr;
 
     void operator()(T* obj) const
     {
-        allocator->Deallocate(obj);
+        if (allocator) {
+            allocator->Deallocate(obj);
+        }
     }
 };
 } // namespace OHOS::Ace::NG

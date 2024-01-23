@@ -17,9 +17,10 @@
 #include <cstdint>
 
 #include "base/geometry/ng/vector.h"
-#include "base/memory/ace_type.h"
 #include "base/geometry/shape.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
+#include "bridge/common/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
@@ -28,6 +29,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/native/node/node_api.h"
 
@@ -666,8 +668,8 @@ void ResetTransform(ArkUINodeHandle node)
                        matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
 
-void SetBorderColor(ArkUINodeHandle node, const uint32_t& leftColorInt, const uint32_t& rightColorInt,
-    const uint32_t& topColorInt, const uint32_t& bottomColorInt)
+void SetBorderColor(ArkUINodeHandle node, uint32_t leftColorInt, uint32_t rightColorInt,
+    uint32_t topColorInt, uint32_t bottomColorInt)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1523,7 +1525,7 @@ void ResetBorder(ArkUINodeHandle node)
 }
 
 void SetBackgroundImagePosition(
-    ArkUINodeHandle node, const double* values, const int32_t* types, bool isAlign, int size)
+    ArkUINodeHandle node, const double* values, const int32_t* types, ArkUI_Bool isAlign, int size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1903,7 +1905,7 @@ void ResetSphericalEffect(ArkUINodeHandle node)
     ViewAbstract::SetSphericalEffect(frameNode, 0.0);
 }
 
-void SetRenderGroup(ArkUINodeHandle node, bool isRenderGroup)
+void SetRenderGroup(ArkUINodeHandle node, ArkUI_Bool isRenderGroup)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1936,7 +1938,7 @@ void ResetRenderFit(ArkUINodeHandle node)
     ViewAbstract::SetRenderFit(frameNode, RenderFit::TOP_LEFT);
 }
 
-void SetUseEffect(ArkUINodeHandle node, bool useEffect)
+void SetUseEffect(ArkUINodeHandle node, ArkUI_Bool useEffect)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1950,7 +1952,7 @@ void ResetUseEffect(ArkUINodeHandle node)
     ViewAbstract::SetUseEffect(frameNode, false);
 }
 
-void SetForegroundColor(ArkUINodeHandle node, bool isColor, uint32_t color)
+void SetForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1968,7 +1970,7 @@ void ResetForegroundColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
 }
 
-void SetMotionPath(ArkUINodeHandle node, const char* path, float from, float to, bool rotatable)
+void SetMotionPath(ArkUINodeHandle node, const char* path, float from, float to, ArkUI_Bool rotatable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1989,7 +1991,7 @@ void ResetMotionPath(ArkUINodeHandle node)
     ViewAbstract::SetMotionPath(frameNode, motionPathOption);
 }
 
-void SetGroupDefaultFocus(ArkUINodeHandle node, bool groupDefaultFocus)
+void SetGroupDefaultFocus(ArkUINodeHandle node, ArkUI_Bool groupDefaultFocus)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2004,7 +2006,7 @@ void ResetGroupDefaultFocus(ArkUINodeHandle node)
     ViewAbstract::SetGroupDefaultFocus(frameNode, groupDefaultFocus);
 }
 
-void SetFocusOnTouch(ArkUINodeHandle node, bool focusOnTouch)
+void SetFocusOnTouch(ArkUINodeHandle node, ArkUI_Bool focusOnTouch)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2018,7 +2020,7 @@ void ResetFocusOnTouch(ArkUINodeHandle node)
     bool focusOnTouch = false;
     ViewAbstract::SetFocusOnTouch(frameNode, focusOnTouch);
 }
-void SetFocusable(ArkUINodeHandle node, bool focusable)
+void SetFocusable(ArkUINodeHandle node, ArkUI_Bool focusable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2033,7 +2035,7 @@ void ResetFocusable(ArkUINodeHandle node)
     ViewAbstract::SetFocusable(frameNode, focusable);
 }
 
-void SetTouchable(ArkUINodeHandle node, bool touchable)
+void SetTouchable(ArkUINodeHandle node, ArkUI_Bool touchable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2048,7 +2050,7 @@ void ResetTouchable(ArkUINodeHandle node)
     ViewAbstract::SetTouchable(frameNode, touchable);
 }
 
-void SetDefaultFocus(ArkUINodeHandle node, bool defaultFocus)
+void SetDefaultFocus(ArkUINodeHandle node, ArkUI_Bool defaultFocus)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2328,7 +2330,7 @@ void ResetSize(ArkUINodeHandle node)
     ViewAbstract::SetHeight(frameNode, CalcLength(0.0, DimensionUnit::VP));
 }
 
-void ClearWidthOrHeight(ArkUINodeHandle node, bool isWidth)
+void ClearWidthOrHeight(ArkUINodeHandle node, ArkUI_Bool isWidth)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2724,7 +2726,7 @@ void ResetMouseResponseRegion(ArkUINodeHandle node)
     ViewAbstract::SetMouseResponseRegion(frameNode, region);
 }
 
-void SetEnabled(ArkUINodeHandle node, bool value)
+void SetEnabled(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2738,7 +2740,7 @@ void ResetEnabled(ArkUINodeHandle node)
     ViewAbstract::SetEnabled(frameNode, true);
 }
 
-void SetDraggable(ArkUINodeHandle node, bool value)
+void SetDraggable(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2752,7 +2754,7 @@ void ResetDraggable(ArkUINodeHandle node)
     ViewAbstract::SetDraggable(frameNode, false);
 }
 
-void SetAccessibilityGroup(ArkUINodeHandle node, bool value)
+void SetAccessibilityGroup(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2873,63 +2875,18 @@ void SetClipPath(ArkUINodeHandle node, const char* type, double* attribute, cons
     ViewAbstract::SetClipShape(frameNode, path);
 }
 
-void SetOpacityTransition(ArkUINodeHandle node, float value)
+void SetAnimationOption(std::shared_ptr<AnimationOption>& option, const ArkUIAnimationOptionType* animationOption)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    NG::TransitionOptions transitionOption;
-    transitionOption.Type = TransitionType::ALL;
-    double opacity = value;
-    if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
-        opacity = 1.0;
-    }
-    transitionOption.UpdateOpacity(value);
-    ViewAbstractModel::GetInstance()->SetTransition(transitionOption);
+    option->SetDuration(animationOption->duration);
+    option->SetCurve(Framework::CreateCurve(std::string(animationOption->curve)));
+    option->SetDelay(animationOption->delay);
+    option->SetIteration(animationOption->iteration);
+    auto direction = static_cast<AnimationDirection>(animationOption->palyMode);
+    option->SetAnimationDirection(direction);
+    option->SetTempo(animationOption->tempo);
 }
 
-void SetRotateTransition(ArkUINodeHandle node, float* arrayValue, int32_t length, float centerXValue,
-    int32_t centerXUnit, float centerYValue, int32_t centerYUnit, float centerZValue, int32_t centerZUnit,
-    float perspective, float angle)
-{
-    CHECK_NULL_VOID(arrayValue);
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (length < ARRAY_SIZE) {
-        return;
-    }
-    Dimension centerXDimension(centerXValue, static_cast<DimensionUnit>(centerXUnit));
-    Dimension centerYDimension(centerYValue, static_cast<DimensionUnit>(centerYUnit));
-    Dimension centerZDimension(centerZValue, static_cast<DimensionUnit>(centerZUnit));
-    NG::RotateOptions rotate(arrayValue[X_INDEX], arrayValue[Y_INDEX], arrayValue[Z_INDEX], angle, centerXDimension,
-        centerYDimension, centerZDimension, perspective);
-
-    NG::TransitionOptions transitionOption;
-    transitionOption.Type = TransitionType::ALL;
-    transitionOption.UpdateRotate(rotate);
-    ViewAbstractModel::GetInstance()->SetTransition(transitionOption);
-}
-
-void SetScaleTransition(ArkUINodeHandle node, float* arrayValue, int32_t length, float centerX, int32_t centerXUnit,
-    float centerY, int32_t centerYUnit)
-{
-    CHECK_NULL_VOID(arrayValue);
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (length < ARRAY_SIZE) {
-        return;
-    }
-
-    Dimension centerXDimension(centerX, static_cast<DimensionUnit>(centerXUnit));
-    Dimension centerYDimension(centerY, static_cast<DimensionUnit>(centerYUnit));
-    NG::ScaleOptions scale(
-        arrayValue[X_INDEX], arrayValue[Y_INDEX], arrayValue[Z_INDEX], centerXDimension, centerYDimension);
-    NG::TransitionOptions transitionOption;
-    transitionOption.Type = TransitionType::ALL;
-    transitionOption.UpdateScale(scale);
-    ViewAbstractModel::GetInstance()->SetTransition(transitionOption);
-}
-
-void SetTranslateTransition(ArkUINodeHandle node, float centerXValue, int32_t centerXUnit, float centerYValue,
+void SetTransitionCenter(ArkUINodeHandle node, float centerXValue, int32_t centerXUnit, float centerYValue,
     int32_t centerYUnit, float centerZValue, int32_t centerZUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2937,11 +2894,209 @@ void SetTranslateTransition(ArkUINodeHandle node, float centerXValue, int32_t ce
     Dimension centerXDimension(centerXValue, static_cast<DimensionUnit>(centerXUnit));
     Dimension centerYDimension(centerYValue, static_cast<DimensionUnit>(centerYUnit));
     Dimension centerZDimension(centerZValue, static_cast<DimensionUnit>(centerZUnit));
-    NG::TranslateOptions translate(centerXDimension, centerYDimension, centerZDimension);
-    NG::TransitionOptions transitionOption;
-    transitionOption.Type = TransitionType::ALL;
-    transitionOption.UpdateTranslate(translate);
-    ViewAbstractModel::GetInstance()->SetTransition(transitionOption);
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition;
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        oneCenterTransition = renderContext->GetOneCenterTransitionOption();
+    }
+    if (!oneCenterTransition) {
+        oneCenterTransition = AceType::MakeRefPtr<OneCenterTransitionOptionType>();
+    }
+    oneCenterTransition->SetCenterX(centerXDimension);
+    oneCenterTransition->SetCenterY(centerYDimension);
+    oneCenterTransition->SetCenterZ(centerZDimension);
+    RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
+    CHECK_NULL_VOID(chainEffect);
+    while (chainEffect) {
+        if (chainEffect->GetType() == ChainedTransitionEffectType::ROTATE) {
+            auto rotateEffect = AceType::DynamicCast<NG::ChainedRotateEffect>(chainEffect);
+            NG::RotateOptions rotate(rotateEffect->GetEffect().xDirection, rotateEffect->GetEffect().yDirection,
+                rotateEffect->GetEffect().zDirection, rotateEffect->GetEffect().angle,
+                oneCenterTransition->GetCenterX(), oneCenterTransition->GetCenterY(), oneCenterTransition->GetCenterZ(),
+                rotateEffect->GetEffect().perspective);
+            rotateEffect->SetRotateEffect(rotate);
+        } else if (chainEffect->GetType() == ChainedTransitionEffectType::SCALE) {
+            auto scaleEffect = AceType::DynamicCast<NG::ChainedScaleEffect>(chainEffect);
+            NG::ScaleOptions scale(scaleEffect->GetEffect().xScale, scaleEffect->GetEffect().yScale,
+                scaleEffect->GetEffect().zScale, oneCenterTransition->GetCenterX(), oneCenterTransition->GetCenterY());
+            scaleEffect->SetScaleEffect(scale);
+        }
+        chainEffect = chainEffect->GetNext();
+    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OneCenterTransitionOption, oneCenterTransition, frameNode);
+    ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
+    DimensionOffset offset(centerXDimension, centerYDimension);
+    offset.SetZ(centerZDimension);
+    ViewAbstract::SetPivot(frameNode, offset);
+}
+
+void SetOpacityTransition(ArkUINodeHandle node, float value, const ArkUIAnimationOptionType* animationOption)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    double opacity = value;
+    if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+        opacity = 1.0;
+    }
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition;
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        oneCenterTransition = renderContext->GetOneCenterTransitionOption();
+    }
+    if (!oneCenterTransition) {
+        oneCenterTransition = AceType::MakeRefPtr<OneCenterTransitionOptionType>();
+    }
+    RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
+    RefPtr<NG::ChainedOpacityEffect> opacityEffect;
+    while (chainEffect) {
+        if (chainEffect->GetType() == ChainedTransitionEffectType::OPACITY) {
+            opacityEffect = AceType::DynamicCast<NG::ChainedOpacityEffect>(chainEffect);
+            break;
+        }
+        chainEffect = chainEffect->GetNext();
+    }
+    auto option = std::make_shared<AnimationOption>();
+    SetAnimationOption(option, animationOption);
+    if (!opacityEffect) {
+        opacityEffect = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+        opacityEffect->SetAnimationOption(option);
+        opacityEffect->SetNext(oneCenterTransition->GetTransitionEffect());
+        oneCenterTransition->SetTransitionEffect(opacityEffect);
+    } else {
+        opacityEffect->SetOpacity(opacity);
+        opacityEffect->SetAnimationOption(option);
+    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OneCenterTransitionOption, oneCenterTransition, frameNode);
+    ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
+}
+
+void SetRotateTransition(ArkUINodeHandle node, float* arrayValue, int32_t length, float perspective, float angle,
+    const ArkUIAnimationOptionType* animationOption)
+{
+    CHECK_NULL_VOID(arrayValue);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (length < ARRAY_SIZE) {
+        return;
+    }
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition;
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        oneCenterTransition = renderContext->GetOneCenterTransitionOption();
+    }
+    if (!oneCenterTransition) {
+        oneCenterTransition = AceType::MakeRefPtr<OneCenterTransitionOptionType>();
+    }
+    RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
+    RefPtr<NG::ChainedRotateEffect> rotateEffect;
+    while (chainEffect) {
+        if (chainEffect->GetType() == ChainedTransitionEffectType::ROTATE) {
+            rotateEffect = AceType::DynamicCast<NG::ChainedRotateEffect>(chainEffect);
+            break;
+        }
+        chainEffect = chainEffect->GetNext();
+    }
+    auto option = std::make_shared<AnimationOption>();
+    SetAnimationOption(option, animationOption);
+    NG::RotateOptions rotate(arrayValue[X_INDEX], arrayValue[Y_INDEX], arrayValue[Z_INDEX], angle,
+        oneCenterTransition->GetCenterX(), oneCenterTransition->GetCenterY(), oneCenterTransition->GetCenterZ(),
+        perspective);
+    if (!rotateEffect) {
+        rotateEffect = AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
+        rotateEffect->SetAnimationOption(option);
+        rotateEffect->SetNext(oneCenterTransition->GetTransitionEffect());
+        oneCenterTransition->SetTransitionEffect(rotateEffect);
+    } else {
+        rotateEffect->SetRotateEffect(rotate);
+        rotateEffect->SetAnimationOption(option);
+    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OneCenterTransitionOption, oneCenterTransition, frameNode);
+    ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
+}
+
+void SetScaleTransition(
+    ArkUINodeHandle node, float* arrayValue, int32_t length, const ArkUIAnimationOptionType* animationOption)
+{
+    CHECK_NULL_VOID(arrayValue);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (length < ARRAY_SIZE) {
+        return;
+    }
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition;
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        oneCenterTransition = renderContext->GetOneCenterTransitionOption();
+    }
+    if (!oneCenterTransition) {
+        oneCenterTransition = AceType::MakeRefPtr<OneCenterTransitionOptionType>();
+    }
+    RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
+    RefPtr<NG::ChainedScaleEffect> scaleEffect;
+    while (chainEffect) {
+        if (chainEffect->GetType() == ChainedTransitionEffectType::SCALE) {
+            scaleEffect = AceType::DynamicCast<NG::ChainedScaleEffect>(chainEffect);
+            break;
+        }
+        chainEffect = chainEffect->GetNext();
+    }
+    auto option = std::make_shared<AnimationOption>();
+    SetAnimationOption(option, animationOption);
+    NG::ScaleOptions scale(arrayValue[X_INDEX], arrayValue[Y_INDEX], arrayValue[Z_INDEX],
+        oneCenterTransition->GetCenterX(), oneCenterTransition->GetCenterY());
+    if (!scaleEffect) {
+        scaleEffect = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+        scaleEffect->SetAnimationOption(option);
+        scaleEffect->SetNext(oneCenterTransition->GetTransitionEffect());
+        oneCenterTransition->SetTransitionEffect(scaleEffect);
+    } else {
+        scaleEffect->SetScaleEffect(scale);
+        scaleEffect->SetAnimationOption(option);
+    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OneCenterTransitionOption, oneCenterTransition, frameNode);
+    ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
+}
+
+void SetTranslateTransition(ArkUINodeHandle node, float xValue, int32_t xUnit, float yValue, int32_t yUnit,
+    float zValue, int32_t zUnit, const ArkUIAnimationOptionType* animationOption)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition;
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        oneCenterTransition = renderContext->GetOneCenterTransitionOption();
+    }
+    if (!oneCenterTransition) {
+        oneCenterTransition = AceType::MakeRefPtr<OneCenterTransitionOptionType>();
+    }
+    RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
+    RefPtr<NG::ChainedTranslateEffect> translateEffect;
+    while (chainEffect) {
+        if (chainEffect->GetType() == ChainedTransitionEffectType::TRANSLATE) {
+            translateEffect = AceType::DynamicCast<NG::ChainedTranslateEffect>(chainEffect);
+            break;
+        }
+        chainEffect = chainEffect->GetNext();
+    }
+
+    auto option = std::make_shared<AnimationOption>();
+    SetAnimationOption(option, animationOption);
+    Dimension xDimension(xValue, static_cast<DimensionUnit>(xUnit));
+    Dimension yDimension(yValue, static_cast<DimensionUnit>(yUnit));
+    Dimension zDimension(zValue, static_cast<DimensionUnit>(zUnit));
+    NG::TranslateOptions translate(xDimension, yDimension, zDimension);
+    if (!translateEffect) {
+        translateEffect = AceType::MakeRefPtr<NG::ChainedTranslateEffect>(translate);
+        translateEffect->SetAnimationOption(option);
+        translateEffect->SetNext(oneCenterTransition->GetTransitionEffect());
+        oneCenterTransition->SetTransitionEffect(translateEffect);
+    } else {
+        translateEffect->SetTranslateEffect(translate);
+        translateEffect->SetAnimationOption(option);
+    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OneCenterTransitionOption, oneCenterTransition, frameNode);
+    ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
 }
 } // namespace
 
@@ -2978,8 +3133,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetTabIndex, SetObscured, ResetObscured, SetResponseRegion, ResetResponseRegion, SetMouseResponseRegion,
         ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetDraggable, ResetDraggable, SetAccessibilityGroup,
         ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect,
-        SetKeyBoardShortCut, ResetKeyBoardShortCut, SetClip, SetClipShape, SetClipPath, SetOpacityTransition,
-        SetRotateTransition, SetScaleTransition, SetTranslateTransition };
+        SetKeyBoardShortCut, ResetKeyBoardShortCut, SetClip, SetClipShape, SetClipPath, SetTransitionCenter,
+        SetOpacityTransition, SetRotateTransition, SetScaleTransition, SetTranslateTransition };
 
     return &modifier;
 }
@@ -2992,7 +3147,7 @@ void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
         ArkUINodeEvent event;
         event.kind = ON_FOCUS;
         event.eventId = eventId;
-        event.extraParam= extraParam;
+        event.extraParam = extraParam;
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
@@ -3006,7 +3161,7 @@ void SetOnBlur(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
         ArkUINodeEvent event;
         event.kind = ON_BLUR;
         event.eventId = eventId;
-        event.extraParam= extraParam;
+        event.extraParam = extraParam;
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
