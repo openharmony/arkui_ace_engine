@@ -78,6 +78,8 @@ private:
     OffsetF AdjustChildPosition(
         OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const;
 
+    SizeF UpdateHeightWithSafeArea(SizeF size);
+
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;

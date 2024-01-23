@@ -57,6 +57,7 @@ constexpr Dimension MULTIPLE_DIALOG_OFFSET_Y = 48.0_vp;
 constexpr Dimension SUBWINDOW_DIALOG_DEFAULT_WIDTH = 400.0_vp;
 constexpr double EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO = 0.67;
 constexpr double EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO = 0.9;
+constexpr double HALF = 2.0;
 } // namespace
 
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -71,7 +72,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     customSize_ = dialogProp->GetUseCustomStyle().value_or(false);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
-    const auto& parentIdealSize = layoutConstraint->parentIdealSize;
+    auto parentIdealSize = UpdateHeightWithSafeArea(layoutConstraint->parentIdealSize.ConvertToSizeT());
     OptionalSizeF realSize;
     // dialog size fit screen.
     realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
@@ -83,7 +84,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // constraint child size unless developer is using customStyle
     if (!customSize_) {
         auto inset = pipeline->GetSafeArea();
-        auto maxSize = layoutConstraint->maxSize;
+        auto maxSize = UpdateHeightWithSafeArea(layoutConstraint->maxSize);
         maxSize.MinusPadding(0, 0, inset.top_.Length(), 0);
         childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
         ComputeInnerLayoutParam(childLayoutConstraint);
@@ -451,10 +452,9 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     auto dialogOffsetY =
         ConvertToPx(CalcLength(dialogOffset_.GetY()), layoutConstraint->scaleProperty, selfSize.Height());
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
-    if (!SetAlignmentSwitch(layoutConstraint->maxSize, childSize, topLeftPoint)) {
-        topLeftPoint = OffsetF(layoutConstraint->maxSize.Width() - childSize.Width(),
-                           layoutConstraint->maxSize.Height() - childSize.Height()) /
-                       2.0;
+    auto maxSize = UpdateHeightWithSafeArea(layoutConstraint->maxSize);
+    if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
+        topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
     }
     const auto& expandSafeAreaOpts = prop->GetSafeAreaExpandOpts();
     bool needAvoidKeyboard = true;
@@ -566,5 +566,24 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
         childOffset.SetY(childOffset.GetY() - (childBottom - (keyboardInsert.start - paddingBottom)));
     }
     return childOffset;
+}
+
+SizeF DialogLayoutAlgorithm::UpdateHeightWithSafeArea(SizeF size)
+{
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    CHECK_NULL_RETURN(container, size);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        container = AceEngine::Get().GetContainer(currentId);
+        ContainerScope scope(currentId);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, size);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+        CHECK_NULL_RETURN(context, size);
+        auto safeArea = context->GetSafeArea();
+        size.MinusHeight(safeArea.bottom_.Length());
+    }
+    return size;
 }
 } // namespace OHOS::Ace::NG
