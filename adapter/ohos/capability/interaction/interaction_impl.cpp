@@ -139,6 +139,29 @@ int32_t InteractionImpl::AddPrivilege()
     return InteractionManager::GetInstance()->AddPrivilege();
 }
 
+int32_t InteractionImpl::RegisterCoordinationListener(std::function<void()> dragOutCallback)
+{
+    std::function<void(Msdp::CoordinationMessage)> callback
+        = [dragOutCallback](Msdp::CoordinationMessage dragNotifyMsg) {
+        if (dragOutCallback && dragNotifyMsg == Msdp::CoordinationMessage::COORDINATION_SUCCESS) {
+            dragOutCallback();
+        }
+    };
+    if (consumer_) {
+        UnRegisterCoordinationListener();
+    }
+    consumer_ = std::make_shared<CoordinationListenerImpl>(callback);
+    return InteractionManager::GetInstance()->RegisterCoordinationListener(consumer_);
+}
+
+int32_t InteractionImpl::UnRegisterCoordinationListener()
+{
+    CHECK_NULL_RETURN(consumer_, 0);
+    auto ret = InteractionManager::GetInstance()->UnregisterCoordinationListener(consumer_);
+    consumer_ = nullptr;
+    return ret;
+}
+
 Msdp::DeviceStatus::DragCursorStyle TranslateDragCursorStyle(OHOS::Ace::DragCursorStyleCore style)
 {
     switch (style) {
