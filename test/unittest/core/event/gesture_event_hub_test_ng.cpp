@@ -702,8 +702,15 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest010, TestSize.Level1)
     std::list<RefPtr<NGGestureRecognizer>> innerTargets;
     TouchTestResult finalResult;
 
-    gestureEventHub->externalExclusiveRecognizer_.push_back(nullptr);
-    gestureEventHub->externalParallelRecognizer_.push_back(nullptr);
+    std::vector<RefPtr<NGGestureRecognizer>> vc;
+    vc.push_back(AceType::MakeRefPtr<ClickRecognizer>());
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(vc);
+    std::vector<RefPtr<NGGestureRecognizer>> parallelVc;
+    parallelVc.push_back(AceType::MakeRefPtr<ClickRecognizer>());
+    auto parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(parallelVc);
+
+    gestureEventHub->externalExclusiveRecognizer_.push_back(exclusiveRecognizer);
+    gestureEventHub->externalParallelRecognizer_.push_back(parallelRecognizer);
     EXPECT_EQ(static_cast<int32_t>(gestureEventHub->externalExclusiveRecognizer_.size()), 1);
     EXPECT_EQ(static_cast<int32_t>(gestureEventHub->externalParallelRecognizer_.size()), 1);
 
