@@ -341,9 +341,9 @@ void SelectOverlayPattern::HandlePanCancel()
 void SelectOverlayPattern::CheckHandleReverse()
 {
     bool handleReverseChanged = false;
-    double epsilon = std::max(info_->firstHandle.paintRect.Height(), info_->secondHandle.paintRect.Height());
-    epsilon = std::max(static_cast<double>(info_->singleLineHeight), epsilon) - 0.001f;
-    if (NearEqual(info_->firstHandle.paintRect.Top(), info_->secondHandle.paintRect.Top(), epsilon)) {
+    double epsilon = 0.5f;
+    if (NearEqual(info_->firstHandle.paintRect.Top(), info_->secondHandle.paintRect.Top(), epsilon) ||
+        NearEqual(info_->firstHandle.paintRect.Bottom(), info_->secondHandle.paintRect.Bottom(), epsilon)) {
         if (info_->firstHandle.paintRect.Left() > info_->secondHandle.paintRect.Left()) {
             if (!info_->handleReverse) {
                 info_->handleReverse = true;
