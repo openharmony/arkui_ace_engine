@@ -72,7 +72,7 @@ constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     JSRef<JSFunc> jsAnimateToFunc, std::function<void()>& onFinishEvent, bool immediately)
 {
-    auto triggerId = Container::CurrentIdWithoutScope();
+    auto triggerId = Container::CurrentIdSafely();
     AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
         auto context = container->GetPipelineContext();
         if (!context) {
@@ -163,10 +163,10 @@ std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& curveOb
         WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         RefPtr<JsFunction> jsFuncCallBack =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
-        customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentIdWithoutScope(), node = frameNode](
+        customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentIdSafely(), node = frameNode](
                              float time) -> float {
             ContainerScope scope(id);
-            auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_RETURN(pipelineContext, 1.0f);
             pipelineContext->UpdateCurrentActiveNode(node);
             JSRef<JSVal> params[1];
@@ -191,7 +191,7 @@ AnimationOption ParseKeyframeOverallParam(const JSExecutionContext& executionCon
     if (onFinish->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         std::function<void()> onFinishEvent = [execCtx = executionContext, func = std::move(jsFunc),
-                            id = Container::CurrentIdWithoutScope()]() mutable {
+                            id = Container::CurrentIdSafely()]() mutable {
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -330,7 +330,7 @@ const AnimationOption JSViewContext::CreateAnimation(const JSRef<JSObject>& anim
 void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 {
     ACE_FUNCTION_TRACE();
-    auto scopedDelegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
         return;
@@ -340,7 +340,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         return;
     }
     AnimationOption option = AnimationOption();
-    auto container = Container::CurrentWithoutScope();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContextBase);
@@ -361,11 +361,11 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentIdWithoutScope(), node = frameNode]() mutable {
+                            id = Container::CurrentIdSafely(), node = frameNode]() mutable {
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
@@ -403,7 +403,7 @@ void JSViewContext::JSAnimateToImmediately(const JSCallbackInfo& info)
 
 void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 {
-    auto scopedDelegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
         return;
@@ -419,7 +419,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         return;
     }
 
-    auto container = Container::CurrentWithoutScope();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -438,11 +438,11 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentIdWithoutScope(), traceStreamPtr, node = frameNode]() mutable {
+                            id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode]() mutable {
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
@@ -477,10 +477,10 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
                     "pipeline is layouting, post animateTo, duration:%{public}d, curve:%{public}s",
                     option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
                 pipelineContext->GetTaskExecutor()->PostTask(
-                    [id = Container::CurrentIdWithoutScope(), option, func = JSRef<JSFunc>::Cast(info[1]),
+                    [id = Container::CurrentIdSafely(), option, func = JSRef<JSFunc>::Cast(info[1]),
                         onFinishEvent, immediately]() mutable {
                         ContainerScope scope(id);
-                        auto container = Container::CurrentWithoutScope();
+                        auto container = Container::CurrentSafely();
                         CHECK_NULL_VOID(container);
                         auto pipelineContext = container->GetPipelineContext();
                         CHECK_NULL_VOID(pipelineContext);
@@ -508,7 +508,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
 {
     ACE_FUNCTION_TRACE();
-    auto scopedDelegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
         return;
@@ -527,7 +527,7 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
         return;
     }
 
-    auto container = Container::CurrentWithoutScope();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);

@@ -97,7 +97,7 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
             (const GestureEvent&) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("SheetInfo.action");
-            auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             func->ExecuteJS();
@@ -109,7 +109,7 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
 
 void JSActionSheet::Show(const JSCallbackInfo& args)
 {
-    auto scopedDelegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
         LOGE("scopedDelegate is null, please check");
@@ -159,7 +159,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("ActionSheet.cancel");
-            auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
@@ -184,7 +184,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
                     func = std::move(actionFunc), node = frameNode](GestureEvent&) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                     ACE_SCORING_EVENT("ActionSheet.confirm.action");
-                    auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+                    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
                     CHECK_NULL_VOID(pipelineContext);
                     pipelineContext->UpdateCurrentActiveNode(node);
                     func->ExecuteJS();
@@ -194,7 +194,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
                                     node = frameNode]() {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                     ACE_SCORING_EVENT("ActionSheet.confirm.action");
-                    auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+                    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
                     CHECK_NULL_VOID(pipelineContext);
                     pipelineContext->UpdateCurrentActiveNode(node);
                     func->Execute();

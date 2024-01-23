@@ -87,7 +87,7 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return MockPipelineContext::GetCurrent();
 }
 
-RefPtr<PipelineContext> PipelineContext::GetCurrentContextWithoutScope()
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
 {
     return MockPipelineContext::GetCurrent();
 }
@@ -530,7 +530,7 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return NG::MockPipelineContext::GetCurrent();
 }
 
-RefPtr<PipelineBase> PipelineBase::GetCurrentContextWithoutScope()
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
 {
     return NG::MockPipelineContext::GetCurrent();
 }
