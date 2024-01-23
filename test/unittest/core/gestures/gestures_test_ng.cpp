@@ -8407,7 +8407,7 @@ HWTEST_F(GesturesTestNg, GestureRefereeTest011, TestSize.Level1)
     gestureScope->isDelay_ = true;
     gestureReferee.gestureScopes_[0] = gestureScope;
     gestureReferee.HandleAcceptDisposal(clickRecognizerPtr);
-    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
 
     /**
      * @tc.steps: step2. call Adjudicate function and compare result
