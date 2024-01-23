@@ -980,7 +980,9 @@ HWTEST_F(SearchTestNg, SetSearchIconColor002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    searchModelInstance.SetSearchSrcPath("/common/icon.png");
+    std::string bundleName = "";
+    std::string moduleName = "";
+    searchModelInstance.SetSearchSrcPath("/common/icon.png", bundleName, moduleName);
     searchModelInstance.SetSearchIconColor(Color::RED);
     ASSERT_STREQ(imageLayoutProperty->GetImageSourceInfo()->GetSrc().c_str(), "/common/icon.png");
 }
@@ -997,7 +999,9 @@ HWTEST_F(SearchTestNg, SetSearchSrcPath001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    searchModelInstance.SetSearchSrcPath("");
+    std::string bundleName = "";
+    std::string moduleName = "";
+    searchModelInstance.SetSearchSrcPath("", bundleName, moduleName);
     ASSERT_STREQ(imageLayoutProperty->GetImageSourceInfo()->GetSrc().c_str(), "resource:///ohos_test_image.svg");
 }
 
@@ -1013,7 +1017,9 @@ HWTEST_F(SearchTestNg, SetSearchSrcPath002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    searchModelInstance.SetSearchSrcPath("/common/icon.png");
+    std::string bundleName = "";
+    std::string moduleName = "";
+    searchModelInstance.SetSearchSrcPath("/common/icon.png", bundleName, moduleName);
     ASSERT_STREQ(imageLayoutProperty->GetImageSourceInfo()->GetSrc().c_str(), "/common/icon.png");
 }
 
