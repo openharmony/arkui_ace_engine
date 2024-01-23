@@ -4181,13 +4181,18 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
         newWidth, newHeight, prevWidth, prevHeight);
     if (SelectOverlayIsOn()) {
         auto proxy = GetSelectOverlayProxy();
-        proxy->ShowOrHiddenMenu(true);
-        UpdateOriginIsMenuShow(false);
-        processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->ProcessOverlay(false);
-        };
+        auto overlayInfo = proxy->GetSelectOverlayMangerInfo();
+        if (!overlayInfo.isUsingMouse) {
+            proxy->ShowOrHiddenMenu(true);
+            UpdateOriginIsMenuShow(false);
+            processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->ProcessOverlay(false);
+            };
+        } else {
+            CloseSelectOverlay();
+        }
     }
     if (HasFocus() && IsSingleHandle()) {
         StartTwinkling();
