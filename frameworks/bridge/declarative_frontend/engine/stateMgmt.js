@@ -3768,8 +3768,8 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.dependentElmtIdsByProperty_.addTrackedObjectPropertyDependency(readTrackedPropertyName, renderingElmtId);
     }
     purgeDependencyOnElmtId(rmElmtId) {
-        
-        this.dependentElmtIdsByProperty_.purgeDependenciesForElmtId(rmElmtId);
+        var _a;
+        (_a = this.dependentElmtIdsByProperty_) === null || _a === void 0 ? void 0 : _a.purgeDependenciesForElmtId(rmElmtId);
     }
     SetPropertyUnchanged() {
         // function to be removed

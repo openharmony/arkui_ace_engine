@@ -366,8 +366,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
   
   public purgeDependencyOnElmtId(rmElmtId: number): void {
-    stateMgmtConsole.debug(`${this.debugInfo()}: purgeDependencyOnElmtId ${rmElmtId}`);
-    this.dependentElmtIdsByProperty_.purgeDependenciesForElmtId(rmElmtId);
+    this.dependentElmtIdsByProperty_?.purgeDependenciesForElmtId(rmElmtId);
   }
 
   public SetPropertyUnchanged(): void {
