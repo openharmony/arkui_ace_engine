@@ -155,6 +155,11 @@ protected:
     {
         originIsMenuShow_ = isShow;
     }
+    
+    bool GetOriginIsMenuShow()
+    {
+        return originIsMenuShow_;
+    }
 
 private:
     bool originIsMenuShow_ = true;
