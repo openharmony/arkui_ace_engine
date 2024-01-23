@@ -70,7 +70,7 @@ public:
 
     static RefPtr<PipelineContext> GetCurrentContext();
 
-    static RefPtr<PipelineContext> GetCurrentContextWithoutScope();
+    static RefPtr<PipelineContext> GetCurrentContextSafely();
 
     static RefPtr<PipelineContext> GetMainPipelineContext();
 

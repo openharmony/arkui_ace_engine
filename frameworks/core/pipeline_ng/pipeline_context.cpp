@@ -115,9 +115,9 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
-RefPtr<PipelineContext> PipelineContext::GetCurrentContextWithoutScope()
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
 {
-    auto currentContainer = Container::CurrentWithoutScope();
+    auto currentContainer = Container::CurrentSafely();
     CHECK_NULL_RETURN(currentContainer, nullptr);
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }

@@ -166,7 +166,7 @@ static napi_value JSMeasureText(napi_env env, napi_callback_info info)
     context.fontWeight = fontWeight;
     context.fontFamily = fontFamily;
     context.letterSpacing = letterSpace;
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         return nullptr;
     }
@@ -298,7 +298,7 @@ static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
         return nullptr;
     }
     SetContextProperty(contextParamMap, context, env);
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         return nullptr;
     }

@@ -39,7 +39,6 @@ public:
 
     void AddContainer(int32_t instanceId, const RefPtr<Container>& container);
     void RemoveContainer(int32_t instanceId);
-    int32_t SingletonId() const;
     RefPtr<Container> GetContainer(int32_t instanceId);
     void RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread = false);
     void UnRegisterFromWatchDog(int32_t instanceId);
