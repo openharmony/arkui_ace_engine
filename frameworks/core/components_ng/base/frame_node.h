@@ -562,6 +562,8 @@ public:
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
+    void SetActiveChildRange(int32_t start, int32_t end) override;
+    void DoSetActiveChildRange(int32_t start, int32_t end) override;
     const std::string& GetHostTag() const override
     {
         return GetTag();

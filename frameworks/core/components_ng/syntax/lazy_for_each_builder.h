@@ -277,6 +277,36 @@ public:
         }
     }
 
+    void SetActiveChildRange(int32_t start, int32_t end)
+    {
+        for (auto& [index, node] : cachedItems_) {
+            if ((start <= end && start <= index && end >= index) ||
+                (start > end && (index <= end || index >= start))) {
+                if (node.second) {
+                    continue;
+                }
+                auto keyIter = expiringItem_.find(node.first);
+                if (keyIter != expiringItem_.end() && keyIter->second.second) {
+                    node.second = keyIter->second.second;
+                    expiringItem_.erase(keyIter);
+                    auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+                    if (frameNode) {
+                        frameNode->SetActive(true);
+                    }
+                }
+                continue;
+            }
+            if (!node.second) {
+                continue;
+            }
+            auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+            if (frameNode) {
+                frameNode->SetActive(false);
+            }
+            expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+        }
+    }
+
     void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
     {
         for (const auto& item : cachedItems_) {

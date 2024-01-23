@@ -491,6 +491,7 @@ public:
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
+    virtual void DoSetActiveChildRange(int32_t start, int32_t end);
     virtual void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint);
 
     // return value: true if the node can be removed immediately.
