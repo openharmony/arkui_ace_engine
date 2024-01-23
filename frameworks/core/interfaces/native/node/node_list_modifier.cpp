@@ -296,7 +296,8 @@ void ResetScrollSnapAlign(ArkUINodeHandle node)
     ListModelNG::SetScrollSnapAlign(frameNode, V2::ScrollSnapAlign::NONE);
 }
 
-void ListSetDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const int32_t* units, ArkUI_Int32 length)
+void ListSetDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+    const int32_t* units, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

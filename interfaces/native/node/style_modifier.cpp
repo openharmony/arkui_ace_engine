@@ -858,7 +858,7 @@ void SetResponseRegion(ArkUI_NodeHandle node, const char* value)
 
     std::vector<std::string> regionArray;
     StringUtils::StringSplitter(value, ',', regionArray);
-    std::vector<double> valuesArray;
+    std::vector<ArkUI_Float32> valuesArray;
     std::vector<int> unitsArray;
     if (regionArray.size() == 1) {
         std::vector<std::string> regionVal;
@@ -890,10 +890,9 @@ void SetResponseRegion(ArkUI_NodeHandle node, const char* value)
             }
         }
     }
-    double* firstValue = valuesArray.data();
-    int* firstUnit = unitsArray.data();
+
     fullImpl->getNodeModifiers()->getCommonModifier()->setResponseRegion(
-        node->uiNodeHandle, firstValue, firstUnit, valuesArray.size());
+        node->uiNodeHandle, valuesArray.data(), unitsArray.data(), valuesArray.size());
 }
 
 void SetOverlay(ArkUI_NodeHandle node, const char* value)

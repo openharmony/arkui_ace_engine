@@ -924,7 +924,8 @@ struct ArkUICommonModifier {
 
     void (*setClip)(ArkUINodeHandle node, ArkUI_Int32 isClip);
     void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_Int32 length);
-    void (*setClipPath)(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_CharPtr commands);
+    void (*setClipPath)(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute,
+        ArkUI_CharPtr commands);
     void (*setTransitionCenter)(ArkUINodeHandle node, ArkUI_Float32 centerX, ArkUI_Int32 centerXUnit,
         ArkUI_Float32 centerY, ArkUI_Int32 centerYUnit, ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit);
     void (*setOpacityTransition)(
@@ -1886,8 +1887,8 @@ struct ArkUISideBarContainerModifier {
     void (*resetSideBarWidth)(ArkUINodeHandle node);
     void (*setMinSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetMinSideBarWidth)(ArkUINodeHandle node);
-    void (*setControlButton)(
-        ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 valueLength, const struct ArkUIIconsStruct* sideBarWidth);
+    void (*setControlButton)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 valueLength,
+        const struct ArkUIIconsStruct* sideBarWidth);
     void (*resetControlButton)(ArkUINodeHandle node);
     void (*setShowControlButton)(ArkUINodeHandle node, ArkUI_Bool isShow);
     void (*resetShowControlButton)(ArkUINodeHandle node);
