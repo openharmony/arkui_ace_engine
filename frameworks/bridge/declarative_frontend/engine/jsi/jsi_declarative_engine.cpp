@@ -948,7 +948,7 @@ void JsiDeclarativeEngine::Destroy()
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     engineInstance_->DestroyAllRootViewHandle();
-    if (isUnique_ || engineInstance_->IsPlugin()) {
+    if (isUnique_) {
         RunFullGarbageCollection();
     }
 
