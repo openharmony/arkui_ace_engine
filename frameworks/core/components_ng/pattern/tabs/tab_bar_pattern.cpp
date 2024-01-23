@@ -1318,7 +1318,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         auto isSelected = columnNode->GetId() == selectedColumnId;
-        textLayoutProperty->UpdateTextColor(isSelected ? tabTheme->GetActiveIndicatorColor()
+        textLayoutProperty->UpdateTextColor(isSelected ? tabTheme->GetSubTabTextOnColor()
                                                        : tabTheme->GetSubTabTextOffColor());
         if (IsNeedUpdateFontWeight(index)) {
             textLayoutProperty->UpdateFontWeight(isSelected ? FontWeight::MEDIUM : FontWeight::NORMAL);
