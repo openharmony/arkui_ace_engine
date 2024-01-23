@@ -695,7 +695,7 @@ private:
 
     RefPtr<FrameNode> rootNode_;
 
-    RefPtr<FrameNode> curFocusNode_;
+    int32_t curFocusNodeId_ = -1;
 
     std::set<RefPtr<FrameNode>> needRenderNode_;
 
