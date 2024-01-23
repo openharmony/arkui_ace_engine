@@ -110,7 +110,7 @@ public:
             }
         }
         for (auto& [key, node] : expiringItem_) {
-            if (static_cast<size_t>(node.first) >= index) {
+            if (static_cast<size_t>(node.first) >= index && node.first != -1) {
                 node.first++;
             }
         }
@@ -159,6 +159,8 @@ public:
                 NotifyDataChanged(index, keyIter->second.second, false);
                 expiringItem_.try_emplace(
                     keyIter->second.first, LazyForEachCacheChild(-1, std::move(keyIter->second.second)));
+            } else {
+                InvalidIndexOfChangedData(index);
             }
             cachedItems_.erase(keyIter);
             return true;
@@ -185,6 +187,16 @@ public:
             cachedItems_.erase(toIter);
         }
         return true;
+    }
+
+    void InvalidIndexOfChangedData(size_t index)
+    {
+        for (auto& [key, child] : expiringItem_) {
+            if (static_cast<size_t>(child.first) == index) {
+                child.first = -1;
+                break;
+            }
+        }
     }
 
     RefPtr<UINode> GetChildByKey(const std::string& key)
@@ -475,6 +487,11 @@ public:
     void SetIsLoop(bool isLoop)
     {
         isLoop_ = isLoop;
+    }
+
+    const std::unordered_map<std::string, LazyForEachCacheChild>& GetCachedUINodeMap()
+    {
+        return expiringItem_;
     }
 
     const std::map<int32_t, LazyForEachChild>& GetAllChildren()

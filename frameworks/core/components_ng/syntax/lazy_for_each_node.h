@@ -97,6 +97,7 @@ public:
         return isLoop_;
     }
     void PostIdleTask();
+    void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) override;
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void BuildAllChildren();
