@@ -46,13 +46,13 @@ public:
             return;
         }
         if (!pixelMap) {
-            callback_(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, [node = node_]() {
+            callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, [node = node_]() {
                 auto frameNode = node.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 Inspector::RemoveOffscreenNode(frameNode);
             });
         } else {
-            callback_(pixelMap, Framework::ERROR_CODE_NO_ERROR, [node = node_]() {
+            callback_(pixelMap, ERROR_CODE_NO_ERROR, [node = node_]() {
                 auto frameNode = node.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 Inspector::RemoveOffscreenNode(frameNode);
@@ -79,7 +79,7 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
 {
     auto node = Inspector::GetFrameNodeByKey(componentId);
     if (!node) {
-        callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, nullptr);
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
     auto rsNode = GetRsNode(node);
@@ -95,7 +95,7 @@ void ComponentSnapshot::Create(
     auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
     auto uiNode = AceType::DynamicCast<UINode>(customNode);
     if (!uiNode) {
-        callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, nullptr);
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
     auto node = AceType::DynamicCast<FrameNode>(customNode);

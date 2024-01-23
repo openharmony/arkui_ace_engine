@@ -13,24 +13,24 @@
  * limitations under the License.
  */
 
-#include "common.h"
-
-#include "basic_node.h"
-#include "node_model.h"
+#include "native_interface.h"
+#include "native_node.h"
+#include "node/node_model.h"
 
 #include "base/log/log_wrapper.h"
 
 namespace {
 
-constexpr int CURRENT_IMPL_SDK_VERSION = 11;
-
-ArkUI_BasicNodeAPI basicImpl_11 = {
-    ARKUI_BASIC_API_FAMILY_VERSION,
+constexpr int32_t CURRENT_NATIVE_NODE_API_VERSION = 1;
+ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
+    CURRENT_NATIVE_NODE_API_VERSION,
     OHOS::Ace::NodeModel::CreateNode,
     OHOS::Ace::NodeModel::DisposeNode,
     OHOS::Ace::NodeModel::AddChild,
     OHOS::Ace::NodeModel::RemoveChild,
     OHOS::Ace::NodeModel::InsertChildAfter,
+    nullptr,
+    nullptr,
     OHOS::Ace::NodeModel::SetAttribute,
     OHOS::Ace::NodeModel::GetAttribute,
     OHOS::Ace::NodeModel::ResetAttribute,
@@ -38,7 +38,6 @@ ArkUI_BasicNodeAPI basicImpl_11 = {
     OHOS::Ace::NodeModel::UnregisterNodeEvent,
     OHOS::Ace::NodeModel::RegisterOnEvent,
     OHOS::Ace::NodeModel::UnregisterOnEvent,
-    OHOS::Ace::NodeModel::ApplyModifierFinish,
     OHOS::Ace::NodeModel::MarkDirty,
 };
 
@@ -48,13 +47,18 @@ ArkUI_BasicNodeAPI basicImpl_11 = {
 extern "C" {
 #endif
 
-ArkUI_AnyNodeAPI* OH_ArkUI_GetNativeNodeAPI(ArkUI_NodeAPIFamilyType type, int32_t version)
+ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32_t version)
 {
+    if (!OHOS::Ace::NodeModel::GetFullImpl()) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+            "fail to get %{public}d node api family of %{public}d version, impl library is not found", type, version);
+        return nullptr;
+    }
     switch (type) {
-        case NODE_BASIC_FAMILY: {
+        case ARKUI_NATIVE_NODE: {
             switch (version) {
-                case CURRENT_IMPL_SDK_VERSION:
-                    return reinterpret_cast<ArkUI_AnyNodeAPI*>(&basicImpl_11);
+                case CURRENT_NATIVE_NODE_API_VERSION:
+                    return reinterpret_cast<ArkUI_AnyNativeAPI*>(&nodeImpl_1);
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                         "fail to get basic node api family, version is incorrect: %{public}d", version);

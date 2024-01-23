@@ -15,6 +15,7 @@
 
 #include "mock_pipeline_context.h"
 
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -304,6 +305,8 @@ bool PipelineContext::OnBackPressed()
 }
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
 
 void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node) {}
 

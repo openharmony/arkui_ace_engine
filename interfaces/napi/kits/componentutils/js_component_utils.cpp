@@ -45,7 +45,7 @@ static napi_value JSGetRectangleById(napi_env env, napi_callback_info info)
     OHOS::Ace::NG::Rectangle rectangle;
     auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
-        NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->GetRectangleById(key, rectangle);

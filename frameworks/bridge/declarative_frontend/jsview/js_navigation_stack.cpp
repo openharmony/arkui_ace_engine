@@ -66,10 +66,10 @@ void JSNavigationStack::SetDataSourceObj(const JSRef<JSObject>& dataSourceObj)
     auto checkNavDestinationExistsFunc = [weakStack = WeakClaim(this)](const JSRef<JSObject>& info) -> int32_t {
         auto stack = weakStack.Upgrade();
         if (stack == nullptr) {
-            return Framework::ERROR_CODE_INTERNAL_ERROR;
+            return ERROR_CODE_INTERNAL_ERROR;
         }
         auto errorCode = stack->CheckNavDestinationExists(info);
-        if (errorCode != Framework::ERROR_CODE_NO_ERROR) {
+        if (errorCode != ERROR_CODE_NO_ERROR) {
             stack->RemoveInvalidPage(info);
         }
         return errorCode;
@@ -585,10 +585,10 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
 {
     if (navDestBuilderFunc_->IsEmpty()) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navDestBuilderFunc_ is empty.");
-        return Framework::ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
+        return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
     }
     
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, Framework::ERROR_CODE_INTERNAL_ERROR);
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, ERROR_CODE_INTERNAL_ERROR);
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
 
     auto pathName = navPathInfo->GetProperty("name");
@@ -607,9 +607,9 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
             pattern->SetNavigationStack(WeakClaim(this));
         }
         SaveNodeToPreBuildList(pathName->ToString(), param, node);
-        return Framework::ERROR_CODE_NO_ERROR;
+        return ERROR_CODE_NO_ERROR;
     }
-    return Framework::ERROR_CODE_DESTINATION_NOT_FOUND;
+    return ERROR_CODE_DESTINATION_NOT_FOUND;
 }
 
 bool JSNavigationStack::GetFlagByIndex(int32_t index) const
