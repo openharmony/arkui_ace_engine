@@ -30,11 +30,12 @@ const IMAGE_DEFAULT = 56;
 const TEXT_PADDING_LEFT_RIGHT = 12;
 const MARGIN_EIGHT = 8;
 const ROW_GAP = 16;
+// Animation Parameters
 const ENTER_EXIT_ICON_DURATION = 200;
-const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1);
-const DRAG_SPRING = curves.interpolatingSpring(0, 1, 400, 38);
-const REMOVE_ADD_SPRING = curves.interpolatingSpring(0, 1, 150, 24);
-const LONG_TOUCH_SCALE = curves.cubicBezierCurve(0.2, 0, 0.2, 1);
+const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1); // Curve of entering and exiting the editing state
+const DRAG_SPRING = curves.interpolatingSpring(0, 1, 400, 38); // Drag to move and fill curves
+const REMOVE_ADD_SPRING = curves.interpolatingSpring(0, 1, 150, 24); // Delete Add Curve
+const LONG_TOUCH_SCALE = curves.cubicBezierCurve(0.2, 0, 0.2, 1); // Press and hold the floating curve
 
 // declaring interface, enum, class
 export interface GridObjectSortComponentItem {
@@ -91,7 +92,7 @@ export struct GridObjectSortComponent {
   @State copyUnSelected: GridObjectSortComponentItem[] = [];
   // Current data when touched
   @State content: GridObjectSortComponentItem = { id: '', text: '', selected: false, order: 0 };
-  @State hoverId: number | string = ''
+  @State hoverId: number | string = '';
   // component state : edit === true   unedited === false
   @State @Watch('onGridComStateChange') gridComState: boolean = false;
   @State menuSwitch: boolean = false;
@@ -137,7 +138,12 @@ export struct GridObjectSortComponent {
   private touchBorderRadius: Resource = $r('sys.float.ohos_id_corner_radius_clicked');
   private hoverBackgroundColor: Resource = $r('sys.color.ohos_id_color_hover');
   private focusBorder: Resource = $r('sys.color.ohos_id_color_focused_outline');
-  private imageText: boolean = false
+  private imageText: boolean = false;
+  private menuItems: Array<MenuItem> = [
+    new MenuItem($r('sys.media.ohos_ic_public_edit'), true, () => {
+      this.goEdit();
+    }),
+  ];
   onSave?: (select: GridObjectSortComponentItem[], unselect: GridObjectSortComponentItem[]) => void;
   onCancel?: () => void;
 
@@ -156,6 +162,20 @@ export struct GridObjectSortComponent {
     }, 500)
   }
 
+  // component disappear
+  aboutToDisappear() {
+    animateTo({
+      duration: ENTER_EXIT_ICON_DURATION,
+      curve: COMMON_BEZIER,
+    }, () => {
+      this.gridComState = false;
+    });
+    this.menuSwitch = false;
+    this.selected = this.copySelected;
+    this.unSelected = this.copyUnSelected;
+  }
+
+  // Array deduplication
   deduplicate(arr: GridObjectSortComponentItem[]) {
     const result: GridObjectSortComponentItem[] = [];
     arr.forEach(item => {
@@ -166,13 +186,7 @@ export struct GridObjectSortComponent {
     return result
   }
 
-  // header
-  private menuItems: Array<MenuItem> = [
-    new MenuItem($r('sys.media.ohos_ic_public_edit'), true, () => {
-      this.goEdit();
-    }),
-  ]
-
+  // Listen to the change of the editing status of the component.
   onGridComStateChange() {
     this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16
     if (!this.imageText) {
@@ -188,6 +202,7 @@ export struct GridObjectSortComponent {
 
   // cancel edit function
   cancelEdit() {
+    if (this.isStartDrag || this.clickAddBtn || this.clickRemoveBtn) return
     animateTo({
       duration: ENTER_EXIT_ICON_DURATION,
       curve: LONG_TOUCH_SCALE
@@ -246,17 +261,40 @@ export struct GridObjectSortComponent {
     this.menuSwitch = false
   }
 
-  // component disappear
-  aboutToDisappear() {
-    animateTo({
-      duration: ENTER_EXIT_ICON_DURATION,
-      curve: COMMON_BEZIER,
-    }, () => {
-      this.gridComState = false;
-    });
-    this.menuSwitch = false;
-    this.selected = this.copySelected;
-    this.unSelected = this.copyUnSelected;
+  // Drag and move triggering event
+  onDragMoveEvent(event: ItemDragInfo, itemIndex: number, insertIndex: number) {
+    if (!this.gridComState || (event.x < this.blockWidth / 3 && event.y < this.blockHeight / 3)) {
+      return
+    }
+    let targetIndex = insertIndex;
+    if (targetIndex < 0) {
+      targetIndex = this.selected.length - 1;
+    }
+    this.insertIndex = insertIndex;
+  }
+
+  // delete Editing an Area Item
+  handleDeleteClick(content: GridObjectSortComponentItem) {
+    if (this.clickAddBtn || this.clickRemoveBtn) return
+    this.clickRemoveBtn = true;
+    this.scaleIcon = 0;
+    this.arraySelectIsChange = 1;
+    let currentIndex = this.selected.findIndex(val => val.id === content.id);
+    this.content = content;
+    this.selectedIndex = currentIndex;
+    animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
+      this.scaleIcon = 1;
+      this.selected.splice(currentIndex, 1);
+      this.unSelected.unshift(content);
+      this.editGridDataLength = this.editGridDataLength - 1;
+      this.editItemMoveX = 0
+      this.editItemMoveY = 0
+      this.arraySelectIsChange = 2;
+      this.clickRemoveBtn = false;
+    } }, () => {
+      this.editItemMoveX = this.getAddItemGridPosition().x
+      this.editItemMoveY = this.getAddItemGridPosition().y
+    })
   }
 
   // get columnsTemplate
@@ -276,12 +314,53 @@ export struct GridObjectSortComponent {
     })
   }
 
+  // Obtains the width of each girdItem.
   getBlockWidth(): number {
     const blockWidth = (this.areaWidth - 32) / this.colNum;
     return blockWidth;
   }
 
-  // Displacement to the first position
+
+  // calculated altitude
+  getGridHeight(data: GridObjectSortComponentItem[], state?: string): number {
+    let height = 0
+    let selectLen = data.length
+    let addRow = 0
+    let lastColumn = selectLen % this.colNum === 0
+    if (this.clickAddBtn && lastColumn || this.isStartDrag && lastColumn && state || this.clickRemoveBtn && lastColumn && !state) {
+      addRow = 1
+    }
+    let rowNumber = Math.ceil(selectLen / this.colNum) + addRow
+    height = this.blockHeight * rowNumber
+    if (selectLen === 0) {
+      height = 0
+    }
+    return height
+  }
+
+  // Drag position calculation in the editing area
+  getCoodXY(index: number): PositionXY {
+    const gridCol = this.colNum;
+    let x = 0;
+    let y = 0;
+    if (index >= this.insertIndex) {
+      // item  newline
+      if (Math.trunc(index % gridCol) === gridCol - 1) {
+        x = x - this.blockWidth * (gridCol - 1)
+        y = y + this.blockHeight
+      } else {
+        // right move
+        x = x + this.blockWidth
+      }
+    }
+    if (!this.isStartDrag) {
+      x = 0;
+      y = 0;
+    }
+    return { x, y }
+  }
+
+  // Position calculation when an item is deleted, Displacement to the first position. (top => bottom)
   getAddItemGridPosition(): PositionXY {
     const len = this.selected.length
     const col: number = this.colNum
@@ -306,6 +385,7 @@ export struct GridObjectSortComponent {
     }
   }
 
+  // When an item is deleted, the filling position of other items is calculated.
   getCoveringGridPosition(index: number): PositionXY {
     let xNew = 0;
     let yNew = 0;
@@ -319,82 +399,7 @@ export struct GridObjectSortComponent {
     }
   }
 
-  onDragMoveEvent(event: ItemDragInfo, itemIndex: number, insertIndex: number) {
-    if (!this.gridComState || (event.x < this.blockWidth / 3 && event.y < this.blockHeight / 3)) {
-      return
-    }
-    let targetIndex = insertIndex;
-    if (targetIndex < 0) {
-      targetIndex = this.selected.length - 1;
-    }
-    this.insertIndex = insertIndex;
-  }
-
-  handleDeleteClick(content: GridObjectSortComponentItem) {
-    if (this.clickAddBtn || this.clickRemoveBtn) return
-    this.clickRemoveBtn = true;
-    this.scaleIcon = 0;
-    this.arraySelectIsChange = 1;
-    let currentIndex = this.selected.findIndex(val => val.id === content.id);
-    this.content = content;
-    this.selectedIndex = currentIndex;
-    animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
-      this.scaleIcon = 1;
-      this.selected.splice(currentIndex, 1);
-      this.unSelected.unshift(content);
-      this.editGridDataLength = this.editGridDataLength - 1;
-      this.editItemMoveX = 0
-      this.editItemMoveY = 0
-      this.arraySelectIsChange = 2;
-      this.clickRemoveBtn = false;
-    } }, () => {
-      this.editItemMoveX = this.getAddItemGridPosition().x
-      this.editItemMoveY = this.getAddItemGridPosition().y
-    })
-  }
-
-  getCoodXY(index: number): PositionXY {
-    const gridCol = this.colNum;
-    let x = 0;
-    let y = 0;
-    if (index >= this.insertIndex) {
-      // item  newline
-      if (Math.trunc(index % gridCol) === gridCol - 1) {
-        x = x - this.blockWidth * (gridCol - 1)
-        y = y + this.blockHeight
-      } else {
-        // right move
-        x = x + this.blockWidth
-      }
-    }
-    if (!this.isStartDrag) {
-      x = 0;
-      y = 0;
-    }
-    return { x, y }
-  }
-
-  // calculated altitude
-  getGridHeight(data: GridObjectSortComponentItem[], state?: string): number {
-    let height = 0
-    let selectLen = data.length
-    let addRow = 0
-    if (
-      this.clickAddBtn && selectLen % this.colNum === 0
-      || this.isStartDrag && selectLen % this.colNum === 0 && state
-      || this.clickRemoveBtn && selectLen % this.colNum === 0 && !state
-    ) {
-      addRow = 1
-    }
-    let rowNumber = Math.ceil(selectLen / this.colNum) + addRow
-    height = this.blockHeight * rowNumber
-    if (selectLen === 0) {
-      height = 0
-    }
-    return height
-  }
-
-  // bottom => top position
+  // Position calculation when adding an item. (bottom => top)
   getEditItemGridPosition(data: GridObjectSortComponentItem[], removeIndex: number): PositionXY {
     const len = data.length
     const col: number = this.colNum
@@ -421,6 +426,7 @@ export struct GridObjectSortComponent {
     }
   }
 
+  // When an item is added, the filling of other items in the addition area is calculated.
   getCoveringGridPositionBottom(index: number): PositionXY {
     let xNew = 0
     let yNew = 0
@@ -434,6 +440,7 @@ export struct GridObjectSortComponent {
     }
   }
 
+  // When an item is deleted, other items in the addition area are moved rightwards.
   getAddItemRightMove(index: number): PositionXY {
     let x = this.blockWidth
     let y = 0
@@ -442,6 +449,64 @@ export struct GridObjectSortComponent {
       y = this.imageText ? this.blockHeight : this.blockHeight - 8
     }
     return { x, y }
+  }
+
+  // Display area movement function
+  getShowAreaItemTranslate(index: number): PositionXY {
+    // Position when dragging
+    if (this.isStartDrag) {
+      return {
+        x: this.getCoodXY(index).x,
+        y: this.getCoodXY(index).y
+      }
+    }
+
+    // Position when remove item
+    if (!this.isStartDrag && index === this.selectedIndex) {
+      return {
+        x: this.editItemMoveX,
+        y: this.editItemMoveY
+      }
+    }
+
+    // Filling position
+    if (!this.isStartDrag && index !== this.selectedIndex && this.clickRemoveBtn) {
+      return {
+        x: this.getCoveringGridPosition(index).x,
+        y: this.getCoveringGridPosition(index).y
+      }
+    }
+
+    return { x: 0, y: 0 }
+  }
+
+  // Add area movement function
+  getAddAreaItemTranslate(index: number): PositionXY {
+      // When an item is removed, the added area is moved rightward.
+      if (this.clickRemoveBtn) {
+        return {
+          x: this.getAddItemRightMove(index).x,
+          y: this.getAddItemRightMove(index).y
+        }
+      }
+
+    // Move the position when adding an item.
+    if(!this.clickRemoveBtn && index === this.unSelectedIndex) {
+        return {
+          x: this.addItemMoveX,
+          y: -this.addItemMoveY
+        }
+    }
+
+    // Filling position when adding
+    if (!this.clickRemoveBtn && index !== this.unSelectedIndex && this.clickAddBtn) {
+      return {
+        x: this.getCoveringGridPositionBottom(index).x,
+        y: this.getCoveringGridPositionBottom(index).y
+      }
+    }
+
+    return { x: 0, y: 0 }
   }
 
   @Builder
@@ -744,7 +809,6 @@ export struct GridObjectSortComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .textAlign(TextAlign.Start)
           .maxLines(1)
-          .padding(0)
           .constraintSize({
             maxWidth: 26
           })
@@ -892,21 +956,7 @@ export struct GridObjectSortComponent {
           )
         }
         .clip(false)
-        .translate(
-          this.clickRemoveBtn ? {
-            x: this.getAddItemRightMove(index).x,
-            y: this.getAddItemRightMove(index).y
-          } : index === this.unSelectedIndex ? {
-            x: this.addItemMoveX,
-            y: -this.addItemMoveY
-          } : this.clickAddBtn ? {
-           x: this.getCoveringGridPositionBottom(index).x,
-           y: this.getCoveringGridPositionBottom(index).y
-          } : {
-            x: 0,
-            y: 0
-          }
-        )
+        .translate(this.getAddAreaItemTranslate(index))
         .animation({
           curve: this.clickRemoveBtn ? DRAG_SPRING : index === this.unSelectedIndex ?  REMOVE_ADD_SPRING : DRAG_SPRING
         })
@@ -970,16 +1020,7 @@ export struct GridObjectSortComponent {
             })
           }
           .clip(false)
-          .translate(this.isStartDrag ? {
-            x: this.getCoodXY(index).x,
-            y: this.getCoodXY(index).y
-          } : index === this.selectedIndex ? {
-            x: this.editItemMoveX,
-            y: this.editItemMoveY
-          } : this.clickRemoveBtn ? {
-            x: this.getCoveringGridPosition(index).x,
-            y: this.getCoveringGridPosition(index).y
-          } : { x: 0, y: 0 })
+          .translate(this.getShowAreaItemTranslate(index))
           .animation({
             curve: this.isStartDrag ? DRAG_SPRING : index === this.selectedIndex ?  REMOVE_ADD_SPRING : DRAG_SPRING,
           })
