@@ -102,6 +102,8 @@ typedef enum {
     ARKUI_NODE_TIME_PICKER,
     /** 滑动选择文本内容的组件 */
     ARKUI_NODE_TEXT_PICKER,
+    /** 滑动条组件 */
+    ARKUI_NODE_SLIDER,
 } ArkUI_NodeType;
 
 /**
@@ -548,9 +550,13 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置当前组件是否可以获焦。
      *
-     * @note 入参格式为内容为true或false的字符串，不区分大小写。
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：参数类型为1或者0。
+     * 
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_FOCUSABLE, "true");
+     * ArkUI_NumberValue value[] = { { .i32 = 1 } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FOCUSABLE, &item);
      * @endcode
      *
      */
@@ -559,9 +565,14 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置无障碍组。
      *
-     * @note 入参格式为内容为true或false的字符串，不区分大小写。
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：为1时表示该组件及其所有子组件为一整个可以选中的组件
+     * 无障碍服务将不再关注其子组件内容。参数类型为1或者0。
+     * 
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_GROUP, "true");
+     * ArkUI_NumberValue value[] = { { .i32 = 1 } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_GROUP, &item);
      * @endcode
      *
      */
@@ -570,9 +581,12 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置无障碍文本。
      *
-     * @note 入参格式为字符串。
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .string：无障碍文本。
+     * 
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_TEXT, "test");
+     * ArkUI_AttributeItem item = {.string = "test"};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_TEXT, &item);
      * @endcode
      *
      */
@@ -581,10 +595,13 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置无障碍重要性。
      *
-     * @note Level:String("auto","yes","no","no-hide-descendants")
-     *       格式字符串，如 "auto"
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：障碍重要性，参数类型{@link ArkUI_AccessibilityLevel}。默认值为ARKUI_ACCESSIBILITY_LEVEL_AUTO。
+     * 
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_LEVEL, "auto");
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_ACCESSIBILITY_LEVEL_AUTO } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_LEVEL, &item);
      * @endcode
      *
      */
@@ -593,9 +610,12 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置无障碍说明。
      *
-     * @note 入参格式为字符串。
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .string：无障碍说明。
+     * 
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_DESCRIPTION, "test");
+     * ArkUI_AttributeItem item = {.string = "test"};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_DESCRIPTION, &item);
      * @endcode
      *
      */
@@ -604,9 +624,13 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置当前组件是否为当前页面上的默认焦点。
      *
-     * @note 入参格式为内容为true或false的字符串，不区分大小写。
+     *{@link ArkUI_AttributeItem}参数类型:
+     * value[0].i32：参数类型为1或者0。
+     * 
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_DEFAULT_FOCUS, "true");
+     * ArkUI_NumberValue value[] = { { .i32 = 1 } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DEFAULT_FOCUS, &item);
      * @endcode
      *
      */
@@ -614,17 +638,22 @@ typedef enum {
 
     /**
      * @brief 通过{@link setAttribute}方法设置一个或多个触摸热区。
-     *
-     * @note 4个参数 用空格分隔
-     * 1：触摸点相对于组件左上角的x轴坐标,单位为vp。
-     * 2：触摸点相对于组件左上角的y轴坐标,单位为vp。
-     * 3：触摸热区的宽度 ，单位为%。
-     * 4：触摸热区的高度，单位为%。
-     * 设置一个触摸热区 如"0 0 100 100"。
-     * 设置多个触摸热区需要用{}，参数用逗号分隔 如"{0 0 100 100},{0 0 100 100}"。
+     * 
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .data[0].f32：触摸点相对于组件左上角的x轴坐标,单位为vp。
+     * .data[1].f32：触摸点相对于组件左上角的y轴坐标,单位为vp。
+     * .data[2].f32：触摸热区的宽度 ，单位为%。
+     * .data[3].f32：触摸热区的高度，单位为%。
+     * .data[4...].f32:可以设置多个手势响应区域，顺序和上述一致
+     * 
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_RESPONSE_REGION, "0 0 100 100");
-     * basicNodeApi->setAttribute(nodeHandle, NODE_RESPONSE_REGION, "{0 0 100 100},{0 0 100 100}");
+     * ArkUI_NumberValue value[] = { 0, 0, 100, 100 };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_RESPONSE_REGION, &item);
+     *
+     * ArkUI_NumberValue value[] = { 0, 0, 100, 100, 0, 0, 100, 100 };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_RESPONSE_REGION, &item);
      * @endcode
      *
      */
@@ -632,16 +661,16 @@ typedef enum {
 
     /**
      * @brief 通过{@link setAttribute}方法设置组件的遮罩文本。
-     *
-     * {@link ArkUI_AttributeItem}参数类型：\n
-     * .string：遮罩文本内容 。\n
-     * .value[0]?.i32：设置浮层组件相对于被遮罩组件的方位，类型为{@link ArkUI_Alignment}，默认值为ARKUI_ALIGNMENT_TOP_START。 \n
-     * .value[1]?.f32：浮层文字相对浮层组件自身左上角的偏移量X，单位为vp。\n
-     * .value[2]?.f32：浮层文字相对浮层组件自身左上角的偏移量Y，单位为vp。
-     *
+     * 
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .string 遮罩文本。
+     * .value[0]?.i32：可选值，浮层相对于组件的位置，参数类型{@link ArkUI_Alignment}，默认值为ARKUI_ALIGNMENT_TOP_START。
+     * .value[1]?.i32：可选值，浮层基于自身左上角的偏移量X，单位为vp。
+     * .value[2]?.i32：可选值，浮层基于自身左上角的偏移量Y，单位为vp。
+     * 
      * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_ALIGNMENT_TOP_LEFT}, 1.2, 0.3 };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue), "test" };
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_ALIGNMENT_TOP_START }, 1.2, 0.3 };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue), "test"};
      * basicNodeApi->setAttribute(nodeHandle, NODE_OVERLAY, &item);
      * @endcode
      *
@@ -761,21 +790,28 @@ typedef enum {
     NODE_TEXT_OVER_FLOW,
     /**
      * @brief 通过{@link setAttribute}方法设置字体列表。
-     *
-     * @note 入参格式字体字符串。
+     * 
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .string：字体字符串，多个用,分隔。
+     * 
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_FAMILY, "HarmonyOS Sans");
+     * ArkUI_AttributeItem item = {.string = "HarmonyOS Sans"};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_FAMILY, &item);
      * @endcode
      *
      */
     NODE_FONT_FAMILY,
-    /**
+
+     /**
      * @brief 通过{@link setAttribute}方法设置文本是否可复制粘贴。
-     *
-     * @note CopyOptions:String("none","in-app","local-device","cross-device")
-     *       格式字符串，如 "none"
+     * 
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：否可复制粘贴，参数类型{@link ArkUI_TextCopyOptions}。默认值为ARKUI_TEXT_COPY_OPTIONS_NONE。
+     * 
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_COPY_OPTION, "none");
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_TEXT_COPY_OPTIONS_NONE } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_COPY_OPTION, &item);
      * @endcode
      *
      */
@@ -802,6 +838,74 @@ typedef enum {
      * @endcode
      */
     NODE_TEXT_TEXT_SHADOW,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置文本最小显示字号。
+     * 
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].f32：文本最小显示字号，单位FP。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { 20 };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_MIN_FONT_SIZE, &item);
+     * @endcode
+     *
+     */
+    NODE_TEXT_MIN_FONT_SIZE,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置文本最大显示字号。
+     * 
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].f32：文本最大显示字号 单位FP。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { 20 };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_MAX_FONT_SIZE, &item);
+     * @endcode
+     *
+     */
+    NODE_TEXT_MAX_FONT_SIZE,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置文本样式。包括字体大小、字体粗细、字体族和字体风格。
+     * 
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .string?：可选值 字体列表，使用多个字体，使用','进行分割。
+     * .value[0].f32：文本尺寸 单位FP。
+     * .value[1]?.i32：可选值，文本的字体粗细，参数类型取值[100, 900]间的100倍数值或者{@link ArkUI_TextFontWeight}。
+     *  默认值为ARKUI_TEXT_FONT_WEIGHT_NORMAL。
+     * .value[2]?.i32：可选值，字体样式，参数类型{@link ArkUI_TextFontStyle}。默认值为ARKUI_TEXT_FONT_STYLE_NORMAL。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { 16, { .i32 = ARKUI_TEXT_FONT_WEIGHT_NORMAL }, { .i32 = ARKUI_TEXT_FONT_STYLE_NORMAL } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_FONT, &item);
+     *
+     * ArkUI_NumberValue value[] = { 16 };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue), "Arial, HarmonyOS Sans"};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_FONT, &item);
+     * @endcode
+     *
+     */
+    NODE_TEXT_FONT,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置文本自适应高度的方式。
+     * 
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：参数类型{@link ArkUI_TextHeightAdaptivePolicy}。默认值为ARKUI_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_HEIGHT_ADAPTIVE_POLICY, &item);
+     * @endcode
+     *
+     */
+    NODE_TEXT_HEIGHT_ADAPTIVE_POLICY,
 
     /**
      * @brief 通过<b>setAttribute</b>为当前span组件设置文本内容。
@@ -1139,37 +1243,34 @@ typedef enum {
      * @brief 通过{@link
      * setAttribute}方法设置嵌套滚动选项。设置向前向后两个方向上的嵌套滚动模式，实现与父组件的滚动联动。
      *
-     * @note NestedScrollMode:String("self-only","self-first","parent-first","parallel")
-     *       格式字符串 可以设置2个参数 用空格隔开。
-     * 1：可滚动组件往末尾端滚动时的嵌套滚动选项。
-     * 2：可滚动组件往起始端滚动时的嵌套滚动选项。
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0]?.i32：可滚动组件往末尾端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。
+     * .value[1]?.i32：可滚动组件往起始端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。
+     * 
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_NESTED_SCROLL, "self-only self-first");
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_SCROLL_NESTED_MODE_SELF_ONLY },
+     * { .i32 = ARKUI_SCROLL_NESTED_OPTIONS_SELF_ONLY } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_NESTED_SCROLL, &item);
      * @endcode
      *
      */
     NODE_SCROLL_NESTED_SCROLL,
-
     /**
      * @brief 通过{@link setAttribute}方法设置滑动到指定位置。
-     * 通过{@link getAttribute}方法返回当前的滚动偏移量。
-     *
-     * @note 设置时:5个参数 用空格分隔，
-     * 1：水平滑动偏移，单位为vp。
-     * 2：垂直滑动偏移，单位为vp。
-     * 3：滚动时长设置，单位毫秒。
-     * 4：滚动曲线设置 {"linear"，"ease"，"easeIn",
-     *       "easeOut"，"ease-in-out"，"fast-out-slow-in"，"linear-out-slow-in"，"fast-out-linear-in"，
-     *       "extreme-deceleration"，"sharp"，"rhythm"，"smooth"，"friction"}。
-     * 5：使能默认弹簧动效  Boolean格式字符串，如"true"，
-     * 如"10 10 1000 linear true"。
-     * 获取时：返回值2个参数 用空格分隔，
-     * 1：水平滑动偏移，单位为vp。
-     * 2：竖直滑动偏移，单位为vp。
-     * 如 “ 10 20”。
+     * 
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].f32：水平滑动偏移，单位为vp。
+     * .value[1].f32：垂直滑动偏移，单位为vp。
+     * .value[2]?.i32：可选值，滚动时长，单位为毫秒。
+     * .value[3]?.i32：可选值，滚动曲线，参数类型{@link ArkUI_Curve}。默认值为ARKUI_CURVE_EASE。
+     * .value[4]?.i32：可选值，是否使能默认弹簧动效，默认值为0不使能。
+     * 
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_OFFSET, "10 10 1000 linear true");
-     * basicNodeApi->getAttribute(nodeHandle, NODE_SCROLL_OFFSET);
+     * ArkUI_NumberValue value[] = { 10, 100, { .i32 = 1000 }, { .i32 = ARKUI_CURVE_EASE },
+     * { .i32 = 1 } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_OFFSET, &item);
      * @endcode
      *
      */
@@ -1177,12 +1278,15 @@ typedef enum {
 
     /**
      * @brief 通过{@link setAttribute}方法设置滚动到容器边缘,
-     * 不区分滚动轴方向，top和start表现相同，bottom和end表现相同。
+     * 不区分滚动轴方向，Edge.Top和Edge.Start表现相同，Edge.Bottom和Edge.End表现相同。
      *
-     * @note Edge:String("top","center","bottom","baseline","start","middle","end")
-     *       格式字符串，如 "top"
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：容器边缘，参数类型{@link ArkUI_ScrollEdge}。
+     * 
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_EDGE, "top");
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_SCROLL_EDGE_TOP } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_EDGE, &item);
      * @endcode
      *
      */
@@ -1487,6 +1591,279 @@ typedef enum {
      * @endcode
      */
     NODE_XCOMPONENT_SURFACE_SIZE,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑块的颜色。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：滑块的颜色, 类型为0xargb，如0xFF1122FF。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = 0xFF1122FF } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_BLOCK_COLOR, &item);
+     * @endcode
+     *
+     */
+    NODE_SLIDER_BLOCK_COLOR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SLIDER,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑轨的背景颜色。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：背景颜色, 类型为0xargb，如0xFF1122FF。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = 0xFF1122FF } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_TRACK_COLOR, &item);
+     * @endcode
+     *
+     */
+    NODE_SLIDER_TRACK_COLOR,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑轨的已滑动部分颜色。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：已滑动部分颜色, 类型为0xargb，如0xFF1122FF。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = 0xFF1122FF } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_SELECTED_COLOR, &item);
+     * @endcode
+     *
+     */
+    NODE_SLIDER_SELECTED_COLOR,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑动时是否显示气泡提示。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：是否显示气泡，1表示显示，0表示不显示，默认值为0。
+     * .string? 可选值，气泡提示的文本内容，默认显示当前百分比字符串。
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = 1 } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue), "test"};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_SHOW_TIPS, &item);
+     * @endcode
+     *
+     */
+    NODE_SLIDER_SHOW_TIPS,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑块形状参数。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：形状参数。参数类型{@link ArkUI_SliderBlockStyle}。
+     * .string? 可选值，根据形状参数而定。
+     * ARKUI_SLIDER_BLOCK_STYLE_IMAGE: 滑块图片资源。如/pages/common/icon.png。
+     * ARKUI_SLIDER_BLOCK_STYLE_SHAPE: 滑块使用的自定义形状。
+     * 如"rect(10,10,10,10)"括号内分别为width、height、radiusWidth与radiusHeight";
+     *    "circle(10,10)"括号内分别为width、height;
+     *    "ellipse(10,10)"括号内分别为width、height;
+     *    "path(10,10,M0 0 L600 0)"括号内分别为width、height、commands。
+     *  
+     * @code {.c}
+     * ArkUI_NumberValue value[] = {{.i32 = ARKUI_SLIDER_BLOCK_STYLE_DEFAULT}};
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_BLOCK_STYLE, &item);
+     *
+     * ArkUI_NumberValue value[] = {{.i32 = ARKUI_SLIDER_BLOCK_STYLE_IMAGE}};
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue), "/pages/common/icon.png"};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_BLOCK_STYLE, &item);
+     *
+     * ArkUI_NumberValue value[] = {{.i32 = ARKUI_SLIDER_BLOCK_STYLE_SHAPE}};
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue), "rect(10,10,10,10)"};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_BLOCK_STYLE, &item);
+     * @endcode
+     *
+     */
+    NODE_SLIDER_BLOCK_STYLE,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置slider进度值。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].f32：进度值。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { 0 };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_VALUE, &item);
+     * @endcode
+     *
+     */
+    NODE_SLIDER_VALUE,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置slider最小值。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].f32：进度值的最小值。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { 0 };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_MIN_VALUE, &item);
+     * @endcode
+     *
+     */
+    NODE_SLIDER_MIN_VALUE,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置slider最大值。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].f32：进度值的最大值。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { 100 };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_MAX_VALUE, &item);
+     * @endcode
+     *
+     */
+    NODE_SLIDER_MAX_VALUE,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置Slider滑动步长。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].f32：滑动步长，取值范围：[0.01, 100]。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { 100 };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_STEP, &item);
+     * @endcode
+     *
+     */
+    NODE_SLIDER_STEP,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑动条滑动方向为水平或竖直方向。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：显示样式，参数类型{@link ArkUI_SliderDirection}，默认值为ARKUI_SLIDER_DIRECTION_VERTICAL。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_SLIDER_DIRECTION_VERTICAL } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_DIRECTION, &item);
+     * @endcode
+     *
+     */
+    NODE_SLIDER_DIRECTION,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑动条取值范围是否反向，横向Slider默认为从左往右滑动，
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：是否反向，1表示反向，0表示不反向。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { {.i32 = 0} };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_REVERSE, &item);
+     * @endcode
+     *
+     */
+    NODE_SLIDER_REVERSE,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置Slider的滑块与滑轨显示样式。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：显示样式，参数类型{@link ArkUI_SliderStyle}，默认值为ARKUI_SLIDER_STYLE_OUT_SET。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_SLIDER_STYLE_OUT_SET } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SLIDER_STYLE, &item);
+     * @endcode
+     *
+     */
+    NODE_SLIDER_STYLE,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置多选框是否选中。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：1表示选中，0表示不选中。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = 0 } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CHECKBOX_SELECT, &item);
+     * @endcode
+     *
+     */
+    NODE_CHECKBOX_SELECT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置多选框选中状态颜色。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：多选框选中状态颜色, 类型为0xargb，如0xFF1122FF。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = 0xFF1122FF } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CHECKBOX_SELECT_COLOR, &item);
+     * @endcode
+     *
+     */
+    NODE_CHECKBOX_SELECT_COLOR,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置多选框非选中状态边框颜色。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：边框颜色, 类型为0xargb，如0xFF1122FF
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = 0xFF1122FF } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CHECKBOX_UNSELECT_COLOR, &item);
+     * @endcode
+     *
+     */
+    NODE_CHECKBOX_UNSELECT_COLOR,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置多选框内部图标样式。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：边框颜色, 类型为0xargb，如0xFF1122FF
+     * .value[1]?.f32：可选，内部图标大小，单位vp。
+     * .value[2]?.f32：可选，内部图标粗细，单位vp，默认值2。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = 0xFF1122FF }, 20.0f, 2.0f };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CHECKBOX_MARK, &item);
+     * @endcode
+     *
+     */
+    NODE_CHECKBOX_MARK,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置CheckBox组件形状, 包括圆形和圆角方形。
+     *
+     *{@link ArkUI_AttributeItem}参数类型:
+     * .value[0].i32：组件形状，参数类型{@link ArkUI_CheckboxShape}。
+     * 
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = ArkUI_CHECKBOX_SHAPE_CIRCLE } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CHECKBOX_SHAPE, &item);
+     * @endcode
+     *
+     */
+    NODE_CHECKBOX_SHAPE,
+
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -1652,6 +2029,23 @@ typedef enum {
      * <b>ArkUI_NodeComponent.data[1].i32</b>表示 选中时间的分，取值范围：[0-59]。\n
      */
     NODE_TIME_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TIME_PICKER,
+
+    /**
+     * @brief 定义ARKUI_NODE_CHECKBOX当选中状态发生变化时，触发该回调。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>1:表示已选中, 0: 表示未选中\n
+     */
+    NODE_CHECKBOX_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX,
+    /**
+     * @brief 定义ARKUI_NODE_SLIDER拖动或点击时触发事件回调。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>ArkUI_NodeComponent.data[0].f32</b>当前滑动进度值。\n
+     * <b>ArkUI_NodeComponent.data[1].i32</b>事件触发的相关状态值\n
+     */
+    NODE_SLIDER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SLIDER,
+
 } ArkUI_NodeEventType;
 
 /**
