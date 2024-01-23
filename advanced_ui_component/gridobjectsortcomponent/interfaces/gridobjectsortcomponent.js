@@ -128,8 +128,6 @@ export class GridObjectSortComponent extends ViewPU {
             moduleName: ""
         };
         this.imageText = !1;
-        this.onSave = void 0;
-        this.onCancel = void 0;
         this.menuItems = [new MenuItem({
             id: -1,
             type: 2e4,
@@ -139,6 +137,8 @@ export class GridObjectSortComponent extends ViewPU {
         }, !0, (() => {
             this.goEdit()
         }))];
+        this.onSave = void 0;
+        this.onCancel = void 0;
         this.setInitiallyProvidedValue(t);
         this.declareWatch("gridComState", this.onGridComStateChange)
     }
@@ -191,9 +191,9 @@ export class GridObjectSortComponent extends ViewPU {
         void 0 !== e.hoverBackgroundColor && (this.hoverBackgroundColor = e.hoverBackgroundColor);
         void 0 !== e.focusBorder && (this.focusBorder = e.focusBorder);
         void 0 !== e.imageText && (this.imageText = e.imageText);
+        void 0 !== e.menuItems && (this.menuItems = e.menuItems);
         void 0 !== e.onSave && (this.onSave = e.onSave);
-        void 0 !== e.onCancel && (this.onCancel = e.onCancel);
-        void 0 !== e.menuItems && (this.menuItems = e.menuItems)
+        void 0 !== e.onCancel && (this.onCancel = e.onCancel)
     }
 
     updateStateVars(e) {
@@ -612,6 +612,15 @@ export class GridObjectSortComponent extends ViewPU {
         }), 500)
     }
 
+    aboutToDisappear() {
+        Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
+            this.gridComState = !1
+        }));
+        this.menuSwitch = !1;
+        this.selected = this.copySelected;
+        this.unSelected = this.copyUnSelected
+    }
+
     deduplicate(e) {
         const t = [];
         e.forEach((e => {
@@ -630,17 +639,19 @@ export class GridObjectSortComponent extends ViewPU {
     }
 
     cancelEdit() {
-        Context.animateTo({ duration: 200, curve: LONG_TOUCH_SCALE }, (() => {
-            this.longScaleOnePointTwo = 1
-        }));
-        Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-            this.gridComState = !1
-        }));
-        this.menuSwitch = !1;
-        this.selected = this.copySelected.slice();
-        this.unSelected = this.copyUnSelected.slice();
-        this.editGridDataLength = this.selected.length;
-        this.onCancel && this.onCancel()
+        if(!(this.isStartDrag || this.clickAddBtn || this.clickRemoveBtn)) {
+            Context.animateTo({ duration: 200, curve: LONG_TOUCH_SCALE }, (() => {
+                this.longScaleOnePointTwo = 1
+            }));
+            Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
+                this.gridComState = !1
+            }));
+            this.menuSwitch = !1;
+            this.selected = this.copySelected.slice();
+            this.unSelected = this.copyUnSelected.slice();
+            this.editGridDataLength = this.selected.length;
+            this.onCancel && this.onCancel()
+        }
     }
 
     goEdit() {
@@ -671,58 +682,6 @@ export class GridObjectSortComponent extends ViewPU {
         this.menuSwitch = !1
     }
 
-    aboutToDisappear() {
-        Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-            this.gridComState = !1
-        }));
-        this.menuSwitch = !1;
-        this.selected = this.copySelected;
-        this.unSelected = this.copyUnSelected
-    }
-
-    customColumnsTemplate() {
-        let e = "1fr 1fr 1fr 1fr";
-        this.imageText && (e = "1fr 1fr 1fr");
-        return e
-    }
-
-    getNewData(e, t, i) {
-        return e.map(((e, o) => {
-            e.selected = t;
-            e.order = i + o;
-            return e
-        }))
-    }
-
-    getBlockWidth() {
-        return (this.areaWidth - 32) / this.colNum;
-    }
-
-    getAddItemGridPosition() {
-        const e = this.selected.length;
-        const t = this.colNum;
-        const i = (this.selectedIndex + 1) % t;
-        const o = Math.ceil((this.selectedIndex + 1) / t);
-        const s = Math.ceil(e / t);
-        const n = this.imageText;
-        let d = 0;
-        d = 0 === i ? n ? 2 * -this.blockWidth : 3 * -this.blockWidth : -this.blockWidth * (i - 1);
-        let a = 0;
-        const r = s - o;
-        a = (1 === e % t ? r : r + 1) * this.blockHeight + 56;
-        return { x: d, y: a }
-    }
-
-    getCoveringGridPosition(e) {
-        let t = 0;
-        let i = 0;
-        if (e > this.selectedIndex && 2 !== this.arraySelectIsChange) {
-            t = e % this.colNum == 0 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
-            i = e % this.colNum == 0 ? -this.blockHeight : 0
-        }
-        return { x: t, y: i }
-    }
-
     onDragMoveEvent(e, t, i) {
         if (!this.gridComState || e.x < this.blockWidth / 3 && e.y < this.blockHeight / 3) return;
         let o = i;
@@ -749,8 +708,38 @@ export class GridObjectSortComponent extends ViewPU {
             this.clickRemoveBtn = !1
         } }, (() => {
             this.editItemMoveX = this.getAddItemGridPosition().x;
-            this.editItemMoveY = this.getAddItemGridPosition().y;
+            this.editItemMoveY = this.getAddItemGridPosition().y
         }))
+    }
+
+    customColumnsTemplate() {
+        let e = "1fr 1fr 1fr 1fr";
+        this.imageText && (e = "1fr 1fr 1fr");
+        return e
+    }
+
+    getNewData(e, t, i) {
+        return e.map(((e, o) => {
+            e.selected = t;
+            e.order = i + o;
+            return e
+        }))
+    }
+
+    getBlockWidth() {
+        return (this.areaWidth - 32) / this.colNum
+    }
+
+    getGridHeight(e, t) {
+        let i = 0;
+        let o = e.length;
+        let s = 0;
+        let n = o % this.colNum == 0;
+        (this.clickAddBtn && n || this.isStartDrag && n && t || this.clickRemoveBtn && n && !t) && (s = 1);
+        let d = Math.ceil(o / this.colNum) + s;
+        i = this.blockHeight * d;
+        0 === o && (i = 0);
+        return i
     }
 
     getCoodXY(e) {
@@ -768,15 +757,29 @@ export class GridObjectSortComponent extends ViewPU {
         return { x: i, y: o }
     }
 
-    getGridHeight(e, t) {
+    getAddItemGridPosition() {
+        const e = this.selected.length;
+        const t = this.colNum;
+        const i = (this.selectedIndex + 1) % t;
+        const o = Math.ceil((this.selectedIndex + 1) / t);
+        const s = Math.ceil(e / t);
+        const n = this.imageText;
+        let d = 0;
+        d = 0 === i ? n ? 2 * -this.blockWidth : 3 * -this.blockWidth : -this.blockWidth * (i - 1);
+        let a = 0;
+        const r = s - o;
+        a = (1 === e % t ? r : r + 1) * this.blockHeight + 56;
+        return { x: d, y: a }
+    }
+
+    getCoveringGridPosition(e) {
+        let t = 0;
         let i = 0;
-        let o = e.length;
-        let s = 0;
-        (this.clickAddBtn && o % this.colNum == 0 || this.isStartDrag && o % this.colNum == 0 && t || this.clickRemoveBtn && o % this.colNum == 0 && !t) && (s = 1);
-        let n = Math.ceil(o / this.colNum) + s;
-        i = this.blockHeight * n;
-        0 === o && (i = 0);
-        return i
+        if (e > this.selectedIndex && 2 !== this.arraySelectIsChange) {
+            t = e % this.colNum == 0 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
+            i = e % this.colNum == 0 ? -this.blockHeight : 0
+        }
+        return { x: t, y: i }
     }
 
     getEditItemGridPosition(e, t) {
@@ -812,12 +815,32 @@ export class GridObjectSortComponent extends ViewPU {
         return { x: t, y: i }
     }
 
+    getShowAreaItemTranslate(e) {
+        return this.isStartDrag ? {
+            x: this.getCoodXY(e).x,
+            y: this.getCoodXY(e).y
+        } : this.isStartDrag || e !== this.selectedIndex ? !this.isStartDrag && e !== this.selectedIndex && this.clickRemoveBtn ? {
+            x: this.getCoveringGridPosition(e).x,
+            y: this.getCoveringGridPosition(e).y
+        } : { x: 0, y: 0 } : { x: this.editItemMoveX, y: this.editItemMoveY }
+    }
+
+    getAddAreaItemTranslate(e) {
+        return this.clickRemoveBtn ? {
+            x: this.getAddItemRightMove(e).x,
+            y: this.getAddItemRightMove(e).y
+        } : this.clickRemoveBtn || e !== this.unSelectedIndex ? !this.clickRemoveBtn && e !== this.unSelectedIndex && this.clickAddBtn ? {
+            x: this.getCoveringGridPositionBottom(e).x,
+            y: this.getCoveringGridPositionBottom(e).y
+        } : { x: 0, y: 0 } : { x: this.addItemMoveX, y: -this.addItemMoveY }
+    }
+
     PixelMapBuilder(e = null) {
         this.observeComponentCreation2(((e, t) => {
             Stack.create({ alignContent: Alignment.Center });
             Stack.clip(!1);
             Stack.height(1.5 * this.blockHeight);
-            Stack.width(1.2 * this.blockWidth);
+            Stack.width(1.2 * this.blockWidth)
         }), Stack);
         this.observeComponentCreation2(((e, t) => {
             If.create();
@@ -831,13 +854,13 @@ export class GridObjectSortComponent extends ViewPU {
                     Column.padding({ left: 8, right: 8 });
                     Column.backgroundColor(this.touchDown);
                     Column.borderRadius(this.touchBorderRadius);
-                    Column.scale({ x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo });
+                    Column.scale({ x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo })
                 }), Column);
                 this.observeComponentCreation2(((e, t) => {
                     Image.create(this.content.url);
                     Image.draggable(!1);
                     Image.height(this.options.imageSize || 56);
-                    Image.width(this.options.imageSize || 56);
+                    Image.width(this.options.imageSize || 56)
                 }), Image);
                 this.observeComponentCreation2(((e, t) => {
                     Text.create(this.content.text);
@@ -852,7 +875,7 @@ export class GridObjectSortComponent extends ViewPU {
                     Text.margin({ top: 2 });
                     Text.maxLines(1);
                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                    Text.textAlign(TextAlign.Center);
+                    Text.textAlign(TextAlign.Center)
                 }), Text);
                 Text.pop();
                 this.observeComponentCreation2(((e, t) => {
@@ -873,7 +896,7 @@ export class GridObjectSortComponent extends ViewPU {
                     });
                     Image.width(24);
                     Image.height(24);
-                    Image.position({ x: this.blockWidth - 40, y: -8 });
+                    Image.position({ x: this.blockWidth - 40, y: -8 })
                 }), Image);
                 Column.pop()
             })) : this.ifElseBranchUpdateFunction(1, (() => {
@@ -892,7 +915,7 @@ export class GridObjectSortComponent extends ViewPU {
                         moduleName: ""
                     });
                     Row.width(this.textItemEditWidth);
-                    Row.height(28);
+                    Row.height(28)
                 }), Row);
                 this.observeComponentCreation2(((e, t) => {
                     Text.create(this.content.text);
@@ -912,7 +935,7 @@ export class GridObjectSortComponent extends ViewPU {
                     });
                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                     Text.textAlign(TextAlign.Center);
-                    Text.maxLines(1);
+                    Text.maxLines(1)
                 }), Text);
                 Text.pop();
                 this.observeComponentCreation2(((e, t) => {
@@ -933,10 +956,10 @@ export class GridObjectSortComponent extends ViewPU {
                     });
                     Image.width(24);
                     Image.height(24);
-                    Image.position({ x: this.blockWidth - 52, y: -8 });
+                    Image.position({ x: this.blockWidth - 52, y: -8 })
                 }), Image);
                 Row.pop()
-            }));
+            }))
         }), If);
         If.pop();
         Stack.pop()
@@ -1023,7 +1046,7 @@ export class GridObjectSortComponent extends ViewPU {
         this.observeComponentCreation2(((e, t) => {
             Column.create();
             Column.padding({ left: 8, right: 8 });
-            Column.width("100%");
+            Column.width("100%")
         }), Column);
         this.observeComponentCreation2(((t, i) => {
             Column.create();
@@ -1034,13 +1057,13 @@ export class GridObjectSortComponent extends ViewPU {
             Column.padding({ left: 8, right: 8 });
             Column.borderRadius(this.isTouchDown && e.id === this.content.id || e.id === this.hoverId ? this.touchBorderRadius : 0);
             Column.backgroundColor(this.isTouchDown && e.id === this.content.id ? this.touchDown : e.id === this.hoverId ? this.hoverBackgroundColor : "");
-            Column.scale(e.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
+            Column.scale(e.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {})
         }), Column);
         this.observeComponentCreation2(((t, i) => {
             Image.create(e.url);
             Image.draggable(!1);
             Image.height(this.options.imageSize || 56);
-            Image.width(this.options.imageSize || 56);
+            Image.width(this.options.imageSize || 56)
         }), Image);
         this.observeComponentCreation2(((t, i) => {
             Text.create(e.text);
@@ -1055,7 +1078,7 @@ export class GridObjectSortComponent extends ViewPU {
             Text.margin({ top: 2 });
             Text.maxLines(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            Text.textAlign(TextAlign.Center);
+            Text.textAlign(TextAlign.Center)
         }), Text);
         Text.pop();
         this.observeComponentCreation2(((i, o) => {
@@ -1107,9 +1130,9 @@ export class GridObjectSortComponent extends ViewPU {
                     }
                 } }, (() => {
                     this.addItemMoveX = i.x;
-                    this.addItemMoveY = i.y;
-                }));
-            }));
+                    this.addItemMoveY = i.y
+                }))
+            }))
         }), Image);
         this.observeComponentCreation2(((i, o) => {
             Image.create(this.clickRemoveBtn && this.content.id === e.id ? {
@@ -1137,7 +1160,7 @@ export class GridObjectSortComponent extends ViewPU {
             Image.width(24);
             Image.height(24);
             Image.position({ x: this.blockWidth - 40, y: -8 });
-            Image.onClick((() => this.handleDeleteClick(e)));
+            Image.onClick((() => this.handleDeleteClick(e)))
         }), Image);
         Column.pop();
         Column.pop()
@@ -1148,7 +1171,7 @@ export class GridObjectSortComponent extends ViewPU {
             Stack.create();
             Stack.scale(e.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
             Stack.padding({ left: 8, right: 8 });
-            Stack.height(28);
+            Stack.height(28)
         }), Stack);
         this.observeComponentCreation2(((t, i) => {
             Row.create();
@@ -1169,13 +1192,13 @@ export class GridObjectSortComponent extends ViewPU {
                 params: ["sys.color.ohos_id_color_button_normal"],
                 bundleName: "",
                 moduleName: ""
-            });
+            })
         }), Row);
         Row.pop();
         this.observeComponentCreation2(((t, i) => {
             Flex.create({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center });
             Context.animation(this.firstIn ? { duration: 0 } : {
-                duration: 200, 
+                duration: 200,
                 curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
             });
             Flex.borderRadius(50);
@@ -1186,7 +1209,7 @@ export class GridObjectSortComponent extends ViewPU {
                 x: -4
             } : { x: 0 });
             Flex.height("100%");
-            Context.animation(null);
+            Context.animation(null)
         }), Flex);
         this.observeComponentCreation2(((t, i) => {
             Image.create({
@@ -1195,7 +1218,7 @@ export class GridObjectSortComponent extends ViewPU {
                 params: ["sys.media.ohos_ic_public_add"],
                 bundleName: "",
                 moduleName: ""
-            })
+            });
             Context.animation({ duration: 200, curve: COMMON_BEZIER });
             Image.width(12);
             Image.height(12);
@@ -1334,7 +1357,6 @@ export class GridObjectSortComponent extends ViewPU {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.textAlign(TextAlign.Start);
             Text.maxLines(1);
-            Text.padding(0);
             Text.constraintSize({ maxWidth: 26 })
         }), Text);
         Text.pop();
@@ -1380,7 +1402,7 @@ export class GridObjectSortComponent extends ViewPU {
             Grid.columnsTemplate(this.customColumnsTemplate());
             Grid.padding({ left: 16, right: 16 });
             Grid.clip(!1);
-            Grid.height(this.getGridHeight(ObservedObject.GetRawObject(this.unSelected)));
+            Grid.height(this.getGridHeight(ObservedObject.GetRawObject(this.unSelected)))
         }), Grid);
         this.observeComponentCreation2(((e, t) => {
             ForEach.create();
@@ -1395,16 +1417,7 @@ export class GridObjectSortComponent extends ViewPU {
                             curve: this.clickRemoveBtn ? DRAG_SPRING : t === this.unSelectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING 
                         });
                         GridItem.clip(!1);
-                        GridItem.translate(this.clickRemoveBtn ? {
-                            x: this.getAddItemRightMove(t).x,
-                            y: this.getAddItemRightMove(t).y
-                        } : t === this.unSelectedIndex ? {
-                            x: this.addItemMoveX,
-                            y: -this.addItemMoveY
-                        } : this.clickAddBtn ? {
-                            x: this.getCoveringGridPositionBottom(t).x,
-                            y: this.getCoveringGridPositionBottom(t).y
-                        } : { x: 0, y: 0 });
+                        GridItem.translate(this.getAddAreaItemTranslate(t));
                         Context.animation(null);
                         i || GridItem.pop();
                         ViewStackProcessor.StopGetAccessRecording()
@@ -1456,8 +1469,8 @@ export class GridObjectSortComponent extends ViewPU {
                                             }
                                         } }, (() => {
                                             this.addItemMoveX = t.x;
-                                            this.addItemMoveY = t.y;
-                                        }));
+                                            this.addItemMoveY = t.y
+                                        }))
                                     }
                                 }
                             }));
@@ -1484,7 +1497,7 @@ export class GridObjectSortComponent extends ViewPU {
                                 }))
                             }));
                             LongPressGesture.pop();
-                            Gesture.pop();
+                            Gesture.pop()
                         }), Stack);
                         this.observeComponentCreation2(((e, t) => {
                             If.create();
@@ -1492,15 +1505,15 @@ export class GridObjectSortComponent extends ViewPU {
                                 this.ImageTextBuilder.bind(this)(i, "add")
                             })) : this.ifElseBranchUpdateFunction(1, (() => {
                                 this.TextBlockAddItemBuilder.bind(this)(i)
-                            }));
+                            }))
                         }), If);
                         If.pop();
                         Stack.pop();
                         GridItem.pop()
                     };
-                    o();
+                    o()
                 }
-            }), (e => e.id.toString()), !0, !1);
+            }), (e => e.id.toString()), !0, !1)
         }), ForEach);
         ForEach.pop();
         Grid.pop()
@@ -1508,7 +1521,7 @@ export class GridObjectSortComponent extends ViewPU {
 
     EditTagBuilder(e = null) {
         this.observeComponentCreation2(((e, t) => {
-            Column.create();
+            Column.create()
         }), Column);
         this.observeComponentCreation2(((e, t) => {
             Grid.create();
@@ -1569,7 +1582,7 @@ export class GridObjectSortComponent extends ViewPU {
                     this.selected.splice(-1 === i ? t : i, 0, ObservedObject.GetRawObject(this.content))
                 }
             }));
-            Grid.onItemDragMove(((e, t, i) => this.onDragMoveEvent(e, t, i)));
+            Grid.onItemDragMove(((e, t, i) => this.onDragMoveEvent(e, t, i)))
         }), Grid);
         this.observeComponentCreation2(((e, t) => {
             ForEach.create();
@@ -1579,21 +1592,12 @@ export class GridObjectSortComponent extends ViewPU {
                     const e = (e, i) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(e);
                         GridItem.create((() => {
-                        }), !1)
-                        Context.animation({ 
+                        }), !1);
+                        Context.animation({
                             curve: this.isStartDrag ? DRAG_SPRING : t === this.selectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING
                         });
                         GridItem.clip(!1);
-                        GridItem.translate(this.isStartDrag ? {
-                            x: this.getCoodXY(t).x,
-                            y: this.getCoodXY(t).y
-                        } : t === this.selectedIndex ? {
-                            x: this.editItemMoveX,
-                            y: this.editItemMoveY
-                        } : this.clickRemoveBtn ? {
-                            x: this.getCoveringGridPosition(t).x,
-                            y: this.getCoveringGridPosition(t).y
-                        } : { x: 0, y: 0 });
+                        GridItem.translate(this.getShowAreaItemTranslate(t));
                         Context.animation(null);
                         i || GridItem.pop();
                         ViewStackProcessor.StopGetAccessRecording()
@@ -1621,7 +1625,7 @@ export class GridObjectSortComponent extends ViewPU {
                                         }))
                                     }
                                 }
-                            }));
+                            }))
                         }), Stack);
                         this.observeComponentCreation2(((e, t) => {
                             If.create();
@@ -1629,14 +1633,14 @@ export class GridObjectSortComponent extends ViewPU {
                                 this.ImageTextBuilder.bind(this)(i, "delete")
                             })) : this.ifElseBranchUpdateFunction(1, (() => {
                                 this.TextBlockBuilder.bind(this)(i)
-                            }));
+                            }))
                         }), If);
                         If.pop();
                         Stack.pop();
                         GridItem.pop()
-                    })();
+                    })()
                 }
-            }), (e => e.id.toString()), !0, !1);
+            }), (e => e.id.toString()), !0, !1)
         }), ForEach);
         ForEach.pop();
         Grid.pop();
@@ -1647,11 +1651,11 @@ export class GridObjectSortComponent extends ViewPU {
         this.observeComponentCreation2(((e, t) => {
             Column.create();
             Column.width("100%");
-            Column.height("90%");
+            Column.height("90%")
         }), Column);
         this.HeaderTitleBuilder.bind(this)();
         this.observeComponentCreation2(((e, t) => {
-            Scroll.create();
+            Scroll.create()
         }), Scroll);
         this.observeComponentCreation2(((e, t) => {
             Column.create();
@@ -1660,9 +1664,9 @@ export class GridObjectSortComponent extends ViewPU {
                 this.blockWidth = this.getBlockWidth();
                 this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
                 this.imageItemWidth = this.blockWidth - 16;
-                this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ? 44 : 36;
+                this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ? 44 : 36
             }));
-            Column.width("100%");
+            Column.width("100%")
         }), Column);
         this.observeComponentCreation2(((e, t) => {
             __Common__.create();
@@ -1706,16 +1710,16 @@ export class GridObjectSortComponent extends ViewPU {
                 icon: "",
                 operationType: OperationType.BUTTON
             })
-        }), null)
+        }), null);
         __Common__.pop();
         this.EditTagBuilder.bind(this)();
         this.observeComponentCreation2(((e, t) => {
             __Common__.create();
-            Context.animation({ duration: 200, curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER })
+            Context.animation({ duration: 200, curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER });
             __Common__.translate(this.clickRemoveBtn && this.selected.length % this.colNum == 1 ? {
                 y: -this.blockHeight
             } : {});
-            Context.animation(null)
+            Context.animation(null);
             __Common__.margin({ bottom: 8 })
         }), __Common__);
         this.observeComponentCreation2(((e, t) => {
