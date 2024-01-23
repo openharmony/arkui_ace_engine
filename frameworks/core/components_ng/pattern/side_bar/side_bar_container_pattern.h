@@ -152,7 +152,6 @@ private:
     void OnModifyDone() override;
     void UpdateAnimDir();
     void DoAnimation();
-    void DoSideBarAnimation();
     void CreateAnimation();
     void FireChangeEvent(bool isShow);
     void UpdateControlButtonIcon();
@@ -185,6 +184,7 @@ private:
     std::optional<float> DimensionConvertToPx(const Dimension& value) const;
     Dimension ConvertPxToPercent(float value) const;
     void UpdateDividerShadow() const;
+    void SetSideBarActive(bool isActive) const;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
