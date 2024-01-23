@@ -212,6 +212,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         indexChanged =
             (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
     }
+    endIndexChanged_ = endIndex_ != listLayoutAlgorithm->GetEndIndex();
     if (indexChanged) {
         startIndex_ = listLayoutAlgorithm->GetStartIndex();
         endIndex_ = listLayoutAlgorithm->GetEndIndex();
@@ -374,7 +375,9 @@ void ListPattern::ProcessEvent(
     auto onReachEnd = listEventHub->GetOnReachEnd();
     if (onReachEnd && (endIndex_ == maxListItemIndex_)) {
         float endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
-        bool scrollUpToEnd = (Positive(prevEndOffset) || !isInitialized_) && NonPositive(endOffset);
+        // deltaOffset passes through multiple items also needs to fire reachEnd
+        bool scrollUpToEnd =
+            (endIndexChanged_ || (Positive(prevEndOffset) || !isInitialized_)) && NonPositive(endOffset);
         bool scrollDownToEnd = Negative(prevEndOffset) && NonNegative(endOffset);
         if (scrollUpToEnd || (scrollDownToEnd && GetScrollSource() != SCROLL_FROM_NONE)) {
             onReachEnd();

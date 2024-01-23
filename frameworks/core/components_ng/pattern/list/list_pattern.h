@@ -338,6 +338,8 @@ private:
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
 
     bool isNeedToUpdateListDirection_ = false;
+
+    bool endIndexChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 
