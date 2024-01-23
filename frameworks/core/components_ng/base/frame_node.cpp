@@ -1085,8 +1085,13 @@ void FrameNode::SetActive(bool active)
             parent->MarkNeedSyncRenderTree();
         }
     }
-    // inform the js side the active status
-    SetJSViewActive(active);
+
+    std::string frameNodeTag = GetTag();
+    if (frameNodeTag == V2::LIST_ITEM_ETS_TAG || frameNodeTag == V2::GRID_ITEM_ETS_TAG ||
+        frameNodeTag == V2::FLOW_ITEM_ETS_TAG || frame_node == V2::TAB_CONTENT_ITEM_ETS_TAG) {
+        // inform the js side the active status
+        SetJSViewActive(active);
+    }
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
