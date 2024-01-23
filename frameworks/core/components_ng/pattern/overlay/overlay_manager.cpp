@@ -1877,52 +1877,68 @@ bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
     auto rootNode = FindWindowScene(topModalNode);
     CHECK_NULL_RETURN(rootNode, true);
     if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
-        auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
-        CHECK_NULL_RETURN(builder, false);
-        auto modalTransition = topModalNode->GetPattern<ModalPresentationPattern>()->GetType();
-        if (builder->GetRenderContext()->HasDisappearTransition()) {
-            if (!topModalNode->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
-                topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
-                // Fire hidden event of navdestination on the disappeared modal
-                FireNavigationStateChange(false, topModalNode);
-            }
-            topModalNode->Clean(false, true);
-            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        }
-        if (modalTransition == ModalTransition::DEFAULT) {
-            PlayDefaultModalTransition(topModalNode, false);
-        } else if (modalTransition == ModalTransition::ALPHA) {
-            PlayAlphaModalTransition(topModalNode, false);
-        } else if (!builder->GetRenderContext()->HasDisappearTransition()) {
+        return ModalPageExitProcess(topModalNode);
+    }
+    if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
+        return SheetPageExitProcess(topModalNode);
+    }
+    return true;
+}
+
+bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
+{
+    auto rootNode = FindWindowScene(topModalNode);
+    CHECK_NULL_RETURN(rootNode, true);
+    auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+    CHECK_NULL_RETURN(builder, false);
+    auto modalTransition = topModalNode->GetPattern<ModalPresentationPattern>()->GetType();
+    if (builder->GetRenderContext()->HasDisappearTransition()) {
+        if (!topModalNode->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
             topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
             // Fire hidden event of navdestination on the disappeared modal
             FireNavigationStateChange(false, topModalNode);
-            rootNode->RemoveChild(topModalNode);
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
-        topModalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
-    } else if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
-        auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetLastChild());
-        CHECK_NULL_RETURN(builder, false);
-        if (builder->GetRenderContext()->HasDisappearTransition()) {
-            if (!topModalNode->GetPattern<SheetPresentationPattern>()->IsExecuteOnDisappear()) {
-                topModalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
-            }
-            topModalNode->Clean(false, true);
-            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        }
-        auto maskNode = GetSheetMask(topModalNode);
-        if (maskNode) {
-            PlaySheetMaskTransition(maskNode, false);
-        }
-        auto sheetType = topModalNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
-        if (sheetType == SheetType::SHEET_POPUP) {
-            PlayBubbleStyleSheetTransition(topModalNode, false);
-        } else {
-            PlaySheetTransition(topModalNode, false);
-        }
-        topModalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
+        topModalNode->Clean(false, true);
+        topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    if (modalTransition == ModalTransition::DEFAULT) {
+        PlayDefaultModalTransition(topModalNode, false);
+    } else if (modalTransition == ModalTransition::ALPHA) {
+        PlayAlphaModalTransition(topModalNode, false);
+    } else if (!builder->GetRenderContext()->HasDisappearTransition()) {
+        topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
+        // Fire hidden event of navdestination on the disappeared modal
+        FireNavigationStateChange(false, topModalNode);
+        rootNode->RemoveChild(topModalNode);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    topModalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
+    return true;
+}
+
+bool OverlayManager::SheetPageExitProcess(const RefPtr<FrameNode>& topModalNode)
+{
+    auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetLastChild());
+    CHECK_NULL_RETURN(builder, false);
+    if (builder->GetRenderContext()->HasDisappearTransition()) {
+        if (!topModalNode->GetPattern<SheetPresentationPattern>()->IsExecuteOnDisappear()) {
+            topModalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
+        }
+        topModalNode->Clean(false, true);
+        topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    auto maskNode = GetSheetMask(topModalNode);
+    if (maskNode) {
+        PlaySheetMaskTransition(
+            maskNode, false, topModalNode->GetPattern<SheetPresentationPattern>()->HasCallback());
+    }
+    auto sheetType = topModalNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
+    if (sheetType == SheetType::SHEET_POPUP) {
+        PlayBubbleStyleSheetTransition(topModalNode, false);
+    } else {
+        PlaySheetTransition(topModalNode, false);
+    }
+    topModalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
     return true;
 }
 
@@ -2562,7 +2578,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
         eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
     }
     maskNode->MountToParent(rootNode);
-    PlaySheetMaskTransition(maskNode, true);
+    PlaySheetMaskTransition(maskNode, true, static_cast<bool>(callback));
     auto columnNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(columnNode);
@@ -2615,7 +2631,7 @@ void OverlayManager::CloseSheet(int32_t targetId)
     ModalPageLostFocus(sheetNode);
     auto maskNode = GetSheetMask(sheetNode);
     if (maskNode) {
-        PlaySheetMaskTransition(maskNode, false);
+        PlaySheetMaskTransition(maskNode, false, sheetNode->GetPattern<SheetPresentationPattern>()->HasCallback());
     }
     auto sheetType = sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP) {
@@ -2706,8 +2722,7 @@ void OverlayManager::PlaySheetTransition(
                 if (context) {
                     context->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
                 }
-            },
-            option.GetOnFinishEvent());
+            });
     } else {
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), id = Container::CurrentId(),
@@ -2736,7 +2751,10 @@ void OverlayManager::PlaySheetTransition(
                     },
                     TaskExecutor::TaskType::UI);
             });
-        sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+        if (sheetPattern->HasCallback()) {
+            sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+                HitTestMode::HTMTRANSPARENT);
+        }
         AnimationUtils::Animate(
             option,
             [context, sheetMaxHeight]() {
@@ -2796,7 +2814,7 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
     }
 }
 
-void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn)
+void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn, bool needTransparent)
 {
     AnimationOption option;
     const RefPtr<InterpolatingSpring> curve =
@@ -2836,7 +2854,10 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
                     },
                     TaskExecutor::TaskType::UI);
             });
-        maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+        if (needTransparent) {
+            maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+                HitTestMode::HTMTRANSPARENT);
+        }
         context->OpacityAnimation(option, 1.0, 0.0);
     }
 }

@@ -377,7 +377,7 @@ public:
     void MarkDirty(PropertyChangeFlag flag);
     float GetRootHeight() const;
 
-    void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn);
+    void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn, bool needTransparent = false);
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true,
         bool isModeChangeToAuto = false);
@@ -446,6 +446,8 @@ private:
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
 
     bool ModalExitProcess(const RefPtr<FrameNode>& topModalNode);
+    bool ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode);
+    bool SheetPageExitProcess(const RefPtr<FrameNode>& topModalNode);
 
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
