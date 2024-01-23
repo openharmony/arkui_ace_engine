@@ -55,7 +55,8 @@ SafeAreaInsets ContentRootPattern::CreateSafeAreaInsets() const
     if (!AvoidTop()) {
         inset.top_ = { 0, 0 };
     }
-
+    LOGD("create root content safeAreaInsets: AvoidKeyboard %{public}d, AvoidTop %{public}d, inset %{public}s",
+        AvoidKeyboard(), AvoidTop(), inset.ToString().c_str());
     return inset;
 }
 } // namespace OHOS::Ace::NG
