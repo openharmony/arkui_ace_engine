@@ -1189,7 +1189,7 @@ struct ArkUIListModifier {
     void (*setChainAnimationOptions)(
         ArkUINodeHandle node, const struct ArkUIChainAnimationOptionsType* chainAnimationOptions);
     void (*resetChainAnimationOptions)(ArkUINodeHandle node);
-    void (*setListSpace)(ArkUINodeHandle node, ArkUI_Float64 space);
+    void (*setListSpace)(ArkUINodeHandle node, ArkUI_Float32 space);
 };
 
 struct ArkUIListItemGroupModifier {

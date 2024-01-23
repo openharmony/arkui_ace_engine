@@ -166,7 +166,7 @@ void ResetSticky(ArkUINodeHandle node)
     ListModelNG::SetSticky(frameNode, DEFAULT_STICKY_STYLE);
 }
 
-void SetListSpace(ArkUINodeHandle node, ArkUI_Float64 space)
+void SetListSpace(ArkUINodeHandle node, ArkUI_Float32 space)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

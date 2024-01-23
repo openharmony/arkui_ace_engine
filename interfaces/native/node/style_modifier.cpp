@@ -41,7 +41,7 @@ const std::regex SIZE_TYPE_MAGIC("([0-9]+)([a-z]+)");
 constexpr char PARAMS_SEPARATOR_LEVEL1 = ';';
 constexpr char PARAMS_SEPARATOR_LEVEL2 = ',';
 constexpr int DEFAULT_ANGLE = 180;
-constexpr ArkUI_Float64 DEFAULT_Z_SCALE = 1.0;
+constexpr ArkUI_Float32 DEFAULT_Z_SCALE = 1.0;
 constexpr int UNIT_VP = 1;
 constexpr int UNIT_FP = 2;
 constexpr int NUM_0 = 0;
@@ -384,7 +384,7 @@ void SetTranslate(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "valuesSrc is empty");
         return;
     }
-    ArkUI_Float64 values[size];
+    ArkUI_Float32 values[size];
     ArkUI_Int32 units[size];
     for (int i = 0; i < size; ++i) {
         values[i] = StringUtils::StringToDouble(valuesSrc[i].c_str());
@@ -410,7 +410,7 @@ void SetScale(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "valuesSrc is invalid");
         return;
     }
-    ArkUI_Float64 values[size + NUM_1];
+    ArkUI_Float32 values[size + NUM_1];
     for (int i = 0; i < size; ++i) {
         values[i] = StringUtils::StringToDouble(valuesSrc[i].c_str());
     }
@@ -432,7 +432,7 @@ void SetRotate(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "valuesSrc is empty");
         return;
     }
-    ArkUI_Float64 values[size];
+    ArkUI_Float32 values[size];
     for (int i = 0; i < size; ++i) {
         values[i] = StringUtils::StringToDouble(valuesSrc[i].c_str());
     }
@@ -449,7 +449,7 @@ void SetBrightness(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
         return;
     }
-    ArkUI_Float64 brightness = StringUtils::StringToDouble(value);
+    ArkUI_Float32 brightness = StringUtils::StringToDouble(value);
     fullImpl->getNodeModifiers()->getCommonModifier()->setBrightness(node->uiNodeHandle, brightness);
 }
 
@@ -461,7 +461,7 @@ void SetSaturate(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
         return;
     }
-    ArkUI_Float64 saturate = StringUtils::StringToDouble(value);
+    ArkUI_Float32 saturate = StringUtils::StringToDouble(value);
     fullImpl->getNodeModifiers()->getCommonModifier()->setSaturate(node->uiNodeHandle, saturate);
 }
 
@@ -473,7 +473,7 @@ void SetBlur(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
         return;
     }
-    ArkUI_Float64 blur = StringUtils::StringToDouble(value);
+    ArkUI_Float32 blur = StringUtils::StringToDouble(value);
     fullImpl->getNodeModifiers()->getCommonModifier()->setBlur(node->uiNodeHandle, blur);
 }
 
@@ -499,14 +499,14 @@ void SetLinearGradient(ArkUI_NodeHandle node, const char* value)
         return;
     }
     auto size = colorsSrc.size() / NUM_2 * NUM_3;
-    ArkUI_Float64 colors[size];
+    ArkUI_Float32 colors[size];
     for (int i = 0, j = 0; i < colorsSrc.size() && j < size; i += NUM_2, j += NUM_3) {
         colors[j + NUM_0] = StringToColorInt(colorsSrc[i + NUM_0].c_str());
         colors[j + NUM_1] = true;
         colors[j + NUM_2] = StringUtils::StringToDouble(colorsSrc[i + NUM_1].c_str());
     }
 
-    ArkUI_Float64 values[NUM_4] = { false, DEFAULT_ANGLE, NUM_3, false };
+    ArkUI_Float32 values[NUM_4] = { false, DEFAULT_ANGLE, NUM_3, false };
     if (params.size() > NUM_1) {
         values[NUM_0] = true;
         values[NUM_1] = StringUtils::StringToDouble(params[NUM_1].c_str());
@@ -1220,7 +1220,7 @@ void SetScrollScrollSnap(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "paginationsSrc is empty");
         return;
     }
-    ArkUI_Float64 paginations[size];
+    ArkUI_Float32 paginations[size];
     ArkUI_Int32 paginationParams[NUM_4 + size];
     for (int i = 0; i < size; ++i) {
         paginations[i] = StringUtils::StringToDouble(paginationsSrc[i].c_str());
@@ -2275,7 +2275,7 @@ void SetListItemGroupDivider(ArkUI_NodeHandle node, const char* value)
     }
 
     auto color = StringToColorInt(params[NUM_0].c_str());
-    ArkUI_Float64 values[NUM_3];
+    ArkUI_Float32 values[NUM_3];
     ArkUI_Int32 units[NUM_3] = { UNIT_VP, UNIT_VP, UNIT_VP };
     for (int i = 0; i < NUM_3; ++i) {
         values[i] = StringUtils::StringToDouble(params[i]);
