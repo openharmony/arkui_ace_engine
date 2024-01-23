@@ -1463,6 +1463,7 @@ void TabBarPattern::TriggerTranslateAnimation(
 void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float targetCurrentOffset)
 {
     auto curve = DurationCubicCurve;
+    isAnimating_ = true;
     StopTranslateAnimation();
     SetSwiperCurve(curve);
     auto pipelineContext = PipelineContext::GetCurrentContext();
