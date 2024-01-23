@@ -230,6 +230,17 @@ void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     return;
 }
 
+void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end)
+{
+    if (!builder_) {
+        return;
+    }
+    children_.clear();
+    builder_->SetActiveChildRange(start, end);
+    MarkNeedSyncRenderTree();
+    PostIdleTask();
+}
+
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
 {
     if (children_.empty()) {

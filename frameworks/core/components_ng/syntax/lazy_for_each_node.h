@@ -102,6 +102,7 @@ public:
     void BuildAllChildren();
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
+    void DoSetActiveChildRange(int32_t start, int32_t end) override;
 
     const std::list<RefPtr<UINode>>& GetChildren() const override;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
