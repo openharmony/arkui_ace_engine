@@ -798,6 +798,7 @@ private:
     void UpdateIndexOnAnimationStop();
     void UpdateIndexOnSwipePageStop();
     void AdjustCurrentFocusIndex();
+    bool IsContentFocused();
 
     int32_t CheckTargetIndex(int32_t targetIndex);
 
@@ -902,7 +903,7 @@ private:
     std::optional<int32_t> preTargetIndex_;
     std::optional<int32_t> pauseTargetIndex_;
     std::optional<int32_t> oldChildrenSize_;
-    float placeItemWidth_ = 0.0f;
+    std::optional<float> placeItemWidth_;
     float currentDelta_ = 0.0f;
     // cumulated delta in a single drag event
     float mainDeltaSum_ = 0.0f;

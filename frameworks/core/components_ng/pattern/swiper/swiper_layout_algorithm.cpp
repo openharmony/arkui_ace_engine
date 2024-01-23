@@ -329,7 +329,7 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             endIndex = GetEndIndex();
         }
 
-        if (swipeByGroup_) {
+        if (swipeByGroup_ && !jumpIndex_ && !targetIndex_) {
             startIndexInVisibleWindow = startIndex;
             auto iter = itemPosition_.find(startIndex);
             if (iter != itemPosition_.end()) {
@@ -409,7 +409,7 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
     auto measureIndex = GetLoopIndex(currentIndex + 1);
     if (swipeByGroup_ && measureIndex >= realTotalCount_) {
         ++currentIndex;
-        endPos = startPos + placeItemWidth_;
+        endPos = startPos + placeItemWidth_.value_or(0.0f);
         itemPosition_[currentIndex] = { startPos, endPos, nullptr };
         return true;
     }
@@ -432,6 +432,11 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
     }
 
     float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
+
+    if (!placeItemWidth_.has_value()) {
+        placeItemWidth_ = mainLen;
+    }
+
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(swiperLayoutProperty, 0);
 
@@ -466,7 +471,7 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
     auto measureIndex = GetLoopIndex(currentIndex - 1);
     if (swipeByGroup_ && measureIndex >= realTotalCount_) {
         --currentIndex;
-        startPos = endPos - placeItemWidth_;
+        startPos = endPos - placeItemWidth_.value_or(0.0f);
         itemPosition_[currentIndex] = { startPos, endPos, nullptr };
         return true;
     }
@@ -488,6 +493,10 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
         wrapper->Measure(layoutConstraint);
     }
     float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
+
+    if (!placeItemWidth_.has_value()) {
+        placeItemWidth_ = mainLen;
+    }
 
     if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
         auto layoutProperty = wrapper->GetLayoutProperty();
