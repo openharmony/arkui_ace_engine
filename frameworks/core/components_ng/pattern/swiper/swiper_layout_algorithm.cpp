@@ -560,6 +560,9 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
                 (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty)));
         if (isSingleCase && !mainSizeIsDefined_) {
             endMainPos = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+            if (measured_) {
+                endMainPos += currentOffset_;
+            }
             endMainPos_ = endMainPos;
         }
         if ((currentIndex >= 0 && currentIndex < (totalItemCount_ - 1)) || isLoop_) {
@@ -614,6 +617,11 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
 void SwiperLayoutAlgorithm::SetInactive(
     LayoutWrapper* layoutWrapper, float startMainPos, float endMainPos, std::optional<int32_t> targetIndex)
 {
+    if (measured_) {
+        // Theoretically, offset should be added in all cases to get correct results. Only apply in flex for now.
+        startMainPos += currentOffset_;
+        endMainPos += currentOffset_;
+    }
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
     std::list<int32_t> removeIndexes;
