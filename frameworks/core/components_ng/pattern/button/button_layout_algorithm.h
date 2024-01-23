@@ -37,6 +37,7 @@ public:
 private:
     void HandleAdaptiveText(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
     void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
+    void MarkNeedFlushMouseEvent(LayoutWrapper* layoutWrapper);
     static void HandleChildLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
     static std::optional<SizeF> HandleLabelCircleButtonConstraint(LayoutWrapper* layoutWrapper);
     static void HandleBorderRadius(LayoutWrapper* layoutWrapper);

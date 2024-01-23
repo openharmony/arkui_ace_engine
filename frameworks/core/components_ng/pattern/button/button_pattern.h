@@ -271,6 +271,16 @@ public:
         isColorUpdateFlag_ = true;
     }
 
+    void SetPreFrameSize(const SizeF& frameSize)
+    {
+        preFrameSize_.SetSizeT(frameSize);
+    }
+
+    const SizeF& GetPreFrameSize() const
+    {
+        return preFrameSize_;
+    }
+
 protected:
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -314,6 +324,7 @@ private:
     Dimension focusBorderWidth_;
 
     bool isColorUpdateFlag_ = false;
+    SizeF preFrameSize_;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
 };
 } // namespace OHOS::Ace::NG
