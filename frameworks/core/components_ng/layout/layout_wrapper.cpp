@@ -37,7 +37,7 @@ namespace {
 bool IsSyntaxNode(const std::string& tag)
 {
     return tag == V2::JS_VIEW_ETS_TAG || tag == V2::JS_IF_ELSE_ETS_TAG || tag == V2::JS_FOR_EACH_ETS_TAG ||
-           tag == V2::JS_LAZY_FOR_EACH_ETS_TAG;
+           tag == V2::JS_LAZY_FOR_EACH_ETS_TAG || tag == V2::JS_SYNTAX_ITEM_ETS_TAG;
 }
 } // namespace
 
