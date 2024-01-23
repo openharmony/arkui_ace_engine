@@ -32,7 +32,7 @@
 #include "core/event/mouse_event.h"
 
 typedef void *NodeHandle;
-constexpr int32_t   INVALID_FONT_STYLE = -1;
+constexpr int32_t INVALID_FONT_STYLE = -1;
 constexpr int32_t INVALID_COLOR_VALUE = -1;
 
 template<typename T>
