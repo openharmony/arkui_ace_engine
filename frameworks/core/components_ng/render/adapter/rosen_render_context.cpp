@@ -793,10 +793,14 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
 #else
     float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
 #endif
+    auto fastAverage = Rosen::BLUR_COLOR_MODE::DEFAULT;
+    if (effectOption->adaptiveColor == AdaptiveColor::AVERAGE) {
+        fastAverage = Rosen::BLUR_COLOR_MODE::FASTAVERAGE;
+    }
     std::shared_ptr<Rosen::RSFilter> backFilter =
         Rosen::RSFilter::CreateMaterialFilter(backblurRadius, static_cast<float>(effectOption->saturation),
             static_cast<float>(effectOption->brightness), effectOption->color.GetValue(),
-            static_cast<Rosen::BLUR_COLOR_MODE>(effectOption->adaptiveColor));
+            static_cast<Rosen::BLUR_COLOR_MODE>(fastAverage));
     rsNode_->SetBackgroundFilter(backFilter);
     if (effectOption->blurOption.grayscale.size() > 1) {
         rsNode_->SetGreyCoef1(effectOption->blurOption.grayscale[0]);
