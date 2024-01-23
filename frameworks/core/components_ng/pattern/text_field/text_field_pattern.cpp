@@ -6123,6 +6123,11 @@ void TextFieldPattern::ProcessResponseArea()
             cleanNodeResponseArea->InitResponseArea();
             UpdateCancelNode();
         }
+    } else {
+        if (cleanNodeResponseArea_) {
+            cleanNodeResponseArea_->ClearArea();
+            cleanNodeResponseArea_.Reset();
+        }
     }
 
     if (IsShowPasswordIcon()) {
