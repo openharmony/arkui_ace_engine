@@ -30,7 +30,27 @@ constexpr int32_t ARGS_COUNT_TWO = 2;
 
 void* DetachOffscreenCanvas(napi_env env, void* value, void* hint)
 {
-    return value;
+    if (value == nullptr) {
+        LOGW("Invalid parameter.");
+        return nullptr;
+    }
+    JSOffscreenCanvas* workCanvas = (JSOffscreenCanvas*)value;
+    if (workCanvas->IsGetContext()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s",
+            "An OffscreenCanvas could not be transferred because it had a rendering context.");
+        return nullptr;
+    }
+    if (workCanvas->IsDetached()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s",
+            "An OffscreenCanvas could not be transferred because the object is detached.");
+        return nullptr;
+    }
+    workCanvas->SetDetachStatus(true);
+
+    auto result = new (std::nothrow) JSOffscreenCanvas();
+    result->SetWidth(workCanvas->GetWidth());
+    result->SetHeight(workCanvas->GetHeight());
+    return result;
 }
 
 napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
@@ -145,36 +165,54 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
 napi_value JSOffscreenCanvas::JsGetWidth(napi_env env, napi_callback_info info)
 {
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
-    return (me != nullptr) ? me->OnGetWidth(env) : nullptr;
+    napi_value defaultWidth = nullptr;
+    napi_create_double(env, 0.0, &defaultWidth);
+    return (me != nullptr && !me->isDetached_) ? me->OnGetWidth(env) : defaultWidth;
 }
 
 napi_value JSOffscreenCanvas::JsGetHeight(napi_env env, napi_callback_info info)
 {
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
-    return (me != nullptr) ? me->OnGetHeight(env) : nullptr;
+    napi_value defaultHeight = nullptr;
+    napi_create_double(env, 0.0, &defaultHeight);
+    return (me != nullptr && !me->isDetached_) ? me->OnGetHeight(env) : defaultHeight;
 }
 
 napi_value JSOffscreenCanvas::JsSetWidth(napi_env env, napi_callback_info info)
 {
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
-    return (me != nullptr) ? me->OnSetWidth(env, info) : nullptr;
+    return (me != nullptr && !me->isDetached_) ? me->OnSetWidth(env, info) : nullptr;
 }
 
 napi_value JSOffscreenCanvas::JsSetHeight(napi_env env, napi_callback_info info)
 {
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
-    return (me != nullptr) ? me->OnSetHeight(env, info) : nullptr;
+    return (me != nullptr && !me->isDetached_) ? me->OnSetHeight(env, info) : nullptr;
 }
 napi_value JSOffscreenCanvas::JsTransferToImageBitmap(napi_env env, napi_callback_info info)
 {
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
-    return (me != nullptr) ? me->onTransferToImageBitmap(env) : nullptr;
+    if (me->isDetached_) {
+        JSException::Throw("%s", "Failed to execute 'transferToImageBitmap' on 'OffscreenCanvas': Cannot transfer an "
+                                 "ImageBitmap from a detached OffscreenCanvas");
+        return nullptr;
+    }
+    napi_value defaultImage = nullptr;
+    napi_create_object(env, &defaultImage);
+    return (me != nullptr) ? me->onTransferToImageBitmap(env) : defaultImage;
 }
 
 napi_value JSOffscreenCanvas::JsGetContext(napi_env env, napi_callback_info info)
 {
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
-    return (me != nullptr) ? me->onGetContext(env, info) : nullptr;
+    if (me->isDetached_) {
+        JSException::Throw(
+            "%s", "Failed to execute 'getContext' on 'OffscreenCanvas': OffscreenCanvas object is detached");
+        return nullptr;
+    }
+    napi_value defaultContext = nullptr;
+    napi_create_object(env, &defaultContext);
+    return (me != nullptr) ? me->onGetContext(env, info) : defaultContext;
 }
 
 napi_value JSOffscreenCanvas::OnGetWidth(napi_env env)
@@ -277,6 +315,7 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
 
 napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info)
 {
+    isGetContext_ = true;
     size_t argc = 2;
     napi_value argv[2] = { nullptr };
     napi_value offscreenCanvas = nullptr;

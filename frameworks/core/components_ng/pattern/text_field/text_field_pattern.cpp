@@ -119,7 +119,7 @@ constexpr double DAMPING = 10.0;
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
-constexpr uint32_t OBSCURE_SHOW_TICKS = 3;
+constexpr uint32_t OBSCURE_SHOW_TICKS = 1;
 constexpr Dimension ERROR_TEXT_TOP_MARGIN = 8.0_vp;
 constexpr Dimension ERROR_TEXT_BOTTOM_MARGIN = 8.0_vp;
 constexpr uint32_t FIND_TEXT_ZERO_INDEX = 1;
@@ -933,6 +933,21 @@ void TextFieldPattern::UpdateBlurReason()
     blurReason_ = focusHub->GetBlurReason();
 }
 
+void TextFieldPattern::ProcNormalInlineStateInBlurEvent()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (IsNormalInlineState()) {
+        if (IsTextArea() && isTextInput_) {
+            layoutProperty->UpdateMaxLines(1);
+            layoutProperty->UpdatePlaceholderMaxLines(1);
+        }
+        inlineSelectAllFlag_ = false;
+        inlineFocusState_ = false;
+        RestorePreInlineStates();
+    }
+}
+
 void TextFieldPattern::HandleBlurEvent()
 {
     auto host = GetHost();
@@ -942,6 +957,7 @@ void TextFieldPattern::HandleBlurEvent()
     CHECK_NULL_VOID(context);
     UpdateBlurReason();
     if (!context->GetOnFoucs()) {
+        StopTwinkling();
         return;
     }
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
@@ -961,15 +977,7 @@ void TextFieldPattern::HandleBlurEvent()
     }
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (IsNormalInlineState()) {
-        if (IsTextArea() && isTextInput_) {
-            layoutProperty->UpdateMaxLines(1);
-            layoutProperty->UpdatePlaceholderMaxLines(1);
-        }
-        inlineSelectAllFlag_ = false;
-        inlineFocusState_ = false;
-        RestorePreInlineStates();
-    }
+    ProcNormalInlineStateInBlurEvent();
     needToRequestKeyboardInner_ = false;
     isLongPress_ = false;
     isFocusedBeforeClick_ = false;
@@ -1573,7 +1581,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
                 pattern->selectController_->UpdateCaretIndex(current - (dragTextEnd - dragTextStart));
                 pattern->InsertValue(str);
             } else {
-                pattern->ShowSelectAfterDragDrop();
+                pattern->ShowSelectAfterDragEvent();
             }
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
@@ -1582,11 +1590,15 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
     };
 }
 
-void TextFieldPattern::ShowSelectAfterDragDrop()
+void TextFieldPattern::ShowSelectAfterDragEvent()
 {
     selectController_->UpdateHandleIndex(dragTextStart_, dragTextEnd_);
     showSelect_ = true;
-    ProcessOverlay(false, false, false, false);
+    processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ProcessOverlay(false, false, false, false);
+    };
 }
 
 void TextFieldPattern::InitDragDropEventWithOutDragStart()
@@ -1681,11 +1693,7 @@ void TextFieldPattern::InitDragDropCallBack()
 
             // Except for DRAG_SUCCESS, all of rest need to show
             if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
-                auto dragTextStart = pattern->dragTextStart_;
-                auto dragTextEnd = pattern->dragTextEnd_;
-                pattern->selectController_->UpdateHandleIndex(dragTextStart, dragTextEnd);
-                pattern->showSelect_ = true;
-                pattern->ProcessOverlay(false, false, false, false);
+                pattern->ShowSelectAfterDragEvent();
             }
             auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
@@ -3074,6 +3082,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             CloseCustomKeyboard();
         }
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
+        UpdateKeyboardOffset(textConfig.positionY, textConfig.height);
 #else
         if (!HasConnection()) {
             TextInputConfiguration config;
@@ -3479,7 +3488,7 @@ void TextFieldPattern::UpdateEditingValueToRecord()
 
 float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithmMeasure)
 {
-    if (!isAlgorithmMeasure && paragraph_ && paragraph_->GetHeight() != 0.0f) {
+    if (!isAlgorithmMeasure && paragraph_ && paragraph_->GetHeight() != 0.0f && paragraph_->GetLineCount() > 0) {
         return paragraph_->GetHeight() / paragraph_->GetLineCount();
     }
     RefPtr<Paragraph> paragraph;

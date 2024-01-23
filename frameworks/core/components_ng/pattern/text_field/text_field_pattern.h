@@ -1120,7 +1120,7 @@ private:
     void InitDragDropEvent();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
-    void ShowSelectAfterDragDrop();
+    void ShowSelectAfterDragEvent();
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
     void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
@@ -1239,6 +1239,7 @@ private:
     void CleanNodeResponseKeyEvent();
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
+    void ProcNormalInlineStateInBlurEvent();
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif

@@ -539,7 +539,8 @@ std::pair<bool, bool> GridPattern::IsFirstOrLastFocusableChild(int32_t curMainIn
         [curCrossIndex](int32_t crossIndex) { return curCrossIndex > crossIndex; });
     auto findGreater = std::find_if(crossIndexSet.begin(), crossIndexSet.end(),
         [curCrossIndex](int32_t crossIndex) { return curCrossIndex < crossIndex; });
-    return { findLesser == crossIndexSet.end(), findGreater == crossIndexSet.end() };
+    return { curCrossIndex == 0 || findLesser == crossIndexSet.end(),
+        curCrossIndex == gridLayoutInfo_.crossCount_ - 1 || findGreater == crossIndexSet.end() };
 }
 
 std::pair<FocusStep, FocusStep> GridPattern::GetFocusSteps(int32_t curMainIndex, int32_t curCrossIndex, FocusStep step)

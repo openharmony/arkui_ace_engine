@@ -35,6 +35,11 @@ int32_t Container::CurrentId()
     return g_id;
 }
 
+int32_t Container::CurrentIdWithoutScope()
+{
+    return g_id;
+}
+
 RefPtr<Container> Container::GetActive()
 {
     RefPtr<Container> activeContainer;
@@ -52,6 +57,11 @@ void Container::UpdateCurrent(int32_t id)
 }
 
 RefPtr<Container> Container::Current()
+{
+    return MockContainer::Current();
+}
+
+RefPtr<Container> Container::CurrentWithoutScope()
 {
     return MockContainer::Current();
 }

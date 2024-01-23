@@ -756,6 +756,50 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
 #endif
 }
 
+void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, RefPtr<SvgDomBase> svgDom,
+    const Ace::CanvasImage& canvasImage, const ImageFit& imageFit)
+{
+    CHECK_NULL_VOID(svgDom);
+    RSRect srcRect;
+    RSRect dstRect;
+    switch (canvasImage.flag) {
+        case 0:
+            srcRect = RSRect(0, 0, svgDom->GetContainerSize().Width(), svgDom->GetContainerSize().Height());
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, svgDom->GetContainerSize().Width() + canvasImage.dx,
+                svgDom->GetContainerSize().Height() + canvasImage.dy);
+            break;
+        case 1: {
+            srcRect = RSRect(0, 0, svgDom->GetContainerSize().Width(), svgDom->GetContainerSize().Height());
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            break;
+        }
+        case 2: {
+            srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
+                canvasImage.sHeight + canvasImage.sy);
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            break;
+        }
+        default:
+            break;
+    }
+    float scaleX = dstRect.GetWidth() / srcRect.GetWidth();
+    float scaleY = dstRect.GetHeight() / srcRect.GetHeight();
+    OffsetF offset = GetContentOffset(paintWrapper);
+    OffsetF startPoint = offset + OffsetF(dstRect.GetLeft(), dstRect.GetTop()) -
+                         OffsetF(srcRect.GetLeft() * scaleX, srcRect.GetTop() * scaleY);
+
+    RSCanvas* rsCanvas = GetRawPtrOfRSCanvas();
+    CHECK_NULL_VOID(rsCanvas);
+    rsCanvas->Save();
+    rsCanvas->ClipRect(dstRect, RSClipOp::INTERSECT);
+    rsCanvas->Translate(startPoint.GetX(), startPoint.GetY());
+    rsCanvas->Scale(scaleX, scaleY);
+    svgDom->DrawImage(*rsCanvas, imageFit, Size(srcRect.GetWidth(), srcRect.GetHeight()));
+    rsCanvas->Restore();
+}
+
 void CustomPaintPaintMethod::PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData)
 {
     if (imageData.data.empty()) {

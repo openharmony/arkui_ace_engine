@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <mutex>
 
 #include "base/utils/macros.h"
 
@@ -52,8 +53,8 @@ public:
     virtual void CreateNewChildFinish(const std::string& id) = 0;
     
 private:
-     static std::unique_ptr<ForEachModel> instance;
-
+    static std::unique_ptr<ForEachModel> instance;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace::NG
 

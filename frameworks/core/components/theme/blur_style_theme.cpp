@@ -39,7 +39,7 @@ RefPtr<BlurStyleTheme> BlurStyleTheme::Builder::Build(const RefPtr<ThemeConstant
 void BlurStyleTheme::Builder::ParsePattern(
     const RefPtr<ThemeStyle>& themeStyle, const RefPtr<BlurStyleTheme>& theme) const
 {
-    const static std::pair<std::string, BlurStyle> blurStyles[] = {
+    const std::pair<std::string, BlurStyle> blurStyles[] = {
         std::pair<std::string, BlurStyle> { "thin", BlurStyle::THIN },
         std::pair<std::string, BlurStyle> { "regular", BlurStyle::REGULAR },
         std::pair<std::string, BlurStyle> { "thick", BlurStyle::THICK },
@@ -65,12 +65,12 @@ void BlurStyleTheme::Builder::ParsePattern(
 BlurParameter BlurStyleTheme::Builder::ParseBlurParam(
     const RefPtr<ThemeStyle>& themeStyle, const std::string& styleName, bool isDark) const
 {
-    constexpr static char prefix[] = "blur_style";
-    constexpr static char radiusName[] = "radius";
-    constexpr static char saturationName[] = "saturation";
-    constexpr static char brightnessName[] = "brightness";
-    constexpr static char maskColorName[] = "color";
-    constexpr static char darkSuffix[] = "_dark";
+    constexpr char prefix[] = "blur_style";
+    constexpr char radiusName[] = "radius";
+    constexpr char saturationName[] = "saturation";
+    constexpr char brightnessName[] = "brightness";
+    constexpr char maskColorName[] = "color";
+    constexpr char darkSuffix[] = "_dark";
     BlurParameter param;
     auto radiusFullName = std::string(prefix) + "_" + styleName + "_" + radiusName;
     auto saturationFullName = std::string(prefix) + "_" + styleName + "_" + saturationName;

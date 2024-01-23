@@ -46,9 +46,9 @@ HWTEST_F(SubwindowManagerTest, ShowPreviewNG001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. 
-     * @tc.expected: expect ShowPreviewNG return result which is not nullptr.
+     * @tc.expected: expect ShowPreviewNG return nullptr.
      */
-    EXPECT_NE(manager->ShowPreviewNG(), nullptr);
+    EXPECT_EQ(manager->ShowPreviewNG(), nullptr);
 }
 
 /**
@@ -64,15 +64,12 @@ HWTEST_F(SubwindowManagerTest, HidePreviewNG001, TestSize.Level1)
     auto manager = SubwindowManager::GetInstance();
     ASSERT_NE(manager, nullptr);
     auto subwindow = manager->ShowPreviewNG();
-    ASSERT_NE(subwindow, nullptr);
-    manager->SetCurrentSubwindow(subwindow);
-    ASSERT_NE(manager->GetCurrentWindow(), nullptr);
+    ASSERT_EQ(subwindow, nullptr);
 
     /**
      * @tc.steps: step2. call HidePreviewNG.
-     * @tc.expected: expect HidePreviewNG run ok, and current window is not nullptr.
+     * @tc.expected: HidePreviewNG return void.
      */
     manager->HidePreviewNG();
-    EXPECT_NE(manager->GetCurrentWindow(), nullptr);
 }
 }

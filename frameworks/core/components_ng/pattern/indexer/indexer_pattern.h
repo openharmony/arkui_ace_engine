@@ -144,6 +144,8 @@ private:
     bool IfSelectIndexValid();
     int32_t GetSelectChildIndex(const Offset& offset);
     void StartBubbleAppearAnimation();
+    void StartDelayTask(uint32_t duration = INDEXER_BUBBLE_WAIT_DURATION);
+    void StartBubbleDisappearAnimation();
     void IndexerHoverInAnimation();
     void IndexerHoverOutAnimation();
     void IndexerPressInAnimation();
@@ -195,6 +197,7 @@ private:
     float actualIndexerHeight_ = 0.0f;
     bool isNewHeightCalculated_ = false;
     IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;
+    CancelableCallback<void()> delayTask_;
 };
 } // namespace OHOS::Ace::NG
 

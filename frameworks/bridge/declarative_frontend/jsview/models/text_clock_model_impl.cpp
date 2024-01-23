@@ -34,7 +34,7 @@ void TextClockModelImpl::SetFormat(const std::string& format)
     component->SetFormat(format);
 }
 
-void TextClockModelImpl::SetHoursWest(const int32_t& hoursWest)
+void TextClockModelImpl::SetHoursWest(float hoursWest)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);

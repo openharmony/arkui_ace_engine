@@ -43,7 +43,7 @@ static napi_value JSGetRectangleById(napi_env env, napi_callback_info info)
     napi_get_value_string_utf8(env, argv, outBuffer, STR_BUFFER_SIZE, &outSize);
     std::string key = std::string(outBuffer);
     OHOS::Ace::NG::Rectangle rectangle;
-    auto delegate = EngineHelper::GetCurrentDelegate();
+    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;

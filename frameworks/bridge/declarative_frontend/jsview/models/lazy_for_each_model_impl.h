@@ -27,9 +27,6 @@ public:
     ~LazyForEachModelImpl() override = default;
 
     void Create(const RefPtr<LazyForEachActuator>& actuator) override;
-
-private:
-    static std::unique_ptr<LazyForEachModelImpl> instance_;
 };
 
 } // namespace OHOS::Ace

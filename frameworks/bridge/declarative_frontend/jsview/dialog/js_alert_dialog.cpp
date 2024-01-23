@@ -121,7 +121,7 @@ void ParseButtonObj(
                             node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("AlertDialog.[" + property + "].onAction");
-            auto pipelineContext = PipelineContext::GetCurrentContext();
+            auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             func->Execute();
@@ -157,7 +157,7 @@ void ParseButtonArray(
 
 void JSAlertDialog::Show(const JSCallbackInfo& args)
 {
-    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    auto scopedDelegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
         LOGE("scopedDelegate is null, please check");
@@ -209,7 +209,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc), node = frameNode]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("AlertDialog.property.cancel");
-                auto pipelineContext = PipelineContext::GetCurrentContext();
+                auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
                 CHECK_NULL_VOID(pipelineContext);
                 pipelineContext->UpdateCurrentActiveNode(node);
                 func->Execute();

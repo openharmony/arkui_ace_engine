@@ -84,7 +84,6 @@ public:
 
 void IndexerTestNg::SetUpTestSuite()
 {
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
@@ -94,7 +93,6 @@ void IndexerTestNg::SetUpTestSuite()
 void IndexerTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
-    MockParagraph::TearDown();
 }
 
 void IndexerTestNg::SetUp() {}
@@ -710,20 +708,19 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create touchEventInfo, set TouchType::DOWN.
-     * @tc.expected: VisibleType is GONE.
+     * @tc.expected: isTouch_ is true.
      */
     TouchEventInfo touchEventInfo = CreateTouchEventInfo(TouchType::DOWN, 0.f);
     onPopupTouchDown(touchEventInfo); // trigger OnPopupTouchDown
-    auto columnLayoutProperty = pattern_->popupNode_->GetLayoutProperty<LinearLayoutProperty>();
-    EXPECT_EQ(columnLayoutProperty->GetVisibility(), VisibleType::GONE);
+    EXPECT_EQ(pattern_->isTouch_, true);
 
     /**
      * @tc.steps: step3. Create touchEventInfo, set TouchType::UP
-     * @tc.expected: VisibleType unchanged.
+     * @tc.expected: isTouch_ is false.
      */
     touchEventInfo = CreateTouchEventInfo(TouchType::UP, 0.f);
     onPopupTouchDown(touchEventInfo);
-    EXPECT_EQ(columnLayoutProperty->GetVisibility(), VisibleType::GONE);
+    EXPECT_EQ(pattern_->isTouch_, false);
 }
 
 /**
@@ -1284,7 +1281,7 @@ HWTEST_F(IndexerTestNg, IndexerLayoutAlgorithm001, TestSize.Level1)
     EXPECT_EQ(offset, OffsetT<Dimension>(Dimension(-106), Dimension(20)));
 
     /**
-     * @tc.case: case4: align is right.
+     * @tc.case: case4: align is left.
      */
     Create(
         [](IndexerModelNG model) {

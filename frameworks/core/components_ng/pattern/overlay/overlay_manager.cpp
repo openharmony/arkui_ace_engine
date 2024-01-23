@@ -929,6 +929,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && focusable)) {
         ResetLowerNodeFocusable(popupNode);
     }
+    CheckReturnFocus(popupNode);
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
     popupPattern->StartExitingAnimation(
@@ -3042,6 +3043,7 @@ void OverlayManager::DeleteModal(int32_t targetId)
                 FireNavigationStateChange(false, modalNode);
                 rootNode->RemoveChild(modalNode);
             } else {
+                RemoveSheetMask(modalNode, rootNode);
                 modalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
                 modalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
                 sheetMap_.erase(targetId);
@@ -3061,6 +3063,14 @@ void OverlayManager::DeleteModal(int32_t targetId)
             modalStack_.push(*modal);
         }
         SaveLastModalNode();
+    }
+}
+
+void OverlayManager::RemoveSheetMask(RefPtr<FrameNode>& sheetNode, RefPtr<UINode>& rootNode)
+{
+    auto maskNode = GetSheetMask(sheetNode);
+    if (maskNode) {
+        rootNode->RemoveChild(maskNode);
     }
 }
 
@@ -3651,5 +3661,18 @@ float OverlayManager::GetRootHeight() const
     CHECK_NULL_RETURN(rootGeometryNode, 0.0);
     auto rootHeight = rootGeometryNode->GetFrameSize().Height();
     return rootHeight;
+}
+
+void OverlayManager::CheckReturnFocus(RefPtr<FrameNode> node)
+{
+    auto focusHub = node->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (focusHub->IsCurrentFocus()) {
+        auto pageNode = GetLastPage();
+        CHECK_NULL_VOID(pageNode);
+        auto pageFocusHub = pageNode->GetFocusHub();
+        CHECK_NULL_VOID(pageFocusHub);
+        pageFocusHub->RequestFocusWithDefaultFocusFirstly();
+    }
 }
 } // namespace OHOS::Ace::NG

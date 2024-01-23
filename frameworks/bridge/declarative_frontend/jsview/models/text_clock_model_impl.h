@@ -26,7 +26,7 @@ class ACE_EXPORT TextClockModelImpl : public TextClockModel {
 public:
     RefPtr<TextClockController> Create() override;
     void SetFormat(const std::string& format) override;
-    void SetHoursWest(const int32_t& hoursWest) override;
+    void SetHoursWest(float hoursWest) override;
     void SetOnDateChange(std::function<void(const std::string)>&& onChange) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;

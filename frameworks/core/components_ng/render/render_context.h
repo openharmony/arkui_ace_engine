@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
+#include <cstdint>
 #include <functional>
 
 #include "base/geometry/dimension.h"
@@ -30,6 +31,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/particle_property.h"
@@ -40,7 +42,6 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
-#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Rosen {
 class DrawCmdList;
@@ -133,12 +134,13 @@ public:
     virtual void OnModifyDone() {}
 
     enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL, INCREMENTAL_CANVAS, HARDWARE_SURFACE };
+    enum class PatternType : int8_t { DEFAULT, VIDEO };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
+        PatternType patternType = PatternType::DEFAULT;
     };
-    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param)
-    {}
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
 
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
@@ -270,6 +272,12 @@ public:
     virtual void SetOpacity(float opacity) {}
     virtual void SetTranslate(float translateX, float translateY, float translateZ) {}
 
+    virtual void SetRectMask(const RectF& rect, const ShapeMaskProperty& property) {}
+    virtual void SetCircleMask(const Circle& circle, const ShapeMaskProperty& property) {}
+    virtual void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) {}
+    virtual void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) {}
+    virtual void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) {}
+
     virtual RectF GetPaintRectWithTransform()
     {
         return {};
@@ -332,30 +340,12 @@ public:
 
     void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
-    void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
-    {
-        sharedTransitionOption_ = option;
-    }
-    const std::shared_ptr<SharedTransitionOption>& GetSharedTransitionOption() const
-    {
-        return sharedTransitionOption_;
-    }
-    void SetShareId(const ShareId& shareId)
-    {
-        shareId_ = shareId;
-    }
-    const ShareId& GetShareId() const
-    {
-        return shareId_;
-    }
-    bool HasSharedTransition() const
-    {
-        return !shareId_.empty();
-    }
-    bool HasSharedTransitionOption() const
-    {
-        return sharedTransitionOption_ != nullptr;
-    }
+    void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option);
+    const std::shared_ptr<SharedTransitionOption>& GetSharedTransitionOption() const;
+    void SetShareId(const ShareId& shareId);
+    const ShareId& GetShareId() const;
+    bool HasSharedTransition() const;
+    bool HasSharedTransitionOption() const;
 
     void SetIsModalRootNode(bool isModalRootNode)
     {

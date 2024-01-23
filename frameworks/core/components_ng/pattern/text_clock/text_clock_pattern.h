@@ -112,11 +112,11 @@ private:
         const int32_t& elementIndex, const bool& oneElement);
 
     std::string GetFormat() const;
-    int32_t GetHoursWest() const;
+    float GetHoursWest() const;
     RefPtr<FrameNode> GetTextNode();
 
     RefPtr<TextClockController> textClockController_;
-    int32_t hourWest_ = 0;
+    float hourWest_ = 0.0f;
     std::optional<int32_t> textId_;
     bool isStart_ = true;
     bool is24H_ = SystemProperties::Is24HourClock();

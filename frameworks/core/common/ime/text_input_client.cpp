@@ -65,6 +65,9 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_ENTER), &tic::HandleOnEnter },
     { KeyComb(KeyCode::KEY_NUMPAD_ENTER), &tic::HandleOnEnter },
     { KeyComb(KeyCode::KEY_DPAD_CENTER), &tic::HandleOnEnter },
+    { KeyComb(KeyCode::KEY_ENTER, KEY_CTRL), &tic::HandleOnEnter },
+    { KeyComb(KeyCode::KEY_NUMPAD_ENTER, KEY_CTRL), &tic::HandleOnEnter },
+    { KeyComb(KeyCode::KEY_DPAD_CENTER, KEY_CTRL), &tic::HandleOnEnter },
     // caret move keys
     { KeyComb(KeyCode::KEY_DPAD_LEFT), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Left); } },
     { KeyComb(KeyCode::KEY_DPAD_RIGHT), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Right); } },

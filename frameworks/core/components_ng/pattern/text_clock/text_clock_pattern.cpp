@@ -307,8 +307,8 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
 {
     time_t current = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto* timeZoneTime = std::localtime(&current);
-    if (!NearEqual(hourWest_, INT_MAX)) {
-        current = current - hourWest_ * TOTAL_SECONDS_OF_HOUR;
+    if (!std::isnan(hourWest_)) {
+        current = current - int32_t(hourWest_ * TOTAL_SECONDS_OF_HOUR);
         timeZoneTime = std::gmtime(&current); // Convert to UTC time.
     }
     CHECK_NULL_RETURN(timeZoneTime, "");
@@ -692,14 +692,14 @@ std::string TextClockPattern::GetFormat() const
     return textClockLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
 }
 
-int32_t TextClockPattern::GetHoursWest() const
+float TextClockPattern::GetHoursWest() const
 {
     auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
-    CHECK_NULL_RETURN(textClockLayoutProperty, INT_MAX);
+    CHECK_NULL_RETURN(textClockLayoutProperty, NAN);
     if (textClockLayoutProperty->GetHoursWest().has_value()) {
         return textClockLayoutProperty->GetHoursWest().value();
     }
-    return INT_MAX;
+    return NAN;
 }
 
 RefPtr<FrameNode> TextClockPattern::GetTextNode()

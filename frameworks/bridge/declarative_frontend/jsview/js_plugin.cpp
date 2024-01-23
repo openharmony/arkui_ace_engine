@@ -29,20 +29,26 @@
 #include "frameworks/core/components/plugin/plugin_component.h"
 
 namespace OHOS::Ace {
+std::unique_ptr<PluginModel> PluginModel::instance_;
+std::mutex PluginModel::mutex_;
+
 PluginModel* PluginModel::GetInstance()
 {
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-    static NG::PluginModelNG model;
-    return &model;
+            instance_.reset(new NG::PluginModelNG());
 #else
-    if (Container::IsCurrentUseNewPipeline()) {
-        static NG::PluginModelNG model;
-        return &model;
-    } else {
-        static Framework::PluginModelImpl model;
-        return &model;
-    }
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::PluginModelNG());
+            } else {
+                instance_.reset(new Framework::PluginModelImpl());
+            }
 #endif
+        }
+    }
+    return instance_.get();
 }
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {

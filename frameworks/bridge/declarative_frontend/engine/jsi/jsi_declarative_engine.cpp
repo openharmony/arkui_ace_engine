@@ -926,7 +926,7 @@ napi_value JsiDeclarativeEngineInstance::GetContextValue()
 }
 
 thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
-thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
+panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 
 // -----------------------
 // Start JsiDeclarativeEngine

@@ -195,6 +195,10 @@ private:
     {
         return true;
     }
+    bool AvoidBottom() const override
+    {
+        return true;
+    }
 
     RefPtr<PageInfo> pageInfo_;
 

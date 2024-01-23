@@ -70,6 +70,8 @@ public:
 
     static RefPtr<PipelineContext> GetCurrentContext();
 
+    static RefPtr<PipelineContext> GetCurrentContextWithoutScope();
+
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
     static RefPtr<PipelineContext> GetContextByContainerId(int32_t containerId);
@@ -693,7 +695,7 @@ private:
 
     RefPtr<FrameNode> rootNode_;
 
-    RefPtr<FrameNode> curFocusNode_;
+    int32_t curFocusNodeId_ = -1;
 
     std::set<RefPtr<FrameNode>> needRenderNode_;
 

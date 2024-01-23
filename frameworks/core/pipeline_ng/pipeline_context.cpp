@@ -115,6 +115,13 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextWithoutScope()
+{
+    auto currentContainer = Container::CurrentWithoutScope();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
+}
+
 RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
 {
     auto pipeline = PipelineBase::GetMainPipelineContext();
@@ -467,10 +474,10 @@ void PipelineContext::IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
 {
     // Frame other window to SCB window Or inSCB window changes,hide keyboard.
     if ((windowFocus_.has_value() && windowFocus_.value()) ||
-        curFocusNode_ != curFrameNode) {
+        curFocusNodeId_ != curFrameNode->GetId()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB Windowfocus first, ready to hide keyboard.");
         windowFocus_.reset();
-        curFocusNode_ = curFrameNode;
+        curFocusNodeId_ = curFrameNode->GetId();
         WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
         return;
     }
@@ -1511,8 +1518,8 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(overlay);
             auto selectOverlay = weakSelectOverlay.Upgrade();
             CHECK_NULL_VOID(selectOverlay);
-            selectOverlay->DestroySelectOverlay();
-            hasOverlay = overlay->RemoveOverlay(true);
+            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
+            hasOverlay |= overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI);
     if (hasOverlay) {

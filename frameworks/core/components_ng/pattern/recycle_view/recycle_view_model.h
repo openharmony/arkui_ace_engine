@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RECYCLE_VIEW_RECYCLE_VIEW_MODEL_H
 
 #include <memory>
+#include <mutex>
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
@@ -28,6 +29,7 @@ public:
     virtual void Create() = 0;
 private:
     static std::unique_ptr<RecycleViewModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

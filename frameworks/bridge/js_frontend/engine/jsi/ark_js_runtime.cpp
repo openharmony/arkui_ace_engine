@@ -182,16 +182,12 @@ bool ArkJSRuntime::StartDebugger()
 
 bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t* data, int32_t size, const std::string& filename, bool needUpdate)
 {
-#if defined(PREVIEW)
-    return JSNApi::ExecuteModuleBuffer(vm_, data, size, filename, needUpdate);
-#else
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
     panda::TryCatch trycatch(vm_);
     bool ret = JSNApi::ExecuteModuleBuffer(vm_, data, size, filename, needUpdate);
     HandleUncaughtException(trycatch);
     return ret;
-#endif
 }
 
 shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::string& src)

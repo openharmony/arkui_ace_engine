@@ -174,6 +174,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
 
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle(), myIndex);
     tabBarPattern->SetBottomTabBarStyle(bottomTabBarStyle, myIndex);
+    auto labelStyle = tabContentPattern->GetLabelStyle();
+    tabBarPattern->SetLabelStyle(labelStyle, myIndex);
     auto tabBarStyle = tabContentPattern->GetTabBarStyle();
     if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
         auto renderContext = columnNode->GetRenderContext();
@@ -294,8 +296,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
     if (tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE) {
         textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    } else if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
+        textLayoutProperty->UpdateFontWeight(myIndex == indicator ? FontWeight::MEDIUM : FontWeight::NORMAL);
     }
-    auto labelStyle = tabContentPattern->GetLabelStyle();
     UpdateLabelStyle(labelStyle, textLayoutProperty);
     ImageSourceInfo imageSourceInfo(tabBarParam.GetIcon());
     if (imageSourceInfo.IsSvg()) {

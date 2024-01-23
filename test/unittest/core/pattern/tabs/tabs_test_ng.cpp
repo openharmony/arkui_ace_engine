@@ -5188,11 +5188,11 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarPatternUpdateTextColor001
- * @tc.desc: test UpdateTextColor and UpdateImageColor
+ * @tc.name: TabBarPatternUpdateTextColorAndFontWeight001
+ * @tc.desc: test UpdateTextColorAndFontWeight and UpdateImageColor
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColor001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColorAndFontWeight001, TestSize.Level1)
 {
     /**
      * @tc.steps: steps1. Create TabBarPattern
@@ -5213,19 +5213,19 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColor001, TestSize.Level1)
     auto pr = tabBarPattern->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
     /**
-     * @tc.steps: step2. Test function UpdateTextColor and UpdateImageColor.
+     * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
      * @tc.expected: Related functions run ok.
      */
-    tabBarPattern->UpdateTextColor(index);
+    tabBarPattern->UpdateTextColorAndFontWeight(index);
     tabBarPattern->UpdateImageColor(index);
 }
 
 /**
- * @tc.name: TabBarPatternUpdateTextColor002
- * @tc.desc: test UpdateTextColor
+ * @tc.name: TabBarPatternUpdateTextColorAndFontWeight002
+ * @tc.desc: test UpdateTextColorAndFontWeight
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColor002, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColorAndFontWeight002, TestSize.Level1)
 {
     /**
      * @tc.steps: steps1. Create TabBarPattern
@@ -5254,10 +5254,10 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColor002, TestSize.Level1)
     }
 
     /**
-     * @tc.steps: step2. Test function UpdateTextColor.
+     * @tc.steps: step2. Test function UpdateTextColorAndFontWeight.
      * @tc.expected: Related function runs ok.
      */
-    tabBarPattern->UpdateTextColor(index);
+    tabBarPattern->UpdateTextColorAndFontWeight(index);
 }
 
 /**

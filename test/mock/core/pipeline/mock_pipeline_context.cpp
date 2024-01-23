@@ -86,6 +86,11 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return MockPipelineContext::GetCurrent();
 }
 
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextWithoutScope()
+{
+    return MockPipelineContext::GetCurrent();
+}
+
 RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
 {
     return MockPipelineContext::GetCurrent();
@@ -518,6 +523,11 @@ void PipelineBase::OnActionEvent(const std::string& action) {}
 void PipelineBase::SetRootSize(double density, int32_t width, int32_t height) {}
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
+{
+    return NG::MockPipelineContext::GetCurrent();
+}
+
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextWithoutScope()
 {
     return NG::MockPipelineContext::GetCurrent();
 }

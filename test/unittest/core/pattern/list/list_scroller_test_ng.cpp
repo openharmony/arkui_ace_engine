@@ -1040,7 +1040,7 @@ HWTEST_F(ListScrollerTestNg, Event001, TestSize.Level1)
     EXPECT_TRUE(isTrigger);
 
     // SetMinPlatformVersion
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN - 1);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
@@ -1061,7 +1061,7 @@ HWTEST_F(ListScrollerTestNg, Event001, TestSize.Level1)
     EXPECT_TRUE(isTrigger);
 
     // set back
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
 }
 
 /**

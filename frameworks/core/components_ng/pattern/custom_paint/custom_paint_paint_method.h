@@ -30,6 +30,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/image/image_loader.h"
@@ -320,6 +321,8 @@ public:
     void SetTransformMatrix(const TransformParam& param);
     void TransformMatrix(const TransformParam& param);
     void TranslateMatrix(double tx, double ty);
+    void DrawSvgImage(PaintWrapper* paintWrapper, RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& canvasImage,
+        const ImageFit& imageFit);
 
     void UpdateRecordingCanvas(float width, float height);
 

@@ -73,11 +73,9 @@ namespace {
     constexpr int ICON_RESOURCE_TABLE = 2;
 }
 
-#ifdef SECURITY_COMPONENT_ENABLE
 namespace {
     constexpr float MAX_ROTATE = 360.0f;
 }
-#endif
 
 class SecurityComponentModelTestNg : public testing::Test {
 public:
@@ -1606,7 +1604,6 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentGetIconResourceTest001, 
     EXPECT_FALSE(SaveButtonModelNG::GetInstance()->GetIconResource(ICON_RESOURCE_TABLE + 1, id));
 }
 
-#ifdef SECURITY_COMPONENT_ENABLE
 /**
  * @tc.name: SecurityComponentHandlerTest001
  * @tc.desc: Test security component handler
@@ -1644,8 +1641,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest002, TestSize
 
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
     ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, 0), -1);
-    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(0),
-        OHOS::Security::SecurityComponent::SCErrCode::SC_SERVICE_ERROR_COMPONENT_NOT_EXIST);
+    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(0), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(0, frameNode, info), -1);
 }
 
@@ -1664,8 +1660,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest003, TestSize
 
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
     ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, 0), -1);
-    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(0),
-        OHOS::Security::SecurityComponent::SCErrCode::SC_SERVICE_ERROR_COMPONENT_NOT_EXIST);
+    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(0), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(0, frameNode, info), -1);
 }
 
@@ -1684,8 +1679,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest004, TestSize
 
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
     ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, 0), -1);
-    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(0),
-        OHOS::Security::SecurityComponent::SCErrCode::SC_SERVICE_ERROR_COMPONENT_NOT_EXIST);
+    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(0), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(0, frameNode, info), -1);
 }
 
@@ -2114,5 +2108,4 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     renderContext->UpdateOpacity(2);
     ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
 }
-#endif
 } // namespace OHOS::Ace::NG

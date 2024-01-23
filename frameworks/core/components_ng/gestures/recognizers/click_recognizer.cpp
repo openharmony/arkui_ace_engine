@@ -249,7 +249,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         DeadlineTimer(tapDeadlineTimer_, MULTI_TAP_TIMEOUT);
     }
 
-    if (refereeState_ != RefereeState::PENDING) {
+    if (refereeState_ != RefereeState::PENDING && refereeState_ != RefereeState::FAIL) {
         Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
     }
 
@@ -389,7 +389,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     auto targetComponent = GetTargetComponent();
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    CHECK_NULL_RETURN(callback, GestureJudgeResult::CONTINUE);
+    if (!callback && !sysJudge_) {
+        return GestureJudgeResult::CONTINUE;
+    }
     auto info = std::make_shared<TapGestureEvent>();
     info->SetTimeStamp(time_);
     info->SetFingerList(fingerList_);
@@ -410,6 +412,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
         info->SetTiltY(touchPoint.tiltY.value());
     }
     info->SetSourceTool(touchPoint.sourceTool);
+    if (sysJudge_) {
+        return sysJudge_(gestureInfo_, info);
+    }
     return callback(gestureInfo_, info);
 }
 

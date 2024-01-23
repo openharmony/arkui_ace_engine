@@ -602,9 +602,9 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         BorderColorProperty outerColorProp;
         outerColorProp.SetColor(menuTheme->GetOuterBorderColor());
         BorderRadiusProperty outerRadiusProp;
-        outerRadiusProp.SetRadius(menuTheme->GetOuterBorderRadius());
+        outerRadiusProp.SetRadius(Dimension(menuTheme->GetOuterBorderRadius()));
         BorderWidthProperty outerWidthProp;
-        outerWidthProp.SetBorderWidth(menuTheme->GetOuterBorderWidth());
+        outerWidthProp.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
         renderContext->SetOuterBorderStyle(styleProp);
         renderContext->SetOuterBorderColor(outerColorProp);
         renderContext->SetOuterBorderRadius(outerRadiusProp);
@@ -614,7 +614,7 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         BorderRadiusProperty innerRadiusProp;
         innerRadiusProp.SetRadius(menuTheme->GetInnerBorderRadius());
         BorderWidthProperty innerWidthProp;
-        innerWidthProp.SetBorderWidth(menuTheme->GetInnerBorderWidth());
+        innerWidthProp.SetBorderWidth(Dimension(menuTheme->GetInnerBorderWidth()));
         renderContext->SetBorderStyle(styleProp);
         renderContext->SetBorderColor(innerColorProp);
         renderContext->SetBorderRadius(innerRadiusProp);
