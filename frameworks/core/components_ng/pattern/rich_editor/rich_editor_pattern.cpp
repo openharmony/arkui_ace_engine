@@ -2099,10 +2099,6 @@ void RichEditorPattern::OnHover(bool isHover)
 
 bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
-    if (!HasFocus()) {
-        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "RequestKeyboard !HasFocus(),return false!");
-        return false;
-    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     CHECK_NULL_RETURN(needShowSoftKeyboard, false);
