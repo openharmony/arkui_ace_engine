@@ -3082,6 +3082,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             CloseCustomKeyboard();
         }
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
+        UpdateKeyboardOffset(textConfig.positionY, textConfig.height);
 #else
         if (!HasConnection()) {
             TextInputConfiguration config;
