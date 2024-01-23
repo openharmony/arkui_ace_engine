@@ -39,6 +39,7 @@ struct RequestFormInfo {
     Dimension height;
     int32_t renderingMode = 0;
     uint64_t index = GetNanoseconds();
+    float borderWidth = 0.0f;
 
     std::string ToString() const
     {

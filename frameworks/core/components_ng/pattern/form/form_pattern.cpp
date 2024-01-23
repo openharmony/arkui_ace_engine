@@ -52,6 +52,7 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
 constexpr double TRANSPARENT_VAL = 0;
+constexpr int32_t DOUBLE = 2;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -231,7 +232,7 @@ void FormPattern::TakeSurfaceCaptureForUI()
         needSnapshotAgain_ = true;
         return;
     }
-    auto externalContext = DynamicCast<NG::RosenRenderContext>(renderContext);
+    auto externalContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalContext);
     auto rsNode = externalContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
@@ -329,8 +330,8 @@ void FormPattern::UpdateImageNode()
     CHECK_NULL_VOID(pixelLayoutProperty);
     auto pixelSourceInfo = ImageSourceInfo(pixelMap_);
 
-    auto width = static_cast<float>(cardInfo_.width.Value());
-    auto height = static_cast<float>(cardInfo_.height.Value());
+    auto width = static_cast<float>(cardInfo_.width.Value()) - cardInfo_.borderWidth * DOUBLE;
+    auto height = static_cast<float>(cardInfo_.height.Value()) - cardInfo_.borderWidth * DOUBLE;
     CalcSize idealSize = { CalcLength(width), CalcLength(height) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
@@ -422,6 +423,12 @@ void FormPattern::OnModifyDone()
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
     info.width = Dimension(width.ConvertToPx());
     info.height = Dimension(height.ConvertToPx());
+    auto &&borderWidthProperty = layoutProperty->GetBorderWidthProperty();
+    float borderWidth = 0.0f;
+    if (borderWidthProperty && borderWidthProperty->topDimen) {
+        borderWidth = borderWidthProperty->topDimen->ConvertToPx();
+    }
+    info.borderWidth = borderWidth;
     layoutProperty->UpdateRequestFormInfo(info);
     UpdateBackgroundColorWhenUnTrustForm();
     HandleFormComponent(info);
