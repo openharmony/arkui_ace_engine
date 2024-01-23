@@ -264,6 +264,9 @@ public:
     const TextEditingValue& GetInputEditingValue() const override
     {
         static TextEditingValue value;
+        value.text = contentController_->GetTextValue();
+        value.hint = GetPlaceHolder();
+        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return value;
     };
     Offset GetGlobalOffset() const;
