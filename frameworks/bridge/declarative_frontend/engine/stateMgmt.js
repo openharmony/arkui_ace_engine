@@ -5724,8 +5724,13 @@ class ViewPU extends NativeViewPartialUpdate {
             
             return;
         }
-        if (itemGenFunc === null || itemGenFunc === undefined) {
+        if (typeof itemGenFunc !== "function") {
             stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): Item generation function missing. Application error!`);
+            
+            return;
+        }
+        if (idGenFunc !== undefined && typeof idGenFunc !== "function") {
+            stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): id generator is not a function. Application error!`);
             
             return;
         }
