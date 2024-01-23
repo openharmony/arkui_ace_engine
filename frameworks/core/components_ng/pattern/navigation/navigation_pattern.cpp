@@ -178,15 +178,7 @@ void NavigationPattern::OnModifyDone()
     CHECK_NULL_VOID(hostNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    auto layoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
-    if (layoutProperty->GetHideNavBarValue(false)) {
-        navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE, true);
-        navBarNode->SetActive(false);
-    } else {
-        navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);
-        navBarNode->SetActive(true);
-        navBarNode->MarkModifyDone();
-    }
+    navBarNode->MarkModifyDone();
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -384,8 +376,12 @@ void NavigationPattern::CheckTopNavPathChange(
         // back to navBar case
         auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
         CHECK_NULL_VOID(navBarNode);
-        navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-        navBarNode->SetActive(true);
+        auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(
+            hostNode->GetLayoutProperty());
+        if (!navigationLayoutProperty->GetHideNavBarValue(false)) {
+            navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+            navBarNode->SetActive(true);
+        }
         auto stageManager = context->GetStageManager();
         if (stageManager != nullptr) {
             RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
@@ -598,6 +594,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         auto layoutProperty = navBarNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
+        navigationNode->SetNeedSetInvisible(true);
     }
 
     // navDestination pop to navBar
