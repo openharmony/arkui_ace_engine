@@ -66,7 +66,8 @@ public:
         touchTestResults_ = touchTestResults;
     }
 
-    void HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset);
+    void HandleGlobalEvent(
+        const TouchEvent& touchPoint, const NG::OffsetF& rootOffset, bool isMousePressAtSelectedNode = false);
 
     void MarkDirty(PropertyChangeFlag flag);
 
@@ -88,6 +89,26 @@ public:
         return selectOverlayInfo_;
     }
 
+    void SetSelectedNodeByMouse(const SelectedByMouseInfo& info)
+    {
+        if (selectedByMouseInfo_ != info) {
+            if (selectedByMouseInfo_.onResetSelection) {
+                selectedByMouseInfo_.onResetSelection();
+            }
+            selectedByMouseInfo_.clear();
+            selectedByMouseInfo_ = info;
+        }
+    }
+
+    bool GetSelectedNodeIdByMouse(int32_t& id) const
+    {
+        CHECK_NULL_RETURN(selectedByMouseInfo_.selectedNode.Upgrade(), false);
+        id = selectedByMouseInfo_.selectedNode.Upgrade()->GetId();
+        return true;
+    }
+
+    void ResetSection(const TouchEvent& touchPoint, bool isMousePressAtSelectedNode);
+
 private:
     void DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation = false);
 
@@ -103,6 +124,8 @@ private:
 
     WeakPtr<FrameNode> selectOverlayItem_;
     WeakPtr<SelectionHost> host_;
+
+    SelectedByMouseInfo selectedByMouseInfo_;
 
     SelectOverlayInfo selectOverlayInfo_;
 

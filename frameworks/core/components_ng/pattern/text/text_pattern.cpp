@@ -571,6 +571,10 @@ void TextPattern::HandleOnSelectAll()
     CloseSelectOverlay(true);
     if (!selectOverlayInfo.isUsingMouse) {
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
+    } else {
+        if (IsSelected()) {
+            PushSelectedByMouseInfoToManager();
+        }
     }
     selectMenuInfo_.showCopyAll = false;
     selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
@@ -1017,9 +1021,24 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
     if (info.GetButton() == MouseButton::LEFT_BUTTON) {
         HandleMouseLeftButton(info, textOffset);
+        if (IsSelected()) {
+            PushSelectedByMouseInfoToManager();
+        }
     } else if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleMouseRightButton(info, textOffset);
     }
+}
+
+void TextPattern::PushSelectedByMouseInfoToManager()
+{
+    SelectedByMouseInfo selectedByMouseInfo;
+    selectedByMouseInfo.selectedNode = GetHost();
+    selectedByMouseInfo.onResetSelection = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ResetSelection();
+    };
+    SetSelectionNode(selectedByMouseInfo);
 }
 
 void TextPattern::HandleMouseLeftButton(const MouseInfo& info, const Offset& textOffset)

@@ -300,18 +300,53 @@ void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
     const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
 {
     CHECK_NULL_VOID(selectOverlayManager);
-    if (touchPoint.type == TouchType::DOWN && touchTestResults_.find(touchPoint.id) != touchTestResults_.end()) {
-        std::vector<std::string> touchTestIds;
-        const auto& resultList = touchTestResults_[touchPoint.id];
-        for (const auto& result : resultList) {
-            auto eventTarget = result->GetEventTarget();
-            if (eventTarget.has_value()) {
-                touchTestIds.emplace_back(eventTarget.value().id);
+    auto isMousePressAtSelectedNode = false;
+    if (touchPoint.type == TouchType::DOWN &&
+        (touchTestResults_.find(touchPoint.id) != touchTestResults_.end() || !currMouseTestResults_.empty())) {
+        int32_t selectedNodeId = -1;
+        if (touchPoint.sourceType == SourceType::MOUSE) {
+            selectOverlayManager->GetSelectedNodeIdByMouse(selectedNodeId);
+        }
+        if (!touchTestResults_.empty()) {
+            std::vector<std::string> touchTestIds;
+            GetTouchTestIds(touchPoint, touchTestIds, isMousePressAtSelectedNode, selectedNodeId);
+            selectOverlayManager->SetOnTouchTestResults(touchTestIds);
+        } else {
+            // When right-click on another component, close the current component selection.
+            CheckMouseTestResults(isMousePressAtSelectedNode, selectedNodeId);
+        }
+    }
+    selectOverlayManager->HandleGlobalEvent(touchPoint, rootOffset, isMousePressAtSelectedNode);
+}
+
+void EventManager::CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId)
+{
+    for (const auto& result : currMouseTestResults_) {
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
+            "HandleGlobalEventNG selectedNodeId: %{public}d mouseTestResult id is: %{public}d", selectedNodeId,
+            result->GetNodeId());
+        if (result->GetNodeId() == selectedNodeId) {
+            isMousePressAtSelectedNode = true;
+        }
+    }
+}
+
+void EventManager::GetTouchTestIds(const TouchEvent& touchPoint, std::vector<std::string>& touchTestIds,
+    bool& isMousePressAtSelectedNode, int32_t selectedNodeId)
+{
+    const auto& resultList = touchTestResults_[touchPoint.id];
+    for (const auto& result : resultList) {
+        auto eventTarget = result->GetEventTarget();
+        if (eventTarget.has_value()) {
+            touchTestIds.emplace_back(eventTarget.value().id);
+            if (eventTarget.value().id == std::to_string(selectedNodeId)) {
+                TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
+                    "HandleGlobalEventNG selectedNodeId: %{public}d eventTarget id is: %{public}s", selectedNodeId,
+                    eventTarget.value().id.c_str());
+                isMousePressAtSelectedNode = true;
             }
         }
-        selectOverlayManager->SetOnTouchTestResults(touchTestIds);
     }
-    selectOverlayManager->HandleGlobalEvent(touchPoint, rootOffset);
 }
 
 void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList)

@@ -1085,6 +1085,9 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     showSelect_ = true;
     if (isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
         CloseSelectOverlay(true);
+        if (IsSelected()) {
+            PushSelectedByMouseInfoToManager();
+        }
         return;
     }
     ProcessOverlay(true, true);
@@ -2875,10 +2878,25 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         HandleRightMouseEvent(info);
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON) {
         HandleLeftMouseEvent(info);
+        if (IsSelected()) {
+            PushSelectedByMouseInfoToManager();
+        }
     }
     if (info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
         isUsingMouse_ = false;
     }
+}
+
+void TextFieldPattern::PushSelectedByMouseInfoToManager()
+{
+    SelectedByMouseInfo selectedByMouseInfo;
+    selectedByMouseInfo.selectedNode = GetHost();
+    selectedByMouseInfo.onResetSelection = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetCaretPosition(pattern->GetTextSelectController()->GetEndIndex());
+    };
+    SetSelectionNode(selectedByMouseInfo);
 }
 
 void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
