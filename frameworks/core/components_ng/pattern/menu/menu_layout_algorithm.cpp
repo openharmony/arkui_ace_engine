@@ -540,6 +540,19 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // calculate menu main size
     auto childConstraint = CreateChildConstraint(layoutWrapper);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
+        auto parentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        auto parentContainer = AceEngine::Get().GetContainer(parentId);
+        CHECK_NULL_VOID(parentContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(parentContainer->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto childInsets = pipeline->GetSafeArea();
+        childInsets.top_.start = 0;
+        childInsets.top_.end = 0;
+        LayoutWrapper::ApplySafeArea(childInsets, childConstraint);
+    }
     if (menuPattern->IsSelectMenu() && menuPattern->GetHasOptionWidth()) {
         auto selectMenuWidth = menuPattern->GetSelectMenuWidth();
         childConstraint.maxSize.SetWidth(selectMenuWidth);
