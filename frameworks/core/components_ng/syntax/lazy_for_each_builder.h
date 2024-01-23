@@ -52,32 +52,7 @@ public:
         return OnGetTotalCount();
     }
 
-    std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild)
-    {
-        auto iter = cachedItems_.find(index);
-        if (iter != cachedItems_.end()) {
-            if (iter->second.second) {
-                return iter->second;
-            }
-            auto keyIter = expiringItem_.find(iter->second.first);
-            if (keyIter != expiringItem_.end() && keyIter->second.second) {
-                iter->second.second = keyIter->second.second;
-                expiringItem_.erase(keyIter);
-                return iter->second;
-            }
-        }
-
-        if (needBuild) {
-            ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
-            auto itemInfo = OnGetChildByIndex(index, expiringItem_);
-            CHECK_NULL_RETURN(itemInfo.second, itemInfo);
-            {
-                cachedItems_[index] = itemInfo;
-            }
-            return itemInfo;
-        }
-        return {};
-    }
+    std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild);
 
     void ExpandChildrenOnInitial()
     {
@@ -130,13 +105,14 @@ public:
             for (auto& [oldindex, child] : temp) {
                 if (static_cast<size_t>(oldindex) == index) {
                     node = child.second;
+                    KeepRemovedItemInCache(child, expiringItem_);
                 } else {
                     cachedItems_.try_emplace(
                         index > static_cast<size_t>(oldindex) ? oldindex : oldindex - 1, std::move(child));
                 }
             }
         }
-        NotifyDataDeleted(node, index);
+        NotifyDataDeleted(node, index, false);
         for (auto& [key, child] : expiringItem_) {
             if (static_cast<size_t>(child.first) > index) {
                 child.first--;
@@ -436,6 +412,7 @@ public:
                     idleIndexes.erase(iter);
                 }
             } else {
+                NotifyDataDeleted(node.second, static_cast<size_t>(node.first), true);
                 ProcessOffscreenNode(node.second, true);
             }
         }
@@ -523,9 +500,12 @@ protected:
 
     virtual void NotifyDataChanged(size_t index, RefPtr<UINode>& lazyForEachNode, bool isRebuild = true) = 0;
 
-    virtual void NotifyDataDeleted(RefPtr<UINode>& lazyForEachNode, size_t index) = 0;
+    virtual void NotifyDataDeleted(RefPtr<UINode>& lazyForEachNode, size_t index, bool removeIds) = 0;
 
     virtual void NotifyDataAdded(size_t index) = 0;
+
+    virtual void KeepRemovedItemInCache(NG::LazyForEachChild node,
+        std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) = 0;
 
 private:
     std::map<int32_t, LazyForEachChild> cachedItems_;
