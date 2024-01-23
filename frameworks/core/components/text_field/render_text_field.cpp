@@ -2528,7 +2528,7 @@ void RenderTextField::HandleOnCut()
     }
 }
 
-void RenderTextField::HandleOnCopy()
+void RenderTextField::HandleOnCopy(bool isUsingExternalKeyboard)
 {
     if (!clipboard_) {
         return;

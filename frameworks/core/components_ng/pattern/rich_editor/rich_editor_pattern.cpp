@@ -3969,7 +3969,7 @@ void RichEditorPattern::CheckEditorTypeChange()
     }
 }
 
-void RichEditorPattern::HandleOnCopy()
+void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
 {
     CHECK_NULL_VOID(clipboard_);
     if (copyOption_ == CopyOptions::None) {
