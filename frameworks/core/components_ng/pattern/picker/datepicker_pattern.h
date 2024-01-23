@@ -90,7 +90,7 @@ public:
     }
 
     void OnLanguageConfigurationUpdate() override;
-	
+
     void OnColorConfigurationUpdate() override;
 
     void SetChangeCallback(ColumnChangeCallback&& value);
@@ -143,7 +143,7 @@ public:
 
     void SetEventCallback(EventCallback&& value);
 
-    void FireChangeEvent(bool refresh) const;
+    void FireChangeEvent(bool refresh);
 
     void FlushColumn();
 
@@ -337,6 +337,8 @@ public:
     void SetSelectDate(const PickerDate& value)
     {
         selectedDate_ = value;
+        isFiredDateChange_ = firedDateStr_.has_value() && firedDateStr_.value() == GetSelectedObject(false);
+        firedDateStr_.reset();
         if (selectedDate_.GetYear() <= 0) {
             LOGW("selectedDate error");
             selectedDate_ = PickerDate::Current();
@@ -562,7 +564,7 @@ public:
 
     void SetFocusDisable();
     void SetFocusEnable();
-    
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -627,6 +629,8 @@ private:
     WeakPtr<FrameNode> contentRowNode_;
     WeakPtr<FrameNode> buttonTitleNode_;
     bool isPicker_ = false;
+    bool isFiredDateChange_ = false;
+    std::optional<std::string> firedDateStr_;
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };
 } // namespace OHOS::Ace::NG
