@@ -1532,10 +1532,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto focusHub = host->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        if (layoutProperty->GetIsDisabledValue(false) || pattern->IsNormalInlineState() ||
-            !focusHub->IsCurrentFocus()) {
+        if (layoutProperty->GetIsDisabledValue(false) || pattern->IsNormalInlineState() || !pattern->HasFocus()) {
             return;
         }
         if (extraParams.empty()) {
