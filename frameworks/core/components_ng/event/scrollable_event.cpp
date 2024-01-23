@@ -65,19 +65,26 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
             scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
             scrollable->OnCollectTouchTarget(result, frameNode, targetComponent);
         }
-        if (event->IsHitTestBlock()) {
-            if (!clickRecognizer_) {
-                clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
-            }
-            clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-            clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
-            clickRecognizer_->AssignNodeId(frameNode->GetId());
-            clickRecognizer_->AttachFrameNode(frameNode);
-            clickRecognizer_->SetTargetComponent(targetComponent);
-            clickRecognizer_->SetIsSystemGesture(true);
-            result.emplace_front(clickRecognizer_);
-            break;
+        if (!clickRecognizer_) {
+            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
         }
+        clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+        clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+        clickRecognizer_->AssignNodeId(frameNode->GetId());
+        clickRecognizer_->AttachFrameNode(frameNode);
+        clickRecognizer_->SetTargetComponent(targetComponent);
+        clickRecognizer_->SetIsSystemGesture(true);
+        clickRecognizer_->SetSysGestureJudge([weak = WeakClaim(RawPtr(event))](const RefPtr<GestureInfo>& gestureInfo,
+                                                 const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
+            auto event = weak.Upgrade();
+            CHECK_NULL_RETURN(event, GestureJudgeResult::CONTINUE);
+            if (!event->IsHitTestBlock()) {
+                return GestureJudgeResult::REJECT;
+            }
+            return GestureJudgeResult::CONTINUE;
+        });
+        result.emplace_front(clickRecognizer_);
+        break;
     }
 }
 } // namespace OHOS::Ace::NG
