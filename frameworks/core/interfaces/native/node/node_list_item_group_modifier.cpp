@@ -26,8 +26,8 @@ constexpr int CALL_ARG_1 = 1;
 constexpr int CALL_ARG_2 = 2;
 constexpr int32_t DEFAULT_GROUP_DIVIDER_VALUES_COUNT = 3;
 
-void ListItemGroupSetDivider(ArkUINodeHandle node, uint32_t color, const double* values, const int* units,
-    int32_t length)
+void ListItemGroupSetDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
