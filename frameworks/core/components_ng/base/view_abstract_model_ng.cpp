@@ -58,33 +58,11 @@ void ViewAbstractModelNG::CreateCustomMenu(const std::function<void()>& buildFun
     NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, offset, menuParam, previewCustomNode);
 }
 
-void ViewAbstractModelNG::BindMenu(
+void ViewAbstractModelNG::BindMenuGesture(
     std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
-    auto targetId = targetNode->GetId();
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto menuNode = overlayManager->GetMenuNode(targetId);
-    if (menuNode) {
-        auto pattern = menuNode->GetPattern<MenuWrapperPattern>();
-        if (!pattern->GetShow() && menuParam.isShow) {
-            overlayManager->ShowMenu(targetId, menuParam.positionOffset, menuNode);
-        } else if (pattern->GetShow() && menuParam.setShow && !menuParam.isShow) {
-            overlayManager->HideMenu(menuNode, targetId, false);
-        }
-    } else if (menuParam.isShow) {
-        if (!params.empty()) {
-            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
-        } else if (buildFunc) {
-            std::function<void()> previewBuildFunc;
-            CreateCustomMenu(buildFunc, targetNode, menuParam.positionOffset, previewBuildFunc, menuParam);
-        }
-    }
     GestureEventFunc showMenu;
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (!params.empty()) {
@@ -115,7 +93,38 @@ void ViewAbstractModelNG::BindMenu(
     }
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(showMenu));
+}
 
+void ViewAbstractModelNG::BindMenu(
+    std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
+{
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    auto targetId = targetNode->GetId();
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    if (menuNode) {
+        auto pattern = menuNode->GetPattern<MenuWrapperPattern>();
+        if (!pattern->GetShow() && menuParam.isShow) {
+            overlayManager->ShowMenu(targetId, menuParam.positionOffset, menuNode);
+        } else if (pattern->GetShow() && menuParam.setShow && !menuParam.isShow) {
+            overlayManager->HideMenu(menuNode, targetId, false);
+        }
+    } else if (menuParam.isShow) {
+        if (!params.empty()) {
+            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
+        } else if (buildFunc) {
+            std::function<void()> previewBuildFunc;
+            CreateCustomMenu(buildFunc, targetNode, menuParam.positionOffset, previewBuildFunc, menuParam);
+        }
+    }
+    if (!menuParam.setShow) {
+        BindMenuGesture(std::move(params), std::move(buildFunc), menuParam);
+    }
     // delete menu when target node destroy
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
