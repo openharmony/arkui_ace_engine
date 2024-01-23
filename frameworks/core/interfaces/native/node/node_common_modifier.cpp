@@ -317,8 +317,8 @@ void SetRadialGradientValues(NG::Gradient& gradient, const ArkUI_Float32* values
     gradient.SetRepeat(static_cast<bool>(repeating));
 }
 
-bool SetCalcDimension(
-    std::optional<CalcDimension>& optDimension, const ArkUIStringAndFloat* options, ArkUI_Int32 optionsLength, ArkUI_Int32 offset)
+bool SetCalcDimension(std::optional<CalcDimension>& optDimension, const ArkUIStringAndFloat* options,
+    ArkUI_Int32 optionsLength, ArkUI_Int32 offset)
 {
     if ((options == nullptr) || (offset < 0) || ((offset + NUM_3) >= optionsLength)) {
         return false;
@@ -343,8 +343,8 @@ bool SetCalcDimension(
     return true;
 }
 
-void SetOptionalBorder(
-    std::optional<Dimension>& optionalDimension, const ArkUI_Float32* values, ArkUI_Int32 valuesSize, ArkUI_Int32& offset)
+void SetOptionalBorder(std::optional<Dimension>& optionalDimension, const ArkUI_Float32* values,
+    ArkUI_Int32 valuesSize, ArkUI_Int32& offset)
 {
     bool hasValue = static_cast<bool>(values[offset]);
     if (hasValue) {
@@ -388,8 +388,8 @@ void SetBorderImageSlice(RefPtr<BorderImage>& borderImage, const std::vector<Bor
     offset += NUM_12;
 }
 
-void SetBorderImageRepeat(
-    RefPtr<BorderImage>& borderImage, const ArkUIStringAndFloat* options, ArkUI_Int32 optionsLength, ArkUI_Int32& offset)
+void SetBorderImageRepeat(RefPtr<BorderImage>& borderImage, const ArkUIStringAndFloat* options,
+    ArkUI_Int32 optionsLength, ArkUI_Int32& offset)
 {
     if ((options == nullptr) || (offset < 0) || ((offset + NUM_2) >= optionsLength)) {
         return;
@@ -431,8 +431,8 @@ void SetBorderImageOutset(RefPtr<BorderImage>& borderImage, const std::vector<Bo
     offset += NUM_12;
 }
 
-void SetBorderImageFill(
-    RefPtr<BorderImage>& borderImage, const ArkUIStringAndFloat* options, ArkUI_Int32 optionsLength, ArkUI_Int32& offset)
+void SetBorderImageFill(RefPtr<BorderImage>& borderImage, const ArkUIStringAndFloat* options,
+    ArkUI_Int32 optionsLength, ArkUI_Int32& offset)
 {
     if ((options == nullptr) || (offset < 0) || ((offset + NUM_2) >= optionsLength)) {
         return;
@@ -494,8 +494,8 @@ void SetBorderImageGradientValues(NG::Gradient& gradient, const ArkUI_Float32* v
     gradient.SetRepeat(static_cast<bool>(repeating));
 }
 
-void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, ArkUI_Float32 valueX, ArkUI_Float32 valueY,
-    BackgroundImagePosition& bgImgPosition)
+void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY,
+    ArkUI_Float32 valueX, ArkUI_Float32 valueY, BackgroundImagePosition& bgImgPosition)
 {
     OHOS::Ace::AnimationOption option;
     bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
@@ -1075,8 +1075,8 @@ void ResetBlur(ArkUINodeHandle node)
  * ...
  * @param colorsLength colors length
  */
-void SetLinearGradient(
-    ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength, const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+void SetLinearGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
+    const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1114,8 +1114,8 @@ void ResetLinearGradient(ArkUINodeHandle node)
  * ...
  * @param colorsLength colors length
  */
-void SetSweepGradient(
-    ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength, const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+void SetSweepGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
+    const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1151,8 +1151,8 @@ void ResetSweepGradient(ArkUINodeHandle node)
  * ...
  * @param colorsLength colors length
  */
-void SetRadialGradient(
-    ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength, const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+void SetRadialGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
+    const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1259,7 +1259,8 @@ void ResetOverlay(ArkUINodeHandle node)
  * option[offset + 40]: bitset
  * @param optionsLength options length
  */
-void SetBorderImage(ArkUINodeHandle node, const char* src, const ArkUIStringAndFloat* options, ArkUI_Int32 optionsLength)
+void SetBorderImage(ArkUINodeHandle node, const char* src,
+    const ArkUIStringAndFloat* options, ArkUI_Int32 optionsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1293,8 +1294,8 @@ void ResetBorderImage(ArkUINodeHandle node)
     SetBorderImage(frameNode, borderImage, imageBorderBitsets);
 }
 
-void SetBorderImageGradient(
-    ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength, const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+void SetBorderImageGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
+    const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1551,8 +1552,8 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
 }
 
-void SetBackgroundImageSize(
-    ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight, ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight)
+void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
+    ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1689,7 +1690,8 @@ void ResetScale(ArkUINodeHandle node)
  * values[7]: angle;values[8]:perspective
  * @param length shadows length
  */
-void SetRotate(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength, const int* units, ArkUI_Int32 unitLength)
+void SetRotate(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength,
+    const int* units, ArkUI_Int32 unitLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2124,7 +2126,8 @@ void ResetMargin(ArkUINodeHandle node)
     ViewAbstract::SetMargin(frameNode, NG::CalcLength(0.0));
 }
 
-void SetMarkAnchor(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue, ArkUI_Int32 yUnit)
+void SetMarkAnchor(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit,
+    ArkUI_Float32 yValue, ArkUI_Int32 yUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2691,7 +2694,8 @@ void ResetResponseRegion(ArkUINodeHandle node)
     ViewAbstract::SetResponseRegion(frameNode, region);
 }
 
-void SetMouseResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
+void SetMouseResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

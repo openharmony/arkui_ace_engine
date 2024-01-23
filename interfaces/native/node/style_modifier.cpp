@@ -546,7 +546,7 @@ void SetBorderWidth(ArkUI_NodeHandle node, const char* value)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     std::string widths(value);
-    double widthVals[ALLOW_SIZE_4] = { 0, 0, 0, 0 };
+    ArkUI_Float32 widthVals[ALLOW_SIZE_4] = { 0, 0, 0, 0 };
     int widthUnits[ALLOW_SIZE_4];
 
     if (IsSingleNumber(widths)) {
@@ -581,7 +581,7 @@ void SetBorderRadius(ArkUI_NodeHandle node, const char* value)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     std::string radius(value);
-    double radiusVals[ALLOW_SIZE_4] = { 1, 1, 1, 1 };
+    ArkUI_Float32 radiusVals[ALLOW_SIZE_4] = { 1, 1, 1, 1 };
     int radiusUnits[ALLOW_SIZE_4];
 
     if (IsSingleNumber(radius)) {
@@ -615,7 +615,7 @@ void SetBorderColor(ArkUI_NodeHandle node, const char* value)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    double defaultBackgroundColor = StringToColorInt("#00000000", 0);
+    ArkUI_Float32 defaultBackgroundColor = StringToColorInt("#00000000", 0);
     std::string colorStr(value);
     int colors[ALLOW_SIZE_4] = { defaultBackgroundColor, defaultBackgroundColor, defaultBackgroundColor,
         defaultBackgroundColor };
@@ -700,7 +700,7 @@ void SetClip(ArkUI_NodeHandle node, const char* value)
         std::vector<std::string> attributeProps;
         StringUtils::StringSplitter(content.c_str(), ',', attributeProps);
         if (std::string("path") == shape) {
-            double pathAttributes[NUM_2];
+            ArkUI_Float32 pathAttributes[NUM_2];
             for (int i = 0; i < NUM_2; ++i) {
                 pathAttributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
             }
@@ -708,7 +708,7 @@ void SetClip(ArkUI_NodeHandle node, const char* value)
             fullImpl->getNodeModifiers()->getCommonModifier()->setClipPath(
                 node->uiNodeHandle, shape.c_str(), pathAttributes, commands.c_str());
         } else {
-            double attributes[attributeProps.size()];
+            ArkUI_Float32 attributes[attributeProps.size()];
             for (int i = 0; i < attributeProps.size(); ++i) {
                 attributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
             }
@@ -767,7 +767,7 @@ void SetShadow(ArkUI_NodeHandle node, const char* value)
     auto* fullImpl = GetFullImpl();
     std::string shadowStr(value);
     if (IsMultipleWords(shadowStr)) {
-        double shadows[ALLOW_SIZE_7] = { 0, 2, 0, 0, 0, 0, 0 };
+        ArkUI_Float32 shadows[ALLOW_SIZE_7] = { 0, 2, 0, 0, 0, 0, 0 };
         int length;
         std::vector<std::string> ShadowProps;
         StringUtils::StringSplitter(shadowStr.c_str(), ' ', ShadowProps);
@@ -799,7 +799,7 @@ void SetShadow(ArkUI_NodeHandle node, const char* value)
         }
         fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_7);
     } else {
-        double shadows[NUM_1] = { 0 };
+        ArkUI_Float32 shadows[NUM_1] = { 0 };
         shadows[NUM_0] = StringToEnumInt(value, COMMON_SHADOW_STYLE, 0);
         fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_1);
     }
@@ -908,7 +908,7 @@ void SetOverlay(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    double values[ALLOW_SIZE_10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1 };
+    ArkUI_Float32 values[ALLOW_SIZE_10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1 };
     std::vector<std::string> alignment = { "top-start", "top", "top-end", "start", "center", "end", "bottom-start",
         "bottom", "bottom-end" };
     // 调用函数参数要求
@@ -1347,7 +1347,7 @@ void SetScrollTo(ArkUI_NodeHandle node, const char* value)
     std::vector<std::string> curve = { "linear", "ease", "easeIn", "easeOut", "ease-in-out", "fast-out-slow-in",
         "linear-out-slow-in", "fast-out-linear-in", "extreme-deceleration", "sharp", "rhythm", "smooth", "friction" };
     // 组装对应的参数
-    double values[ALLOW_SIZE_7] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    ArkUI_Float32 values[ALLOW_SIZE_7] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     values[0] = StringToDouble(valueVal[0].c_str(), 0.0);
     values[1] = 1;
     values[2] = StringToDouble(valueVal[1].c_str(), 0.0);
