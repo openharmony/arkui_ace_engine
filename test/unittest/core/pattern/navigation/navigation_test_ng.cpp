@@ -1215,6 +1215,10 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     layout->propVisibility_ = VisibleType::VISIBLE;
     navigationLayoutAlgorithm->navigationMode_ = NavigationMode::SPLIT;
     layout->propHideNavBar_ = true;
+    navigation->contentNode_ = contentNode;
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigation->contentNode_->children_.push_back(navDestination);
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     ASSERT_EQ(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_, VisibleType::INVISIBLE);
 }
