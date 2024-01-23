@@ -320,6 +320,8 @@ public:
         return childLayoutConstraint_;
     }
 
+    void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index);
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -382,7 +384,6 @@ private:
     int32_t FindPredictSnapEndIndexInItemPositions(float predictEndPos, V2::ScrollSnapAlign scrollSnapAlign);
     bool IsUniformHeightProbably();
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
-    void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index);
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
 
     std::optional<int32_t> jumpIndex_;
