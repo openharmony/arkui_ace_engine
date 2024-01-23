@@ -1171,7 +1171,6 @@ void TextFieldPattern::HandleOnPaste()
             end = textfield->selectController_->GetCaretIndex();
         }
         std::wstring pasteData = StringUtils::ToWstring(data);
-        textfield->StripNextLine(pasteData);
         auto originLength = static_cast<int32_t>(textfield->contentController_->GetWideText().length());
         textfield->contentController_->ReplaceSelectedValue(start, end, StringUtils::ToString(pasteData));
         auto caretMoveLength =
