@@ -332,7 +332,7 @@ void RosenRenderContext::AddFrameNodeInfoToRsNode()
     if (rsNode_) {
         auto frameNodePtr = GetHost();
         CHECK_NULL_VOID(frameNodePtr);
-        // rsNode_->SetFrameNodeInfo(frameNodePtr->GetId(), frameNodePtr->GetTag());
+        rsNode_->SetFrameNodeInfo(frameNodePtr->GetId(), frameNodePtr->GetTag());
     }
 }
 
