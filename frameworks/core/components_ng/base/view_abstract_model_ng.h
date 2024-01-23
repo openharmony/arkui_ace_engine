@@ -984,6 +984,9 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
 
+    void BindMenuGesture(
+        std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
+
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
