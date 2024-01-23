@@ -32,8 +32,8 @@
  * @since 12
  */
 
-#ifndef ARKUI_NATIVE_TYPE
-#define ARKUI_NATIVE_TYPE
+#ifndef ARKUI_NATIVE_TYPE_H
+#define ARKUI_NATIVE_TYPE_H
 
 #include <stdint.h>
 
@@ -79,6 +79,8 @@ typedef enum {
     ARKUI_UNIT_VP = 0,
     /** PX单位。*/
     ARKUI_UNIT_PX,
+    /** FP单位。*/
+    ARKUI_UNIT_FP,
     /** 百分比单位。*/
     ARKUI_UNIT_PERCENT
 } ArkUI_DimensionUnit;
@@ -109,25 +111,9 @@ typedef enum {
     ARKUI_ALIGNMENT_BOTTOM_END,
 } ArkUI_Alignment;
 
-/**
- * @brief 定义Native接口的错误码。
- *
- * @since 12
- */
-typedef enum {
-    /** 接口调用成功。*/
-    ARKUI_RESULT_SUCCESS = 0,
-    /** 接口调用失败。*/
-    ARKUI_RESULT_FAIL = -1,
-    /** 参数解析异常。*/
-    ARKUI_RESULT_BAD_PARAMETER = -2,
-    /** 不支持该类型参数。*/
-    ARKUI_RESULT_UNSUPPORTED = -3,
-} ArkUI_ErrorCode;
-
 #ifdef __cplusplus
 };
 #endif
 
-#endif // ARKUI_NATIVE_TYPE
+#endif // ARKUI_NATIVE_TYPE_H
 /** @} */

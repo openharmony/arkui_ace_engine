@@ -32,8 +32,8 @@
  * @since 12
  */
 
-#ifndef ARKUI_NATIVE_INTERFACE
-#define ARKUI_NATIVE_INTERFACE
+#ifndef ARKUI_NATIVE_INTERFACE_H
+#define ARKUI_NATIVE_INTERFACE_H
 
 #include <stdint.h>
 
@@ -89,5 +89,5 @@ ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32
 };
 #endif
 
-#endif // ARKUI_NATIVE_INTERFACE
+#endif // ARKUI_NATIVE_INTERFACE_H
 /** @} */
