@@ -97,8 +97,10 @@ bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::strin
 std::function<void(const AAFwk::WantParams&)> DataDetectorMgr::GetOnReceive(const RefPtr<NG::FrameNode>& uiExtNode,
     NG::RectF aiRect, std::function<void(const std::string&)> onClickMenu, const RefPtr<NG::FrameNode>& targetNode)
 {
-    return [uiExtNode, aiRect, onClickMenu, targetNode](const AAFwk::WantParams& wantParams) {
+    return [uiExtNode, aiRect, onClickMenu, weak = AceType::WeakClaim(AceType::RawPtr(targetNode))](
+               const AAFwk::WantParams& wantParams) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability onReceive");
+        auto targetNode = weak.Upgrade();
         CHECK_NULL_VOID(uiExtNode);
         CHECK_NULL_VOID(targetNode);
         auto pipeline = NG::PipelineContext::GetCurrentContext();
