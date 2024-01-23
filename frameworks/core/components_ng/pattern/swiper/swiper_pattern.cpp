@@ -1128,6 +1128,9 @@ void SwiperPattern::InitSwiperController()
     swiperController_->SetShowNextImpl([weak = WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
+            auto swiperNode = swiper->GetHost();
+            CHECK_NULL_VOID(swiperNode);
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowNext, id:%{public}d", swiperNode->GetId());
             swiper->ShowNext();
         }
     });
@@ -1135,6 +1138,9 @@ void SwiperPattern::InitSwiperController()
     swiperController_->SetShowPrevImpl([weak = WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
+            auto swiperNode = swiper->GetHost();
+            CHECK_NULL_VOID(swiperNode);
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper SetShowPrevImpl, id:%{public}d", swiperNode->GetId());
             swiper->ShowPrevious();
         }
     });
