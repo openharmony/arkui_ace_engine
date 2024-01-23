@@ -123,6 +123,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
             SetItemInfo(currentIndex - i, { id, startPos, endPos, isGroup });
         }
     }
+    float startIndex = GetLanesFloor(layoutWrapper, currentIndex);
+    OnItemPositionAddOrUpdate(layoutWrapper, startIndex);
     return cnt;
 }
 
@@ -181,6 +183,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
             SetItemInfo(currentIndex + i, { id, startPos, endPos, isGroup });
         }
     }
+    float startIndex = GetLanesFloor(layoutWrapper, currentIndex);
+    OnItemPositionAddOrUpdate(layoutWrapper, startIndex);
     return cnt;
 }
 
