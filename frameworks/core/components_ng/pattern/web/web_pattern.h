@@ -446,6 +446,7 @@ public:
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
     void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
+    bool IsRootNeedExportTexture();
 
 private:
     void RegistVirtualKeyBoardListener();
