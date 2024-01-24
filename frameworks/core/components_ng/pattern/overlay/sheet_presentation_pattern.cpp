@@ -269,7 +269,6 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
         offset = pageHeight_ - sheetMaxHeight_;
         currentOffset_ = height_ - sheetMaxHeight_;
     }
-    ChangeScrollHeight(height_ - currentOffset_);
     ProcessColumnRect(height_ - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
@@ -309,6 +308,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
                 SheetInteractiveDismiss(true, std::abs(dragVelocity));
             } else {
                 ChangeSheetHeight(downHeight);
+                ChangeScrollHeight(height_);
                 SheetTransition(true, std::abs(dragVelocity));
             }
         } else if (LessNotEqual(std::abs(currentSheetHeight - upHeight), std::abs(currentSheetHeight - downHeight))) {
@@ -323,6 +323,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
                 SheetInteractiveDismiss(true, std::abs(dragVelocity));
             } else {
                 ChangeSheetHeight(downHeight);
+                ChangeScrollHeight(height_);
                 SheetTransition(true, std::abs(dragVelocity));
             }
         } else {
@@ -369,7 +370,6 @@ bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
         offset = pageHeight_ - sheetMaxHeight_;
         currentOffset_ = height_ - sheetMaxHeight_;
     }
-    ChangeScrollHeight(height_ - currentOffset_);
     ProcessColumnRect(height_ - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
@@ -562,7 +562,6 @@ void SheetPresentationPattern::SheetInteractiveDismiss(bool isDragClose, float d
         overlayManager->SetDismissTargetId(targetId_);
         if (isDragClose) {
             ProcessColumnRect(height_);
-            ChangeScrollHeight(height_);
             SheetTransition(true);
         }
         CallShouldDismiss();
