@@ -309,7 +309,7 @@ void SetRadialGradientValues(NG::Gradient& gradient, const double* values, int32
 }
 
 bool SetCalcDimension(std::optional<CalcDimension>& optDimension,
-    const StringAndDouble* options, int32_t optionsLength, int32_t offset)
+    const ArkUIStringAndFloat* options, int32_t optionsLength, int32_t offset)
 {
     if ((options == nullptr) || (offset < 0) || ((offset + NUM_3) >= optionsLength)) {
         return false;
@@ -367,7 +367,7 @@ void SetOptionalBorderStyle(
 
 void SetBorderImageSlice(RefPtr<BorderImage>& borderImage,
     const std::vector<BorderImageDirection> directions,
-    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+    const ArkUIStringAndFloat* options, int32_t optionsLength, int32_t& offset)
 {
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
@@ -381,7 +381,7 @@ void SetBorderImageSlice(RefPtr<BorderImage>& borderImage,
 }
 
 void SetBorderImageRepeat(RefPtr<BorderImage>& borderImage,
-    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+    const ArkUIStringAndFloat* options, int32_t optionsLength, int32_t& offset)
 {
     if ((options == nullptr) || (offset < 0) || ((offset + NUM_2) >= optionsLength)) {
         return;
@@ -397,7 +397,7 @@ void SetBorderImageRepeat(RefPtr<BorderImage>& borderImage,
 
 void SetBorderImageWidth(RefPtr<BorderImage>& borderImage,
     const std::vector<BorderImageDirection> directions,
-    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+    const ArkUIStringAndFloat* options, int32_t optionsLength, int32_t& offset)
 {
     for (int32_t index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
@@ -412,7 +412,7 @@ void SetBorderImageWidth(RefPtr<BorderImage>& borderImage,
 
 void SetBorderImageOutset(RefPtr<BorderImage>& borderImage,
     const std::vector<BorderImageDirection> directions,
-    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+    const ArkUIStringAndFloat* options, int32_t optionsLength, int32_t& offset)
 {
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
@@ -426,7 +426,7 @@ void SetBorderImageOutset(RefPtr<BorderImage>& borderImage,
 }
 
 void SetBorderImageFill(RefPtr<BorderImage>& borderImage,
-    const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
+    const ArkUIStringAndFloat* options, int32_t optionsLength, int32_t& offset)
 {
     if ((options == nullptr) || (offset < 0) || ((offset + NUM_2) >= optionsLength)) {
         return;
@@ -1255,7 +1255,7 @@ void ResetOverlay(NodeHandle node)
  * option[offset + 40]: bitset
  * @param optionsLength options length
  */
-void SetBorderImage(NodeHandle node, const char* src, const StringAndDouble* options, int32_t optionsLength)
+void SetBorderImage(NodeHandle node, const char* src, const ArkUIStringAndFloat* options, int32_t optionsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2486,7 +2486,7 @@ void ResetExpandSafeArea(NodeHandle node)
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
 
-void SetFlexBasis(NodeHandle node, const struct StringAndDouble* flexBasisValue)
+void SetFlexBasis(NodeHandle node, const struct ArkUIStringAndFloat* flexBasisValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

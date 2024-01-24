@@ -41,7 +41,7 @@ const std::regex SIZE_TYPE_MAGIC("([0-9]+)([a-z]+)");
 constexpr char PARAMS_SEPARATOR_LEVEL1 = ';';
 constexpr char PARAMS_SEPARATOR_LEVEL2 = ',';
 constexpr int DEFAULT_ANGLE = 180;
-constexpr ArkUI_Float64 DEFAULT_Z_SCALE = 1.0;
+constexpr ArkUI_Float32 DEFAULT_Z_SCALE = 1.0;
 constexpr int UNIT_VP = 1;
 constexpr int UNIT_FP = 2;
 constexpr int NUM_0 = 0;
@@ -384,7 +384,7 @@ void SetTranslate(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "valuesSrc is empty");
         return;
     }
-    ArkUI_Float64 values[size];
+    ArkUI_Float32 values[size];
     ArkUI_Int32 units[size];
     for (int i = 0; i < size; ++i) {
         values[i] = StringUtils::StringToDouble(valuesSrc[i].c_str());
@@ -410,7 +410,7 @@ void SetScale(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "valuesSrc is invalid");
         return;
     }
-    ArkUI_Float64 values[size + NUM_1];
+    ArkUI_Float32 values[size + NUM_1];
     for (int i = 0; i < size; ++i) {
         values[i] = StringUtils::StringToDouble(valuesSrc[i].c_str());
     }
@@ -432,7 +432,7 @@ void SetRotate(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "valuesSrc is empty");
         return;
     }
-    ArkUI_Float64 values[size];
+    ArkUI_Float32 values[size];
     for (int i = 0; i < size; ++i) {
         values[i] = StringUtils::StringToDouble(valuesSrc[i].c_str());
     }
@@ -449,7 +449,7 @@ void SetBrightness(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
         return;
     }
-    ArkUI_Float64 brightness = StringUtils::StringToDouble(value);
+    ArkUI_Float32 brightness = StringUtils::StringToDouble(value);
     fullImpl->getNodeModifiers()->getCommonModifier()->setBrightness(node->uiNodeHandle, brightness);
 }
 
@@ -461,7 +461,7 @@ void SetSaturate(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
         return;
     }
-    ArkUI_Float64 saturate = StringUtils::StringToDouble(value);
+    ArkUI_Float32 saturate = StringUtils::StringToDouble(value);
     fullImpl->getNodeModifiers()->getCommonModifier()->setSaturate(node->uiNodeHandle, saturate);
 }
 
@@ -473,7 +473,7 @@ void SetBlur(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
         return;
     }
-    ArkUI_Float64 blur = StringUtils::StringToDouble(value);
+    ArkUI_Float32 blur = StringUtils::StringToDouble(value);
     fullImpl->getNodeModifiers()->getCommonModifier()->setBlur(node->uiNodeHandle, blur);
 }
 
@@ -499,14 +499,14 @@ void SetLinearGradient(ArkUI_NodeHandle node, const char* value)
         return;
     }
     auto size = colorsSrc.size() / NUM_2 * NUM_3;
-    ArkUI_Float64 colors[size];
+    ArkUI_Float32 colors[size];
     for (int i = 0, j = 0; i < colorsSrc.size() && j < size; i += NUM_2, j += NUM_3) {
         colors[j + NUM_0] = StringToColorInt(colorsSrc[i + NUM_0].c_str());
         colors[j + NUM_1] = true;
         colors[j + NUM_2] = StringUtils::StringToDouble(colorsSrc[i + NUM_1].c_str());
     }
 
-    ArkUI_Float64 values[NUM_4] = { false, DEFAULT_ANGLE, NUM_3, false };
+    ArkUI_Float32 values[NUM_4] = { false, DEFAULT_ANGLE, NUM_3, false };
     if (params.size() > NUM_1) {
         values[NUM_0] = true;
         values[NUM_1] = StringUtils::StringToDouble(params[NUM_1].c_str());
@@ -546,7 +546,7 @@ void SetBorderWidth(ArkUI_NodeHandle node, const char* value)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     std::string widths(value);
-    double widthVals[ALLOW_SIZE_4] = { 0, 0, 0, 0 };
+    ArkUI_Float32 widthVals[ALLOW_SIZE_4] = { 0, 0, 0, 0 };
     int widthUnits[ALLOW_SIZE_4];
 
     if (IsSingleNumber(widths)) {
@@ -581,7 +581,7 @@ void SetBorderRadius(ArkUI_NodeHandle node, const char* value)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     std::string radius(value);
-    double radiusVals[ALLOW_SIZE_4] = { 1, 1, 1, 1 };
+    ArkUI_Float32 radiusVals[ALLOW_SIZE_4] = { 1, 1, 1, 1 };
     int radiusUnits[ALLOW_SIZE_4];
 
     if (IsSingleNumber(radius)) {
@@ -615,7 +615,7 @@ void SetBorderColor(ArkUI_NodeHandle node, const char* value)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    double defaultBackgroundColor = StringToColorInt("#00000000", 0);
+    ArkUI_Float32 defaultBackgroundColor = StringToColorInt("#00000000", 0);
     std::string colorStr(value);
     int colors[ALLOW_SIZE_4] = { defaultBackgroundColor, defaultBackgroundColor, defaultBackgroundColor,
         defaultBackgroundColor };
@@ -700,7 +700,7 @@ void SetClip(ArkUI_NodeHandle node, const char* value)
         std::vector<std::string> attributeProps;
         StringUtils::StringSplitter(content.c_str(), ',', attributeProps);
         if (std::string("path") == shape) {
-            double pathAttributes[NUM_2];
+            ArkUI_Float32 pathAttributes[NUM_2];
             for (int i = 0; i < NUM_2; ++i) {
                 pathAttributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
             }
@@ -708,7 +708,7 @@ void SetClip(ArkUI_NodeHandle node, const char* value)
             fullImpl->getNodeModifiers()->getCommonModifier()->setClipPath(
                 node->uiNodeHandle, shape.c_str(), pathAttributes, commands.c_str());
         } else {
-            double attributes[attributeProps.size()];
+            ArkUI_Float32 attributes[attributeProps.size()];
             for (int i = 0; i < attributeProps.size(); ++i) {
                 attributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
             }
@@ -767,7 +767,7 @@ void SetShadow(ArkUI_NodeHandle node, const char* value)
     auto* fullImpl = GetFullImpl();
     std::string shadowStr(value);
     if (IsMultipleWords(shadowStr)) {
-        double shadows[ALLOW_SIZE_7] = { 0, 2, 0, 0, 0, 0, 0 };
+        ArkUI_Float32 shadows[ALLOW_SIZE_7] = { 0, 2, 0, 0, 0, 0, 0 };
         int length;
         std::vector<std::string> ShadowProps;
         StringUtils::StringSplitter(shadowStr.c_str(), ' ', ShadowProps);
@@ -799,7 +799,7 @@ void SetShadow(ArkUI_NodeHandle node, const char* value)
         }
         fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_7);
     } else {
-        double shadows[NUM_1] = { 0 };
+        ArkUI_Float32 shadows[NUM_1] = { 0 };
         shadows[NUM_0] = StringToEnumInt(value, COMMON_SHADOW_STYLE, 0);
         fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_1);
     }
@@ -858,7 +858,7 @@ void SetResponseRegion(ArkUI_NodeHandle node, const char* value)
 
     std::vector<std::string> regionArray;
     StringUtils::StringSplitter(value, ',', regionArray);
-    std::vector<double> valuesArray;
+    std::vector<ArkUI_Float32> valuesArray;
     std::vector<int> unitsArray;
     if (regionArray.size() == 1) {
         std::vector<std::string> regionVal;
@@ -890,10 +890,9 @@ void SetResponseRegion(ArkUI_NodeHandle node, const char* value)
             }
         }
     }
-    double* firstValue = valuesArray.data();
-    int* firstUnit = unitsArray.data();
+
     fullImpl->getNodeModifiers()->getCommonModifier()->setResponseRegion(
-        node->uiNodeHandle, firstValue, firstUnit, valuesArray.size());
+        node->uiNodeHandle, valuesArray.data(), unitsArray.data(), valuesArray.size());
 }
 
 void SetOverlay(ArkUI_NodeHandle node, const char* value)
@@ -908,7 +907,7 @@ void SetOverlay(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    double values[ALLOW_SIZE_10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1 };
+    ArkUI_Float32 values[ALLOW_SIZE_10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1 };
     std::vector<std::string> alignment = { "top-start", "top", "top-end", "start", "center", "end", "bottom-start",
         "bottom", "bottom-end" };
     // 调用函数参数要求
@@ -1220,7 +1219,7 @@ void SetScrollScrollSnap(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "paginationsSrc is empty");
         return;
     }
-    ArkUI_Float64 paginations[size];
+    ArkUI_Float32 paginations[size];
     ArkUI_Int32 paginationParams[NUM_4 + size];
     for (int i = 0; i < size; ++i) {
         paginations[i] = StringUtils::StringToDouble(paginationsSrc[i].c_str());
@@ -1347,7 +1346,7 @@ void SetScrollTo(ArkUI_NodeHandle node, const char* value)
     std::vector<std::string> curve = { "linear", "ease", "easeIn", "easeOut", "ease-in-out", "fast-out-slow-in",
         "linear-out-slow-in", "fast-out-linear-in", "extreme-deceleration", "sharp", "rhythm", "smooth", "friction" };
     // 组装对应的参数
-    double values[ALLOW_SIZE_7] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    ArkUI_Float32 values[ALLOW_SIZE_7] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     values[0] = StringToDouble(valueVal[0].c_str(), 0.0);
     values[1] = 1;
     values[2] = StringToDouble(valueVal[1].c_str(), 0.0);
@@ -1574,7 +1573,7 @@ void SetTextBaselineOffset(ArkUI_NodeHandle node, const char* value)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    struct StringAndDouble offset = { 0.0, nullptr };
+    struct ArkUIStringAndFloat offset = { 0.0, nullptr };
 
     std::string valueString = std::string(value);
     if (std::regex_match(valueString, FLOAT_MAGIC)) {
@@ -1591,11 +1590,11 @@ void SetTextTextShadow(ArkUI_NodeHandle node, const char* value)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
 
-    std::vector<struct TextShadowStruct> shadows;
+    std::vector<struct ArkUITextShadowStruct> shadows;
     std::vector<std::string> values;
     StringUtils::StringSplitter(value, ',', values);
     for (auto& items : values) {
-        struct TextShadowStruct shadow;
+        struct ArkUITextShadowStruct shadow;
         std::vector<std::string> item;
         StringUtils::StringSplitter(items.c_str(), ' ', item);
         size_t length = item.size();
@@ -2121,7 +2120,7 @@ void SetLetterSpacing(ArkUI_NodeHandle node, const char* value)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    StringAndDouble letterSpacingValue = { 0.0, value };
+    ArkUIStringAndFloat letterSpacingValue = { 0.0, value };
     switch (node->type) {
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanLetterSpacing(
@@ -2275,7 +2274,7 @@ void SetListItemGroupDivider(ArkUI_NodeHandle node, const char* value)
     }
 
     auto color = StringToColorInt(params[NUM_0].c_str());
-    ArkUI_Float64 values[NUM_3];
+    ArkUI_Float32 values[NUM_3];
     ArkUI_Int32 units[NUM_3] = { UNIT_VP, UNIT_VP, UNIT_VP };
     for (int i = 0; i < NUM_3; ++i) {
         values[i] = StringUtils::StringToDouble(params[i]);

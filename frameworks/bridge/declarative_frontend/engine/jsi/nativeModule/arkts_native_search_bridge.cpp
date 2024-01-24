@@ -41,8 +41,8 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> fiveArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    struct StringAndInt32 weight = {0, nullptr};
-    struct FontStruct value = {0.0, 0, nullptr, nullptr, INVALID_FONT_STYLE};
+    const char* fontFamilies[1];
+    struct ArkUIFontStruct value = {0.0, 0, 0, INVALID_FONT_STYLE, fontFamilies, 0};
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     auto pipelineContext = container->GetPipelineContext();
@@ -55,35 +55,32 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
     CalcDimension size;
     if (secondArg->IsNull() || secondArg->IsUndefined() ||
         !ArkTSUtils::ParseJsDimensionFp(vm, secondArg, size) || size.Unit() == DimensionUnit::PERCENT) {
-        value.value = themeFontSize.Value();
-        value.unit = static_cast<int8_t>(themeFontSize.Unit());
+        value.fontSizeNumber = themeFontSize.Value();
+        value.fontSizeUnit = static_cast<int8_t>(themeFontSize.Unit());
     } else {
-        value.value = size.Value();
-        value.unit = static_cast<int8_t>(size.Unit());
+        value.fontSizeNumber = size.Value();
+        value.fontSizeUnit = static_cast<int8_t>(size.Unit());
     }
 
-    std::string weightStr = "";
     if (threeArg->IsString() || threeArg->IsNumber()) {
-        value.weight = &weight;
-
         if (threeArg->IsString()) {
-            weightStr = threeArg->ToString(vm)->ToString();
-            weight.valueStr = weightStr.c_str();
+            auto weightStr = threeArg->ToString(vm)->ToString();
+            value.fontWeight = std::stoi(weightStr);
         }
 
         if (threeArg->IsNumber()) {
-            weight.value = threeArg->Int32Value(vm);
+            value.fontWeight = threeArg->Int32Value(vm);
         }
     }
 
-    std::string familyStr = "";
     if (fourArg->IsString()) {
-        familyStr = fourArg->ToString(vm)->ToString();
-        value.family = familyStr.c_str();
+        auto familyStr = fourArg->ToString(vm)->ToString();
+        value.fontFamilies[0] = familyStr.c_str();
+        value.familyLength = 1;
     }
 
     if (!fiveArg->IsNull() && fiveArg->IsNumber()) {
-        value.style = fiveArg->Int32Value(vm);
+        value.fontStyle = fiveArg->Int32Value(vm);
     }
 
     GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchTextFont(nativeNode, &value);
@@ -331,8 +328,8 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> fiveArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    struct StringAndInt32 weight = {0, nullptr};
-    struct FontStruct value = {0.0, 0, nullptr, nullptr, INVALID_FONT_STYLE};
+    const char* fontFamilies[1];
+    struct ArkUIFontStruct value = {0.0, 0, 0, INVALID_FONT_STYLE, fontFamilies, 0};
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     auto pipelineContext = container->GetPipelineContext();
@@ -345,35 +342,32 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
     CalcDimension size;
     if (secondArg->IsNull() || secondArg->IsUndefined() ||
         !ArkTSUtils::ParseJsDimensionFp(vm, secondArg, size) || size.Unit() == DimensionUnit::PERCENT) {
-        value.value = themeFontSize.Value();
-        value.unit = static_cast<int8_t>(themeFontSize.Unit());
+        value.fontSizeNumber = themeFontSize.Value();
+        value.fontSizeUnit = static_cast<int8_t>(themeFontSize.Unit());
     } else {
-        value.value = size.Value();
-        value.unit = static_cast<int8_t>(size.Unit());
+        value.fontSizeNumber = size.Value();
+        value.fontSizeUnit = static_cast<int8_t>(size.Unit());
     }
 
-    std::string weightStr = "";
     if (threeArg->IsString() || threeArg->IsNumber()) {
-        value.weight = &weight;
-
         if (threeArg->IsString()) {
-            weightStr = threeArg->ToString(vm)->ToString();
-            weight.valueStr = weightStr.c_str();
+            auto weightStr = threeArg->ToString(vm)->ToString();
+            value.fontWeight = std::stoi(weightStr);
         }
 
         if (threeArg->IsNumber()) {
-            weight.value = threeArg->Int32Value(vm);
+            value.fontWeight = threeArg->Int32Value(vm);
         }
     }
 
-    std::string familyStr = "";
     if (fourArg->IsString()) {
-        familyStr = fourArg->ToString(vm)->ToString();
-        value.family = familyStr.c_str();
+        auto familyStr = fourArg->ToString(vm)->ToString();
+        value.fontFamilies[0] = familyStr.c_str();
+        value.familyLength = 1;
     }
 
     if (!fiveArg->IsNull() && fiveArg->IsNumber()) {
-        value.style = fiveArg->Int32Value(vm);
+        value.fontStyle = fiveArg->Int32Value(vm);
     }
     GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchPlaceholderFont(nativeNode, &value);
     return panda::JSValueRef::Undefined(vm);
@@ -399,7 +393,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchIcon(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> fourArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    struct IconOptionsStruct value = {0.0, 0, INVALID_COLOR_VALUE, nullptr};
+    struct ArkUIIconOptionsStruct value = {0.0, 0, INVALID_COLOR_VALUE, nullptr};
 
     CalcDimension size;
     auto container = Container::Current();
@@ -458,7 +452,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> fourArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    struct SearchButtonOptionsStruct value = {"", 0.0, 0, INVALID_COLOR_VALUE};
+    struct ArkUISearchButtonOptionsStruct value = {"", 0.0, 0, INVALID_COLOR_VALUE};
     
     std::string valueString = "";
     if (secondArg->IsString()) {

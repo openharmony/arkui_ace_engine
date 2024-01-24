@@ -303,12 +303,13 @@ ArkUIExtendedNodeAPI impl_extended = {
 };
 /* clang-format on */
 
-void CanvasDrawRect(ArkUICanvasHandle canvas,
-    ArkUI_Float64 left, ArkUI_Float64 top, ArkUI_Float64 right, ArkUI_Float64 bottom, ArkUIPaintHandle paint) {
-        TAG_LOGI(AceLogTag::ACE_NATIVE_NODE,
-            "DrawRect canvas=%{public}p [%{public}f, %{public}f, %{public}f, %{public}f]\n",
-            canvas, left, top, right, bottom);
-    }
+void CanvasDrawRect(ArkUICanvasHandle canvas, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right,
+    ArkUI_Float32 bottom, ArkUIPaintHandle paint)
+{
+    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE,
+        "DrawRect canvas=%{public}p [%{public}f, %{public}f, %{public}f, %{public}f]\n",
+        canvas, left, top, right, bottom);
+}
 
 const ArkUIGraphicsCanvas* GetCanvasAPI()
 {

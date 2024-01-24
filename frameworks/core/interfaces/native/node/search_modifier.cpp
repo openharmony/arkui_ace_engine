@@ -37,35 +37,16 @@ constexpr CancelButtonStyle DEFAULT_CANCELBUTTON_STYLE = CancelButtonStyle::INPU
 constexpr Dimension THEME_SEARCH_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 constexpr Color THEME_SEARCH_TEXT_COLOR = Color(0xe5000000);
 
-void SetSearchTextFont(NodeHandle node, const struct FontStruct* value)
+void SetSearchTextFont(NodeHandle node, const struct ArkUIFontStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
-    font.fontSize = CalcDimension(value->value, static_cast<DimensionUnit>(value->unit));
-    if (value->weight != nullptr) {
-        std::string weightVal;
-        if (value->weight->valueStr != nullptr) {
-            weightVal = value->weight->valueStr;
-            font.fontWeight = OHOS::Ace::Framework::ConvertStrToFontWeight(weightVal);
-        } else {
-            weightVal = std::to_string(value->weight->value);
-            font.fontWeight = OHOS::Ace::Framework::ConvertStrToFontWeight(weightVal, FontWeight::W400);
-        }
-    } else {
-        font.fontWeight = DEFAULT_FONT_WEIGHT;
-    }
+    font.fontSize = Dimension(value->fontSizeNumber, static_cast<DimensionUnit>(value->fontSizeUnit));
+    font.fontWeight = static_cast<FontWeight>(value->fontWeight);
+    font.fontFamilies.assign(value->fontFamilies, value->fontFamilies + value->familyLength);
+    font.fontStyle = static_cast<OHOS::Ace::FontStyle>(value->fontStyle);
 
-    if (value->family != nullptr) {
-        font.fontFamilies = OHOS::Ace::Framework::ConvertStrToFontFamilies(value->family);
-    }
-
-    if (value->style != INVALID_FONT_STYLE) {
-        OHOS::Ace::FontStyle styleVal = static_cast<OHOS::Ace::FontStyle>(value->style);
-        font.fontStyle = styleVal;
-    } else {
-        font.fontStyle = DEFAULT_FONT_STYLE;
-    }
     SearchModelNG::SetTextFont(frameNode, font);
 }
 
@@ -177,33 +158,15 @@ void ResetSearchEnableKeyboardOnFocus(NodeHandle node)
     SearchModelNG::RequestKeyboardOnFocus(frameNode, true);
 }
 
-void SetSearchPlaceholderFont(NodeHandle node, const struct FontStruct* value)
+void SetSearchPlaceholderFont(NodeHandle node, const struct ArkUIFontStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
-    font.fontSize = CalcDimension(value->value, static_cast<DimensionUnit>(value->unit));
-    if (value->weight != nullptr) {
-        std::string weightVal;
-        if (value->weight->valueStr != nullptr) {
-            weightVal = value->weight->valueStr;
-            font.fontWeight = OHOS::Ace::Framework::ConvertStrToFontWeight(weightVal);
-        } else {
-            weightVal = std::to_string(value->weight->value);
-            font.fontWeight = OHOS::Ace::Framework::ConvertStrToFontWeight(weightVal, FontWeight::W400);
-        }
-    } else {
-        font.fontWeight = DEFAULT_FONT_WEIGHT;
-    }
-
-    if (value->family != nullptr) {
-        font.fontFamilies = OHOS::Ace::Framework::ConvertStrToFontFamilies(value->family);
-    }
-
-    if (value->style != INVALID_FONT_STYLE) {
-        OHOS::Ace::FontStyle styleVal = static_cast<OHOS::Ace::FontStyle>(value->style);
-        font.fontStyle = styleVal;
-    }
+    font.fontSize = Dimension(value->fontSizeNumber, static_cast<DimensionUnit>(value->fontSizeUnit));
+    font.fontWeight = static_cast<FontWeight>(value->fontWeight);
+    font.fontFamilies.assign(value->fontFamilies, value->fontFamilies + value->familyLength);
+    font.fontStyle = static_cast<OHOS::Ace::FontStyle>(value->fontStyle);
 
     SearchModelNG::SetPlaceholderFont(frameNode, font);
 }
@@ -219,7 +182,7 @@ void ResetSearchPlaceholderFont(NodeHandle node)
     SearchModelNG::SetPlaceholderFont(frameNode, font);
 }
 
-void SetSearchSearchIcon(NodeHandle node, const struct IconOptionsStruct* value)
+void SetSearchSearchIcon(NodeHandle node, const struct ArkUIIconOptionsStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -237,7 +200,7 @@ void ResetSearchSearchIcon(NodeHandle node)
     SearchModelNG::SetSearchSrcPath(frameNode, "");
 }
 
-void SetSearchSearchButton(NodeHandle node, const struct SearchButtonOptionsStruct* value)
+void SetSearchSearchButton(NodeHandle node, const struct ArkUISearchButtonOptionsStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

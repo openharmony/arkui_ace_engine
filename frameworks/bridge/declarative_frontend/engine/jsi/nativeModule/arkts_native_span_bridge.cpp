@@ -288,7 +288,7 @@ ArkUINativeModuleValue SpanBridge::SetLetterSpacing(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    struct StringAndDouble letterSpacingValue = { 0.0, nullptr };
+    struct ArkUIStringAndFloat letterSpacingValue = { 0.0, nullptr };
     if (secondArg->IsNumber()) {
         letterSpacingValue.value = secondArg->ToNumber(vm)->Value();
         GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanLetterSpacing(nativeNode, &letterSpacingValue);

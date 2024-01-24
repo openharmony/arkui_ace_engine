@@ -138,7 +138,7 @@ ArkUINativeModuleValue SideBarContainerBridge::SetControlButton(ArkUIRuntimeCall
     std::string iconsShown;
     std::string iconsHidden;
     std::string iconsSwitching;
-    struct IconsStruct iconsStruct {
+    struct ArkUIIconsStruct iconsStruct {
         nullptr, nullptr, nullptr
     };
     if (ArkTSUtils::ParseJsMedia(vm, iconsShownArg, iconsShown)) {

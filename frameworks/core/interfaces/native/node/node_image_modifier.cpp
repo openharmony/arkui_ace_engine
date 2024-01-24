@@ -43,7 +43,7 @@ void SetImageSrc(ArkUINodeHandle node, const char* value)
     ImageModelNG::InitImage(frameNode, src);
 }
 
-void SetCopyOption(ArkUINodeHandle node, int32_t copyOption)
+void SetCopyOption(ArkUINodeHandle node, ArkUI_Int32 copyOption)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -75,7 +75,7 @@ void ResetAutoResize(ArkUINodeHandle node)
     ImageModelNG::SetAutoResize(frameNode, DEFAULT_IMAGE_AUTORESIZE);
 }
 
-void SetObjectRepeat(ArkUINodeHandle node, int32_t imageRepeat)
+void SetObjectRepeat(ArkUINodeHandle node, ArkUI_Int32 imageRepeat)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -93,7 +93,7 @@ void ResetObjectRepeat(ArkUINodeHandle node)
     ImageModelNG::SetImageRepeat(frameNode, ImageRepeat::NO_REPEAT);
 }
 
-void SetRenderMode(ArkUINodeHandle node, int32_t imageRenderMode)
+void SetRenderMode(ArkUINodeHandle node, ArkUI_Int32 imageRenderMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -125,7 +125,7 @@ void ResetSyncLoad(ArkUINodeHandle node)
     ImageModelNG::SetSyncMode(frameNode, DEFAULT_SYNC_LOAD_VALUE);
 }
 
-void SetObjectFit(ArkUINodeHandle node, int32_t objectFitNumber)
+void SetObjectFit(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -157,7 +157,7 @@ void ResetFitOriginalSize(ArkUINodeHandle node)
     ImageModelNG::SetFitOriginSize(frameNode, DEFAULT_FIT_ORIGINAL_SIZE);
 }
 
-void SetSourceSize(ArkUINodeHandle node, double width, double height)
+void SetSourceSize(ArkUINodeHandle node, ArkUI_Float32 width, ArkUI_Float32 height)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -173,7 +173,7 @@ void ResetSourceSize(ArkUINodeHandle node)
     ImageModelNG::SetImageSourceSize(frameNode, std::pair<CalcDimension, CalcDimension>());
 }
 
-void SetMatchTextDirection(ArkUINodeHandle node, uint32_t value)
+void SetMatchTextDirection(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -187,7 +187,7 @@ void ResetMatchTextDirection(ArkUINodeHandle node)
     ImageModelNG::SetMatchTextDirection(frameNode, false);
 }
 
-void SetFillColor(ArkUINodeHandle node, uint32_t value)
+void SetFillColor(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -221,7 +221,7 @@ void ResetAlt(ArkUINodeHandle node)
     return;
 }
 
-void SetImageInterpolation(ArkUINodeHandle node, int32_t value)
+void SetImageInterpolation(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -271,7 +271,7 @@ void ResetImageSyncLoad(ArkUINodeHandle node)
     ImageModelNG::SetSyncMode(frameNode, DEFAULT_SYNC_LOAD_VALUE);
 }
 
-void SetImageObjectFit(ArkUINodeHandle node, int32_t objectFitNumber)
+void SetImageObjectFit(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -322,7 +322,7 @@ void ResetImageDraggable(ArkUINodeHandle node)
  * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
  * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
  */
-void SetImageBorderRadius(ArkUINodeHandle node, const double* values, const int* units, int32_t length) {}
+void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, ArkUI_Int32 length) {}
 
 void ResetImageBorderRadius(ArkUINodeHandle node) {}
 } // namespace
