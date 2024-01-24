@@ -3484,12 +3484,12 @@ void OverlayManager::RemoveFilter()
         return;
     }
     auto columnNode = filterColumnNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(columnNode);
-    auto rootNode = columnNode->GetParent();
-    CHECK_NULL_VOID(rootNode);
-    auto children = columnNode->GetChildren();
-    rootNode->RemoveChild(columnNode);
-    rootNode->RebuildRenderContextTree();
+    if (columnNode) {
+        auto rootNode = columnNode->GetParent();
+        CHECK_NULL_VOID(rootNode);
+        rootNode->RemoveChild(columnNode);
+        rootNode->RebuildRenderContextTree();
+    }
     hasFilter_ = false;
 }
 
