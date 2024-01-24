@@ -2616,6 +2616,7 @@ void OverlayManager::CloseSheet(int32_t targetId)
     }
     auto sheetNode = sheetMap_[targetId].Upgrade();
     CHECK_NULL_VOID(sheetNode);
+    sheetNode->GetPattern<SheetPresentationPattern>()->SetShowState(false);
     auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
     CHECK_NULL_VOID(scrollNode);
     auto builder = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));

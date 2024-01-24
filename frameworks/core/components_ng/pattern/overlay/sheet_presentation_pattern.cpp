@@ -347,6 +347,10 @@ void SheetPresentationPattern::OnCoordScrollStart()
 
 bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
 {
+    if (!GetShowState()) {
+        return false;
+    }
+
     auto sheetType = GetSheetType();
     auto sheetDetentsSize = sheetDetentHeight_.size();
     if ((sheetType == SheetType::SHEET_POPUP) || (sheetDetentsSize == 0)) {
