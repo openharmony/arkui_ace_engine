@@ -23,7 +23,12 @@ Rect ListPositionController::GetItemRectInGroup(int32_t index, int32_t indexInGr
 {
     auto listPattern = AceType::DynamicCast<ListPattern>(scroll_.Upgrade());
     CHECK_NULL_RETURN(listPattern, Rect());
-    return listPattern->GetItemRectInGroup(index, indexInGroup);
+    auto pxRect = listPattern->GetItemRectInGroup(index, indexInGroup);
+    auto pxOffset = pxRect.GetOffset();
+    return Rect(Dimension(pxOffset.GetX(), DimensionUnit::PX).ConvertToVp(),
+                Dimension(pxOffset.GetY(), DimensionUnit::PX).ConvertToVp(),
+                Dimension(pxRect.Width(), DimensionUnit::PX).ConvertToVp(),
+                Dimension(pxRect.Height(), DimensionUnit::PX).ConvertToVp());
 }
 
 void ListPositionController::JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth,
