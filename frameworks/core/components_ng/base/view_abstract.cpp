@@ -406,6 +406,14 @@ void ViewAbstract::SetAlignRules(const std::map<AlignDirection, AlignRule> &alig
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules);
 }
 
+void ViewAbstract::SetChainStyle(const ChainInfo& chainInfo)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, ChainStyle, chainInfo);
+}
+
 void ViewAbstract::SetBias(const BiasPair& biasPair)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2591,6 +2599,12 @@ void ViewAbstract::SetAlignRules(FrameNode* frameNode, const std::map<AlignDirec
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules, frameNode);
+}
+
+void ViewAbstract::SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, ChainStyle, chainInfo, frameNode);
 }
 
 void ViewAbstract::SetGrid(

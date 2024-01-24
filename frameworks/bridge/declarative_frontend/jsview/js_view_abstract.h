@@ -267,6 +267,7 @@ public:
     static void JsOverlay(const JSCallbackInfo& info);
     static Alignment ParseAlignment(int32_t align);
     static void JsAlignRules(const JSCallbackInfo& info);
+    static void JsChainStyle(const JSCallbackInfo& info);
 
     static void SetVisibility(const JSCallbackInfo& info);
     static void Pop();
