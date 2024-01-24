@@ -1326,6 +1326,7 @@ void IndexerPattern::StartDelayTask(uint32_t duration)
     CHECK_NULL_VOID(context->GetTaskExecutor());
     delayTask_.Reset([weak = AceType::WeakClaim(this)] {
         auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         pattern->StartBubbleDisappearAnimation();
         });
     context->GetTaskExecutor()->PostDelayedTask(
