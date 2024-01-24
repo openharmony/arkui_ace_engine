@@ -1673,7 +1673,7 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
             "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
             "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
             "ViewPosX = %{public}d, ViewPosY = %{public}d",
@@ -1692,7 +1692,7 @@ bool UIContentImpl::ProcessPointerEventWithCallback(
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
             "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
             "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
             "ViewPosX = %{public}d, ViewPosY = %{public}d",
@@ -1706,7 +1706,7 @@ bool UIContentImpl::ProcessPointerEventWithCallback(
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+    TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
         "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
         "keyEvent info: keyCode is %{public}d, "
         "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
