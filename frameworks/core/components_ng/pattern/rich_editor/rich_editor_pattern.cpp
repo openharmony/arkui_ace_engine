@@ -1823,6 +1823,10 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     }
     selectionMenuOffset_ = info.GetGlobalLocation();
     if (info.GetSourceDevice() != SourceType::MOUSE || caretUpdateType_ != CaretUpdateType::DOUBLE_CLICK) {
+        if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()
+            && caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
+            selectOverlayProxy_.Reset();
+        }
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
         StopTwinkling();
     } else if (selectStart == selectEnd) {
