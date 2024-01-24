@@ -4655,9 +4655,6 @@ std::vector<RectF> RichEditorPattern::GetTextBoxes()
     std::vector<RectF> res;
     res.reserve(selectedRects.size());
     for (auto&& rect : selectedRects) {
-        if (NearZero(rect.Width())) {
-            continue;
-        }
         res.emplace_back(rect);
     }
     if (!res.empty() && paragraphs_.IsSelectLineHeadAndUseLeadingMargin(textSelector_.GetTextStart())) {
@@ -4671,7 +4668,11 @@ float RichEditorPattern::GetLineHeight() const
 {
     auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     CHECK_NULL_RETURN(selectedRects.size(), 0.0f);
-    return selectedRects.front().Height();
+    RectF finalRect = selectedRects.front();
+    for (auto& selectRect : selectedRects) {
+        finalRect = finalRect.CombineRectT(selectRect);
+    }
+    return finalRect.Height();
 }
 
 void RichEditorPattern::UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
