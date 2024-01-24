@@ -115,6 +115,8 @@ public:
     void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) override;
 
     // ArkTS Form
+    void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void RunFormPage() override;
     std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
     void UpdateFormData(const std::string& data) override;
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;

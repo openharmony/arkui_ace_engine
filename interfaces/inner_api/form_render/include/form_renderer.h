@@ -43,6 +43,8 @@ public:
     ~FormRenderer();
 
     void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void PreInitAddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void RunFormPage(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void ReloadForm(const std::string& url);
     void Destroy();
@@ -67,6 +69,8 @@ private:
     void ParseWant(const OHOS::AAFwk::Want& want);
     void SetRenderDelegate(const sptr<IRemoteObject>& renderRemoteObj);
     void AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
     bool allowUpdate_ = true;
     float width_ = 0.0f;

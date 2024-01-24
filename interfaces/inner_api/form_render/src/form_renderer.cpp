@@ -52,7 +52,7 @@ FormRenderer::~FormRenderer()
     HILOG_DEBUG("called");
 }
 
-void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f.", width_, height_);
     SetAllowUpdate(allowUpdate_);
@@ -60,8 +60,12 @@ void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppE
     uiContent_->SetFormHeight(height_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormData(formJsInfo.formData);
-    uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
+    uiContent_->PreInitializeForm(nullptr, formJsInfo.formSrc, nullptr);
+}
 
+void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+{
+    uiContent_->RunFormPage();
     backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
     if (!backgroundColor_.empty()) {
         uiContent_->SetFormBackgroundColor(backgroundColor_);
@@ -105,6 +109,12 @@ void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppE
     uiContent_->Foreground();
 }
 
+void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+{
+    PreInitUIContent(want, formJsInfo);
+    RunFormPageInner(want, formJsInfo);
+}
+
 void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
 {
     allowUpdate_ = want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true);
@@ -124,6 +134,34 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
     formRendererDispatcherImpl_ = new FormRendererDispatcherImpl(uiContent_, shared_from_this(), eventHandler_);
     ParseWant(want);
     InitUIContent(want, formJsInfo);
+    SetRenderDelegate(proxy_);
+    if (want.HasParameter(OHOS::AppExecFwk::Constants::FORM_STATUS_DATA)) {
+        std::string statusData = want.GetStringParam(OHOS::AppExecFwk::Constants::FORM_STATUS_DATA);
+        RecoverForm(statusData);
+    }
+    OnSurfaceCreate(formJsInfo, want.GetBoolParam(
+        OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false));
+}
+
+void FormRenderer::PreInitAddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+{
+    if (uiContent_ == nullptr) {
+        HILOG_ERROR("uiContent is null!");
+        return;
+    }
+    formRendererDispatcherImpl_ = new FormRendererDispatcherImpl(uiContent_, shared_from_this(), eventHandler_);
+    ParseWant(want);
+    PreInitUIContent(want, formJsInfo);
+}
+
+void FormRenderer::RunFormPage(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+{
+    if (uiContent_ == nullptr) {
+        HILOG_ERROR("uiContent is null!");
+        return;
+    }
+    ParseWant(want);
+    RunFormPageInner(want, formJsInfo);
     SetRenderDelegate(proxy_);
     if (want.HasParameter(OHOS::AppExecFwk::Constants::FORM_STATUS_DATA)) {
         std::string statusData = want.GetStringParam(OHOS::AppExecFwk::Constants::FORM_STATUS_DATA);
