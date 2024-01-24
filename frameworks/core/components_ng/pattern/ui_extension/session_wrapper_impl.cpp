@@ -443,13 +443,10 @@ void SessionWrapperImpl::RefreshDisplayArea(const RectF& displayArea)
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto curWindow = pipeline->GetCurrentWindowRect();
-    auto curDisplayArea = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
-    if (curDisplayArea != displayArea_) {
-        displayArea_ = curDisplayArea;
-        session_->UpdateRect({ std::round(curDisplayArea.Left()), std::round(curDisplayArea.Top()),
-                                 std::round(curDisplayArea.Width()), std::round(curDisplayArea.Height()) },
-            Rosen::SizeChangeReason::UNDEFINED);
-    }
+    displayArea_ = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
+    session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
+                                std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
+        Rosen::SizeChangeReason::UNDEFINED);
 }
 /************************************************ End: The interface to control the display area **********************/
 

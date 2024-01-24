@@ -181,6 +181,7 @@ private:
     void DispatchFocusActiveEvent(bool isFocusActive);
     void DispatchFocusState(bool focusState);
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void DispatchDisplayArea(bool isForce = false);
 
     void RegisterVisibleAreaChange();
     void UpdateTextFieldManager(const Offset& offset, float height);
@@ -213,6 +214,7 @@ private:
     bool isAsyncModalBinding_ = false;
     int32_t uiExtensionId_ = 0;
     int32_t callbackId_ = 0;
+    RectF displayArea_;
 
     // for DynamicComponent
     ComponentType componentType_ = ComponentType::UI_EXTENSION;
