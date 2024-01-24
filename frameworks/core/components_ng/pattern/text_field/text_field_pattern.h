@@ -1409,7 +1409,6 @@ private:
     std::queue<InputOperation> inputOperations_;
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
-    bool showSelect_ = false;
     bool isLongPress_ = false;
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
