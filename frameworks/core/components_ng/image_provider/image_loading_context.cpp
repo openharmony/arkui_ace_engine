@@ -153,7 +153,7 @@ void ImageLoadingContext::OnDataLoading()
             return;
         }
     }
-    if (src_.GetSrcType() == SrcType::NETWORK && SystemProperties::GetDownloadByNetworkEnabled()) {
+    if (Downloadable()) {
         if (syncLoad_) {
             DownloadImage();
         } else {
@@ -195,48 +195,70 @@ bool ImageLoadingContext::NotifyReadyIfCacheHit()
     return true;
 }
 
+bool ImageLoadingContext::Downloadable()
+{
+    return src_.GetSrcType() == SrcType::NETWORK && SystemProperties::GetDownloadByNetworkEnabled();
+}
+
 void ImageLoadingContext::DownloadImage()
 {
     if (NotifyReadyIfCacheHit()) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    DownloadCallback downloadCallback = [taskExecutor, weak = AceType::WeakClaim(this)](
-                                            const std::string&& result, DownloadState state) {
-        taskExecutor->PostTask(
-            [result = std::move(result), state, weak]() {
-                auto ctx = weak.Upgrade();
-                CHECK_NULL_VOID(ctx);
-                TAG_LOGI(AceLogTag::ACE_IMAGE, "DownLoad src=%{public}s, result length=%{public}zu",
-                    ctx->GetSourceInfo().ToString().c_str(), result.size());
-                if (state == DownloadState::SUCCESS) {
-                    auto data = ImageData::MakeFromDataWithCopy(result.data(), result.size());
-                    if (!Positive(result.size())) {
-                        ctx->FailCallback(
-                            "DownloadImage successfully, but the length of imageData from netStack is not positive");
-                        return;
-                    }
-                    // if downloading is necessary, cache object, data to file
-                    RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(ctx->GetSourceInfo(), data);
-                    if (!imageObj) {
-                        ctx->FailCallback("ImageObject null");
-                        return;
-                    }
-                    ImageProvider::CacheImageObject(imageObj);
-                    ImageLoader::CacheImageData(ctx->GetSourceInfo().GetKey(), data);
-                    ImageLoader::WriteCacheToFile(ctx->GetSourceInfo().GetSrc(), result);
-                    ctx->DataReadyCallback(imageObj);
-                } else {
-                    TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER, "Download image failed! The error Message is %{public}s",
-                        result.c_str());
-                    ctx->FailCallback(result);
-                }
-            },
-            TaskExecutor::TaskType::UI);
+    PerformDownload();
+}
+
+void ImageLoadingContext::PerformDownload()
+{
+    DownloadCallback downloadCallback;
+    downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](
+                                           const std::string&& imageData, bool async, int32_t instanceId) {
+        ContainerScope scope(instanceId);
+        auto callback = [weak = weak, data = std::move(imageData)]() {
+            auto ctx = weak.Upgrade();
+            CHECK_NULL_VOID(ctx);
+            ctx->DownloadImageSuccess(data);
+        };
+        async ? NG::ImageUtils::PostToUI(callback) : callback();
     };
+    downloadCallback.failCallback = [weak = AceType::WeakClaim(this)](
+                                        std::string errorMessage, bool async, int32_t instanceId) {
+        ContainerScope scope(instanceId);
+        auto callback = [weak = weak, errorMessage = errorMessage]() {
+            auto ctx = weak.Upgrade();
+            CHECK_NULL_VOID(ctx);
+            ctx->DownloadImageFailed(errorMessage);
+        };
+        async ? NG::ImageUtils::PostToUI(callback) : callback();
+    };
+    downloadCallback.cancelCallback = downloadCallback.failCallback;
     NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_);
+}
+
+void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
+{
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image successfully, ImageData length=%{public}zu", imageData.size());
+    auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
+    if (!Positive(imageData.size())) {
+        FailCallback("The length of imageData from netStack is not positive");
+        return;
+    }
+    // if downloading is necessary, cache object, data to file
+    RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(GetSourceInfo(), data);
+    if (!imageObj) {
+        FailCallback("ImageObject null");
+        return;
+    }
+    ImageProvider::CacheImageObject(imageObj);
+    ImageLoader::CacheImageData(GetSourceInfo().GetKey(), data);
+    ImageLoader::WriteCacheToFile(GetSourceInfo().GetSrc(), imageData);
+    DataReadyCallback(imageObj);
+}
+
+void ImageLoadingContext::DownloadImageFailed(const std::string& errorMessage)
+{
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image failed, the error message is %{public}s", errorMessage.c_str());
+    FailCallback(errorMessage);
 }
 
 void ImageLoadingContext::OnMakeCanvasImage()

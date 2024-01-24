@@ -25,11 +25,13 @@ public:
     {
         return false;
     }
-    bool DownloadAsync(DownloadCallback&& /* downloadCallback */, const std::string& /* url */) override
+    bool DownloadAsync(
+        DownloadCallback&& /* downloadCallback */, const std::string& /* url */, int32_t /* instanceId */) override
     {
         return false;
     }
-    bool DownloadSync(DownloadCallback&& /* downloadCallback */, const std::string& /* url */) override
+    bool DownloadSync(
+        DownloadCallback&& /* downloadCallback */, const std::string& /* url */, int32_t /* instanceId */) override
     {
         return false;
     }

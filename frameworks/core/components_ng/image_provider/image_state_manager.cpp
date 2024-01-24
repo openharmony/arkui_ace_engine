@@ -120,4 +120,8 @@ void ImageStateManager::HandleCommandByLoadFailState(ImageLoadingCommand command
     }
 }
 
+void ImageStateManager::SetState(ImageLoadingState state)
+{
+    state_ = state;
+}
 } // namespace OHOS::Ace::NG
