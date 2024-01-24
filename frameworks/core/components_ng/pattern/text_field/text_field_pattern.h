@@ -1103,6 +1103,8 @@ public:
 
     void CleanNodeResponseKeyEvent();
 
+    void OnVirtualKeyboardAreaChanged() override;
+
 protected:
     virtual void InitDragEvent();
 
