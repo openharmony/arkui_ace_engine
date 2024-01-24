@@ -28,6 +28,9 @@
     "src/lib/sdk/persistent_storage.ts",
     "src/lib/sdk/environment.ts",
 
+    // ark runtime debug tools
+    "src/lib/common/ark_tools.d.ts",
+
     // common
     "src/lib/common/state_mgmt_console_trace.ts",
     "src/lib/common/observed_object.ts",
