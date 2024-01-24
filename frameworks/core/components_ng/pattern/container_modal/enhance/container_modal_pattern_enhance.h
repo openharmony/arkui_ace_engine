@@ -29,6 +29,7 @@ public:
     void OnWindowForceUnfocused() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height);
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
 
 protected:
     RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex) override;

@@ -352,6 +352,8 @@ public:
     };
 
     virtual void UpdateTransform(const OHOS::Rosen::Transform& transform) {};
+
+    virtual void UpdateDecorVisible(bool visible, bool hasDeco = true) {};
 };
 
 } // namespace OHOS::Ace
