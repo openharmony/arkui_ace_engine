@@ -5727,6 +5727,8 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
     }
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
     PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    visibleContentRect.SetLeft(visibleContentRect.GetX() - BOX_EPSILON);
+    visibleContentRect.SetWidth(visibleContentRect.Width() + 2 * BOX_EPSILON);
     return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
 }
 
