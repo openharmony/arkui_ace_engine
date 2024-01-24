@@ -385,6 +385,105 @@ typedef enum {
     ARKUI_STICKYSTYLE_BOTH = 3,
 } ArkUI_StickyStyle;
 
+
+/**
+ * @brief 边框线条样式枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 显示为一条实线。 */
+    ARKUI_BORDER_STYLE_SOLID = 0,
+    /** 显示为一系列短的方形虚线。*/
+    ARKUI_BORDER_STYLE_DASHED,
+    /** 显示为一系列圆点。*/
+    ARKUI_BORDER_STYLE_DOTTED,
+} ArkUI_BorderStyle;
+
+/**
+ * @brief 触摸测试控制枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 默认触摸测试效果。 */
+    ARKUI_HIT_TEST_MODE_DEFAULT = 0,
+    /** 自身响应触摸测试。*/
+    ARKUI_HIT_TEST_MODE_BLOCK,
+    /** 自身和子节点都响应触摸测试。*/
+    ARKUI_HIT_TEST_MODE_TRANSPARENT,
+    /** 自身不响应触摸测试。*/
+    ARKUI_HIT_TEST_MODE_NONE
+} ArkUI_HitTestMode;
+
+/**
+ * @brief 阴影效果枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 超小阴影。 */
+    ARKUI_SHADOW_STYLE_OUTER_DEFAULT_XS = 0,
+    /** 小阴影。*/
+    ARKUI_SHADOW_STYLE_OUTER_DEFAULT_SM,
+    /** 中阴影。*/
+    ARKUI_SHADOW_STYLE_OUTER_DEFAULT_MD,
+    /** 大阴影。*/
+    ARKUI_SHADOW_STYLE_OUTER_DEFAULT_LG,
+    /** 浮动小阴影。*/
+    ARKUI_SHADOW_STYLE_OUTER_FLOATING_SM,
+    /** 浮动中阴影。*/
+    ARKUI_SHADOW_STYLE_OUTER_FLOATING_MD,
+} ArkUI_ShadowStyle;
+
+/**
+ * @brief 动画曲线枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 动画从头到尾的速度都是相同。 */
+    ARKUI_CURVE_LINEAR = 0,
+    /** 动画以低速开始，然后加快，在结束前变慢。 */
+    ARKUI_CURVE_EASE,
+    /** 动画以低速开始。 */
+    ARKUI_CURVE_EASE_IN,
+    /** 动画以低速结束。 */
+    ARKUI_CURVE_EASE_OUT,
+    /** 动画以低速开始和结束。 */
+    ARKUI_CURVE_EASE_IN_OUT,
+    /** 动画标准曲线。 */
+    ARKUI_CURVE_FAST_OUT_SLOW_IN,
+    /** 动画减速曲线。 */
+    ARKUI_CURVE_LINEAR_OUT_SLOW_IN,
+    /** 动画加速曲线。 */
+    ARKUI_CURVE_FAST_OUT_LINEAR_IN,
+    /** 动画急缓曲线。 */
+    ARKUI_CURVE_EXTREME_DECELERATION,
+    /** 动画锐利曲线。 */
+    ARKUI_CURVE_SHARP,
+    /** 动画节奏曲线。 */
+    ARKUI_CURVE_RHYTHM,
+    /** 动画平滑曲线。 */
+    ARKUI_CURVE_SMOOTH,
+    /** 动画阻尼曲线。 */
+    ARKUI_CURVE_FRICTION,
+} ArkUI_AnimationCurve;
+
+/**
+ * @brief Swiper导航点箭头枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 不显示swiper中导航点箭头。 */
+    ARKUI_SWIPER_ARROW_FALSE = 0,
+    /** 显示swiper中导航点箭头。 */
+    ARKUI_SWIPER_ARROW_TRUE,
+    /** 在hover状态下显示swiper中导航点箭头。 */
+    ARKUI_SWIPER_ARROW__SHOW_ON_HOVER,
+} ArkUI_SwiperDisplayArrow;
+
 #ifdef __cplusplus
 };
 #endif
