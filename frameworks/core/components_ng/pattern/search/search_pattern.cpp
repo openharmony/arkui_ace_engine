@@ -775,6 +775,8 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
             } else {
                 textFieldPattern->HandleFocusEvent(); // Show caret
             }
+        } else {
+            textFieldPattern->HandleFocusEvent();
         }
     } else {
         if (textFieldPattern->IsSelected() || textFieldPattern->GetCursorVisible()) {
