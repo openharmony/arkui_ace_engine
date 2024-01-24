@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
@@ -225,6 +226,14 @@ void ApplyModifierFinish(ArkUINodeHandle nodePtr)
     }
 }
 
+void MarkDirty(ArkUINodeHandle nodePtr, ArkUI_Uint32 flag)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(nodePtr);
+    if (uiNode) {
+        uiNode->MarkDirtyNode(flag);
+    }
+}
+
 static ArkUIAPICallbackMethod* callbacks = nullptr;
 
 static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
@@ -256,7 +265,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         nullptr,
 
         ApplyModifierFinish,
-        nullptr,
+        MarkDirty,
     };
     /* clang-format on */
 

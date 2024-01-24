@@ -354,9 +354,9 @@ std::pair<int32_t, std::string> UdmfClientImpl::GetErrorInfo(int32_t errorCode)
 {
     switch (errorCode) {
         case UDMF::E_NOT_FOUND:
-            return { Framework::ERROR_CODE_DRAG_DATA_NOT_FOUND, "GetData failed, data not found." };
+            return { ERROR_CODE_DRAG_DATA_NOT_FOUND, "GetData failed, data not found." };
         default:
-            return { Framework::ERROR_CODE_DRAG_DATA_ERROR, "GetData failed, data error." };
+            return { ERROR_CODE_DRAG_DATA_ERROR, "GetData failed, data error." };
     }
 }
 } // namespace OHOS::Ace

@@ -2520,11 +2520,18 @@ struct ArkUINodeModifiers {
     const ArkUITextAreaControllerModifier* (*getTextAreaControllerModifier)();
 };
 
-enum ArkUINodeDirtyFlag {
-    NEED_MEASURE = 0,
-    NEED_LAYOUT,
-    NEED_RENDER,
-};
+// same as inner defines in property.h
+typedef enum {
+    ARKUI_DIRTY_FLAG_MEASURE = 0b1,
+    ARKUI_DIRTY_FLAG_LAYOUT = 0b10,
+    /** mark the node need to do attribute diff to drive update. */
+    ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF = 0b100,
+    ARKUI_DIRTY_FLAG_MEASURE_SELF = 0b1000,
+    ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT = 0b10000,
+    ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST = 0b100000,
+    ARKUI_DIRTY_FLAG_RENDER = 0b1000000,
+    ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_CHILD = 0b1000000000,
+} ArkUIDirtyFlag;
 
 struct ArkUIBasicAPI {
     /// Tree operations.
@@ -2556,7 +2563,8 @@ struct ArkUIBasicAPI {
 
     // Commit attributes updates for node.
     void (*applyModifierFinish)(ArkUINodeHandle nodePtr);
-    void (*markDirty)(ArkUINodeHandle nodePtr, ArkUINodeDirtyFlag dirtyFlag);
+    // the flag can combine different flag like ARKUI_DIRTY_FLAG_MEASURE | ARKUI_DIRTY_FLAG_RENDER
+    void (*markDirty)(ArkUINodeHandle nodePtr, ArkUI_Uint32 dirtyFlag);
 };
 
 struct ArkUIBasicNodeAPI {

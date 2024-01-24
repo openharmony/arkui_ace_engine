@@ -131,6 +131,13 @@ public:
     void MarkDirtyNode(
         bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
+    void ProcessPropertyDiff()
+    {
+        // TODO: modify done need to optimize.
+        MarkModifyDone();
+        MarkDirtyNode();
+    }
+
     void FlushUpdateAndMarkDirty() override;
 
     void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override
@@ -777,6 +784,7 @@ private:
 
     bool needSyncRenderTree_ = false;
 
+    bool isPropertyDiffMarked_ = false;
     bool isLayoutDirtyMarked_ = false;
     bool isRenderDirtyMarked_ = false;
     bool isMeasureBoundary_ = false;

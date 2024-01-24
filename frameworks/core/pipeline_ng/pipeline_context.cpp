@@ -170,6 +170,13 @@ float PipelineContext::GetCurrentRootHeight()
     return static_cast<float>(context->rootHeight_);
 }
 
+void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
+{
+    dirtyPropertyNodes_.emplace(dirtyNode);
+    hasIdleTasks_ = true;
+    RequestFrame();
+}
+
 void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);
@@ -251,6 +258,13 @@ void PipelineContext::FlushDirtyNodeUpdate()
     ACE_FUNCTION_TRACE();
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
+    }
+
+    // node api property diff before ets update.
+    decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
+    dirtyPropertyNodes_.clear();
+    for (const auto& node : dirtyPropertyNodes) {
+        node->ProcessPropertyDiff();
     }
 
     // SomeTimes, customNode->Update may add some dirty custom nodes to dirtyNodes_,
