@@ -1047,7 +1047,7 @@ int32_t TextLayoutAlgorithm::GetFirstSpanStartPositon()
     if (!spanItemChildren_.empty()) {
         auto firstSpan = spanItemChildren_.front();
         if (firstSpan) {
-            start = firstSpan->position - StringUtils::ToWstring(firstSpan->content).length();
+            start = firstSpan->position - static_cast<int32_t>(StringUtils::ToWstring(firstSpan->content).length());
         }
     }
     return start;

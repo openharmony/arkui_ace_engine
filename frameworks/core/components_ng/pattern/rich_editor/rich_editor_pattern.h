@@ -137,7 +137,7 @@ public:
         uint32_t spanTextLength = 0;
         for (auto& span : spans_) {
             spanTextLength += StringUtils::ToWstring(span->content).length();
-            span->position = spanTextLength;
+            span->position = static_cast<int32_t>(spanTextLength);
         }
     }
 
