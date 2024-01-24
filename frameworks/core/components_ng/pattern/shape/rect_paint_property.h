@@ -56,6 +56,8 @@ public:
         value->propStrokeLineJoin_ = CloneStrokeLineJoin();
         value->propStrokeMiterLimit_ = CloneStrokeMiterLimit();
         value->propAntiAlias_ = CloneAntiAlias();
+        value->SetContentOffset(contentOffset_);
+        value->SetContentSize(contentSize_);
         return value;
     }
 
@@ -229,11 +231,34 @@ public:
         }
     }
 
+    OffsetF GetContentOffset()
+    {
+        return contentOffset_;
+    }
+
+    SizeF GetContentSize()
+    {
+        return contentSize_;
+    }
+
+    void SetContentOffset(const OffsetF& contentOffset)
+    {
+        contentOffset_.SetX(contentOffset.GetX());
+        contentOffset_.SetY(contentOffset.GetY());
+    }
+
+    void SetContentSize(const SizeF& contentSize)
+    {
+        contentSize_.SetSizeT(contentSize);
+    }
+
 private:
     std::optional<Radius> propTopLeftRadius_;
     std::optional<Radius> propTopRightRadius_;
     std::optional<Radius> propBottomLeftRadius_;
     std::optional<Radius> propBottomRightRadius_;
+    SizeF contentSize_;
+    OffsetF contentOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RectPaintProperty);
 };
