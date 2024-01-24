@@ -73,6 +73,7 @@ ohos_unittest("ace_engine_special_test") {
     "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/for_each_node.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_builder.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
