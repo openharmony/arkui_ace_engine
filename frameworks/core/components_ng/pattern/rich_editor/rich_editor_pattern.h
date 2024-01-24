@@ -411,6 +411,7 @@ protected:
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll);
+    void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
     void HandleOnPaste() override;
     void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;

@@ -66,6 +66,32 @@ void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppEx
         return;
     }
     HILOG_INFO("The user is not verified at this time, can not render the form now.");
+    PreInitAddForm(formRequest);
+}
+
+void FormRendererGroup::PreInitAddForm(const FormRequest& formRequest)
+{
+    HILOG_DEBUG("called");
+    if (initState_ != FormRendererInitState::UNINITIALIZED) {
+        HILOG_WARN("no need to pre init again");
+        return;
+    }
+    auto compId = formRequest.compId;
+    OHOS::AAFwk::Want want = formRequest.want;
+    AppExecFwk::FormJsInfo formJsInfo = formRequest.formJsInfo;
+    if (formRenderer_ != nullptr) {
+        HILOG_WARN("no need to pre init");
+        return;
+    }
+    formRenderer_ = std::make_shared<FormRenderer>(context_, runtime_, eventHandler_);
+    if (!formRenderer_) {
+        HILOG_ERROR("create form render failed");
+        return;
+    }
+    HILOG_INFO("compId is %{public}s. formId is %{public}s", compId.c_str(),
+        std::to_string(formJsInfo.formId).c_str());
+    formRenderer_->PreInitAddForm(want, formJsInfo);
+    initState_ = FormRendererInitState::PRE_INITIALIZED;
 }
 
 void FormRendererGroup::OnUnlock()
@@ -88,7 +114,7 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
     auto compId = formRequest.compId;
     OHOS::AAFwk::Want want = formRequest.want;
     AppExecFwk::FormJsInfo formJsInfo = formRequest.formJsInfo;
-    if (formRenderer_ == nullptr) {
+    if (formRenderer_ == nullptr || initState_ == FormRendererInitState::UNINITIALIZED) {
         formRenderer_ = std::make_shared<FormRenderer>(context_, runtime_, eventHandler_);
         if (!formRenderer_) {
             HILOG_ERROR("InnerAddForm create form render failed");
@@ -97,7 +123,13 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
         HILOG_INFO("InnerAddForm compId is %{public}s. formId is %{public}s", compId.c_str(),
             std::to_string(formJsInfo.formId).c_str());
         formRenderer_->AddForm(want, formJsInfo);
-    } else {
+        initState_ = FormRendererInitState::INITIALIZED;
+    } else if (initState_ == FormRendererInitState::PRE_INITIALIZED) {
+        HILOG_INFO("RunFormPage compId is %{public}s. formId is %{public}s", compId.c_str(),
+            std::to_string(formJsInfo.formId).c_str());
+        formRenderer_->RunFormPage(want, formJsInfo);
+        initState_ = FormRendererInitState::INITIALIZED;
+    } else { // initState_ == FormRendererInitState::INITIALIZED
         HILOG_INFO("AttachForm compId is %{public}s formRequests size is :%{public}s.",
             compId.c_str(), std::to_string(formRequests_.size()).c_str());
         formRenderer_->AttachForm(want, formJsInfo);

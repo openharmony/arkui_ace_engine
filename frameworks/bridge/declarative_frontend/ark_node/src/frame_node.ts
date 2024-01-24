@@ -25,6 +25,7 @@ class FrameNode {
     this.baseNode_ = new BaseNode(uiContext);
     this.nodePtr_ =  this.baseNode_.createRenderNode(this);
     this.renderNode_.setNodePtr(this.nodePtr_);
+    this.renderNode_.setBaseNode(this.baseNode_);
   }
   getRenderNode(): RenderNode | null {
     if (
@@ -40,7 +41,14 @@ class FrameNode {
     this.nodePtr_ = nodePtr;
     this.renderNode_.setNodePtr(nodePtr);
   }
+  setBaseNode(baseNode: BaseNode | null) {
+    this.baseNode_ = baseNode;
+    this.renderNode_.setBaseNode(baseNode);
+  }
   getNodePtr(): number | null {
     return this.nodePtr_;
+  }
+  dispose() {
+    this.baseNode_.dispose()
   }
 }

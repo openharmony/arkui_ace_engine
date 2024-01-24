@@ -443,7 +443,8 @@ void CleanNodeResponseArea::OnCleanNodeClicked()
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    textFieldPattern->ClearEditingValue();
+    CHECK_NULL_VOID(!textFieldPattern->IsDragging());
+    textFieldPattern->CleanNodeResponseKeyEvent();
 }
 
 void CleanNodeResponseArea::UpdateCleanNode(bool isShow)

@@ -188,7 +188,7 @@ public:
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, cb, &valueType);
         if (valueType != napi_function) {
-            NapiThrow(env, "Check param failed", Framework::ERROR_CODE_PARAM_INVALID);
+            NapiThrow(env, "Check param failed", ERROR_CODE_PARAM_INVALID);
             return nullptr;
         }
         DragAction* dragAction = ConvertDragAction(env, thisVar);
@@ -226,7 +226,7 @@ public:
             napi_valuetype valueType = napi_undefined;
             napi_typeof(env, cb, &valueType);
             if (valueType != napi_function) {
-                NapiThrow(env, "Check param failed", Framework::ERROR_CODE_PARAM_INVALID);
+                NapiThrow(env, "Check param failed", ERROR_CODE_PARAM_INVALID);
                 return nullptr;
             }
             auto iter = dragAction->FindCbList(cb);
@@ -257,13 +257,13 @@ public:
             return nullptr;
         }
         if (dragAction->asyncCtx_ == nullptr) {
-            NapiThrow(env, "dragaction must be recreated for each dragging", Framework::ERROR_CODE_INTERNAL_ERROR);
+            NapiThrow(env, "dragaction must be recreated for each dragging", ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         napi_value promiseResult = nullptr;
         napi_status status = napi_create_promise(env, &dragAction->asyncCtx_->deferred, &promiseResult);
         if (status != napi_ok) {
-            NapiThrow(env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
+            NapiThrow(env, "ace engine delegate is null", ERROR_CODE_INTERNAL_ERROR);
             napi_close_escapable_handle_scope(env, scope);
             return nullptr;
         }
@@ -656,7 +656,7 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         return;
     }
     if (!JudgeCoordinateCanDrag(shadowInfos[0])) {
-        HandleFail(asyncCtx, Framework::ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
+        HandleFail(asyncCtx, ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
         return;
     }
     auto pointerId = asyncCtx->pointerId;
@@ -810,7 +810,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 x = -width * PIXELMAP_WIDTH_RATE;
                 y = -height * PIXELMAP_HEIGHT_RATE;
             } else if (x < 0 || y < 0 || x > static_cast<double>(width) || y > static_cast<double>(height)) {
-                HandleFail(asyncCtx, Framework::ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
+                HandleFail(asyncCtx, ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
                 return;
             }
             Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y };
@@ -937,7 +937,7 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx)
     napi_open_escapable_handle_scope(asyncCtx->env, &scope);
     auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
-        NapiThrow(asyncCtx->env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(asyncCtx->env, "ace engine delegate is null", ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(asyncCtx->env, scope);
         return false;
     }
@@ -968,7 +968,7 @@ bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value custo
 
     auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
-        NapiThrow(asyncCtx->env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(asyncCtx->env, "ace engine delegate is null", ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(asyncCtx->env, scope);
         return false;
     }
@@ -1305,18 +1305,18 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
 
     std::string errMsg;
     if (!CheckAndParseParams(dragAsyncContext, errMsg)) {
-        NapiThrow(env, errMsg, Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env, errMsg, ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     napi_value result = nullptr;
     CreateCallback(dragAsyncContext, &result);
     auto container = AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
     if (!container) {
-        NapiThrow(env, "container is null", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "container is null", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     if (CheckDragging(container)) {
-        NapiThrow(env, "only one drag is allowed at the same time", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "only one drag is allowed at the same time", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     auto getPointSuccess = ConfirmCurPointerEventInfo(dragAsyncContext, container);
@@ -1353,27 +1353,27 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
 
     std::string errMsg;
     if (!CheckAndParseParams(dragAsyncContext, errMsg)) {
-        NapiThrow(env, errMsg, Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env, errMsg, ERROR_CODE_PARAM_INVALID);
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
     auto container = AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
     if (!container) {
-        NapiThrow(env, "container is null", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "container is null", ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
     if (CheckDragging(container)) {
-        NapiThrow(env, "only one dragAction is allowed at the same time", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "only one dragAction is allowed at the same time", ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
     auto getPointSuccess = ConfirmCurPointerEventInfo(dragAsyncContext, container);
     if (!getPointSuccess) {
-        NapiThrow(env, "confirm pointer info failed", Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env, "confirm pointer info failed", ERROR_CODE_PARAM_INVALID);
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
@@ -1403,7 +1403,7 @@ static napi_value JSGetDragPreview(napi_env env, napi_callback_info info)
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
     NapiThrow(env, "The current environment does not enable drag framework or does not support drag preview.",
-        Framework::ERROR_CODE_INTERNAL_ERROR);
+        ERROR_CODE_INTERNAL_ERROR);
     napi_close_escapable_handle_scope(env, scope);
     return nullptr;
 }
@@ -1413,7 +1413,7 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
     NapiThrow(env, "The current environment does not enable drag framework or does not support pixelMap.",
-        Framework::ERROR_CODE_INTERNAL_ERROR);
+        ERROR_CODE_INTERNAL_ERROR);
     napi_close_escapable_handle_scope(env, scope);
     return nullptr;
 }
@@ -1423,7 +1423,7 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
     NapiThrow(env, "The current environment does not enable drag framework or does not support pixelMap.",
-        Framework::ERROR_CODE_INTERNAL_ERROR);
+        ERROR_CODE_INTERNAL_ERROR);
     napi_close_escapable_handle_scope(env, scope);
     return nullptr;
 }

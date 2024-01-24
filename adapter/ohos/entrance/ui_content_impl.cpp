@@ -507,6 +507,25 @@ void UIContentImpl::InitializeInner(
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
+void UIContentImpl::PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
+{
+    // ArkTSCard need no window
+    if (isFormRender_ && !window) {
+        LOGI("CommonInitializeForm url = %{public}s", url.c_str());
+        CommonInitializeForm(window, url, storage);
+    }
+}
+
+void UIContentImpl::RunFormPage()
+{
+    LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "", false);
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+}
+
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
     InitializeInner(window, url, storage, false);

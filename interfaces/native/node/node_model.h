@@ -15,9 +15,12 @@
 
 #pragma once
 
-#include "basic_node.h"
-#include "common.h"
-#include "frameworks/core/interfaces/native/node/node_api.h"
+#include <cstdint>
+
+#include "native_node.h"
+#include "native_type.h"
+
+#include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,11 +47,14 @@ void AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
 void RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
 void InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode);
 
-const char* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
-void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const char* value);
+// deprecated.
+[[deprecated]] void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const char* value);
+
+int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value);
+const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
 void ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
 
-void RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId);
+int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId);
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType);
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event));
 void UnregisterOnEvent();

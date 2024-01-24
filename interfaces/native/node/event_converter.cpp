@@ -14,11 +14,10 @@
  */
 #include "node/event_converter.h"
 
-#include "basic_node.h"
+#include "native_node.h"
 #include "securec.h"
 
 #include "base/log/log_wrapper.h"
-#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NodeModel {
 
@@ -97,7 +96,7 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
 {
     if (memcpy_sp(event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM, origin->componentAsyncEvent.data,
-        MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
+            MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
         return false;
     }

@@ -305,7 +305,7 @@ void JSBaseNode::JSBind(BindingTarget globalObj)
     JSClass<JSBaseNode>::CustomMethod("createRenderNode", &JSBaseNode::CreateRenderNode);
     JSClass<JSBaseNode>::CustomMethod("finishUpdateFunc", &JSBaseNode::FinishUpdateFunc);
     JSClass<JSBaseNode>::CustomMethod("postTouchEvent", &JSBaseNode::PostTouchEvent);
-    JSClass<JSBaseNode>::CustomMethod("reset", &JSBaseNode::Reset);
+    JSClass<JSBaseNode>::CustomMethod("dispose", &JSBaseNode::Dispose);
 
     JSClass<JSBaseNode>::Bind(globalObj, JSBaseNode::ConstructorCallback, JSBaseNode::DestructorCallback);
 }

@@ -239,7 +239,10 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
         if (srcPathProp->IsUndefined() || srcPathProp->IsNull() || !ParseJsMedia(srcPathProp, src)) {
             src = "";
         }
-        SearchModel::GetInstance()->SetSearchSrcPath(src);
+        std::string bundleName;
+        std::string moduleName;
+        GetJsMediaBundleInfo(srcPathProp, bundleName, moduleName);
+        SearchModel::GetInstance()->SetSearchSrcPath(src, bundleName, moduleName);
 
         // set icon color
         Color colorVal;

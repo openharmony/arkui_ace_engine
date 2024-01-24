@@ -96,6 +96,8 @@ public:
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) override {}
 
     // ArkTS Form
+    void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override {}
+    void RunFormPage() override {}
     void OnFormSurfaceChange(float width, float height) override {}
     void UpdateFormData(const std::string& data) override {}
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override

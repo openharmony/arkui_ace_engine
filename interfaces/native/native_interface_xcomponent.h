@@ -39,8 +39,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "native_type.h"
 #include "native_xcomponent_key_event.h"
-#include "node/common.h"
 
 #ifdef __cplusplus
 extern "C" {

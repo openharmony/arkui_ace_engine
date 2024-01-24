@@ -32,14 +32,14 @@ class BuilderNode {
     this._JSBuilderNode.build(builder, params);
     this.nodePtr_ = this._JSBuilderNode.getNodePtr();
   }
-  public reset(): void {
-    this._JSBuilderNode.reset();
-  }
   public getFrameNode(): FrameNode {
     return this._JSBuilderNode.getFrameNode();
   }
   public postTouchEvent(touchEvent: TouchEvent): boolean {
     return this._JSBuilderNode.postTouchEvent(touchEvent);
+  }
+  public dispose(): void {
+    this._JSBuilderNode.dispose();
   }
 }
 
@@ -90,6 +90,7 @@ class JSBuilderNode extends BaseNode {
       this.frameNode_ = new FrameNode(this.uiContext_, 'BuilderNode');
     }
     this.frameNode_.setNodePtr(this.nodePtr_);
+    this.frameNode_.setBaseNode(this);
     __JSScopeUtil__.restoreInstanceId();
   }
   public update(param: Object) {
@@ -273,9 +274,9 @@ class JSBuilderNode extends BaseNode {
   public getNodePtr(): number | null {
     return this.nodePtr_;
   }
-  public reset() {
+  public dispose() {
     this.nodePtr_ = null;
-    super.reset();
+    super.dispose();
     if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
       this.frameNode_.setNodePtr(null);
     }

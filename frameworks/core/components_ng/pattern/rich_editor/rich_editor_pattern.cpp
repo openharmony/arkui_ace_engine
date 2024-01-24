@@ -2099,10 +2099,6 @@ void RichEditorPattern::OnHover(bool isHover)
 
 bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
-    if (!HasFocus()) {
-        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "RequestKeyboard !HasFocus(),return false!");
-        return false;
-    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     CHECK_NULL_RETURN(needShowSoftKeyboard, false);
@@ -4010,6 +4006,17 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
     clipboard_->HasData(hasDataCallback);
 }
 
+void RichEditorPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation)
+{
+    bool isOriginMenuShow = true;
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        isOriginMenuShow = GetOriginIsMenuShow();
+    }
+    TextPattern::UpdateSelectOverlayOrCreate(selectInfo);
+    CHECK_NULL_VOID(selectOverlayProxy_);
+    selectOverlayProxy_->ShowOrHiddenMenu(!isOriginMenuShow);
+}
+
 void RichEditorPattern::CheckEditorTypeChange()
 {
     CHECK_NULL_VOID(selectOverlayProxy_);
@@ -4392,6 +4399,7 @@ void RichEditorPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight
 {
     if (newWidth != prevWidth || newHeight != prevHeight) {
         TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+        UpdateOriginIsMenuShow(false);
     }
     UpdateCaretInfoToController();
 }

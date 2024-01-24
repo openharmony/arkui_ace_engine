@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::u16string ELLIPSIS = u"\u2026";
 const std::u16string SYMBOL_TRANS = u"\uF0001";
+const int32_t LENGTH_INCREMENT = 2;
 constexpr char16_t NEWLINE_CODE = u'\n';
 constexpr float TEXT_SPLIT_RATIO = 0.6f;
 } // namespace
@@ -464,8 +465,8 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
     }
 
     result.Reset();
-    const int32_t graphemeClusterLength = 1;
-    const int32_t next = extent + graphemeClusterLength;
+    int32_t graphemeClusterLength = 1;
+    int32_t next = extent + graphemeClusterLength;
 #ifndef USE_GRAPHIC_TEXT_GINE
     auto boxes = paragraph_->GetRectsForRange(
         extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
@@ -474,6 +475,20 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
         extent, next, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
         Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
+
+    while (boxes.empty() && !text_.empty()) {
+        graphemeClusterLength *= LENGTH_INCREMENT;
+        next = extent + graphemeClusterLength;
+#ifndef USE_GRAPHIC_TEXT_GINE
+        boxes = paragraph_->GetRectsForRange(
+            extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+#else
+        boxes = paragraph_->GetTextRectsByBoundary(
+            extent, next, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+            Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
+#endif
+    }
+
     if (boxes.empty()) {
         return false;
     }
@@ -481,15 +496,12 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
     const auto& textBox = *boxes.begin();
 #ifndef USE_GRAPHIC_TEXT_GINE
     bool isLtr = textBox.direction == txt::TextDirection::ltr;
-#else
-    bool isLtr = textBox.direction == Rosen::TextDirection::LTR;
-#endif
-    // Caret is within width of the downstream glyphs.
-#ifndef USE_GRAPHIC_TEXT_GINE
     double caretStart = isLtr ? textBox.rect.fLeft : textBox.rect.fRight;
 #else
+    bool isLtr = textBox.direction == Rosen::TextDirection::LTR;
     double caretStart = isLtr ? textBox.rect.GetLeft() : textBox.rect.GetRight();
 #endif
+    // Caret is within width of the downstream glyphs.
     double offsetX = std::min(caretStart, paragraph_->GetMaxWidth());
     result.offset.SetX(offsetX);
 #ifndef USE_GRAPHIC_TEXT_GINE

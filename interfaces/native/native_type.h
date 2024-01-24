@@ -476,10 +476,10 @@ typedef enum {
  * @since 12
  */
 typedef enum {
-    /** 显示swiper中导航点箭头。 */
-    ARKUI_SWIPER_ARROW_TRUE = 0,
     /** 不显示swiper中导航点箭头。 */
-    ARKUI_SWIPER_ARROW_FALSE,
+    ARKUI_SWIPER_ARROW_FALSE = 0,
+    /** 显示swiper中导航点箭头。 */
+    ARKUI_SWIPER_ARROW_TRUE,
     /** 在hover状态下显示swiper中导航点箭头。 */
     ARKUI_SWIPER_ARROW__SHOW_ON_HOVER,
 } ArkUI_SwiperDisplayArrow;

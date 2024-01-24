@@ -47,13 +47,13 @@ struct NavgationAsyncContext {
 std::string ErrorToMessage(int32_t code)
 {
     switch (code) {
-        case Framework::ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED:
+        case ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED:
             return "Builder function not exists";
-        case Framework::ERROR_CODE_INTERNAL_ERROR:
+        case ERROR_CODE_INTERNAL_ERROR:
             return "Internal error.";
-        case Framework::ERROR_CODE_DESTINATION_NOT_FOUND:
+        case ERROR_CODE_DESTINATION_NOT_FOUND:
             return "NavDestination not found.";
-        case Framework::ERROR_CODE_PARAM_INVALID:
+        case ERROR_CODE_PARAM_INVALID:
             return "Paramter error.";
         default:
             return "Error code is not supported.";
@@ -71,7 +71,7 @@ void ProcessPromiseCallback(std::shared_ptr<NavgationAsyncContext> asyncContext,
         return;
     }
     CHECK_NULL_VOID(scope);
-    if (callbackCode == Framework::ERROR_CODE_NO_ERROR) {
+    if (callbackCode == ERROR_CODE_NO_ERROR) {
         napi_value result = nullptr;
         napi_get_undefined(asyncContext->env, &result);
         napi_resolve_deferred(asyncContext->env, asyncContext->deferred, result);
@@ -186,20 +186,20 @@ void JSNavPathStack::OnPushDestination(const JSCallbackInfo& info)
     napi_value result = nullptr;
     napi_create_promise(asyncContext->env, &asyncContext->deferred, &result);
     if (info.Length() != ARGC_ONE || !info[0]->IsObject()) {
-        ProcessPromiseCallback(asyncContext, Framework::ERROR_CODE_INTERNAL_ERROR);
+        ProcessPromiseCallback(asyncContext, ERROR_CODE_INTERNAL_ERROR);
         ReturnPromise(info, result);
         return;
     }
     asyncContext->navPathInfo = JSRef<JSObject>::Cast(info[0]);
     if (!(asyncContext->navPathInfo->GetProperty("name")->IsString())) {
-        ProcessPromiseCallback(asyncContext, Framework::ERROR_CODE_PARAM_INVALID);
+        ProcessPromiseCallback(asyncContext, ERROR_CODE_PARAM_INVALID);
         ReturnPromise(info, result);
         return;
     }
 
     auto context = PipelineContext::GetCurrentContext();
     if (context == nullptr) {
-        ProcessPromiseCallback(asyncContext, Framework::ERROR_CODE_INTERNAL_ERROR);
+        ProcessPromiseCallback(asyncContext, ERROR_CODE_INTERNAL_ERROR);
         ReturnPromise(info, result);
         return;
     }
@@ -208,7 +208,7 @@ void JSNavPathStack::OnPushDestination(const JSCallbackInfo& info)
         CHECK_NULL_VOID(asyncContext);
         auto stack = weakStack.Upgrade();
         if (stack == nullptr || stack->checkNavDestinationExistsFunc_ == nullptr) {
-            ProcessPromiseCallback(asyncContext, Framework::ERROR_CODE_INTERNAL_ERROR);
+            ProcessPromiseCallback(asyncContext, ERROR_CODE_INTERNAL_ERROR);
             return;
         }
         auto errorCode = stack->checkNavDestinationExistsFunc_(asyncContext->navPathInfo);

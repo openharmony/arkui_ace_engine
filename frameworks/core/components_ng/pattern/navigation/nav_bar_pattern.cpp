@@ -528,6 +528,7 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
         }
     }
     toolBarNode->MarkModifyDone();
+    toolBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 } // namespace
 

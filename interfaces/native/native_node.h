@@ -411,8 +411,7 @@ typedef enum {
      * .value[3].f32：设置左边框的边框宽度。 \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * 1: .value[0].f32：统一设置四条边的边框宽度。 \n
-     * 2: .value[0].f32：设置上边框的边框宽度。 \n
+     * .value[0].f32：设置上边框的边框宽度。 \n
      * .value[1].f32：设置右边框的边框宽度。 \n
      * .value[2].f32：设置下边框的边框宽度。 \n
      * .value[3].f32：设置左边框的边框宽度。 \n
@@ -467,29 +466,29 @@ typedef enum {
      * @brief 边框颜色属性，支持属性设置，属性重置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * 1: .value[0].i32：统一设置四条边的边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
-     * 2: .value[0].i32：设置上侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
-     * .value[1].i32：设置右侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
-     * .value[2].i32：设置下侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
-     * .value[3].i32：设置左侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
+     * 1: .value[0].u32：统一设置四条边的边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
+     * 2: .value[0].u32：设置上侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
+     * .value[1].u32：设置右侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
+     * .value[2].u32：设置下侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
+     * .value[3].u32：设置左侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：设置上侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
-     * .value[1].i32：设置右侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
-     * .value[2].i32：设置下侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
-     * .value[3].i32：设置左侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
+     * .value[0].u32：设置上侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
+     * .value[1].u32：设置右侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
+     * .value[2].u32：设置下侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
+     * .value[3].u32：设置左侧边框颜色，使用0xargb表示，如0xFFFF11FF。 \n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { {.i32 = 0xFFFF11FF} };
+     * ArkUI_NumberValue value[] = { {.u32 = 0xFFFF11FF} };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BORDER_COLOR, &item);
-     * ArkUI_NumberValue value[] = { {.i32 = 0xFFFF11FF}, {.i32 = 0xFFFF11FF}, {.i32 = 0xFFFFFFFF}, {.i32 = 0x000000} };
+     * ArkUI_NumberValue value[] = { {.u32 = 0xFFFF11FF}, {.u32 = 0xFFFF11FF}, {.u32 = 0xFFFFFFFF}, {.u32 = 0x000000} };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BORDER_COLOR, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BORDER_COLOR);
-     * auto nodeBorderColor = item->value[0].i32;
+     * auto nodeBorderColor = item->value[0].u32;
      * @endcode
      *
      */
