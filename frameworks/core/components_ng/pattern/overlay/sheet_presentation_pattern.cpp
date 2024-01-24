@@ -26,6 +26,7 @@
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
@@ -743,6 +744,28 @@ void SheetPresentationPattern::UpdateInteractive()
         }
     }
     maskNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SheetPresentationPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto sheetCloseIcon = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
+    CHECK_NULL_VOID(sheetCloseIcon);
+    auto renderContext = sheetCloseIcon->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
+    sheetCloseIcon->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto imageNode = DynamicCast<FrameNode>(sheetCloseIcon->GetChildAtIndex(0));
+    CHECK_NULL_VOID(imageNode);
+    auto imagePaintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imagePaintProperty);
+    imagePaintProperty->UpdateSvgFillColor(sheetTheme->GetCloseIconImageColor());
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SheetPresentationPattern::CheckSheetHeightChange()
