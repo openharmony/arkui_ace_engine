@@ -225,9 +225,9 @@ ArkUINativeModuleValue RenderNodeBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> color = runtimeCallInfo->GetCallArgRef(1);
-    float colorValue = 0;
+    uint32_t colorValue = 0;
     if (color->IsNumber()) {
-        colorValue = color->ToNumber(vm)->Value();
+        colorValue = color->Uint32Value(vm);
     }
 
     GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetRenderNodeBackgroundColor(nativeNode, colorValue);

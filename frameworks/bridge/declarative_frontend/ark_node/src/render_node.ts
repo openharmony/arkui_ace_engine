@@ -215,7 +215,7 @@ class RenderNode {
 
   set backgroundColor(color: number) {
     this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue<number>(color, 0);
-    GetUINativeModule().common.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
+    GetUINativeModule().renderNode.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
   }
   set clipToFrame(useClip: boolean) {
     this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue<boolean>(useClip, false);

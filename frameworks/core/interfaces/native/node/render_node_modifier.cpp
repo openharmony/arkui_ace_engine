@@ -144,6 +144,7 @@ void Invalidate(NodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RenderNodePattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->Invalidate();
 }
 
