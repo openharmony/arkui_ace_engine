@@ -65,6 +65,15 @@ class RecycleManager {
     })
     this.cachedRecycleNodes_.clear();
   }
+
+  // Set active status for all cached nodes
+  public setActive(active): void {
+    this.cachedRecycleNodes_.forEach((nodes, _) => {
+      nodes.forEach((node) => {
+        node.setActiveInternal(active);
+      })
+    })
+  }
 }
 
 class BidirectionalMap {

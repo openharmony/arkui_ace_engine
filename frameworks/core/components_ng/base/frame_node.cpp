@@ -1085,13 +1085,6 @@ void FrameNode::SetActive(bool active)
             parent->MarkNeedSyncRenderTree();
         }
     }
-
-    std::string frameNodeTag = GetTag();
-    if (frameNodeTag == V2::LIST_ITEM_ETS_TAG || frameNodeTag == V2::GRID_ITEM_ETS_TAG ||
-        frameNodeTag == V2::FLOW_ITEM_ETS_TAG || frame_node == V2::TAB_CONTENT_ITEM_ETS_TAG) {
-        // inform the js side the active status
-        SetJSViewActive(active);
-    }
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
@@ -3040,10 +3033,16 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end)
     if (start <= end) {
         if (start > 0 || end < 0) {
             SetActive(false);
+            SetJSViewActive(false);
+        } else {
+            SetJSViewActive(true);
         }
     } else {
         if (end < 0 && start > 0) {
             SetActive(false);
+            SetJSViewActive(false);
+        } else {
+            SetJSViewActive(true);
         }
     }
 }

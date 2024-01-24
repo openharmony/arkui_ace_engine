@@ -543,6 +543,16 @@ public:
         return cachedItems_;
     }
 
+    void SetJSViewActive(bool active)
+    {
+        for (const auto& node : cachedItems_) {
+            node.second.second->SetJSViewActive(active);
+        }
+        for (const auto& node : expiringItem_) {
+            node.second.second->SetJSViewActive(active);
+        }
+    }
+
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 
