@@ -44,6 +44,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
+constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 
 void ExitToDesktop()
@@ -411,11 +412,24 @@ bool PageRouterManager::StartPop()
     }
 
     // pop top page in page stack
-    auto topNode = pageRouterStack_.back();
-    pageRouterStack_.pop_back();
+    auto preWeakNode = pageRouterStack_.back();
+    auto prePageNode = preWeakNode.Upgrade();
+    if (prePageNode) {
+        auto prePageNodePattern = prePageNode->GetPattern<PagePattern>();
+        // stack's top page should be removed after AboutToDisappear
+        // If in the future, back gesture can BE INTERRUPTED, this delay operation
+        // may lead to error in animation, because the animation will pick a wrong
+        // top element of stack (old top hasn't be removed yet due to interruption).
+        prePageNodePattern->SetDisappearCallback([weak = WeakClaim(this), preWeakNode]() {
+            auto manager = weak.Upgrade();
+            if (manager) {
+                manager->pageRouterStack_.remove(preWeakNode);
+            }
+        });
+    }
 
-    //clean prev top page params
-    currentPage = pageRouterStack_.empty() ? nullptr : pageRouterStack_.back().Upgrade();
+    // clean prev top page params
+    currentPage = (++pageRouterStack_.rbegin())->Upgrade();
     CHECK_NULL_RETURN(currentPage, false);
     pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
@@ -424,9 +438,8 @@ bool PageRouterManager::StartPop()
     std::string params = pageInfo->GetPageParams();
     pageInfo->ReplacePageParams("");
 
-    //do pop page
+    // do pop page
     if (!OnPopPage(true, true)) {
-        pageRouterStack_.emplace_back(topNode);
         pageInfo->ReplacePageParams(params);
         return false;
     }
@@ -511,6 +524,24 @@ std::string PageRouterManager::GetParams() const
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_RETURN(pageInfo, "");
     return pageInfo->GetPageParams();
+}
+
+int32_t PageRouterManager::GetIndexByUrl(const std::string& url) const
+{
+    int32_t index = 0;
+    for (auto iter : pageRouterStack_) {
+        auto pageNode = iter.Upgrade();
+        if (!pageNode) {
+            continue;
+        }
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        auto localUrl = pagePattern->GetPageInfo()->GetPageUrl();
+        if (localUrl == url) {
+            return index;
+        }
+        ++index;
+    }
+    return INVALID_PAGE_INDEX;
 }
 
 std::string PageRouterManager::GetCurrentPageUrl()

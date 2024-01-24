@@ -94,7 +94,7 @@ public:
 
     void SetOnBackPressed(std::function<bool()>&& OnBackPressed)
     {
-        OnBackPressed_ = std::move(OnBackPressed);
+        onBackPressed_ = std::move(OnBackPressed);
     }
 
     void SetPageTransitionFunc(std::function<void()>&& pageTransitionFunc)
@@ -181,6 +181,11 @@ public:
         dynamicPageSizeCallback_ = std::move(dynamicPageSizeCallback);
     }
 
+    void SetDisappearCallback(std::function<void()>&& callback)
+    {
+        disappearCallback_ = std::move(callback);
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
@@ -204,7 +209,8 @@ private:
 
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;
-    std::function<bool()> OnBackPressed_;
+    std::function<bool()> onBackPressed_;
+    std::function<void()> disappearCallback_;
     std::function<void()> pageTransitionFunc_;
     std::function<void()> firstBuildCallback_;
     DynamicPageSizeCallback dynamicPageSizeCallback_;

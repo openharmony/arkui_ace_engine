@@ -16,6 +16,7 @@
 #include "core/components_ng/base/observer_handler.h"
 
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -60,9 +61,9 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
         AceApplicationInfo::GetInstance().GetProcessName(),
         Container::Current()->GetModuleName()
     };
-    int32_t index = pageInfo->GetPageId();
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
+    int32_t index = EngineHelper::GetCurrentDelegate()->GetIndexByUrl(name);
     routerPageHandleFunc_(info, context, index, name, path, state);
 }
 
@@ -103,11 +104,14 @@ std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const Re
     auto pattern = routerPage->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     auto pageInfo = pattern->GetPageInfo();
+    std::string name = pageInfo->GetPageUrl();
+    std::string path = pageInfo->GetPagePath();
+    int32_t index = EngineHelper::GetCurrentDelegate()->GetIndexByUrl(name);
     return std::make_shared<RouterPageInfoNG>(
         GetUIContextValue(),
-        pageInfo->GetPageId(),
-        pageInfo->GetPageUrl(),
-        pageInfo->GetPagePath(),
+        index,
+        name,
+        path,
         RouterPageState(pattern->GetPageState()));
 }
 

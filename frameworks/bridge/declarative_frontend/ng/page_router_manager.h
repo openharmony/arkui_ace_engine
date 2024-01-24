@@ -123,6 +123,8 @@ public:
 
     std::string GetParams() const;
 
+    int32_t GetIndexByUrl(const std::string& url) const;
+
     RefPtr<FrameNode> GetCurrentPageNode() const
     {
         if (pageRouterStack_.empty()) {

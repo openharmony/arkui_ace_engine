@@ -43,12 +43,12 @@ struct NavDestinationInfo {
 
 struct RouterPageInfoNG {
     napi_value context;
-    int index;
+    int32_t index;
     std::string name;
     std::string path;
     RouterPageState state;
 
-    RouterPageInfoNG(napi_value context, int index, std::string name, std::string path, RouterPageState state)
+    RouterPageInfoNG(napi_value context, int32_t index, std::string name, std::string path, RouterPageState state)
         : context(context), index(index), name(std::move(name)), path(std::move(path)), state(state)
     {}
 };

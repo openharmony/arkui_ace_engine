@@ -89,6 +89,11 @@ public:
     virtual void GetState(int32_t& index, std::string& name, std::string& path) = 0;
     // Gets current page's components count
     virtual size_t GetComponentsCount() = 0;
+    // Gets page's index by url
+    virtual int32_t GetIndexByUrl(const std::string& url)
+    {
+        return -1;
+    }
     // Gets current page's params
     virtual std::string GetParams()
     {
