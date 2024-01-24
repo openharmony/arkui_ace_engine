@@ -193,11 +193,23 @@ void AddAlarmLogFunc()
 {
     std::function<void(uint64_t, int, int)> logFunc = [](uint64_t nodeId, int count, int num) {
         auto rsNode = Rosen::RSNodeMap::Instance().GetNode<Rosen::RSNode>(nodeId);
+        if (rsNode == nullptr) {
+            LOGI("rsNodeId = %{public}" PRId64 " send %{public}d commands, total number of rsNode is %{public}d"
+                 "But cannot find the rsNode with this rsNodeId",
+                nodeId, count, num);
+            return;
+        }
         auto frameNodeId = rsNode->GetFrameNodeId();
         auto frameNodeTag = rsNode->GetFrameNodeTag();
         auto frameNode = NG::FrameNode::GetFrameNode(frameNodeTag, frameNodeId);
+        if (frameNode == nullptr) {
+            LOGI("frameNodeId = %{public}d, rsNodeId = %{public}" PRId64 " send %{public}d commands, "
+                 "total number of rsNode is %{public}d. But cannot find the frameNode with this frameNodeId.",
+                frameNodeId, nodeId, count, num);
+            return;
+        }
         LOGI("frameNodeId = %{public}d, rsNodeId = %{public}" PRId64 " send %{public}d commands, "
-            "the tag of corresponding frame node is %{public}s, total number of rsNode is %{public}d",
+             "the tag of corresponding frame node is %{public}s, total number of rsNode is %{public}d",
             frameNodeId, nodeId, count, frameNodeTag.c_str(), num);
     };
 
