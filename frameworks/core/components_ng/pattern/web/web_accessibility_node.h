@@ -29,6 +29,7 @@ public:
     {
         webNode_ = WeakPtr(webNode);
         accessibilityNodeInfo_.pageId = webNode->GetPageId();
+        accessibilityNodeInfo_.selected = false;
     }
     ~WebAccessibilityNode()
     {

@@ -485,7 +485,7 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
     CHECK_NULL_RETURN(session_, false);
     CHECK_NULL_RETURN(info, false);
     CHECK_NULL_RETURN(isNotifyOccupiedAreaChange_, false);
-    int32_t keyboardHeight = info->rect_.height_;
+    int32_t keyboardHeight = static_cast<int32_t>(info->rect_.height_);
     if (keyboardHeight > 0) {
         ContainerScope scope(instanceId_);
         auto pipeline = PipelineBase::GetCurrentContext();
