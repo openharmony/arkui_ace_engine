@@ -924,6 +924,7 @@ private:
     bool isTouchPad_ = false;
     bool fadeAnimationIsRunning_ = false;
     bool autoLinearReachBoundary = false;
+    bool needAdjustIndex_ = false;
 
     std::optional<int32_t> cachedCount_;
 

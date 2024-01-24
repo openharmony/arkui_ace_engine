@@ -285,6 +285,20 @@ float SwiperLayoutAlgorithm::GetChildMaxSize(LayoutWrapper* layoutWrapper, Axis 
     return maxSize;
 }
 
+void SwiperLayoutAlgorithm::AdjustStartInfoOnSwipeByGroup(
+    int32_t startIndex, const PositionMap& itemPosition, int32_t& startIndexInVisibleWindow, float& startPos)
+{
+    if (!swipeByGroup_) {
+        return;
+    }
+
+    startIndexInVisibleWindow = startIndex;
+    auto iter = itemPosition.find(startIndex);
+    if (iter != itemPosition.end()) {
+        startPos = iter->second.startPos;
+    }
+}
+
 void SwiperLayoutAlgorithm::MeasureSwiper(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
@@ -324,14 +338,6 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             endIndex = GetEndIndex();
         }
 
-        if (swipeByGroup_ && !jumpIndex_ && !targetIndex_) {
-            startIndexInVisibleWindow = startIndex;
-            auto iter = itemPosition_.find(startIndex);
-            if (iter != itemPosition_.end()) {
-                startPos = iter->second.startPos;
-            }
-        }
-
         itemPosition_.clear();
     }
 
@@ -349,6 +355,7 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         currentIndex_ = jumpIndex_.value();
     } else if (targetIndex_.has_value()) {
         if (LessNotEqual(startIndexInVisibleWindow, targetIndex_.value())) {
+            AdjustStartInfoOnSwipeByGroup(startIndex, prevItemPosition_, startIndexInVisibleWindow, startPos);
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
             if (GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
@@ -371,6 +378,7 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             }
         } else {
             targetIsSameWithStartFlag_ = true;
+            AdjustStartInfoOnSwipeByGroup(startIndex, prevItemPosition_, startIndexInVisibleWindow, startPos);
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
             if (Positive(prevMargin_)) {
                 float startPosition =
@@ -379,6 +387,7 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             }
         }
     } else {
+        AdjustStartInfoOnSwipeByGroup(startIndex, prevItemPosition_, startIndexInVisibleWindow, startPos);
         bool overScrollTop = startIndexInVisibleWindow == 0 && GreatNotEqual(startPos, startMainPos_);
         if ((!overScrollFeature_ && NonNegative(currentOffset_)) || (overScrollFeature_ && overScrollTop)) {
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
