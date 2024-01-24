@@ -313,6 +313,78 @@ typedef struct {
     int32_t size;
 } ARKUI_TextPickerCascadeRangeContent;
 
+/**
+ * @brief 定义边缘滑动效果枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 弹性物理动效，滑动到边缘后可以根据初始速度或通过触摸事件继续滑动一段距离，松手后回弹。*/
+    ARKUI_EDGE_EFFECT_SPRING = 0,
+    /** 阴影效果，滑动到边缘后会有圆弧状的阴影。*/
+    ARKUI_EDGE_EFFECT_FADE,
+    /** 滑动到边缘后无效果。*/
+    ARKUI_EDGE_EFFECT_NONE,
+} ArkUI_EdgeEffect;
+
+/**
+ * @brief 定义列表项滚动结束对齐效果枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 默认无项目滚动对齐效果。*/
+    ARKUI_SCROLL_SNAP_ALIGN_NONE = 0,
+    /** 视图中的第一项将在列表的开头对齐。*/
+    ARKUI_SCROLL_SNAP_ALIGN_START,
+    /** 视图中的中间项将在列表中心对齐。*/
+    ARKUI_SCROLL_SNAP_ALIGN_CENTER,
+    /** 视图中的最后一项将在列表末尾对齐。*/
+    ARKUI_SCROLL_SNAP_ALIGN_END,
+} ArkUI_ScrollSnapAlign;
+
+/**
+ * @brief 定义滚动条状态枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 不显示。*/
+    ARKUI_SCROLL_BAR_DISPLAY_MODE_OFF = 0,
+    /** 按需显示(触摸时显示，2s后消失)。*/
+    ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO,
+    /** 常驻显示。*/
+    ARKUI_SCROLL_BAR_DISPLAY_MODE_ON,
+} ArkUI_ScrollBarDisplayMode;
+
+/**
+ * @brief 定义滚动方向和List组件排列方向枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 仅支持竖直方向滚动。*/
+    ARKUI_AXIS_VERTICAL = 0,
+    /** 仅支持水平方向滚动。*/
+    ARKUI_AXIS_HORIZONTAL,
+} ArkUI_Axis;
+
+/**
+ * @brief 定义列表是否吸顶和吸底枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** ListItemGroup的header不吸顶，footer不吸底。*/
+    ARKUI_STICKYSTYLE_NONE = 0,
+    /** ListItemGroup的header吸顶，footer不吸底。*/
+    ARKUI_STICKYSTYLE_HEADER = 1,
+    /** ListItemGroup的footer吸底，header不吸顶。*/
+    ARKUI_STICKYSTYLE_FOOTER = 2,
+    /** ListItemGroup的footer吸底，header吸顶。*/
+    ARKUI_STICKYSTYLE_BOTH = 3,
+} ArkUI_StickyStyle;
+
 #ifdef __cplusplus
 };
 #endif

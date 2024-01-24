@@ -258,9 +258,15 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置组件平移。
      *
-     * @note 入参 x:double,y:double,z:double，单位vp，格式字符串，如"100.0,20,0"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].f32： x轴移动距离，单位vp，默认值0；\n
+     * .value[1].f32： y轴移动距离，单位vp，默认值0；\n
+     * .value[2].f32： z轴移动距离，单位vp，默认值0。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE, "100.0,20,0");
+     * ArkUI_NumberValue value[] = { 100, 20, 0 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE, &item);
      * @endcode
      *
      */
@@ -268,9 +274,14 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置组件缩放。
      *
-     * @note 入参 centerX:double(单位vp),centerY:double(单位vp),x:double,y:double，格式字符串，如 "0.5,0.5,1.0,0.5"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].f32： x轴的缩放系数，默认值1；\n
+     * .value[1].f32： y轴的缩放系数，默认值1。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCALE, "0.5,0.5,1.0,0.5");
+     * ArkUI_NumberValue value[] = { 1.0, 0.5 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCALE, &item);
      * @endcode
      *
      */
@@ -278,10 +289,17 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置组件旋转。
      *
-     * @note 入参 centerX:double(单位vp),centerY:double(单位vp),centerZ:double(单位vp),x:double,y:double,
-     *       z:double,angle:double,perspective:double，格式字符串，如 "0.5,0.5,0.0,0,0,1,300,0"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].f32： 旋转轴向量x坐标，默认值0；\n
+     * .value[1].f32： 旋转轴向量y坐标，默认值0；\n
+     * .value[2].f32： 旋转轴向量z坐标，默认值0；\n
+     * .value[3].f32： 旋转角度，默认值0；\n
+     * .value[4].f32： 视距，即视点到z=0平面的距离，单位vp，默认值0。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ROTATE, "0.5,0.5,0.0,0,0,1,300,0");
+     * ArkUI_NumberValue value[] = { 0, 0, 1, 300, 0 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ROTATE, &item);
      * @endcode
      *
      */
@@ -289,9 +307,13 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置组件高光效果。
      *
-     * @note 入参brightness:double，格式字符串，如"1.2"，推荐取值范围[0,2]。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].f32： 亮度值，默认值1.0，推荐取值范围[0,2]。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BRIGHTNESS, "1.2");
+     * ArkUI_NumberValue value[] = { 1.2 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BRIGHTNESS, &item);
      * @endcode
      *
      */
@@ -299,9 +321,13 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置组件饱和度效果。
      *
-     * @note 入参blur:double,格式字符串，如"1.0"，推荐取值范围[0,∞]。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].f32： 饱和度值，默认值1.0，推荐取值范围[0,FLT_MAX]。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SATURATE, "1.0");
+     * ArkUI_NumberValue value[] = { 1.0 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SATURATE, &item);
      * @endcode
      *
      */
@@ -309,8 +335,12 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置组件内容模糊效果。
      *
-     * @note 入参格式模糊度字符串，如"1.0"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].f32： 模糊半径，模糊半径越大越模糊，为0时不模糊。单位vp，默认值0.0。
+     *
      * @code {.c}
+     * ArkUI_NumberValue value[] = { 1.0 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * basicNodeApi->setAttribute(nodeHandle, NODE_BLUR, "1.0");
      * @endcode
      *
@@ -319,16 +349,17 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置组件颜色渐变效果。
      *
-     * @note 入参
-     *      colors:#argb,dimension:double(范围[0,1] 单位PERCENT)..;
-     *      angle?:number(线性渐变的起始角度。0点方向顺时针旋转为正向角度。默认值：180);
-     *      direction?:String("left","top","right","bottom","left-top","left-bottom","right-top",
-     *                        "right-bottom","none"，默认值 "bottom");
-     *      repeating?:Boolean(默认值 false);
-     *      格式字符串，如 "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5 90 left true"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 字符串组合参数，入参4个，以分号分割：\n
+     *      入参1： 指定某百分比位置处的渐变色颜色,设置非法颜色直接跳过。颜色和位置（单位vp）数组类型，以逗号分割；\n
+     *      入参2： 线性渐变的起始角度。0点方向顺时针旋转为正向角度，默认值：180；\n
+     *      入参3： 线性渐变的方向，设置angle后不生效。取值("left","top","right","bottom","left-top","left-bottom","right-top",\n
+     *             "right-bottom","none", 默认值 "bottom")；\n
+     *      入参4： 为渐变的颜色重复着色，默认值 false；\n
+     *      如 "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;;left;true" 。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LINEAR_GRADIENT,
-     *      "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5 90 left true");
+     * ARKUI_AttributeItem item = { .string = "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;;left;true" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LINEAR_GRADIENT, &item);
      * @endcode
      *
      */
@@ -336,9 +367,12 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置组件内容在元素绘制区域内的对齐方式。
      *
-     * @note 入参 align:String("top-start","top","top-end","start","center","end","bottom-start","bottom",
-     *       "bottom-end")，格式字符串，如 "center"
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32： 对齐方式，数据类型{@link ArkUI_Alignment}，默认值ARKUI_ALIGNMENT_CENTER。
+     *
      * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_ALIGNMENT_CENTER } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * basicNodeApi->setAttribute(nodeHandle, NODE_ALIGN, "center");
      * @endcode
      *
@@ -974,12 +1008,12 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置加载进度条前景色。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：前景颜色数值，0xargb格式，形如 0xFFFF0000 表示红色。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .data[0].i32： 进度条前景色，0xargb类型，默认值0x99666666。
      *
      * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32=0x99FF0000} };
-     * ArkUI_AttributeItem item = { value, 1 };
+     * ArkUI_NumberValue value[] = { { .i32 = 0x99666666 } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * basicNodeApi->setAttribute(nodeHandle, NODE_LOADING_PROGRESS_COLOR, &item);
      * @endcode
      *
@@ -988,12 +1022,12 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置LoadingProgress动画显示或者不显示。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * value[0].i32：false时不显示动画，true时可以显示动画。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32： LoadingProgress动画显示或者不显示，默认值true。
      *
      * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32 = true} };
-     * ArkUI_AttributeItem item = { value, 1 };
+     * ArkUI_NumberValue value[] = { { .i32 = true } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * basicNodeApi->setAttribute(nodeHandle, NODE_LOADING_PROGRESS_ENABLE_LOADING, &item);
      * @endcode
      */
@@ -1218,87 +1252,114 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置子组件在容器内的对齐方式。
      *
-     * @note
-     * 入参alignContent:String("TopStart","Top","TopEnd","Start","Center","End","BottomStart","Bottom","BottomEnd")
-     *       格式字符串，如 "Center"
-     * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT, "Center");
-     * @endcode
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32： 对齐方式，数据类型{@link ArkUI_Alignment}，默认值ARKUI_ALIGNMENT_CENTER。
      *
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_ALIGNMENT_CENTER } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT, &item);
+     * @endcode
      */
     NODE_STACK_ALIGN_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_STACK,
 
     /**
      * @brief 通过{@link setAttribute}方法设置滚动条状态。
      *
-     * @note 入参 displayMode:String("off","auto","on") ，格式字符串，如 "on"
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32： 滚动条状态，数据类型{@link ArkUI_ScrollBarDisplayMode}，默认值ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR, "on");
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_BAR_DISPLAY_MODE, &item);
      * @endcode
      *
      */
-    NODE_SCROLL_SCROLL_BAR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SCROLL,
+    NODE_SCROLL_BAR_DISPLAY_MODE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SCROLL,
     /**
      * @brief 通过{@link setAttribute}方法设置滚动条的宽度。
      *
-     * @note 入参 srcollBarWidth:double(单位vp) ，格式字符串，如 "2"
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].f32： 滚动条宽度，单位vp，默认值4。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR_WIDTH, "2");
+     * ArkUI_NumberValue value[] = { 20 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_BAR_WIDTH, &item);
      * @endcode
      *
      */
-    NODE_SCROLL_SCROLL_BAR_WIDTH,
+    NODE_SCROLL_BAR_WIDTH,
     /**
      * @brief 通过{@link setAttribute}方法设置滚动条的颜色。
      *
-     * @note 入参color: #argb类型，格式字符串，如"#ffffffff"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .data[0].i32： 滚动条颜色，0xargb类型。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR_COLOR, "#ffffffff");
+     * ArkUI_NumberValue value[] = { { .i32 = 0xFFFFFFFF } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_BAR_COLOR, &item);
      * @endcode
      *
      */
-    NODE_SCROLL_SCROLL_BAR_COLOR,
+    NODE_SCROLL_BAR_COLOR,
     /**
      * @brief 通过{@link setAttribute}方法设置滚动方向。
      *
-     * @note 入参 axis:String("vertical","horizontal","free","none")，格式字符串，如 "vertical"
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32：滚动方向，数据类型{@link ArkUI_Axis}，默认值ARKUI_AXIS_VERTICAL。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLLABLE, "vertical");
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_AXIS_VERTICAL } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_DIRECTION, &item);
      * @endcode
      *
      */
-    NODE_SCROLL_SCROLLABLE,
+    NODE_SCROLL_SCROLL_DIRECTION,
     /**
      * @brief 通过{@link setAttribute}方法设置边缘滑动效果。
      *
-     * @note 入参 edgeEffect:String("spring","fade","none") alwaysEnabled?:Boolean(默认值为true) ，格式字符串，
-     *       如 "spring" 或者 "spring false"
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32： 边缘滑动效果，参数类型{@link ArkUI_EdgeEffect}，默认值ARKUI_EDGE_EFFECT_NONE；\n
+     * .value[1]?.i32： 可选值，组件内容大小小于组件自身时，设置是否开启滑动效果，开启为1，关闭为0，默认值1。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_EDGE_EFFECT, "spring");
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_EDGE_EFFECT_NONE }, { .i32 = 1 } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_EDGE_EFFECT, &item);
      * @endcode
      *
      */
     NODE_SCROLL_EDGE_EFFECT,
     /**
      * @brief
-     * 通过{@link
-     * setAttribute}方法设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口。
+     * 通过{@link setAttribute}方法设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口。
      *
-     * @note 入参 enableScrollInteraction:Boolean，格式为字符串，如"true"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32： 是否支持滚动手势，默认值true。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_ENABLE_SCROLL_INTERACTION, "true");
+     * ArkUI_NumberValue value[] = { { .i32 = true } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_ENABLE_SCROLL_INTERACTION, &item);
      * @endcode
      *
      */
     NODE_SCROLL_ENABLE_SCROLL_INTERACTION,
     /**
      * @brief
-     * 通过{@link
-     * setAttribute}方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响。
+     * 通过{@link setAttribute}方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响。
      *
-     * @note 入参 fiction:float，格式为字符串，如 "0.6"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].f32： 摩擦系数，默认值：非可穿戴设备为0.6，可穿戴设备为0.9。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_FRICTION, "0.6");
+     * ArkUI_NumberValue value[] = { 0.6 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_FRICTION, &item);
      * @endcode
      *
      */
@@ -1306,15 +1367,23 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置Scroll组件的限位滚动模式。
      *
-     * @note 入参 snapAlign:String("none","start","center","end")
-     * pagination1:double(单位vp),pagination2:double(单位vp),..。 enableSnapToStart:Boolean
-     * enableSnapToEnd:Boolean"，格式字符串，如 "start 0,500,1000,1500 true true"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32： Scroll组件限位滚动时的对其方式，数据类型{@link ArkUI_ScrollSnapAlign}，默认值ARKUI_SCROLL_SNAP_ALIGN_NONE；\n
+     * .value[1].i32： 在Scroll组件限位滚动模式下，该属性设置为false后，运行Scroll在开头和第一个限位点间自由滑动。默认值true，仅在限位点为多个时生效；\n
+     * .value[2].i32： 在Scroll组件限位滚动模式下，该属性设置为false后，运行Scroll在最后一个限位点和末尾间自由滑动。默认值true，仅在限位点为多个时生效；\n
+     * .value[3...].f32： Scroll组件限位滚动时的限位点，限位点即为Scroll组件能滑动停靠的偏移量。可以1个或多个。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_SNAP, "none 0,500,1000,1500 true true");
+     * ArkUI_NumberValue value[] = {
+     *     { .i32=ARKUI_SCROLL_SNAP_ALIGN_NONE }, { .i32=true }, { .i32=true },
+     *     { .f32=0 }, { .f32=500 }, { .f32=1000 }, { .f32=1500 }
+     * };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SNAP, &item);
      * @endcode
      *
      */
-    NODE_SCROLL_SCROLL_SNAP,
+    NODE_SCROLL_SNAP,
 
     /**
      * @brief 通过{@link
@@ -1368,82 +1437,67 @@ typedef enum {
      *
      */
     NODE_SCROLL_EDGE,
-    /**
-     * @brief 通过{@link setAttribute}方法设置列表中ListItem/ListItemGroup的预加载数量，只在LazyForEach中生效。
-     *
-     * @note 入参cachedCount: int，格式字符串，如"5"
-     * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_CACHED_COUNT, "5");
-     * @endcode
-     *
-     */
-    NODE_LIST_CACHED_COUNT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置滚动条状态。
+     * @brief 通过{@link setAttribute}方法设置是否支持滑动翻页。
+     * @note 如果同时设置了划动翻页 enablePaging 和限位滚动 scrollSnap，则 scrollSnap 优先生效，enablePaging 不生效。
      *
-     * @note 入参 displayMode:String("off","auto","on") ，格式字符串，如 "on"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32： 是否支持划动翻页，默认值false。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR, "on");
+     * ArkUI_NumberValue value[] = { { .i32 = true } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_ENABLE_PAGING, &item);
      * @endcode
      *
      */
-    NODE_LIST_SCROLL_BAR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
+    NODE_SCROLL_ENABLE_PAGING,
+
     /**
      * @brief 通过{@link setAttribute}方法设置List组件排列方向。
      *
-     * @note 入参 axis:String("vertical","horizontal","free","none")，格式字符串，如 "vertical"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32：List组件排列方向，数据类型{@link ArkUI_Axis}，默认值ARKUI_AXIS_VERTICAL。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_LIST_DIRECTION, "vertical");
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_AXIS_VERTICAL } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_LIST_DIRECTION, &item);
      * @endcode
      *
      */
-    NODE_LIST_LIST_DIRECTION,
+    NODE_LIST_LIST_DIRECTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
     /**
-     * @brief 通过{@link setAttribute}方法配合ListItemGroup组件使用，设置ListItemGroup中header和footer是否要吸顶或吸底。
+     * @brief 通过{@link setAttribute}方法配合ListItemGroup组件使用，设置 ListItemGroup 中 header 和 footer 是否要吸顶或吸底。
      *
-     * @note 入参 stickyStyle:String("none","header","footer","both")，格式字符串，如 "header"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32：配合ListItemGroup组件使用，设置ListItemGroup中header和footer是否要吸顶或吸底。数据类型{@link ArkUI_StickyStyle}，默认值
+     *     ARKUI_STICKYSTYLE_NONE。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_STICKY, "header");
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_STICKYSTYLE_NONE } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_STICKY, &item);
      * @endcode
      *
      */
     NODE_LIST_STICKY,
     /**
-     * @brief 通过{@link setAttribute}方法设置边缘滑动效果。
+     * @brief 通过{@link setAttribute}方法设置列表项间距。
      *
-     * @note 入参 edgeEffect:String("spring","fade","none") alwaysEnabled?:Boolean(默认值 true) ，格式字符串，
-     *       如 "spring" 或 "spring false"。
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].f32： 子组件主轴方向的间隔。默认值0。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_EDGE_EFFECT, "spring");
+     * ArkUI_NumberValue value[] = { 10 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_SPACE, &item);
      * @endcode
      *
      */
-    NODE_LIST_EDGE_EFFECT,
-    /**
-     * @brief
-     * 通过{@link
-     * setAttribute}方法设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口。
-     *
-     * @note 入参 enableScrollInteraction:Boolean，格式为字符串，如"true"。
-     * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_ENABLE_SCROLL_INTERACTION, "true");
-     * @endcode
-     *
-     */
-    NODE_LIST_ENABLE_SCROLL_INTERACTION,
-    /**
-     * @brief
-     * 通过{@link
-     * setAttribute}方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响。
-     *
-     * @note 入参fiction: float，格式为字符串，如"0.6"。
-     * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_FRICTION, "0.6");
-     * @endcode
-     *
-     */
-    NODE_LIST_FRICTION,
+    NODE_LIST_SPACE,
+
     /**
      * @brief 通过{@link setAttribute}方法设置是否开启循环。
      *
@@ -1792,6 +1846,226 @@ typedef enum {
     NODE_XCOMPONENT_SURFACE_SIZE,
 
     /**
+     * @brief 通过{@link setAttribute}方法设置 ListItemGroup 头部组件。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .object：使用{@link ArkUI_NodeHandle}对象作为ListItemGroup头部组件。
+     *
+     * @code {.c}
+     * auto header = nodeAPI->createNode(ARKUI_NODE_TEXT);
+     * ARKUI_AttributeItem item = { .object = header };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_HEADER, &item);
+     * @endcode
+     */
+    NODE_LIST_ITEM_GROUP_SET_HEADER = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST_ITEM_GROUP,
+    /**
+     * @brief 通过{@link setAttribute}方法设置 ListItemGroup 尾部组件。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .object：使用{@link ArkUI_NodeHandle}对象作为ListItemGroup尾部组件。
+     *
+     * @code {.c}
+     * auto footer = nodeAPI->createNode(ARKUI_NODE_TEXT);
+     * ARKUI_AttributeItem item = { .object = footer };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_FOOTER, &item);
+     * @endcode
+     */
+    NODE_LIST_ITEM_GROUP_SET_FOOTER,
+    /**
+     * @brief 通过{@link setAttribute}方法设置ListItem分割线样式，默认无分割线。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32： 颜色，0xargb类型；\n
+     * .value[0].f32： 分割线宽，单位vp；\n
+     * .value[1].f32： 分割线距离列表侧边起始端的距离，单位vp；\n
+     * .value[2].f32： 分割线距离列表侧边结束端的距离，单位vp。
+     *
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = 0xFFFFFFFF }, 1, 0, 0 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE, &item);
+     * @endcode
+     */
+    NODE_LIST_ITEM_GROUP_SET_DIVIDER,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件的日期是否显示农历。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32： 是否显示农历，默认值false。
+     *
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = true } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_LUNAR, &item);
+     * @endcode
+     */
+    NODE_DATE_PICKER_LUNAR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_DATE_PICKER,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件选择器的起始日期。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 日期，默认值"1970-1-1"。
+     *
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "1970-1-1" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_START, &item);
+     * @endcode
+     */
+    NODE_DATE_PICKER_START,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件选择器的结束日期。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 日期，默认值"2100-12-31"。
+     *
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "2100-12-31" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_END, &item);
+     * @endcode
+     */
+    NODE_DATE_PICKER_END,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件选中项的日期。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 日期，默认值"2024-01-22"。
+     *
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "2024-01-22" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_SELECTED, &item);
+     * @endcode
+     */
+    NODE_DATE_PICKER_SELECTED,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件的所有选项中最上和最下两个选项的文本颜色、字号、字体粗细。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 入参5个，格式为字符串，以 ';' 分割：\n
+     *       入参1： 文本颜色，#argb类型\n
+     *       入参2： 文本大小，数字类型，单位fp\n
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")\n
+     *       入参4： 文本字体列表，使用 ',' 进行分割\n
+     *       入参5： 文本样式，字符串枚举("normal", "italic")\n
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE, &item);
+     * @endcode
+     */
+    NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件的所有选项中除了最上、最下及选中项以外的文本颜色、字号、字体粗细。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 入参5个，格式为字符串，以 ';' 分割：\n
+     *       入参1： 文本颜色，#argb类型\n
+     *       入参2： 文本大小，数字类型，单位fp\n
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")\n
+     *       入参4： 文本字体列表，使用 ',' 进行分割\n
+     *       入参5： 文本样式，字符串枚举("normal", "italic")\n
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_TEXT_STYLE, &item);
+     * @endcode
+     */
+    NODE_DATE_PICKER_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置日期选择器组件的选中项的文本颜色、字号、字体粗细。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 入参5个，格式为字符串，以 ';' 分割：\n
+     *       入参1： 文本颜色，#argb类型\n
+     *       入参2： 文本大小，数字类型，单位fp\n
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")\n
+     *       入参4： 文本字体列表，使用 ',' 进行分割\n
+     *       入参5： 文本样式，字符串枚举("normal", "italic")\n
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_SELECTED_TEXT_STYLE, &item);
+     * @endcode
+     */
+    NODE_DATE_PICKER_SELECTED_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置时间选择组件选中项的时间。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 时间，默认值当前系统时间。
+     *
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "17-11" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TIME_PICKER_SELECTED, &item);
+     * @endcode
+     */
+
+    NODE_TIME_PICKER_SELECTED = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TIME_PICKER,
+    /**
+     * @brief 通过{@link setAttribute}方法设置时间选择组件展示时间是否为24小时制。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0].i32： 是否为24小时制，默认值false。
+     *
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = true } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TIME_PICKER_USE_MILITARY_TIME, &item);
+     * @endcode
+     */
+    NODE_TIME_PICKER_USE_MILITARY_TIME,
+    /**
+     * @brief 通过{@link setAttribute}方法设置时间选择组件所有选项中最上和最下两个选项的文本颜色、字号、字体粗细。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 入参5个，格式为字符串，以 ';' 分割：\n
+     *       入参1： 文本颜色，#argb类型\n
+     *       入参2： 文本大小，数字类型，单位fp\n
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")\n
+     *       入参4： 文本字体列表，使用 ',' 进行分割\n
+     *       入参5： 文本样式，字符串枚举("normal", "italic")\n
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE, &item);
+     * @endcode
+     */
+    NODE_TIME_PICKER_DISAPPEAR_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置时间选择组件所有选项中除了最上、最下及选中项以外的文本颜色、字号、字体粗细。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 入参5个，格式为字符串，以 ';' 分割：\n
+     *       入参1： 文本颜色，#argb类型\n
+     *       入参2： 文本大小，数字类型，单位fp\n
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")\n
+     *       入参4： 文本字体列表，使用 ',' 进行分割\n
+     *       入参5： 文本样式，字符串枚举("normal", "italic")\n
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TIME_PICKER_TEXT_STYLE, &item);
+     * @endcode
+     */
+    NODE_TIME_PICKER_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置时间选择组件选中项的文本颜色、字号、字体粗细。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 入参5个，格式为字符串，以 ';' 分割：\n
+     *       入参1： 文本颜色，#argb类型\n
+     *       入参2： 文本大小，数字类型，单位fp\n
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")\n
+     *       入参4： 文本字体列表，使用 ',' 进行分割\n
+     *       入参5： 文本样式，字符串枚举("normal", "italic")\n
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TIME_PICKER_SELECTED_TEXT_STYLE, &item);
+     * @endcode
+     */
+    NODE_TIME_PICKER_SELECTED_TEXT_STYLE,
+
+    /**
      * @brief 通过{@link setAttribute}方法设置滑动选择文本选择器的选择列表。
      *
      * {@link ArkUI_AttributeItem}入参格式：\n
@@ -1838,6 +2112,71 @@ typedef enum {
      *
      */
     NODE_TEXT_PICKER_OPTION_VALUE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件所有选项中最上和最下两个选项的文本颜色、字号、字体粗细。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 入参5个，格式为字符串，以 ';' 分割：\n
+     *       入参1： 文本颜色，#argb类型\n
+     *       入参2： 文本大小，数字类型，单位fp\n
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")\n
+     *       入参4： 文本字体列表，使用 ',' 进行分割\n
+     *       入参5： 文本样式，字符串枚举("normal", "italic")\n
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_DISAPPEAR_TEXT_STYLE, &item);
+     * @endcode
+     */
+    NODE_TEXT_PICKER_DISAPPEAR_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件所有选项中除了最上、最下及选中项以外的文本颜色、字号、字体粗细。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 入参5个，格式为字符串，以 ';' 分割：\n
+     *       入参1： 文本颜色，#argb类型\n
+     *       入参2： 文本大小，数字类型，单位fp\n
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")\n
+     *       入参4： 文本字体列表，使用 ',' 进行分割\n
+     *       入参5： 文本样式，字符串枚举("normal", "italic")\n
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_TEXT_STYLE, &item);
+     * @endcode
+     */
+    NODE_TEXT_PICKER_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件选中项的文本颜色、字号、字体粗细。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .string： 入参5个，格式为字符串，以 ';' 分割：\n
+     *       入参1： 文本颜色，#argb类型\n
+     *       入参2： 文本大小，数字类型，单位fp\n
+     *       入参3： 文本粗细，字符串枚举("bold", "normal", "bolder", "lighter", "medium", "regular")\n
+     *       入参4： 文本字体列表，使用 ',' 进行分割\n
+     *       入参5： 文本样式，字符串枚举("normal", "italic")\n
+     *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。
+     * @code {.c}
+     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_SELECTED_TEXT_STYLE, &item);
+     * @endcode
+     */
+    NODE_TEXT_PICKER_SELECTED_TEXT_STYLE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件默认选中项在数组中的索引值，优先级高于 options 中的选中值。
+     *
+     * {@link ArkUI_AttributeItem}参数类型：\n
+     * .value[0...].i32：默认选中项在数组中的索引值数组，优先级高于options中的选中值。
+     *
+     * @note 入参索引列表，数字类型数组，格式字符串，以空格分割，如 "0 1" 。
+     * @code {.c}
+     * ArkUI_NumberValue value[] = { { .i32 = 0 }, { .i32 = 1 } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_SELECTED_INDEX, &item);
+     * @endcode
+     */
+    NODE_TEXT_PICKER_SELECTED_INDEX,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -1923,7 +2262,7 @@ typedef enum {
      * 2、通过滚动控制器API接口调用。\n
      * 3、越界回弹。\n
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * <b>::ArkUI_NodeComponentEvent</b>中包含2个参数
+     * <b>::ArkUI_NodeComponentEvent</b>中包含2个参数\n
      * <b>ArkUI_NodeComponent.data[0].f32</b>表示距离上一次事件触发的X轴增量。\n
      * <b>ArkUI_NodeComponent.data[1].f32</b>表示距离上一次事件触发的Y轴增量。\n
      */
