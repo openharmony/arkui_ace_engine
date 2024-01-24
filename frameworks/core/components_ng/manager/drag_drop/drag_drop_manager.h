@@ -216,6 +216,19 @@ public:
         dragDropState_ = dragDropMgrState;
     }
 
+    void SetDraggingPressedState(bool pointerPressed)
+    {
+        draggingPressedState_ = pointerPressed;
+    }
+
+    bool IsDraggingPressed(int32_t currentPointerId) const
+    {
+        if (currentPointerId_ == currentPointerId) {
+            return draggingPressedState_;
+        }
+        return false;
+    }
+
     bool IsSameDraggingPointer(int32_t currentPointerId) const
     {
         return currentPointerId_ == currentPointerId;
@@ -296,6 +309,7 @@ private:
     uint32_t recordSize_ = 0;
     int64_t currentId_ = -1;
     int32_t currentPointerId_ = -1;
+    bool draggingPressedState_ = false;
 
     std::function<void(void)> notifyInDraggedCallback_ = nullptr;
     bool isDragged_ = false;
