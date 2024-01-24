@@ -129,19 +129,27 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
         inlineMeasureItem_.inlineSizeHeight = inlineIdealHeight;
     } else {
         // calc inline status in advance
-        inlineMeasureItem_.inlineSizeHeight = inlineParagraph_->GetHeight() / inlineParagraph_->GetLineCount()
-            * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
-        inlineMeasureItem_.inlineContentRectHeight = GreatNotEqual(inlineParagraph_->GetLongestLine(), 0.0)
-            ? inlineParagraph_->GetHeight() : std::max(preferredHeight_, inlineParagraph_->GetHeight());
-        inlineMeasureItem_.inlineLastOffsetY =
-            std::max(inlineMeasureItem_.inlineSizeHeight, inlineMeasureItem_.inlineContentRectHeight)
-            - std::min(inlineMeasureItem_.inlineSizeHeight, inlineMeasureItem_.inlineContentRectHeight);
+        CalcInlineMeasureItem(layoutWrapper);
     }
 
     auto contentHeight = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
         ? paragraph_->GetHeight() : std::max(preferredHeight_, paragraph_->GetHeight());
 
     return SizeF(contentWidth, std::min(inlineIdealHeight, contentHeight));
+}
+
+void TextFieldLayoutAlgorithm::CalcInlineMeasureItem(LayoutWrapper* layoutWrapper)
+{
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto lineCount = inlineParagraph_->GetLineCount() != 0 ? inlineParagraph_->GetLineCount() : 1;
+    inlineMeasureItem_.inlineSizeHeight = inlineParagraph_->GetHeight() / lineCount
+        * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+    inlineMeasureItem_.inlineContentRectHeight = GreatNotEqual(inlineParagraph_->GetLongestLine(), 0.0)
+        ? inlineParagraph_->GetHeight() : std::max(preferredHeight_, inlineParagraph_->GetHeight());
+    inlineMeasureItem_.inlineLastOffsetY =
+        std::max(inlineMeasureItem_.inlineSizeHeight, inlineMeasureItem_.inlineContentRectHeight)
+        - std::min(inlineMeasureItem_.inlineSizeHeight, inlineMeasureItem_.inlineContentRectHeight);
 }
 
 float TextFieldLayoutAlgorithm::ConstraintWithMinWidth(

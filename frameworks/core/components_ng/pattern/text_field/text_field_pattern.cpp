@@ -6322,7 +6322,19 @@ void TextFieldPattern::PaintUnitRect()
 
 void TextFieldPattern::CleanNodeResponseKeyEvent()
 {
-    ClearEditingValue();
+    CHECK_NULL_VOID(!IsDragging());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    InitEditingValueText("");
+    if (!HasFocus()) {
+        auto focusHub = host->GetOrCreateFocusHub();
+        focusHub->RequestFocusImmediately();
+    } else {
+        CloseSelectOverlay();
+        StartTwinkling();
+    }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::PasswordResponseKeyEvent()
