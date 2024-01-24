@@ -14,6 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
+import("//foundation/graphic/graphic_2d/graphic_config.gni")
 import("../../../build/uicast.gni")
 
 template("build_component_ng") {

@@ -450,7 +450,6 @@ void WebModelNG::SetCopyOptionMode(CopyOptions mode)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateCopyOptionMode(static_cast<int32_t>(mode));
 }
 
 void WebModelNG::SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled)
@@ -834,7 +833,6 @@ void WebModelNG::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
 void WebModelNG::SetOnControllerAttached(std::function<void()>&& callback)
@@ -941,7 +939,5 @@ void WebModelNG::SetPermissionClipboard(std::function<void(const std::shared_ptr
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    
-    webPattern->SetPermissionClipboardCallback(std::move(jsCallback));
 }
 } // namespace OHOS::Ace::NG
