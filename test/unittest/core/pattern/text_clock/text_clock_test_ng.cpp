@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,7 +111,7 @@ RefPtr<FrameNode> TextClockTestNG::CreateTextClockParagraph(const TestProperty& 
 HWTEST_F(TextClockTestNG, TextClockTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize all properties of textclock.
+     * @tc.steps: step1. Initialize all properties of textClock.
      */
     TestProperty testProperty;
     testProperty.format = std::make_optional(CLOCK_FORMAT);
@@ -183,7 +183,7 @@ HWTEST_F(TextClockTestNG, TextClockTest001, TestSize.Level1)
 HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textclock and get frameNode.
+     * @tc.steps: step1. create textClock and get frameNode.
      */
     TestProperty testProperty;
     testProperty.format = std::make_optional(FORMAT_DATA);
@@ -239,13 +239,13 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
 
 /**
  * @tc.name: TextClockTest003
- * @tc.desc: Test event function of textclock.
+ * @tc.desc: Test event function of textClock.
  * @tc.type: FUNC
  */
 HWTEST_F(TextClockTestNG, TextClockTest003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textclock and set event.
+     * @tc.steps: step1. create textClock and set event.
      */
     TextClockModelNG textClockModel;
     textClockModel.Create();
@@ -254,7 +254,7 @@ HWTEST_F(TextClockTestNG, TextClockTest003, TestSize.Level1)
     textClockModel.SetOnDateChange(onChange);
 
     /**
-     * @tc.steps: step2. get textclock frameNode and event.
+     * @tc.steps: step2. get textClock frameNode and event.
      * @tc.expected: function is called.
      */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -272,13 +272,13 @@ HWTEST_F(TextClockTestNG, TextClockTest003, TestSize.Level1)
 
 /**
  * @tc.name: TextClockTest004
- * @tc.desc: Test GetHourWest function of textclock.
+ * @tc.desc: Test GetHourWest function of textClock.
  * @tc.type: FUNC
  */
 HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize the format property of textclock.
+     * @tc.steps: step1. Initialize the format property of textClock.
      */
     TestProperty testProperty;
     testProperty.format = std::make_optional(CLOCK_FORMAT);
@@ -313,7 +313,7 @@ HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
 HWTEST_F(TextClockTestNG, TextClockTest005, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize all properties of textclock.
+     * @tc.steps: step1. Initialize all properties of textClock.
      */
     TestProperty testProperty;
     testProperty.format = std::make_optional("M月d日yy年y E EEEE HH:mm:ss.SSS aa");
@@ -366,7 +366,7 @@ HWTEST_F(TextClockTestNG, TextClockTest005, TestSize.Level1)
 HWTEST_F(TextClockTestNG, TextClockTest006, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize all properties of textclock.
+     * @tc.steps: step1. Initialize all properties of textClock.
      */
     TestProperty testProperty;
     testProperty.format = std::make_optional("yyyy-M-M-d-d EEEE hh:mm:ss.SS.SSS aa");
@@ -432,7 +432,7 @@ HWTEST_F(TextClockTestNG, TextClockAccessibilityPropertyIsScrollable001, TestSiz
 HWTEST_F(TextClockTestNG, TextClockTest007, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textclock frameNode.
+     * @tc.steps: step1. create textClock frameNode.
      */
     TestProperty testProperty;
     RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
@@ -477,7 +477,7 @@ HWTEST_F(TextClockTestNG, TextClockTest007, TestSize.Level1)
 HWTEST_F(TextClockTestNG, TextClockTest008, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textclock frameNode.
+     * @tc.steps: step1. create textClock frameNode.
      */
     TestProperty testProperty;
     testProperty.format = std::make_optional(CLOCK_FORMAT);
@@ -539,7 +539,7 @@ HWTEST_F(TextClockTestNG, TextClockTest008, TestSize.Level1)
 HWTEST_F(TextClockTestNG, TextClockTest009, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textclock frameNode.
+     * @tc.steps: step1. create textClock frameNode.
      */
     TestProperty testProperty;
     testProperty.format = std::make_optional(CLOCK_FORMAT);
@@ -603,7 +603,7 @@ HWTEST_F(TextClockTestNG, TextClockTest009, TestSize.Level1)
 HWTEST_F(TextClockTestNG, TextClockTest010, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textclock frameNode.
+     * @tc.steps: step1. create textClock frameNode.
      */
     TestProperty testProperty;
     testProperty.hoursWest = std::make_optional(HOURS_WEST);
@@ -677,7 +677,7 @@ HWTEST_F(TextClockTestNG, TextClockTest010, TestSize.Level1)
 HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textclock and set event.
+     * @tc.steps: step1. create textClock and set event.
      */
     TextClockModelNG textClockModel;
     textClockModel.Create();
@@ -686,7 +686,7 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
     textClockModel.SetOnDateChange(onChange);
 
     /**
-     * @tc.steps: step2. get textclock frameNode and event.
+     * @tc.steps: step2. get textClock frameNode and event.
      * @tc.expected: function is called.
      */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -759,7 +759,7 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
 HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textclock frameNode.
+     * @tc.steps: step1. create textClock frameNode.
      */
     TestProperty testProperty;
     testProperty.format = std::make_optional(CLOCK_FORMAT);
@@ -819,7 +819,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm001, TestSize.Level1)
 HWTEST_F(TextClockTestNG, TextClockTest012, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textclock frameNode.
+     * @tc.steps: step1. create textClock frameNode.
      */
     TestProperty testProperty;
     testProperty.format = std::make_optional(CLOCK_FORMAT);
@@ -855,5 +855,45 @@ HWTEST_F(TextClockTestNG, TextClockTest012, TestSize.Level1)
     EXPECT_TRUE(pattern->isSetVisible_);
     EXPECT_TRUE(pattern->isInVisibleArea_);
     EXPECT_TRUE(pattern->isFormVisible_);
+}
+
+/**
+ * @tc.name: TextClockTest013
+ * @tc.desc: Test TextClockModelNG of TextClock.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and get frameNode.
+     */
+    TextClockModelNG model;
+    model.Create();
+    RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. the layoutProperty is not set and InitFontDefault.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    const double fontSize = 20.1;
+    model.InitFontDefault(
+        TextStyle(FONT_FAMILY_VALUE, fontSize, FONT_WEIGHT_VALUE, ITALIC_FONT_STYLE_VALUE, TEXT_COLOR_VALUE));
+    EXPECT_EQ(layoutProperty->GetFontSize(), Dimension(fontSize));
+    EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+
+    /**
+     * @tc.steps: step3. the layoutProperty has been set and InitFontDefault.
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    model.InitFontDefault(TextStyle());
+    EXPECT_EQ(layoutProperty->GetFontSize(), Dimension(fontSize));
+    EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
 }
 } // namespace OHOS::Ace::NG
