@@ -272,22 +272,25 @@ void JSNavigation::Create(const JSCallbackInfo& info)
         NavigationModel::GetInstance()->SetNavigationStackProvided(!newObj->IsEmpty());
         auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
         CHECK_NULL_VOID(jsStack);
-
-        if (newObj->IsEmpty()) {
-            newObj = JSNavPathStack::CreateNewNavPathStackJSObject();
-        }
         const auto& oldObj = jsStack->GetDataSourceObj();
-        auto objStrictEqual = [](const JSRef<JSVal>& obja, const JSRef<JSVal>& objb) -> bool {
-            return (obja->IsEmpty() && objb->IsEmpty()) ||
-                (obja->GetLocalHandle()->IsStrictEquals(obja->GetEcmaVM(), objb->GetLocalHandle()));
-        };
-        if (objStrictEqual(newObj, oldObj)) {
-            return;
+        if (oldObj->IsEmpty()) {
+            if (newObj->IsEmpty()) {
+                newObj = JSNavPathStack::CreateNewNavPathStackJSObject();
+            }
+            auto nativeObj = JSClass<JSNavPathStack>::NewInstance();
+            JSNavPathStack::SetNativeNavPathStack(newObj, nativeObj);
+            jsStack->SetDataSourceObj(newObj);
+        } else if (!newObj->IsEmpty()) {
+            auto objStrictEqual = [](const JSRef<JSVal>& obja, const JSRef<JSVal>& objb) -> bool {
+                return obja->GetLocalHandle()->IsStrictEquals(obja->GetEcmaVM(), objb->GetLocalHandle());
+                };
+            if (objStrictEqual(newObj, oldObj)) {
+                return;
+            }
+            auto nativeObj = JSClass<JSNavPathStack>::NewInstance();
+            JSNavPathStack::SetNativeNavPathStack(newObj, nativeObj);
+            jsStack->SetDataSourceObj(newObj);
         }
-
-        auto nativeObj = JSClass<JSNavPathStack>::NewInstance();
-        JSNavPathStack::SetNativeNavPathStack(newObj, nativeObj);
-        jsStack->SetDataSourceObj(newObj);
     };
     NavigationModel::GetInstance()->SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
 }

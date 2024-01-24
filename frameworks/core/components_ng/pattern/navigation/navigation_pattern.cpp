@@ -173,6 +173,7 @@ void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 
 void NavigationPattern::OnModifyDone()
 {
+    // !!! Do not add operations about NavPathStack here, see @SyncWithJsStackIfNeeded
     Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -219,6 +220,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     }
 
     needSyncWithJsStack_ = false;
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack");
     UpdateNavPathList();
     RefreshNavDestination();
 }
@@ -1408,7 +1410,10 @@ void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& naviga
     }
     navigationStack_ = navigationStack;
     if (navigationStack_) {
-        auto callback = [weakPattern = WeakClaim(this)]() {
+        WeakPtr<NavigationPattern> weakPattern = WeakClaim(this);
+        auto id = Container::CurrentId();
+        auto uiTask = [weakPattern, id]() {
+            ContainerScope scope(id);
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->NeedSyncWithJsStackMarked()) {
@@ -1416,7 +1421,7 @@ void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& naviga
             }
 
             pattern->MarkNeedSyncWithJsStack();
-            auto context = NG::PipelineContext::GetCurrentContext();
+            auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
             context->AddBuildFinishCallBack([weakPattern]() {
                 auto pattern = weakPattern.Upgrade();
@@ -1427,6 +1432,14 @@ void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& naviga
                 host->MarkDirtyNode();
             });
             context->RequestFrame();
+        };
+        auto callback = [id, task = std::move(uiTask)]() {
+            ContainerScope scope(id);
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
         };
         navigationStack_->SetOnStateChangedCallback(callback);
     }
