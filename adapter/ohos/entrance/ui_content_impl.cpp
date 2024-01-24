@@ -1831,16 +1831,22 @@ void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
 void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
 {
     LOGI("UIContentImpl: UpdateWindowMode, window mode is %{public}d, hasDeco is %{public}d", mode, hasDeco);
+    UpdateDecorVisible(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
+}
+
+void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
+{
+    LOGI("UIContentImpl: UpdateWindowMode, window visible is %{public}d, hasDeco is %{public}d", visible, hasDeco);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [container, mode, hasDeco]() {
-            auto pipelineContext = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
+        [container, visible, hasDeco]() {
+           auto pipelineContext = container->GetPipelineContext();
+           CHECK_NULL_VOID(pipelineContext);
+           pipelineContext->ShowContainerTitle(visible, hasDeco);
         },
         TaskExecutor::TaskType::UI);
 }

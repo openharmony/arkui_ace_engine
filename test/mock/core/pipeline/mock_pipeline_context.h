@@ -62,6 +62,7 @@ public:
     MOCK_METHOD0(ContainerModalUnFocus, void());
     MOCK_METHOD3(ShowContainerTitle, void(bool isShow, bool hasDeco, bool needUpdate));
     MOCK_METHOD2(UpdateTitleInTargetPos, void(bool isShow, int32_t height));
+    MOCK_METHOD2(UpdateDecorVisible, void(bool visible, bool hasDeco));
     MOCK_METHOD4(OnSurfaceChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type,
                                        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
     MOCK_METHOD1(OnLayoutCompleted, void(const std::string& componentId));
