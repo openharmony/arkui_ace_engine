@@ -411,6 +411,9 @@ void SubwindowOhos::HideWindow()
             }
             return;
         }
+        if (!rootNode->GetChildren().empty()) {
+            return;
+        }
         auto focusHub = rootNode->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetIsDefaultHasFocused(false);
