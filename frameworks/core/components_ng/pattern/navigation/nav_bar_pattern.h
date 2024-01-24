@@ -139,6 +139,11 @@ public:
         maxMenuNums_ = maxMenu;
     }
 
+    bool NeedCoordWithScroll()
+    {
+        return titleMode_ == NavigationTitleMode::FREE;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
