@@ -87,6 +87,24 @@ struct SelectMenuCallback {
     std::function<void()> onDisappear;
 };
 
+struct SelectedByMouseInfo {
+    WeakPtr<FrameNode> selectedNode;
+    std::function<void()> onResetSelection;
+
+    bool operator!=(const SelectedByMouseInfo& info) const
+    {
+        CHECK_NULL_RETURN(selectedNode.Upgrade(), true);
+        CHECK_NULL_RETURN(info.selectedNode.Upgrade(), true);
+        return selectedNode.Upgrade() != info.selectedNode.Upgrade();
+    }
+
+    void clear()
+    {
+        selectedNode.Reset();
+        onResetSelection = nullptr;
+    }
+};
+
 struct SelectOverlayInfo {
     bool isUsingMouse = false;
     bool isSingleHandle = false;

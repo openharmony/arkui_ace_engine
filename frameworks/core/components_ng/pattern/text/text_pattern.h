@@ -552,6 +552,7 @@ protected:
     bool IsDraggable(const Offset& localOffset);
     virtual void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void PushSelectedByMouseInfoToManager();
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
         bool animation, bool isUsingMouse = false, bool isShowMenu = true);
