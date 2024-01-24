@@ -1084,7 +1084,6 @@ public:
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
-    void ContentFireOnChangeEvent();
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
     void SetMagnifierRect(MagnifierRect magnifierRect)
@@ -1105,6 +1104,7 @@ public:
     }
 
     void CleanNodeResponseKeyEvent();
+    void FireSelectEvent();
 
 protected:
     virtual void InitDragEvent();
