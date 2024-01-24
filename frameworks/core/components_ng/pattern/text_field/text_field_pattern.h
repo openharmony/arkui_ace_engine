@@ -1101,6 +1101,8 @@ public:
         return magnifierController_;
     }
 
+    void CleanNodeResponseKeyEvent();
+
 protected:
     virtual void InitDragEvent();
 
@@ -1236,7 +1238,7 @@ private:
         CHECK_NULL_RETURN(cleanNodeArea, false);
         return cleanNodeArea->IsShow();
     }
-    void CleanNodeResponseKeyEvent();
+
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
     void ProcNormalInlineStateInBlurEvent();
