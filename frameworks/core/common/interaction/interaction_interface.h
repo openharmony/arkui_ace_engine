@@ -55,6 +55,10 @@ public:
     virtual int32_t EnterTextEditorArea(bool enable) = 0;
 
     virtual int32_t AddPrivilege() = 0;
+
+    virtual int32_t RegisterCoordinationListener(std::function<void()> dragOutCallback) = 0;
+
+    virtual int32_t UnRegisterCoordinationListener() = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_INTERFACE_H

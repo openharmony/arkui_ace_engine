@@ -255,7 +255,7 @@ public:
     void CreateHandles() override;
     void HandleMenuCallbackOnSelectAll();
     void HandleOnSelectAll() override;
-    void HandleOnCopy() override;
+    void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     bool JudgeDraggable(GestureEvent& info);
 
     bool IsUsingMouse() const

@@ -212,6 +212,7 @@ void SwiperPattern::AdjustCurrentIndexOnSwipePage(int32_t index)
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateIndexWithoutMeasure(GetLoopIndex(adjustIndex));
+    currentIndex_ = GetLoopIndex(adjustIndex);
 }
 
 void SwiperPattern::OnModifyDone()
@@ -226,10 +227,6 @@ void SwiperPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-
-    if (IsSwipeByGroup() && layoutProperty->GetIndex().has_value()) {
-        AdjustCurrentIndexOnSwipePage(layoutProperty->GetIndex().value());
-    }
 
     InitIndicator();
     InitArrow();
@@ -288,6 +285,7 @@ void SwiperPattern::OnModifyDone()
     }
 
     SetAccessibilityAction();
+    placeItemWidth_.reset();
 }
 
 void SwiperPattern::OnAfterModifyDone()
@@ -333,8 +331,13 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         if (oldIndex != userSetCurrentIndex) {
             currentIndex_ = userSetCurrentIndex;
             propertyAnimationIndex_ = GetLoopIndex(propertyAnimationIndex_);
+
+            if (IsSwipeByGroup()) {
+                AdjustCurrentIndexOnSwipePage(CurrentIndex());
+            }
         }
     }
+
     if (oldIndex_ != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)) {
         jumpIndex_ = GetLoopIndex(currentIndex_);
         currentFirstIndex_ = jumpIndex_.value_or(0);
@@ -1128,6 +1131,9 @@ void SwiperPattern::InitSwiperController()
     swiperController_->SetShowNextImpl([weak = WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
+            auto swiperNode = swiper->GetHost();
+            CHECK_NULL_VOID(swiperNode);
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowNext, id:%{public}d", swiperNode->GetId());
             swiper->ShowNext();
         }
     });
@@ -1135,6 +1141,9 @@ void SwiperPattern::InitSwiperController()
     swiperController_->SetShowPrevImpl([weak = WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
+            auto swiperNode = swiper->GetHost();
+            CHECK_NULL_VOID(swiperNode);
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper SetShowPrevImpl, id:%{public}d", swiperNode->GetId());
             swiper->ShowPrevious();
         }
     });
@@ -1364,6 +1373,17 @@ void SwiperPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
 
+bool SwiperPattern::IsContentFocused()
+{
+    RefPtr<FocusHub> indicatorNode = GetFocusHubChild(V2::SWIPER_INDICATOR_ETS_TAG);
+    RefPtr<FocusHub> rightArrowNode = GetFocusHubChild(V2::SWIPER_RIGHT_ARROW_ETS_TAG);
+    RefPtr<FocusHub> leftArrowNode = GetFocusHubChild(V2::SWIPER_LEFT_ARROW_ETS_TAG);
+
+    return !((indicatorNode && indicatorNode->IsCurrentFocus()) ||
+             (rightArrowNode && rightArrowNode->IsCurrentFocus()) ||
+             (leftArrowNode && leftArrowNode->IsCurrentFocus()));
+}
+
 bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.action != KeyAction::DOWN) {
@@ -1371,7 +1391,7 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
     }
     if ((GetDirection() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
         (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
-        auto onlyFlushFocus = GetDisplayCount() > 1 && currentFocusIndex_ > currentIndex_;
+        auto onlyFlushFocus = IsContentFocused() && GetDisplayCount() > 1 && currentFocusIndex_ > currentIndex_;
         if (onlyFlushFocus) {
             currentFocusIndex_ = IsLoop() ? currentFocusIndex_ - 1 :
                                             std::clamp(currentFocusIndex_ - 1, 0, TotalCount() - 1);
@@ -1387,7 +1407,7 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
     if ((GetDirection() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
         (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
         auto onlyFlushFocus =
-            GetDisplayCount() > 1 && currentFocusIndex_ < currentIndex_ + GetDisplayCount() - 1;
+            IsContentFocused() && GetDisplayCount() > 1 && currentFocusIndex_ < currentIndex_ + GetDisplayCount() - 1;
         if (onlyFlushFocus) {
             currentFocusIndex_ = IsLoop() ? currentFocusIndex_ + 1 :
                                             std::clamp(currentFocusIndex_ + 1, 0, TotalCount() - 1);
@@ -1935,7 +1955,7 @@ int32_t SwiperPattern::ComputeSwipePageNextIndex(float velocity, bool onlyDistan
     }
 
     auto currentOffset = iter->second.startPos;
-    auto direction = GreatNotEqual(currentOffset, 0.0);
+    auto direction = GreatNotEqual(velocity, 0.0);
     auto dragThresholdFlag = direction ? currentOffset > swiperWidth / 2 : -currentOffset > swiperWidth / 2;
     auto nextIndex = currentIndex_;
     auto displayCount = GetDisplayCount();

@@ -982,6 +982,16 @@ void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     }
 }
 
+void UINode::DoSetActiveChildRange(int32_t start, int32_t end)
+{
+    for (const auto& child : children_) {
+        uint32_t count = static_cast<uint32_t>(child->FrameCount());
+        child->DoSetActiveChildRange(start, end);
+        start -= count;
+        end -= count;
+    }
+}
+
 void UINode::OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
 {
     for (const auto& child : GetChildren()) {

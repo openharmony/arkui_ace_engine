@@ -20,6 +20,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/resource/internal_resource.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
@@ -45,7 +46,6 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
-constexpr int32_t SLIDE_TRANSLATE_DURATION = 400;
 constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM = 2;
 constexpr float RATIO_NEGATIVE = -1.0f;
 constexpr float RATIO_ZERO = 0.0f;
@@ -470,6 +470,15 @@ void SideBarContainerPattern::UpdateDividerShadow() const
     }
 }
 
+void SideBarContainerPattern::SetSideBarActive(bool isActive) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sideBarNode = GetSideBarNode(host);
+    CHECK_NULL_VOID(sideBarNode);
+    sideBarNode->SetJSViewActive(isActive);
+}
+
 void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode)
 {
     CHECK_NULL_VOID(parentNode);
@@ -713,6 +722,7 @@ void SideBarContainerPattern::DoAnimation()
         sideBarStatus_ = SideBarStatus::HIDDEN;
     }
 
+    SetSideBarActive(true);
     UpdateAnimDir();
 
     AnimationOption option = AnimationOption();
@@ -733,20 +743,13 @@ void SideBarContainerPattern::DoAnimation()
     context->OpenImplicitAnimation(option, option.GetCurve(), [weak, sideBarStatus]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            auto sideBarContainerNode = pattern->GetHost();
-            auto sideBarNode = sideBarContainerNode->GetChildByIndex(1);
             if (sideBarStatus == SideBarStatus::HIDDEN) {
                 pattern->SetSideBarStatus(SideBarStatus::SHOW);
                 pattern->UpdateControlButtonIcon();
-                if (sideBarNode) {
-                    sideBarNode->SetActive(true);
-                }
             } else {
                 pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
                 pattern->UpdateControlButtonIcon();
-                if (sideBarNode) {
-                    sideBarNode->SetActive(false);
-                }
+                pattern->SetSideBarActive(false);
             }
             pattern->inAnimation_ = false;
         }
@@ -780,51 +783,6 @@ void SideBarContainerPattern::HandlePanEventEnd()
     if (sideBarStatus_ == SideBarStatus::HIDDEN) {
         DoAnimation();
     }
-}
-
-void SideBarContainerPattern::DoSideBarAnimation()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    CHECK_NULL_VOID(controller_);
-    CHECK_NULL_VOID(leftToRightAnimation_);
-    CHECK_NULL_VOID(rightToLeftAnimation_);
-
-    if (!controller_->IsStopped()) {
-        controller_->Stop();
-    }
-
-    auto weak = AceType::WeakClaim(this);
-    controller_->ClearStopListeners();
-    controller_->ClearInterpolators();
-    controller_->SetDuration(SLIDE_TRANSLATE_DURATION);
-
-    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
-    bool isSideBarStart = sideBarPosition == SideBarPosition::START;
-
-    FireChangeEvent(sideBarStatus_ == SideBarStatus::HIDDEN);
-    if (sideBarStatus_ == SideBarStatus::HIDDEN) {
-        controller_->AddInterpolator(isSideBarStart ? leftToRightAnimation_ : rightToLeftAnimation_);
-        controller_->AddStopListener([weak]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->SetSideBarStatus(SideBarStatus::SHOW);
-            pattern->UpdateControlButtonIcon();
-        });
-    } else {
-        controller_->AddInterpolator(isSideBarStart ? rightToLeftAnimation_ : leftToRightAnimation_);
-        controller_->AddStopListener([weak]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
-            pattern->UpdateControlButtonIcon();
-        });
-    }
-    controller_->Play();
-    UpdateControlButtonIcon();
 }
 
 void SideBarContainerPattern::UpdateSideBarPosition(float value)
@@ -924,6 +882,10 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
 
     if (autoHide_ != layoutAlgorithm->GetAutoHide()) {
         FireChangeEvent(layoutAlgorithm->GetSideBarStatus() == SideBarStatus::SHOW);
+    }
+
+    if (!inAnimation_) {
+        SetSideBarActive(layoutAlgorithm->GetSideBarStatus() == SideBarStatus::SHOW);
     }
 
     adjustMaxSideBarWidth_ = layoutAlgorithm->GetAdjustMaxSideBarWidth();

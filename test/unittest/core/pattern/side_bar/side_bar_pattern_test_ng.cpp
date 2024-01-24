@@ -229,25 +229,6 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg005, TestSize.Level1)
 }
 
 /**
- * @tc.name: SideBarPatternTestNg006
- * @tc.desc: Test SideBar DoSideBarAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg006, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    EXPECT_FALSE(pattern == nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    EXPECT_FALSE(frameNode == nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    pattern->CreateAnimation();
-    pattern->DoSideBarAnimation();
-    EXPECT_EQ(pattern->showSideBar_, true);
-}
-
-/**
  * @tc.name: SideBarPatternTestNg007
  * @tc.desc: Test SideBar UpdateSideBarPosition
  * @tc.type: FUNC
@@ -906,30 +887,6 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg029, TestSize.Level1)
 }
 
 /**
- * @tc.name: SideBarPatternTestNg030
- * @tc.desc: Test SideBar DoSideBarAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg030, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get pattern and frameNode, modify sideBarStatus_.
-     * @tc.expected: check whether the showSideBar_ is correct.
-     */
-    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    pattern->CreateAnimation();
-    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
-    pattern->DoSideBarAnimation();
-    EXPECT_EQ(pattern->showSideBar_, true);
-}
-
-/**
  * @tc.name: SideBarPatternTestNg031
  * @tc.desc: Test SideBar CreateAndMountControlButton
  * @tc.type: FUNC
@@ -1452,30 +1409,6 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg044, TestSize.Level1)
     pattern->autoHide_ = true;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(pattern->needInitRealSideBarWidth_);
-}
-
-/**
- * @tc.name: SideBarPatternTestNg045
- * @tc.desc: Test SideBar DoSideBarAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg045, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get pattern and frameNode, modify sideBarStatus_.
-     * @tc.expected: check whether the showSideBar_ is correct.
-     */
-    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    pattern->CreateAnimation();
-    pattern->controller_->status_ = Animator::Status::STOPPED;
-    pattern->DoSideBarAnimation();
-    EXPECT_EQ(pattern->showSideBar_, true);
 }
 
 /**

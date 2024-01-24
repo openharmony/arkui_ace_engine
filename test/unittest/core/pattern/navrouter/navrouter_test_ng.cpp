@@ -794,7 +794,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0016, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetNavigationModeValue(NavigationMode::AUTO), NavigationMode::AUTO);
     layoutProperty->propNavigationMode_ = NavigationMode::STACK;
     navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetPattern<NavRouterPattern>()->routeInfo_ = AceType::MakeRefPtr<RouteInfo>();
     auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 55, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     preNavDestination->titleBarNode_ = TitleBarNode::GetOrCreateTitleBarNode(
@@ -853,7 +852,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0016, TestSize.Level1)
     ASSERT_NE(parent->GetPattern<NavigationPattern>()->GetNavDestinationNode(), nullptr);
     navRouterGroupNode->navDestinationNode_ = NavDestinationGroupNode::GetOrCreateGroupNode(
         "navDestinationNode", 20, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_NE(
+    ASSERT_EQ(
         navRouterGroupNode->navDestinationNode_, parent->GetPattern<NavigationPattern>()->GetNavDestinationNode());
 
     AceType::DynamicCast<NavDestinationGroupNode>(navRouterGroupNode->navDestinationNode_)->titleBarNode_ =
@@ -963,6 +962,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0021, TestSize.Level1)
     stack->navPathList_.push_back(p2);
 
     parent->isOnAnimation_ = true;
+    auto onBackButtonEvent = [](GestureEvent&) -> bool {return true;};
+    navDestination->backButtonEvent_ = onBackButtonEvent;
     parent->CheckCanHandleBack();
     bool isPop = true;
     EXPECT_TRUE(parent->isOnAnimation_);

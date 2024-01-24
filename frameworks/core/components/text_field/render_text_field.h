@@ -695,7 +695,7 @@ private:
     void HandleOnRevoke();
     void HandleOnInverseRevoke();
     void HandleOnCut() override;
-    void HandleOnCopy() override;
+    void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCopyAll(const std::function<void(const Offset&, const Offset&)>& callback);
     void HandleOnStartHandleMove(int32_t end, const Offset& startHandleOffset,

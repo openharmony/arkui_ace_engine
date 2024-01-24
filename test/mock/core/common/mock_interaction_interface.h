@@ -56,6 +56,10 @@ public:
     MOCK_METHOD(int32_t, EnterTextEditorArea, (bool enable), (override));
 
     MOCK_METHOD(int32_t, AddPrivilege, (), (override));
+
+    MOCK_METHOD(int32_t, RegisterCoordinationListener, (std::function<void()> dragOutCallback), (override));
+
+    MOCK_METHOD(int32_t, UnRegisterCoordinationListener, (), (override));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_INTERACTION_H

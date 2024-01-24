@@ -110,7 +110,7 @@ public:
             }
         }
         for (auto& [key, node] : expiringItem_) {
-            if (static_cast<size_t>(node.first) >= index) {
+            if (static_cast<size_t>(node.first) >= index && node.first != -1) {
                 node.first++;
             }
         }
@@ -159,6 +159,8 @@ public:
                 NotifyDataChanged(index, keyIter->second.second, false);
                 expiringItem_.try_emplace(
                     keyIter->second.first, LazyForEachCacheChild(-1, std::move(keyIter->second.second)));
+            } else {
+                InvalidIndexOfChangedData(index);
             }
             cachedItems_.erase(keyIter);
             return true;
@@ -185,6 +187,16 @@ public:
             cachedItems_.erase(toIter);
         }
         return true;
+    }
+
+    void InvalidIndexOfChangedData(size_t index)
+    {
+        for (auto& [key, child] : expiringItem_) {
+            if (static_cast<size_t>(child.first) == index) {
+                child.first = -1;
+                break;
+            }
+        }
     }
 
     RefPtr<UINode> GetChildByKey(const std::string& key)
@@ -261,6 +273,36 @@ public:
                 frameNode->SetActive(false);
             }
             node.second->SetJSViewActive(false);
+            expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+        }
+    }
+
+    void SetActiveChildRange(int32_t start, int32_t end)
+    {
+        for (auto& [index, node] : cachedItems_) {
+            if ((start <= end && start <= index && end >= index) ||
+                (start > end && (index <= end || index >= start))) {
+                if (node.second) {
+                    continue;
+                }
+                auto keyIter = expiringItem_.find(node.first);
+                if (keyIter != expiringItem_.end() && keyIter->second.second) {
+                    node.second = keyIter->second.second;
+                    expiringItem_.erase(keyIter);
+                    auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+                    if (frameNode) {
+                        frameNode->SetActive(true);
+                    }
+                }
+                continue;
+            }
+            if (!node.second) {
+                continue;
+            }
+            auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+            if (frameNode) {
+                frameNode->SetActive(false);
+            }
             expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
         }
     }
@@ -475,6 +517,11 @@ public:
     void SetIsLoop(bool isLoop)
     {
         isLoop_ = isLoop;
+    }
+
+    const std::unordered_map<std::string, LazyForEachCacheChild>& GetCachedUINodeMap()
+    {
+        return expiringItem_;
     }
 
     const std::map<int32_t, LazyForEachChild>& GetAllChildren()

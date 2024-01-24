@@ -18,6 +18,8 @@
  
 #include "core/common/interaction/interaction_interface.h"
 
+#include "coordination_listener_impl.h"
+
 namespace OHOS::Ace {
 class InteractionImpl : public InteractionInterface {
 DECLARE_ACE_TYPE(InteractionImpl, InteractionInterface);
@@ -52,6 +54,13 @@ public:
     int32_t EnterTextEditorArea(bool enable) override;
 
     int32_t AddPrivilege() override;
+
+    int32_t RegisterCoordinationListener(std::function<void()> dragOutCallback) override;
+
+    int32_t UnRegisterCoordinationListener() override;
+
+private:
+    std::shared_ptr<CoordinationListenerImpl> consumer_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_INTERACTION_IMPL_H

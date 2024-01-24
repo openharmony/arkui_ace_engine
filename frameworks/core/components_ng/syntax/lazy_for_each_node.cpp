@@ -230,6 +230,17 @@ void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     return;
 }
 
+void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end)
+{
+    if (!builder_) {
+        return;
+    }
+    children_.clear();
+    builder_->SetActiveChildRange(start, end);
+    MarkNeedSyncRenderTree();
+    PostIdleTask();
+}
+
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
 {
     if (children_.empty()) {
@@ -251,6 +262,19 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
         }
     }
     return children_;
+}
+
+void LazyForEachNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
+{
+    if (configurationChange.colorModeUpdate && builder_) {
+        auto map = builder_->GetCachedUINodeMap();
+        for (auto &it : map) {
+            auto node = DynamicCast<UINode>(it.second.second);
+            if (node) {
+                node->UpdateConfigurationUpdate(configurationChange);
+            }
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -30,6 +30,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     // Construct text style.
     TextStyle textStyle;
     ConstructTextStyles(frameNode, textStyle, textContent_, showPlaceHolder_);
+    std::replace(textContent_.begin(), textContent_.end(), '\n', ' ');
 
     auto isInlineStyle = pattern->IsNormalInlineState();
 

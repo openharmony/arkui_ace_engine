@@ -70,22 +70,6 @@ typedef union {
 } ArkUI_NumberValue;
 
 /**
- * @brief 长度类型单位。
- *
- * @since 12
- */
-typedef enum {
-    /** VP单位。*/
-    ARKUI_UNIT_VP = 0,
-    /** PX单位。*/
-    ARKUI_UNIT_PX,
-    /** FP单位。*/
-    ARKUI_UNIT_FP,
-    /** 百分比单位。*/
-    ARKUI_UNIT_PERCENT
-} ArkUI_DimensionUnit;
-
-/**
  * @brief 定义布局对齐枚举值。
  *
  * @since 12
@@ -110,6 +94,296 @@ typedef enum {
     /** 底部尾端。*/
     ARKUI_ALIGNMENT_BOTTOM_END,
 } ArkUI_Alignment;
+
+/**
+ * @brief 定义图片重复铺设枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 不重复。 */
+    ARKUI_IMAGEREPEAT_NO_REPEAT = 0,
+    /** 在X轴方向重复。 */
+    ARKUI_IMAGEREPEAT_X,
+    /** 在Y轴方向重复。 */
+    ARKUI_IMAGEREPEAT_Y,
+    /** 在X轴和Y轴方向重复。 */
+    ARKUI_IMAGEREPEAT_XY,
+} ArkUI_ImageRepeat;
+
+/**
+ * @brief 定义字体样式枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 标准字体样式。 */
+    ARKUI_FONT_STYLE_NORMAL = 0,
+    /** 斜体字体样式。 */
+    ARKUI_FONT_STYLE_ITALIC
+} ArkUI_FontStyle;
+
+/**
+ * @brief 定义字体粗细/字重枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 100 */
+    ARKUI_FONT_WEIGHT_W100 = 0,
+    /** 200 */
+    ARKUI_FONT_WEIGHT_W200,
+    /** 300 */
+    ARKUI_FONT_WEIGHT_W300,
+    /** 400 */
+    ARKUI_FONT_WEIGHT_W400,
+    /** 500 */
+    ARKUI_FONT_WEIGHT_W500,
+    /** 600 */
+    ARKUI_FONT_WEIGHT_W600,
+    /** 700 */
+    ARKUI_FONT_WEIGHT_W700,
+    /** 800 */
+    ARKUI_FONT_WEIGHT_W800,
+    /** 900 */
+    ARKUI_FONT_WEIGHT_W900,
+    /** 字体较粗。 */
+    ARKUI_FONT_WEIGHT_BOLD,
+    /** 字体粗细正常 */
+    ARKUI_FONT_WEIGHT_NORMAL,
+    /** 字体非常粗。 */
+    ARKUI_FONT_WEIGHT_BOLDER,
+    /** 字体较细。 */
+    ARKUI_FONT_WEIGHT_LIGHTER,
+    /** 字体粗细适中。 */
+    ARKUI_FONT_WEIGHT_MEDIUM,
+    /** 字体粗细正常 */
+    ARKUI_FONT_WEIGHT_REGULAR,
+} ArkUI_FontWeight;
+
+/**
+ * @brief 定义字体水平对齐样式枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 水平对齐首部。 */
+    ARKUI_TEXT_ALIGN_START = 0,
+    /** 水平居中对齐。 */
+    ARKUI_TEXT_ALIGN_CENTER,
+    /** 水平对齐尾部。 */
+    ARKUI_TEXT_ALIGN_END,
+    /** 双端对齐。 */
+    ARKUI_TEXT_ALIGN_JUSTIFY,
+} ArkUI_TextAlign;
+
+/**
+ * @brief 定义单行文本输入法回车键类型枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 显示为开始样式。 */
+    ARKUI_ENTER_KEY_TYPE_GO = 2,
+    /** 显示为搜索样式。 */
+    ARKUI_ENTER_KEY_TYPE_SEARCH = 3,
+    /** 显示为发送样式。 */
+    ARKUI_ENTER_KEY_TYPE_SEND,
+    /** 显示为下一个样式。 */
+    ARKUI_ENTER_KEY_TYPE_NEXT,
+    /** 显示为完成样式。 */
+    ARKUI_ENTER_KEY_TYPE_DONE,
+    /** 显示为上一个样式。 */
+    ARKUI_ENTER_KEY_TYPE_PREVIOUS,
+    /** 显示为换行样式。 */
+    ARKUI_ENTER_KEY_TYPE_NEW_LINE,
+} ArkUI_EnterKeyType;
+
+/**
+ * @brief 定义单行文本输入法类型枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 基本输入模式。 */
+    ARKUI_TEXTINPUT_TYPE_NORMAL = 0,
+    /** 纯数字模式。 */
+    ARKUI_TEXTINPUT_TYPE_NUMBER = 2,
+    /** 电话号码输入模式。 */
+    ARKUI_TEXTINPUT_TYPE_PHONE_NUMBER = 3,
+    /** 邮箱地址输入模式。 */
+    ARKUI_TEXTINPUT_TYPE_EMAIL = 5,
+    /** 密码输入模式。 */
+    ARKUI_TEXTINPUT_TYPE_PASSWORD = 7,
+    /** 纯数字密码输入模式。 */
+    ARKUI_TEXTINPUT_TYPE_NUMBER_PASSWORD = 8,
+    /** 锁屏应用密码输入模式。 */
+    ARKUI_TEXTINPUT_TYPE_SCREEN_LOCK_PASSWORD = 9,
+    /** 用户名输入模式。 */
+    ARKUI_TEXTINPUT_TYPE_USER_NAME = 10,
+    /** 新密码输入模式。 */
+    ARKUI_TEXTINPUT_TYPE_NEW_PASSWORD = 11,
+    /** 带小数点的数字输入模式。 */
+    ARKUI_TEXTINPUT_TYPE_NUMBER_DECIMAL = 12,
+} ArkUI_TextInputType;
+
+/**
+ * @brief 定义清除按钮样式枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 清除按钮常显样式。*/
+    ARKUI_CANCELBUTTON_STYLE_CONSTANT = 0,
+    /** 清除按钮常隐样式。*/
+    ARKUI_CANCELBUTTON_STYLE_INVISIBLE,
+    /** 清除按钮输入样式。*/
+    ARKUI_CANCELBUTTON_STYLE_INPUT,
+} ArkUI_CancelButtonStyle;
+
+/**
+ * @brief 定义XComponent类型枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 用于EGL/OpenGLES和媒体数据写入，开发者定制绘制内容单独显示在屏幕上。*/
+    ARKUI_XCOMPONENT_TYPE_SURFACE = 0,
+    /** 用于EGL/OpenGLES和媒体数据写入，开发者定制绘制内容和XComponent组件内容合成后展示在屏幕上。*/
+    ARKUI_XCOMPONENT_TYPE_TEXTURE = 2,
+} ArkUI_XComponentType;
+
+/**
+ * @brief 定义进度条类型枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 线性样式。*/
+    ARKUI_PROGRESS_LINEAR = 0,
+    /** 环形无刻度样式。*/
+    ARKUI_PROGRESS_RING,
+    /** 圆形样式。*/
+    ARKUI_PROGRESS_ECLIPSE,
+    /** 唤醒有刻度样式。*/
+    ARKUI_PROGRESS_SCALERING,
+    /** 胶囊样式。*/
+    ARKUI_PROGRESS_CAPSULE,
+}ArkUI_ProgressType;
+
+/**
+ * @brief 定义滑动选择文本选择器输入类型。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 单列数据选择器。*/
+    ARKUI_TEXTPICKER_RANGETYPE_SINGLE = 0,
+    /** 多列数据选择器。*/
+    ARKUI_TEXTPICKER_RANGETYPE_MULTI = 0,
+    /** 支持图片资源的单列数据选择器。*/
+    ARKUI_TEXTPICKER_RANGETYPE_RANGE_C0NTENT = 0,
+    /** 支持联动的多列数据选择器。*/
+    ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT = 0,
+} ArkUI_TextPickerRangeType;
+
+/**
+ * @brief 定义单列滑动数据选择器支持图片资源的输入结构体。
+ *
+ * @since 12
+ */
+typedef struct {
+    /** 图片资源。*/
+    const char* icon;
+    /** 文本信息。*/
+    const char* text;
+} ARKUI_TextPickerRangeContent;
+
+/**
+ * @brief 定义多列带联动能力的滑动数据选择器的输入结构体。
+ *
+ * @since 12
+ */
+typedef struct {
+    /** 文本信息。*/
+    const char* text;
+    /** 联动数据。*/
+    const ARKUI_TextPickerRangeContent* children;
+    /** 联动数据数组大小。*/
+    int32_t size;
+} ARKUI_TextPickerCascadeRangeContent;
+
+/**
+ * @brief 定义边缘滑动效果枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 弹性物理动效，滑动到边缘后可以根据初始速度或通过触摸事件继续滑动一段距离，松手后回弹。*/
+    ARKUI_EDGE_EFFECT_SPRING = 0,
+    /** 阴影效果，滑动到边缘后会有圆弧状的阴影。*/
+    ARKUI_EDGE_EFFECT_FADE,
+    /** 滑动到边缘后无效果。*/
+    ARKUI_EDGE_EFFECT_NONE,
+} ArkUI_EdgeEffect;
+
+/**
+ * @brief 定义列表项滚动结束对齐效果枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 默认无项目滚动对齐效果。*/
+    ARKUI_SCROLL_SNAP_ALIGN_NONE = 0,
+    /** 视图中的第一项将在列表的开头对齐。*/
+    ARKUI_SCROLL_SNAP_ALIGN_START,
+    /** 视图中的中间项将在列表中心对齐。*/
+    ARKUI_SCROLL_SNAP_ALIGN_CENTER,
+    /** 视图中的最后一项将在列表末尾对齐。*/
+    ARKUI_SCROLL_SNAP_ALIGN_END,
+} ArkUI_ScrollSnapAlign;
+
+/**
+ * @brief 定义滚动条状态枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 不显示。*/
+    ARKUI_SCROLL_BAR_DISPLAY_MODE_OFF = 0,
+    /** 按需显示(触摸时显示，2s后消失)。*/
+    ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO,
+    /** 常驻显示。*/
+    ARKUI_SCROLL_BAR_DISPLAY_MODE_ON,
+} ArkUI_ScrollBarDisplayMode;
+
+/**
+ * @brief 定义滚动方向和List组件排列方向枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 仅支持竖直方向滚动。*/
+    ARKUI_AXIS_VERTICAL = 0,
+    /** 仅支持水平方向滚动。*/
+    ARKUI_AXIS_HORIZONTAL,
+} ArkUI_Axis;
+
+/**
+ * @brief 定义列表是否吸顶和吸底枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** ListItemGroup的header不吸顶，footer不吸底。*/
+    ARKUI_STICKYSTYLE_NONE = 0,
+    /** ListItemGroup的header吸顶，footer不吸底。*/
+    ARKUI_STICKYSTYLE_HEADER = 1,
+    /** ListItemGroup的footer吸底，header不吸顶。*/
+    ARKUI_STICKYSTYLE_FOOTER = 2,
+    /** ListItemGroup的footer吸底，header吸顶。*/
+    ARKUI_STICKYSTYLE_BOTH = 3,
+} ArkUI_StickyStyle;
 
 /**
  * @brief 定义无障碍重要性。

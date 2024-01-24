@@ -136,6 +136,7 @@ protected:
 
 private:
     float GetVisualTextWidth() const;
+    void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
