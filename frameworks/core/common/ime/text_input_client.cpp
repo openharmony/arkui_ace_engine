@@ -104,6 +104,13 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }
+    uint32_t ctrlFlag =
+        (keyEvent.HasKey(KeyCode::KEY_CTRL_LEFT) || keyEvent.HasKey(KeyCode::KEY_CTRL_RIGHT) ? KEY_CTRL : KEY_NULL);
+    bool vFlag = keyEvent.HasKey(KeyCode::KEY_V);
+    if (!keyEvent.msg.empty() && ctrlFlag == KEY_CTRL && vFlag) {
+        InsertValue(keyEvent.msg);
+        return true;
+    }
     uint32_t modKeyFlags =
         (keyEvent.HasKey(KeyCode::KEY_ALT_LEFT) || keyEvent.HasKey(KeyCode::KEY_ALT_RIGHT) ? KEY_ALT : KEY_NULL) |
         (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT) ? KEY_SHIFT : KEY_NULL) |
