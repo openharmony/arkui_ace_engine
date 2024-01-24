@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include <type_traits>
 
 #include "base/log/ace_trace.h"
-#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/base/element_register.h"
@@ -107,6 +107,15 @@ void IfElseNode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int3
 void IfElseNode::FlushUpdateAndMarkDirty()
 {
     if (branchIdChanged_) {
+        auto parent = GetParent();
+        while (parent) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+            if (frameNode) {
+                frameNode->ChildrenUpdatedFrom(0);
+                break;
+            }
+            parent = parent->GetParent();
+        }
         // mark parent dirty to flush measure.
         MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
