@@ -16,6 +16,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components/common/properties/color.h"
@@ -190,32 +191,36 @@ void ResetStrokeDashArray(NodeHandle node)
     ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
 }
 
-void SetShapeWidth(NodeHandle node)
+void SetShapeWidth(NodeHandle node, const double value, const int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelNG::SetWidth(frameNode);
+    DimensionUnit unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    Dimension width = Dimension(value, unitEnum);
+    ShapeAbstractModelNG::SetWidth(frameNode, width);
 }
 
 void ResetShapeWidth(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelNG::SetWidth(frameNode);
+    ShapeAbstractModelNG::ResetWidth(frameNode);
 }
 
-void SetShapeHeight(NodeHandle node)
+void SetShapeHeight(NodeHandle node, const double value, const int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelNG::SetHeight(frameNode);
+    DimensionUnit unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    Dimension height = Dimension(value, unitEnum);
+    ShapeAbstractModelNG::SetHeight(frameNode, height);
 }
 
 void ResetShapeHeight(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelNG::SetHeight(frameNode);
+    ShapeAbstractModelNG::ResetHeight(frameNode);
 }
 
 void SetShapeForegroundColor(NodeHandle node, bool isColor, uint32_t color)
@@ -244,7 +249,7 @@ ArkUICommonShapeModifierAPI GetCommonShapeModifier()
         ResetStrokeMiterLimit, SetFillOpacity, ResetFillOpacity, SetStrokeOpacity, ResetStrokeOpacity, SetStrokeWidth,
         ResetStrokeWidth, SetAntiAlias, ResetAntiAlias, SetStroke, ResetStroke, SetFill, ResetFill, SetStrokeDashOffset,
         ResetStrokeDashOffset, SetStrokeLineCap, ResetStrokeLineCap, SetStrokeLineJoin, ResetStrokeLineJoin,
-        SetShapeHeight, ResetShapeHeight, SetShapeWidth, ResetShapeWidth, SetShapeForegroundColor,
+        SetShapeWidth, ResetShapeWidth, SetShapeHeight, ResetShapeHeight, SetShapeForegroundColor,
         ResetShapeForegroundColor };
     return modifier;
 }

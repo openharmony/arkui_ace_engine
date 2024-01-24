@@ -363,12 +363,21 @@ ArkUINativeModuleValue CommonShapeBridge::ResetAntiAlias(ArkUIRuntimeCallInfo* r
 
 ArkUINativeModuleValue CommonShapeBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    CommonBridge::SetWidth(runtimeCallInfo);
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetShapeWidth(nativeNode);
+    Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CalcDimension width;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, widthArg, width)) {
+        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetShapeWidth(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(0.0);
+    }
+    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetShapeWidth(
+        nativeNode, width.Value(), static_cast<int32_t>(width.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -385,12 +394,21 @@ ArkUINativeModuleValue CommonShapeBridge::ResetWidth(ArkUIRuntimeCallInfo* runti
 
 ArkUINativeModuleValue CommonShapeBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    CommonBridge::SetHeight(runtimeCallInfo);
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetShapeHeight(nativeNode);
+    Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CalcDimension height;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, heightArg, height)) {
+        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetShapeHeight(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(0.0);
+    }
+    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetShapeHeight(
+        nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 

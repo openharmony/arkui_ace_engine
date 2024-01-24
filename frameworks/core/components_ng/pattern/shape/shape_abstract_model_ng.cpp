@@ -97,4 +97,29 @@ void ShapeAbstractModelNG::SetHeight(Dimension& height)
     ViewAbstract::SetHeight(CalcLength(height));
 }
 
+void ShapeAbstractModelNG::SetWidth(FrameNode* frameNode, Dimension& width)
+{
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(0.0);
+    }
+    ViewAbstract::SetWidth(frameNode, CalcLength(width));
+}
+
+void ShapeAbstractModelNG::SetHeight(FrameNode* frameNode, Dimension& height)
+{
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(0.0);
+    }
+    ViewAbstract::SetHeight(frameNode, CalcLength(height));
+}
+
+void ShapeAbstractModelNG::ResetWidth(FrameNode* frameNode)
+{
+    ViewAbstract::ClearWidthOrHeight(frameNode, true);
+}
+
+void ShapeAbstractModelNG::ResetHeight(FrameNode* frameNode)
+{
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
+}
 } // namespace OHOS::Ace::NG
