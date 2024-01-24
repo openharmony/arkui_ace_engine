@@ -39,7 +39,7 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
 // actions
 #if defined(MAC_PLATFORM)
     { KeyComb(KeyCode::KEY_A, KEY_META), &tic::HandleOnSelectAll },
-    { KeyComb(KeyCode::KEY_C, KEY_META), &tic::HandleOnCopy },
+    { KeyComb(KeyCode::KEY_C, KEY_META), [](tic* c) -> void { c->HandleOnCopy(true); }  },
     { KeyComb(KeyCode::KEY_D, KEY_META), [](tic* c) -> void { c->HandleOnDelete(true); } },
     { KeyComb(KeyCode::KEY_V, KEY_META), &tic::HandleOnPaste },
     { KeyComb(KeyCode::KEY_X, KEY_META), &tic::HandleOnCut },
@@ -48,7 +48,7 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_Z, KEY_META | KEY_SHIFT), &tic::HandleOnRedoAction },
 #else
     { KeyComb(KeyCode::KEY_A, KEY_CTRL), &tic::HandleOnSelectAll },
-    { KeyComb(KeyCode::KEY_C, KEY_CTRL), &tic::HandleOnCopy },
+    { KeyComb(KeyCode::KEY_C, KEY_CTRL), [](tic* c) -> void { c->HandleOnCopy(true); } },
     { KeyComb(KeyCode::KEY_D, KEY_CTRL), [](tic* c) -> void { c->HandleOnDelete(true); } },
     { KeyComb(KeyCode::KEY_V, KEY_CTRL), &tic::HandleOnPaste },
     { KeyComb(KeyCode::KEY_X, KEY_CTRL), &tic::HandleOnCut },
@@ -58,7 +58,7 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
 #endif
     { KeyComb(KeyCode::KEY_DEL), [](tic* c) -> void { c->HandleOnDelete(true); } },
     { KeyComb(KeyCode::KEY_FORWARD_DEL), [](tic* c) -> void { c->HandleOnDelete(false); } },
-    { KeyComb(KeyCode::KEY_INSERT, KEY_CTRL), &tic::HandleOnCopy },
+    { KeyComb(KeyCode::KEY_INSERT, KEY_CTRL), [](tic* c) -> void { c->HandleOnCopy(true); } },
     { KeyComb(KeyCode::KEY_INSERT, KEY_SHIFT), &tic::HandleOnPaste },
     { KeyComb(KeyCode::KEY_F10, KEY_SHIFT), &tic::HandleOnShowMenu },
     { KeyComb(KeyCode::KEY_MENU), &tic::HandleOnShowMenu },

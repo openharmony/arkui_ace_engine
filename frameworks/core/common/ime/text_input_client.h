@@ -149,7 +149,7 @@ public:
 
     virtual void HandleOnShowMenu() {}
 
-    virtual void HandleOnCopy() {}
+    virtual void HandleOnCopy(bool isUsingExternalKeyboard = false) {}
 
     virtual void HandleOnCut() {}
 

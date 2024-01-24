@@ -1090,7 +1090,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     ProcessOverlay(true, true);
 }
 
-void TextFieldPattern::HandleOnCopy()
+void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
 {
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::HandleOnCopy");
@@ -1121,7 +1121,7 @@ void TextFieldPattern::HandleOnCopy()
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
 
-    if (!IsUsingMouse()) {
+    if (!IsUsingMouse() && !isUsingExternalKeyboard) {
         selectController_->MoveCaretToContentRect(selectController_->GetSecondHandleIndex(), TextAffinity::UPSTREAM);
         StartTwinkling();
     }
