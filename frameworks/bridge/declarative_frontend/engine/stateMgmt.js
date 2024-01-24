@@ -3768,8 +3768,8 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.dependentElmtIdsByProperty_.addTrackedObjectPropertyDependency(readTrackedPropertyName, renderingElmtId);
     }
     purgeDependencyOnElmtId(rmElmtId) {
-        
-        this.dependentElmtIdsByProperty_.purgeDependenciesForElmtId(rmElmtId);
+        var _a;
+        (_a = this.dependentElmtIdsByProperty_) === null || _a === void 0 ? void 0 : _a.purgeDependenciesForElmtId(rmElmtId);
     }
     SetPropertyUnchanged() {
         // function to be removed
@@ -5724,8 +5724,13 @@ class ViewPU extends NativeViewPartialUpdate {
             
             return;
         }
-        if (itemGenFunc === null || itemGenFunc === undefined) {
+        if (typeof itemGenFunc !== "function") {
             stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): Item generation function missing. Application error!`);
+            
+            return;
+        }
+        if (idGenFunc !== undefined && typeof idGenFunc !== "function") {
+            stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): id generator is not a function. Application error!`);
             
             return;
         }

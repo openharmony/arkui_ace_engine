@@ -118,6 +118,7 @@ public:
 
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
+    void SetActiveChildRange(int32_t start, int32_t end) override {}
 
     void ResetHostNode();
 

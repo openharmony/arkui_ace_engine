@@ -225,7 +225,19 @@ void UIExtensionPattern::OnAreaChangedInner()
 
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    return (componentType_ == ComponentType::DYNAMIC) && OnDirtyLayoutWrapperSwapForDynamicComponent(dirty, config);
+    if (componentType_ == ComponentType::DYNAMIC) {
+        return OnDirtyLayoutWrapperSwapForDynamicComponent(dirty, config);
+    }
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    CHECK_NULL_RETURN(dirty, false);
+    auto host = dirty->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto displaySize = geometryNode->GetFrameSize();
+    sessionWrapper_->RefreshDisplayArea({ displayOffset, displaySize });
+    return false;
 }
 
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwapForDynamicComponent(

@@ -1108,9 +1108,7 @@ void SliderPattern::RegisterVisibleAreaChange()
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
-
     pipeline->AddWindowStateChangedCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;
 }
@@ -1193,6 +1191,10 @@ void SliderPattern::RemoveIsFocusActiveUpdateEvent()
 
 void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    RemoveIsFocusActiveUpdateEvent();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
+    hasVisibleChangeRegistered_ = false;
 }
 } // namespace OHOS::Ace::NG

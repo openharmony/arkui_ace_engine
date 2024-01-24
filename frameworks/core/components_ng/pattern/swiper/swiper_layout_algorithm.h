@@ -236,7 +236,7 @@ public:
         realTotalCount_ = realTotalCount;
     }
 
-    void SetPlaceItemWidth(float placeItemWidth)
+    void SetPlaceItemWidth(std::optional<float> placeItemWidth)
     {
         placeItemWidth_ = placeItemWidth;
     }
@@ -297,7 +297,7 @@ private:
     std::set<int32_t> needUnmountIndexs_;
     bool swipeByGroup_ = false;
     int32_t realTotalCount_ = 0;
-    float placeItemWidth_ = 0.0f;
+    std::optional<float> placeItemWidth_;
 };
 
 } // namespace OHOS::Ace::NG

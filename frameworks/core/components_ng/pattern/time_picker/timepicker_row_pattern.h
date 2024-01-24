@@ -199,6 +199,8 @@ public:
     void SetSelectedTime(const PickerTime& value)
     {
         selectedTime_ = value;
+        isFiredTimeChange_ = firedTimeStr_.has_value() && firedTimeStr_.value() == value.ToString(true, hasSecond_);
+        firedTimeStr_.reset();
     }
 
     const PickerTime& GetSelectedTime()
@@ -344,7 +346,7 @@ public:
 
     void CreateAmPmNode();
     void OnColorConfigurationUpdate() override;
-	
+
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
     {
         contentRowNode_ = contentRowNode;
@@ -362,7 +364,7 @@ public:
 
     void SetFocusDisable();
     void SetFocusEnable();
-    
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -411,6 +413,8 @@ private:
     WeakPtr<FrameNode> buttonTitleNode_;
     WeakPtr<FrameNode> contentRowNode_;
     bool isPicker_ = false;
+    bool isFiredTimeChange_ = false;
+    std::optional<std::string> firedTimeStr_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -91,6 +91,11 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
 void DatePickerPattern::OnModifyDone()
 {
+    if (isFiredDateChange_) {
+        isFiredDateChange_ = false;
+        return;
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitDisabled();
@@ -509,7 +514,7 @@ void DatePickerPattern::FlushMonthDaysColumn()
     yearColumnPattern->FlushCurrentOptions();
 }
 
-void DatePickerPattern::FireChangeEvent(bool refresh) const
+void DatePickerPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
         auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
@@ -518,6 +523,7 @@ void DatePickerPattern::FireChangeEvent(bool refresh) const
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         datePickerEventHub->FireChangeEvent(info.get());
         datePickerEventHub->FireDialogChangeEvent(str);
+        firedDateStr_ = str;
     }
 }
 
@@ -1278,7 +1284,7 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
     auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_RETURN(monthDaysDatePickerColumnPattern, lunarResult);
     CHECK_NULL_RETURN(yearDatePickerColumnPattern, lunarResult);
-    
+
 
     uint32_t lunarLeapMonth = 0;
     bool hasLeapMonth = GetLunarLeapMonth(lunarYear, lunarLeapMonth);

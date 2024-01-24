@@ -249,10 +249,11 @@ void WindowSceneHelper::InjectPointerEvent(RefPtr<FrameNode> node,
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
             "PointerEvent Process to inject, eventInfo: id:%{public}d, "
             "WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
-            "ViewPosX = %{public}d, ViewPosY = %{public}d. node: id:%{public}d, type:%{public}s",
+            "ViewPosX = %{public}d, ViewPosY = %{public}d. node: id:%{public}d, type:%{public}s, "
+            "inspectorId:%{public}s",
             pointerEvent->GetId(), container->GetWindowId(), container->GetViewWidth(),
             container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY(),
-            node->GetId(), node->GetTag().c_str());
+            node->GetId(), node->GetTag().c_str(), node->GetInspectorIdValue("").c_str());
     }
     auto aceView = static_cast<OHOS::Ace::Platform::AceViewOhos*>(container->GetView());
     CHECK_NULL_VOID(aceView);

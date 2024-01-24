@@ -361,26 +361,9 @@ void GestureReferee::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& rec
         recognizer->OnBlocked();
         return;
     }
-    auto prevState = recognizer->GetRefereeState();
     recognizer->AboutToAccept();
-    std::list<size_t> delayIds;
     for (const auto& scope : gestureScopes_) {
         scope.second->OnAcceptGesture(recognizer);
-    }
-    // clean delay task.
-    if (prevState == RefereeState::PENDING) {
-        if (AceType::InstanceOf<ParallelRecognizer>(recognizer)) {
-            return;
-        }
-        auto iter = gestureScopes_.begin();
-        while (iter != gestureScopes_.end()) {
-            if (iter->second->IsDelayClosed()) {
-                iter->second->Close();
-                iter = gestureScopes_.erase(iter);
-            } else {
-                ++iter;
-            }
-        }
     }
 }
 

@@ -63,6 +63,7 @@ public:
     virtual const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) = 0;
     virtual void RemoveChildInRenderTree(uint32_t index) = 0;
     virtual void RemoveAllChildInRenderTree() = 0;
+    virtual void SetActiveChildRange(int32_t start, int32_t end) = 0;
 
     RefPtr<FrameNode> GetHostNode() const;
     virtual const std::string& GetHostTag() const = 0;

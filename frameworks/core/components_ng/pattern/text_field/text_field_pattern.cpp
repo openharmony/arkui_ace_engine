@@ -1090,7 +1090,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     ProcessOverlay(true, true);
 }
 
-void TextFieldPattern::HandleOnCopy()
+void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
 {
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::HandleOnCopy");
@@ -1121,7 +1121,7 @@ void TextFieldPattern::HandleOnCopy()
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
 
-    if (!IsUsingMouse()) {
+    if (!IsUsingMouse() && !isUsingExternalKeyboard) {
         selectController_->MoveCaretToContentRect(selectController_->GetSecondHandleIndex(), TextAffinity::UPSTREAM);
         StartTwinkling();
     }
@@ -1171,7 +1171,6 @@ void TextFieldPattern::HandleOnPaste()
             end = textfield->selectController_->GetCaretIndex();
         }
         std::wstring pasteData = StringUtils::ToWstring(data);
-        textfield->StripNextLine(pasteData);
         auto originLength = static_cast<int32_t>(textfield->contentController_->GetWideText().length());
         textfield->contentController_->ReplaceSelectedValue(start, end, StringUtils::ToString(pasteData));
         auto caretMoveLength =
@@ -1532,10 +1531,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto focusHub = host->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        if (layoutProperty->GetIsDisabledValue(false) || pattern->IsNormalInlineState() ||
-            !focusHub->IsCurrentFocus()) {
+        if (layoutProperty->GetIsDisabledValue(false) || pattern->IsNormalInlineState() || !pattern->HasFocus()) {
             return;
         }
         if (extraParams.empty()) {

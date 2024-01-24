@@ -1142,9 +1142,8 @@ HWTEST_F(ListScrollerTestNg, Event004, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll down to end
      */
-    isTrigger = false;
     ScrollDown(3);
-    EXPECT_FALSE(isTrigger);
+    EXPECT_TRUE(isTrigger);
 }
 
 /**

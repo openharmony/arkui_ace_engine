@@ -111,6 +111,8 @@ void ImageAnimatorPattern::SetShowingIndex(int32_t index)
         UpdateCacheImageInfo(cacheImage, nextIndex);
         nextIndex = GetNextIndex(nextIndex);
     }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void ImageAnimatorPattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNode, int32_t index)

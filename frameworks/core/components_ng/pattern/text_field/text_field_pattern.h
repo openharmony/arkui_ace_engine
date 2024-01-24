@@ -805,7 +805,7 @@ public:
     {
         HandleOnSelectAll(true);
     }
-    void HandleOnCopy() override;
+    void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
     void HandleOnCameraInput();

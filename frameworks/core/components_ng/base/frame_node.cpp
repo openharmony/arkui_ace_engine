@@ -232,6 +232,25 @@ public:
         }
     }
 
+    void SetActiveChildRange(int32_t start, int32_t end)
+    {
+        for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
+            int32_t index = itor->first;
+            if ((start <= end && index >= start && index <= end) ||
+                (start > end && (index <= end || start <= index))) {
+                itor->second->SetActive(true);
+                itor++;
+            } else {
+                itor->second->SetActive(false);
+                partFrameNodeChildren_.erase(itor++);
+            }
+        }
+        auto guard = GetGuard();
+        for (const auto& child : children_) {
+            child.node->DoSetActiveChildRange(start - child.startIndex, end - child.startIndex);
+        }
+    }
+
     void RemoveAllChildInRenderTree()
     {
         SetAllChildrenInActive();
@@ -2890,6 +2909,11 @@ void FrameNode::RemoveAllChildInRenderTree()
     frameProxy_->RemoveAllChildInRenderTree();
 }
 
+void FrameNode::SetActiveChildRange(int32_t start, int32_t end)
+{
+    frameProxy_->SetActiveChildRange(start, end);
+}
+
 void FrameNode::RemoveChildInRenderTree(uint32_t index)
 {
     frameProxy_->RemoveChildInRenderTree(index);
@@ -3004,6 +3028,19 @@ void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 {
     isActive_ = false;
     SetActive(false);
+}
+
+void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end)
+{
+    if (start <= end) {
+        if (start > 0 || end < 0) {
+            SetActive(false);
+        }
+    } else {
+        if (end < 0 && start > 0) {
+            SetActive(false);
+        }
+    }
 }
 
 void FrameNode::OnInspectorIdUpdate(const std::string& id)

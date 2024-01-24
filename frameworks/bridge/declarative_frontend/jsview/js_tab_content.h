@@ -63,7 +63,7 @@ private:
     static void SetSubTabBarStyle(const JSRef<JSObject>& paramObject);
     static void SetLabelStyle(const JSRef<JSVal>& info, bool isSubTabStyle);
     static void SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle);
-    static void GetFontContent(JSRef<JSVal> font, LabelStyle& labelStyle);
+    static void GetFontContent(JSRef<JSVal> font, LabelStyle& labelStyle, bool isSubTabStyle);
     static void CompleteParameters(LabelStyle& buttonParameters, bool isSubTabStyle);
     static void SetLayoutMode(const JSRef<JSVal>& info);
     static void SetVerticalAlign(const JSRef<JSVal>& info);

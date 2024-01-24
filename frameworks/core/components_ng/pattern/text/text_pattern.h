@@ -519,7 +519,6 @@ public:
 
 protected:
     void OnAfterModifyDone() override;
-    virtual void HandleOnCopy();
     void ClickAISpanOfSpan(std::map<int, OHOS::Ace::AISpan>::iterator& aiSpanIterator,
         const OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>& item, PointF textOffset, bool& isClickOnAISpan);
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
@@ -619,6 +618,7 @@ protected:
     std::optional<TextSpanType> selectedType_;
 
 private:
+    void HandleOnCopy();
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToFrameNode() override;
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
