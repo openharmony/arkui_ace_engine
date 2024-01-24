@@ -48,7 +48,15 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   constructor(initializingProperties: Object = {}) {
-    super();
+    // This is edited for the statibility issue that "construtor is false", which meaning that the super() is not callable
+    // It is just the debug log using ArkTools print.
+    try {
+      super();
+    } catch (error) {
+      stateMgmtConsole.error(`An error occurred in the constructor of LocalStorage ${error.message}`);
+      ArkTools.print("NativeLocalStorage", NativeLocalStorage);
+      throw error;
+    }
     stateMgmtConsole.debug(`${this.constructor.name} constructor.`)
     this.storage_ = new Map<string, ObservedPropertyAbstract<any>>();
     if (Object.keys(initializingProperties).length) {
