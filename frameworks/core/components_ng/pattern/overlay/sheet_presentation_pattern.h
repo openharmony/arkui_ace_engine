@@ -284,6 +284,16 @@ public:
 
     void ProcessColumnRect(float height = 0.0f);
 
+    void SetShowState(bool show)
+    {
+        show_ = show;
+    }
+
+    bool GetShowState() const
+    {
+        return show_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -352,6 +362,8 @@ private:
     std::vector<float> sheetDetentHeight_;
 
     std::shared_ptr<AnimationUtils::Animation> animation_;
+
+    bool show_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
 };
