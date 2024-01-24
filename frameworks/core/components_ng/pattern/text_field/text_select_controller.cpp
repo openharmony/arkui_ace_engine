@@ -31,7 +31,6 @@ void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t s
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
     CalculateHandleOffset();
     UpdateCaretOffset();
-    FireSelectEvent();
 }
 
 void TextSelectController::UpdateCaretIndex(int32_t index)
@@ -41,7 +40,6 @@ void TextSelectController::UpdateCaretIndex(int32_t index)
     firstHandleInfo_.index = newIndex;
     secondHandleInfo_.index = newIndex;
     UpdateRecordCaretIndex(caretInfo_.index);
-    FireSelectEvent();
 }
 
 RectF TextSelectController::CalculateEmptyValueCaretRect() const
@@ -356,7 +354,6 @@ void TextSelectController::MoveFirstHandleToContentRect(int32_t index)
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
     UpdateCaretOffset();
     UpdateSecondHandleOffset();
-    FireSelectEvent();
 }
 
 void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
@@ -374,7 +371,6 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
     UpdateCaretOffset();
     UpdateFirstHandleOffset();
-    FireSelectEvent();
 }
 
 void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity textAffinity, bool isEditorValueChanged)
