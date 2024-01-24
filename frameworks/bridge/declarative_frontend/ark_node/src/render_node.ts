@@ -475,6 +475,12 @@ class RenderNode {
   setNodePtr(nodePtr: number | null) {
     this.nodePtr = nodePtr;
   }
+  setBaseNode(baseNode: BaseNode | null) {
+    this.baseNode_ = baseNode;
+  }
+  dispose() {
+    this.baseNode_.dispose()
+  }
   getNodePtr(): number | null {
     return this.nodePtr;
   }
