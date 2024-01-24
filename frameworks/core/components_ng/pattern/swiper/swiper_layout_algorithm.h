@@ -257,6 +257,8 @@ private:
     int32_t GetDisplayCount(LayoutWrapper* layoutWrapper) const;
     void SetInactiveOnForward(LayoutWrapper* layoutWrapper, Axis axis);
     void SetInactiveOnBackward(LayoutWrapper* layoutWrapper, Axis axis);
+    void AdjustStartInfoOnSwipeByGroup(
+        int32_t startIndex, const PositionMap& itemPosition, int32_t& startIndexInVisibleWindow, float& startPos);
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
