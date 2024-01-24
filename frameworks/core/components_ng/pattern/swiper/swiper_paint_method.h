@@ -30,7 +30,7 @@ public:
     SwiperPaintMethod(Axis axis, float mainDelta) : axis_(axis), mainDelta_(mainDelta) {};
     ~SwiperPaintMethod() override = default;
 
-    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
+    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
     void SetNeedPaintFade(bool needPaintFade)
