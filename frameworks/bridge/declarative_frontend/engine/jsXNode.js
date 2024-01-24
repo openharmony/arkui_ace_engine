@@ -67,14 +67,14 @@ class BuilderNode {
         this._JSBuilderNode.build(builder, params);
         this.nodePtr_ = this._JSBuilderNode.getNodePtr();
     }
-    reset() {
-        this._JSBuilderNode.reset();
-    }
     getFrameNode() {
         return this._JSBuilderNode.getFrameNode();
     }
     postTouchEvent(touchEvent) {
         return this._JSBuilderNode.postTouchEvent(touchEvent);
+    }
+    dispose() {
+        this._JSBuilderNode.dispose();
     }
 }
 class JSBuilderNode extends BaseNode {
@@ -117,6 +117,7 @@ class JSBuilderNode extends BaseNode {
             this.frameNode_ = new FrameNode(this.uiContext_, 'BuilderNode');
         }
         this.frameNode_.setNodePtr(this.nodePtr_);
+        this.frameNode_.setBaseNode(this);
         __JSScopeUtil__.restoreInstanceId();
     }
     update(param) {
@@ -278,9 +279,9 @@ class JSBuilderNode extends BaseNode {
     getNodePtr() {
         return this.nodePtr_;
     }
-    reset() {
+    dispose() {
         this.nodePtr_ = null;
-        super.reset();
+        super.dispose();
         if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
             this.frameNode_.setNodePtr(null);
         }
@@ -306,7 +307,7 @@ class BuilderNodeFinalizationRegisterProxy {
             if (heldValue.name === "BuilderNode") {
                 const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
                 BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
-                builderNode.reset();
+                builderNode.dispose();
             }
         });
     }
@@ -374,6 +375,7 @@ class FrameNode {
         this.baseNode_ = new BaseNode(uiContext);
         this.nodePtr_ = this.baseNode_.createRenderNode(this);
         this.renderNode_.setNodePtr(this.nodePtr_);
+        this.renderNode_.setBaseNode(this.baseNode_);
     }
     getRenderNode() {
         if (this.renderNode_ !== undefined &&
@@ -387,8 +389,15 @@ class FrameNode {
         this.nodePtr_ = nodePtr;
         this.renderNode_.setNodePtr(nodePtr);
     }
+    setBaseNode(baseNode) {
+        this.baseNode_ = baseNode;
+        this.renderNode_.setBaseNode(baseNode);
+    }
     getNodePtr() {
         return this.nodePtr_;
+    }
+    dispose() {
+        this.baseNode_.dispose();
     }
 }
 /*
@@ -761,6 +770,12 @@ class RenderNode {
     }
     setNodePtr(nodePtr) {
         this.nodePtr = nodePtr;
+    }
+    setBaseNode(baseNode) {
+        this.baseNode_ = baseNode;
+    }
+    dispose() {
+        this.baseNode_.dispose();
     }
     getNodePtr() {
         return this.nodePtr;

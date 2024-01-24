@@ -42,7 +42,7 @@ public:
     void BuildNode(const JSCallbackInfo& info);
     void PostTouchEvent(const JSCallbackInfo& info);
     void CreateRenderNode(const JSCallbackInfo& info);
-    void Reset(const JSCallbackInfo& info)
+    void Dispose(const JSCallbackInfo& info)
     {
         viewNode_.Reset();
     }

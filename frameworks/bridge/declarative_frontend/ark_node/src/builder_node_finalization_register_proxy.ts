@@ -19,7 +19,7 @@ class BuilderNodeFinalizationRegisterProxy {
       if (heldValue.name === "BuilderNode") {
         const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
         BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
-        builderNode.reset();
+        builderNode.dispose();
       }
     });
   }
@@ -28,6 +28,6 @@ class BuilderNodeFinalizationRegisterProxy {
   }
 
   public static instance_: BuilderNodeFinalizationRegisterProxy = new BuilderNodeFinalizationRegisterProxy();
-  public static ElementIdToOwningBuilderNode_ = new Map();
+  public static ElementIdToOwningBuilderNode_ = new Map<Symbol, BaseNode>();
   private finalizationRegistry_: FinalizationRegistry;
 }
