@@ -42,7 +42,7 @@ public:
     virtual void SetCaretColor(const Color& color);
     virtual void SetSearchIconSize(const Dimension& value);
     virtual void SetSearchIconColor(const Color& color);
-    virtual void SetSearchSrcPath(const std::string& src);
+    virtual void SetSearchSrcPath(const std::string& src, const std::string& bundleName, const std::string& moduleName);
     virtual void SetRightIconSrcPath(const std::string& src);
     virtual void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle);
     virtual void SetCancelIconSize(const Dimension& value);

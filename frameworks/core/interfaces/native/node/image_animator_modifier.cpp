@@ -31,7 +31,7 @@ constexpr FillMode DEFAULT_FILL_MODE = FillMode::FORWARDS;
 constexpr uint32_t DEFAULT_ITERATIONS = 1;
 constexpr int32_t IMAGES_LENGTH = 4;
 
-void ParseImage(CalcDimension* dimension, int32_t dimensionLength, const ImagePropertiesStruct* image)
+void ParseImage(CalcDimension* dimension, int32_t dimensionLength, const ArkUIImagePropertiesStruct* image)
 {
     for (int32_t i = 0; i < dimensionLength; i++) {
         if (image->unit[i] == static_cast<int8_t>(DimensionUnit::CALC)) {
@@ -126,7 +126,7 @@ void ResetReverse(NodeHandle node)
     ImageAnimatorModelNG::SetIsReverse(frameNode, false);
 }
 
-void SetImages(NodeHandle node, struct ImagePropertiesStruct* images, int32_t length)
+void SetImages(NodeHandle node, struct ArkUIImagePropertiesStruct* images, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -140,7 +140,7 @@ void SetImages(NodeHandle node, struct ImagePropertiesStruct* images, int32_t le
     }
     std::vector<ImageProperties> imageList;
     for (int32_t i = 0; i < length; i++) {
-        ImagePropertiesStruct* image = images + i;
+        ArkUIImagePropertiesStruct* image = images + i;
         CHECK_NULL_VOID(image);
         CalcDimension dimension[IMAGES_LENGTH];
         ParseImage(dimension, IMAGES_LENGTH, image);

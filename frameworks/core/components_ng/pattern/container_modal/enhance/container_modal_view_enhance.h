@@ -39,9 +39,6 @@ protected:
     static void BondingMenuItemEvent(RefPtr<FrameNode> item);
     static RefPtr<FrameNode> BuildMenuItem(
         std::string title, InternalResource::ResourceId resourceId, RefPtr<ClickEvent> event, bool chooseCurrent);
-    static RefPtr<FrameNode> BuildMaximizeMenuItem();
-    static RefPtr<FrameNode> BuildFullScreenMenuItem();
-    static RefPtr<FrameNode> BuildDividerMenuItem();
     static RefPtr<FrameNode> BuildLeftSplitMenuItem();
     static RefPtr<FrameNode> BuildRightSplitMenuItem();
     static RefPtr<FrameNode> BuildMenuItemIcon(InternalResource::ResourceId resourceId);

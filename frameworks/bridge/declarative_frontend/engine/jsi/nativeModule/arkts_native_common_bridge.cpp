@@ -234,14 +234,14 @@ void ResetCalcDimensions(std::vector<std::optional<CalcDimension>>& optDimension
     }
 }
 
-void PushDimensionsToVector(std::vector<StringAndDouble>& results,
+void PushDimensionsToVector(std::vector<ArkUIStringAndFloat>& results,
     const std::vector<std::optional<CalcDimension>>& optDimensions)
 {
     for (uint32_t index = 0; index < optDimensions.size(); index++) {
         auto optDimension = optDimensions[index];
         auto hasValue = optDimension.has_value();
         DimensionUnit unit = DimensionUnit::PX;
-        StringAndDouble value = { 0.0, nullptr };
+        ArkUIStringAndFloat value = { 0.0, nullptr };
         if (hasValue) {
             unit = optDimension.value().Unit();
             if (unit == DimensionUnit::CALC) {
@@ -250,9 +250,9 @@ void PushDimensionsToVector(std::vector<StringAndDouble>& results,
                 value.value = optDimension.value().Value();
             }
         }
-        results.push_back(StringAndDouble { static_cast<double>(hasValue), nullptr });
+        results.push_back(ArkUIStringAndFloat { static_cast<double>(hasValue), nullptr });
         results.push_back(value);
-        results.push_back(StringAndDouble { static_cast<double>(unit), nullptr });
+        results.push_back(ArkUIStringAndFloat { static_cast<double>(unit), nullptr });
     }
 }
 
@@ -284,7 +284,7 @@ void ParseBorderImageOutset(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& off
 }
 
 bool ParseBorderImageRepeat(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offset,
-    std::vector<StringAndDouble>& options, uint8_t& bitsets)
+    std::vector<ArkUIStringAndFloat>& options, uint8_t& bitsets)
 {
     auto argsNumber = runtimeCallInfo->GetArgsNumber();
     if ((offset + NUM_1) > argsNumber) {
@@ -306,8 +306,8 @@ bool ParseBorderImageRepeat(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& off
             repeatValue = BorderImageRepeat::STRETCH;
         }
     }
-    options.push_back(StringAndDouble { static_cast<double>(repeatHasValue), nullptr });
-    options.push_back(StringAndDouble { static_cast<double>(repeatValue), nullptr });
+    options.push_back(ArkUIStringAndFloat { static_cast<double>(repeatHasValue), nullptr });
+    options.push_back(ArkUIStringAndFloat { static_cast<double>(repeatValue), nullptr });
     if (repeatHasValue) {
         bitsets |= BorderImage::REPEAT_BIT;
     }
@@ -316,7 +316,7 @@ bool ParseBorderImageRepeat(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& off
 }
 
 bool ParseBorderImageFill(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offset,
-    std::vector<StringAndDouble>& options)
+    std::vector<ArkUIStringAndFloat>& options)
 {
     auto argsNumber = runtimeCallInfo->GetArgsNumber();
     if ((offset + NUM_1) > argsNumber) {
@@ -325,8 +325,8 @@ bool ParseBorderImageFill(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offse
     auto fillArg = runtimeCallInfo->GetCallArgRef(offset);
     auto hasValue = fillArg->IsBoolean();
     auto fill = (hasValue) ? fillArg->BooleaValue() : false;
-    options.push_back(StringAndDouble {static_cast<double>(hasValue), nullptr });
-    options.push_back(StringAndDouble {static_cast<double>(fill), nullptr });
+    options.push_back(ArkUIStringAndFloat {static_cast<double>(hasValue), nullptr });
+    options.push_back(ArkUIStringAndFloat {static_cast<double>(fill), nullptr });
     offset += NUM_1;
     return true;
 }
@@ -2312,7 +2312,7 @@ ArkUINativeModuleValue CommonBridge::SetBorderImage(ArkUIRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
     std::string src;
-    std::vector<StringAndDouble> options;
+    std::vector<ArkUIStringAndFloat> options;
     uint8_t bitsets = 0;
     uint32_t offset = NUM_1;
     std::vector<std::optional<CalcDimension>> sliceDimensions;
@@ -2329,7 +2329,7 @@ ArkUINativeModuleValue CommonBridge::SetBorderImage(ArkUIRuntimeCallInfo* runtim
     ParseBorderImageOutset(runtimeCallInfo, offset, outsetDimensions, bitsets); // use 4 args
     PushDimensionsToVector(options, outsetDimensions);
     ParseBorderImageFill(runtimeCallInfo, offset, options); // use 1 args
-    options.push_back(StringAndDouble { static_cast<double>(bitsets), nullptr });
+    options.push_back(ArkUIStringAndFloat { static_cast<double>(bitsets), nullptr });
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorderImage(nativeNode,
         src.c_str(), options.data(), options.size());
     ResetCalcDimensions(sliceDimensions);
@@ -3950,7 +3950,7 @@ ArkUINativeModuleValue CommonBridge::SetFlexBasis(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    struct StringAndDouble flexBasis { 0.0, nullptr};
+    struct ArkUIStringAndFloat flexBasis { 0.0, nullptr};
     std::string tempValueStr = "";
     if (secondArg->IsNumber()) {
         flexBasis.value = secondArg->ToNumber(vm)->Value();

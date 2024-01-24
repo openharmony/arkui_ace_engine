@@ -46,10 +46,10 @@ static void ParseString(napi_env env, napi_value propertyNapi, std::string& prop
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, propertyNapi, &valueType);
         if (valueType == napi_undefined) {
-            NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+            NapiThrow(env, "Required input parameters are missing.", ERROR_CODE_PARAM_INVALID);
             return;
         } else if (valueType != napi_string) {
-            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
             return;
         }
 
@@ -71,10 +71,10 @@ static void ParseInt(napi_env env, napi_value propertyNapi, int32_t& property)
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, propertyNapi, &valueType);
         if (valueType == napi_undefined) {
-            NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+            NapiThrow(env, "Required input parameters are missing.", ERROR_CODE_PARAM_INVALID);
             return;
         } else if (valueType != napi_number) {
-            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
             return;
         }
         napi_get_value_int32(env, propertyNapi, &property);
@@ -87,10 +87,10 @@ static void ParseDouble(napi_env env, napi_value propertyNapi, double& property)
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, propertyNapi, &valueType);
         if (valueType == napi_undefined) {
-            NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+            NapiThrow(env, "Required input parameters are missing.", ERROR_CODE_PARAM_INVALID);
             return;
         } else if (valueType != napi_number) {
-            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
             return;
         }
         napi_get_value_double(env, propertyNapi, &property);
@@ -171,7 +171,7 @@ static void ParseAnimatorOption(napi_env env, napi_callback_info info, std::shar
     napi_value argv;
     napi_get_cb_info(env, info, &argc, &argv, NULL, NULL);
     if (argc != 1) {
-        NapiThrow(env, "The number of parameters must be equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env, "The number of parameters must be equal to 1.", ERROR_CODE_PARAM_INVALID);
         return;
     }
     napi_value durationNapi = nullptr;
@@ -194,7 +194,7 @@ static void ParseAnimatorOption(napi_env env, napi_callback_info info, std::shar
         napi_get_named_property(env, argv, "begin", &beginNapi);
         napi_get_named_property(env, argv, "end", &endNapi);
     } else {
-        NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return;
     }
 
@@ -249,18 +249,18 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, NULL, NULL, &thisVar, NULL);
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
-        NapiThrow(env, "Internal error. Unwrap animator result is failed.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "Internal error. Unwrap animator result is failed.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     auto option = animatorResult->GetAnimatorOption();
     if (!option) {
-        NapiThrow(env, "Internal error. Option is null in AnimatorResult.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "Internal error. Option is null in AnimatorResult.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     ParseAnimatorOption(env, info, option);
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        NapiThrow(env, "Internal error. Animator is null in AnimatorResult.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "Internal error. Animator is null in AnimatorResult.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     animator->ClearInterpolators();

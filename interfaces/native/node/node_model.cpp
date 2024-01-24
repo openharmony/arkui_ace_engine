@@ -15,16 +15,19 @@
 
 #include "node_model.h"
 
-#include "basic_node.h"
+#include <cstdint>
+
 #include "event_converter.h"
+#include "native_node.h"
+#include "native_type.h"
 #include "style_modifier.h"
 
+#include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/property/property.h"
-#include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -114,11 +117,8 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_STACK, ARKUI_SCROLL, ARKUI_LIST, ARKUI_SWIPER, ARKUI_TEXTAREA,
         ARKUI_BUTTON, ARKUI_PROGRESS, ARKUI_CHECKBOX, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_LIST_ITEM,
         ARKUI_REFRESH, ARKUI_XCOMPONENT, ARKUI_LIST_ITEM_GROUP };
+    // already check in entry point.
     auto* impl = GetFullImpl();
-    if (!impl) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get node impl");
-        return nullptr;
-    }
     if (type > sizeof(nodes) / sizeof(ArkUINodeType)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d NOT IMPLEMENT", type);
         return nullptr;
@@ -128,63 +128,48 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d can not find in full impl", type);
         return nullptr;
     }
+    impl->getBasicAPI()->markDirty(uiNode, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
     return new ArkUI_Node({ type, uiNode });
 }
 
 void DisposeNode(ArkUI_NodeHandle nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
+    // already check in entry point.
     auto* impl = GetFullImpl();
-    if (!impl) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get node impl");
-        return;
-    }
-    if (nativePtr) {
-        impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
-        delete nativePtr;
-    }
+    impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
+    delete nativePtr;
 }
 
 void AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 {
     CHECK_NULL_VOID(parentNode);
     CHECK_NULL_VOID(childNode);
+    // already check in entry point.
     auto* impl = GetFullImpl();
-    if (!impl) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get node impl");
-        return;
-    }
     impl->getBasicAPI()->addChild(parentNode->uiNodeHandle, childNode->uiNodeHandle);
+    impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
 }
 
 void RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 {
     CHECK_NULL_VOID(parentNode);
     CHECK_NULL_VOID(childNode);
+    // already check in entry point.
     auto* impl = GetFullImpl();
-    if (!impl) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get node impl");
-        return;
-    }
     impl->getBasicAPI()->removeChild(parentNode->uiNodeHandle, childNode->uiNodeHandle);
+    impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
 }
 
 void InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode)
 {
     CHECK_NULL_VOID(parentNode);
     CHECK_NULL_VOID(childNode);
+    // already check in entry point.
     auto* impl = GetFullImpl();
-    if (!impl) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get node impl");
-        return;
-    }
     impl->getBasicAPI()->insertChildAfter(
         parentNode->uiNodeHandle, childNode->uiNodeHandle, siblingNode ? siblingNode->uiNodeHandle : nullptr);
-}
-
-const char* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
-{
-    return GetNodeAttribute(node, attribute);
+    impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
 }
 
 void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const char* value)
@@ -192,25 +177,34 @@ void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, cons
     SetNodeAttribute(node, attribute, value);
 }
 
+int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value)
+{
+    return SetNodeAttribute(node, attribute, value);
+}
+
 void ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
     ResetNodeAttribute(node, attribute);
 }
 
-void RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId)
+const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
+{
+    // TODO.
+    return nullptr;
+}
+
+int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId)
 {
     auto originEventType = ConvertOriginEventType(eventType);
     if (originEventType < 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "event is not supported %{public}d", eventType);
-        return;
+        return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
+    // already check in entry point.
     auto* impl = GetFullImpl();
-    if (!impl) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get node impl");
-        return;
-    }
     impl->getBasicAPI()->registerNodeAsyncEvent(
         nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), eventId, nodePtr);
+    return ERROR_CODE_NO_ERROR;
 }
 
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType)
@@ -223,11 +217,8 @@ void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event))
 {
     g_eventReceiver = eventReceiver;
     if (g_eventReceiver) {
+        // already check in entry point.
         auto* impl = GetFullImpl();
-        if (!impl) {
-            TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get event register impl");
-            return;
-        }
         auto innerReceiver = [](ArkUINodeEvent* origin) {
             if (g_eventReceiver) {
                 auto event = reinterpret_cast<ArkUI_NodeEvent*>(origin);
@@ -254,32 +245,35 @@ int32_t CheckEvent(ArkUI_NodeEvent* event)
 
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)
 {
+    // already check in entry point.
     auto* impl = GetFullImpl();
-    if (!impl) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get node impl");
-        return;
-    }
     impl->getBasicAPI()->applyModifierFinish(nodePtr->uiNodeHandle);
 }
 
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
 {
     // spanNode inherited from UINode
-    auto* uiNode = reinterpret_cast<NG::UINode*>(nodePtr->uiNodeHandle);
-    CHECK_NULL_VOID(uiNode);
-    NG::PropertyChangeFlag flag;
+    ArkUIDirtyFlag flag = ARKUI_DIRTY_FLAG_MEASURE;
     switch (dirtyFlag) {
+        case NODE_NEED_MEASURE: {
+            flag = ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT;
+            break;
+        }
         case NODE_NEED_LAYOUT: {
-            flag = NG::PROPERTY_UPDATE_LAYOUT;
+            flag = ARKUI_DIRTY_FLAG_LAYOUT;
+            break;
         }
         case NODE_NEED_RENDER: {
-            flag = NG::PROPERTY_UPDATE_RENDER;
+            flag = ARKUI_DIRTY_FLAG_RENDER;
+            break;
         }
         default: {
-            flag = NG::PROPERTY_UPDATE_NORMAL;
+            flag = ARKUI_DIRTY_FLAG_MEASURE;
         }
     }
-    uiNode->MarkDirtyNode(flag);
+    // already check in entry point.
+    auto* impl = GetFullImpl();
+    impl->getBasicAPI()->markDirty(nodePtr->uiNodeHandle, flag);
 }
 
 } // namespace OHOS::Ace::NodeModel

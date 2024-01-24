@@ -233,7 +233,7 @@ ArkUINativeModuleValue ImageAnimatorBridge::SetImages(ArkUIRuntimeCallInfo* runt
         !ArkTSUtils::ParseArray<int32_t>(vm, seventhArg, durationArray.get(), arrayLength, parseInt32)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto images = std::make_unique<ImagePropertiesStruct[]>(arrayLength);
+    auto images = std::make_unique<ArkUIImagePropertiesStruct[]>(arrayLength);
     for (int32_t i = 0; i < arrayLength; i++) {
         images[i].src = srcArray[i].c_str();
         for (int32_t j = 0; j < IMAGESIZE; j++) {

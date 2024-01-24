@@ -264,6 +264,9 @@ public:
     const TextEditingValue& GetInputEditingValue() const override
     {
         static TextEditingValue value;
+        value.text = contentController_->GetTextValue();
+        value.hint = GetPlaceHolder();
+        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return value;
     };
     Offset GetGlobalOffset() const;
@@ -1081,7 +1084,6 @@ public:
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
-    void ContentFireOnChangeEvent();
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
     void SetMagnifierRect(MagnifierRect magnifierRect)
@@ -1102,6 +1104,7 @@ public:
     }
 
     void CleanNodeResponseKeyEvent();
+    void FireSelectEvent();
 
 protected:
     virtual void InitDragEvent();

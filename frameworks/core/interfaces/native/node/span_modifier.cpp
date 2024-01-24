@@ -170,7 +170,7 @@ void ResetSpanFontColor(NodeHandle node)
     SpanModelNG::SetTextColor(frameNode, Color(textColor));
 }
 
-void SetSpanLetterSpacing(NodeHandle node, const struct StringAndDouble *letterSpacingValue)
+void SetSpanLetterSpacing(NodeHandle node, const struct ArkUIStringAndFloat *letterSpacingValue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

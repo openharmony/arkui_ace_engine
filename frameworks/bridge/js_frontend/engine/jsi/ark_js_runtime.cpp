@@ -335,7 +335,7 @@ void ArkJSRuntime::HandleUncaughtException(panda::TryCatch& trycatch,
         Local<ObjectRef> exception = trycatch.GetAndClearException();
         if (!exception.IsEmpty() && !exception->IsHole()) {
             errorCallback("loading js file has crash or the uri of router is not exist.",
-                Framework::ERROR_CODE_URI_ERROR);
+                ERROR_CODE_URI_ERROR);
             return;
         }
     }

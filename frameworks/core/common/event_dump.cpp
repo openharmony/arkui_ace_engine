@@ -146,12 +146,17 @@ void EventTreeRecord::AddGestureProcedure(uint64_t id,
     iter->second->AddProcedure(procedure, state, disposal, timestamp);
 }
 
-void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
+void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList,
+    int32_t depth, int32_t startNumber) const
 {
     int32_t index = 0;
     int32_t listDepth = depth + 1;
     int32_t detailDepth = listDepth + 1;
     for (auto& tree : eventTreeList) {
+        if (index < startNumber) {
+            index++;
+            continue;
+        }
         std::string header = std::to_string(index).append(": event tree =>");
 
         // dump needful touch points:

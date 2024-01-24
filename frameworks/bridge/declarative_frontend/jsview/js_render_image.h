@@ -103,7 +103,7 @@ private:
     RefPtr<PixelMap> pixelMap_;
     RefPtr<NG::SvgDomBase> svgDom_;
     ImageSourceInfo sourceInfo_;
-    ImageFit imageFit_;
+    ImageFit imageFit_ = ImageFit::NONE;
     NG::SizeF imageSize_;
 
     std::string src_;

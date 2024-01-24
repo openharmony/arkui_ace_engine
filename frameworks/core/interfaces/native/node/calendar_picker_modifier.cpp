@@ -147,9 +147,9 @@ void ResetCalendarPickerPadding(NodeHandle node)
 
 void SetCalendarPickerBorder(NodeHandle node, uint32_t color)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    
+
     ViewAbstract::SetBorderColor(frameNode, Color(color));
 }
 
@@ -162,11 +162,9 @@ void ResetCalendarPickerBorder(NodeHandle node)
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
-
-    CalcDimension borderWidth;
-    ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+    ViewAbstract::SetBorderWidth(frameNode, calendarTheme->GetEntryBorderWidth());
     ViewAbstract::SetBorderColor(frameNode, calendarTheme->GetEntryBorderColor());
-    ViewAbstract::SetBorderRadius(frameNode, borderWidth);
+    ViewAbstract::SetBorderRadius(frameNode, calendarTheme->GetEntryBorderRadius());
     ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
 }
 

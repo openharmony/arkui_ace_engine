@@ -73,6 +73,7 @@ public:
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override {}
+    void UpdateDecorVisible(bool visible, bool hasDeco = true) override {};
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override {}
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override {}
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override {}
@@ -96,6 +97,8 @@ public:
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) override {}
 
     // ArkTS Form
+    void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override {}
+    void RunFormPage() override {}
     void OnFormSurfaceChange(float width, float height) override {}
     void UpdateFormData(const std::string& data) override {}
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override

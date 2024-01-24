@@ -163,6 +163,8 @@ public:
     virtual void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) = 0;
 
     // ArkTS Form
+    virtual void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
+    virtual void RunFormPage() = 0;
     virtual std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() = 0;
 
     virtual void UpdateFormData(const std::string& data) = 0;
@@ -350,6 +352,8 @@ public:
     };
 
     virtual void UpdateTransform(const OHOS::Rosen::Transform& transform) {};
+
+    virtual void UpdateDecorVisible(bool visible, bool hasDeco = true) {};
 };
 
 } // namespace OHOS::Ace

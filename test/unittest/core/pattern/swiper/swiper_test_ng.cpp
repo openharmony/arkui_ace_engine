@@ -9888,11 +9888,11 @@ HWTEST_F(SwiperTestNg, SwiperPatternAlgorithmMeasure001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperPaintMethodGetForegroundDrawFunction001
- * @tc.desc: GetForegroundDrawFunction
+ * @tc.name: SwiperPaintMethodGetOverlayDrawFunction001
+ * @tc.desc: GetOverlayDrawFunction
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperPaintMethodGetForegroundDrawFunction001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperPaintMethodGetOverlayDrawFunction001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
     SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
@@ -9909,7 +9909,7 @@ HWTEST_F(SwiperTestNg, SwiperPaintMethodGetForegroundDrawFunction001, TestSize.L
      * @tc.steps: step2. call PaintFade whith setting (GreatNotEqual(mainDelta_, 0.0)) .
      * @tc.expected: Related function is called.
      */
-    auto canvasDrawFunction = swiperPaintMethod1.GetForegroundDrawFunction(&paintWrapper);
+    auto canvasDrawFunction = swiperPaintMethod1.GetOverlayDrawFunction(&paintWrapper);
     canvasDrawFunction(canvas);
     EXPECT_TRUE(canvasDrawFunction);
 }

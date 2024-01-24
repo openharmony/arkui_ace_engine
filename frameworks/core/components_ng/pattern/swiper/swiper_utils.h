@@ -122,7 +122,8 @@ public:
             return index;
         }
 
-        return static_cast<int32_t>(std::floor(index / displayCount)) * displayCount;
+        return static_cast<int32_t>(std::floor(static_cast<float>(index) / static_cast<float>(displayCount))) *
+               displayCount;
     }
 
     static int32_t ComputePageEndIndex(int32_t index, int32_t displayCount)
@@ -131,7 +132,8 @@ public:
             return index;
         }
 
-        return (index / displayCount) * displayCount + displayCount - 1;
+        return static_cast<int32_t>(std::floor(static_cast<float>(index) / static_cast<float>(displayCount))) *
+                displayCount + displayCount - 1;
     }
 
 private:

@@ -29,6 +29,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "base/error/error_code.h"
 #include "base/geometry/axis.h"
 #include "base/json/json_util.h"
 #include "base/log/log.h"
@@ -74,33 +75,6 @@ const char UNICODE_BODY = '0';
 const char UNICODE_HEAD[] = "\\u";
 const char LEFT_CURLY_BRACES = '{';
 const char RIGHT_CURLY_BRACES = '}';
-
-// Common error code
-constexpr int32_t ERROR_CODE_NO_ERROR = 0;
-constexpr int32_t ERROR_CODE_PERMISSION_DENIED = 201; // The application does not have permission to call the interface.
-constexpr int32_t ERROR_CODE_PARAM_INVALID = 401;     // Invalid input parameter.
-constexpr int32_t ERROR_CODE_SYSTEMCAP_ERROR = 801;   // The specified SystemCapability names was not found.
-
-// Notification error code
-constexpr int32_t ERROR_CODE_INTERNAL_ERROR = 100001;      // Internal error.
-constexpr int32_t ERROR_CODE_URI_ERROR = 100002;           // Uri error.
-constexpr int32_t ERROR_CODE_PAGE_STACK_FULL = 100003;     // The pages are pushed too much.
-constexpr int32_t ERROR_CODE_NAMED_ROUTE_ERROR = 100004;           // Named route error.
-constexpr int32_t ERROR_CODE_URI_ERROR_LITE = 200002;      // Uri error for lite.
-
-// push destination error code
-constexpr int32_t ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED = 100005; // builder function not registered
-constexpr int32_t ERROR_CODE_DESTINATION_NOT_FOUND = 100006; // navDestination not found
-
-// Send synchronous message error code
-// No callback has been registered to process synchronous data transferring.
-constexpr int32_t ERROR_CODE_UIEXTENSION_NOT_REGISTER_SYNC_CALLBACK = 100011;
-// Transferring data failed
-constexpr int32_t ERROR_CODE_UIEXTENSION_TRANSFER_DATA_FAILED       = 100012;
-
-// Drag event error code
-constexpr int32_t ERROR_CODE_DRAG_DATA_NOT_FOUND = 190001;      // GetData failed, data not found.
-constexpr int32_t ERROR_CODE_DRAG_DATA_ERROR = 190002;      // GetData failed, data error.
 
 template<class T>
 bool GetAssetContentImpl(const RefPtr<AssetManager>& assetManager, const std::string& url, T& content)
@@ -239,8 +213,8 @@ inline ImageRepeat ConvertStrToImageRepeat(const std::string& repeat)
     return index < 0 ? ImageRepeat::NO_REPEAT : imageRepeatTable[index].value;
 }
 
-inline std::pair<bool, FontWeight> ParseFontWeight(const std::string& weight,
-    FontWeight defaultFontWeight = FontWeight::NORMAL)
+inline std::pair<bool, FontWeight> ParseFontWeight(
+    const std::string& weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
 {
     return StringUtils::ParseFontWeight(weight, defaultFontWeight);
 }
@@ -273,10 +247,11 @@ inline TextDecorationStyle ConvertStrToTextDecorationStyle(const std::string& te
         { DOM_TEXT_DECORATION_STYLE_DOTTED, TextDecorationStyle::DOTTED },
         { DOM_TEXT_DECORATION_STYLE_DOUBLE, TextDecorationStyle::DOUBLE },
         { DOM_TEXT_DECORATION_STYLE_SOLID, TextDecorationStyle::SOLID },
-        { DOM_TEXT_DECORATION_STYLE_WAVY, TextDecorationStyle::WAVY }, };
+        { DOM_TEXT_DECORATION_STYLE_WAVY, TextDecorationStyle::WAVY },
+    };
 
-    auto index = BinarySearchFindIndex(textDecorationStyleTable, ArraySize(textDecorationStyleTable),
-        textDecorationStyle.c_str());
+    auto index = BinarySearchFindIndex(
+        textDecorationStyleTable, ArraySize(textDecorationStyleTable), textDecorationStyle.c_str());
     return index < 0 ? TextDecorationStyle::SOLID : textDecorationStyleTable[index].value;
 }
 
@@ -299,9 +274,9 @@ inline WhiteSpace ConvertStrToWhiteSpace(const std::string& whiteSpace)
 inline VerticalAlign ConvertStrToTextVerticalAlign(const std::string& align)
 {
     static const LinearMapNode<VerticalAlign> textVerticalAlignTable[] = {
-        {DOM_BOTTOM, VerticalAlign::BOTTOM},
-        {DOM_MIDDLE, VerticalAlign::CENTER},
-        {DOM_TOP, VerticalAlign::TOP},
+        { DOM_BOTTOM, VerticalAlign::BOTTOM },
+        { DOM_MIDDLE, VerticalAlign::CENTER },
+        { DOM_TOP, VerticalAlign::TOP },
     };
     auto index = BinarySearchFindIndex(textVerticalAlignTable, ArraySize(textVerticalAlignTable), align.c_str());
     return index < 0 ? VerticalAlign::NONE : textVerticalAlignTable[index].value;
@@ -673,7 +648,7 @@ inline void HandleEscapeCharaterInUtf8TextForJson(std::string& text)
             ((text.at(pos) >= ESCAPE_CHARATER_START) && (text.at(pos) <= ESCAPE_CHARATER_END))) {
             std::ostringstream is;
             is << UNICODE_HEAD << std::hex << std::setw(UNICODE_LENGTH) << std::setfill(UNICODE_BODY)
-                << int(text.at(pos));
+               << int(text.at(pos));
             text.replace(pos, 1, is.str());
         }
     }
@@ -727,8 +702,8 @@ inline void ReplacePlaceHolder(std::string& resultStr, const std::unique_ptr<Jso
     }
 }
 
-inline std::string ParserPluralResource(const std::unique_ptr<JsonValue>& argsPtr, const std::string& choice,
-    const std::string& count)
+inline std::string ParserPluralResource(
+    const std::unique_ptr<JsonValue>& argsPtr, const std::string& choice, const std::string& count)
 {
     std::string valueStr;
     std::string defaultPluralStr(DEFAULT_PLURAL_CHOICE);

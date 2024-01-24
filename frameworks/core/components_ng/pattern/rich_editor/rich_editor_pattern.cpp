@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/pattern/text/typed_text.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
 #include "core/components_ng/property/property.h"
@@ -2691,6 +2692,55 @@ void RichEditorPattern::FireOnDeleteComplete(const RichEditorDeleteValue& info)
     }
 }
 
+bool RichEditorPattern::EraseEmoji(const RefPtr<SpanItem>& spanItem)
+{
+    CHECK_NULL_RETURN(spanItem, false);
+    auto& content = spanItem->content;
+    bool eraseSuccess = false;
+    uint32_t start = 0;
+    uint32_t end = 0;
+    while (start < content.length()) {
+        auto unicode = TypedText::GetUTF8Next(content.c_str(), start, end);
+        if (TypedText::IsEmoji(unicode)) {
+            content.erase(start, end - start);
+            eraseSuccess = true;
+            continue;
+        }
+        start = end;
+    }
+    return eraseSuccess;
+}
+
+bool RichEditorPattern::EraseEmoji()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    std::set<int32_t, std::greater<int32_t>> deleteNodes;
+    bool eraseSuccess = false;
+    for (auto i = 0; i < static_cast<int32_t>(host->GetChildren().size()); ++i) {
+        RefPtr<UINode> uiNode = host->GetChildAtIndex(i);
+        auto spanNode = DynamicCast<SpanNode>(uiNode);
+        if (!spanNode || spanNode->GetTag() != V2::SPAN_ETS_TAG) {
+            continue;
+        }
+        const auto& spanItem = spanNode->GetSpanItem();
+        eraseSuccess |= EraseEmoji(spanItem);
+        if (spanItem && spanItem->content.empty()) {
+            deleteNodes.emplace(i);
+        }
+    }
+    for (auto index : deleteNodes) {
+        host->RemoveChildAtIndex(index);
+    }
+    if (eraseSuccess) {
+        UpdateSpanPosition();
+        SetCaretPosition(std::clamp(caretPosition_, 0, static_cast<int32_t>(GetTextContentLength())));
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        OnModifyDone();
+    }
+    return eraseSuccess;
+}
+
 void RichEditorPattern::HandleOnDelete(bool backward)
 {
     backward ? DeleteBackward(1) : DeleteForward(1);
@@ -2698,6 +2748,9 @@ void RichEditorPattern::HandleOnDelete(bool backward)
 
 void RichEditorPattern::DeleteBackward(int32_t length)
 {
+    if (EraseEmoji()) {
+        return;
+    }
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_;
     std::wstring deleteText = DeleteBackwardOperation(length);
@@ -2756,6 +2809,9 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
 
 void RichEditorPattern::DeleteForward(int32_t length)
 {
+    if (EraseEmoji()) {
+        return;
+    }
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_;
     std::wstring deleteText = DeleteForwardOperation(length);
@@ -4006,6 +4062,17 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
     clipboard_->HasData(hasDataCallback);
 }
 
+void RichEditorPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation)
+{
+    bool isOriginMenuShow = true;
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        isOriginMenuShow = GetOriginIsMenuShow();
+    }
+    TextPattern::UpdateSelectOverlayOrCreate(selectInfo);
+    CHECK_NULL_VOID(selectOverlayProxy_);
+    selectOverlayProxy_->ShowOrHiddenMenu(!isOriginMenuShow);
+}
+
 void RichEditorPattern::CheckEditorTypeChange()
 {
     CHECK_NULL_VOID(selectOverlayProxy_);
@@ -4388,6 +4455,7 @@ void RichEditorPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight
 {
     if (newWidth != prevWidth || newHeight != prevHeight) {
         TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+        UpdateOriginIsMenuShow(false);
     }
     UpdateCaretInfoToController();
 }
@@ -4587,9 +4655,6 @@ std::vector<RectF> RichEditorPattern::GetTextBoxes()
     std::vector<RectF> res;
     res.reserve(selectedRects.size());
     for (auto&& rect : selectedRects) {
-        if (NearZero(rect.Width())) {
-            continue;
-        }
         res.emplace_back(rect);
     }
     if (!res.empty() && paragraphs_.IsSelectLineHeadAndUseLeadingMargin(textSelector_.GetTextStart())) {
@@ -4603,7 +4668,11 @@ float RichEditorPattern::GetLineHeight() const
 {
     auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     CHECK_NULL_RETURN(selectedRects.size(), 0.0f);
-    return selectedRects.front().Height();
+    RectF finalRect = selectedRects.front();
+    for (auto& selectRect : selectedRects) {
+        finalRect = finalRect.CombineRectT(selectRect);
+    }
+    return finalRect.Height();
 }
 
 void RichEditorPattern::UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)

@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model.h"
 
 namespace OHOS::Ace::NG {
@@ -38,6 +39,10 @@ public:
     void SetAntiAlias(bool antiAlias) override;
     void SetWidth(Dimension& width) override;
     void SetHeight(Dimension& height) override;
+    static void SetWidth(FrameNode* frameNode, Dimension& width);
+    static void ResetWidth(FrameNode* frameNode);
+    static void SetHeight(FrameNode* frameNode, Dimension& height);
+    static void ResetHeight(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

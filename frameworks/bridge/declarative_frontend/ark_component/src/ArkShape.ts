@@ -56,6 +56,38 @@ class ShapeMeshModifier extends ModifierWithKey<ArkMesh> {
     return !(this.stageValue as ArkMesh).isEqual(this.value as ArkMesh);
   }
 }
+class ShapeHeightModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('shapeHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetHeight(node);
+    } else {
+      getUINativeModule().common.setHeight(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class ShapeWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('shapeWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetWidth(node);
+    } else {
+      getUINativeModule().common.setWidth(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 class ArkShapeComponent extends ArkCommonShapeComponent implements ShapeAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -79,6 +111,14 @@ class ArkShapeComponent extends ArkCommonShapeComponent implements ShapeAttribut
       arkMesh.row = row;
     }
     modifierWithKey(this._modifiersWithKeys, ShapeMeshModifier.identity, ShapeMeshModifier, arkMesh);
+    return this;
+  }
+  height(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, ShapeHeightModifier.identity, ShapeHeightModifier, value);
+    return this;
+  }
+  width(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, ShapeWidthModifier.identity, ShapeWidthModifier, value);
     return this;
   }
 }

@@ -276,7 +276,7 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
         return false;
     }
 
-    CHECK_NULL_RETURN(navBarPattern_, false);
+    CHECK_NULL_RETURN(navBarPattern_ && navBarPattern_->NeedCoordWithScroll(), false);
 
     auto overOffsets = GetOverScrollOffset(offset);
     float offsetRemain = 0.0f;
@@ -975,7 +975,6 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
         animator_->Stop();
     }
     finalPosition_ = position;
-    runningAnimationCount_++;
     if (smooth) {
         PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS, DEFAULT_SCROLL_TO_STIFFNESS,
             DEFAULT_SCROLL_TO_DAMPING);
@@ -1003,11 +1002,6 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
                 ContainerScope scope(id);
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
-                pattern->runningAnimationCount_--;
-                if (pattern->runningAnimationCount_ > 0) {
-                    return;
-                }
-                pattern->StopAnimation(pattern->curveAnimation_);
                 pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
                     SceneStatus::END);
                 ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
@@ -1044,11 +1038,6 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->runningAnimationCount_--;
-            if (pattern->runningAnimationCount_ > 0) {
-                return;
-            }
-            pattern->StopAnimation(pattern->springAnimation_);
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
                 SceneStatus::END);
     });

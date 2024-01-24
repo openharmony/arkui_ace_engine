@@ -78,17 +78,27 @@ public:
         }
     }
 
-    void NotifyDataDeleted(RefPtr<NG::UINode>& lazyForEachNode, size_t index) override
+    void NotifyDataDeleted(RefPtr<NG::UINode>& lazyForEachNode, size_t index, bool removeIds) override
     {
         if (updateChangedNodeFlag_) {
             decltype(changedLazyForEachNodes_) temp(std::move(changedLazyForEachNodes_));
             for (auto& [oldindex, child] : temp) {
-                if (static_cast<size_t>(oldindex) != index) {
+                if (static_cast<size_t>(oldindex) != index && lazyForEachNode != child) {
                     changedLazyForEachNodes_.try_emplace(
                         index > static_cast<size_t>(oldindex) ? oldindex : oldindex - 1, std::move(child));
                 }
             }
-            dependElementIds_.erase(lazyForEachNode);
+            if (removeIds) {
+                dependElementIds_.erase(lazyForEachNode);
+            }
+        }
+    }
+
+    void KeepRemovedItemInCache(NG::LazyForEachChild node,
+        std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) override
+    {
+        if (updateChangedNodeFlag_) {
+            cachedItems.try_emplace(node.first, NG::LazyForEachCacheChild(-1, node.second));
         }
     }
 

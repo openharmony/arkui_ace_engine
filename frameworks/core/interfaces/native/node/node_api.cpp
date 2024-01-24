@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
@@ -225,6 +226,14 @@ void ApplyModifierFinish(ArkUINodeHandle nodePtr)
     }
 }
 
+void MarkDirty(ArkUINodeHandle nodePtr, ArkUI_Uint32 flag)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(nodePtr);
+    if (uiNode) {
+        uiNode->MarkDirtyNode(flag);
+    }
+}
+
 static ArkUIAPICallbackMethod* callbacks = nullptr;
 
 static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
@@ -256,7 +265,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         nullptr,
 
         ApplyModifierFinish,
-        nullptr,
+        MarkDirty,
     };
     /* clang-format on */
 
@@ -294,12 +303,13 @@ ArkUIExtendedNodeAPI impl_extended = {
 };
 /* clang-format on */
 
-void CanvasDrawRect(ArkUICanvasHandle canvas,
-    ArkUI_Float64 left, ArkUI_Float64 top, ArkUI_Float64 right, ArkUI_Float64 bottom, ArkUIPaintHandle paint) {
-        TAG_LOGI(AceLogTag::ACE_NATIVE_NODE,
-            "DrawRect canvas=%{public}p [%{public}f, %{public}f, %{public}f, %{public}f]\n",
-            canvas, left, top, right, bottom);
-    }
+void CanvasDrawRect(ArkUICanvasHandle canvas, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right,
+    ArkUI_Float32 bottom, ArkUIPaintHandle paint)
+{
+    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE,
+        "DrawRect canvas=%{public}p [%{public}f, %{public}f, %{public}f, %{public}f]\n",
+        canvas, left, top, right, bottom);
+}
 
 const ArkUIGraphicsCanvas* GetCanvasAPI()
 {

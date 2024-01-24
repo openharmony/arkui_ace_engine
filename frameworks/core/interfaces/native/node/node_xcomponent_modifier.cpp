@@ -43,7 +43,7 @@ void ResetXComponentBackgroundColor(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundColor(frameNode, Color(Color::TRANSPARENT));
 }
 
-void SetXComponentOpacity(ArkUINodeHandle node, double opacity)
+void SetXComponentOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

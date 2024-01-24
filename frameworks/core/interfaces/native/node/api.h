@@ -45,7 +45,7 @@ static OHOS::Ace::RefPtr<T> GetTheme()
     return themeManager->GetTheme<T>();
 }
 
-struct StringAndDouble {
+struct ArkUIStringAndFloat {
     double value;
     const char *valueStr;
 };
@@ -55,43 +55,24 @@ struct ArkUIResourceColorType {
     const char* string;
 };
 
-struct IconsStruct {
+struct ArkUIIconsStruct {
     const char* ShowIconInfo;
     const char* HiddenIconInfo;
     const char* SwitchingIconInfo;
 };
 
-struct FontStruct {
-    double value;
-    int8_t unit;
-    const struct StringAndInt32* weight;
-    const char* family;
-    int32_t style;
-};
-
-struct IconOptionsStruct {
+struct ArkUIIconOptionsStruct {
     double value;
     int8_t unit;
     int32_t color;
     const char* src;
 };
 
-struct SearchButtonOptionsStruct {
+struct ArkUISearchButtonOptionsStruct {
     const char* value;
     double sizeValue;
     int8_t sizeUnit;
     int32_t fontColor;
-};
-
-struct Int32AndInt32 {
-    int32_t number1;
-    int32_t number2;
-};
-
-struct ListLanesStruct {
-    int32_t number;
-    int32_t minLength;
-    int32_t maxlength;
 };
 
 struct ArkUISizeType {
@@ -100,12 +81,7 @@ struct ArkUISizeType {
     const char* string;
 };
 
-struct StringAndInt32 {
-    int32_t value;
-    const char* valueStr;
-};
-
-struct TextShadowStruct {
+struct ArkUITextShadowStruct {
     double radius;
     uint32_t type;
     uint32_t color;
@@ -114,17 +90,12 @@ struct TextShadowStruct {
     uint32_t fill;
 };
 
-struct ImagePropertiesStruct {
+struct ArkUIImagePropertiesStruct {
     const char* src;
     double number[4];
     int8_t unit[4];
     char* calc[4];
     int32_t duration;
-};
-
-struct ArkUIFontWeight {
-    int32_t value;
-    const char* valueStr;
 };
 
 struct ArkUILengthType {
@@ -274,7 +245,7 @@ struct ArkUICommonModifierAPI {
     void (*ResetRadialGradient)(NodeHandle node);
     void (*SetOverlay)(NodeHandle node, const char* text, const double* options, int32_t optionsLength);
     void (*ResetOverlay)(NodeHandle node);
-    void (*SetBorderImage)(NodeHandle node, const char* src, const StringAndDouble* options, int32_t optionsLength);
+    void (*SetBorderImage)(NodeHandle node, const char* src, const ArkUIStringAndFloat* options, int32_t optionsLength);
     void (*ResetBorderImage)(NodeHandle node);
     void (*SetBorderImageGradient)(
         NodeHandle node, const double* values, int32_t valuesLength, const double* colors, int32_t colorsLength);
@@ -382,7 +353,7 @@ struct ArkUICommonModifierAPI {
     void (*ResetGridSpan)(NodeHandle node);
     void (*SetExpandSafeArea)(NodeHandle node, const char* typeStr, const char* edgesStr);
     void (*ResetExpandSafeArea)(NodeHandle node);
-    void (*SetFlexBasis)(NodeHandle node, const struct StringAndDouble* flexBasisValue);
+    void (*SetFlexBasis)(NodeHandle node, const struct ArkUIStringAndFloat* flexBasisValue);
     void (*ResetFlexBasis)(NodeHandle node);
     void (*SetAlignRules)(NodeHandle node, char** anchors, int8_t* direction, int32_t length);
     void (*ResetAlignRules)(NodeHandle node);
@@ -470,15 +441,15 @@ struct ArkUITextModifierAPI {
     void (*ResetTextFontFamily)(NodeHandle node);
     void (*SetTextCopyOption)(NodeHandle node, const int32_t copyOption);
     void (*ResetTextCopyOption)(NodeHandle node);
-    void (*SetTextTextShadow)(NodeHandle node, struct TextShadowStruct* shadows, uint32_t length);
+    void (*SetTextTextShadow)(NodeHandle node, struct ArkUITextShadowStruct* shadows, uint32_t length);
     void (*ResetTextTextShadow)(NodeHandle node);
     void (*SetTextHeightAdaptivePolicy)(NodeHandle node, int32_t value);
     void (*ResetTextHeightAdaptivePolicy)(NodeHandle node);
-    void (*SetTextTextIndent)(NodeHandle node, const struct StringAndDouble* value);
+    void (*SetTextTextIndent)(NodeHandle node, const struct ArkUIStringAndFloat* value);
     void (*ResetTextTextIndent)(NodeHandle node);
-    void (*SetTextBaselineOffset)(NodeHandle node, const struct StringAndDouble* offset);
+    void (*SetTextBaselineOffset)(NodeHandle node, const struct ArkUIStringAndFloat* offset);
     void (*ResetTextBaselineOffset)(NodeHandle node);
-    void (*SetTextLetterSpacing)(NodeHandle node, const struct StringAndDouble* letterSpacingStruct);
+    void (*SetTextLetterSpacing)(NodeHandle node, const struct ArkUIStringAndFloat* letterSpacingStruct);
     void (*ResetTextLetterSpacing)(NodeHandle node);
     void (*SetTextFont)(NodeHandle node, const struct ArkUIFontStruct *fontInfo);
     void (*ResetTextFont)(NodeHandle node);
@@ -580,7 +551,7 @@ struct ArkUIBlankModifierAPI {
 struct ArkUISearchModifierAPI {
     void (*SetSearchPlaceholderColor)(NodeHandle node, uint32_t color);
     void (*ResetSearchPlaceholderColor)(NodeHandle node);
-    void (*SetSearchTextFont)(NodeHandle node, const struct FontStruct* value);
+    void (*SetSearchTextFont)(NodeHandle node, const struct ArkUIFontStruct* value);
     void (*ResetSearchTextFont)(NodeHandle node);
     void (*SetSearchSelectionMenuHidden)(NodeHandle node, uint32_t selectionMenuHidden);
     void (*ResetSearchSelectionMenuHidden)(NodeHandle node);
@@ -593,11 +564,11 @@ struct ArkUISearchModifierAPI {
     void (*ResetSearchCancelButton)(NodeHandle node);
     void (*SetSearchEnableKeyboardOnFocus)(NodeHandle node, uint32_t value);
     void (*ResetSearchEnableKeyboardOnFocus)(NodeHandle node);
-    void (*SetSearchPlaceholderFont)(NodeHandle node, const struct FontStruct* value);
+    void (*SetSearchPlaceholderFont)(NodeHandle node, const struct ArkUIFontStruct* value);
     void (*ResetSearchPlaceholderFont)(NodeHandle node);
-    void (*SetSearchSearchIcon)(NodeHandle node, const struct IconOptionsStruct* value);
+    void (*SetSearchSearchIcon)(NodeHandle node, const struct ArkUIIconOptionsStruct* value);
     void (*ResetSearchSearchIcon)(NodeHandle node);
-    void (*SetSearchSearchButton)(NodeHandle node, const struct SearchButtonOptionsStruct* value);
+    void (*SetSearchSearchButton)(NodeHandle node, const struct ArkUISearchButtonOptionsStruct* value);
     void (*ResetSearchSearchButton)(NodeHandle node);
     void (*SetSearchFontColor)(NodeHandle node, uint32_t value);
     void (*ResetSearchFontColor)(NodeHandle node);
@@ -1088,7 +1059,7 @@ struct ArkUISpanModifierAPI {
     void (*ResetSpanDecoration)(NodeHandle node);
     void (*SetSpanFontColor)(NodeHandle node, uint32_t textColor);
     void (*ResetSpanFontColor)(NodeHandle node);
-    void (*SetSpanLetterSpacing)(NodeHandle node, const struct StringAndDouble *letterSpacingValue);
+    void (*SetSpanLetterSpacing)(NodeHandle node, const struct ArkUIStringAndFloat *letterSpacingValue);
     void (*ResetSpanLetterSpacing)(NodeHandle node);
     void (*SetSpanFont)(NodeHandle node, const struct ArkUIFontStruct *fontInfo);
     void (*ResetSpanFont)(NodeHandle node);
@@ -1104,7 +1075,7 @@ struct ArkUIImageAnimatorModifierAPI {
     void (*ResetFillMode)(NodeHandle node);
     void (*SetReverse)(NodeHandle node, uint32_t value);
     void (*ResetReverse)(NodeHandle node);
-    void (*SetImages)(NodeHandle node, struct ImagePropertiesStruct* images, int32_t length);
+    void (*SetImages)(NodeHandle node, struct ArkUIImagePropertiesStruct* images, int32_t length);
     void (*ResetImages)(NodeHandle node);
     void (*SetImageAnimatorIteration)(NodeHandle node, int32_t value);
     void (*ResetImageAnimatorIteration)(NodeHandle node);
@@ -1116,7 +1087,7 @@ struct ArkUISideBarContainerModifierAPI {
     void (*SetMinSideBarWidth)(NodeHandle node, double value, int32_t unit);
     void (*ResetMinSideBarWidth)(NodeHandle node);
     void (*SetControlButton)(
-        NodeHandle node, double* values, int32_t valueLength, const struct IconsStruct* sideBarWidth);
+        NodeHandle node, double* values, int32_t valueLength, const struct ArkUIIconsStruct* sideBarWidth);
     void (*ResetControlButton)(NodeHandle node);
     void (*SetShowControlButton)(NodeHandle node, bool isShow);
     void (*ResetShowControlButton)(NodeHandle node);
@@ -1610,9 +1581,9 @@ struct ArkUICommonShapeModifierAPI {
     void (*ResetStrokeLineCap)(NodeHandle node);
     void (*SetStrokeLineJoin)(NodeHandle node, const int lineJoinStyle);
     void (*ResetStrokeLineJoin)(NodeHandle node);
-    void (*SetShapeWidth)(NodeHandle node);
+    void (*SetShapeWidth)(NodeHandle node, const double value, const int32_t unit);
     void (*ResetShapeWidth)(NodeHandle node);
-    void (*SetShapeHeight)(NodeHandle node);
+    void (*SetShapeHeight)(NodeHandle node, const double value, const int32_t unit);
     void (*ResetShapeHeight)(NodeHandle node);
     void (*SetShapeForegroundColor)(NodeHandle node, bool isColor, uint32_t color);
     void (*ResetShapeForegroundColor)(NodeHandle node);

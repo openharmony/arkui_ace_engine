@@ -1867,7 +1867,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(float crossSize, float
             }
         }
         CompeleteItemCrossPosition(layoutWrapper, line->second);
-        gridLayoutInfo_.endIndex_ += line->second.size();
+        gridLayoutInfo_.endIndex_ += static_cast<int32_t>(line->second.size());
         cellAveLength_ = -1.0f;
         return cellAveLength_;
     }
@@ -1895,7 +1895,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(float crossSize, float
             --currentIndex;
             break;
         }
-        i = lastCross_ - 1;
+        i = static_cast<uint32_t>(lastCross_ - 1);
         // // Step3. Measure [GridItem]
         LargeItemLineHeight(itemWrapper, hasNormalItem);
 

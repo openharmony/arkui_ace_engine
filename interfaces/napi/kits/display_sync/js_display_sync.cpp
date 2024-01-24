@@ -130,13 +130,13 @@ napi_value ParseExpectedFrameRateRange(napi_env env, napi_callback_info info, Fr
     napi_value thisVar = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
     if (argc != 1) {
-        NapiThrow(env, "The number of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return NapiGetUndefined(env);
     }
 
     napi_value nativeObj = argv[0];
     if (nativeObj == nullptr) {
-        NapiThrow(env, "The nativeObj is nullptr.", Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env, "The nativeObj is nullptr.", ERROR_CODE_PARAM_INVALID);
         return NapiGetUndefined(env);
     }
 
@@ -146,7 +146,7 @@ napi_value ParseExpectedFrameRateRange(napi_env env, napi_callback_info info, Fr
     ParseJsValue(env, nativeObj, "expected", expectedFPS);
 
     if (!(minFPS <= maxFPS && expectedFPS >= minFPS && expectedFPS <= maxFPS)) {
-        NapiThrow(env, "ExpectedFrameRateRange Error", Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env, "ExpectedFrameRateRange Error", ERROR_CODE_PARAM_INVALID);
         return NapiGetUndefined(env);
     }
     frameRateRange.Set(minFPS, maxFPS, expectedFPS);

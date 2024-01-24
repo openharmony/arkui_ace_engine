@@ -229,6 +229,18 @@ napi_value ObserverProcess::ProcessRouterPageUnRegister(napi_env env, napi_callb
         UIObserver::UnRegisterRouterPageCallback(0, argv[1]);
     }
 
+    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
+        napi_value context = argv[1];
+        if (context) {
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterRouterPageCallback(env, context, nullptr);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterRouterPageCallback(uiContextInstanceId, nullptr);
+            }
+        }
+    }
+
     if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
         napi_value context = argv[1];
         if (context) {
