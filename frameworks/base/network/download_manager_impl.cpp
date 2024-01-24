@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,9 +114,9 @@ public:
 
         CURLcode result = curl_easy_perform(handle.get());
         if (result != CURLE_OK) {
-            LOGE("Failed to download, url: %{private}s, %{public}s", url.c_str(), curl_easy_strerror(result));
+            LOGE("Failed to download, url: [%{private}s], [%{public}s]", url.c_str(), curl_easy_strerror(result));
             if (!errorStr.empty()) {
-                LOGE("Failed to download reason: %{public}s", errorStr.c_str());
+                LOGE("Failed to download reason: [%{public}s]", errorStr.c_str());
             }
             dataOut.clear();
             return false;
@@ -125,29 +125,30 @@ public:
         return true;
     }
 
-    bool DownloadAsync(DownloadCallback&& downloadCallback, const std::string& url) override
+    bool DownloadAsync(DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId) override
     {
         NetStackRequest httpReq;
         httpReq.SetURL(url);
         auto& session = NetStack::HttpClient::HttpSession::GetInstance();
         auto task = session.CreateTask(httpReq);
-        task->OnSuccess([downloadCallback = std::move(downloadCallback)](
+        task->OnSuccess([successCallback = std::move(downloadCallback.successCallback), instanceId](
                             const NetStackRequest& request, const NetStackResponse& response) {
-            LOGI("Async http task of url %{private}s success", request.GetURL().c_str());
-            downloadCallback(std::move(response.GetResult()), DownloadState::SUCCESS);
+            LOGI("Async http task of url [%{private}s] success", request.GetURL().c_str());
+            successCallback(std::move(response.GetResult()), true, instanceId);
         });
-        task->OnCancel([downloadCallback = std::move(downloadCallback)](
+        task->OnCancel([cancelCallback = std::move(downloadCallback.cancelCallback), instanceId](
                            const NetStackRequest& request, const NetStackResponse& response) {
-            LOGI("Async Http task of url %{private}s cancelled by netStack", request.GetURL().c_str());
+            LOGI("Async Http task of url [%{private}s] cancelled by netStack", request.GetURL().c_str());
             std::string errorMsg;
             errorMsg.append("Http task of url ");
             errorMsg.append(request.GetURL());
             errorMsg.append(" cancelled by netStack");
-            downloadCallback(std::move(errorMsg), DownloadState::CANCEL);
+            cancelCallback(errorMsg, true, instanceId);
         });
-        task->OnFail([downloadCallback = std::move(downloadCallback)](
+        task->OnFail([failCallback = std::move(downloadCallback.failCallback), instanceId](
                          const NetStackRequest& request, const NetStackResponse& response, const NetStackError& error) {
-            LOGI("Async http task of url %{private}s failed, response code %{public}d, msg from netStack: %{public}s",
+            LOGI("Async http task of url [%{private}s] failed, response code %{public}d, msg from netStack: "
+                 "[%{public}s]",
                 request.GetURL().c_str(), response.GetResponseCode(), error.GetErrorMessage().c_str());
             std::string errorMsg;
             errorMsg.append("Http task of url ");
@@ -157,25 +158,25 @@ public:
             errorMsg.append(std::to_string(responseCode));
             errorMsg.append(", msg from netStack: ");
             errorMsg.append(error.GetErrorMessage());
-            downloadCallback(std::move(errorMsg), DownloadState::FAILED);
+            failCallback(errorMsg, true, instanceId);
         });
         auto result = task->Start();
-        LOGI("Task of netstack with src %{private}s %{public}s", url.c_str(),
+        LOGI("Task of netstack with src [%{private}s] [%{public}s]", url.c_str(),
             result ? " started on another thread successfully"
                    : " failed to start on another thread, please check netStack log");
         return result;
     }
 
-    bool DownloadSync(DownloadCallback&& downloadCallback, const std::string& url) override
+    bool DownloadSync(DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId) override
     {
-        LOGI("DownloadSync task of %{private}s start", url.c_str());
+        LOGI("DownloadSync task of [%{private}s] start", url.c_str());
         NetStackRequest httpReq;
         httpReq.SetURL(url);
         auto& session = NetStack::HttpClient::HttpSession::GetInstance();
         auto task = session.CreateTask(httpReq);
         std::shared_ptr<DownloadCondition> downloadCondition = std::make_shared<DownloadCondition>();
         task->OnSuccess([downloadCondition](const NetStackRequest& request, const NetStackResponse& response) {
-            LOGI("Sync Http task of url %{private}s success", request.GetURL().c_str());
+            LOGI("Sync Http task of url [%{private}s] success", request.GetURL().c_str());
             {
                 std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
                 downloadCondition->downloadSuccess = true;
@@ -184,7 +185,7 @@ public:
             downloadCondition->cv.notify_all();
         });
         task->OnCancel([downloadCondition](const NetStackRequest& request, const NetStackResponse& response) {
-            LOGI("Sync Http task of url %{private}s cancelled", request.GetURL().c_str());
+            LOGI("Sync Http task of url [%{private}s] cancelled", request.GetURL().c_str());
             {
                 std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
                 downloadCondition->errorMsg.append("Http task of url ");
@@ -196,7 +197,8 @@ public:
         });
         task->OnFail([downloadCondition](
                          const NetStackRequest& request, const NetStackResponse& response, const NetStackError& error) {
-            LOGI("Sync Http task of url %{private}s failed, response code %{public}d, msg from netStack: %{public}s",
+            LOGI(
+                "Sync Http task of url [%{private}s] failed, response code %{public}d, msg from netStack: [%{public}s]",
                 request.GetURL().c_str(), response.GetResponseCode(), error.GetErrorMessage().c_str());
             {
                 std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
@@ -212,10 +214,20 @@ public:
             downloadCondition->cv.notify_all();
         });
         auto result = task->Start();
+        return HandleDownloadResult(result, std::move(downloadCallback), downloadCondition, instanceId, url);
+    }
+
+private:
+    struct ProxyInfo {
+        std::string host;
+        int32_t port = 0;
+        std::string exclusions;
+    };
+
+    bool HandleDownloadResult(bool result, DownloadCallback&& downloadCallback,
+        const std::shared_ptr<DownloadCondition>& downloadCondition, int32_t instanceId, const std::string& url)
+    {
         if (!result) {
-            LOGI("Sync Task of netstack with url %{private}s failed to start on another thread, please check netStack "
-                 "log",
-                url.c_str());
             return result;
         }
         {
@@ -227,22 +239,15 @@ public:
                 });
         }
         if (!downloadCondition->downloadSuccess.has_value()) {
-            LOGI("Sync Task of netstack with url %{private}s maximum waiting period exceed", url.c_str());
+            LOGI("Sync Task of netstack with url [%{private}s] maximum waiting period exceed", url.c_str());
         }
         if (downloadCondition->downloadSuccess.value_or(false)) {
-            downloadCallback(std::move(downloadCondition->dataOut), DownloadState::SUCCESS);
+            downloadCallback.successCallback(std::move(downloadCondition->dataOut), false, instanceId);
         } else {
-            downloadCallback(std::move(downloadCondition->errorMsg), DownloadState::FAILED);
+            downloadCallback.failCallback(downloadCondition->errorMsg, false, instanceId);
         }
         return true;
     }
-
-private:
-    struct ProxyInfo {
-        std::string host;
-        int32_t port = 0;
-        std::string exclusions;
-    };
 
     bool Initialize()
     {

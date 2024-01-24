@@ -54,6 +54,7 @@ public:
 
     ImageLoadingState GetCurrentState();
     void HandleCommand(ImageLoadingCommand command);
+    void SetState(ImageLoadingState state);
 
 private:
     void HandleCommandByUnloadedState(ImageLoadingCommand command);
