@@ -276,7 +276,7 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
         return false;
     }
 
-    CHECK_NULL_RETURN(navBarPattern_, false);
+    CHECK_NULL_RETURN(navBarPattern_ && navBarPattern_->NeedCoordWithScroll(), false);
 
     auto overOffsets = GetOverScrollOffset(offset);
     float offsetRemain = 0.0f;
