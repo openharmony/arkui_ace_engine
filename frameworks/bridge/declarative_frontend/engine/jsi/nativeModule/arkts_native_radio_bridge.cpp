@@ -129,7 +129,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioHeight(ArkUIRuntimeCallInfo* runtime
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
 
     CalcDimension height;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, height)) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
         GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
