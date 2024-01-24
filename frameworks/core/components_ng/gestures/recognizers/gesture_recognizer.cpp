@@ -157,7 +157,12 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 
 void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
-    auto gestureGroup = gestureGroup_.Upgrade();
+    RefPtr<NGGestureRecognizer> gestureGroup;
+    if (!parentGestureGroup_.Invalid()) {
+        gestureGroup = parentGestureGroup_.Upgrade();
+    } else {
+        gestureGroup = gestureGroup_.Upgrade();
+    }
     if (gestureGroup) {
         gestureGroup->Adjudicate(recognizer, disposal);
         return;
@@ -294,4 +299,12 @@ bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& ge
     return true;
 }
 
+void NGGestureRecognizer::SetParentGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
+{
+    if (gestureGroup.Invalid()) {
+        return;
+    }
+
+    parentGestureGroup_ = gestureGroup;
+}
 } // namespace OHOS::Ace::NG
