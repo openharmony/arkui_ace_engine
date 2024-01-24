@@ -28,6 +28,7 @@ template("declarative_frontend") {
     defines += invoker.defines
     defines += [ "USE_ARK_ENGINE" ]
     configs = [ "$ace_root:ace_config" ]
+    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
     include_dirs =
         [ "$ace_napi_frameworks/bridge/declarative_frontend/engine/jsi" ]
@@ -37,6 +38,10 @@ template("declarative_frontend") {
         "ng/frontend_delegate_declarative_ng.cpp",
         "ng/page_router_manager.cpp",
       ]
+      deps += [
+        "//arkcompiler/ets_runtime:libark_jsruntime_static",
+        "//foundation/arkui/napi:ace_napi",
+      ]
     } else {
       sources = [
         "declarative_frontend.cpp",
@@ -45,7 +50,6 @@ template("declarative_frontend") {
       ]
     }
 
-    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     external_deps = [
       "ets_runtime:libark_jsruntime",
       "napi:ace_napi",

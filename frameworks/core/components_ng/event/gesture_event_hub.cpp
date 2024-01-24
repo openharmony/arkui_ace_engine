@@ -43,19 +43,12 @@
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-#if defined(PIXEL_MAP_SUPPORTED)
-#include "image_source.h"
-#endif
-
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 namespace OHOS::Ace::NG {
 RefPtr<PixelMap> g_pixelMap;
 bool g_getPixelMapSucc = false;
 namespace {
-#if defined(PIXEL_MAP_SUPPORTED)
-constexpr int32_t CREATE_PIXELMAP_TIME = 80;
-#endif
 constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 200;
 } // namespace
 const std::string DEFAULT_MOUSE_DRAG_IMAGE { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
@@ -734,34 +727,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
             dragDropInfo.customNode = dragPreviewInfo.customNode;
         }
     }
-#if defined(PIXEL_MAP_SUPPORTED)
-    g_getPixelMapSucc = false;
-    if (dragDropInfo.customNode) {
-        auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
-                            frameNode, dragDropInfo,
-                            event](std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
-            ContainerScope scope(id);
-            if (pixelMap == nullptr) {
-                g_getPixelMapSucc = false;
-            } else {
-                g_pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
-                g_getPixelMapSucc = true;
-            }
-            auto taskScheduler = pipeline->GetTaskExecutor();
-            CHECK_NULL_VOID(taskScheduler);
-            taskScheduler->PostTask(
-                [pipeline, info, gestureEventHubPtr, frameNode, dragDropInfo, event]() {
-                    CHECK_NULL_VOID(gestureEventHubPtr);
-                    CHECK_NULL_VOID(frameNode);
-                    gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
-                },
-                TaskExecutor::TaskType::UI);
-        };
-        auto customNode = AceType::DynamicCast<FrameNode>(dragDropInfo.customNode);
-        NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
-        return;
-    }
-#endif
     OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
 }
 
