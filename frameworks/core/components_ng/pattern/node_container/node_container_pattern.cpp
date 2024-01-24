@@ -39,31 +39,52 @@ bool NodeContainerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     auto size = geometryNode->GetFrameSize();
     FireOnResize(size);
     auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(context, false);
-    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto exportTextureNode = pattern->GetExportTextureNode();
-        CHECK_NULL_VOID(exportTextureNode);
-        auto exportTextureFrameNode = DynamicCast<FrameNode>(exportTextureNode);
-        while (exportTextureNode && !exportTextureFrameNode) {
-            exportTextureNode = exportTextureNode->GetFirstChild();
-            exportTextureFrameNode = DynamicCast<FrameNode>(exportTextureNode);
-        }
-        CHECK_NULL_VOID(exportTextureFrameNode);
-        auto exportTextureRenderContext = exportTextureFrameNode->GetRenderContext();
-        CHECK_NULL_VOID(exportTextureRenderContext);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->SetIsNeedRebuildRSTree(false);
-        auto ret = exportTextureRenderContext->DoTextureExport(pattern->GetSurfaceId());
-        if (!ret) {
-            TAG_LOGW(AceLogTag::ACE_NODE_CONTAINER, "DoTextureExport fail");
-        }
-    });
+    if (context && surfaceId_ != 0U && !exportTextureNode_.Invalid()) {
+        context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto ret = pattern->HandleTextureExport(false);
+            if (!ret) {
+                TAG_LOGW(AceLogTag::ACE_NODE_CONTAINER, "DoTextureExport fail");
+            }
+        });
+    }
     return false;
+}
+
+bool NodeContainerPattern::HandleTextureExport(bool isStop)
+{
+    auto exportTextureNode = GetExportTextureNode();
+    CHECK_NULL_RETURN(exportTextureNode, false);
+    auto exportTextureRenderContext = exportTextureNode->GetRenderContext();
+    CHECK_NULL_RETURN(exportTextureRenderContext, false);
+    auto host = GetHost();
+    if (host) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        renderContext->SetIsNeedRebuildRSTree(isStop);
+    }
+    if (isStop) {
+        return exportTextureRenderContext->StopTextureExport();
+    }
+    return exportTextureRenderContext->DoTextureExport(surfaceId_);
+}
+
+void NodeContainerPattern::OnDetachFromFrameNode(FrameNode* /* frameNode */)
+{
+    HandleTextureExport(true);
+}
+
+RefPtr<FrameNode> NodeContainerPattern::GetExportTextureNode() const
+{
+    auto exportTextureNode = exportTextureNode_.Upgrade();
+    CHECK_NULL_RETURN(exportTextureNode, nullptr);
+    auto exportTextureFrameNode = DynamicCast<FrameNode>(exportTextureNode);
+    while (exportTextureNode && !exportTextureFrameNode) {
+        exportTextureNode = exportTextureNode->GetFirstChild();
+        exportTextureFrameNode = DynamicCast<FrameNode>(exportTextureNode);
+    }
+    return exportTextureFrameNode;
 }
 
 void NodeContainerPattern::ResetExportTextureInfo()
@@ -74,11 +95,11 @@ void NodeContainerPattern::ResetExportTextureInfo()
 
 void NodeContainerPattern::SetExportTextureInfoIfNeeded()
 {
+    ResetExportTextureInfo();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto viewNode = host->GetChildAtIndex(0);
     CHECK_NULL_VOID(viewNode);
-    ResetExportTextureInfo();
     if (!viewNode->IsNeedExportTexture()) {
         return;
     }
@@ -102,12 +123,8 @@ void NodeContainerPattern::SetExportTextureInfoIfNeeded()
 
 void NodeContainerPattern::OnAddBaseNode()
 {
+    HandleTextureExport(true);
     SetExportTextureInfoIfNeeded();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetIsNeedRebuildRSTree(true);
 }
 
 void NodeContainerPattern::OnMountToParentDone()

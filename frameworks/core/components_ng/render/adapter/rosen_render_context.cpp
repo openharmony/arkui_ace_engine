@@ -3929,11 +3929,12 @@ bool RosenRenderContext::DoTextureExport(uint64_t surfaceId)
 bool RosenRenderContext::StopTextureExport()
 {
     CHECK_NULL_RETURN(rsNode_, false);
-    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
-    CHECK_NULL_RETURN(rsSurfaceNode, false);
     CHECK_NULL_RETURN(rsTextureExport_, false);
     rsTextureExport_->StopTextureExport();
-    rsSurfaceNode->SetTextureExport(false);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    if (rsSurfaceNode) {
+        rsSurfaceNode->SetTextureExport(false);
+    }
     return true;
 }
 
