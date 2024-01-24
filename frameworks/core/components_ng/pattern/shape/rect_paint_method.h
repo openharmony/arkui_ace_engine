@@ -54,8 +54,8 @@ public:
             rectPaintProperty->UpdateFill(Color::FOREGROUND);
             rectPaintProperty->ResetFillOpacity();
         }
-        rect_.SetSize(paintWrapper->GetContentSize());
-        rect_.SetOffset(paintWrapper->GetContentOffset());
+        rect_.SetSize(rectPaintProperty->GetContentSize());
+        rect_.SetOffset(rectPaintProperty->GetContentOffset());
 
         return [rect = rect_, rectPaintProperty, paintWrapper](RSCanvas& canvas) {
                     RectPainter::DrawRect(canvas, rect, *rectPaintProperty);
