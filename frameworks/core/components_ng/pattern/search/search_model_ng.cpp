@@ -185,7 +185,8 @@ void SearchModelNG::SetSearchIconColor(const Color& color)
     }
 }
 
-void SearchModelNG::SetSearchSrcPath(const std::string& src)
+void SearchModelNG::SetSearchSrcPath(
+    const std::string& src, const std::string& bundleName, const std::string& moduleName)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -204,6 +205,8 @@ void SearchModelNG::SetSearchSrcPath(const std::string& src)
     } else {
         imageSourceInfo.SetSrc(src);
     }
+    imageSourceInfo.SetBundleName(bundleName);
+    imageSourceInfo.SetModuleName(moduleName);
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageFrameNode->MarkModifyDone();
     imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
