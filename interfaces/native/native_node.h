@@ -129,94 +129,135 @@ typedef struct {
  */
 typedef enum {
     /**
-     * @brief 通过{@link setAttribute}方法设置宽度属性。
+     * @brief 宽度属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].f32：宽度数值，单位为vp。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：宽度数值，单位为vp；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：宽度数值，单位为vp；\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { 1.2 };
-     * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_WIDTH, &item);
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_WIDTH, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_WIDTH);
+     * auto nodeWidth = item->value[0].f32;
      * @endcode
      *
      */
     NODE_WIDTH = 0,
     /**
-     * @brief 通过{@link setAttribute}方法设置高度属性。
+     * @brief 高度属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].f32：高度数值，单位为vp。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：高度数值，单位为vp；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：高度数值，单位为vp；\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { 100 };
-     * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_HEIGHT, &item);
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { 1.2 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_HEIGHT, &item);clang-tid
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_HEIGHT);
+     * auto nodeHeight = item->value[0].f32;
      * @endcode
      *
      */
     NODE_HEIGHT,
     /**
-     * @brief 通过{@link setAttribute}方法设置背景色属性。
+     * @brief 背景色属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：背景色数值，0xargb格式，形如 0xFFFF0000 表示红色。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：背景色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：背景色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32=0xFFFF0000} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.u32=0xFFFF0000} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_COLOR, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_COLOR, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_BACKGROUND_COLOR);
+     * auto nodeBackgroundColor = item->value[0].u32;
      * @endcode
      *
      */
     NODE_BACKGROUND_COLOR,
     /**
-     * @brief 通过{@link setAttribute}方法设置背景图片属性。
+     * @brief 背景色图片属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
      * .string: 图片地址；\n
-     * .value[0]?.i32：可选值，repeat参数，参数类型{@link ArkUI_ImageRepeat}，默认值为ARKUI_IMAGEREPEAT_NO_REPEAT。
+     * .value[0]?.i32：可选值，repeat参数，参数类型{@link ArkUI_ImageRepeat}，默认值为ARKUI_IMAGEREPEAT_NO_REPEAT；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .string: 图片地址；\n
+     * .value[0].i32：repeat参数，参数类型{@link ArkUI_ImageRepeat}；\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = ARKUI_IMAGEREPEAT_NO_REPEAT} };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue), "/pages/icon.png" };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_BACKGROUND_IMAGE);
+     * auto nodeBackgroundImageUrl = item->string;
+     * auto nodeBackgroundImageRepeat = item->value[0].i32;
      * @endcode
      *
      */
     NODE_BACKGROUND_IMAGE,
     /**
-     * @brief 通过{@link setAttribute}方法设置组件内间距。
+     * @brief 内间距属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}支持两种入参格式：\n
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式有两种：\n
      * 1：上下左右四个位置的内间距值相等。\n
      * .value[0].f32：内间距数值，单位为vp；\n
      * 2：分别指定上下左右四个位置的内间距值。\n
      * .value[0].f32：上内间距数值，单位为vp；\n
      * .value[1].f32：右内间距数值，单位为vp；\n
      * .value[2].f32：下内间距数值，单位为vp；\n
-     * .value[3].f32：左内间距数值，单位为vp。
+     * .value[3].f32：左内间距数值，单位为vp；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：上内间距数值，单位为vp；\n
+     * .value[1].f32：右内间距数值，单位为vp；\n
+     * .value[2].f32：下内间距数值，单位为vp；\n
+     * .value[3].f32：左内间距数值，单位为vp；\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value1[] = { 1, 2, 3, 4};
      * ArkUI_AttributeItem item1 = { value1, sizeof(value1)/sizeof(ArkUI_NumberValue) };
      * ArkUI_NumberValue value2[] = { 10 };
      * ArkUI_AttributeItem item2 = { value2, sizeof(value2)/sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_PADDING, &item1);
-     * basicNodeApi->setAttribute(nodeHandle, NODE_PADDING, &item2);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_PADDING, &item1);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_PADDING, &item2);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_PADDING);
+     * auto nodePaddingTop = item->value[0].f32;
      * @endcode
      *
      */
     NODE_PADDING,
     /**
-     * @brief 通过{@link setAttribute}方法设置组件ID。
+     * @brief 组件ID属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * string: ID的内容。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .string: ID的内容；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .string: ID的内容；\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_AttributeItem item = { .string = "test" };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ID, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_ID, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_ID);
+     * auto nodeId = item->string;
      * @endcode
      *
      */
@@ -224,13 +265,19 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置组件是否可交互，设置为false可不响应点击等操作。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * value[0].i32：false表示不可交互，true表示可交互。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：false表示不可交互，true表示可交互；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：0表示不可交互，1表示可交互；\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = false} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ENABLED, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_ENABLED, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_ENABLED);
+     * auto nodeEnabled = item->value[0].i32;
      * @endcode
      */
     NODE_ENABLED,
@@ -1052,57 +1099,81 @@ typedef enum {
      */
     NODE_TEXT_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
     /**
-     * @brief 通过{@link setAttribute}方法设置组件字体颜色，只针对包含文本元素的组件。
+     * @brief 组件字体颜色属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：字体颜色数值，0xargb格式，形如 0xFFFF0000 表示红色。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：字体颜色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：字体颜色数值，0xargb格式；\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32=0xFFFF0000} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.u32=0xFFFF0000} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_COLOR, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_FONT_COLOR, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_FONT_COLOR);
+     * auto nodeFontColor = item->value[0].u32;
      * @endcode
      *
      */
     NODE_FONT_COLOR,
     /**
-     * @brief 通过{@link setAttribute}方法设置字体大小。
+     * @brief 组件字体大小属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].f32：字体大小数值，单位为fp。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：字体大小数值，单位为fp；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：字体大小数值，单位为fp；\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { 10 };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_SIZE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_FONT_SIZE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_FONT_SIZE);
+     * auto nodeFontSize = item->value[0].f32;
      * @endcode
      *
      */
     NODE_FONT_SIZE,
     /**
-     * @brief 通过{@link setAttribute}方法设置字体样式。
+     * @brief 组件字体样式属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：字体样式{@link ArkUI_FontStyle}，默认值为ARKUI_FONT_STYLE_NORMAL。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：字体样式{@link ArkUI_FontStyle}，默认值为ARKUI_FONT_STYLE_NORMAL；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：字体样式{@link ArkUI_FontStyle}；\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = ARKUI_FONT_STYLE_NORMAL} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_STYLE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_FONT_STYLE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_FONT_STYLE);
+     * auto nodeFontStyle = item->value[0].i32;
      * @endcode
      *
      */
     NODE_FONT_STYLE,
     /**
-     * @brief 通过{@link setAttribute}方法设置字重。
+     * @brief 组件字体粗细属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .i32：字体粗细样式{@link ArkUI_FontWeight}，默认值为ARKUI_FONT_WEIGHT_NORMAL。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：字体粗细样式{@link ArkUI_FontWeight}，默认值为ARKUI_FONT_WEIGHT_NORMAL；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：字体粗细样式{@link ArkUI_FontWeight}；\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = ARKUI_FONT_WEIGHT_NORMAL} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_WEIGHT, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_FONT_WEIGHT, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_FONT_WEIGHT);
+     * auto nodeFontWeight = item->value[0].i32;
      * @endcode
      *
      */
@@ -1117,31 +1188,66 @@ typedef enum {
      */
     NODE_TEXT_LINE_HEIGHT,
     /**
-     * @brief 通过<b>setAttribute</b>为当前组件提供设置文本装饰线样式及其颜色。
+     * @brief 置文本装饰线样式及其颜色属性，支持属性设置，属性重置和属性获取接口。
      *
-     * @note 入参:type：String("none"，"underline"，"overline"，"line_through",
-     * "inherit"),color：String
-     * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_DECORATION, "overline #FF1122FF");
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：文本装饰线样式{@link ArkUI_TextDecorationType}，默认值为ARKUI_TEXT_DECORATION_TYPE_NONE；\n
+     * .value[1]?.u32：可选值，装饰线颜色，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：文本装饰线样式{@link ArkUI_TextDecorationType}；\n
+     * .value[1].u32：装饰线颜色，0xargb格式。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_TEXT_DECORATION_TYPE_NONE}, {.u32=0xFFFF0000} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_DECORATION, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_DECORATION);
+     * auto nodeDecorationStyle = item->value[0].i32;
+     * auto nodeDecorationColor = item->value[1].u32;
      * @endcode
+     *
      */
     NODE_TEXT_DECORATION,
     /**
-     * @brief 通过<b>setAttribute</b>为当前组件提供设置文本大小写。
+     * @brief 文本大小写属性，支持属性设置，属性重置和属性获取接口。
      *
-     * @note 入参:value：String("normal"，"lowercase"，"uppercase")
-     * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_CASE, "lowercase");
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：文本大小写样式{@link ArkUI_TextCase}，默认值为ARKUI_TEXT_CASE_NORMAL；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：文本大小写样式{@link ArkUI_TextCase}。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_TEXT_CASE_NORMAL} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_CASE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_CASE);
+     * auto nodeTextCase = item->value[0].i32;
      * @endcode
+     *
      */
     NODE_TEXT_CASE,
     /**
-     * @brief 通过<b>setAttribute</b>为当前组件提供设置文本字符间距。
+     * @brief 文本字符间距属性，支持属性设置，属性重置和属性获取接口。
      *
-     * @note 入参:value：number，默认单位fp
-     * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_LETTER_SPACING, "5");
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：文本字符间距数值，单位为fp；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：文本字符间距数值，单位为fp。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { 10 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_LETTER_SPACING, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_LETTER_SPACING);
+     * auto nodeTextLetterSpacing = item->value[0].f32;
      * @endcode
+     *
      */
     NODE_TEXT_LETTER_SPACING,
     /**
@@ -1154,15 +1260,21 @@ typedef enum {
      */
     NODE_TEXT_MAX_LINES,
     /**
-     * @brief 通过{@link setAttribute}方法设置字体水平对齐方式。
+     * @brief 字体水平对齐属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：水平对齐方式{@link ArkUI_TextAlign}，默认值为ARKUI_TEXT_ALIGN_START。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：水平对齐方式{@link ArkUI_TextAlign}，默认值为ARKUI_TEXT_ALIGN_START；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：水平对齐方式{@link ArkUI_TextAlign}。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = ARKUI_TEXT_ALIGN_START} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_ALIGN, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_ALIGN, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_ALIGN);
+     * auto nodeTextAlign = item->value[0].i32;
      * @endcode
      *
      */
@@ -1196,48 +1308,76 @@ typedef enum {
      *
      */
     NODE_FONT_FAMILY,
-
-     /**
-     * @brief Text复制粘贴属性，支持属性设置，属性重置和属性获取。
-     * 
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[0].i32：否可复制粘贴，参数类型{@link ArkUI_TextCopyOptions}。
+    /**
+     * @brief 文本复制粘贴属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：复制粘贴方式{@link ArkUI_CopyOptions}，默认值为ARKUI_COPY_OPTIONS_NONE；\n
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：否可复制粘贴，参数类型{@link ArkUI_TextCopyOptions}。
-     * 
-     * @code {.c}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_TEXT_COPY_OPTIONS_NONE } };
-     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_COPY_OPTION, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_COPY_OPTION);
-     * auto value = item->value[0].i32;
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：复制粘贴方式{@link ArkUI_CopyOptions}。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_COPY_OPTIONS_NONE} };
+     * ArkUI_AttributeItem item = { value, 1 };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_COPY_OPTION, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_COPY_OPTION);
+     * auto nodeTextCopyOption = item->value[0].i32;
      * @endcode
      *
      */
     NODE_TEXT_COPY_OPTION,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置文本基线的偏移量。
-     * @note 入参格式为数字类型字符串，如"20"，单位为fp。
+     * @brief 文本基线的偏移量属性，支持属性设置，属性重置和属性获取接口。
      *
-     * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_BASELINE_OFFSET, "20");
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：偏移量数值，单位为fp；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：偏移量数值，单位为fp。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { 10 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_BASELINE_OFFSET, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_BASELINE_OFFSET);
+     * auto nodeTextBaselineOffset = item->value[0].f32;
      * @endcode
+     *
      */
     NODE_TEXT_BASELINE_OFFSET,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置文字阴影效果。
+     * @brief 文字阴影效果属性，支持属性设置，属性重置和属性获取接口。
      *
-     * @note 入参格式为按照阴影模糊半径、阴影类型、阴影的颜色、阴影的X轴偏移量、阴影的Y轴偏移量顺序设置的字符串，\n
-     *  如"10 blur #FFFFFF00 10 10"，输入参数不足时，按照指定顺序填充，最多只识别前五个参数；\n
-     *  其中阴影类型可选范围为[color，blur]，如"color"。
-     *  多组阴影设置参数之间用","作为分割符。
-     * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_TEXT_SHADOW, "5 blur #FF008000 5 5");
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_TEXT_SHADOW, "5 blur #FF008000 5 5，10 color #FFFFFF00 10 10");
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：阴影模糊半径，单位为vp；\n
+     * .value[1].i32：阴影类型{@link ArkUI_ShadowType}，默认值为ARKUI_SHADOW_TYPE_COLOR；\n
+     * .value[2].u32：阴影颜色，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * .value[3].f32：阴影X轴偏移量，单位为vp；\n
+     * .value[4].f32：阴影Y轴偏移量，单位为vp；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：阴影模糊半径，单位为vp；\n
+     * .value[1].i32：阴影类型{@link ArkUI_ShadowType}；\n
+     * .value[2].u32：阴影颜色，0xargb格式；\n
+     * .value[3].f32：阴影X轴偏移量，单位为vp；\n
+     * .value[4].f32：阴影Y轴偏移量，单位为vp；\n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { 10, {.i32=ARKUI_SHADOW_TYPE_COLOR}, {.u32=0xFFFF0000}, 10, 10 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_TEXT_SHADOW, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_TEXT_SHADOW);
+     * auto nodeTextShadowRadius = item->value[0].f32;
+     * auto nodeTextShadowType = item->value[1].i32;
+     * auto nodeTextShadowColor = item->value[2].u32;
+     * auto nodeTextShadowOffsetX = item->value[3].f32;
+     * auto nodeTextShadowOffsetY = item->value[4].f32;
      * @endcode
+     *
      */
     NODE_TEXT_TEXT_SHADOW,
 
@@ -1415,273 +1555,394 @@ typedef enum {
     NODE_IMAGE_COLOR_FILTER,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置组件打开状态的背景颜色。
+     * @brief 组件打开状态的背景颜色属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：背景色数值，0xargb格式，形如 0xFFFF0000 表示红色。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：背景色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：背景色数值，0xargb格式。\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32=0xFFFF0000} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.u32=0xFFFF0000} };
      * ArkUI_AttributeItem item = { value, 1 };
      * basicNodeApi->setAttribute(nodeHandle, NODE_TOGGLE_SELECTED_COLOR, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TOGGLE_SELECTED_COLOR);
+     * auto nodeToggleSelectedColor = item->value[0].u32;
      * @endcode
      *
      */
     NODE_TOGGLE_SELECTED_COLOR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TOGGLE,
     /**
-     * @brief 通过{@link setAttribute}方法设置Switch类型的圆形滑块颜色。
+     * @brief Switch类型的圆形滑块颜色属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：圆形滑块颜色数值，0xargb格式，形如 0xFFFF0000 表示红色。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：圆形滑块颜色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：圆形滑块颜色数值，0xargb格式。\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32=0xFFFF0000} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.u32=0xFFFF0000} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TOGGLE_SWITCH_POINT_COLOR, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TOGGLE_SWITCH_POINT_COLOR, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TOGGLE_SWITCH_POINT_COLOR);
+     * auto nodeSwitchPointColor = item->value[0].u32;
      * @endcode
      *
      */
     NODE_TOGGLE_SWITCH_POINT_COLOR,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置加载进度条前景色。
+     * @brief 加载进度条前景色属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}参数类型：\n
-     * .data[0].i32： 进度条前景色，0xargb类型，默认值0x99666666。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：前景颜色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：前景颜色数值，0xargb格式。\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { { .i32 = 0x99666666 } };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { { .u32 = 0x99666666 } };
      * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LOADING_PROGRESS_COLOR, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_LOADING_PROGRESS_COLOR, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_LOADING_PROGRESS_COLOR);
+     * auto nodeLoadingProgressColor = item->value[0].u32;
      * @endcode
      *
      */
     NODE_LOADING_PROGRESS_COLOR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LOADING_PROGRESS,
     /**
-     * @brief 通过{@link setAttribute}方法设置LoadingProgress动画显示或者不显示。
+     * @brief LoadingProgress动画显示属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}参数类型：\n
-     * .value[0].i32： LoadingProgress动画显示或者不显示，默认值true。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：false时不显示动画，true时可以显示动画；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：0时不显示动画，1时可以显示动画。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { { .i32 = true } };
      * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LOADING_PROGRESS_ENABLE_LOADING, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_LOADING_PROGRESS_ENABLE_LOADING, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_LOADING_PROGRESS_ENABLE_LOADING);
+     * auto nodeLoadingProgressEnableLoading = item->value[0].i32;
      * @endcode
      */
     NODE_LOADING_PROGRESS_ENABLE_LOADING,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置单行文本输入框的默认提示文本内容。
+     * @brief 单行文本输入框的默认提示文本内容属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .string：默认提示文本的内容。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .string：默认提示文本的内容；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .string：默认提示文本的内容。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_AttributeItem item = { .string="input" };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER);
+     * auto nodeTextInputPlaceholder = item->string;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_PLACEHOLDER = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_INPUT,
     /**
-     * @brief 通过{@link setAttribute}方法设置单行文本输入框的默认文本内容。
+     * @brief 单行文本输入框的默认文本内容属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .string：默认文本的内容。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .string：默认文本的内容；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .string：默认文本的内容。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_AttributeItem item = { .string="input" };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_TEXT, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_TEXT, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_TEXT);
+     * auto nodeTextInputText = item->string;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_TEXT,
     /**
-     * @brief 通过{@link setAttribute}方法设置光标颜色。
+     * @brief 光标颜色属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：背景色数值，0xargb格式，形如 0xFFFF0000 表示红色。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：背景色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：背景色数值，0xargb格式。\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32=0xFFFF0000} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.u32=0xFFFF0000} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_CARET_COLOR, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_CARET_COLOR, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_CARET_COLOR);
+     * auto nodeTextInputCaretColor = item->value[0].u32;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_CARET_COLOR,
     /**
-     * @brief 通过{@link setAttribute}方法设置光标风格。
+     * @brief 光标风格属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].f32：光标宽度数值，单位为vp
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：光标宽度数值，单位为vp；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：光标宽度数值，单位为vp。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { 100 };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_CARET_STYLE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_CARET_STYLE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_CARET_STYLE);
+     * auto nodeTextInputCaretStyle = item->value[0].f32;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_CARET_STYLE,
     /**
-     * @brief 通过{@link setAttribute}方法设置组件是否展示下划线，设置为true则显示。
+     * @brief 单行文本输入框下划线属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * value[0].i32：false表示不展示下划线，true表示展示下划线。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：false表示不展示下划线，true表示展示下划线；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：0表示不展示下划线，1表示展示下划线。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = true} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_SHOW_UNDERLINE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_SHOW_UNDERLINE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_SHOW_UNDERLINE);
+     * auto nodeTextInputUnderline = item->value[0].i32;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_SHOW_UNDERLINE,
     /**
-     * @brief 通过{@link setAttribute}方法设置输入框支持的最大文本数。
+     * @brief 输入框支持的最大文本数属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * value[0].i32：最大文本数的数字，无单位。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：最大文本数的数字，无单位；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：最大文本数的数字。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { { .i32 = 50 } };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_MAX_LENGTH, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_MAX_LENGTH, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_MAX_LENGTH);
+     * auto nodeTextInputMaxlength = item->value[0].i32;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_MAX_LENGTH,
     /**
-     * @brief 通过{@link setAttribute}方法设置回车键类型。
+     * @brief 回车键类型属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：回车键类型枚举{@link ArkUI_EnterKeyType}，默认值为ARKUI_ENTER_KEY_TYPE_DONE。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：回车键类型枚举{@link ArkUI_EnterKeyType}，默认值为ARKUI_ENTER_KEY_TYPE_DONE；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：回车键类型枚举{@link ArkUI_EnterKeyType}。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = ARKUI_ENTER_KEY_TYPE_DONE} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_ENTER_KEY_TYPE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_ENTER_KEY_TYPE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_ENTER_KEY_TYPE);
+     * auto nodeTextInputMaxlength = item->value[0].i32;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_ENTER_KEY_TYPE,
     /**
-     * @brief 通过{@link setAttribute}方法设置无输入时默认提示文本的颜色。
+     * @brief 无输入时默认提示文本的颜色属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：颜色数值，0xargb格式，形如 0xFFFF0000 表示红色。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式。\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32=0xFFFF0000} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.u32=0xFFFF0000} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER_COLOR, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER_COLOR, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER_COLOR);
+     * auto nodeTextInputPlaceholderColor = item->value[0].u32;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_PLACEHOLDER_COLOR,
     /**
-     * @brief 通过{@link setAttribute}方法设置无输入时默认提示文本的字体配置（包括大小、字重、样式、字体列表）。
+     * @brief 无输入时默认提示文本的字体配置（包括大小、字重、样式、字体列表）属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
      * .value[0]?.f32：可选字体大小数值，默认值16.0，单位为fp；\n
      * .value[1]?.i32：可选字体样式{@link ArkUI_FontStyle}，默认值为ARKUI_FONT_STYLE_NORMAL；\n
      * .value[2]?.i32：可选字体粗细样式{@link ArkUI_FontWeight}，默认值为ARKUI_FONT_WEIGHT_NORMAL；\n
-     * ?.string: 字体族内容，多个字体族之间使用逗号分隔，形如“字重；字体族1，字体族2”。
+     * ?.string: 字体族内容，多个字体族之间使用逗号分隔，形如“字重；字体族1，字体族2”；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：字体大小数值，单位为fp；\n
+     * .value[1].i32：字体样式{@link ArkUI_FontStyle}；\n
+     * .value[2].i32：字体粗细样式{@link ArkUI_FontWeight}；\n
+     * .string: 字体族内容，多个字体族之间使用逗号分隔。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = \n
      * { 16.0, {.i32=ARKUI_FONT_STYLE_NORMAL}, {.i32=ARKUI_FONT_WEIGHT_NORMAL} };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue), "Arial" };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER_FONT, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER_FONT, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER_FONT);
+     * auto nodeTextInputPlaceholderFontSize = item->value[0].f32;
+     * auto nodeTextInputPlaceholderFontStyle = item->value[1].i32;
+     * auto nodeTextInputPlaceholderFontWeight = item->value[2].i32;
+     * auto nodeTextInputPlaceholderFontFamily = item->string;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_PLACEHOLDER_FONT,
     /**
-     * @brief 通过{@link setAttribute}方法设置当通过点击以外的方式聚焦时是否绑定输入法。
+     * @brief 聚焦时是否绑定输入法属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * value[0].i32：false表示聚焦不拉起输入法，true表示拉起。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：false表示聚焦不拉起输入法，true表示拉起；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：0表示聚焦不拉起输入法，1表示拉起。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = true} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_ENABLE_KEYBOARD_ON_FOCUS, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_ENABLE_KEYBOARD_ON_FOCUS, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_ENABLE_KEYBOARD_ON_FOCUS);
+     * auto nodeTextInputFocusKeyboard = item->value[0].i32;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_ENABLE_KEYBOARD_ON_FOCUS,
     /**
-     * @brief 通过{@link setAttribute}方法设置输入框的类型。
+     * @brief 输入框的类型属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：输入框类型枚举{@link ArkUI_TextInputType}，默认值为ARKUI_TEXTINPUT_TYPE_NORMAL。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：输入框类型枚举{@link ArkUI_TextInputType}，默认值为ARKUI_TEXTINPUT_TYPE_NORMAL；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：输入框类型枚举{@link ArkUI_TextInputType}。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = ARKUI_TEXTINPUT_TYPE_NORMAL} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_TYPE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_TYPE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_TYPE);
+     * auto nodeTextInputType = item->value[0].i32;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_TYPE,
     /**
-     * @brief 通过{@link setAttribute}方法设置文本选中时的背景色。
+     * @brief 输入框文本选中时的背景色属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：颜色数值，0xargb格式，形如 0xFFFF0000 表示红色。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式。\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32=0xFFFF0000} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.u32=0xFFFF0000} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_SELECTED_BACKGROUND_COLOR, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_SELECTED_BACKGROUND_COLOR, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_SELECTED_BACKGROUND_COLOR);
+     * auto nodeTextInputSelectedColor = item->value[0].u32;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_SELECTED_BACKGROUND_COLOR,
     /**
-     * @brief 通过{@link setAttribute}方法设置密码输入模式时是否显示末尾图标。
+     * @brief 密码输入模式时是否显示末尾图标属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * value[0].i32：false表示不显示图标，true表示显示图标。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：false表示不显示图标，true表示显示图标；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：0表示不显示图标，1表示显示图标。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = true} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_SHOW_PASSWORD_ICON, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_SHOW_PASSWORD_ICON, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_SHOW_PASSWORD_ICON);
+     * auto nodeTextInputPasswordIcon = item->value[0].i32;
      * @endcode
      *
      */
     NODE_TEXT_INPUT_SHOW_PASSWORD_ICON,
     /**
-     * @brief 通过{@link setAttribute}方法用于控制单行文本输入框编辑态。
+     * @brief 控制单行文本输入框编辑态属性，支持属性设置。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * value[0].i32：false表示退出编辑态，true表示维持现状。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：false表示退出编辑态，true表示维持现状。
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = false} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_EDITING, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_EDITING, &item);
      * @endcode
      *
      */
     NODE_TEXT_INPUT_EDITING,
     /**
-     * @brief 通过{@link setAttribute}方法设置单行文本右侧清除按钮样式。
+     * @brief 单行文本右侧清除按钮样式属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * value[0].i32：按钮样式{@link ArkUI_CancelButtonStyle}，默认值为ARKUI_CANCELBUTTON_STYLE_INPUT；\n
-     * value[1]?.f32：图标大小数值，单位为vp；\n
-     * value[2]?.i32：按钮图标颜色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
-     * ?.string：按钮图标地址，入参内容为图片本地地址，例如 /pages/icon.png。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：按钮样式{@link ArkUI_CancelButtonStyle}，默认值为ARKUI_CANCELBUTTON_STYLE_INPUT；\n
+     * .value[1]?.f32：图标大小数值，单位为vp；\n
+     * .value[2]?.u32：按钮图标颜色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * ?.string：按钮图标地址，入参内容为图片本地地址，例如 /pages/icon.png；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：按钮样式{@link ArkUI_CancelButtonStyle}；\n
+     * .value[1].f32：图标大小数值，单位为vp；\n
+     * .value[2].u32：按钮图标颜色数值，0xargb格式；\n
+     * .string：按钮图标地址；\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32=ARKUI_CANCELBUTTON_STYLE_INPUT}, 10.0, {.i32=0xFFFF0000} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.i32=ARKUI_CANCELBUTTON_STYLE_INPUT}, 10.0, {.u32=0xFFFF0000} };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue), "/pages/icon.png" };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_CANCEL_BUTTON, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_CANCEL_BUTTON, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_INPUT_CANCEL_BUTTON);
+     * auto nodeCancelButtonStyle = item->value[0].i32;
+     * auto nodeCancelButtonSize = item->value[1].f32;
+     * auto nodeCancelButtonColor = item->value[2].u32;
+     * auto nodeCancelButtonImage = item->string;
      * @endcode
      *
      */
@@ -2222,214 +2483,306 @@ typedef enum {
     NODE_SWIPER_SHOW_DISPLAY_ARROW,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置多行文本输入框的默认提示文本内容。
+     * @brief 多行文本输入框的默认提示文本内容属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .string：默认提示文本的内容。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .string：默认提示文本的内容；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .string：默认提示文本的内容。\n
      *
-     * @code {.c}
-     * ArkUI_AttributeItem item = { .string="multi-input" };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_PLACEHOLDER, &item);
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_AttributeItem item = { .string="input" };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_PLACEHOLDER, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_AREA_PLACEHOLDER);
+     * auto nodeTextAreaPlaceholder = item->string;
      * @endcode
      *
      */
     NODE_TEXT_AREA_PLACEHOLDER = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_AREA,
     /**
-     * @brief 通过{@link setAttribute}方法设置多行文本输入框的默认文本内容。
+     * @brief 多行文本输入框的默认文本内容属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .string：默认文本的内容。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .string：默认文本的内容；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .string：默认文本的内容。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_AttributeItem item = { .string="input" };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_TEXT, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_TEXT, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_AREA_TEXT);
+     * auto nodeTextAreaText = item->string;
      * @endcode
      *
      */
     NODE_TEXT_AREA_TEXT,
     /**
-     * @brief 通过{@link setAttribute}方法设置多行输入框支持的最大文本数。
+     * @brief 输入框支持的最大文本数属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * value[0].i32：最大文本数的数字，无单位。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：最大文本数的数字，无单位；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：最大文本数的数字。\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32 = 50} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { { .i32 = 50 } };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_MAX_LENGTH, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_MAX_LENGTH, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_AREA_MAX_LENGTH);
+     * auto nodeTextAreaMaxlength = item->value[0].i32;
      * @endcode
      *
      */
     NODE_TEXT_AREA_MAX_LENGTH,
     /**
-     * @brief 通过{@link setAttribute}方法设置无输入时默认提示文本的颜色。
+     * @brief 无输入时默认提示文本的颜色属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：颜色数值，0xargb格式，形如 0xFFFF0000 表示红色。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式。\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32=0xFFFF0000} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.u32=0xFFFF0000} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_PLACEHOLDER_COLOR, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_PLACEHOLDER_COLOR, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_AREA_PLACEHOLDER_COLOR);
+     * auto nodeTextAreaPlaceholderColor = item->value[0].u32;
      * @endcode
      *
      */
     NODE_TEXT_AREA_PLACEHOLDER_COLOR,
     /**
-     * @brief 通过{@link setAttribute}方法设置无输入时默认提示文本的字体配置（包括大小、字重、样式、字体列表）。
+     * @brief 无输入时默认提示文本的字体配置（包括大小、字重、样式、字体列表）属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
      * .value[0]?.f32：可选字体大小数值，默认值16.0，单位为fp；\n
      * .value[1]?.i32：可选字体样式{@link ArkUI_FontStyle}，默认值为ARKUI_FONT_STYLE_NORMAL；\n
      * .value[2]?.i32：可选字体粗细样式{@link ArkUI_FontWeight}，默认值为ARKUI_FONT_WEIGHT_NORMAL；\n
-     * ?.string: 字体族内容，多个字体族之间使用逗号分隔，形如“字重；字体族1，字体族2”。
+     * ?.string: 字体族内容，多个字体族之间使用逗号分隔，形如“字重；字体族1，字体族2”；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：字体大小数值，单位为fp；\n
+     * .value[1].i32：字体样式{@link ArkUI_FontStyle}；\n
+     * .value[2].i32：字体粗细样式{@link ArkUI_FontWeight}；\n
+     * .string: 字体族内容，多个字体族之间使用逗号分隔。\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = \n
-     * { 16.0, {.i32=ARKUI_FONT_STYLE_NORMAL}, {.i32=ARKUI_FONT_WEIGHT_NORMAL} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { 16.0, {.i32=ARKUI_FONT_STYLE_NORMAL}, {.i32=ARKUI_FONT_WEIGHT_NORMAL} };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue), "Arial" };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_PLACEHOLDER_FONT, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_PLACEHOLDER_FONT, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_AREA_PLACEHOLDER_FONT);
+     * auto nodeTextAreaPlaceholderFontSize = item->value[0].f32;
+     * auto nodeTextAreaPlaceholderFontStyle = item->value[1].i32;
+     * auto nodeTextAreaPlaceholderFontWeight = item->value[2].i32;
+     * auto nodeTextAreaPlaceholderFontFamily = item->string;
      * @endcode
      *
      */
     NODE_TEXT_AREA_PLACEHOLDER_FONT,
     /**
-     * @brief 通过{@link setAttribute}方法设置光标颜色。
+     * @brief 光标颜色属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：背景色数值，0xargb格式，形如 0xFFFF0000 表示红色。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：背景色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：背景色数值，0xargb格式。\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32=0xFFFF0000} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.u32=0xFFFF0000} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_CARET_COLOR, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_CARET_COLOR, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_AREA_CARET_COLOR);
+     * auto nodeTextAreaCaretColor = item->value[0].u32;
      * @endcode
      *
      */
     NODE_TEXT_AREA_CARET_COLOR,
     /**
-     * @brief 通过{@link setAttribute}方法用于控制多行文本输入框编辑态。
+     * @brief 控制多行文本输入框编辑态属性，支持属性设置。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * value[0].i32：false表示退出编辑态，true表示维持现状。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：false表示退出编辑态，true表示维持现状。
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = false} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_EDITING, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_EDITING, &item);
      * @endcode
      *
      */
     NODE_TEXT_AREA_EDITING,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置button按钮的文本内容。
+     * @brief button按钮的文本内容属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .string：默认文本的内容。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .string：默认文本的内容；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .string：默认文本的内容。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_AttributeItem item = { .string="click" };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BUTTON_LABEL, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_BUTTON_LABEL, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_BUTTON_LABEL);
+     * auto nodeButtonLabelr = item->string;
      * @endcode
      *
      */
     NODE_BUTTON_LABEL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_BUTTON,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置进度条的当前进度值。
+     * @brief 进度条的当前进度值属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * value[0].f32：进度条当前值。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：进度条当前值；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：进度条当前值。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { 10 };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_PROGRESS_VALUE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_PROGRESS_VALUE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_PROGRESS_VALUE);
+     * auto nodeProgressValue = item->value[0].f32;
      * @endcode
      *
      */
     NODE_PROGRESS_VALUE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_PROGRESS,
     /**
-     * @brief 通过{@link setAttribute}方法设置进度条的总长。
+     * @brief 进度条的总长属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * value[0].f32：进度条总长。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：进度条总长；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：进度条总长。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { 100 };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_PROGRESS_TOTAL, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_PROGRESS_TOTAL, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_PROGRESS_TOTAL);
+     * auto nodeProgressTotal = item->value[0].f32;
      * @endcode
      *
      */
     NODE_PROGRESS_TOTAL,
     /**
-     * @brief 通过{@link setAttribute}方法设置进度条显示进度值的颜色。
+     * @brief 进度条显示进度值的颜色属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：颜色数值，0xargb格式，形如 0xFFFF0000 表示红色。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式。\n
      *
-     * @code {.c}
-     * ArkUI_NumberValue value[] = { {.i32=0xFFFF0000} };
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.u32=0xFFFF0000} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_PROGRESS_COLOR, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_PROGRESS_COLOR, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_PROGRESS_COLOR);
+     * auto nodeProgressColor = item->value[0].u32;
      * @endcode
      *
      */
     NODE_PROGRESS_COLOR,
     /**
-     * @brief 通过{@link setAttribute}方法设置进度条的类型。
+     * @brief 进度条的类型属性，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：进度条类型枚举值{@link ArkUI_ProgressType}，默认值为ARKUI_PROGRESS_LINEAR。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：进度条类型枚举值{@link ArkUI_ProgressType}，默认值为ARKUI_PROGRESS_LINEAR；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：进度条类型枚举值{@link ArkUI_ProgressType}。\n
      *
      * @code {.c}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32=ARKUI_PROGRESS_LINEAR} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_PROGRESS_TYPE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_PROGRESS_TYPE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_PROGRESS_TYPE);
+     * auto nodeProgressType = item->value[0].i32;
      * @endcode
      */
     NODE_PROGRESS_TYPE,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置XComponent组件ID。
+     * @brief XComponent组件ID属性，支持属性设置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * string: ID的内容。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .string: ID的内容；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .string: ID的内容。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_AttributeItem item = { .string = "test" };
      * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_ID, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_XCOMPONENT_ID);
+     * auto nodeXcomponentId = item->string;
      * @endcode
      *
      */
     NODE_XCOMPONENT_ID = MAX_NODE_SCOPE_NUM * ARKUI_NODE_XCOMPONENT,
     /**
-     * @brief 通过{@link setAttribute}方法设置XComponent的类型。
+     * @brief XComponent的类型，支持属性设置，属性重置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].i32：字体样式{@link ArkUI_XComponentType}，默认值为ARKUI_XCOMPONENT_TYPE_SURFACE。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：字体样式{@link ArkUI_XComponentType}，默认值为ARKUI_XCOMPONENT_TYPE_SURFACE；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：字体样式{@link ArkUI_XComponentType}。\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32 = ARKUI_XCOMPONENT_TYPE_SURFACE} };
      * ArkUI_AttributeItem item = { value, 1 };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_TYPE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_TYPE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_XCOMPONENT_TYPE);
+     * auto nodeXcomponentType = item->value[0].i32;
      * @endcode
      *
      */
     NODE_XCOMPONENT_TYPE,
     /**
-     * @brief 通过{@link setAttribute}方法设置XComponent的宽高。
+     * @brief 设置XComponent的宽高，支持属性设置和获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
      * .value[0].f32：宽数值，单位为vp；\n
-     * .value[1].f32：高数值，单位为vp。
+     * .value[1].f32：高数值，单位为vp；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：宽数值，单位为vp；\n
+     * .value[1].f32：高数值，单位为vp；\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { 300, 50 };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE);
+     * auto nodeXcomponentSurfaceWidth = item->value[0].f32;
+     * auto nodeXcomponentSurfaceHeight = item->value[1].f32;
      * @endcode
      *
      */
@@ -2658,49 +3011,73 @@ typedef enum {
     NODE_TIME_PICKER_SELECTED_TEXT_STYLE,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置滑动选择文本选择器的选择列表。
+     * @brief 滑动选择文本选择器的选择列表, 支持属性设置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
      * .value[0].i32：使用的选择器类型{@link ArkUI_TextPickerRangeType}，默认值为ARKUI_TEXTPICKER_RANGETYPE_SINGLE；\n
      * ?.string：针对不同选择器类型有如下输入范式：\n
      * 1：单列选择器，入参格式为用分号分隔的一组字符串；\n
      * 2：多列选择器，支持多对纯文本字符串对，多对之间使用分号分隔，每对内部使用逗号分隔；\n
      * ?.object：针对不同选择器类型有如下输入范式：\n
      * 1：单列支持图片的选择器，输入结构体为{@link ARKUI_TextPickerRangeContent}；\n
-     * 2：多列联动选择器，输入结构体为{@link ARKUI_TextPickerCascadeRangeContent}。
+     * 2：多列联动选择器，输入结构体为{@link ARKUI_TextPickerCascadeRangeContent}；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：使用的选择器类型{@link ArkUI_TextPickerRangeType}；\n
+     * ?.string：针对不同选择器类型有如下输出范式：\n
+     * 1：单列选择器，输出格式为用分号分隔的一组字符串；\n
+     * 2：多列选择器，输出多对纯文本字符串对，多对之间使用分号分隔，每对内部使用逗号分隔；\n
+     * ?.object：针对不同选择器类型有如下输出范式：\n
+     * 1：单列支持图片的选择器，输出结构体为{@link ARKUI_TextPickerRangeContent}；\n
+     * 2：多列联动选择器，输出结构体为{@link ARKUI_TextPickerCascadeRangeContent}；\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.i32=ARKUI_TEXTPICKER_RANGETYPE_MULTI} };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue), "1,2,3;A,B,C" };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_OPTION_RANGE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_OPTION_RANGE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_PICKER_OPTION_RANGE);
+     * auto nodeTextPickerRangeType = item->value[0].i32;
+     * auto nodeTextPickerMultiRange = item->string;
      * @endcode
      *
      */
     NODE_TEXT_PICKER_OPTION_RANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_PICKER,
     /**
-     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件默认选中项在数组中的索引值。
+     * @brief 滑动选择文本内容的组件默认选中项在数组中的索引值，支持属性设置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .value[0].u32：索引值，如存在多个索引值则逐个添加。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：索引值，如存在多个索引值则逐个添加；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：索引值，如存在多个索引值则逐个添加；\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { {.u32 = 1}, {.u32 = 2} };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_OPTION_SELECTED, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_OPTION_SELECTED, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_PICKER_OPTION_SELECTED);
+     * auto nodeTextPickerSelected = item->value[0].u32;
      * @endcode
      *
      */
     NODE_TEXT_PICKER_OPTION_SELECTED,
     /**
-     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件默认选中项的值，优先级低于
-     * NODE_TEXT_PICKER_OPTION_SELECTED。
+     * @brief 滑动选择文本内容的组件默认选中项的值，支持属性设置和属性获取接口。
      *
-     * {@link ArkUI_AttributeItem}入参格式：\n
-     * .string：选中项的值，如存在多个值则逐个添加，用分号分隔。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .string：选中项的值，如存在多个值则逐个添加，用分号分隔；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .string：选中项的值，如存在多个值则逐个添加，用分号分隔；\n
      *
-     * @code {.c}
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_AttributeItem item = { .string = "A;B" };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_OPTION_VALUE, &item);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_OPTION_VALUE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_PICKER_OPTION_VALUE);
+     * auto nodeTextPickerValue = item->string;
      * @endcode
      *
      */
@@ -3243,11 +3620,14 @@ typedef enum {
     NODE_EVENT_ON_ON_AREA_CHANGE,
     NODE_ON_FOCUS,
     NODE_ON_BLUR,
+    NODE_ON_CLICK,
 
     NODE_TOGGLE_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TOGGLE,
 
     NODE_TEXT_INPUT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_INPUT,
     NODE_TEXT_INPUT_ON_SUBMIT,
+    NODE_TEXT_INPUT_ON_CUT,
+    NODE_TEXT_INPUT_ON_PASTE,
 
     /**
      * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动事件枚举值。
@@ -3339,6 +3719,17 @@ typedef enum {
     NODE_TIME_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TIME_PICKER,
 
     /**
+     * @brief 定义ARKUI_NODE_TEXT_PICKER 列表组件的滚动触摸事件枚举值。
+     *
+     * 触发该事件的条件 ：选择时间时触发该事件。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>::ArkUI_NodeComponentEvent</b>中包含2个参数。\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>表示 选中时间的时，取值范围：[0-23]。\n
+     * <b>ArkUI_NodeComponent.data[1].i32</b>表示 选中时间的分，取值范围：[0-59]。\n
+     */
+    NODE_TEXT_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_PICKER,
+
+    /**
      * @brief 定义ARKUI_NODE_CHECKBOX当选中状态发生变化时，触发该回调。
      *
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
@@ -3353,7 +3744,7 @@ typedef enum {
      * <b>ArkUI_NodeComponent.data[1].i32</b>事件触发的相关状态值\n
      */
     NODE_SLIDER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SLIDER,
-
+    
 } ArkUI_NodeEventType;
 
 /**
