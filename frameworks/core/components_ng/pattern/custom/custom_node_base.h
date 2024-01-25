@@ -49,7 +49,6 @@ public:
         if (destroyFunc_) {
             destroyFunc_();
         }
-        executeFireOnAppear_ = false;
     }
 
     virtual void SetRenderFunction(const RenderFunction& renderFunction) {}

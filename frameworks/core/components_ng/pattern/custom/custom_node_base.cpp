@@ -29,7 +29,7 @@ CustomNodeBase::~CustomNodeBase()
     if (!executeFireOnAppear_ && appearFunc_) {
         appearFunc_();
     }
-    if (!executeFireOnAppear_ && destroyFunc_) {
+    if (destroyFunc_) {
         destroyFunc_();
     }
 }
