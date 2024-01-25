@@ -608,13 +608,7 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
                 } else {
                     frameSize = previewSize;
                 }
-
-                if (LessOrEqual(frameSize.Width(), maxWidth)) {
-                    geometryNode->SetFrameSize(SizeF(frameSize.Width(), frameSize.Height()));
-                } else {
-                    auto maxHeight = frameSize.Height() / frameSize.Width() * maxWidth;
-                    geometryNode->SetFrameSize(SizeF(maxWidth, maxHeight));
-                }
+                geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
             } else {
                 geometryNode->SetFrameSize(frameSize);
             }
