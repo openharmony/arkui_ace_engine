@@ -271,6 +271,44 @@ typedef enum {
     ARKUI_PROGRESS_CAPSULE,
 }ArkUI_ProgressType;
 
+typedef enum {
+    /** 不使用装饰线。*/
+    ARKUI_TEXT_DECORATION_TYPE_NONE = 0,
+    /** 文字下划线修饰。*/
+    ARKUI_TEXT_DECORATION_TYPE_UNDERLINE,
+    /** 文字上划线修饰。*/
+    ARKUI_TEXT_DECORATION_TYPE_OVERLINE,
+    /** 穿过文本的修饰线。*/
+    ARKUI_TEXT_DECORATION_TYPE_LINETHROUGH,
+} ArkUI_TextDecorationType;
+
+typedef enum {
+    /** 保持原有大小写。*/
+    ARKUI_TEXT_CASE_NORMAL = 0,
+    /** 文本全小写。*/
+    ARKUI_TEXT_CASE_LOWER,
+    /** 文本全大写。*/
+    ARKUI_TEXT_CASE_UPPER,
+} ArkUI_TextCase;
+
+typedef enum {
+    /** 不支持复制。*/
+    ARKUI_COPY_OPTIONS_NONE = 0,
+    /** 支持应用内复制。*/
+    ARKUI_COPY_OPTIONS_IN_APP,
+    /** 支持设备内复制。*/
+    ARKUI_COPY_OPTIONS_LOCAL_DEVICE,
+    /** 支持跨设备复制。*/
+    ARKUI_COPY_OPTIONS_CROSS_DEVICE,
+} ArkUI_CopyOptions;
+
+typedef enum {
+    /** 颜色。*/
+    ARKUI_SHADOW_TYPE_COLOR = 0,
+    /** 模糊。*/
+    ARKUI_SHADOW_TYPE_BLUR
+} ArkUI_ShadowType;
+
 /**
  * @brief 定义滑动选择文本选择器输入类型。
  *
@@ -280,11 +318,11 @@ typedef enum {
     /** 单列数据选择器。*/
     ARKUI_TEXTPICKER_RANGETYPE_SINGLE = 0,
     /** 多列数据选择器。*/
-    ARKUI_TEXTPICKER_RANGETYPE_MULTI = 0,
+    ARKUI_TEXTPICKER_RANGETYPE_MULTI,
     /** 支持图片资源的单列数据选择器。*/
-    ARKUI_TEXTPICKER_RANGETYPE_RANGE_C0NTENT = 0,
+    ARKUI_TEXTPICKER_RANGETYPE_RANGE_C0NTENT,
     /** 支持联动的多列数据选择器。*/
-    ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT = 0,
+    ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT,
 } ArkUI_TextPickerRangeType;
 
 /**
