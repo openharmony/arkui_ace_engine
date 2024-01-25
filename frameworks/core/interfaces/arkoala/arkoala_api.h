@@ -1380,6 +1380,8 @@ struct ArkUIScrollModifier {
     void (*resetEnableScrollInteraction)(ArkUINodeHandle node);
     void (*setScrollTo)(ArkUINodeHandle node, const ArkUI_Float32* values);
     void (*setScrollEdge)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetScrollTo)(ArkUINodeHandle node);
+    void (*resetScrollEdge)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemModifier {

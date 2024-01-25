@@ -22,6 +22,7 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "core/components/scroll/scroll_position_controller.h"
 #include "core/animation/curves.h"
+#include <vector>
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -39,6 +40,8 @@ constexpr int32_t SCROLL_TO_INDEX_3 = 3;
 constexpr int32_t SCROLL_TO_INDEX_4 = 4;
 constexpr int32_t SCROLL_TO_INDEX_5 = 5;
 constexpr int32_t SCROLL_TO_INDEX_6 = 6;
+constexpr float DEFAULT_OFFSET_VALUE = 0.0;
+
 const std::vector<RefPtr<Curve>> CurvesVector = { Curves::LINEAR, Curves::EASE, Curves::EASE_IN,
     Curves::EASE_OUT, Curves::EASE_IN_OUT, Curves::FAST_OUT_SLOW_IN, Curves::LINEAR_OUT_SLOW_IN,
     Curves::FAST_OUT_LINEAR_IN, Curves::EXTREME_DECELERATION, Curves::SHARP, Curves::RHYTHM,
@@ -278,6 +281,16 @@ void SetScrollEdge(ArkUINodeHandle node, ArkUI_Int32 value)
     scrollControllerBase->ScrollToEdge(static_cast<ScrollEdgeType>(value), true);
 }
 
+void ResetScrollTo(ArkUINodeHandle node)
+{
+    std::vector<float> values = { DEFAULT_OFFSET_VALUE, DEFAULT_OFFSET_VALUE };
+    SetScrollTo(node, values.data());
+}
+
+void ResetScrollEdge(ArkUINodeHandle node)
+{
+    SetScrollEdge(node, DEFAULT_SNAP_ALIGN_VALUE);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -307,6 +320,9 @@ const ArkUIScrollModifier* GetScrollModifier()
         ResetEnableScrollInteraction,
         SetScrollTo,
         SetScrollEdge,
+        ResetScrollTo,
+        ResetScrollEdge
+
     };
     /* clang-format on */
     return &modifier;

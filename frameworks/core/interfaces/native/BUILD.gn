@@ -80,6 +80,8 @@ template("ace_core_interfaces_native_node") {
       "node/node_text_input_modifier.cpp",
       "node/node_text_modifier.cpp",
       "node/node_toggle_modifier.cpp",
+      "node/node_slider_modifier.cpp",
+      "node/node_checkbox_modifier.cpp",
       "node/panel_modifier.cpp",
       "node/path_modifier.cpp",
       "node/pattern_lock_modifier.cpp",

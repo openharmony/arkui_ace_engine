@@ -1434,7 +1434,7 @@ typedef enum {
      * .value[1]?.i32：可选值，文本的字体粗细，参数类型{@link ArkUI_FontWeight}。
      * 默认值为ARKUI_FONT_WEIGHT_NORMAL。 \n
      * .value[2]?.i32：可选值，字体样式，参数类型{@link ArkUI_FontStyle}。
-     *  默认值为ARKUI_TEXT_FONT_STYLE_NORMAL。
+     *  默认值为ARKUI_FONT_STYLE_NORMAL。
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
      * .string?：可选值 字体列表，使用多个字体，使用','进行分割。 \n
@@ -1442,13 +1442,13 @@ typedef enum {
      * .value[1]?.i32：可选值，文本的字体粗细，参数类型{@link ArkUI_FontWeight}。
      * 默认值为ARKUI_FONT_WEIGHT_NORMAL。 \n
      * .value[2]?.i32：可选值，字体样式，参数类型{@link ArkUI_FontStyle}。
-     *  默认值为ARKUI_TEXT_FONT_STYLE_NORMAL。
+     *  默认值为ARKUI_FONT_STYLE_NORMAL。
      * 
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { 16, { .i32 = ARKUI_FONT_STYLE_NORMAL },
-     * { .i32 = ARKUI_TEXT_FONT_STYLE_NORMAL } };
+     * { .i32 = ARKUI_FONT_STYLE_NORMAL } };
      * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_FONT, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_FONT);
