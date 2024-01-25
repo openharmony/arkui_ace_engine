@@ -1111,6 +1111,8 @@ public:
         return false;
     }
 
+    virtual void CheckVirtualKeyboardHeight() {}
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
