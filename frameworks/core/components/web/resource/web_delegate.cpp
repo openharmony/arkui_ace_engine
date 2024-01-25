@@ -3371,6 +3371,38 @@ void WebDelegate::UpdateDefaultFixedFontSize(int32_t defaultFixedFontSize)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::OnConfigurationUpdated(const std::string& colorMode)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+
+    executor->PostTask(
+        [weak = WeakClaim(this), colorMode]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto nweb = delegate->GetNweb();
+            CHECK_NULL_VOID(nweb);
+            auto setting = nweb->GetPreference();
+            CHECK_NULL_VOID(setting);
+
+            if (colorMode == "dark") {
+                setting->PutDarkSchemeEnabled(true);
+                if (delegate->GetForceDarkMode()) {
+                    setting->PutForceDarkModeEnabled(true);
+                }
+                return;
+            }
+            if (colorMode == "light") {
+                setting->PutDarkSchemeEnabled(false);
+                setting->PutForceDarkModeEnabled(false);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::UpdateDefaultFontSize(int32_t defaultFontSize)
 {
     auto context = context_.Upgrade();
