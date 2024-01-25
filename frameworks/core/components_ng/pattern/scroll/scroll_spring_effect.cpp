@@ -53,4 +53,21 @@ void ScrollSpringEffect::ProcessScrollOver(double velocity)
         position, velocity, ExtentPair(minExtent, maxExtent), ExtentPair(initMinExtent, initMaxExtent));
 }
 
+void ScrollSpringEffect::ProcessSpringUpdate()
+{
+    if (!currentPositionCallback_ || !leadingCallback_ || !trailingCallback_ || !initLeadingCallback_ ||
+        !initTrailingCallback_ || !scrollable_) {
+        return;
+    }
+    double position = currentPositionCallback_();
+    double minExtent = leadingCallback_();
+    double maxExtent = trailingCallback_();
+    double initMinExtent = initLeadingCallback_();
+    double initMaxExtent = initTrailingCallback_();
+    if (!scrollable_->Available() && minExtent < 0.0) {
+        minExtent = 0.0;
+    }
+    scrollable_->UpdateSpringMotion(
+        position, ExtentPair(minExtent, maxExtent), ExtentPair(initMinExtent, initMaxExtent));
+}
 } // namespace OHOS::Ace::NG
