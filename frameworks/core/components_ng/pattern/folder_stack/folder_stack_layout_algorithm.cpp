@@ -264,6 +264,14 @@ void FolderStackLayoutAlgorithm::AdjustNodeTree(const RefPtr<FolderStackGroupNod
 {
     auto hoverNode = hostNode->GetHoverNode();
     auto controlPartsStackNode = hostNode->GetControlPartsStackNode();
+    auto isChangeItemId = hostNode->GetIsChangeItemId();
+    if (isChangeItemId) {
+        hostNode->SetIsChangeItemId(false);
+    } else if ((!isIntoFolderStack_ && hoverNode->GetChildren().size() == 0) ||
+        (isIntoFolderStack_ && hoverNode->GetChildren().size() > 0)) {
+        return;
+    }
+
     for (auto& hover : hoverNode->GetChildren()) {
         hoverNode->RemoveChild(hover);
     }
