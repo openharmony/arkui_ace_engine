@@ -24,7 +24,7 @@ namespace OHOS::Ace::Framework {
 
 void JSContextMenu::Close(const JSCallbackInfo& args)
 {
-    auto scopedDelegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
         LOGE("scopedDelegate is null, please check");
@@ -38,7 +38,7 @@ void JSContextMenu::Close(const JSCallbackInfo& args)
     }
 #elif !defined(NG_BUILD)
     // Close context menu.
-    auto container = Container::CurrentWithoutScope();
+    auto container = Container::CurrentSafely();
     if (container) {
         auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
         auto executor = container->GetTaskExecutor();

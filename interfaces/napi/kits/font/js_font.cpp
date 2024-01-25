@@ -95,7 +95,7 @@ static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
 
     std::string bundleName = resourceInfo.bundleName.has_value() ? resourceInfo.bundleName.value() : "";
     std::string moduleName = resourceInfo.moduleName.has_value() ? resourceInfo.moduleName.value() : "";
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         TAG_LOGW(AceLogTag::ACE_FONT, "can not get delegate.");
         return nullptr;
@@ -114,7 +114,7 @@ static napi_value JSgetSystemFontList(napi_env env, napi_callback_info info)
         return arrayResult;
     }
     std::vector<std::string> fontList;
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         return nullptr;
     }
@@ -148,7 +148,7 @@ static napi_value JSgetFontByName(napi_env env, napi_callback_info info)
     std::string fontNameStr(fontName, len);
 
     FontInfo fontInfo;
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         return nullptr;
     }
@@ -268,7 +268,7 @@ static napi_value GetUIFontFallbackInfo(napi_env env, const FontConfigJsonInfo& 
 static napi_value JsGetUIFontConfig(napi_env env, napi_callback_info info)
 {
     FontConfigJsonInfo fontConfigJsonInfo;
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         return nullptr;
     }
