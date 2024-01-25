@@ -932,13 +932,16 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
     popupPattern->StartExitingAnimation(
-        [isShowInSubWindow, isTypeWithOption, isUseCustom, focusable, popupNodeWk = WeakPtr<FrameNode>(popupNode),
+        [isShowInSubWindow, isTypeWithOption, isUseCustom, focusable,
+            targetId, popupNodeWk = WeakPtr<FrameNode>(popupNode),
             rootNodeWk = WeakPtr<UINode>(rootNode), weak = WeakClaim(this)]() {
             auto rootNode = rootNodeWk.Upgrade();
             auto popupNode = popupNodeWk.Upgrade();
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(rootNode && popupNode && overlayManager);
-
+            if (overlayManager->popupMap_[targetId].isCurrentOnShow) {
+                return;
+            }
             auto popupPattern = popupNode->GetPattern<BubblePattern>();
             CHECK_NULL_VOID(popupPattern);
             popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
