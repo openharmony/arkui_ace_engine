@@ -33,6 +33,7 @@ const IMAGE_DEFAULT = 56;
 const TEXT_PADDING_LEFT_RIGHT = 12;
 const MARGIN_EIGHT = 8;
 const ROW_GAP = 16;
+const SUBTITLE_HEIGHT = 56;
 const ENTER_EXIT_ICON_DURATION = 200;
 const COMMON_BEZIER = curves.cubicBezierCurve(.33, 0, .67, 1);
 const DRAG_SPRING = curves.interpolatingSpring(0, 1, 400, 38);
@@ -735,26 +736,63 @@ export class GridObjectSortComponent extends ViewPU {
         let o = e.length;
         let s = 0;
         let n = o % this.colNum == 0;
-        (this.clickAddBtn && n || this.isStartDrag && n && t || this.clickRemoveBtn && n && !t) && (s = 1);
+        s = this.clickAddBtn && n || this.isStartDrag && n && t || this.clickRemoveBtn && n && !t ? 1 : 0;
         let d = Math.ceil(o / this.colNum) + s;
         i = this.blockHeight * d;
         0 === o && (i = 0);
         return i
     }
 
-    getCoodXY(e) {
-        const t = this.colNum;
-        let i = 0;
-        let o = 0;
-        if (e >= this.insertIndex) if (Math.trunc(e % t) === t - 1) {
-            i -= this.blockWidth * (t - 1);
-            o += this.blockHeight
-        } else i += this.blockWidth;
-        if (!this.isStartDrag) {
-            i = 0;
-            o = 0
+    imageTextRemoveIcon(e) {
+        return this.clickRemoveBtn && this.content.id === e.id ? {
+            id: -1,
+            type: 2e4,
+            params: ["sys.media.ohos_ic_public_add_norm_filled"],
+            bundleName: "",
+            moduleName: ""
+        } : {
+            id: -1,
+            type: 2e4,
+            params: ["sys.media.ohos_ic_public_remove_filled"],
+            bundleName: "",
+            moduleName: ""
         }
-        return { x: i, y: o }
+    }
+
+    imageTextAddIcon(e) {
+        return this.clickAddBtn && this.content.id === e.id && this.gridComState ? {
+            id: -1,
+            type: 2e4,
+            params: ["sys.media.ohos_ic_public_remove_filled"],
+            bundleName: "",
+            moduleName: ""
+        } : {
+            id: -1,
+            type: 2e4,
+            params: ["sys.media.ohos_ic_public_add_norm_filled"],
+            bundleName: "",
+            moduleName: ""
+        }
+    }
+
+    imageTextAddIconVisible(e) {
+        return this.clickAddBtn && this.content.id === e.id && !this.gridComState ? Visibility.Hidden : Visibility.Visible
+    }
+
+    getCoodXY(e) {
+        let t = 0;
+        let i = 0;
+        const o = this.colNum;
+        const s = Math.trunc(e % o);
+        if (e >= this.insertIndex) if (s === o - 1) {
+            t -= this.blockWidth * (o - 1);
+            i += this.blockHeight
+        } else t += this.blockWidth;
+        if (!this.isStartDrag) {
+            t = 0;
+            i = 0
+        }
+        return { x: t, y: i }
     }
 
     getAddItemGridPosition() {
@@ -790,17 +828,21 @@ export class GridObjectSortComponent extends ViewPU {
         let d = Math.abs(s - n) * this.blockWidth;
         s < n ? d = -d : s > n || (d = 0);
         let a = 0;
-        let r = Math.trunc(t / this.colNum) ;
-        a = (!this.imageText && this.gridComState && t > 3 ? (r + 1) * (this.blockHeight - 8) + 8 : (r + 1) * this.blockHeight) + 56;
+        let r = 0;
+        let h = Math.trunc(t / this.colNum) ;
+        r = !this.imageText && this.gridComState && t > 3 ? (h + 1) * (this.blockHeight - 8) + 8 : (h + 1) * this.blockHeight;
+        a = r + 56;
         return { x: d, y: a }
     }
 
     getCoveringGridPositionBottom(e) {
         let t = 0;
         let i = 0;
+        const o = e % this.colNum == 0;
+        const s = this.gridComState && !this.imageText ? 8 - this.blockHeight : -this.blockHeight;
         if (e > this.unSelectedIndex && 2 !== this.arrayUnSelectIsChange) {
-            t = e % this.colNum == 0 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
-            i = e % this.colNum == 0 ? this.gridComState && !this.imageText ? 8 - this.blockHeight : -this.blockHeight : 0
+            t = o ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
+            i = o ? s : 0
         }
         return { x: t, y: i }
     }
@@ -1082,21 +1124,9 @@ export class GridObjectSortComponent extends ViewPU {
         }), Text);
         Text.pop();
         this.observeComponentCreation2(((i, o) => {
-            Image.create(this.clickAddBtn && this.content.id === e.id && this.gridComState ? {
-                id: -1,
-                type: 2e4,
-                params: ["sys.media.ohos_ic_public_remove_filled"],
-                bundleName: "",
-                moduleName: ""
-            } : {
-                id: -1,
-                type: 2e4,
-                params: ["sys.media.ohos_ic_public_add_norm_filled"],
-                bundleName: "",
-                moduleName: ""
-            });
+            Image.create(this.imageTextAddIcon(e)); 
             Image.draggable(!1);
-            Image.visibility("add" === t ? this.clickAddBtn && this.content.id === e.id && !this.gridComState ? Visibility.Hidden : Visibility.Visible : Visibility.Hidden);
+            Image.visibility("add" === t ? this.imageTextAddIconVisible(e) : Visibility.Hidden);
             Image.fillColor({
                 id: -1,
                 type: 10001,
@@ -1135,19 +1165,7 @@ export class GridObjectSortComponent extends ViewPU {
             }))
         }), Image);
         this.observeComponentCreation2(((i, o) => {
-            Image.create(this.clickRemoveBtn && this.content.id === e.id ? {
-                id: -1,
-                type: 2e4,
-                params: ["sys.media.ohos_ic_public_add_norm_filled"],
-                bundleName: "",
-                moduleName: ""
-            } : {
-                id: -1,
-                type: 2e4,
-                params: ["sys.media.ohos_ic_public_remove_filled"],
-                bundleName: "",
-                moduleName: ""
-            });
+            Image.create(this.imageTextRemoveIcon(e));
             Image.draggable(!1);
             Image.fillColor({
                 id: -1,
