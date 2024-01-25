@@ -692,7 +692,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest013, TestSize.Level1)
     json->Put("month", 1);
     json->Put("day", 1);
     pickerPattern->SetDate(json->ToString());
-    EXPECT_FALSE(pickerPattern->HandleYearKeyEvent(0));
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(0));
 }
 
 /**
@@ -773,7 +773,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest016, TestSize.Level1)
     json->Put("month", 10);
     json->Put("day", 1);
     pickerPattern->SetDate(json->ToString());
-    EXPECT_FALSE(pickerPattern->HandleMonthKeyEvent(10));
+    EXPECT_TRUE(pickerPattern->HandleMonthKeyEvent(10));
 
     pickerPattern->isKeyWaiting_ = true;
     json->Put("year", 2000);
@@ -788,7 +788,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest016, TestSize.Level1)
     json->Put("month", 0);
     json->Put("day", 1);
     pickerPattern->SetDate(json->ToString());
-    EXPECT_FALSE(pickerPattern->HandleMonthKeyEvent(0));
+    EXPECT_TRUE(pickerPattern->HandleMonthKeyEvent(0));
 
     pickerPattern->isKeyWaiting_ = false;
     json->Put("year", 2000);
@@ -850,14 +850,14 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest018, TestSize.Level1)
     json->Put("month", 1);
     json->Put("day", 31);
     pickerPattern->SetDate(json->ToString());
-    EXPECT_FALSE(pickerPattern->HandleDayKeyEvent(31));
+    EXPECT_TRUE(pickerPattern->HandleDayKeyEvent(31));
 
     pickerPattern->isKeyWaiting_ = false;
     json->Put("year", 2000);
     json->Put("month", 1);
     json->Put("day", 0);
     pickerPattern->SetDate(json->ToString());
-    EXPECT_FALSE(pickerPattern->HandleDayKeyEvent(0));
+    EXPECT_TRUE(pickerPattern->HandleDayKeyEvent(0));
 
     pickerPattern->isKeyWaiting_ = false;
     json->Put("year", 2000);

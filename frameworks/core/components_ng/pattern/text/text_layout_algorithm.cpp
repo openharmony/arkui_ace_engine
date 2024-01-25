@@ -303,22 +303,14 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     CHECK_NULL_VOID(pipeline);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
-    auto textCase = textStyle.GetTextCase();
-    auto builder = paragraph_;
-    auto updateTextAction = [builder, textCase](const std::string content, TextStyle textStyle) {
-        if (content.empty()) {
-            return;
-        }
-        auto displayText = content;
-        StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
-        builder->PushStyle(textStyle);
-        builder->AddText(StringUtils::Str8ToStr16(displayText));
-        builder->PopStyle();
-    };
     auto textForAI = pattern->GetTextForAI();
     auto wTextForAI = StringUtils::ToWstring(textForAI);
     int32_t wTextForAILength = static_cast<int32_t>(wTextForAI.length());
     int32_t preEnd = 0;
+    DragSpanPosition dragSpanPosition;
+    dragSpanPosition.dragStart = pattern->GetRecoverStart();
+    dragSpanPosition.dragEnd = pattern->GetRecoverEnd();
+    bool isDragging = pattern->IsDragging();
     for (auto kv : pattern->GetAISpanMap()) {
         if (preEnd >= wTextForAILength) {
             break;
@@ -329,19 +321,63 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
             continue;
         }
         if (preEnd < aiSpan.start) {
-            auto beforeContent = StringUtils::ToString(wTextForAI.substr(preEnd, aiSpan.start - preEnd));
-            updateTextAction(beforeContent, textStyle);
+            dragSpanPosition.spanStart = preEnd;
+            dragSpanPosition.spanEnd = aiSpan.start;
+            GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, isDragging);
         }
         TextStyle aiSpanTextStyle = textStyle;
         aiSpanTextStyle.SetTextColor(Color::BLUE);
         aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
         aiSpanTextStyle.SetTextDecorationColor(Color::BLUE);
         preEnd = aiSpan.end;
-        updateTextAction(aiSpan.content, aiSpanTextStyle);
+        dragSpanPosition.spanStart = aiSpan.start;
+        dragSpanPosition.spanEnd = aiSpan.end;
+        GrayDisplayAISpan(dragSpanPosition, wTextForAI, aiSpanTextStyle, isDragging);
     }
     if (preEnd < wTextForAILength) {
-        auto afterContent = StringUtils::ToString(wTextForAI.substr(preEnd, wTextForAILength - preEnd));
-        updateTextAction(afterContent, textStyle);
+        dragSpanPosition.spanStart = preEnd;
+        dragSpanPosition.spanEnd = wTextForAILength;
+        GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, isDragging);
+    }
+}
+
+void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition,
+    const std::wstring wTextForAI, const TextStyle& textStyle, bool isDragging)
+{
+    int32_t dragStart = dragSpanPosition.dragStart;
+    int32_t dragEnd = dragSpanPosition.dragEnd;
+    int32_t spanStart = dragSpanPosition.spanStart;
+    int32_t spanEnd = dragSpanPosition.spanEnd;
+    std::vector<std::string> contents = {};
+    std::string firstParagraph = "";
+    std::string secondParagraph = "";
+    std::string thirdParagraph = "";
+    if (dragStart > spanEnd || dragEnd < spanStart || !isDragging) {
+        firstParagraph = StringOutBoundProtection(spanStart, spanEnd - spanStart, wTextForAI);
+    } else if (spanStart <= dragStart && spanEnd >= dragStart && spanEnd <= dragEnd) {
+        firstParagraph = StringOutBoundProtection(spanStart, dragStart - spanStart, wTextForAI);
+        secondParagraph = StringOutBoundProtection(dragStart, spanEnd - dragStart, wTextForAI);
+    } else if (spanStart >= dragStart && spanEnd <= dragEnd) {
+        secondParagraph = StringOutBoundProtection(spanStart, spanEnd - spanStart, wTextForAI);
+    } else if (spanStart <= dragStart && spanEnd >= dragEnd) {
+        firstParagraph = StringOutBoundProtection(spanStart, dragStart - spanStart, wTextForAI);
+        secondParagraph = StringOutBoundProtection(dragStart, dragEnd - dragStart, wTextForAI);
+        thirdParagraph = StringOutBoundProtection(dragEnd, spanEnd - dragEnd, wTextForAI);
+    } else {
+        secondParagraph = StringOutBoundProtection(spanStart, dragEnd - spanStart, wTextForAI);
+        thirdParagraph = StringOutBoundProtection(dragEnd, spanEnd - dragEnd, wTextForAI);
+    }
+    contents = { firstParagraph, secondParagraph, thirdParagraph };
+    CreateParagraphDrag(textStyle, contents);
+}
+
+std::string TextLayoutAlgorithm::StringOutBoundProtection(int32_t position, int32_t length, std::wstring wTextForAI)
+{
+    int32_t wTextForAILength = static_cast<int32_t>(wTextForAI.length());
+    if (position >= wTextForAILength || length > wTextForAILength - position) {
+        return "";
+    } else {
+        return StringUtils::ToString(wTextForAI.substr(position, length));
     }
 }
 
@@ -384,12 +420,12 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     paragraph_->PushStyle(textStyle);
     CHECK_NULL_RETURN(pattern, -1);
     if (spanItemChildren_.empty()) {
-        if (pattern->IsDragging()) {
-            auto dragContents = pattern->GetDragContents();
-            CreateParagraphDrag(textStyle, dragContents, content, layoutWrapper);
+        if (pattern->NeedShowAIDetect()) {
+            UpdateParagraphForAISpan(textStyle, layoutWrapper);
         } else {
-            if (pattern->NeedShowAIDetect()) {
-                UpdateParagraphForAISpan(textStyle, layoutWrapper);
+            if (pattern->IsDragging()) {
+                auto dragContents = pattern->GetDragContents();
+                CreateParagraphDrag(textStyle, dragContents);
             } else {
                 StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
                 paragraph_->AddText(StringUtils::Str8ToStr16(content));
@@ -416,8 +452,7 @@ void TextLayoutAlgorithm::UpdateSymbolSpanEffect(RefPtr<FrameNode>& frameNode)
     }
 }
 
-void TextLayoutAlgorithm::CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents,
-    const std::string content, LayoutWrapper* layoutWrapper)
+void TextLayoutAlgorithm::CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents)
 {
     TextStyle dragTextStyle = textStyle;
     Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
@@ -426,6 +461,9 @@ void TextLayoutAlgorithm::CreateParagraphDrag(const TextStyle& textStyle, const 
 
     for (size_t i = 0; i < contents.size(); i++) {
         std::string splitStr = contents[i];
+        if (splitStr.empty()) {
+            continue;
+        }
         auto& style = textStyles[i];
         paragraph_->PushStyle(style);
         StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));

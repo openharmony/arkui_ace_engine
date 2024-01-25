@@ -72,12 +72,21 @@ public:
         return src_;
     }
 
+    const RefPtr<ImageStateManager>& GetStateManger()
+    {
+        return stateManager_;
+    }
+
     // callbacks that will be called by ImageProvider when load process finishes
     void DataReadyCallback(const RefPtr<ImageObject>& imageObj);
     void SuccessCallback(const RefPtr<CanvasImage>& canvasImage);
     void FailCallback(const std::string& errorMsg);
     const std::string GetCurrentLoadingState();
     void ResizableCalcDstSize();
+    void DownloadImage();
+    void PerformDownload();
+    bool Downloadable();
+    void OnDataReady();
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
@@ -94,13 +103,12 @@ private:
     // tasks that run when entering a new state
     void OnUnloaded();
     void OnDataLoading();
-    void OnDataReady();
     void OnMakeCanvasImage();
     void OnLoadSuccess();
     void OnLoadFail();
-    void DownloadImage();
     bool NotifyReadyIfCacheHit();
-
+    void DownloadImageSuccess(const std::string& imageData);
+    void DownloadImageFailed(const std::string& errorMessage);
     // round up int to the nearest 2-fold proportion of image width
     // REQUIRE: value > 0, image width > 0
     int32_t RoundUp(int32_t value);

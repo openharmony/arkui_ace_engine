@@ -1085,8 +1085,6 @@ void FrameNode::SetActive(bool active)
             parent->MarkNeedSyncRenderTree();
         }
     }
-    // inform the js side the active status
-    SetJSViewActive(active);
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
@@ -3045,10 +3043,16 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end)
     if (start <= end) {
         if (start > 0 || end < 0) {
             SetActive(false);
+            SetJSViewActive(false);
+        } else {
+            SetJSViewActive(true);
         }
     } else {
         if (end < 0 && start > 0) {
             SetActive(false);
+            SetJSViewActive(false);
+        } else {
+            SetJSViewActive(true);
         }
     }
 }

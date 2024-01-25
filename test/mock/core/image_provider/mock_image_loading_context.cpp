@@ -155,4 +155,15 @@ int32_t ImageLoadingContext::GetFrameCount() const
 {
     return 1;
 }
+
+bool ImageLoadingContext::Downloadable()
+{
+    return true;
+}
+
+void ImageLoadingContext::PerformDownload() {}
+
+void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData) {}
+
+void ImageLoadingContext::DownloadImageFailed(const std::string& errorMessage) {}
 } // namespace OHOS::Ace::NG

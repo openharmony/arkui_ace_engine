@@ -216,11 +216,7 @@ void UIExtensionPattern::OnExtensionDied()
 
 void UIExtensionPattern::OnAreaChangedInner()
 {
-    CHECK_NULL_VOID(sessionWrapper_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto displayArea = host->GetTransformRectRelativeToWindow();
-    sessionWrapper_->RefreshDisplayArea(displayArea);
+    DispatchDisplayArea();
 }
 
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -236,7 +232,8 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto displaySize = geometryNode->GetFrameSize();
-    sessionWrapper_->RefreshDisplayArea({ displayOffset, displaySize });
+    displayArea_ = RectF(displayOffset, displaySize);
+    sessionWrapper_->RefreshDisplayArea(displayArea_);
     return false;
 }
 
@@ -319,7 +316,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
     callbackId_ = pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->OnAreaChangedInner();
+            pattern->DispatchDisplayArea(true);
         }
     });
 }
@@ -575,6 +572,18 @@ void UIExtensionPattern::DispatchPointerEvent(const std::shared_ptr<MMI::Pointer
         dynamicComponentRenderer_->TransferPointerEvent(pointerEvent);
     } else if (sessionWrapper_) {
         sessionWrapper_->NotifyPointerEventAsync(pointerEvent);
+    }
+}
+
+void UIExtensionPattern::DispatchDisplayArea(bool isForce)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto displayArea = host->GetTransformRectRelativeToWindow();
+    if (displayArea_ != displayArea || isForce) {
+        displayArea_ = displayArea;
+        sessionWrapper_->RefreshDisplayArea(displayArea_);
     }
 }
 

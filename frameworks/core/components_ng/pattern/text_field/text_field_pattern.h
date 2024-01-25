@@ -1154,6 +1154,7 @@ private:
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void ShowSelectOverlay(const ShowSelectOverlayParams& params);
+    void PushSelectedByMouseInfoToManager();
     void CursorMoveOnClick(const Offset& offset);
 
     void ProcessOverlay(

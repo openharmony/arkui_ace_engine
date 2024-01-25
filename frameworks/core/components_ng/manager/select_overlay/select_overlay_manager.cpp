@@ -253,8 +253,10 @@ bool SelectOverlayManager::IsSameSelectOverlayInfo(const SelectOverlayInfo& info
     return true;
 }
 
-void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset)
+void SelectOverlayManager::HandleGlobalEvent(
+    const TouchEvent& touchPoint, const NG::OffsetF& rootOffset, bool isMousePressAtSelectedNode)
 {
+    ResetSection(touchPoint, isMousePressAtSelectedNode);
     CHECK_NULL_VOID(!selectOverlayItem_.Invalid());
     NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
     // handle global touch event.
@@ -299,6 +301,18 @@ void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const
     if (!IsInSelectedOrSelectOverlayArea(point)) {
         NotifyOverlayClosed(true);
         DestroySelectOverlay();
+    }
+}
+
+void SelectOverlayManager::ResetSection(const TouchEvent& touchPoint, bool isMousePressAtSelectedNode)
+{
+    if (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::MOUSE &&
+        !isMousePressAtSelectedNode && !selectOverlayItem_.Upgrade()) {
+        CHECK_NULL_VOID(selectedByMouseInfo_.selectedNode.Upgrade());
+        if (selectedByMouseInfo_.onResetSelection) {
+            selectedByMouseInfo_.onResetSelection();
+        }
+        selectedByMouseInfo_.clear();
     }
 }
 

@@ -2514,8 +2514,7 @@ void RichEditorPattern::SpanNodeFission(
     auto text = spanItem->content;
     std::wstring textTemp = StringUtils::ToWstring(text);
     std::wstring insertValueTemp = StringUtils::ToWstring(insertValue);
-    textTemp.insert(info.GetOffsetInSpan(), insertValueTemp);
-
+    InsertValueInSpanOffset(info, textTemp, insertValueTemp);
     auto index = textTemp.find(lineSeparator);
     if (index != std::wstring::npos) {
         auto textBefore = textTemp.substr(0, index + 1);
@@ -2540,6 +2539,14 @@ void RichEditorPattern::SpanNodeFission(
         spanNode->UpdateContent(text);
         spanItem->position += static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
     }
+}
+
+void RichEditorPattern::InsertValueInSpanOffset(
+    const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue)
+{
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insert value info: %{public}s", info.ToString().c_str());
+    auto offsetInSpan = std::clamp(info.GetOffsetInSpan(), 0, static_cast<int32_t>(text.length()));
+    text.insert(offsetInSpan, insertValue);
 }
 
 RefPtr<SpanNode> RichEditorPattern::InsertValueToBeforeSpan(
@@ -5158,7 +5165,7 @@ bool RichEditorPattern::NeedAiAnalysis(
     if (pos == content.length()) {
         return false;
     }
-    
+
     if (IsClickBoundary(pos) && targeType == CaretUpdateType::PRESSED) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis IsClickBoundary,return!");
         return false;

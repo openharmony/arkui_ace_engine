@@ -113,6 +113,14 @@ public:
             builder_->SetCacheCount(cacheCount);
         }
     }
+    void SetJSViewActive(bool active = true) override
+    {
+        if (builder_) {
+            builder_->SetJSViewActive(active);
+            isActive_ = active;
+        }
+    }
+
     int32_t GetIndexByUINode(const RefPtr<UINode>& uiNode) const;
 
 private:
@@ -157,6 +165,7 @@ private:
     mutable std::list<RefPtr<UINode>> children_;
     mutable bool needPredict_ = false;
     bool needMarkParent_ = true;
+    bool isActive_ = true;
 
     RefPtr<LazyForEachBuilder> builder_;
 
