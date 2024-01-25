@@ -292,7 +292,7 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
 
     if (isReactInParentMovement_) {
         float handledByNav = ProcessNavBarReactOnUpdate(offsetCoordinate);
-        if (NearEqual(handledByNav, offsetCoordinate)) {
+        if (NearEqual(handledByNav, offsetCoordinate) && !NearZero(offset)) {
             // All offsets are handled by Navigation, list cannot scroll over.
             SetCanOverScroll(false);
             offset = offsetRemain;
