@@ -1749,10 +1749,10 @@ ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t in
         resultObject.imageStyle.size[RichEditorImageSize::SIZEWIDTH] = geometryNode->GetMarginFrameSize().Width();
         resultObject.imageStyle.size[RichEditorImageSize::SIZEHEIGHT] = geometryNode->GetMarginFrameSize().Height();
         if (imageLayoutProperty->HasImageFit()) {
-            resultObject.imageStyle.verticalAlign = static_cast<int32_t>(imageLayoutProperty->GetImageFitValue());
+            resultObject.imageStyle.objectFit = static_cast<int32_t>(imageLayoutProperty->GetImageFitValue());
         }
         if (imageLayoutProperty->HasVerticalAlign()) {
-            resultObject.imageStyle.objectFit = static_cast<int32_t>(imageLayoutProperty->GetVerticalAlignValue());
+            resultObject.imageStyle.verticalAlign = static_cast<int32_t>(imageLayoutProperty->GetVerticalAlignValue());
         }
         if (geometryNode->GetMargin()) {
             resultObject.imageStyle.margin = geometryNode->GetMargin()->ToJsonString();
