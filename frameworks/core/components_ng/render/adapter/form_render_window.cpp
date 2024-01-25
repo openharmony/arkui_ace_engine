@@ -101,7 +101,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     }
 
     std::string surfaceNodeName = "ArkTSCardNode";
-    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName};
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName, .isSync = true};
     rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
     rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
 
