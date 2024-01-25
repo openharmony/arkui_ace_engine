@@ -44,6 +44,14 @@ public:
         executeFireOnAppear_ = true;
     }
 
+    void FireOnDisappear()
+    {
+        if (destroyFunc_) {
+            destroyFunc_();
+        }
+        executeFireOnAppear_ = false;
+    }
+
     virtual void SetRenderFunction(const RenderFunction& renderFunction) {}
 
     void SetAppearFunction(std::function<void()>&& appearFunc)

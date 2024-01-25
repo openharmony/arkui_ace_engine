@@ -357,6 +357,11 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
         if (!pageNode->GetChildren().empty()) {
             auto oldChild = AceType::DynamicCast<NG::CustomNode>(pageNode->GetChildren().front());
             if (oldChild) {
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+                if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
+                    oldChild->FireOnDisappear();
+                }
+#endif
                 oldChild->Reset();
             }
             pageNode->Clean();
