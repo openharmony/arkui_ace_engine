@@ -674,6 +674,191 @@ typedef enum {
     ArkUI_CHECKBOX_SHAPE_ROUNDED_SQUARE,
 } ArkUI_CheckboxShape;
 
+/**
+ * @brief 混合模式枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 将上层图像直接覆盖到下层图像上，不进行任何混合操作。 */
+    ARKUI_BLEND_MODE_NONE,
+    /** 将源像素覆盖的目标像素清除为完全透明。 */
+    ARKUI_BLEND_MODE_CLEAR,
+    /** r = s，只显示源像素。 */
+    ARKUI_BLEND_MODE_SRC,
+    /** r = d，只显示目标像素。 */
+    ARKUI_BLEND_MODE_DST,
+    /** r = s + (1 - sa) * d，将源像素按照透明度进行混合，覆盖在目标像素上。 */
+    ARKUI_BLEND_MODE_SRC_OVER,
+    /** r = d + (1 - da) * s，将目标像素按照透明度进行混合，覆盖在源像素上。 */
+    ARKUI_BLEND_MODE_DST_OVER,
+    /** r = s * da，只显示源像素中与目标像素重叠的部分。 */
+    ARKUI_BLEND_MODE_SRC_IN,
+    /** r = d * sa，只显示目标像素中与源像素重叠的部分。 */
+    ARKUI_BLEND_MODE_DST_IN,
+    /** r = s * (1 - da)，只显示源像素中与目标像素不重叠的部分。 */
+    ARKUI_BLEND_MODE_SRC_OUT,
+    /** r = d * (1 - sa)，只显示目标像素中与源像素不重叠的部分。 */
+    ARKUI_BLEND_MODE_DST_OUT,
+    /** r = s * da + d * (1 - sa)，在源像素和目标像素重叠的地方绘制源像素，在源像素和目标像素不重叠的地方绘制目标像素。
+     */
+    ARKUI_BLEND_MODE_SRC_ATOP,
+    /** r = d * sa + s * (1 - da)，在源像素和目标像素重叠的地方绘制目标像素，在源像素和目标像素不重叠的地方绘制源像素。
+     */
+    ARKUI_BLEND_MODE_DST_ATOP,
+    /** r = s * (1 - da) + d * (1 - sa)，只显示源像素与目标像素不重叠的部分。 */
+    ARKUI_BLEND_MODE_XOR,
+    /** r = min(s + d, 1)，将源像素值与目标像素值相加，并将结果作为新的像素值。 */
+    ARKUI_BLEND_MODE_PLUS,
+    /** r = s * d，将源像素与目标像素进行乘法运算，并将结果作为新的像素值。 */
+    ARKUI_BLEND_MODE_MODULATE,
+    /** r = s + d - s * d，将两个图像的像素值相加，然后减去它们的乘积来实现混合。 */
+    ARKUI_BLEND_MODE_SCREEN,
+    /** 根据目标像素来决定使用MULTIPLY混合模式还是SCREEN混合模式。 */
+    ARKUI_BLEND_MODE_OVERLAY,
+    /** rc = s + d - max(s * da, d * sa), ra = kSrcOver，当两个颜色重叠时，较暗的颜色会覆盖较亮的颜色。 */
+    ARKUI_BLEND_MODE_DARKEN,
+    /** rc = s + d - min(s * da, d * sa), ra =
+       kSrcOver，将源图像和目标图像中的像素进行比较，选取两者中较亮的像素作为最终的混合结果。 */
+    ARKUI_BLEND_MODE_LIGHTEN,
+    /** 使目标像素变得更亮来反映源像素。 */
+    ARKUI_BLEND_MODE_COLOR_DODGE,
+    /** 使目标像素变得更暗来反映源像素。 */
+    ARKUI_BLEND_MODE_COLOR_BURN,
+    /** 根据源像素的值来决定目标像素变得更亮或者更暗。根据源像素来决定使用MULTIPLY混合模式还是SCREEN混合模式。 */
+    ARKUI_BLEND_MODE_HARD_LIGHT,
+    /** 根据源像素来决定使用LIGHTEN混合模式还是DARKEN混合模式。 */
+    ARKUI_BLEND_MODE_SOFT_LIGHT,
+    /** rc = s + d - 2 * (min(s * da, d * sa)), ra =
+       kSrcOver，对比源像素和目标像素，亮度更高的像素减去亮度更低的像素，产生高对比度的效果。 */
+    ARKUI_BLEND_MODE_DIFFERENCE,
+    /** rc = s + d - two(s * d), ra = kSrcOver，对比源像素和目标像素，亮度更高的像素减去亮度更低的像素，产生柔和的效果。
+     */
+    ARKUI_BLEND_MODE_EXCLUSION,
+    /** r = s * (1 - da) + d * (1 - sa) + s * d，将源图像与目标图像进行乘法混合，得到一张新的图像。	 */
+    ARKUI_BLEND_MODE_MULTIPLY,
+    /** 保留源图像的亮度和饱和度，但会使用目标图像的色调来替换源图像的色调。 */
+    ARKUI_BLEND_MODE_HUE,
+    /** 保留目标像素的亮度和色调，但会使用源像素的饱和度来替换目标像素的饱和度。 */
+    ARKUI_BLEND_MODE_SATURATION,
+    /** 保留源像素的饱和度和色调，但会使用目标像素的亮度来替换源像素的亮度。 */
+    ARKUI_BLEND_MODE_COLOR,
+    /** 保留目标像素的色调和饱和度，但会用源像素的亮度替换目标像素的亮度。 */
+    ARKUI_BLEND_MODE_LUMINOSITY,
+} ArkUI_BlendMode;
+
+/**
+ * @brief 设置容器元素内主轴方向上的布局枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 元素从左到右布局。 */
+    ARKUI_DIRECTION_LTR = 0,
+    /** 元素从右到左布局。 */
+    ARKUI_DIRECTION_RTL,
+    /** 使用系统默认布局方向。 */
+    ARKUI_DIRECTION_AUTO = 3,
+} ArkUI_Direction;
+
+/**
+ * @brief 设置子组件在父容器交叉轴的对齐格式枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 使用Flex容器中默认配置。 */
+    ARKUI_ITEM_ALIGN_AUTO = 0,
+    /** 元素在Flex容器中，交叉轴方向首部对齐。 */
+    ARKUI_ITEM_ALIGN_START,
+    /** 元素在Flex容器中，交叉轴方向居中对齐。 */
+    ARKUI_ITEM_ALIGN_CENTER,
+    /** 元素在Flex容器中，交叉轴方向底部对齐。 */
+    ARKUI_ITEM_ALIGN_END,
+    /** 元素在Flex容器中，交叉轴方向拉伸填充。 */
+    ARKUI_ITEM_ALIGN_STRETCH,
+    /** 元素在Flex容器中，交叉轴方向文本基线对齐。 */
+    ARKUI_ITEM_ALIGN_BASELINE,
+} ArkUI_ItemAlign;
+
+/**
+ * @brief 前景色枚举值。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 前景色为控件背景色的反色。 */
+    ARKUI_COLOR_STRATEGY_INVERT = 0,
+    /** 控件背景阴影色为控件背景阴影区域的平均色。 */
+    ARKUI_COLOR_STRATEGY_AVERAGE,
+    /** 控件背景阴影色为控件背景阴影区域的主色。 */
+    ARKUI_COLOR_STRATEGY_PRIMARY,
+} ArkUI_ColoringStrategy;
+
+/**
+ * @brief 定义水平方向对齐方式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 按照语言方向起始端对齐。 */
+    ARKUI_HORIZONTAL_ALIGN_START = 0,
+    /** 居中对齐，默认对齐方式。 */
+    ARKUI_HORIZONTAL_ALIGN_CENTER,
+    /** 按照语言方向末端对齐。 */
+    ARKUI_HORIZONTAL_ALIGN_END,
+} ArkUI_HorizontalAlign;
+
+/**
+ * @brief 定义垂直方向对齐方式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 主轴方向首端对齐。 */
+    ARKUI_FLEX_ALIGN_START = 1,
+    /** 主轴方向中心对齐。 */
+    ARKUI_FLEX_ALIGN_CENTER = 2,
+    /** 主轴方向尾部对齐。 */
+    ARKUI_FLEX_ALIGN_END = 3,
+    /** Flex主轴方向均匀分配弹性元素，相邻元素之间距离相同，第一个元素行首对齐，最后的元素行尾对齐。 */
+    ARKUI_FLEX_ALIGN_SPACE_BETWEEN = 6,
+    /** Flex主轴方向均匀分配弹性元素，相邻元素之间距离相同，第一个元素到行首的距离时相邻元素间距离的一半。 */
+    ARKUI_FLEX_ALIGN_SPACE_AROUND = 7,
+    /** Flex主轴方向均匀分配弹性元素，相邻元素之间距离、第一个元素到行首的距离和最后的元素到行尾的距离均相等。 */
+    ARKUI_FLEX_ALIGN_SPACE_EVENLY = 8,
+} ArkUI_FlexAlign;
+
+/**
+ * @brief 定义Flex容器的主轴方向。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 主轴与行方向一致。 */
+    ARKUI_FLEX_DIRECTION_ROW = 0,
+    /** 主轴与列方向一致。 */
+    ARKUI_FLEX_DIRECTION_COLUMN,
+    /** 主轴与行方向相反。 */
+    ARKUI_FLEX_DIRECTION_ROW_REVERSE,
+    /** 主轴与列方向相反。 */
+    ARKUI_FLEX_DIRECTION_COLUMN_REVERSE,
+} ArkUI_FlexDirection;
+
+/**
+ * @brief 定义Flex行列布局模式模式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 单行/单列布局，子项不能超出容器。 */
+    ARKUI_FLEX_WRAP_NO_WRAP = 0,
+    /** 多行/多列布局，子项允许超出容器。 */
+    ARKUI_FLEX_WRAP_WRAP,
+    /** 反向多行/多列布局，子项允许超出容器。 */
+    ARKUI_FLEX_WRAP_WRAP_REVERSE,
+} ArkUI_FlexWrap;
+
 #ifdef __cplusplus
 };
 #endif
