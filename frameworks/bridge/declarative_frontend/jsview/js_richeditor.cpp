@@ -1246,6 +1246,7 @@ void JSRichEditorController::AddPlaceholderSpan(const JSCallbackInfo& args)
         ViewStackModel::GetInstance()->NewScope();
         builderFunc->Execute();
         auto customNode = AceType::DynamicCast<NG::UINode>(ViewStackModel::GetInstance()->Finish());
+        CHECK_NULL_VOID(customNode);
         auto controller = controllerWeak_.Upgrade();
         int32_t spanIndex = 0;
         if (controller) {
