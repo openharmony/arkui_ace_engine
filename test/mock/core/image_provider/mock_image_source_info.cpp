@@ -243,4 +243,14 @@ const std::string& ImageSourceInfo::GetModuleName() const
 {
     return moduleName_;
 }
+
+void ImageSourceInfo::SetBundleName(const std::string& bundleName)
+{
+    bundleName_ = bundleName;
+}
+
+void ImageSourceInfo::SetModuleName(const std::string& moduleName)
+{
+    moduleName_ = moduleName;
+}
 } // namespace OHOS::Ace

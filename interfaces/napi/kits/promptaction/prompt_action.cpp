@@ -91,7 +91,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
     if (argc != requireArgc) {
-        NapiThrow(env, "The number of parameters must be equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env, "The number of parameters must be equal to 1.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     napi_value messageNApi = nullptr;
@@ -106,7 +106,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     if (valueType == napi_object) {
         // message can not be null
         if (!HasProperty(env, argv, "message")) {
-            NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+            NapiThrow(env, "Required input parameters are missing.", ERROR_CODE_PARAM_INVALID);
             return nullptr;
         }
         napi_get_named_property(env, argv, "message", &messageNApi);
@@ -114,7 +114,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         napi_get_named_property(env, argv, "bottom", &bottomNApi);
         napi_get_named_property(env, argv, "showMode", &showModeNApi);
     } else {
-        NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
 
@@ -128,15 +128,15 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         messageString = message.get();
     } else if (valueType == napi_object) {
         if (!ParseResourceParam(env, messageNApi, recv)) {
-            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            NapiThrow(env, "Can not parse resource info from input params.", ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(recv, messageString)) {
-            NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            NapiThrow(env, "Can not get message from resource manager.", ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
     } else {
-        NapiThrow(env, "The type of message is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env, "The type of message is incorrect.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
 
@@ -148,11 +148,11 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     } else if (valueType == napi_object) {
         recv = {};
         if (!ParseResourceParam(env, durationNApi, recv)) {
-            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            NapiThrow(env, "Can not parse resource info from input params.", ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(recv, durationStr)) {
-            NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            NapiThrow(env, "Can not get message from resource manager.", ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         duration = StringUtils::StringToInt(durationStr);
@@ -171,11 +171,11 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     } else if (valueType == napi_object) {
         recv = {};
         if (!ParseResourceParam(env, bottomNApi, recv)) {
-            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            NapiThrow(env, "Can not parse resource info from input params.", ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(recv, bottomString)) {
-            NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            NapiThrow(env, "Can not get message from resource manager.", ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
     }
@@ -194,7 +194,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         showMode == NG::ToastShowMode::DEFAULT) {
         auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
         if (!delegate) {
-            NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
@@ -206,7 +206,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 #else
     auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
-        NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->ShowToast(messageString, duration, bottomString, NG::ToastShowMode::DEFAULT);
@@ -255,7 +255,7 @@ void DeleteContextAndThrowError(
         // context is null, no need to delete
         return;
     }
-    NapiThrow(env, errorMessage, Framework::ERROR_CODE_PARAM_INVALID);
+    NapiThrow(env, errorMessage, ERROR_CODE_PARAM_INVALID);
 }
 
 bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, int32_t maxButtonNum)
@@ -436,7 +436,7 @@ bool JSPromptParseParam(napi_env env, size_t argc, napi_value* argv, std::shared
 void JSPromptThrowInterError(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext, std::string strMsg)
 {
     napi_value code = nullptr;
-    std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+    std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
     napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
     napi_value msg = nullptr;
     napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
@@ -459,7 +459,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
     if (argc < requireArgc) {
         NapiThrow(
-            env, "The number of parameters must be greater than or equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
+            env, "The number of parameters must be greater than or equal to 1.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     if (thisVar == nullptr) {
@@ -628,10 +628,10 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         } else {
             // throw internal error
             napi_value code = nullptr;
-            std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+            std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
             napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
             napi_value msg = nullptr;
-            std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
             napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
             napi_value error = nullptr;
             napi_create_error(env, code, msg, &error);
@@ -657,10 +657,10 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     } else {
         // throw internal error
         napi_value code = nullptr;
-        std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+        std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
         napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
         napi_value msg = nullptr;
-        std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
+        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
         napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
         napi_value error = nullptr;
         napi_create_error(env, code, msg, &error);
@@ -690,7 +690,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
     if (argc < requireArgc) {
         NapiThrow(
-            env, "The number of parameters must be greater than or equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
+            env, "The number of parameters must be greater than or equal to 1.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     if (thisVar == nullptr) {
@@ -840,10 +840,10 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             delegate->ShowActionMenu(promptDialogAttr, asyncContext->buttons, std::move(callBack));
         } else {
             napi_value code = nullptr;
-            std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+            std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
             napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
             napi_value msg = nullptr;
-            std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
             napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
             napi_value error = nullptr;
             napi_create_error(env, code, msg, &error);
@@ -868,10 +868,10 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         delegate->ShowActionMenu(promptDialogAttr, asyncContext->buttons, std::move(callBack));
     } else {
         napi_value code = nullptr;
-        std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+        std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
         napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
         napi_value msg = nullptr;
-        std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
+        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
         napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
         napi_value error = nullptr;
         napi_create_error(env, code, msg, &error);
@@ -898,7 +898,7 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < requireArgc) {
         NapiThrow(
-            env, "The number of parameters must be greater than or equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
+            env, "The number of parameters must be greater than or equal to 1.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
 
@@ -988,7 +988,7 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
             delegate->OpenCustomDialog(promptDialogAttr, std::move(callBack));
         } else {
             // throw internal error
-            std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
             JSPromptThrowInterError(env, asyncContext, strMsg);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
@@ -1001,7 +1001,7 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
         delegate->OpenCustomDialog(promptDialogAttr, std::move(callBack));
     } else {
         // throw internal error
-        std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
+        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
         JSPromptThrowInterError(env, asyncContext, strMsg);
     }
 #endif
@@ -1015,7 +1015,7 @@ napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
     int32_t dialogId = -1;
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > 1) {
-        NapiThrow(env, "The number of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     } else if (argc == 0) {
         dialogId = -1;
@@ -1023,7 +1023,7 @@ napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[0], &valueType);
         if (valueType != napi_number) {
-            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
             return nullptr;
         }
         napi_get_value_int32(env, argv[0], &dialogId);
@@ -1040,7 +1040,7 @@ napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
             auto asyncContext = std::make_shared<PromptAsyncContext>();
             asyncContext->env = env;
             napi_create_promise(env, &asyncContext->deferred, nullptr);
-            std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
             JSPromptThrowInterError(env, asyncContext, strMsg);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
@@ -1055,7 +1055,7 @@ napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
         auto asyncContext = std::make_shared<PromptAsyncContext>();
         asyncContext->env = env;
         napi_create_promise(env, &asyncContext->deferred, nullptr);
-        std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
+        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
         JSPromptThrowInterError(env, asyncContext, strMsg);
     }
 #endif

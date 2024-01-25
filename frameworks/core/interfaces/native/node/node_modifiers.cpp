@@ -76,7 +76,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
-    NodeModifier::GetSpanModifier,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,

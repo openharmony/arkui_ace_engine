@@ -305,7 +305,7 @@ void ResetTextCopyOption(NodeHandle node)
     TextModelNG::SetCopyOption(frameNode, DEFAULT_COPY_OPTION);
 }
 
-void SetTextTextShadow(NodeHandle node, struct TextShadowStruct* shadows, uint32_t length)
+void SetTextTextShadow(NodeHandle node, struct ArkUITextShadowStruct* shadows, uint32_t length)
 {
     CHECK_NULL_VOID(shadows);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -313,7 +313,7 @@ void SetTextTextShadow(NodeHandle node, struct TextShadowStruct* shadows, uint32
     std::vector<Shadow> shadowList(length);
     for (uint32_t i = 0; i < length; i++) {
         Shadow shadow;
-        TextShadowStruct* shadowStruct = shadows + i;
+        ArkUITextShadowStruct* shadowStruct = shadows + i;
         shadow.SetBlurRadius(shadowStruct->radius);
         shadow.SetShadowType(static_cast<ShadowType>(shadowStruct->type));
         shadow.SetColor(Color(shadowStruct->color));
@@ -349,7 +349,7 @@ void ResetTextHeightAdaptivePolicy(NodeHandle node)
     TextModelNG::SetHeightAdaptivePolicy(frameNode, TextHeightAdaptivePolicy::MAX_LINES_FIRST);
 }
 
-void SetTextTextIndent(NodeHandle node, const struct StringAndDouble* textIndentStruct)
+void SetTextTextIndent(NodeHandle node, const struct ArkUIStringAndFloat* textIndentStruct)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -369,7 +369,7 @@ void ResetTextTextIndent(NodeHandle node)
     TextModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::FP));
 }
 
-void SetTextBaselineOffset(NodeHandle node, const struct StringAndDouble* offset)
+void SetTextBaselineOffset(NodeHandle node, const struct ArkUIStringAndFloat* offset)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -387,7 +387,7 @@ void ResetTextBaselineOffset(NodeHandle node)
     TextModelNG::SetBaselineOffset(frameNode, DEFAULT_BASELINE_OFFSET);
 }
 
-void SetTextLetterSpacing(NodeHandle node, const struct StringAndDouble* letterSpacingStruct)
+void SetTextLetterSpacing(NodeHandle node, const struct ArkUIStringAndFloat* letterSpacingStruct)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

@@ -264,6 +264,9 @@ public:
     const TextEditingValue& GetInputEditingValue() const override
     {
         static TextEditingValue value;
+        value.text = contentController_->GetTextValue();
+        value.hint = GetPlaceHolder();
+        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return value;
     };
     Offset GetGlobalOffset() const;
@@ -1081,7 +1084,6 @@ public:
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
-    void ContentFireOnChangeEvent();
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
     void SetMagnifierRect(MagnifierRect magnifierRect)
@@ -1100,6 +1102,9 @@ public:
     {
         return magnifierController_;
     }
+
+    void CleanNodeResponseKeyEvent();
+    void FireSelectEvent();
 
 protected:
     virtual void InitDragEvent();
@@ -1149,6 +1154,7 @@ private:
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void ShowSelectOverlay(const ShowSelectOverlayParams& params);
+    void PushSelectedByMouseInfoToManager();
     void CursorMoveOnClick(const Offset& offset);
 
     void ProcessOverlay(
@@ -1236,7 +1242,7 @@ private:
         CHECK_NULL_RETURN(cleanNodeArea, false);
         return cleanNodeArea->IsShow();
     }
-    void CleanNodeResponseKeyEvent();
+
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
     void ProcNormalInlineStateInBlurEvent();
@@ -1263,6 +1269,8 @@ private:
     void InitDragDropCallBack();
     void InitDragDropEventWithOutDragStart();
     void UpdateBlurReason();
+    RectF GetSelectArea();
+    void UpdateOverlaySelectArea();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1404,7 +1412,6 @@ private:
     std::queue<InputOperation> inputOperations_;
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
-    bool showSelect_ = false;
     bool isLongPress_ = false;
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;

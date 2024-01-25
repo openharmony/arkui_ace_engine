@@ -592,7 +592,7 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
         }
         if (hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || hostNode->GetTag() == V2::IMAGE_ETS_TAG) {
             RefPtr<GridColumnInfo> columnInfo =
-                GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CARD_TYPE);
+                GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
             CHECK_NULL_RETURN(columnInfo, size);
             auto parent = columnInfo->GetParent();
             CHECK_NULL_RETURN(parent, size);
@@ -608,7 +608,11 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
                 } else {
                     frameSize = previewSize;
                 }
-                geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
+                if (LessOrEqual(frameSize.Width(), maxWidth)) {
+                    geometryNode->SetFrameSize(SizeF(frameSize.Width(), frameSize.Height()));
+                } else {
+                    geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
+                }
             } else {
                 geometryNode->SetFrameSize(frameSize);
             }
@@ -900,6 +904,7 @@ void MenuLayoutAlgorithm::UpdateScrollAndColumnLayoutConstraint(
             child->Measure(constraint);
         }
     }
+
     for (auto& child : previewLayoutWrapper->GetAllChildrenWithBuild()) {
         auto hostNode = child->GetHostNode();
         auto geometryNode = child->GetGeometryNode();
@@ -907,16 +912,14 @@ void MenuLayoutAlgorithm::UpdateScrollAndColumnLayoutConstraint(
             continue;
         }
         auto frameSize = previewGeometryNode->GetMarginFrameSize();
-        auto previewSecurity = static_cast<float>(PREVIEW_INNER_SECURITY.ConvertToPx() / previewScale_) * 2;
-        geometryNode->SetFrameSize(SizeF(frameSize.Width() - previewSecurity, frameSize.Height() - previewSecurity));
+        geometryNode->SetFrameSize(SizeF(frameSize.Width(), frameSize.Height()));
         auto layoutProperty = child->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         auto constraint = layoutProperty->GetLayoutConstraint();
         if (constraint.has_value()) {
-            constraint.value().maxSize.SetWidth(frameSize.Width() - previewSecurity);
-            constraint.value().maxSize.SetHeight(frameSize.Height() - previewSecurity);
-            constraint.value().selfIdealSize.UpdateSizeWithCheck(
-                SizeF(frameSize.Width() - previewSecurity, frameSize.Height() - previewSecurity));
+            constraint.value().maxSize.SetWidth(frameSize.Width());
+            constraint.value().maxSize.SetHeight(frameSize.Height());
+            constraint.value().selfIdealSize.UpdateSizeWithCheck(SizeF(frameSize.Width(), frameSize.Height()));
             layoutProperty->UpdateLayoutConstraint(constraint.value());
             hostNode->GetRenderContext()->SetClipToBounds(true);
             child->Measure(constraint);
@@ -1741,8 +1744,8 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
-void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
-    const RefPtr<MenuPattern>& menuPattern)
+void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
+    const LayoutWrapper* layoutWrapper, bool isContextMenu, const RefPtr<MenuPattern>& menuPattern)
 {
     CHECK_NULL_VOID(layoutWrapper);
     CHECK_NULL_VOID(menuPattern);
@@ -1752,6 +1755,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     CHECK_NULL_VOID(geometryNode);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
+    bool expandDisplay = menuPattern->GetMenuExpandDisplay();
     if (props->GetIsRectInTargetValue(false)) {
         targetSize_ = props->GetTargetSizeValue(SizeF());
         targetOffset_ = props->GetMenuOffsetValue(OffsetF());
@@ -1762,12 +1766,14 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     menuPattern->SetTargetSize(targetSize_);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    if ((isContextMenu || hierarchicalParameters_) && (targetTag_ != V2::SELECT_ETS_TAG)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        expandDisplay = true;
+    }
+    if (((isContextMenu && expandDisplay) || hierarchicalParameters_) && (targetTag_ != V2::SELECT_ETS_TAG)) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
         float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
         targetOffset_ += OffsetF(windowsOffsetX, windowsOffsetY);
-
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
         targetOffset_ -= offset;
         return;

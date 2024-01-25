@@ -29,10 +29,10 @@ declare class DrawContext {}
 declare class __JSBaseNode__ {
   constructor(options?: RenderOptions);
   create(builder: (...args: Object[]) => void, params: Object): number | null;
-  createRenderNode(): number | null;
+  createRenderNode(node: FrameNode | RenderNode): number | null;
   finishUpdateFunc(): void;
   postTouchEvent(touchEvent: TouchEvent): boolean;
-  reset(): void;
+  dispose(): void;
   draw(drawContext: DrawContext): void;
 }
 

@@ -215,7 +215,7 @@ class RenderNode {
 
   set backgroundColor(color: number) {
     this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue<number>(color, 0);
-    GetUINativeModule().common.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
+    GetUINativeModule().renderNode.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
   }
   set clipToFrame(useClip: boolean) {
     this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue<boolean>(useClip, false);
@@ -474,6 +474,12 @@ class RenderNode {
   }
   setNodePtr(nodePtr: number | null) {
     this.nodePtr = nodePtr;
+  }
+  setBaseNode(baseNode: BaseNode | null) {
+    this.baseNode_ = baseNode;
+  }
+  dispose() {
+    this.baseNode_.dispose()
   }
   getNodePtr(): number | null {
     return this.nodePtr;

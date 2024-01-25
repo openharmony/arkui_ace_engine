@@ -859,13 +859,12 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo)
 
     const auto& rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.rbegin(), rootChildren.rend(), popupNode);
-    if (iter != rootChildren.rend()) {
-        return;
+    if (iter == rootChildren.rend()) {
+        popupNode->MountToParent(rootNode);
     }
 
     // attach popupNode before entering animation
     popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
-    popupNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     popupMap_[targetId].isCurrentOnShow = true;
 
@@ -2617,6 +2616,7 @@ void OverlayManager::CloseSheet(int32_t targetId)
     }
     auto sheetNode = sheetMap_[targetId].Upgrade();
     CHECK_NULL_VOID(sheetNode);
+    sheetNode->GetPattern<SheetPresentationPattern>()->SetShowState(false);
     auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
     CHECK_NULL_VOID(scrollNode);
     auto builder = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
@@ -3484,12 +3484,12 @@ void OverlayManager::RemoveFilter()
         return;
     }
     auto columnNode = filterColumnNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(columnNode);
-    auto rootNode = columnNode->GetParent();
-    CHECK_NULL_VOID(rootNode);
-    auto children = columnNode->GetChildren();
-    rootNode->RemoveChild(columnNode);
-    rootNode->RebuildRenderContextTree();
+    if (columnNode) {
+        auto rootNode = columnNode->GetParent();
+        CHECK_NULL_VOID(rootNode);
+        rootNode->RemoveChild(columnNode);
+        rootNode->RebuildRenderContextTree();
+    }
     hasFilter_ = false;
 }
 

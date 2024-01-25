@@ -137,7 +137,7 @@ public:
         uint32_t spanTextLength = 0;
         for (auto& span : spans_) {
             spanTextLength += StringUtils::ToWstring(span->content).length();
-            span->position = spanTextLength;
+            span->position = static_cast<int32_t>(spanTextLength);
         }
     }
 
@@ -306,8 +306,6 @@ public:
     std::function<void(Offset)> GetThumbnailCallback() override;
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
-    void AdjustHandleRect(OffsetF& firstHandleOffset, OffsetF& secondHandleOffset, SizeF& firstHandlePaintSize,
-        SizeF& secondHandlePaintSize);
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
@@ -411,6 +409,7 @@ protected:
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll);
+    void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
     void HandleOnPaste() override;
     void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
@@ -552,6 +551,9 @@ private:
     void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
     bool IsClickBoundary(const int32_t position);
+    bool EraseEmoji();
+    bool EraseEmoji(const RefPtr<SpanItem>& spanItem);
+    void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

@@ -239,6 +239,8 @@ public:
 
     RefPtr<FrameNode> FindNavigationNodeToHandleBack(const RefPtr<UINode>& node);
 
+    void AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty);
+
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
@@ -590,6 +592,8 @@ public:
     // return value means whether it has printed info
     bool PrintVsyncInfoIfNeed() const override;
 
+    void CheckVirtualKeyboardHeight() override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -677,6 +681,8 @@ private:
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
+
+    std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyPropertyNodes_; // used in node api.
     std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
 

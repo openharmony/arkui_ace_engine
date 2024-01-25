@@ -85,7 +85,7 @@ void JSHyperlink::Create(const JSCallbackInfo& args)
 void JSHyperlink::SetColor(const JSCallbackInfo& info)
 {
     Color color;
-    if (!ParseJsColor(info[0], color) || info[0]->ToNumber<int32_t>() < 0) {
+    if (!ParseJsColor(info[0], color)) {
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<HyperlinkTheme>();

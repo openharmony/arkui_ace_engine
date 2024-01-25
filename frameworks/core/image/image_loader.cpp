@@ -268,8 +268,9 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
 // NG ImageLoader entrance
 bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync)
 {
-    return sync ? DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback), src)
-                : DownloadManager::GetInstance()->DownloadAsync(std::move(downloadCallback), src);
+    return sync ? DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback), src, Container::CurrentId())
+                : DownloadManager::GetInstance()->DownloadAsync(
+                      std::move(downloadCallback), src, Container::CurrentId());
 }
 
 #ifndef USE_ROSEN_DRAWING
@@ -478,6 +479,9 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
 #endif
 
     // 2. if not found. download it.
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Download network image, uri=%{public}s", uri.c_str());
+    }
     std::vector<uint8_t> imageData;
     if (!DownloadManager::GetInstance()->Download(uri, imageData) || imageData.empty()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Download network image %{private}s failed!", uri.c_str());

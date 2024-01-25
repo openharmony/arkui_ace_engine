@@ -305,7 +305,7 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     return digitalParameters;
 }
 
-void SetSwiperNextMargin(ArkUINodeHandle node, double nextMarginValue, int32_t nextMarginUnit)
+void SetSwiperNextMargin(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, int32_t nextMarginUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -320,7 +320,7 @@ void ResetSwiperNextMargin(ArkUINodeHandle node)
     SwiperModelNG::SetNextMargin(frameNode, value);
 }
 
-void SetSwiperPrevMargin(ArkUINodeHandle node, double prevMarginValue, int32_t prevMarginUnit)
+void SetSwiperPrevMargin(ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, int32_t prevMarginUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -505,7 +505,7 @@ void ResetSwiperDisplayMode(ArkUINodeHandle node)
     SwiperModelNG::SetDisplayMode(frameNode, SwiperDisplayMode::STRETCH);
 }
 
-void SetSwiperItemSpace(ArkUINodeHandle node, double itemSpaceValue, int32_t itemSpaceUnit)
+void SetSwiperItemSpace(ArkUINodeHandle node, ArkUI_Float32 itemSpaceValue, int32_t itemSpaceUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

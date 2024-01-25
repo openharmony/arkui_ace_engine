@@ -30,7 +30,6 @@ constexpr Dimension MAGNIFIER_WIDTH = 140.0_vp;
 constexpr Dimension MAGNIFIER_HEIGHT = 48.0_vp;
 constexpr Dimension MAGNIFIER_OFFSET_Y = 4.0_vp;
 constexpr Dimension PIXEL_MAP_IMAGE_OFFSET = 4.0_vp;
-constexpr Dimension CLOSE_MAGNIFIER_MAX_OFFSET_X = 70.0_vp;
 constexpr Dimension MAGNIFIER_BOUNDRY_WIDTH = 1.0_vp;
 constexpr Dimension DEFAULT_STATUS_BAR_HEIGHT = 48.0_vp;
 } // namespace
@@ -333,7 +332,6 @@ bool TextFieldOverlayModifier::GetMagnifierRect(
     auto magnifierWidth = MAGNIFIER_WIDTH.ConvertToPx();
     auto magnifierHeight = MAGNIFIER_HEIGHT.ConvertToPx();
     auto magnifierOffsetY = MAGNIFIER_OFFSET_Y.ConvertToPx();
-    auto closeMagnifierMaxOffsetX = CLOSE_MAGNIFIER_MAX_OFFSET_X.ConvertToPx();
     auto localOffsetY = magnifierRect_.localOffset.GetY();
     localOffsetX = std::max(localOffsetX, magnifierRect_.contentOffset.GetX());
     localOffsetX = std::min(localOffsetX, magnifierRect_.contentSize.Width() + magnifierRect_.contentOffset.GetX());
@@ -341,12 +339,9 @@ bool TextFieldOverlayModifier::GetMagnifierRect(
     if (!pattern->GetTextBoxes().empty()) {
         textBoxesLeft = pattern->GetTextBoxes()[0].Left();
     }
-    if (std::abs(localOffsetX - cursorOffsetX) > closeMagnifierMaxOffsetX &&
-        std::abs(localOffsetX - textBoxesLeft) > closeMagnifierMaxOffsetX) {
-        return false;
-    }
     startX = localOffsetX - magnifierWidth / 2.0f;
-    if (pattern->GetCaretIndex() == pattern->GetContentWideTextLength() && localOffsetX >= cursorOffsetX) {
+    if ((pattern->GetCaretIndex() == pattern->GetContentWideTextLength() && localOffsetX >= cursorOffsetX) ||
+        (pattern->GetCaretIndex() == 0 && localOffsetX <= cursorOffsetX)) {
         startX = cursorOffsetX - magnifierWidth / 2.0f;
         localOffsetX = cursorOffsetX;
     }

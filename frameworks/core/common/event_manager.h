@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/event_dump.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/gestures/gesture_referee.h"
@@ -31,7 +32,6 @@
 #include "core/event/touch_event.h"
 #include "core/focus/focus_node.h"
 #include "core/gestures/gesture_referee.h"
-#include "core/common/event_dump.h"
 
 namespace OHOS::Ace {
 namespace NG {
@@ -61,6 +61,7 @@ struct RectCallback final {
 
 class EventManager : public virtual AceType {
     DECLARE_ACE_TYPE(EventManager, AceType);
+
 public:
     EventManager();
     ~EventManager() override = default;
@@ -238,6 +239,9 @@ public:
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
+    void GetTouchTestIds(const TouchEvent& touchPoint, std::vector<std::string>& touchTestIds,
+        bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
+    void CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;

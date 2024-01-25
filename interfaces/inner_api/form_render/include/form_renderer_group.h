@@ -82,13 +82,20 @@ public:
     const std::vector<FormRequest>& GetAllRendererFormRequests() const;
     void RecycleForm(std::string& statusData) const;
 private:
+    enum class FormRendererInitState {
+        UNINITIALIZED,
+        PRE_INITIALIZED,
+        INITIALIZED
+    };
     void InnerAddForm(const FormRequest& formRequest);
+    void PreInitAddForm(const FormRequest& formRequest);
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
     std::shared_ptr<FormRenderer> formRenderer_;
     std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     std::vector<FormRequest> formRequests_;
     std::string currentCompId_;
+    FormRendererInitState initState_ = FormRendererInitState::UNINITIALIZED;
 };
 }  // namespace Ace
 }  // namespace OHOS

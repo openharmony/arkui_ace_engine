@@ -464,6 +464,7 @@ public:
     void UpdateCacheMode(const WebCacheMode& mode);
     std::shared_ptr<OHOS::NWeb::NWeb> GetNweb();
     bool GetForceDarkMode();
+    void OnConfigurationUpdated(const std::string& colorMode);
     void UpdateDarkMode(const WebDarkMode& mode);
     void UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting);
     void UpdateForceDarkAccess(const bool& access);

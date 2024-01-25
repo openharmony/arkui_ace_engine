@@ -181,6 +181,7 @@ private:
     void InitDialogProperties(DialogProperties& properties);
     void PostTaskToUI(const std::function<void()>& task);
     void HandleTaskCallback();
+    void HandleZeroStartTaskCallback();
     void HandleTextFocusEvent(int32_t index);
     void HandleBlurEvent();
     void HandleButtonHoverEvent(bool state, int32_t index);
@@ -189,6 +190,8 @@ private:
     void ResetTextStateByNode(const RefPtr<FrameNode>& textFrameNode);
     void FlushTextStyle();
     bool IsInNodeRegion(const RefPtr<FrameNode>& node, const PointF& point);
+    bool HandleYearKeyWaitingEvent(
+        const uint32_t number, const std::function<void()>& task, const std::function<void()>& zeroStartTask);
     bool HandleYearKeyEvent(uint32_t number);
     bool HandleMonthKeyEvent(uint32_t number);
     bool HandleDayKeyEvent(uint32_t number);
@@ -197,6 +200,11 @@ private:
 
     std::string GetEntryDateInfo();
     void SetDate(const std::string& info);
+
+    uint32_t yearEnterCount_ = 0;
+    uint32_t yearPrefixZeroCount_ = 0;
+    uint32_t monthPrefixZeroCount_ = 0;
+    uint32_t dayPrefixZeroCount_ = 0;
 
     std::optional<int32_t> subId_;
     std::optional<int32_t> contentId_;

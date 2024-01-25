@@ -87,6 +87,24 @@ struct SelectMenuCallback {
     std::function<void()> onDisappear;
 };
 
+struct SelectedByMouseInfo {
+    WeakPtr<FrameNode> selectedNode;
+    std::function<void()> onResetSelection;
+
+    bool operator!=(const SelectedByMouseInfo& info) const
+    {
+        CHECK_NULL_RETURN(selectedNode.Upgrade(), true);
+        CHECK_NULL_RETURN(info.selectedNode.Upgrade(), true);
+        return selectedNode.Upgrade() != info.selectedNode.Upgrade();
+    }
+
+    void clear()
+    {
+        selectedNode.Reset();
+        onResetSelection = nullptr;
+    }
+};
+
 struct SelectOverlayInfo {
     bool isUsingMouse = false;
     bool isSingleHandle = false;
@@ -95,6 +113,7 @@ struct SelectOverlayInfo {
     // Used to determine the range of judgment that is parallel to the first and second handles.
     float singleLineHeight = 10.0f;
     bool isSelectRegionVisible = false;
+    bool isNewAvoid = false;
     SelectHandleInfo firstHandle;
     SelectHandleInfo secondHandle;
     HitTestMode hitTestMode = HitTestMode::HTMTRANSPARENT_SELF;
@@ -102,6 +121,7 @@ struct SelectOverlayInfo {
     // show area
     bool useFullScreen = true;
     RectF showArea;
+    RectF selectArea;
 
     OffsetF rightClickOffset;
 

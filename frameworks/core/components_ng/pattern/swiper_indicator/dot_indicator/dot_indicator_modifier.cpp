@@ -141,6 +141,7 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
     RSCanvas& canvas = context.canvas;
     OffsetF selectedCenter = {};
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
+
     for (size_t i = 0; i < totalCount; ++i) {
         LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
@@ -148,7 +149,8 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
             PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(unselectedColor_->Get()));
         } else {
             selectedCenter = center;
-            PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(unselectedColor_->Get()));
+            PaintUnselectedIndicator(canvas, center, itemHalfSizes, isCustomSize_,
+                LinearColor(unselectedColor_->Get()));
         }
     }
 

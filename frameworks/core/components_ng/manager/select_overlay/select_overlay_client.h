@@ -49,6 +49,8 @@ struct OverlayExtraInfo {
 struct ClientOverlayInfo {
     std::optional<SelectHandleInfo> firstHandleInfo;
     std::optional<SelectHandleInfo> secondHandleInfo;
+    RectF selectArea;
+    bool isNewAvoid = false;
     bool animation = true;
     bool isMenuShow = true;
     bool isShowMouseMenu = false;
@@ -154,6 +156,11 @@ protected:
     void UpdateOriginIsMenuShow(bool isShow)
     {
         originIsMenuShow_ = isShow;
+    }
+    
+    bool GetOriginIsMenuShow()
+    {
+        return originIsMenuShow_;
     }
 
 private:

@@ -328,7 +328,7 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
     }
 
-    return image_;
+    return image_ || altImage_;
 }
 
 void ImagePattern::CreateObscuredImage()

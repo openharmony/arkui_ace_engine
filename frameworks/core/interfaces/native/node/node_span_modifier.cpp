@@ -75,7 +75,7 @@ void ResetSpanFontWeight(ArkUINodeHandle node)
     SpanModelNG::SetFontWeight(frameNode, DEFAULT_FONT_WEIGHT);
 }
 
-void SetSpanLineHeight(ArkUINodeHandle node, const double number, const int32_t unit)
+void SetSpanLineHeight(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -101,7 +101,7 @@ void ReSetSpanFontStyle(ArkUINodeHandle node)
     SpanModelNG::SetItalicFontStyle(frameNode, DEFAULT_FONT_STYLE_VALUE);
 }
 
-void SetSpanFontSize(ArkUINodeHandle node, const double number, const int32_t unit)
+void SetSpanFontSize(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -142,7 +142,7 @@ void ResetSpanFontFamily(ArkUINodeHandle node)
     SpanModelNG::SetFontFamily(frameNode, families);
 }
 
-void SetSpanDecoration(ArkUINodeHandle node, const int32_t decoration, const uint32_t color, const uint32_t style)
+void SetSpanDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Uint32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -179,7 +179,7 @@ void ResetSpanFontColor(ArkUINodeHandle node)
     SpanModelNG::SetTextColor(frameNode, Color(textColor));
 }
 
-void SetSpanLetterSpacing(ArkUINodeHandle node, const struct StringAndDouble* letterSpacingValue)
+void SetSpanLetterSpacing(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

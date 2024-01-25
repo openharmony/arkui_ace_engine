@@ -557,13 +557,14 @@ void SearchPattern::OnClickButtonAndImage()
 
 void SearchPattern::OnClickCancelButton()
 {
-    focusChoice_ = FocusChoice::SEARCH;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
+    CHECK_NULL_VOID(!textFieldPattern->IsDragging());
+    focusChoice_ = FocusChoice::SEARCH;
     textFieldPattern->InitEditingValueText("");
     auto textRect = textFieldPattern->GetTextRect();
     textRect.SetLeft(0.0f);
@@ -774,6 +775,8 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
             } else {
                 textFieldPattern->HandleFocusEvent(); // Show caret
             }
+        } else {
+            textFieldPattern->HandleFocusEvent();
         }
     } else {
         if (textFieldPattern->IsSelected() || textFieldPattern->GetCursorVisible()) {

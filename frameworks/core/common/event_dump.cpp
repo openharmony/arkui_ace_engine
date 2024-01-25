@@ -20,6 +20,7 @@ namespace {
 constexpr size_t MAX_EVENT_TREE_RECORD_CNT = 5;
 constexpr size_t MAX_FRAME_NODE_CNT = 256;
 constexpr int32_t MAX_EVENT_TREE_TOUCH_DOWN_CNT = 10;
+constexpr int32_t MAX_EVENT_TREE_TOUCH_POINT_CNT = 20;
 } // end of namespace
 
 void FrameNodeSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
@@ -63,6 +64,18 @@ void TouchPointSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpLi
 
 void EventTreeRecord::AddTouchPoint(const TouchEvent& event)
 {
+    if (!eventTreeList.empty()) {
+        if (eventTreeList.back().touchPoints.size() > MAX_EVENT_TREE_TOUCH_POINT_CNT) {
+            eventTreeList.pop_back();
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+                "EventTreeList last record touchPoint size is over limit! Last record is cleaned.");
+        }
+        if (event.type == Ace::TouchType::DOWN && eventTreeList.back().downFingerIds_.count(event.id) > 0) {
+            eventTreeList.pop_back();
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+                "EventTreeList last record receive DOWN event twice. Last record is cleaned.");
+        }
+    }
     TouchType type = event.type;
     if (type == Ace::TouchType::DOWN) {
         // multi fingers touch down will be in one tree
@@ -74,6 +87,7 @@ void EventTreeRecord::AddTouchPoint(const TouchEvent& event)
             }
         }
         eventTreeList.back().touchDownCount++;
+        eventTreeList.back().downFingerIds_.insert(event.id);
     }
 
     if (eventTreeList.empty()) {
@@ -83,6 +97,7 @@ void EventTreeRecord::AddTouchPoint(const TouchEvent& event)
     if (type == TouchType::UP || type == TouchType::CANCEL || type == TouchType::PULL_UP ||
         type == TouchType::PULL_OUT_WINDOW) {
         eventTreeList.back().touchDownCount--;
+        eventTreeList.back().downFingerIds_.erase(event.id);
     }
     eventTreeList.back().touchPoints.emplace_back(TouchPointSnapshot(event));
 }
@@ -146,12 +161,17 @@ void EventTreeRecord::AddGestureProcedure(uint64_t id,
     iter->second->AddProcedure(procedure, state, disposal, timestamp);
 }
 
-void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
+void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList,
+    int32_t depth, int32_t startNumber) const
 {
     int32_t index = 0;
     int32_t listDepth = depth + 1;
     int32_t detailDepth = listDepth + 1;
     for (auto& tree : eventTreeList) {
+        if (index < startNumber) {
+            index++;
+            continue;
+        }
         std::string header = std::to_string(index).append(": event tree =>");
 
         // dump needful touch points:

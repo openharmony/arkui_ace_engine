@@ -37,13 +37,13 @@ std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 } // namespace
 
 static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG {
-    { Framework::ERROR_CODE_PERMISSION_DENIED, "Permission denied. " },
-    { Framework::ERROR_CODE_PARAM_INVALID, "Parameter error. " },
-    { Framework::ERROR_CODE_SYSTEMCAP_ERROR, "Capability not supported. " },
-    { Framework::ERROR_CODE_INTERNAL_ERROR, "Internal error. " },
-    { Framework::ERROR_CODE_URI_ERROR, "Uri error. " },
-    { Framework::ERROR_CODE_PAGE_STACK_FULL, "Page stack error. " },
-    { Framework::ERROR_CODE_URI_ERROR_LITE, "Uri error. " }
+    { ERROR_CODE_PERMISSION_DENIED, "Permission denied. " },
+    { ERROR_CODE_PARAM_INVALID, "Parameter error. " },
+    { ERROR_CODE_SYSTEMCAP_ERROR, "Capability not supported. " },
+    { ERROR_CODE_INTERNAL_ERROR, "Internal error. " },
+    { ERROR_CODE_URI_ERROR, "Uri error. " },
+    { ERROR_CODE_PAGE_STACK_FULL, "Page stack error. " },
+    { ERROR_CODE_URI_ERROR_LITE, "Uri error. " }
 };
 
 void NapiThrow(napi_env env, const std::string& message, int32_t errCode)

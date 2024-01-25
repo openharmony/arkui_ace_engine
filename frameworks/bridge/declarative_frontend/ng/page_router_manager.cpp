@@ -206,7 +206,7 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         LOGW("router stack size is larger than max size 32.");
         if (target.errorCallback != nullptr) {
-            target.errorCallback("The pages are pushed too much.", Framework::ERROR_CODE_PAGE_STACK_FULL);
+            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
         }
         return;
     }
@@ -659,7 +659,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         LOGW("Router stack size is larger than max size 32.");
         if (target.errorCallback != nullptr) {
-            target.errorCallback("The pages are pushed too much.", Framework::ERROR_CODE_PAGE_STACK_FULL);
+            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
         }
         return;
     }
@@ -727,7 +727,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         LOGW("Router stack size is larger than max size 32.");
         if (target.errorCallback != nullptr) {
-            target.errorCallback("The pages are pushed too much.", Framework::ERROR_CODE_PAGE_STACK_FULL);
+            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
         }
         return;
     }
@@ -736,7 +736,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     if (info.path.empty()) {
         LOGW("[Engine Log] this uri is empty, not support in route push.");
         if (info.errorCallback != nullptr) {
-            info.errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
+            info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
         }
         return;
     }
@@ -827,7 +827,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
     if (info.path.empty()) {
         LOGW("[Engine Log] this uri is empty, not support in route push.");
         if (info.errorCallback != nullptr) {
-            info.errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR_LITE);
+            info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR_LITE);
         }
         return;
     }
@@ -943,7 +943,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         if (!target.isNamedRouterMode) {
             result = updateRootComponent_();
         } else if (target.errorCallback) {
-            target.errorCallback("The named route is not exist.", Framework::ERROR_CODE_NAMED_ROUTE_ERROR);
+            target.errorCallback("The named route is not exist.", ERROR_CODE_NAMED_ROUTE_ERROR);
         }
     }
 
@@ -958,7 +958,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     }
 
     if (target.errorCallback != nullptr) {
-        target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
+        target.errorCallback("", ERROR_CODE_NO_ERROR);
     }
 #if defined(PREVIEW)
     }
@@ -1007,7 +1007,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
 {
     LOGI("Move page to front to index: %{public}d", index);
     if (target.errorCallback != nullptr) {
-        target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
+        target.errorCallback("", ERROR_CODE_NO_ERROR);
     }
 
     // update param first.

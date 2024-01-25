@@ -20,5 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIImageModifier* GetImageModifier();
-}
+void SetImageOnComplete(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+void SetImageOnError(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+} // namespace OHOS::Ace::NG::NodeModifier
 #endif

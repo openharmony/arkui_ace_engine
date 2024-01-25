@@ -26,6 +26,7 @@
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
@@ -269,7 +270,6 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
         offset = pageHeight_ - sheetMaxHeight_;
         currentOffset_ = height_ - sheetMaxHeight_;
     }
-    ChangeScrollHeight(height_ - currentOffset_);
     ProcessColumnRect(height_ - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
@@ -309,6 +309,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
                 SheetInteractiveDismiss(true, std::abs(dragVelocity));
             } else {
                 ChangeSheetHeight(downHeight);
+                ChangeScrollHeight(height_);
                 SheetTransition(true, std::abs(dragVelocity));
             }
         } else if (LessNotEqual(std::abs(currentSheetHeight - upHeight), std::abs(currentSheetHeight - downHeight))) {
@@ -323,6 +324,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
                 SheetInteractiveDismiss(true, std::abs(dragVelocity));
             } else {
                 ChangeSheetHeight(downHeight);
+                ChangeScrollHeight(height_);
                 SheetTransition(true, std::abs(dragVelocity));
             }
         } else {
@@ -347,6 +349,10 @@ void SheetPresentationPattern::OnCoordScrollStart()
 
 bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
 {
+    if (!GetShowState()) {
+        return false;
+    }
+
     auto sheetType = GetSheetType();
     auto sheetDetentsSize = sheetDetentHeight_.size();
     if ((sheetType == SheetType::SHEET_POPUP) || (sheetDetentsSize == 0)) {
@@ -365,7 +371,6 @@ bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
         offset = pageHeight_ - sheetMaxHeight_;
         currentOffset_ = height_ - sheetMaxHeight_;
     }
-    ChangeScrollHeight(height_ - currentOffset_);
     ProcessColumnRect(height_ - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
@@ -558,7 +563,6 @@ void SheetPresentationPattern::SheetInteractiveDismiss(bool isDragClose, float d
         overlayManager->SetDismissTargetId(targetId_);
         if (isDragClose) {
             ProcessColumnRect(height_);
-            ChangeScrollHeight(height_);
             SheetTransition(true);
         }
         CallShouldDismiss();
@@ -743,6 +747,28 @@ void SheetPresentationPattern::UpdateInteractive()
         }
     }
     maskNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SheetPresentationPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto sheetCloseIcon = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
+    CHECK_NULL_VOID(sheetCloseIcon);
+    auto renderContext = sheetCloseIcon->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
+    sheetCloseIcon->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto imageNode = DynamicCast<FrameNode>(sheetCloseIcon->GetChildAtIndex(0));
+    CHECK_NULL_VOID(imageNode);
+    auto imagePaintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imagePaintProperty);
+    imagePaintProperty->UpdateSvgFillColor(sheetTheme->GetCloseIconImageColor());
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SheetPresentationPattern::CheckSheetHeightChange()

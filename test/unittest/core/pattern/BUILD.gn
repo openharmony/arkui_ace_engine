@@ -92,8 +92,6 @@ group("core_pattern_unittest") {
     "toggle:toggle_test_ng",
     "video:video_test_ng",
     "waterflow:water_flow_test_ng",
-
-    # "web:web_pattern_unit_test",
     "xcomponent:xcomponent_test_ng",
   ]
 }

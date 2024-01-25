@@ -32,6 +32,8 @@ inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE = 1;
 // Mark self to reLayout.
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_LAYOUT = 1 << 1;
 
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_DIFF = 1 << 2;
+
 // Mark self to remeasure.
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF = 1 << 3;
 
@@ -47,6 +49,11 @@ inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST = 1 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 8;
 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD = 1 << 9;
+
+inline bool CheckNeedMakePropertyDiff(PropertyChangeFlag flag)
+{
+    return (flag & PROPERTY_UPDATE_DIFF) == PROPERTY_UPDATE_DIFF;
+}
 
 bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag);
 

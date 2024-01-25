@@ -24,6 +24,7 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/common/container.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 using ParagraphT = std::variant<std::shared_ptr<RSParagraph>, RefPtr<Paragraph>>;
@@ -88,6 +89,14 @@ public:
     MouseStatus GetMouseStatus() const
     {
         return mouseStatus_;
+    }
+
+    static void SetSelectionNode(const SelectedByMouseInfo& info)
+    {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto selectOverlayManager = pipeline->GetSelectOverlayManager();
+        selectOverlayManager->SetSelectedNodeByMouse(info);
     }
 
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false)

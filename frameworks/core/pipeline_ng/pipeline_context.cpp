@@ -170,6 +170,13 @@ float PipelineContext::GetCurrentRootHeight()
     return static_cast<float>(context->rootHeight_);
 }
 
+void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
+{
+    dirtyPropertyNodes_.emplace(dirtyNode);
+    hasIdleTasks_ = true;
+    RequestFrame();
+}
+
 void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);
@@ -251,6 +258,13 @@ void PipelineContext::FlushDirtyNodeUpdate()
     ACE_FUNCTION_TRACE();
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
+    }
+
+    // node api property diff before ets update.
+    decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
+    dirtyPropertyNodes_.clear();
+    for (const auto& node : dirtyPropertyNodes) {
+        node->ProcessPropertyDiff();
     }
 
     // SomeTimes, customNode->Update may add some dirty custom nodes to dirtyNodes_,
@@ -1344,6 +1358,23 @@ void PipelineContext::SyncSafeArea(bool onKeyboard)
     }
 }
 
+void PipelineContext::CheckVirtualKeyboardHeight()
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_) {
+        return;
+    }
+#endif
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto keyboardArea = container->GetKeyboardSafeArea();
+    auto keyboardHeight = keyboardArea.bottom_.end - keyboardArea.bottom_.start;
+    if (keyboardHeight > 0) {
+        LOGI("Current View has keyboard.");
+    }
+    OnVirtualKeyboardHeightChange(keyboardHeight);
+}
+
 void PipelineContext::OnVirtualKeyboardHeightChange(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
@@ -1792,6 +1823,9 @@ void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint)
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    if (manager->IsDraggingPressed(touchPoint.id)) {
+        manager->SetDraggingPressedState(false);
+    }
     if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
         manager->OnDragEnd(PointerEvent(touchPoint.x, touchPoint.y), "");
     }
@@ -2442,7 +2476,6 @@ void PipelineContext::WindowFocus(bool isFocus)
         RestoreDefault();
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
-        OnVirtualKeyboardAreaChange(Rect());
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
         auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;

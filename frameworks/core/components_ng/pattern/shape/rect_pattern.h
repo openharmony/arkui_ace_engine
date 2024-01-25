@@ -43,6 +43,20 @@ public:
         return MakeRefPtr<RectPaintProperty>();
     }
 
+    void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto pixelRoundContentOffset = geometryNode->GetPixelRoundContentOffset();
+        auto pixelRoundContentSize = geometryNode->GetPixelRoundContentSize();
+        auto rectPaintProperty = host->GetPaintProperty<RectPaintProperty>();
+        CHECK_NULL_VOID(rectPaintProperty);
+        rectPaintProperty->SetContentOffset(pixelRoundContentOffset);
+        rectPaintProperty->SetContentSize(pixelRoundContentSize);
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RectPattern);
 };

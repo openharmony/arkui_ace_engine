@@ -193,11 +193,23 @@ void AddAlarmLogFunc()
 {
     std::function<void(uint64_t, int, int)> logFunc = [](uint64_t nodeId, int count, int num) {
         auto rsNode = Rosen::RSNodeMap::Instance().GetNode<Rosen::RSNode>(nodeId);
+        if (rsNode == nullptr) {
+            LOGI("rsNodeId = %{public}" PRId64 " send %{public}d commands, total number of rsNode is %{public}d"
+                 "But cannot find the rsNode with this rsNodeId",
+                nodeId, count, num);
+            return;
+        }
         auto frameNodeId = rsNode->GetFrameNodeId();
         auto frameNodeTag = rsNode->GetFrameNodeTag();
         auto frameNode = NG::FrameNode::GetFrameNode(frameNodeTag, frameNodeId);
+        if (frameNode == nullptr) {
+            LOGI("frameNodeId = %{public}d, rsNodeId = %{public}" PRId64 " send %{public}d commands, "
+                 "total number of rsNode is %{public}d. But cannot find the frameNode with this frameNodeId.",
+                frameNodeId, nodeId, count, num);
+            return;
+        }
         LOGI("frameNodeId = %{public}d, rsNodeId = %{public}" PRId64 " send %{public}d commands, "
-            "the tag of corresponding frame node is %{public}s, total number of rsNode is %{public}d",
+             "the tag of corresponding frame node is %{public}s, total number of rsNode is %{public}d",
             frameNodeId, nodeId, count, frameNodeTag.c_str(), num);
     };
 
@@ -502,6 +514,25 @@ void UIContentImpl::InitializeInner(
     LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
     // run page.
     Platform::AceContainer::RunPage(instanceId_, startUrl_, "", isNamedRouter);
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+}
+
+void UIContentImpl::PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
+{
+    // ArkTSCard need no window
+    if (isFormRender_ && !window) {
+        LOGI("CommonInitializeForm url = %{public}s", url.c_str());
+        CommonInitializeForm(window, url, storage);
+    }
+}
+
+void UIContentImpl::RunFormPage()
+{
+    LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "", false);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
@@ -1654,7 +1685,7 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
             "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
             "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
             "ViewPosX = %{public}d, ViewPosY = %{public}d",
@@ -1673,7 +1704,7 @@ bool UIContentImpl::ProcessPointerEventWithCallback(
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
             "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
             "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
             "ViewPosX = %{public}d, ViewPosY = %{public}d",
@@ -1687,7 +1718,7 @@ bool UIContentImpl::ProcessPointerEventWithCallback(
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+    TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
         "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
         "keyEvent info: keyCode is %{public}d, "
         "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
@@ -1812,16 +1843,22 @@ void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
 void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
 {
     LOGI("UIContentImpl: UpdateWindowMode, window mode is %{public}d, hasDeco is %{public}d", mode, hasDeco);
+    UpdateDecorVisible(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
+}
+
+void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
+{
+    LOGI("UIContentImpl: UpdateWindowMode, window visible is %{public}d, hasDeco is %{public}d", visible, hasDeco);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [container, mode, hasDeco]() {
-            auto pipelineContext = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
+        [container, visible, hasDeco]() {
+           auto pipelineContext = container->GetPipelineContext();
+           CHECK_NULL_VOID(pipelineContext);
+           pipelineContext->ShowContainerTitle(visible, hasDeco);
         },
         TaskExecutor::TaskType::UI);
 }

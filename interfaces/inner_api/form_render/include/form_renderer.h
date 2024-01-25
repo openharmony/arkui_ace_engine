@@ -43,6 +43,8 @@ public:
     ~FormRenderer();
 
     void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void PreInitAddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void RunFormPage(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void ReloadForm(const std::string& url);
     void Destroy();
@@ -67,10 +69,14 @@ private:
     void ParseWant(const OHOS::AAFwk::Want& want);
     void SetRenderDelegate(const sptr<IRemoteObject>& renderRemoteObj);
     void AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
     bool allowUpdate_ = true;
     float width_ = 0.0f;
     float height_ = 0.0f;
+    float borderWidth_ = 0.0f;
+    float lastBorderWidth_ = 0.0f;
     std::string backgroundColor_;
     AppExecFwk::Constants::RenderingMode renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
     std::vector<std::string> cachedInfos_;

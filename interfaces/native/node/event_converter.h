@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include "basic_node.h"
+#include "native_node.h"
 
-#include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NodeModel {
 

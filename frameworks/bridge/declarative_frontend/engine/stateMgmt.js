@@ -5144,6 +5144,9 @@ class ViewPU extends NativeViewPartialUpdate {
                 childViewPU.setActiveInternal(this.isActive_);
             }
         }
+        if (this.hasRecycleManager()) {
+            this.getRecycleManager().setActive(this.isActive_);
+        }
     }
     onInactiveInternal() {
         if (this.isActive_) {
@@ -5160,6 +5163,9 @@ class ViewPU extends NativeViewPartialUpdate {
             if (childViewPU) {
                 childViewPU.setActiveInternal(this.isActive_);
             }
+        }
+        if (this.hasRecycleManager()) {
+            this.getRecycleManager().setActive(this.isActive_);
         }
     }
     setParent(parent) {
@@ -6153,6 +6159,14 @@ class RecycleManager {
             });
         });
         this.cachedRecycleNodes_.clear();
+    }
+    // Set active status for all cached nodes
+    setActive(active) {
+        this.cachedRecycleNodes_.forEach((nodes, _) => {
+            nodes.forEach((node) => {
+                node.setActiveInternal(active);
+            });
+        });
     }
 }
 class BidirectionalMap {

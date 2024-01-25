@@ -79,11 +79,6 @@ bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
     content_ = StringUtils::ToString(wideText.substr(0, startIndex)) + tmp +
                StringUtils::ToString(wideText.substr(endIndex, static_cast<int32_t>(wideText.length()) - endIndex));
     FilterValue();
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
-    auto textField = DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_RETURN(textField, false);
-    textField->ContentFireOnChangeEvent();
     return !tmp.empty();
 }
 
@@ -184,7 +179,6 @@ void ContentController::FilterValue()
     if (GreatNotEqual(textWidth, maxLength)) {
         content_ = StringUtils::ToString(GetWideText().substr(0, maxLength));
     }
-    textField->ContentFireOnChangeEvent();
 }
 
 void ContentController::FilterValueType(std::string& value)
@@ -197,8 +191,7 @@ void ContentController::FilterValueType(std::string& value)
     CHECK_NULL_VOID(textField);
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
 
-    bool hasInputFilter =
-        property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty() && !content_.empty();
+    bool hasInputFilter = property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty();
     if (!hasInputFilter) {
         FilterTextInputStyle(textChanged, result);
     } else {
@@ -336,11 +329,6 @@ void ContentController::erase(int32_t startIndex, int32_t length)
     }
     auto wideText = GetWideText().erase(startIndex, length);
     content_ = StringUtils::ToString(wideText);
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto textField = DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_VOID(textField);
-    textField->ContentFireOnChangeEvent();
 }
 
 std::string ContentController::GetValueBeforeIndex(int32_t index)

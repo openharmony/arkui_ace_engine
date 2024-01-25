@@ -33,7 +33,8 @@ public:
     void SetCaretColor(const Color& color) override;
     void SetSearchIconSize(const Dimension& value) override;
     void SetSearchIconColor(const Color& color) override;
-    void SetSearchSrcPath(const std::string& src) override;
+    void SetSearchSrcPath(
+        const std::string& src, const std::string& bundleName, const std::string& moduleName) override;
     void SetRightIconSrcPath(const std::string& src) override;
     void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle) override;
     void SetCancelIconSize(const Dimension& value) override;

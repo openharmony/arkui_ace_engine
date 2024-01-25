@@ -571,6 +571,10 @@ void TextPattern::HandleOnSelectAll()
     CloseSelectOverlay(true);
     if (!selectOverlayInfo.isUsingMouse) {
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
+    } else {
+        if (IsSelected()) {
+            PushSelectedByMouseInfoToManager();
+        }
     }
     selectMenuInfo_.showCopyAll = false;
     selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
@@ -1017,9 +1021,24 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
     if (info.GetButton() == MouseButton::LEFT_BUTTON) {
         HandleMouseLeftButton(info, textOffset);
+        if (IsSelected()) {
+            PushSelectedByMouseInfoToManager();
+        }
     } else if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleMouseRightButton(info, textOffset);
     }
+}
+
+void TextPattern::PushSelectedByMouseInfoToManager()
+{
+    SelectedByMouseInfo selectedByMouseInfo;
+    selectedByMouseInfo.selectedNode = GetHost();
+    selectedByMouseInfo.onResetSelection = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ResetSelection();
+    };
+    SetSelectionNode(selectedByMouseInfo);
 }
 
 void TextPattern::HandleMouseLeftButton(const MouseInfo& info, const Offset& textOffset)
@@ -1413,7 +1432,6 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     dragResultObjects_.clear();
     if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
         HandleSelectionChange(recoverStart_, recoverEnd_);
-        showSelect_ = true;
         isShowMenu_ = false;
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
@@ -1434,7 +1452,6 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
         pattern->contentMod_->ChangeDragStatus();
         if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
             HandleSelectionChange(recoverStart_, recoverEnd_);
-            pattern->showSelect_ = true;
             isShowMenu_ = false;
             CalculateHandleOffsetAndShowOverlay();
             ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
@@ -1493,6 +1510,7 @@ void TextPattern::InitDragEvent()
         ContainerScope scope(scopeId);
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->showSelect_ = true;
         if (pattern->spans_.empty()) {
             pattern->OnDragEndNoChild(event);
         } else {
@@ -1730,10 +1748,10 @@ ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t in
         resultObject.imageStyle.size[RichEditorImageSize::SIZEWIDTH] = geometryNode->GetMarginFrameSize().Width();
         resultObject.imageStyle.size[RichEditorImageSize::SIZEHEIGHT] = geometryNode->GetMarginFrameSize().Height();
         if (imageLayoutProperty->HasImageFit()) {
-            resultObject.imageStyle.verticalAlign = static_cast<int32_t>(imageLayoutProperty->GetImageFitValue());
+            resultObject.imageStyle.objectFit = static_cast<int32_t>(imageLayoutProperty->GetImageFitValue());
         }
         if (imageLayoutProperty->HasVerticalAlign()) {
-            resultObject.imageStyle.objectFit = static_cast<int32_t>(imageLayoutProperty->GetVerticalAlignValue());
+            resultObject.imageStyle.verticalAlign = static_cast<int32_t>(imageLayoutProperty->GetVerticalAlignValue());
         }
         if (geometryNode->GetMargin()) {
             resultObject.imageStyle.margin = geometryNode->GetMargin()->ToJsonString();

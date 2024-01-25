@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,11 @@
 #include <string>
 
 namespace OHOS::Ace {
-enum class DownloadState { SUCCESS = 0, FAILED = 1, CANCEL = 2 };
-
-using DownloadCallback = std::function<void(const std::string&&, DownloadState)>;
+struct DownloadCallback {
+    std::function<void(const std::string&&, bool, int32_t)> successCallback;
+    std::function<void(std::string, bool, int32_t)> failCallback;
+    std::function<void(std::string, bool, int32_t)> cancelCallback;
+};
 
 struct DownloadCondition {
     std::condition_variable cv;
@@ -43,8 +45,8 @@ public:
     virtual ~DownloadManager() = default;
 
     virtual bool Download(const std::string& url, std::vector<uint8_t>& dataOut);
-    virtual bool DownloadAsync(DownloadCallback&& downloadCallback, const std::string& url);
-    virtual bool DownloadSync(DownloadCallback&& downloadCallback, const std::string& url);
+    virtual bool DownloadAsync(DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId);
+    virtual bool DownloadSync(DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId);
 
 private:
     static std::unique_ptr<DownloadManager> instance_;

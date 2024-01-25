@@ -54,6 +54,8 @@ public:
 
     void Close(bool animation = false) const;
 
+    void UpdateSelectArea(const RectF& selectArea);
+
     int32_t GetSelectOverlayId() const
     {
         return selectOverlayId_;

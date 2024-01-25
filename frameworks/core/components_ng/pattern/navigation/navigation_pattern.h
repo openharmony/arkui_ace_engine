@@ -392,6 +392,8 @@ private:
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     bool navigationModeChange_ = false;
     bool isCustomAnimation_ = false; // custom animation
+    bool isInDividerDrag_ = false;
+    bool isDividerDraggable_ = true;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
     OnNavigationAnimation onTransition_;

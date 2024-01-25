@@ -72,7 +72,7 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback
             napi_get_undefined(ctx->env, &result[0]);
             napi_get_undefined(ctx->env, &result[1]);
 
-            if (ctx->errCode == Framework::ERROR_CODE_NO_ERROR) {
+            if (ctx->errCode == ERROR_CODE_NO_ERROR) {
 #ifdef PIXEL_MAP_SUPPORTED
                 // convert pixelMap to napi value
                 result[1] = Media::PixelMapNapi::CreatePixelMap(ctx->env, ctx->pixmap);
@@ -82,7 +82,7 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback
 
             if (ctx->deferred) {
                 // promise
-                if (ctx->errCode == Framework::ERROR_CODE_NO_ERROR) {
+                if (ctx->errCode == ERROR_CODE_NO_ERROR) {
                     napi_resolve_deferred(ctx->env, ctx->deferred, result[1]);
                 } else {
                     napi_reject_deferred(ctx->env, ctx->deferred, result[0]);
@@ -122,21 +122,21 @@ bool JsComponentSnapshot::CheckArgs(napi_valuetype firstArgType)
     if (argc_ < minArgc) {
         errorMsg = "The number of parameters must be greater than or equal to 1.";
         LOGE("%{public}s", errorMsg.c_str());
-        NapiThrow(env_, errorMsg, Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env_, errorMsg, ERROR_CODE_PARAM_INVALID);
 
         return false;
     }
     if (argc_ > ARGC_MAX) {
         errorMsg = "The largest number of parameters is 2.";
         LOGE("%{public}s", errorMsg.c_str());
-        NapiThrow(env_, errorMsg, Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env_, errorMsg, ERROR_CODE_PARAM_INVALID);
     }
     napi_valuetype type = napi_undefined;
     napi_typeof(env_, argv_[0], &type);
     if (type != firstArgType) {
         errorMsg = "parameter id is not of type string";
         LOGE("%{public}s", errorMsg.c_str());
-        NapiThrow(env_, errorMsg, Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(env_, errorMsg, ERROR_CODE_PARAM_INVALID);
         return false;
     }
     if (argc_ == ARGC_MAX) {
@@ -144,7 +144,7 @@ bool JsComponentSnapshot::CheckArgs(napi_valuetype firstArgType)
         if (type != napi_function) {
             errorMsg = "parameter callback is not of type function";
             LOGE("%{public}s", errorMsg.c_str());
-            NapiThrow(env_, errorMsg, Framework::ERROR_CODE_PARAM_INVALID);
+            NapiThrow(env_, errorMsg, ERROR_CODE_PARAM_INVALID);
             return false;
         }
     }
@@ -204,7 +204,7 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
 
     auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
-        NapiThrow(env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "ace engine delegate is null", ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return result;
     }
@@ -229,7 +229,7 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
 
     auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
-        NapiThrow(env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "ace engine delegate is null", ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }

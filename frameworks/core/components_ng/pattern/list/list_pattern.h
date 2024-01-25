@@ -255,7 +255,7 @@ private:
     void InitScrollableEvent();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
-    void CheckRestartSpring();
+    void CheckRestartSpring(bool sizeDiminished);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     void UpdateScrollSnap();
     bool IsScrollSnapAlignCenter() const;
@@ -312,6 +312,7 @@ private:
     bool scrollable_ = true;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
+    bool isNeedCheckOffset_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
 

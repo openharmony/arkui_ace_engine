@@ -424,6 +424,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
         childViewPU.setActiveInternal(this.isActive_);
       }
     }
+    if (this.hasRecycleManager()) {
+      this.getRecycleManager().setActive(this.isActive_);
+    }
   }
 
 
@@ -444,6 +447,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
       if (childViewPU) {
         childViewPU.setActiveInternal(this.isActive_);
       }
+    }
+    if (this.hasRecycleManager()) {
+      this.getRecycleManager().setActive(this.isActive_);
     }
   }
 

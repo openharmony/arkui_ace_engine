@@ -62,6 +62,7 @@ struct EventTree {
     std::map<uint64_t, RefPtr<GestureSnapshot>> gestureMap;
 
     int32_t touchDownCount = 0;
+    std::set<int32_t> downFingerIds_;
 };
 
 struct EventTreeRecord {
@@ -77,7 +78,7 @@ struct EventTreeRecord {
     void AddGestureProcedure(uint64_t id,
         const TouchEvent& point, const std::string& state, const std::string& disposal, int64_t timestamp = 0);
 
-    void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const;
+    void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth, int32_t startNumber = 0) const;
 
     std::list<EventTree> eventTreeList;
 };

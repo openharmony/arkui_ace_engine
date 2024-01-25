@@ -304,7 +304,16 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
     if (!RegisterTask(key, ctxWp)) {
         return;
     }
-
+    auto context = ctxWp.Upgrade();
+    if (context && context->Downloadable() && !obj->GetData() && context->GetStateManger()) {
+        auto stateManager = context->GetStateManger();
+        if (stateManager) {
+            stateManager->SetState(ImageLoadingState::UNLOADED);
+            stateManager->HandleCommand(ImageLoadingCommand::LOAD_DATA);
+        }
+        context->OnDataReady();
+        return;
+    }
     if (sync) {
         MakeCanvasImageHelper(obj, size, key, forceResize, true);
     } else {

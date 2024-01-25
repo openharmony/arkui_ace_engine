@@ -15,11 +15,14 @@
 
 #pragma once
 
-#include "basic_node.h"
+#include "native_node.h"
+#include "native_type.h"
 
 namespace OHOS::Ace::NodeModel {
 
-void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const char* value);
+[[deprecated]] void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const char* value);
+
+int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const ArkUI_AttributeItem* item);
 
 const char* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type);
 

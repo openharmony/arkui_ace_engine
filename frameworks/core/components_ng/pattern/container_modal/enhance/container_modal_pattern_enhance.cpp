@@ -36,6 +36,79 @@ constexpr double FOCUS_ALPHA = 1.0;
 constexpr int32_t TITLE_POPUP_DURATION = 200;
 } // namespace
 
+void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
+{
+    auto containerNode = GetHost();
+    CHECK_NULL_VOID(containerNode);
+    auto customTitleRow = GetCustomTitleRow();
+    CHECK_NULL_VOID(customTitleRow);
+    auto floatingTitleRow = GetFloatingTitleRow();
+    CHECK_NULL_VOID(floatingTitleRow);
+    bool isFocus_ = GetIsFocus();
+    if (needUpdate) {
+        LOGI("title is need update, isFocus_: %{public}d", isFocus_);
+        ChangeCustomTitle(isFocus_);
+        ChangeControlButtons(isFocus_);
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stackNode = GetStackNode();
+    CHECK_NULL_VOID(stackNode);
+    auto windowManager = pipelineContext->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    windowMode_ = windowManager->GetWindowMode();
+    isShow =isShow && hasDeco;
+    // set container window show state to RS
+    pipelineContext->SetContainerWindow(isShow);
+    // update container modal padding and border
+    auto layoutProperty = containerNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+    PaddingProperty padding;
+    if (isShow && customTitleSettedShow_) {
+        padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
+            CalcLength(CONTENT_PADDING) };
+    }
+    layoutProperty->UpdatePadding(padding);
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(isShow ? CONTAINER_BORDER_WIDTH : 0.0_vp);
+    layoutProperty->UpdateBorderWidth(borderWidth);
+    auto renderContext = containerNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(isFocus_ ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
+
+    // update stack content border
+    auto stackLayoutProperty = stackNode->GetLayoutProperty();
+    CHECK_NULL_VOID(stackLayoutProperty);
+    stackLayoutProperty->UpdateLayoutWeight(1.0f);
+    auto stackRenderContext = stackNode->GetRenderContext();
+    CHECK_NULL_VOID(stackRenderContext);
+    BorderRadiusProperty stageBorderRadius;
+    stageBorderRadius.SetRadius(isShow ? CONTAINER_INNER_RADIUS : 0.0_vp);
+    stackRenderContext->UpdateBorderRadius(stageBorderRadius);
+    stackRenderContext->SetClipToBounds(true);
+    auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
+    CHECK_NULL_VOID(customTitleLayoutProperty);
+    customTitleLayoutProperty->UpdateVisibility((isShow && customTitleSettedShow_) ? VisibleType::VISIBLE
+        : VisibleType::GONE);
+
+    auto floatingLayoutProperty = floatingTitleRow->GetLayoutProperty();
+    CHECK_NULL_VOID(floatingLayoutProperty);
+    floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    auto controlButtonsNode = GetControlButtonRow();
+    CHECK_NULL_VOID(controlButtonsNode);
+    auto controlButtonsLayoutProperty = controlButtonsNode->GetLayoutProperty();
+    CHECK_NULL_VOID(controlButtonsLayoutProperty);
+    AddOrRemovePanEvent(controlButtonsNode);
+    ChangeFloatingTitle(isFocus_);
+    ChangeControlButtons(isFocus_);
+    auto controlButtonsContext = controlButtonsNode->GetRenderContext();
+    CHECK_NULL_VOID(controlButtonsContext);
+    controlButtonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+    controlButtonsLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
+}
+
 RefPtr<UINode> ContainerModalPatternEnhance::GetTitleItemByIndex(
     const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
 {
@@ -84,7 +157,10 @@ void ContainerModalPatternEnhance::ChangeControlButtons(bool isFocus)
     auto windowManager = pipeline->GetWindowManager();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
     InternalResource::ResourceId maxId =
-        (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN)
+        (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR
+            || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN
+            || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY
+            || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)
             ? InternalResource::ResourceId::IC_WINDOW_RESTORES
             : InternalResource::ResourceId::IC_WINDOW_MAX;
     ChangeTitleButtonIcon(maximizeButton, maxId, isFocus);
@@ -207,9 +283,11 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     if (!isShow && this->CanHideFloatingTitle()) {
         AnimationUtils::Animate(
             option,
-            [floatingContext, buttonsContext, titlePopupDistance]() {
-                floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
-                buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
+            [floatingContext, buttonsContext, titlePopupDistance, height]() {
+                floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(titlePopupDistance)- height,
+                    0.0f });
+                buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(titlePopupDistance) - height,
+                    0.0f });
             },
             [floatingLayoutProperty, id = Container::CurrentId()]() {
                 ContainerScope scope(id);

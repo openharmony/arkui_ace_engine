@@ -16,7 +16,6 @@
 #include "native_interface_xcomponent.h"
 
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
-#include "node/common.h"
 #include "node/node_model.h"
 
 #ifdef __cplusplus

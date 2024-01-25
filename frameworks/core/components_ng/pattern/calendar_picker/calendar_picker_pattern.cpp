@@ -30,6 +30,7 @@ namespace {
 constexpr int32_t YEAR_INDEX = 0;
 constexpr int32_t MONTH_INDEX = 2;
 constexpr int32_t DAY_INDEX = 4;
+constexpr int32_t YEAR_LENTH = 4;
 constexpr int32_t ADD_BUTTON_INDEX = 0;
 constexpr int32_t SUB_BUTTON_INDEX = 1;
 constexpr uint32_t MIN_YEAR = 1;
@@ -485,6 +486,50 @@ bool CalendarPickerPattern::HandleBlurEvent(const KeyEvent& event)
     return focusHub->HandleKeyEvent(event);
 }
 
+bool CalendarPickerPattern::HandleYearKeyWaitingEvent(
+    const uint32_t number, const std::function<void()>& task, const std::function<void()>& zeroStartTask)
+{
+    auto json = JsonUtil::ParseJsonString(GetEntryDateInfo());
+    if (yearPrefixZeroCount_ > 0 && yearPrefixZeroCount_ < YEAR_LENTH - 1 && number == 0 &&
+        yearEnterCount_ == yearPrefixZeroCount_ + 1) {
+        yearPrefixZeroCount_++;
+        PostTaskToUI(std::move(zeroStartTask));
+        return true;
+    } else if (yearPrefixZeroCount_ >= YEAR_LENTH - 1 && number == 0) {
+        yearPrefixZeroCount_ = 0;
+        yearEnterCount_ = 0;
+        isKeyWaiting_ = false;
+        return false;
+    }
+
+    auto newYear = json->GetUInt("year") * 10 + number;
+
+    if (yearPrefixZeroCount_ > 0 && yearEnterCount_ == yearPrefixZeroCount_ + 1) {
+        newYear = number;
+    }
+    if (yearEnterCount_ < YEAR_LENTH) {
+        json->Replace("year", static_cast<int32_t>(newYear));
+        SetDate(json->ToString());
+        PostTaskToUI(std::move(task));
+        return true;
+    }
+    newYear = std::max(newYear, MIN_YEAR);
+    newYear = std::min(newYear, MAX_YEAR);
+    json->Replace("year", static_cast<int32_t>(newYear));
+    auto maxDay = PickerDate::GetMaxDay(newYear, json->GetUInt("month"));
+    if (json->GetUInt("day") > maxDay) {
+        json->Replace("day", static_cast<int32_t>(maxDay));
+    }
+    SetDate(json->ToString());
+    FireChangeEvents(json->ToString());
+    if (yearEnterCount_ >= YEAR_LENTH) {
+        yearPrefixZeroCount_ = 0;
+        yearEnterCount_ = 0;
+    }
+    isKeyWaiting_ = false;
+    return true;
+}
+
 bool CalendarPickerPattern::HandleYearKeyEvent(uint32_t number)
 {
     auto json = JsonUtil::ParseJsonString(GetEntryDateInfo());
@@ -493,36 +538,23 @@ bool CalendarPickerPattern::HandleYearKeyEvent(uint32_t number)
         CHECK_NULL_VOID(pattern);
         pattern->HandleTaskCallback();
     };
-
+    auto zeroStartTaskCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTaskCallback();
+    };
+    if (yearEnterCount_ < YEAR_LENTH) {
+        yearEnterCount_++;
+    } else {
+        return false;
+    }
     if (isKeyWaiting_) {
-        if (json->GetUInt("year") >= 1000) {
-            isKeyWaiting_ = false;
-            return true;
-        }
-
-        auto newYear = json->GetUInt("year") * 10 + number;
-        if (newYear < 1 || newYear > 9999) {
-            return true;
-        }
-        if (newYear < 1000) {
-            json->Replace("year", static_cast<int32_t>(newYear));
-            SetDate(json->ToString());
-            PostTaskToUI(std::move(taskCallback));
-            return true;
-        }
-        newYear = std::max(newYear, MIN_YEAR);
-        newYear = std::min(newYear, MAX_YEAR);
-        json->Replace("year", static_cast<int32_t>(newYear));
-        auto maxDay = PickerDate::GetMaxDay(newYear, json->GetUInt("month"));
-        if (json->GetUInt("day") > maxDay) {
-            json->Replace("day", static_cast<int32_t>(maxDay));
-        }
-        SetDate(json->ToString());
-        FireChangeEvents(json->ToString());
-        isKeyWaiting_ = false;
+        return HandleYearKeyWaitingEvent(number, taskCallback, zeroStartTaskCallback);
     } else {
         if (number == 0) {
-            return false;
+            yearPrefixZeroCount_++;
+            PostTaskToUI(std::move(zeroStartTaskCallback));
+            isKeyWaiting_ = true;
         } else {
             json->Replace("year", static_cast<int32_t>(number));
             SetDate(json->ToString());
@@ -530,7 +562,6 @@ bool CalendarPickerPattern::HandleYearKeyEvent(uint32_t number)
             isKeyWaiting_ = true;
         }
     }
-
     return true;
 }
 
@@ -542,14 +573,24 @@ bool CalendarPickerPattern::HandleMonthKeyEvent(uint32_t number)
         CHECK_NULL_VOID(pattern);
         pattern->HandleTaskCallback();
     };
+    auto zeroStartTaskCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTaskCallback();
+    };
 
     if (isKeyWaiting_) {
-        if (json->GetUInt("month") >= 10) {
+        if (monthPrefixZeroCount_ == 1 && number == 0) {
+            monthPrefixZeroCount_ = 0;
             isKeyWaiting_ = false;
             return false;
         }
 
         auto newMonth = json->GetUInt("month") * 10 + number;
+
+        if (monthPrefixZeroCount_ == 1) {
+            newMonth = number;
+        }
         if (newMonth < 1 || newMonth > MAX_MONTH) {
             return true;
         }
@@ -561,9 +602,12 @@ bool CalendarPickerPattern::HandleMonthKeyEvent(uint32_t number)
         SetDate(json->ToString());
         FireChangeEvents(json->ToString());
         isKeyWaiting_ = false;
+        monthPrefixZeroCount_ = 0;
     } else {
         if (number == 0) {
-            return false;
+            monthPrefixZeroCount_++;
+            PostTaskToUI(std::move(zeroStartTaskCallback));
+            isKeyWaiting_ = true;
         } else {
             json->Replace("month", static_cast<int32_t>(number));
             SetDate(json->ToString());
@@ -584,23 +628,36 @@ bool CalendarPickerPattern::HandleDayKeyEvent(uint32_t number)
         CHECK_NULL_VOID(pattern);
         pattern->HandleTaskCallback();
     };
+    auto zeroStartTaskCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTaskCallback();
+    };
 
     if (isKeyWaiting_) {
-        if (json->GetUInt("day") >= 10) {
+        if (dayPrefixZeroCount_ == 1 && number == 0) {
+            dayPrefixZeroCount_ = 0;
             isKeyWaiting_ = false;
             return false;
         }
 
         auto newDay = json->GetUInt("day") * 10 + number;
+
+        if (dayPrefixZeroCount_ == 1) {
+            newDay = number;
+        }
         if (newDay <= PickerDate::GetMaxDay(json->GetUInt("year"), json->GetUInt("month"))) {
             json->Replace("day", static_cast<int32_t>(newDay));
             SetDate(json->ToString());
             FireChangeEvents(json->ToString());
             isKeyWaiting_ = false;
+            dayPrefixZeroCount_ = 0;
         }
     } else {
         if (number == 0) {
-            return false;
+            dayPrefixZeroCount_++;
+            PostTaskToUI(std::move(zeroStartTaskCallback));
+            isKeyWaiting_ = true;
         } else {
             json->Replace("day", static_cast<int32_t>(number));
             SetDate(json->ToString());
@@ -678,6 +735,29 @@ void CalendarPickerPattern::HandleTaskCallback()
     }
     SetDate(json->ToString());
     FireChangeEvents(json->ToString());
+    yearEnterCount_ = 0;
+    yearPrefixZeroCount_ = 0;
+    monthPrefixZeroCount_ = 0;
+    dayPrefixZeroCount_ = 0;
+    isKeyWaiting_ = false;
+}
+
+void CalendarPickerPattern::HandleZeroStartTaskCallback()
+{
+    taskCount_--;
+    if (taskCount_ > 0) {
+        return;
+    } else if (taskCount_ < 0) {
+        taskCount_ = 0;
+    }
+    if (!isKeyWaiting_) {
+        return;
+    }
+
+    yearEnterCount_ = 0;
+    yearPrefixZeroCount_ = 0;
+    monthPrefixZeroCount_ = 0;
+    dayPrefixZeroCount_ = 0;
     isKeyWaiting_ = false;
 }
 

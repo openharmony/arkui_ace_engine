@@ -121,6 +121,23 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
 
     auto inlineIdealHeight = contentConstraint.maxSize.Height();
+    GetInlineMeasureItem(contentConstraint, layoutWrapper, inlineIdealHeight);
+    auto contentHeight = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
+        ? paragraph_->GetHeight() : std::max(preferredHeight_, paragraph_->GetHeight());
+
+    return SizeF(contentWidth, std::min(inlineIdealHeight, contentHeight));
+}
+
+void TextFieldLayoutAlgorithm::GetInlineMeasureItem(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float& inlineIdealHeight)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+
     if (pattern->HasFocus() && paragraph_->GetLineCount() != 0) {
         pattern->SetSingleLineHeight(paragraph_->GetHeight() / paragraph_->GetLineCount());
         // The maximum height of the inline mode defaults to a maximum of three rows.
@@ -129,19 +146,22 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
         inlineMeasureItem_.inlineSizeHeight = inlineIdealHeight;
     } else {
         // calc inline status in advance
-        inlineMeasureItem_.inlineSizeHeight = inlineParagraph_->GetHeight() / inlineParagraph_->GetLineCount()
-            * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
-        inlineMeasureItem_.inlineContentRectHeight = GreatNotEqual(inlineParagraph_->GetLongestLine(), 0.0)
-            ? inlineParagraph_->GetHeight() : std::max(preferredHeight_, inlineParagraph_->GetHeight());
-        inlineMeasureItem_.inlineLastOffsetY =
-            std::max(inlineMeasureItem_.inlineSizeHeight, inlineMeasureItem_.inlineContentRectHeight)
-            - std::min(inlineMeasureItem_.inlineSizeHeight, inlineMeasureItem_.inlineContentRectHeight);
+        CalcInlineMeasureItem(layoutWrapper);
     }
+}
 
-    auto contentHeight = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
-        ? paragraph_->GetHeight() : std::max(preferredHeight_, paragraph_->GetHeight());
-
-    return SizeF(contentWidth, std::min(inlineIdealHeight, contentHeight));
+void TextFieldLayoutAlgorithm::CalcInlineMeasureItem(LayoutWrapper* layoutWrapper)
+{
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto lineCount = inlineParagraph_->GetLineCount() != 0 ? inlineParagraph_->GetLineCount() : 1;
+    inlineMeasureItem_.inlineSizeHeight = inlineParagraph_->GetHeight() / lineCount
+        * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+    inlineMeasureItem_.inlineContentRectHeight = GreatNotEqual(inlineParagraph_->GetLongestLine(), 0.0)
+        ? inlineParagraph_->GetHeight() : std::max(preferredHeight_, inlineParagraph_->GetHeight());
+    inlineMeasureItem_.inlineLastOffsetY =
+        std::max(inlineMeasureItem_.inlineSizeHeight, inlineMeasureItem_.inlineContentRectHeight)
+        - std::min(inlineMeasureItem_.inlineSizeHeight, inlineMeasureItem_.inlineContentRectHeight);
 }
 
 float TextFieldLayoutAlgorithm::ConstraintWithMinWidth(

@@ -33,6 +33,13 @@ namespace OHOS::Ace::NG {
 class PipelineContext;
 class TextContentModifier;
 
+struct DragSpanPosition {
+    int32_t dragStart { 0 };
+    int32_t dragEnd { 0 };
+    int32_t spanStart { 0 };
+    int32_t spanEnd { 0 };
+};
+
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT TextLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(TextLayoutAlgorithm, BoxLayoutAlgorithm);
@@ -94,13 +101,17 @@ protected:
 
     virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper);
 
+    void GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring textForAI,
+        const TextStyle& textStyle, bool isDragging);
+
+    std::string StringOutBoundProtection(int32_t position, int32_t length, std::wstring wTextForAI);
+
 private:
     virtual void ApplyIndent(const TextStyle& textStyle, double width);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     bool CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper);
     void UpdateSymbolSpanEffect(RefPtr<FrameNode>& frameNode);
-    void CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents,
-        const std::string content, LayoutWrapper* layoutWrapper);
+    void CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents);
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,

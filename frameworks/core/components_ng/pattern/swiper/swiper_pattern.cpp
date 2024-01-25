@@ -286,6 +286,10 @@ void SwiperPattern::OnModifyDone()
 
     SetAccessibilityAction();
     placeItemWidth_.reset();
+
+    if (IsSwipeByGroup()) {
+        needAdjustIndex_ = true;
+    }
 }
 
 void SwiperPattern::OnAfterModifyDone()
@@ -331,11 +335,12 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         if (oldIndex != userSetCurrentIndex) {
             currentIndex_ = userSetCurrentIndex;
             propertyAnimationIndex_ = GetLoopIndex(propertyAnimationIndex_);
-
-            if (IsSwipeByGroup()) {
-                AdjustCurrentIndexOnSwipePage(CurrentIndex());
-            }
         }
+    }
+
+    if (IsSwipeByGroup() && needAdjustIndex_) {
+        AdjustCurrentIndexOnSwipePage(CurrentIndex());
+        needAdjustIndex_ = false;
     }
 
     if (oldIndex_ != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)) {

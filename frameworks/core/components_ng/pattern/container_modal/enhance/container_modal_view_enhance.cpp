@@ -72,10 +72,7 @@ namespace OHOS::Ace::NG {
  */
 namespace {
 const Dimension MENU_CONTAINER_WIDTH = 240.0_vp;
-const Dimension MENU_CONTAINER_HEIGHT = 201.0_vp;
-const Dimension MENU_CONTAINER_HEIGHT_HIDE = 96.0_vp;
-const Dimension MENU_CONTAINER_DIVIDER_HEIGHT = 9.0_vp;
-const Dimension MENU_CONTAINER_DIVIDER_STROKE_HEIGHT = 1.0_vp;
+const Dimension MENU_CONTAINER_HEIGHT = 96.0_vp;
 const Dimension MENU_ITEM_RADIUS = 8.0_vp;
 const Dimension MENU_ITEM_WIDTH = 240.0_vp;
 const Dimension MENU_ITEM_HEIGHT = 48.0_vp;
@@ -98,11 +95,7 @@ const int32_t DOUBLE_CLICK_TO_RECOVER = 2;
 
 const int32_t MAX_MENU_ITEM_LEFT_SPLIT = 1;
 const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
-const int32_t MAX_MENU_ITEM_FULLSCREEN = 3;
-const int32_t MAX_MENU_ITEM_MAXIMIZE = 4;
 
-const int32_t MAX_MENU_DEFAULT_TO_FULLSCREEN = 1;
-const int32_t MAX_MENU_DEFAULT_TO_MAXIMIZE = 2;
 const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
 } // namespace
 bool ContainerModalViewEnhance::sIsForbidMenuEvent_ = false;
@@ -165,7 +158,10 @@ void ContainerModalViewEnhance::SetTapGestureEvent(
         CHECK_NULL_VOID(containerNode);
         auto windowMode = windowManager->GetWindowMode();
         auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
-        if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR
+            || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN
+            || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY
+            || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_RECOVER);
             windowManager->WindowRecover();
         } else if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
@@ -197,7 +193,10 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
             ResetHoverTimer();
             auto mode = windowManager->GetWindowMode();
             auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
-            if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+            if (mode == WindowMode::WINDOW_MODE_FULLSCREEN
+                || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR
+                || mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY
+                || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
                 windowManager->WindowRecover();
             } else {
                 windowManager->WindowMaximize(true);
@@ -317,6 +316,10 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(
 RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>& targetNode, OffsetF menuPosition)
 {
     LOGI("ShowMaxMenu called");
+    if (!enableSplit_) {
+        LOGI("the app window is not support spilt menu");
+        return nullptr;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
@@ -327,14 +330,9 @@ RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>
     auto listLayoutProperty = menuList->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listLayoutProperty, nullptr);
     listLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(MENU_CONTAINER_WIDTH),
-        CalcLength(enableSplit_ ? MENU_CONTAINER_HEIGHT : MENU_CONTAINER_HEIGHT_HIDE)));
-    menuList->AddChild(BuildMaximizeMenuItem());
-    menuList->AddChild(BuildFullScreenMenuItem());
-    if (enableSplit_) {
-        menuList->AddChild(BuildDividerMenuItem());
-        menuList->AddChild(BuildLeftSplitMenuItem());
-        menuList->AddChild(BuildRightSplitMenuItem());
-    }
+        CalcLength(MENU_CONTAINER_HEIGHT)));
+    menuList->AddChild(BuildLeftSplitMenuItem());
+    menuList->AddChild(BuildRightSplitMenuItem());
     auto subWindowManger = SubwindowManager::GetInstance();
     CHECK_NULL_RETURN(subWindowManger, nullptr);
     if ((!subWindowManger->GetSubwindow(Container::CurrentId()) ||
@@ -347,89 +345,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>
     }
     ResetHoverTimer();
     return menuList;
-}
-
-RefPtr<FrameNode> ContainerModalViewEnhance::BuildMaximizeMenuItem()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, nullptr);
-    // click maxize Item Event
-    auto maximizeClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
-        auto windowManager = weak.Upgrade();
-        if (!windowManager) {
-            LOGE("create maxBtn callback func failed,windowManager is null");
-            return;
-        }
-        ResetHoverTimer();
-        if (MaximizeMode::MODE_AVOID_SYSTEM_BAR == windowManager->GetCurrentWindowMaximizeMode()) {
-            EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_MENU_DEFAULT_NOT_CHANGE);
-            windowManager->WindowRecover();
-        } else {
-            ACE_SCOPED_TRACE("ContainerModalViewEnhance::SwithToMaximize");
-            EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_MENU_DEFAULT_TO_MAXIMIZE);
-            windowManager->SetWindowMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
-            windowManager->WindowMaximize(true);
-        }
-    };
-    auto maximizeEvent = AceType::MakeRefPtr<ClickEvent>(std::move(maximizeClickFunc));
-    auto curMaxMode = windowManager->GetCurrentWindowMaximizeMode();
-    auto maximizeTitle = Localization::GetInstance()->GetEntryLetters(
-        curMaxMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ? "window.exitMaximize" : "window.maximize");
-    auto maximizeRow = BuildMenuItem(maximizeTitle, InternalResource::ResourceId::IC_WINDOW_MENU_MAXIMIZE,
-        maximizeEvent, windowManager->GetWindowMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR);
-    maximizeRow->UpdateInspectorId("EnhanceMenuMaximizeRow");
-    return maximizeRow;
-}
-
-RefPtr<FrameNode> ContainerModalViewEnhance::BuildFullScreenMenuItem()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, nullptr);
-    auto fullScreenClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
-        auto windowManager = weak.Upgrade();
-        if (!windowManager) {
-            LOGE("create fullScreen callback func failed,windowManager is null!");
-            return;
-        }
-        ResetHoverTimer();
-        if (MaximizeMode::MODE_FULL_FILL == windowManager->GetCurrentWindowMaximizeMode()) {
-            EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_FULLSCREEN, MAX_MENU_DEFAULT_NOT_CHANGE);
-        } else {
-            EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_FULLSCREEN, MAX_MENU_DEFAULT_TO_FULLSCREEN);
-        }
-
-        if (MaximizeMode::MODE_FULL_FILL == windowManager->GetCurrentWindowMaximizeMode() &&
-            WindowMode::WINDOW_MODE_FULLSCREEN == windowManager->GetWindowMode()) {
-            windowManager->WindowRecover();
-        } else {
-            ACE_SCOPED_TRACE("ContainerModalViewEnhance::SwithToFULLFILL");
-            windowManager->SetWindowMaximizeMode(MaximizeMode::MODE_FULL_FILL);
-            windowManager->WindowMaximize(true);
-        }
-    };
-    auto fullScreenEvent = AceType::MakeRefPtr<ClickEvent>(std::move(fullScreenClickFunc));
-    auto fullScreenTitle = Localization::GetInstance()->GetEntryLetters(
-        WindowMode::WINDOW_MODE_FULLSCREEN == windowManager->GetWindowMode() ? "window.exitFullScreen"
-                                                                             : "window.fullScreen");
-    auto fullScreenRow = BuildMenuItem(fullScreenTitle, InternalResource::ResourceId::IC_WINDOW_MENU_FULLSCREEN,
-        fullScreenEvent, windowManager->GetWindowMaximizeMode() == MaximizeMode::MODE_FULL_FILL);
-    fullScreenRow->UpdateInspectorId("EnhanceMenuFullScreenRow");
-    return fullScreenRow;
-}
-
-RefPtr<FrameNode> ContainerModalViewEnhance::BuildDividerMenuItem()
-{
-    auto divider = FrameNode::CreateFrameNode(V2::DIVIDER_COMPONENT_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<DividerPattern>());
-    auto dividerLayout = divider->GetLayoutProperty<DividerLayoutProperty>();
-    dividerLayout->UpdateStrokeWidth(MENU_CONTAINER_DIVIDER_STROKE_HEIGHT);
-    dividerLayout->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(MENU_CONTAINER_WIDTH), CalcLength(MENU_CONTAINER_DIVIDER_HEIGHT)));
-    return divider;
 }
 
 RefPtr<FrameNode> ContainerModalViewEnhance::BuildLeftSplitMenuItem()
