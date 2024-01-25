@@ -725,7 +725,8 @@ private:
     void ProcessAllVisibleCallback(
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
     void OnVisibleAreaChangeCallback(
-        VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled);
+        std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks,
+        bool visibleType, double currentVisibleRatio, bool isHandled);
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
 
