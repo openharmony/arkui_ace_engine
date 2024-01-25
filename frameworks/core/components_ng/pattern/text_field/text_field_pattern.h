@@ -1269,6 +1269,8 @@ private:
     void InitDragDropCallBack();
     void InitDragDropEventWithOutDragStart();
     void UpdateBlurReason();
+    RectF GetSelectArea();
+    void UpdateOverlaySelectArea();
 
     RectF frameRect_;
     RectF contentRect_;

@@ -574,4 +574,9 @@ void SelectOverlayPattern::StopHiddenHandleTask()
 {
     hiddenHandleTask_.Cancel();
 }
+
+void SelectOverlayPattern::UpdateSelectArea(const RectF& selectArea)
+{
+    info_->selectArea = selectArea;
+}
 } // namespace OHOS::Ace::NG
