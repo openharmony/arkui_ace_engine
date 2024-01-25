@@ -702,7 +702,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     SetScrollSource(source);
     FireAndCleanScrollingListener();
     currentDelta_ = currentDelta_ - offset;
-    if (source == SCROLL_FROM_BAR) {
+    if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING) {
         isNeedCheckOffset_ = true;
     }
     MarkDirtyNodeSelf();
