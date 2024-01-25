@@ -2309,12 +2309,11 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
     if (info.Length() == 0) {
         return;
     }
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
     EffectOption option;
-    ParseEffectOption(jsOption, option);
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
+        ParseEffectOption(jsOption, option);
+    }
     ViewAbstractModel::GetInstance()->SetBackgroundEffect(option);
 }
 
@@ -3477,7 +3476,7 @@ void JSViewAbstract::ParseOuterBorderColor(const JSRef<JSVal>& args)
 
         ViewAbstractModel::GetInstance()->SetOuterBorderColor(leftColor, rightColor, topColor, bottomColor);
     } else {
-        return;
+        ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color::BLACK);
     }
 }
 
@@ -3781,17 +3780,12 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundBrightness(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     double rate = 0.0;
     double lightUpDegree = 0.0;
-    if (!ParseJsDouble(jsObj->GetProperty("rate"), rate)) {
-        return;
-    }
-    if (!ParseJsDouble(jsObj->GetProperty("lightUpDegree"), lightUpDegree)) {
-        return;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        ParseJsDouble(jsObj->GetProperty("rate"), rate);
+        ParseJsDouble(jsObj->GetProperty("lightUpDegree"), lightUpDegree);
     }
     SetDynamicLightUp(rate, lightUpDegree);
 }
