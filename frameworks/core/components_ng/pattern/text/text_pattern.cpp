@@ -1432,7 +1432,6 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     dragResultObjects_.clear();
     if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
         HandleSelectionChange(recoverStart_, recoverEnd_);
-        showSelect_ = true;
         isShowMenu_ = false;
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
@@ -1453,7 +1452,6 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
         pattern->contentMod_->ChangeDragStatus();
         if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
             HandleSelectionChange(recoverStart_, recoverEnd_);
-            pattern->showSelect_ = true;
             isShowMenu_ = false;
             CalculateHandleOffsetAndShowOverlay();
             ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
@@ -1512,6 +1510,7 @@ void TextPattern::InitDragEvent()
         ContainerScope scope(scopeId);
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->showSelect_ = true;
         if (pattern->spans_.empty()) {
             pattern->OnDragEndNoChild(event);
         } else {
