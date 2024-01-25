@@ -299,12 +299,12 @@ bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& ge
     return true;
 }
 
-void NGGestureRecognizer::SetParentGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
+void NGGestureRecognizer::SetEventImportGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
 {
     if (gestureGroup.Invalid()) {
         return;
     }
 
-    parentGestureGroup_ = gestureGroup;
+    eventImportGestureGroup_ = gestureGroup;
 }
 } // namespace OHOS::Ace::NG
