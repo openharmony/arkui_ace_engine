@@ -555,6 +555,7 @@ private:
     bool IsClickBoundary(const int32_t position);
     bool EraseEmoji();
     bool EraseEmoji(const RefPtr<SpanItem>& spanItem);
+    void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
