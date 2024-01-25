@@ -2456,7 +2456,6 @@ void PipelineContext::WindowFocus(bool isFocus)
         RestoreDefault();
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
-        OnVirtualKeyboardAreaChange(Rect());
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
         auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
