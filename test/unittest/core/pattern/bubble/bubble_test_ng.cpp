@@ -650,7 +650,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest008, TestSize.Level1)
     popupParam->SetPlacement(Placement::LEFT);
     popupParam->SetMessage(BUBBLE_NEW_MESSAGE);
     popupParam->SetHasAction(true);
-    BubbleView::UpdatePopupParam(popupId, popupParam, targetNode);
+    BubbleView::UpdateCustomPopupParam(popupId, popupParam);
     /**
      * @tc.steps: step4. using default param to create custom bubble and get popupNode.
      * @tc.expected: Check the popupNode were created successfully.
@@ -659,7 +659,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest008, TestSize.Level1)
     auto popupNode2 =
         BubbleView::CreateCustomBubbleNode(targetNode->GetTag(), targetNode->GetId(), rowFrameNode, popupParam2);
     ASSERT_NE(popupNode2, nullptr);
-    BubbleView::UpdatePopupParam(popupId, popupParam2, targetNode);
+    BubbleView::UpdateCustomPopupParam(popupId, popupParam2);
 }
 
 /**
