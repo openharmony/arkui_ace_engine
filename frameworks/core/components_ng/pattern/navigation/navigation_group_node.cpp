@@ -589,7 +589,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     /* curNode */
     curNode->GetRenderContext()->ClipWithRRect(
-        RectF(curFrameSize.Width() * HALF, 0.0f, curFrameSize.Width(), curFrameSize.Height()),
+        RectF(curFrameSize.Width() * HALF, 0.0f, curFrameSize.Width(), REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     curNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF, 0.0f });
     curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF, 0.0f });
@@ -606,7 +606,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         preTitleNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * PARENT_TITLE_OFFSET, 0.0f });
         // curNode
         curNode->GetRenderContext()->ClipWithRRect(
-            RectF(0.0f, 0.0f, curFrameSize.Width(), curFrameSize.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
+            RectF(0.0f, 0.0f, curFrameSize.Width(), REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
         curNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         curTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     }, option.GetOnFinishEvent());
