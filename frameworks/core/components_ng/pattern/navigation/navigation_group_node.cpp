@@ -436,7 +436,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 
     /* set initial status of animation */
     preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
-    preNode->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, preFrameSize.Width(), preFrameSize.Height()),
+    preNode->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, preFrameSize.Width(), REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -458,7 +458,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start");
         /* preNode */
         preNode->GetRenderContext()->ClipWithRRect(
-            RectF(preFrameSize.Width() * HALF, 0.0f, preFrameSize.Width(), preFrameSize.Height()),
+            RectF(preFrameSize.Width() * HALF, 0.0f, preFrameSize.Width(), REMOVE_CLIP_SIZE),
             RadiusF(EdgeF(0.0f, 0.0f)));
         preNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * HALF, 0.0f });
         preTitleNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * HALF, 0.0f });
