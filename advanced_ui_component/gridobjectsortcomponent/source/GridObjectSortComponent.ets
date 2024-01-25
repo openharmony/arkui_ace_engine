@@ -30,6 +30,7 @@ const IMAGE_DEFAULT = 56;
 const TEXT_PADDING_LEFT_RIGHT = 12;
 const MARGIN_EIGHT = 8;
 const ROW_GAP = 16;
+const SUBTITLE_HEIGHT = 56;
 // Animation Parameters
 const ENTER_EXIT_ICON_DURATION = 200;
 const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1); // Curve of entering and exiting the editing state
@@ -327,8 +328,14 @@ export struct GridObjectSortComponent {
     let selectLen = data.length
     let addRow = 0
     let lastColumn = selectLen % this.colNum === 0
-    if (this.clickAddBtn && lastColumn || this.isStartDrag && lastColumn && state || this.clickRemoveBtn && lastColumn && !state) {
+    if (this.clickAddBtn && lastColumn) {
       addRow = 1
+    } else if (this.isStartDrag && lastColumn && state) {
+      addRow = 1
+    } else if (this.clickRemoveBtn && lastColumn && !state) {
+      addRow = 1
+    } else {
+      addRow = 0
     }
     let rowNumber = Math.ceil(selectLen / this.colNum) + addRow
     height = this.blockHeight * rowNumber
@@ -337,15 +344,34 @@ export struct GridObjectSortComponent {
     }
     return height
   }
+  // Display area icon in image_text mode
+  imageTextRemoveIcon (select: GridObjectSortComponentItem): Resource {
+    const clickRemoveIcon = this.clickRemoveBtn && this.content.id === select.id
+    const icon = clickRemoveIcon ? $r("sys.media.ohos_ic_public_add_norm_filled") : $r("sys.media.ohos_ic_public_remove_filled")
+    return icon
+  }
+  // Adding a Region Icon in image_text Mode
+  imageTextAddIcon (select: GridObjectSortComponentItem): Resource {
+    const clickAddIcon = this.clickAddBtn && this.content.id === select.id && this.gridComState
+    const icon = clickAddIcon ? $r("sys.media.ohos_ic_public_remove_filled") : $r("sys.media.ohos_ic_public_add_norm_filled")
+    return icon
+  }
+  // Displaying and hiding area icons in image_text mode
+  imageTextAddIconVisible (select: GridObjectSortComponentItem): Visibility {
+    const iconHideShow = this.clickAddBtn && this.content.id === select.id && !this.gridComState
+    const visible = iconHideShow ? Visibility.Hidden : Visibility.Visible
+    return visible
+  }
 
   // Drag position calculation in the editing area
   getCoodXY(index: number): PositionXY {
-    const gridCol = this.colNum;
     let x = 0;
     let y = 0;
+    const gridCol = this.colNum;
+    const lastCol = Math.trunc(index % gridCol)
     if (index >= this.insertIndex) {
       // item  newline
-      if (Math.trunc(index % gridCol) === gridCol - 1) {
+      if (lastCol === gridCol - 1) {
         x = x - this.blockWidth * (gridCol - 1)
         y = y + this.blockHeight
       } else {
@@ -374,11 +400,12 @@ export struct GridObjectSortComponent {
     } else {
       xNew = -this.blockWidth * (removeCol - 1)
     }
-    const subTitleHeight: number = 56
+    const subTitleHeight: number = SUBTITLE_HEIGHT
     let yNew = 0
     const removeNumY = totalRows - currentLine
     const minusLine = len % col
-    yNew = (minusLine === 1 ? removeNumY : removeNumY + 1) * (this.blockHeight) + subTitleHeight
+    const line = minusLine === 1 ? removeNumY : removeNumY + 1
+    yNew = line * this.blockHeight + subTitleHeight
     return {
       x: xNew,
       y: yNew
@@ -416,9 +443,15 @@ export struct GridObjectSortComponent {
     }
 
     let yNew = 0
+    let itemHeight = 0
     let removeRow = Math.trunc(removeIndex / this.colNum)
-    const subTitleHeight: number = 56
-    const itemHeight = !this.imageText && this.gridComState && removeIndex > 3 ? (removeRow + 1) * (this.blockHeight - 8) + 8 : (removeRow + 1) * this.blockHeight
+    const subTitleHeight: number = SUBTITLE_HEIGHT
+    const textShowAreaEditItem = !this.imageText && this.gridComState && removeIndex > 3 
+    if (textShowAreaEditItem) {
+      itemHeight = (removeRow + 1) * (this.blockHeight - 8) + 8
+    } else {
+      itemHeight = (removeRow + 1) * this.blockHeight
+    }
     yNew = itemHeight + subTitleHeight
     return {
       x: xNew,
@@ -430,9 +463,11 @@ export struct GridObjectSortComponent {
   getCoveringGridPositionBottom(index: number): PositionXY {
     let xNew = 0
     let yNew = 0
+    const lastCol = index % this.colNum === 0
+    const textShowAreaItemHeight = this.gridComState && !this.imageText ? -this.blockHeight + 8 : -this.blockHeight
     if (index > this.unSelectedIndex && this.arrayUnSelectIsChange !== 2) {
-      xNew = index % this.colNum === 0 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth
-      yNew = index % this.colNum === 0 ? this.gridComState && !this.imageText ? -this.blockHeight + 8 : -this.blockHeight : 0
+      xNew = lastCol ? this.blockWidth * (this.colNum - 1) : -this.blockWidth
+      yNew = lastCol ? textShowAreaItemHeight : 0
     }
     return {
       x: xNew,
@@ -444,7 +479,8 @@ export struct GridObjectSortComponent {
   getAddItemRightMove(index: number): PositionXY {
     let x = this.blockWidth
     let y = 0
-    if ((index + 1) % this.colNum === 0) {
+    let lastCol = (index + 1) % this.colNum === 0
+    if (lastCol) {
       x = -this.blockWidth * (this.colNum - 1)
       y = this.imageText ? this.blockHeight : this.blockHeight - 8
     }
@@ -618,9 +654,9 @@ export struct GridObjectSortComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .textAlign(TextAlign.Center)
 
-        Image(this.clickAddBtn && this.content.id === select.id && this.gridComState ? $r("sys.media.ohos_ic_public_remove_filled") : $r("sys.media.ohos_ic_public_add_norm_filled"))
+        Image(this.imageTextAddIcon(select))
           .draggable(false)
-          .visibility(type === "add" ? this.clickAddBtn && this.content.id === select.id && !this.gridComState ? Visibility.Hidden : Visibility.Visible : Visibility.Hidden)
+          .visibility(type === "add" ? this.imageTextAddIconVisible(select) : Visibility.Hidden)
           .fillColor($r("sys.color.ohos_id_color_secondary"))
           .width(ICON_SIZE)
           .height(ICON_SIZE)
@@ -660,7 +696,7 @@ export struct GridObjectSortComponent {
             })
           })
 
-        Image(this.clickRemoveBtn && this.content.id === select.id ? $r("sys.media.ohos_ic_public_add_norm_filled") : $r("sys.media.ohos_ic_public_remove_filled"))
+        Image(this.imageTextRemoveIcon(select))
           .draggable(false)
           .fillColor($r("sys.color.ohos_id_color_secondary"))
           .visibility(type === "delete" && this.gridComState ? Visibility.Visible : Visibility.Hidden)
