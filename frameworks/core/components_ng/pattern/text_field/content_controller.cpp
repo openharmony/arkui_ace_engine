@@ -191,8 +191,7 @@ void ContentController::FilterValueType(std::string& value)
     CHECK_NULL_VOID(textField);
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
 
-    bool hasInputFilter =
-        property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty() && !content_.empty();
+    bool hasInputFilter = property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty();
     if (!hasInputFilter) {
         FilterTextInputStyle(textChanged, result);
     } else {
