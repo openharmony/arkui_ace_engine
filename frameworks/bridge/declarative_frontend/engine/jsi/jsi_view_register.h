@@ -29,6 +29,7 @@ void JsBindFormViews(
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj);
 void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj);
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine);
+void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode);
 
 RefPtr<FrontendDelegate> JsGetFrontendDelegate();
 
