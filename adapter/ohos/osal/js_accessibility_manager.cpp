@@ -770,9 +770,11 @@ std::vector<RefPtr<NG::FrameNode>> GetWebs(const RefPtr<NG::FrameNode>& root)
         if (frameNode != nullptr && frameNode->GetTag() == V2::WEB_ETS_TAG) {
             results.emplace_back(frameNode);
         }
-        const auto& children = current->GetChildren();
-        for (const auto& child : children) {
-            nodes.push(child);
+        if (current != nullptr) {
+            const auto& children = current->GetChildren();
+            for (const auto& child : children) {
+                nodes.push(child);
+            }
         }
     }
     return results;
@@ -3474,6 +3476,7 @@ void JsAccessibilityManager::SetWebAccessibilityState(bool state)
     auto rootNode = ngPipeline->GetRootElement();
     auto webs = GetWebs(rootNode);
     for (auto& web : webs) {
+        CHECK_NULL_VOID(web);
         auto webPattern = web->GetPattern<NG::WebPattern>();
         CHECK_NULL_VOID(webPattern);
         webPattern->SetAccessibilityState(state);
