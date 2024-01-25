@@ -158,8 +158,8 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     RefPtr<NGGestureRecognizer> gestureGroup;
-    if (!parentGestureGroup_.Invalid()) {
-        gestureGroup = parentGestureGroup_.Upgrade();
+    if (!eventImportGestureGroup_.Invalid()) {
+        gestureGroup = eventImportGestureGroup_.Upgrade();
     } else {
         gestureGroup = gestureGroup_.Upgrade();
     }
