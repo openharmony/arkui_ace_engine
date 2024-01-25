@@ -25,6 +25,9 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#ifdef SECURITY_COMPONENT_ENABLE
+#include "pointer_event.h"
+#endif
 
 namespace OHOS::Ace::NG {
 bool SecurityComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
@@ -70,14 +73,12 @@ bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
-void SecurityComponentPattern::InitOnKeyEvent()
+void SecurityComponentPattern::InitOnKeyEvent(RefPtr<FrameNode>& secCompNode)
 {
     if (isSetOnKeyEvent) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
+    auto focusHub = secCompNode->GetOrCreateFocusHub();
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         if (!pattern) {
@@ -87,6 +88,92 @@ void SecurityComponentPattern::InitOnKeyEvent()
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
     isSetOnKeyEvent = true;
+}
+
+bool SecurityComponentPattern::IsParentMenu(RefPtr<FrameNode>& secCompNode)
+{
+    auto parent = secCompNode->GetParent();
+    while (parent != nullptr) {
+        auto parentNode = AceType::DynamicCast<FrameNode>(parent);
+        if (parentNode == nullptr) {
+            break;
+        }
+        if (parentNode->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            return true;
+        }
+        parent = parent->GetParent();
+    }
+    return false;
+}
+
+void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& info)
+{
+#ifdef SECURITY_COMPONENT_ENABLE
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pointerEvent = info.GetPointerEvent();
+    CHECK_NULL_VOID(pointerEvent);
+
+    int32_t pointerId = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    if (!pointerEvent->GetPointerItem(pointerId, item)) {
+        LOGW("Get pointer item failed");
+        return;
+    }
+
+    GestureEvent gestureInfo;
+    gestureInfo.SetDisplayX(item.GetDisplayX());
+    gestureInfo.SetDisplayY(item.GetDisplayY());
+    gestureInfo.SetTimeStamp(TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime())));
+    gestureInfo.SetEnhanceData(pointerEvent->GetEnhanceData());
+    int res = SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
+        host, gestureInfo);
+    if (res != 0) {
+        LOGW("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
+        res = 1;
+    }
+    auto jsonNode = JsonUtil::Create(true);
+    jsonNode->Put("handleRes", res);
+    std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    gestureEventHub->ActClick(jsonShrd);
+#endif
+}
+
+// When security component is a child node of menu wrapper, the menu is immediately hidden
+// after being touched, and then the security component will trigger a click event.
+// However, it will be considered to have been triggered in a hidden state,
+// Therefore, we should report click event on UP touch event.
+void SecurityComponentPattern::OnTouch(const TouchEventInfo& info)
+{
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        lastTouchOffset_ = std::make_unique<Offset>(info.GetTouches().front().GetLocalLocation());
+    } else if (touchType == TouchType::UP) {
+        auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
+        if (lastTouchOffset_ &&
+            (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_SECURITY_COMPONENT_CLICK_DISTANCE) {
+            HandleClickEventFromTouch(info);
+        }
+        lastTouchOffset_.reset();
+    }
+}
+
+void SecurityComponentPattern::InitOnTouch(RefPtr<FrameNode>& secCompNode)
+{
+    if (onTouchListener_ != nullptr) {
+        return;
+    }
+    auto gestureHub = secCompNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnTouch(info);
+    };
+    onTouchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gestureHub->AddTouchEvent(onTouchListener_);
 }
 
 void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
@@ -103,18 +190,24 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
         CHECK_NULL_VOID(buttonPattern);
         auto frameNode = buttonPattern->GetHost();
         CHECK_NULL_VOID(frameNode);
-        if (!info.GetSecCompHandleEvent()) {
-            int res = SecurityComponentHandler::ReportSecurityComponentClickEvent(buttonPattern->scId_,
+        if (info.GetSecCompHandleEvent()) {
+            return;
+        }
+        auto jsonNode = JsonUtil::Create(true);
+        std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
+        int32_t res;
+        if (buttonPattern->IsParentMenu(frameNode)) {
+            res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
+        } else {
+            res = SecurityComponentHandler::ReportSecurityComponentClickEvent(buttonPattern->scId_,
                 frameNode, info);
             if (res != 0) {
-                LOGE("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
-                res = 1;
+                LOGW("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
+                res = static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED);
             }
-            auto jsonNode = JsonUtil::Create(true);
-            jsonNode->Put("handleRes", res);
-            std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
-            info.SetSecCompHandleEvent(jsonShrd);
         }
+        jsonShrd->Put("handleRes", res);
+        info.SetSecCompHandleEvent(jsonShrd);
 #endif
     };
 
@@ -309,8 +402,9 @@ void SecurityComponentPattern::OnModifyDone()
     }
 
     InitOnClick(frameNode, iconNode, textNode, buttonNode);
-    InitOnKeyEvent();
+    InitOnKeyEvent(frameNode);
     InitAppearCallback(frameNode);
+    InitOnTouch(frameNode);
     RegisterOrUpdateSecurityComponent(frameNode, scId_);
 }
 
