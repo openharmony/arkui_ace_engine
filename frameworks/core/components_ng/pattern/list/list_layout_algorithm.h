@@ -145,6 +145,11 @@ public:
         return currentOffset_;
     }
 
+    void SetIsJumpToIndex(bool isJumpToIndex)
+    {
+        isJumpToIndex_ = isJumpToIndex;
+    }
+
     void SetTotalOffset(float totalOffset)
     {
         totalOffset_ = totalOffset;
@@ -409,6 +414,7 @@ private:
     bool isSpringEffect_ = false;
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;
+    bool isJumpToIndex_ = false;
 
     int32_t totalItemCount_ = 0;
 

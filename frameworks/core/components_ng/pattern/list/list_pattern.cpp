@@ -484,6 +484,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     }
     listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
+    listLayoutAlgorithm->SetIsJumpToIndex(isJumpToIndex_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
     if (IsOutOfBoundary(false) && GetScrollSource() != SCROLL_FROM_AXIS) {
@@ -700,6 +701,9 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     SetScrollSource(source);
     FireAndCleanScrollingListener();
     currentDelta_ = currentDelta_ - offset;
+    if (source == SCROLL_FROM_BAR) {
+        isJumpToIndex_ = true;
+    }
     MarkDirtyNodeSelf();
     if (!IsOutOfBoundary() || !scrollable_) {
         return true;
