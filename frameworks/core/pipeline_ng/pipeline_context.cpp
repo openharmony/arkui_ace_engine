@@ -2457,7 +2457,6 @@ void PipelineContext::WindowFocus(bool isFocus)
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
-        CancelHistoryPoints();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
         auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
@@ -3267,17 +3266,5 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
         return true;
     }
     return false;
-}
-
-void PipelineContext::CancelHistoryPoints()
-{
-    eventManager_->FlushTouchEventsBegin(touchEvents_);
-    for (auto iter = historyPointsById_.begin(); iter != historyPointsById_.end(); ++iter) {
-        TouchEvent cancelEvent;
-        cancelEvent.id = iter->first;
-        cancelEvent.type = TouchType::CANCEL;
-        eventManager_->DispatchTouchEvent(cancelEvent);
-    }
-    eventManager_->FlushTouchEventsEnd(touchEvents_);
 }
 } // namespace OHOS::Ace::NG
