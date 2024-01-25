@@ -25,6 +25,8 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t DEFAULT_SECURITY_COMPONENT_CLICK_DISTANCE = 15;
+
 static inline RefPtr<FrameNode> GetSecCompChildNode(RefPtr<FrameNode>& parent, const std::string& tag)
 {
     for (const auto& child : parent->GetChildren()) {
@@ -75,8 +77,10 @@ public:
 
     int32_t scId_ = -1;
 protected:
-    void InitOnKeyEvent();
+    void InitOnTouch(RefPtr<FrameNode>& secCompNode);
+    void InitOnKeyEvent(RefPtr<FrameNode>& secCompNode);
     bool OnKeyEvent(const KeyEvent& event);
+    void OnTouch(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnModifyDone() override;
     void SetNodeHitTestMode(RefPtr<FrameNode>& node, HitTestMode mode);
@@ -87,12 +91,16 @@ protected:
     void InitAppearCallback(RefPtr<FrameNode>& frameNode);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void ToJsonValueRect(std::unique_ptr<JsonValue>& json) const;
+    bool IsParentMenu(RefPtr<FrameNode>& secCompNode);
 private:
+    void HandleClickEventFromTouch(const TouchEventInfo& info);
     void UpdateIconProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& iconNode);
     void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
 
+    std::unique_ptr<Offset> lastTouchOffset_;
     RefPtr<ClickEvent> clickListener_;
+    RefPtr<TouchEventImpl> onTouchListener_;
     bool isSetOnKeyEvent = false;
     bool isAppearCallback_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SecurityComponentPattern);

@@ -133,7 +133,10 @@ RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_
         { CalcLength(buttonWidth), std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
     buttonPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     if (callback) {
-        pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& /* info */) {
+        pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& info) {
+            if (!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info)) {
+                return;
+            }
             if (callback) {
                 callback();
             }
