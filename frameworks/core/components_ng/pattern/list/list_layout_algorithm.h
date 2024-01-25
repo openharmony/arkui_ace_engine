@@ -145,9 +145,9 @@ public:
         return currentOffset_;
     }
 
-    void SetIsJumpToIndex(bool isJumpToIndex)
+    void SetIsNeedCheckOffset(bool isNeedCheckOffset)
     {
-        isJumpToIndex_ = isJumpToIndex;
+        isNeedCheckOffset_ = isNeedCheckOffset;
     }
 
     void SetTotalOffset(float totalOffset)
@@ -414,7 +414,7 @@ private:
     bool isSpringEffect_ = false;
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;
-    bool isJumpToIndex_ = false;
+    bool isNeedCheckOffset_ = false;
 
     int32_t totalItemCount_ = 0;
 

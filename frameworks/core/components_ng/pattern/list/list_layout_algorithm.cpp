@@ -564,7 +564,7 @@ float ListLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper
 
 void ListLayoutAlgorithm::CheckJumpToIndex()
 {
-    if (jumpIndex_.has_value() || !isJumpToIndex_) {
+    if (jumpIndex_.has_value() || !isNeedCheckOffset_) {
         return;
     }
     if (LessOrEqual(std::abs(currentDelta_), contentMainSize_ * 2.0f) || itemPosition_.empty()) {

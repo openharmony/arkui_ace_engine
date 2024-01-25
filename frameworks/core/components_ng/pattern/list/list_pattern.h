@@ -312,7 +312,7 @@ private:
     bool scrollable_ = true;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
-    bool isJumpToIndex_ = false;
+    bool isNeedCheckOffset_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
 
