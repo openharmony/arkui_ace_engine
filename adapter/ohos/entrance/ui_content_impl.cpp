@@ -391,11 +391,29 @@ private:
 
 class FoldDisplayModeListener : public OHOS::Rosen::DisplayManager::IDisplayModeListener {
 public:
-    explicit FoldDisplayModeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    explicit FoldDisplayModeListener(int32_t instanceId, bool isDialog = false)
+        : instanceId_(instanceId), isDialog_(isDialog)
+    {}
     ~FoldDisplayModeListener() = default;
     void OnDisplayModeChanged(OHOS::Rosen::FoldDisplayMode displayMode) override
     {
-        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        if (!isDialog_) {
+            auto container = Platform::AceContainer::GetContainer(instanceId_);
+            CHECK_NULL_VOID(container);
+            auto taskExecutor = container->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            ContainerScope scope(instanceId_);
+            taskExecutor->PostTask(
+                [container, displayMode] {
+                    auto context = container->GetPipelineContext();
+                    CHECK_NULL_VOID(context);
+                    auto aceDisplayMode = static_cast<FoldDisplayMode>(static_cast<uint32_t>(displayMode));
+                    context->OnFoldDisplayModeChanged(aceDisplayMode);
+                },
+                TaskExecutor::TaskType::UI);
+            return;
+        }
+        auto container = Platform::DialogContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -412,6 +430,7 @@ public:
 
 private:
     int32_t instanceId_ = -1;
+    bool isDialog_ = false;
 };
 
 class TouchOutsideListener : public OHOS::Rosen::ITouchOutsideListener {
@@ -2000,7 +2019,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
     foldStatusListener_ = new FoldScreenListener(instanceId_);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
-    foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_);
+    foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_, isDialog);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterDisplayModeListener(foldDisplayModeListener_);
 }
 
