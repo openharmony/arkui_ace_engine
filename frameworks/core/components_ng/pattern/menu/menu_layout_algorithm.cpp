@@ -1268,6 +1268,9 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             position_ += offset;
         }
         auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
+        if (menuPattern->IsSelectOverlayRightClickMenu()) {
+            AdjustSelectOverlayMenuPosition(menuPosition, geometryNode);
+        }
         SetMenuPlacementForAnimation(layoutWrapper);
         arrowPosition_ = GetArrowPositionWithPlacement(size);
         if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
@@ -1300,6 +1303,23 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
         translate += OffsetF(0, child->GetGeometryNode()->GetFrameSize().Height());
+    }
+}
+
+void MenuLayoutAlgorithm::AdjustSelectOverlayMenuPosition(
+    OffsetF& menuPosition, const RefPtr<GeometryNode>& geometryNode)
+{
+    auto pipelineContext = GetCurrentPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    auto size = geometryNode->GetFrameSize();
+    auto start = static_cast<float>(keyboardInsert.start);
+    if (GreatNotEqual(menuPosition.GetY() + size.Height(), start) && GreatOrEqual(start, size.Height())) {
+        menuPosition.SetY(menuPosition.GetY() - margin_ - size.Height());
+    } else if (GreatNotEqual(menuPosition.GetY() + size.Height(), start) && LessNotEqual(start, size.Height()) &&
+               GreatNotEqual(start, 0)) {
+        menuPosition.SetY(menuPosition.GetY() - margin_ - size.Height() / 2);
     }
 }
 
