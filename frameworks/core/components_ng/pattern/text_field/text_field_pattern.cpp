@@ -4395,8 +4395,12 @@ void TextFieldPattern::HandleSelectionUp()
         UpdateSelection(selectController_->GetCaretIndex());
     }
     auto newOffsetY = selectController_->GetCaretRect().GetY() - PreferredLineHeight() * 0.5 - textRect_.GetY();
-    selectController_->MoveSecondHandleByKeyBoard(static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(
-        Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY))));
+    if (GreatOrEqual(newOffsetY, 0.0)) {
+        selectController_->MoveSecondHandleByKeyBoard(paragraph_->GetGlyphIndexByCoordinate(
+            Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY)));
+    } else {
+        selectController_->MoveSecondHandleByKeyBoard(0);
+    }
     AfterSelection();
 }
 
@@ -4409,8 +4413,12 @@ void TextFieldPattern::HandleSelectionDown()
         UpdateSelection(selectController_->GetCaretIndex());
     }
     auto newOffsetY = selectController_->GetCaretRect().GetY() + PreferredLineHeight() * 1.5 - textRect_.GetY();
-    selectController_->MoveSecondHandleByKeyBoard(static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(
-        Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY))));
+    if (LessOrEqual(newOffsetY, textRect_.Height())) {
+        selectController_->MoveSecondHandleByKeyBoard(paragraph_->GetGlyphIndexByCoordinate(
+            Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY)));
+    } else {
+        selectController_->MoveSecondHandleByKeyBoard(static_cast<int32_t>(contentController_->GetWideText().length()));
+    }
     AfterSelection();
 }
 

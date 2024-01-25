@@ -3260,8 +3260,8 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
             float caretHeight = 0.0f;
             OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
             auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
-            newPos = paragraphs_.GetIndex(
-                Offset(caretOffset.GetX() - GetTextRect().GetX(), caretOffset.GetY() - GetTextRect().GetY() - minDet));
+            newPos = paragraphs_.GetIndex(Offset(caretOffset.GetX() - GetTextRect().GetX(),
+                caretOffset.GetY() - GetTextRect().GetY() - minDet), true);
             break;
         }
         case CaretMoveIntent::Down: {
@@ -3269,7 +3269,7 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
             OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
             auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
             newPos = paragraphs_.GetIndex(Offset(caretOffset.GetX() - GetTextRect().GetX(),
-                caretOffset.GetY() - GetTextRect().GetY() + caretHeight + minDet / 2.0));
+                caretOffset.GetY() - GetTextRect().GetY() + caretHeight + minDet / 2.0), true);
             break;
         }
         default:
