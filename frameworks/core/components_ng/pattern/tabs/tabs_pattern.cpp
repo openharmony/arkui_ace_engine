@@ -72,7 +72,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
         CHECK_NULL_VOID(tabsLayoutProperty);
         tabsLayoutProperty->UpdateIndex(index);
-        tabBarPattern->SetIsAnimating(false);
+        tabBarPattern->ResetIndicatorAnimationState();
         auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(tabBarLayoutProperty);
         if (!tabBarPattern->IsMaskAnimationByCreate()) {
