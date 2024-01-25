@@ -522,6 +522,158 @@ typedef enum {
     ARKUI_SWIPER_ARROW__SHOW_ON_HOVER,
 } ArkUI_SwiperDisplayArrow;
 
+
+/**
+ * @brief 定义无障碍重要性。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 根据组件不同会转换为“yes”或者“no”。 */
+    ARKUI_ACCESSIBILITY_LEVEL_AUTO = 0,
+    /** 当前组件可被无障碍辅助服务所识别。*/
+    ARKUI_ACCESSIBILITY_LEVEL_YES,
+    /** 当前组件不可被无障碍辅助服务所识别。*/
+    ARKUI_ACCESSIBILITY_LEVEL_NO,
+    /** 当前组件及其所有子组件不可被无障碍辅助服务所识别。*/
+    ARKUI_ACCESSIBILITY_LEVEL_NO_HIDE_DESCENDANTS,
+} ArkUI_AccessibilityLevel;
+
+/**
+ * @brief 定义组件支持设置文本是否可复制粘贴。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 不支持复制。 */
+    ARKUI_TEXT_COPY_OPTIONS_NONE = 0,
+    /** 支持应用内复制。*/
+    ARKUI_TEXT_COPY_OPTIONS_IN_APP,
+    /** 支持设备内复制。*/
+    ARKUI_TEXT_COPY_OPTIONS_LOCAL_DEVICE,
+    /** 支持跨设备复制。*/
+    ARKUI_TEXT_COPY_OPTIONS_CROSS_DEVICE,
+} ArkUI_TextCopyOptions;
+
+/**
+ * @brief 定义字体样式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 标准的字体样式。*/
+    ARKUI_TEXT_FONT_STYLE_NORMAL = 0,
+    /** 斜体的字体样式。*/
+    ARKUI_TEXT_FONT_STYLE_ITALIC,
+} ArkUI_TextFontStyle;
+
+/**
+ * @brief 定义文本自适应高度的方式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 设置文本高度自适应方式为以MaxLines优先。 */
+    ARKUI_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST = 0,
+    /** 设置文本高度自适应方式为以缩小字体优先。*/
+    ARKUI_TEXT_HEIGHT_ADAPTIVE_POLICY_MIN_FONT_SIZE_FIRST,
+    /** 设置文本高度自适应方式为以布局约束（高度）优先。*/
+    ARKUI_TEXT_HEIGHT_ADAPTIVE_POLICY_LAYOUT_CONSTRAINT_FIRST,
+} ArkUI_TextHeightAdaptivePolicy;
+
+
+/**
+ * @brief 定义嵌套滚动选项。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 只自身滚动，不与父组件联动。 */
+    ARKUI_SCROLL_NESTED_MODE_SELF_ONLY = 0,
+    /** 自身先滚动，自身滚动到边缘以后父组件滚动。父组件滚动到边缘以后
+    如果父组件有边缘效果，则父组件触发边缘效果，否则子组件触发边缘效果。*/
+    ARKUI_SCROLL_NESTED_MODE_SELF_FIRST,
+    /** 父组件先滚动，父组件滚动到边缘以后自身滚动。
+    身滚动到边缘后，如果有边缘效果，会触发自身的边缘效果，否则触发父组件的边缘效果。*/
+    ARKUI_SCROLL_NESTED_MODE_PARENT_FIRST,
+    /** 自身和父组件同时滚动，自身和父组件都到达边缘以后
+    如果自身有边缘效果，则自身触发边缘效果，否则父组件触发边缘效果。*/
+    ARKUI_SCROLL_NESTED_MODE_PARALLEL,
+} ArkUI_ScrollNestedMode;
+
+
+/**
+ * @brief 定义滚动到的边缘位置。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 竖直方向上边缘。*/
+    ARKUI_SCROLL_EDGE_TOP = 0,
+    /** 竖直方向居中位置。*/
+    ARKUI_SCROLL_EDGE_CENTER,
+    /** 竖直方向下边缘。*/
+    ARKUI_SCROLL_EDGE_BOTTOM,
+    /** 交叉轴方向文本基线位置。*/
+    ARKUI_SCROLL_EDGE_BASELINE,
+    /** 水平方向起始位置。*/
+    ARKUI_SCROLL_EDGE_START,
+    /** 水平方向居中位置。*/
+    ARKUI_SCROLL_EDGE_MIDDLE,
+    /** 水平方向末尾位置。*/
+    ARKUI_SCROLL_EDGE_END,
+} ArkUI_ScrollEdge;
+
+/**
+ * @brief 定义滑块形状。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 使用默认滑块（圆形）。*/
+    ARKUI_SLIDER_BLOCK_STYLE_DEFAULT = 0,
+    /** 使用图片资源作为滑块。*/
+    ARKUI_SLIDER_BLOCK_STYLE_IMAGE,
+    /** 使用自定义形状作为滑块。*/
+    ARKUI_SLIDER_BLOCK_STYLE_SHAPE,
+} ArkUI_SliderBlockStyle;
+
+/**
+ * @brief 定义滑动条滑动方向。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 方向为纵向。*/
+    ARKUI_SLIDER_DIRECTION_VERTICAL = 0,
+    /** 方向为横向。*/
+    ARKUI_SLIDER_DIRECTION_HORIZONTAL,
+} ArkUI_SliderDirection;
+
+/**
+ * @brief 定义滑块与滑轨显示样式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 滑块在滑轨上。*/
+    ARKUI_SLIDER_STYLE_OUT_SET = 0,
+    /** 滑块在滑轨内。*/
+    ARKUI_SLIDER_STYLE_IN_SET,
+} ArkUI_SliderStyle;
+
+/**
+ * @brief 定义CheckBox组件形状。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 圆形。*/
+    ArkUI_CHECKBOX_SHAPE_CIRCLE = 0,
+    /** 圆角方形。*/
+    ArkUI_CHECKBOX_SHAPE_ROUNDED_SQUARE,
+} ArkUI_CheckboxShape;
+
 #ifdef __cplusplus
 };
 #endif
