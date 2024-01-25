@@ -4400,7 +4400,13 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     SizeF secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
     OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
     OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
-    AdjustHandleRect(firstHandleOffset, secondHandleOffset, firstHandlePaintSize, secondHandlePaintSize);
+    if (GetTextContentLength() == 0) {
+        float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
+        secondHandlePaintSize.SetHeight(caretHeight);
+        // only show the second handle.
+        firstHandlePaintSize = SizeF{};
+        firstHandleOffset = OffsetF{};
+    }
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
     RectF firstHandle;
@@ -4411,19 +4417,6 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     secondHandle.SetOffset(secondHandleOffset);
     secondHandle.SetSize(secondHandlePaintSize);
     textSelector_.secondHandle = secondHandle;
-}
-
-void RichEditorPattern::AdjustHandleRect(
-    OffsetF& firstHandleOffset, OffsetF& secondHandleOffset, SizeF& firstHandlePaintSize, SizeF& secondHandlePaintSize)
-{
-    if (GetTextContentLength() == 0) {
-        float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
-        secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight / 2 };
-        secondHandleOffset = OffsetF(secondHandleOffset.GetX(), secondHandleOffset.GetY() + caretHeight / 2);
-        // only show the second handle.
-        firstHandlePaintSize = SizeF{};
-        firstHandleOffset = OffsetF{};
-    }
 }
 
 void RichEditorPattern::ResetSelection()
