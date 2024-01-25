@@ -591,7 +591,6 @@ public:
     const SerializedGesture& GetSerializedGesture() const override;
     // return value means whether it has printed info
     bool PrintVsyncInfoIfNeed() const override;
-    void CancelHistoryPoints();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
