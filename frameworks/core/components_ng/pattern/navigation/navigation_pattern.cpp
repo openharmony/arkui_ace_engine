@@ -1159,34 +1159,47 @@ void NavigationPattern::NotifyDialogChange(bool isShow, bool isNavigationChanged
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     const auto& navDestinationNodes = navigationStack_->GetAllNavDestinationNodes();
     int32_t standardIndex = hostNode->GetLastStandardIndex();
-    for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1; index >= 0 && index >= standardIndex;
-         index--) {
-        const auto& curPath = navDestinationNodes[index];
-        auto curDestination =
-            AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetNavDestinationNode(curPath.second));
-        if (!curDestination) {
-            continue;
-        }
-        auto navDestinationPattern = curDestination->GetPattern<NavDestinationPattern>();
-        CHECK_NULL_VOID(navDestinationPattern);
-        if (navDestinationPattern->GetIsOnShow() == isShow) {
-            continue;
-        }
-        auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        if (isShow) {
+    if (isShow) {
+        int32_t startIndex = standardIndex > 0 ? standardIndex : 0;
+        for (int32_t index = startIndex; index < static_cast<int32_t>(navDestinationNodes.size()); index++) {
+            const auto& curPath = navDestinationNodes[index];
+            auto curDestination =
+                AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetNavDestinationNode(curPath.second));
+            if (!curDestination) {
+                continue;
+            }
+            auto navDestinationPattern = curDestination->GetPattern<NavDestinationPattern>();
+            if (navDestinationPattern->GetIsOnShow()) {
+                continue;
+            }
+            auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
             if (isNavigationChanged) {
                 NavigationPattern::FireNavigationStateChange(curDestination, true);
             }
             auto param = Recorder::EventRecorder::Get().IsPageRecordEnable() ? navigationStack_->GetRouteParam() : "";
             eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
-        } else {
+            navDestinationPattern->SetIsOnShow(true);
+        }
+    } else {
+        for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1;
+         index >= 0 && index >= standardIndex; index--) {
+            const auto& curPath = navDestinationNodes[index];
+            auto curDestination =
+                AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetNavDestinationNode(curPath.second));
+            if (!curDestination) {
+                continue;
+            }
+            auto navDestinationPattern = curDestination->GetPattern<NavDestinationPattern>();
+            if (!navDestinationPattern->GetIsOnShow()) {
+                continue;
+            }
+            auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
             if (isNavigationChanged) {
                 NavigationPattern::FireNavigationStateChange(curDestination, false);
             }
             eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
+            navDestinationPattern->SetIsOnShow(false);
         }
-        navDestinationPattern->SetIsOnShow(isShow);
     }
 }
 
