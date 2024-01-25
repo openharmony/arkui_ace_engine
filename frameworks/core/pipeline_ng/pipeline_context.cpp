@@ -1358,6 +1358,23 @@ void PipelineContext::SyncSafeArea(bool onKeyboard)
     }
 }
 
+void PipelineContext::CheckVirtualKeyboardHeight()
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_) {
+        return;
+    }
+#endif
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto keyboardArea = container->GetKeyboardSafeArea();
+    auto keyboardHeight = keyboardArea.bottom_.end - keyboardArea.bottom_.start;
+    if (keyboardHeight > 0) {
+        LOGI("Current View has keyboard.");
+    }
+    OnVirtualKeyboardHeightChange(keyboardHeight);
+}
+
 void PipelineContext::OnVirtualKeyboardHeightChange(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
@@ -2456,7 +2473,6 @@ void PipelineContext::WindowFocus(bool isFocus)
         RestoreDefault();
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
-        OnVirtualKeyboardAreaChange(Rect());
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
         auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;

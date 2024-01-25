@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_IMAGE_MODIFIER_H
-#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_IMAGE_MODIFIER_H
+#include "adapter/ohos/entrance/ace_extra_input_data.h"
 
-#include "core/interfaces/native/node/node_api.h"
+namespace OHOS::Ace {
+void AceExtraInputData::WriteToInput(const std::shared_ptr<MMI::InputEvent>& inputEvent, AceExtraInputData& data) {}
 
-namespace OHOS::Ace::NG::NodeModifier {
-const ArkUIImageModifier* GetImageModifier();
-void SetImageOnComplete(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetImageOnError(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-} // namespace OHOS::Ace::NG::NodeModifier
-#endif
+void AceExtraInputData::ReadToTouchEvent(const std::shared_ptr<MMI::InputEvent>& inputEvent, TouchEvent& event) {}
+
+void AceExtraInputData::InsertInterpolatePoints(const TouchEventInfo& info) {}
+} // namespace OHOS::Ace

@@ -608,7 +608,11 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
                 } else {
                     frameSize = previewSize;
                 }
-                geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
+                if (LessOrEqual(frameSize.Width(), maxWidth)) {
+                    geometryNode->SetFrameSize(SizeF(frameSize.Width(), frameSize.Height()));
+                } else {
+                    geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
+                }
             } else {
                 geometryNode->SetFrameSize(frameSize);
             }
@@ -1740,8 +1744,8 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
-void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
-    const RefPtr<MenuPattern>& menuPattern)
+void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
+    const LayoutWrapper* layoutWrapper, bool isContextMenu, const RefPtr<MenuPattern>& menuPattern)
 {
     CHECK_NULL_VOID(layoutWrapper);
     CHECK_NULL_VOID(menuPattern);
@@ -1751,6 +1755,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     CHECK_NULL_VOID(geometryNode);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
+    bool expandDisplay = menuPattern->GetMenuExpandDisplay();
     if (props->GetIsRectInTargetValue(false)) {
         targetSize_ = props->GetTargetSizeValue(SizeF());
         targetOffset_ = props->GetMenuOffsetValue(OffsetF());
@@ -1761,12 +1766,14 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     menuPattern->SetTargetSize(targetSize_);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    if ((isContextMenu || hierarchicalParameters_) && (targetTag_ != V2::SELECT_ETS_TAG)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        expandDisplay = true;
+    }
+    if (((isContextMenu && expandDisplay) || hierarchicalParameters_) && (targetTag_ != V2::SELECT_ETS_TAG)) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
         float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
         targetOffset_ += OffsetF(windowsOffsetX, windowsOffsetY);
-
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
         targetOffset_ -= offset;
         return;

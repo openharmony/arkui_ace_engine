@@ -109,7 +109,7 @@ public:
     virtual void RegisterSpringCallback() {}
 
     virtual void ProcessScrollOver(double velocity) {}
-
+    virtual void ProcessSpringUpdate() {}
 protected:
     RefPtr<Scrollable> scrollable_;
     EdgeCallback currentPositionCallback_; // get current position

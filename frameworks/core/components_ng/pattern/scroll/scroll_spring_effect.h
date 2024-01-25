@@ -30,6 +30,7 @@ public:
     void RegisterSpringCallback() override;
     void InitialEdgeEffect() override;
     void ProcessScrollOver(double velocity) override;
+    void ProcessSpringUpdate() override;
 
     void SetOutBoundaryCallback(const OutBoundaryCallback& outBoundaryCallback)
     {

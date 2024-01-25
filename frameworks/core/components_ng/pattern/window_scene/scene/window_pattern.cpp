@@ -203,8 +203,9 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
         snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
         ImageSourceInfo sourceInfo;
         if (session_->GetScenePersistence()->IsSavingSnapshot()) {
-            auto sessionSnapshotPixelMap = session_->GetSnapshotPixelMap();
-            auto pixelMap = PixelMap::CreatePixelMap(&sessionSnapshotPixelMap);
+            auto snapshotPixelMap = session_->GetSnapshotPixelMap();
+            CHECK_NULL_VOID(snapshotPixelMap);
+            auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
             sourceInfo = ImageSourceInfo(pixelMap);
         } else {
             sourceInfo = ImageSourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());

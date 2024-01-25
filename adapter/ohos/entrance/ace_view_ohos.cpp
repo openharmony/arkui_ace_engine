@@ -83,6 +83,7 @@ void AceViewOhos::SurfaceChanged(AceViewOhos* view, int32_t width, int32_t heigh
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->HideOverlays();
+        pipelineContext->CheckVirtualKeyboardHeight();
     }
 }
 
@@ -261,7 +262,7 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
     auto markProcess = [pointerEvent, finallyCallback = callback]() {
         CHECK_NULL_VOID(pointerEvent);
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent markProcessed in ace_view, eventInfo: id:%{public}d",
+            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "touchEvent markProcessed in ace_view, eventInfo: id:%{public}d",
                 pointerEvent->GetId());
         }
         pointerEvent->MarkProcessed();

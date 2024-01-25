@@ -334,6 +334,12 @@ public:
     {
         return isHeightModifiedBySelect_;
     }
+
+    bool GetMenuExpandDisplay() const
+    {
+        return expandDisplay_;
+    }
+
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -392,6 +398,7 @@ private:
     bool hasLaid_ = false;
     bool hasOptionWidth_ = false;
     SizeF targetSize_;
+    bool expandDisplay_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

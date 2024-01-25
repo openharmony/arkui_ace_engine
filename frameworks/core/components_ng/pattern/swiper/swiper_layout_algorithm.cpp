@@ -257,6 +257,7 @@ void SwiperLayoutAlgorithm::MeasureCustomAnimation(
             continue;
         }
 
+        layoutWrapper->RemoveChildInRenderTree(index);
         removeIndexs.insert(index);
     }
 
