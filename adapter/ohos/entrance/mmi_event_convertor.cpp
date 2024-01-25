@@ -20,6 +20,7 @@
 #include "pointer_event.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
@@ -111,6 +112,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         TouchType::UNKNOWN, TouchType::UNKNOWN, time, touchPoint.size, touchPoint.force, touchPoint.tiltX,
         touchPoint.tiltY, pointerEvent->GetDeviceId(), pointerEvent->GetTargetDisplayId(), SourceType::NONE,
         touchPoint.sourceTool };
+    AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
 #ifdef SECURITY_COMPONENT_ENABLE
     event.enhanceData = pointerEvent->GetEnhanceData();
