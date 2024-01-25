@@ -123,7 +123,12 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d NOT IMPLEMENT", type);
         return nullptr;
     }
-    auto* uiNode = impl->getBasicAPI()->createNode(nodes[type - 1], -1, 0);
+
+    ArkUI_Int32 id = -1;
+    if (type == ARKUI_NODE_LOADING_PROGRESS) {
+        id = ARKUI_AUTO_GENERATE_NODE_ID;
+    }
+    auto* uiNode = impl->getBasicAPI()->createNode(nodes[type - 1], id, 0);
     if (!uiNode) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d can not find in full impl", type);
         return nullptr;
@@ -189,8 +194,7 @@ void ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 
 const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
-    // TODO.
-    return nullptr;
+    return GetNodeAttribute(node, attribute);
 }
 
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId)
