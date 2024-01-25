@@ -104,6 +104,8 @@ OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWra
     auto menuSize = menu->GetGeometryNode()->GetFrameSize();
     if (menuOffset.GetX() + menuSize.Width() > maxWidth && menuOffset.GetX() >= menuSize.Width()) {
         menuOffset.SetX(menuOffset.GetX() - menuSize.Width());
+    } else if (menuOffset.GetX() + menuSize.Width() > maxWidth && menuOffset.GetX() < menuSize.Width()) {
+        menuOffset.SetX(menuOffset.GetX() - menuSize.Width() / 2.0);
     }
     return menuOffset;
 }

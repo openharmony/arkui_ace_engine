@@ -327,9 +327,10 @@ public:
         isFirstFocus_ = isFirstFocus;
     }
 
-    void SetIsAnimating(bool isAnimating)
+    void ResetIndicatorAnimationState()
     {
-        isAnimating_ = isAnimating;
+        isAnimating_ = false;
+        animationTargetIndex_.reset();
     }
 
     bool GetTouchingSwiper() const
@@ -486,6 +487,8 @@ private:
     std::vector<LabelStyle> labelStyles_;
     bool isFirstFocus_ = true;
     bool isTouchingSwiper_ = false;
+    float indicatorStartPos_ = 0.0f;
+    float indicatorEndPos_ = 0.0f;
     float turnPageRate_ = 0.0f;
     int32_t swiperStartIndex_ = 0;
     std::vector<BottomTabBarStyle> bottomTabBarStyles_;

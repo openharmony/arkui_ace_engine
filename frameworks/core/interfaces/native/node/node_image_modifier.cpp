@@ -339,5 +339,33 @@ const ArkUIImageModifier* GetImageModifier()
         SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius };
     return &modifier;
 }
+
+void SetImageOnComplete(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, eventId, extraParam](const LoadImageSuccessEvent& info) {
+        ArkUINodeEvent event;
+        event.kind = ON_IMAGE_COMPLETE;
+        event.eventId = eventId;
+        event.extraParam = extraParam;
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageModelNG::SetOnComplete(frameNode, std::move(onEvent));
+}
+
+void SetImageOnError(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, eventId, extraParam](const LoadImageFailEvent& info) {
+        ArkUINodeEvent event;
+        event.kind = ON_IMAGE_ERROR;
+        event.eventId = eventId;
+        event.extraParam = extraParam;
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageModelNG::SetOnError(frameNode, std::move(onEvent));
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
