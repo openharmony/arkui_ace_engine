@@ -19,6 +19,7 @@
 
 #include "ipc_skeleton.h"
 #include "root_scene.h"
+#include "screen_manager.h"
 #include "ui/rs_display_node.h"
 
 #include "base/utils/utils.h"
@@ -106,8 +107,7 @@ void ScreenPattern::UpdateToInputManager(float rotation)
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto screenId = screenSession_->GetScreenId();
-    auto screenProperty = screenSession_->GetScreenProperty();
-    auto dpi = screenProperty.GetDefaultDensity() * DOT_PER_INCH;
+    auto dpi = GetDensityInCurrentResolution() * DOT_PER_INCH;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -195,9 +195,19 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto screenBounds = screenSession_->GetScreenProperty().GetPhyBounds();
     Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
         screenBounds.rect_.width_, screenBounds.rect_.height_ };
-    float density = screenSession_->GetScreenProperty().GetDefaultDensity();
+    float density = GetDensityInCurrentResolution();
     rootScene->SetDisplayDensity(density);
     rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
     return true;
+}
+
+float ScreenPattern::GetDensityInCurrentResolution()
+{
+    sptr<Rosen::Screen> screen = Rosen::ScreenManager::GetInstance().GetScreenById(screenSession_->GetScreenId());
+    float density = screenSession_->GetScreenProperty().GetDefaultDensity();
+    if (screen != nullptr) {
+        screen->GetDensityInCurResolution(density);
+    }
+    return density;
 }
 } // namespace OHOS::Ace::NG
