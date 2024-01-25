@@ -22,14 +22,14 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_image_modifier.h"
+#include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
-#include "core/interfaces/native/node/node_common_modifier.h"
-#include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::NG {
@@ -135,6 +135,10 @@ const ComponentAsyncEventHandler TOGGLE_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnToggleChange,
 };
 
+const ComponentAsyncEventHandler imageNodeAsyncEventHandlers[] = {
+    NodeModifier::SetImageOnComplete,
+    NodeModifier::SetImageOnError,
+};
 /* clang-format on */
 void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId, void* extraParam)
 {
@@ -150,6 +154,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
             }
             eventHandle = commonNodeAsyncEventHandlers[subKind];
             break;
+        }
+        case ARKUI_IMAGE: {
+            if (subKind >= sizeof(imageNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = imageNodeAsyncEventHandlers[subKind];
+            break;            
         }
         case ARKUI_SCROLL: {
             // scroll event type.

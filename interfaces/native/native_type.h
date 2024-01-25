@@ -102,13 +102,13 @@ typedef enum {
  */
 typedef enum {
     /** 不重复。 */
-    ARKUI_IMAGEREPEAT_NO_REPEAT = 0,
+    ARKUI_IMAGE_REPEAT_NO_REPEAT = 0,
     /** 在X轴方向重复。 */
-    ARKUI_IMAGEREPEAT_X,
+    ARKUI_IMAGE_REPEAT_X,
     /** 在Y轴方向重复。 */
-    ARKUI_IMAGEREPEAT_Y,
+    ARKUI_IMAGE_REPEAT_Y,
     /** 在X轴和Y轴方向重复。 */
-    ARKUI_IMAGEREPEAT_XY,
+    ARKUI_IMAGE_REPEAT_XY,
 } ArkUI_ImageRepeat;
 
 /**
@@ -673,6 +673,192 @@ typedef enum {
     /** 圆角方形。*/
     ArkUI_CHECKBOX_SHAPE_ROUNDED_SQUARE,
 } ArkUI_CheckboxShape;
+
+/**
+ * @brief 定义动画播放模式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 动画正向播放。*/
+    ARKUI_PLAY_MODE_NORMAL = 0,
+    /** 动画反向播放。*/
+    ARKUI_PLAY_MODE_REVERSE,
+    /** 动画在奇数次（1、3、5...）正向播放，在偶数次（2、4、6...）反向播放。*/
+    ARKUI_PLAY_MODE_ALTERNATE,
+    /** 动画在奇数次（1、3、5...）反向播放，在偶数次（2、4、6...）正向播放。*/
+    ARKUI_PLAY_MODE_ALTERNATE_REVERSE,
+} ArkUI_AnimationPlayMode;
+
+/**
+ * @brief 定义图片宽高样式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 保持原图的比例不变。*/
+    ARKUI_IMAGE_SIZE_AUTO = 0,
+    /** 默认值，保持宽高比进行缩小或者放大，使得图片两边都大于或等于显示边界。*/
+    ARKUI_IMAGE_SIZE_COVER,
+    /** 保持宽高比进行缩小或者放大，使得图片完全显示在显示边界内。*/
+    ARKUI_IMAGE_SIZE_CONTAIN,
+} ArkUI_ImageSize;
+
+/**
+ * @brief 定义取色模式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 不使用取色模糊。*/
+    ARKUI_ADAPTIVE_COLOR_DEFAULT = 0,
+    /** 使用取色模糊。*/
+    ARKUI_ADAPTIVE_COLOR_AVERAGE,
+} ArkUI_AdaptiveColor;
+
+/**
+ * @brief 定义深浅色模式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 跟随系统深浅色模式。*/
+    ARKUI_COLOR_MODE_SYSTEM = 0,
+    /** 固定使用浅色模式。*/
+    ARKUI_COLOR_MODE_LIGHT,
+    /** 固定使用深色模式。 */
+    ARKUI_COLOR_MODE_DARK,
+} ArkUI_ColorMode;
+
+/**
+ * @brief 定义背景模糊样式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 轻薄材质模糊。 */
+    ARKUI_BLUR_STYLE_THIN = 0,
+    /** 普通厚度材质模糊。 */
+    ARKUI_BLUR_STYLE_REGULAR,
+    /** 厚材质模糊。 */
+    ARKUI_BLUR_STYLE_THICK,
+    /** 近距景深模糊。 */
+    ARKUI_BLUR_STYLE_BACKGROUND_THIN,
+    /** 中距景深模糊。 */
+    ARKUI_BLUR_STYLE_BACKGROUND_REGULAR,
+    /** 远距景深模糊。 */
+    ARKUI_BLUR_STYLE_BACKGROUND_THICK,
+    /** 超远距景深模糊。 */
+    ARKUI_BLUR_STYLE_BACKGROUND_ULTRA_THICK,
+    /** 关闭模糊。 */
+    ARKUI_BLUR_STYLE_NONE,
+    /** 组件超轻薄材质模糊。 */
+    ARKUI_BLUR_STYLE_COMPONENT_ULTRA_THIN,
+    /** 组件轻薄材质模糊。 */
+    ARKUI_BLUR_STYLE_COMPONENT_THIN,
+    /** 组件普通材质模糊。 */
+    ARKUI_BLUR_STYLE_COMPONENT_REGULAR,
+    /** 组件厚材质模糊。 */
+    ARKUI_BLUR_STYLE_COMPONENT_THICK,
+    /** 组件超厚材质模糊。 */
+    ARKUI_BLUR_STYLE_COMPONENT_ULTRA_THICK,
+} ArkUI_BlurStyle;
+
+/**
+ * @brief 定义垂直对齐方式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 顶部对齐。 */
+    ARKUI_VERTICAL_ALIGN_TOP = 0,
+    /** 居中对齐，默认对齐方式。 */
+    ARKUI_VERTICAL_ALIGN_CENTER,
+    /** 底部对齐。 */
+    ARKUI_VERTICAL_ALIGN_BOTTOM,
+} ArkUI_VerticalAlign;
+
+/**
+ * @brief 定义语言方向对齐方式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 按照语言方向起始端对齐。 */
+    ARKUI_HORIZONTAL_ALIGN_START = 0,
+    /** 居中对齐，默认对齐方式。 */
+    ARKUI_HORIZONTAL_ALIGN_CENTER,
+    /** 按照语言方向末端对齐。 */
+    ARKUI_HORIZONTAL_ALIGN_END,
+} ArkUI_HorizontalAlign;
+
+/**
+ * @brief 定义文本超长时的显示方式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 文本超长时不裁剪显示。 */
+    ARKUI_TEXT_OVERFLOW_NONE = 0,
+    /** 文本超长时进行裁剪显示。 */
+    ARKUI_TEXT_OVERFLOW_CLIP,
+    /** 文本超长时显示不下的文本用省略号代替。 */
+    ARKUI_TEXT_OVERFLOW_ELLIPSIS,
+    /** 文本超长时以跑马灯的方式展示。 */
+    ARKUI_TEXT_OVERFLOW_MARQUEE,
+} ArkUI_TextOverFlow;
+
+/**
+ * @brief 定义图片基于文本的对齐方式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 图片下边沿与文本BaseLine对齐。*/
+    ARKUI_IMAGE_SPAN_ALIGNMENT_BASELINE = 0,
+    /** 图片下边沿与文本下边沿对齐。*/
+    ARKUI_IMAGE_SPAN_ALIGNMENT_BOTTOM,
+    /** 图片中间与文本中间对齐。*/
+    ARKUI_IMAGE_SPAN_ALIGNMENT_CENTER,
+    /** 图片上边沿与文本上边沿对齐。 */
+    ARKUI_IMAGE_SPAN_ALIGNMENT_TOP,
+} ArkUI_ImageSpanAlignment;
+
+/**
+ * @brief 定义image填充效果。
+ *ImageSpanAlignment
+ * @since 12
+ */
+typedef enum {
+    /** 保持宽高比进行缩小或者放大，使得图片完全显示在显示边界内。 */
+    ARKUI_OBJECT_FIT_CONTAIN = 0,
+    /** 保持宽高比进行缩小或者放大，使得图片两边都大于或等于显示边界。*/
+    ARKUI_OBJECT_FIT_COVER,
+    /** 自适应显示。*/
+    ARKUI_OBJECT_FIT_AUTO,
+    /** 不保持宽高比进行放大缩小，使得图片充满显示边界。*/
+    ARKUI_OBJECT_FIT_FILL,
+    /** 保持宽高比显示，图片缩小或者保持不变。*/
+    ARKUI_OBJECT_FIT_SCALE_DOWN,
+    /** 保持原有尺寸显示。*/
+    ARKUI_OBJECT_FIT_NONE,
+} ArkUI_ObjectFit;
+
+/**
+ * @brief 定义图片插值效果。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 不使用图片插值。*/
+    ARKUI_INTERPOLATION_NONE = 0,
+    /** 低图片插值。*/
+    ARKUI_INTERPOLATION_LOW,
+    /** 中图片插值。*/
+    ARKUI_INTERPOLATION_MEDIUM,
+    /** 高图片插值，插值质量最高。*/
+    ARKUI_INTERPOLATION_HIGH,
+} ArkUI_ImageInterpolation;
 
 #ifdef __cplusplus
 };
