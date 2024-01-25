@@ -419,17 +419,6 @@ void GestureReferee::HandleRejectDisposal(const RefPtr<NGGestureRecognizer>& rec
             }
         }
     }
-
-    // clean delay task.
-    auto iter = gestureScopes_.begin();
-    while (iter != gestureScopes_.end()) {
-        if (iter->second->IsDelayClosed()) {
-            iter->second->Close();
-            iter = gestureScopes_.erase(iter);
-        } else {
-            ++iter;
-        }
-    }
 }
 
 bool GestureReferee::HasGestureAccepted(size_t touchId) const
