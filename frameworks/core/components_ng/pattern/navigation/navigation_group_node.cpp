@@ -538,11 +538,6 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 auto preNode = weakPreNode.Upgrade();
                 CHECK_NULL_VOID(preNode);
                 auto preTitle = weakPreTitle.Upgrade();
-                if (preTitle) {
-                    preTitle->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-                }
-                preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-                preNode->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
                 bool needSetInvisible = false;
                 if (isNavBar) {
                     needSetInvisible = AceType::DynamicCast<NavBarNode>(preNode)->GetTransitionType() ==
@@ -555,6 +550,12 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 }
                 // for the case, the navBar form EXIT_PUSH to push during animation
                 if (needSetInvisible) {
+                    if (preTitle) {
+                        preTitle->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+                    }
+                    preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+                    preNode->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+
                     if (!isNavBar) {
                         preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                         preNode->SetActive(false);
