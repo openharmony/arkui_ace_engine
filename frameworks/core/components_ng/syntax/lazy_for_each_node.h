@@ -24,6 +24,7 @@
 #include <utility>
 
 #include "base/utils/utils.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
@@ -97,7 +98,7 @@ public:
         return isLoop_;
     }
     void PostIdleTask();
-    void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) override;
+    void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void BuildAllChildren();

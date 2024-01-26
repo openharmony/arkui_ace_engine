@@ -147,7 +147,7 @@ void ImageLoadingContext::OnDataReady()
 
 void ImageLoadingContext::OnDataLoading()
 {
-    if (!src_.GetIsOnSystemColorChange()) {
+    if (!src_.GetIsConfigurationChange()) {
         if (auto obj = ImageProvider::QueryImageObjectFromCache(src_); obj) {
             DataReadyCallback(obj);
             return;
@@ -167,7 +167,7 @@ void ImageLoadingContext::OnDataLoading()
         return;
     }
     ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_);
-    src_.SetIsSystemColorChange(false);
+    src_.SetIsConfigurationChange(false);
 }
 
 bool ImageLoadingContext::NotifyReadyIfCacheHit()

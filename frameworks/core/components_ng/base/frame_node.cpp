@@ -745,7 +745,7 @@ void FrameNode::OnAttachToBuilderNode(NodeStatus nodeStatus)
     pattern_->OnAttachToBuilderNode(nodeStatus);
 }
 
-void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
+void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.languageUpdate) {
         pattern_->OnLanguageConfigurationUpdate();
@@ -767,7 +767,16 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (configurationChange.defaultFontUpdate) {
+    if (configurationChange.fontUpdate) {
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    if (configurationChange.iconUpdate) {
+        pattern_->OnIconConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    if (configurationChange.skinUpdate) {
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
