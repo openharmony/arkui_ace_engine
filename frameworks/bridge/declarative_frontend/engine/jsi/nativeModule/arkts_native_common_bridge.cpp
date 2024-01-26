@@ -689,9 +689,7 @@ NG::TransitionOptions ParseJsTransition(const Framework::JSRef<Framework::JSVal>
     if (jsObj->HasProperty("opacity")) {
         double opacity = 1.0;
         Framework::JSViewAbstract::ParseJsDouble(jsObj->GetProperty("opacity"), opacity);
-        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
-            opacity = 1.0;
-        }
+        opacity = std::clamp(opacity, 0.0, 1.0);
         transitionOption.UpdateOpacity(static_cast<float>(opacity));
         hasEffect = true;
     }
