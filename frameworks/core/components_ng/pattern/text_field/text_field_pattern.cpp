@@ -1435,7 +1435,6 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     scrollable_ = false;
     SetScrollEnable(scrollable_);
     selectController_->UpdateCaretInfoByOffset(info.GetTouches().front().GetLocalLocation());
-    ProcessOverlay(false, true, false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1821,7 +1820,9 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
 
     if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex, lastCaretRect) &&
         info.GetSourceDevice() != SourceType::MOUSE) {
-        if (contentController_->IsEmpty()) {
+        if (needSelectAll_) {
+            HandleOnSelectAll(true);
+        } else if (contentController_->IsEmpty()) {
             ProcessOverlay(true, true, true, true);
         } else {
             ProcessOverlay(true, true);
