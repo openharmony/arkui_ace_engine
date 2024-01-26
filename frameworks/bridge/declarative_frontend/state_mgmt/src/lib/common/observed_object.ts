@@ -233,7 +233,7 @@ class SubscribableHandler {
           return true;
         }
         Reflect.set(target, property, newValue);
-        const propString = String(property)
+        const propString = String(property);
         if (TrackedObject.isCompatibilityMode(target)) {
           stateMgmtConsole.debug(`SubscribableHandler: set ObservedObject property '${propString}' (object property tracking compatibility mode).`);
           this.notifyObjectPropertyHasChanged(propString, newValue);

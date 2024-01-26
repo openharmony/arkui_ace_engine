@@ -903,7 +903,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask([dragDropManager]() {
             dragDropManager->HideDragPreviewOverlay();
-        }, TaskExecutor::TaskType::UI);
+            }, TaskExecutor::TaskType::UI);
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }

@@ -717,7 +717,6 @@ RefPtr<CanvasPath2D> JSCanvasRenderer::JsMakePath2D(const JSCallbackInfo& info)
 JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-
     if (runtime == nullptr) {
         return nullptr;
     }
