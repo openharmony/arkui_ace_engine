@@ -1559,10 +1559,16 @@ void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkU
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     BackgroundImageSize bgImgSize;
-    bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeWidth));
-    bgImgSize.SetSizeValueX(valueWidth);
-    bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeHeight));
-    bgImgSize.SetSizeValueY(valueHeight);
+    if (LessNotEqual(valueWidth, 0.0f)) {
+        bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeWidth));
+    } else {
+        bgImgSize.SetSizeValueX(valueWidth);
+    }
+    if (LessNotEqual(valueHeight, 0.0f)) {
+        bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeHeight));
+    } else {
+        bgImgSize.SetSizeValueY(valueWidth);
+    }
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
 
@@ -2960,7 +2966,6 @@ void SetTransitionCenter(ArkUINodeHandle node, float centerXValue, ArkUI_Int32 c
     oneCenterTransition->SetCenterY(centerYDimension);
     oneCenterTransition->SetCenterZ(centerZDimension);
     RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
-    CHECK_NULL_VOID(chainEffect);
     while (chainEffect) {
         if (chainEffect->GetType() == ChainedTransitionEffectType::ROTATE) {
             auto rotateEffect = AceType::DynamicCast<NG::ChainedRotateEffect>(chainEffect);
@@ -2978,7 +2983,10 @@ void SetTransitionCenter(ArkUINodeHandle node, float centerXValue, ArkUI_Int32 c
         chainEffect = chainEffect->GetNext();
     }
     ACE_UPDATE_NODE_RENDER_CONTEXT(OneCenterTransitionOption, oneCenterTransition, frameNode);
-    ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
+    chainEffect = oneCenterTransition->GetTransitionEffect();
+    if (chainEffect) {
+        ViewAbstract::SetChainedTransition(frameNode, chainEffect);
+    }
     DimensionOffset offset(centerXDimension, centerYDimension);
     offset.SetZ(centerZDimension);
     ViewAbstract::SetPivot(frameNode, offset);
