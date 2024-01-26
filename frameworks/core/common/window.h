@@ -80,6 +80,8 @@ public:
         return false;
     }
 
+    virtual void FlushAnimationStartTime(uint64_t timeStamp) {}
+
     virtual void FlushModifier() {}
 
     virtual bool HasUIAnimation()

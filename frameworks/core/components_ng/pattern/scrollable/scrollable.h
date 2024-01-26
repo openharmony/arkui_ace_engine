@@ -432,6 +432,7 @@ private:
     double ComputeCap(int dragCount);
     double GetGain(double delta);
     void SetDelayedTask();
+    void MarkNeedFlushAnimationStartTime();
     float GetFrictionVelocityByFinalPosition(float final, float position, float signum, float friction,
         float threshold = DEFAULT_MULTIPLIER);
 
