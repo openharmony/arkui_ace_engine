@@ -29,6 +29,13 @@ enum class TouchBottomType {
     START,
     END,
 };
+
+enum class TouchBottomAnimationStage {
+    STAGE_NONE,
+    STAGE_SHRINKT_TO_BLACK_POINT,
+    STAGE_EXPAND_TO_LONG_POINT,
+};
+
 class DotIndicatorModifier : public ContentModifier {
     DECLARE_ACE_TYPE(DotIndicatorModifier, ContentModifier);
 public:
@@ -85,7 +92,7 @@ public:
     void PaintContent(DrawingContext& context, ContentProperty& contentProperty);
     void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, const LinearVector<float>& itemHalfSizes,
         bool currentIndexFlag, const LinearColor& indicatorColor);
-    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& center, const OffsetF& leftCenter,
+    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter,
         const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes);
     void PaintMask(DrawingContext& context);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
@@ -285,6 +292,7 @@ private:
     void PlayTouchBottomAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
         TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX);
     void PlayOpacityAnimation();
+    std::pair<float, float> GetTouchBottomCenterX(ContentProperty& contentProperty);
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
@@ -300,8 +308,6 @@ private:
     RefPtr<AnimatablePropertyFloat> backgroundHeightDilateRatio_;
 
     std::shared_ptr<AnimationUtils::Animation> blackPointsAnimation_;
-    std::shared_ptr<AnimationUtils::Animation> longPointLeftAnimation_;
-    std::shared_ptr<AnimationUtils::Animation> longPointRightAnimation_;
     RefPtr<Curve> headCurve_;
     float motionVelocity_ = 0;
 
@@ -313,6 +319,7 @@ private:
     RefPtr<AnimatablePropertyColor> touchBottomPointColor_;
     bool isTouchBottomLoop_ = false;
     bool ifNeedFinishCallback_ = false;
+    TouchBottomAnimationStage animationState_ = TouchBottomAnimationStage::STAGE_NONE;
     std::optional<int32_t> normalToHoverIndex_ = std::nullopt;
     std::optional<int32_t> hoverToNormalIndex_ = std::nullopt;
     bool longPointIsHover_ = false;
