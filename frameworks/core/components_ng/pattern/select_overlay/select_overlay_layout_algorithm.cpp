@@ -430,16 +430,15 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(float menuWidth, floa
     auto menuSpacing =
         static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
     menuPosition =
-        OffsetF(positionX, selectArea.Bottom() - menuSpacing - menuHeight);
+        OffsetF(positionX, selectArea.Top() - menuSpacing - menuHeight);
     if (LessNotEqual(menuPosition.GetY(), topArea)) { // 顶部避让失败，实行底部避让
         menuPosition = OffsetF(positionX, selectArea.Bottom() + menuSpacing);
     }
     auto viewPort = pipeline->GetRootRect();
-    if ((hasKeyboard || (menuPosition.GetY() + menuHeight) > keyboardInsert.start) ||
+    if ((hasKeyboard && (menuPosition.GetY() + menuHeight) > keyboardInsert.start) ||
         (menuPosition.GetY() + menuHeight) > viewPort.Bottom()) { // 底部避让失败，实行选中区避让
         selectArea = selectArea.IntersectRectT(viewPort);
-        menuPosition =
-            OffsetF(positionX, (selectArea.Top() + selectArea.Bottom()) / 2.0f - menuHeight / 2.0f);
+        menuPosition = OffsetF(positionX, (selectArea.Top() + selectArea.Bottom() - - menuHeight) / 2.0f);
     }
     return menuPosition;
 }
