@@ -214,9 +214,9 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
     return imageCache_;
 }
 
-void PipelineBase::SetRootSize(double density, int32_t width, int32_t height)
+void PipelineBase::SetRootSize(double density, double width, double height)
 {
-    ACE_SCOPED_TRACE("SetRootSize(%lf, %d, %d)", density, width, height);
+    ACE_SCOPED_TRACE("SetRootSize(%lf, %lf, %lf)", density, width, height);
     density_ = density;
     auto task = [weak = AceType::WeakClaim(this), width, height]() {
         auto context = weak.Upgrade();

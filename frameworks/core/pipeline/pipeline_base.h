@@ -311,7 +311,7 @@ public:
         return nullptr;
     }
 
-    void SetRootSize(double density, int32_t width, int32_t height);
+    void SetRootSize(double density, double width, double height);
 
     void UpdateFontWeightScale();
 

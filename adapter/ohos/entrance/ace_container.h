@@ -407,7 +407,7 @@ public:
     static void SetView(AceView* view, double density, int32_t width, int32_t height,
         sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback = nullptr);
     static void SetViewNew(
-        AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow);
+        AceView* view, double density, double width, double height, sptr<OHOS::Rosen::Window> rsWindow);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
@@ -553,7 +553,7 @@ private:
     std::string GetFontFamilyName(std::string path);
     bool endsWith(std::string str, std::string suffix);
 
-    void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
+    void AttachView(std::shared_ptr<Window> window, AceView* view, double density, double width, double height,
         uint32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
