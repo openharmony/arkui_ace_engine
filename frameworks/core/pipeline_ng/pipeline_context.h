@@ -255,6 +255,11 @@ public:
 
     void AddAfterRenderTask(std::function<void()>&& task);
 
+    void AddDragWindowVisibleTask(std::function<void()>&& task)
+    {
+        dragWindowVisibleCallback_ = std::move(task);
+    }
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
@@ -750,6 +755,7 @@ private:
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
+    std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;
     std::optional<bool> windowFocus_;
