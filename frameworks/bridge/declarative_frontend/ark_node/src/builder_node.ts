@@ -81,6 +81,23 @@ class JSBuilderNode extends BaseNode {
     }
     child.updateStateVars(params);
   }
+  public createOrGetNode(elmtId: number, builder: () => object): object {
+    const entry = this.updateFuncByElmtId.get(elmtId);
+    if (entry === undefined) {
+      throw new Error(`fail to create node, elmtId is illegal`);
+    }
+    let updateFuncRecord : UpdateFuncRecord = (typeof entry === 'object') ? entry : undefined;
+    if(updateFuncRecord === undefined)
+    {
+      throw new Error(`fail to create node, the api level of app does not supported`);
+    }
+    let nodeInfo = updateFuncRecord.node;
+    if (nodeInfo === undefined) {
+      nodeInfo = builder();
+      updateFuncRecord.node = nodeInfo;
+    }
+    return nodeInfo;
+  }
   public build(builder: WrappedBuilder<Object[]>, params: Object) {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.params_ = params;
