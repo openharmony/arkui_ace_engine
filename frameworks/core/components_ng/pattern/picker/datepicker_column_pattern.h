@@ -140,12 +140,12 @@ public:
         deltaSize_ = deltaSize;
     }
 
-    const std::map<WeakPtr<FrameNode>, std::vector<std::string>>& GetOptions() const
+    const std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>>& GetOptions() const
     {
         return options_;
     }
 
-    void SetOptions(const std::map<WeakPtr<FrameNode>, std::vector<std::string>>& value)
+    void SetOptions(const std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>>& value)
     {
         options_ = value;
     }
@@ -328,7 +328,7 @@ private:
     float localDownDistance_ = 0.0f;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
-    std::map<WeakPtr<FrameNode>, std::vector<std::string>> options_;
+    std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>> options_;
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
     uint32_t currentIndex_ = 0;
