@@ -43,18 +43,18 @@ bool TypedText::IsEmoji(uint32_t codePoint)
 {
     // Miscellaneous symbols and symbol fonts
     return (codePoint >= 0x2600 && codePoint <= 0x27BF) || codePoint == 0x303D || codePoint == 0x2049 ||
-           codePoint == 0x203C || (codePoint >= 0x2000 && codePoint <= 0x200F) ||
-           (codePoint >= 0x2028 && codePoint <= 0x202F) || codePoint == 0x205F ||
-           // Area occupied by punctuation, Alphabetic symbol
-           (codePoint >= 0x2065 && codePoint <= 0x206F) || (codePoint >= 0x2100 && codePoint <= 0x214F) ||
-           // Various technical symbols, Arrow A
-           (codePoint >= 0x2300 && codePoint <= 0x23FF) || (codePoint >= 0x2B00 && codePoint <= 0x2BFF) ||
-           // Arrow B,Chinese symbols
-           (codePoint >= 0x2900 && codePoint <= 0x297F) || (codePoint >= 0x3200 && codePoint <= 0x32FF) ||
-           // High and low substitution reserved area, Private reserved area
-           (codePoint >= 0xD800 && codePoint <= 0xDFFF) || (codePoint >= 0xE000 && codePoint <= 0xF8FF) ||
-           // Mutation selector, Plane above the second plane，char can't be saved, all can be transferred
-           (codePoint >= 0xFE00 && codePoint <= 0xFE0F) || codePoint >= 0x10000;
+        codePoint == 0x203C || (codePoint >= 0x2000 && codePoint <= 0x200F) ||
+        (codePoint >= 0x2028 && codePoint <= 0x202F) || codePoint == 0x205F ||
+        // Area occupied by punctuation, Alphabetic symbol
+        (codePoint >= 0x2065 && codePoint <= 0x206F) || (codePoint >= 0x2100 && codePoint <= 0x214F) ||
+        // Various technical symbols, Arrow A
+        (codePoint >= 0x2300 && codePoint <= 0x23FF) || (codePoint >= 0x2B00 && codePoint <= 0x2BFF) ||
+        // Arrow B,Chinese symbols
+        (codePoint >= 0x2900 && codePoint <= 0x297F) || (codePoint >= 0x3200 && codePoint <= 0x32FF) ||
+        // High and low substitution reserved area, Private reserved area
+        (codePoint >= 0xD800 && codePoint <= 0xDFFF) || (codePoint >= 0xE000 && codePoint <= 0xF8FF) ||
+        // Mutation selector, Plane above the second plane，char can't be saved, all can be transferred
+        (codePoint >= 0xFE00 && codePoint <= 0xFE0F) || codePoint >= 0x10000;
 }
 
 uint32_t TypedText::GetUTF8Next(const char* text, uint32_t i, uint32_t& j)
