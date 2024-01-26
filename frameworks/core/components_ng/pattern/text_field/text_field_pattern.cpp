@@ -4153,7 +4153,11 @@ void TextFieldPattern::OnAreaChangedInner()
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
         selectController_->CalculateHandleOffset();
         if (SelectOverlayIsOn()) {
-            ProcessOverlay(false);
+            if (IsUsingMouse()) {
+                CloseSelectOverlay();
+            } else {
+                ProcessOverlay(false);
+            }
         }
     }
     RequestKeyboardOnFocus();
