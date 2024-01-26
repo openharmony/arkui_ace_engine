@@ -236,11 +236,14 @@ public:
             CHECK_NULL_VOID(container);
             auto taskExecutor = container->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
-            auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            auto context = container->GetPipelineContext();
             CHECK_NULL_VOID(context);
-            auto uiExtMgr = context->GetUIExtensionManager();
-            if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
-                return;
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+            if (pipeline) {
+                auto uiExtMgr = pipeline->GetUIExtensionManager();
+                if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
+                    return;
+                }
             }
             auto curWindow = context->GetCurrentWindowRect();
             positionY -= curWindow.Top();
@@ -1661,10 +1664,11 @@ bool UIContentImpl::ProcessBackPressed()
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_RETURN(pipeline, false);
-    auto uiExtMgr = pipeline->GetUIExtensionManager();
-    if (uiExtMgr && uiExtMgr->OnBackPressed()) {
-        return true;
+    if (pipeline) {
+        auto uiExtMgr = pipeline->GetUIExtensionManager();
+        if (uiExtMgr && uiExtMgr->OnBackPressed()) {
+            return true;
+        }
     }
     bool ret = false;
     taskExecutor->PostSyncTask(
