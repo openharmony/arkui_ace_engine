@@ -1462,6 +1462,7 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     if (itemPosition_.empty()) {
+        MarkDirtyNodeSelf();
         return;
     }
     if (!IsLoop() && (isDragging_ || childScrolling_)) {
