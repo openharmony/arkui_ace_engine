@@ -347,6 +347,10 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         itemPosition_.clear();
     }
 
+    if (!placeItemWidth_ && !prevItemPosition_.empty()) {
+        placeItemWidth_ = prevItemPosition_.begin()->second.endPos - prevItemPosition_.begin()->second.startPos;
+    }
+
     if (jumpIndex_) {
         startPos = (jumpIndex_.value() == 0) && Negative(startMainPos_) ? startMainPos_ : 0;
         LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startPos);
