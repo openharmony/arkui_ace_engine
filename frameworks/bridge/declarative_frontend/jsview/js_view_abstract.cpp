@@ -6674,6 +6674,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("accessibilityVirtualNode", &JSViewAbstract::JsAccessibilityVirtualNode);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
+    JSClass<JSViewAbstract>::StaticMethod("chainStyle", &JSViewAbstract::JsChainStyle);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
@@ -6788,6 +6789,20 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
 
     ViewAbstractModel::GetInstance()->SetAlignRules(alignRules);
     ViewAbstractModel::GetInstance()->SetBias(biasPair);
+}
+
+void JSViewAbstract::JsChainStyle(const JSCallbackInfo& info)
+{
+    ChainInfo chainInfo;
+    if (info.Length() >= 1 && info[0]->IsNumber()) {
+        auto direction = info[0]->ToNumber<int32_t>();
+        chainInfo.direction = static_cast<LineDirection>(direction);
+    }
+    if (info.Length() >= 2 && info[1]->IsNumber()) { // 2 : two args
+        auto style = info[1]->ToNumber<int32_t>();
+        chainInfo.style = static_cast<ChainStyle>(style);
+    }
+    ViewAbstractModel::GetInstance()->SetChainStyle(chainInfo);
 }
 
 void JSViewAbstract::SetMarginTop(const JSCallbackInfo& info)

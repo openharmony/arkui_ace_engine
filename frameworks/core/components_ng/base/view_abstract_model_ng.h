@@ -430,6 +430,11 @@ public:
         ViewAbstract::SetAlignRules(alignRules);
     }
 
+    void SetChainStyle(const ChainInfo& chainInfo) override
+    {
+        ViewAbstract::SetChainStyle(chainInfo);
+    }
+
     void SetBias(const BiasPair& biasPair) override
     {
         ViewAbstract::SetBias(biasPair);
