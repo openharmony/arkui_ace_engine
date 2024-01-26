@@ -151,7 +151,7 @@ private:
     void SupplyAllData2ZeroIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 
     void FillCacheLineAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
-    float FillNewCacheLineBackward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
+    float FillNewCacheLineBackward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper, int32_t currentLine);
     int32_t MeasureCachedChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
         const RefPtr<LayoutWrapper>& childLayoutWrapper);
 
