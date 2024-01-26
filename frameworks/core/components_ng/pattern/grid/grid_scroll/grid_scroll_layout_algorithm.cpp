@@ -792,17 +792,12 @@ void GridScrollLayoutAlgorithm::LargeItemLineHeight(const RefPtr<LayoutWrapper>&
 
 bool GridScrollLayoutAlgorithm::IsIndexInMatrix(int32_t index, int32_t& startLine)
 {
-    auto iter = std::find_if(gridLayoutInfo_.gridMatrix_.begin(), gridLayoutInfo_.gridMatrix_.end(),
-        [index, &startLine](const std::pair<int32_t, std::map<int32_t, int32_t>>& item) {
-            for (auto& subitem : item.second) {
-                if (subitem.second == index) {
-                    startLine = item.first;
-                    return true;
-                }
-            }
-            return false;
-        });
-    return (iter != gridLayoutInfo_.gridMatrix_.end());
+    auto iter = gridLayoutInfo_.FindInMatrix(index);
+    if (iter != gridLayoutInfo_.gridMatrix_.end()) {
+        startLine = iter->first;
+        return true;
+    }
+    return false;
 }
 
 void GridScrollLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(

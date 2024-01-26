@@ -233,7 +233,7 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
         return 0.0f;
     }
     float averageHeight = heightSum / itemCount;
-    
+
     if (itemCount == childrenCount_) {
         return heightSum - mainGap;
     }
@@ -464,6 +464,37 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
         }
     }
     return true;
+}
+
+decltype(GridLayoutInfo::gridMatrix_)::const_iterator GridLayoutInfo::FindInMatrix(int32_t index) const
+{
+    size_t count = gridMatrix_.size();
+    size_t step = 0;
+    auto left = gridMatrix_.begin();
+    auto it = left;
+    while (count > 0) {
+        it = left;
+        step = count / 2;
+        std::advance(it, step); 
+
+        // with irregular items, only the max index on each row is guaranteed to be in order.
+        int32_t maxV = 0;
+        for (auto [_, item] : it->second) {
+            maxV = std::max(maxV, item);
+            if (item == index) {
+                return it;
+            }
+        }
+
+        if (index < maxV) {
+            count = step;
+        } else {
+            // index on the right side of current row
+            left = ++it;
+            count -= step + 1;
+        }
+    }
+    return gridMatrix_.end();
 }
 
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
