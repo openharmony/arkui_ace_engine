@@ -208,7 +208,7 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
             auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
             sourceInfo = ImageSourceInfo(pixelMap);
         } else {
-            sourceInfo = ImageSourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
+            sourceInfo = ImageSourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePathFromAce());
         }
 
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
