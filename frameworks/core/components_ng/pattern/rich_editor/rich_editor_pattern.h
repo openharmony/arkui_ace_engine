@@ -409,7 +409,7 @@ protected:
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll);
-    void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
+    void UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, bool animation = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;

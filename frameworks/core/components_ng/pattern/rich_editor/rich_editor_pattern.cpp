@@ -4071,13 +4071,13 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
     clipboard_->HasData(hasDataCallback);
 }
 
-void RichEditorPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation)
+void RichEditorPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, bool animation)
 {
     bool isOriginMenuShow = true;
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         isOriginMenuShow = GetOriginIsMenuShow();
     }
-    TextPattern::UpdateSelectOverlayOrCreate(selectInfo);
+    TextPattern::UpdateSelectOverlayOrCreate(selectInfo, animation);
     CHECK_NULL_VOID(selectOverlayProxy_);
     selectOverlayProxy_->ShowOrHiddenMenu(!isOriginMenuShow);
 }
