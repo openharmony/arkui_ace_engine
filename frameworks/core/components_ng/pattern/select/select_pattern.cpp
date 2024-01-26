@@ -1194,4 +1194,22 @@ void SelectPattern::SetOptionHeight(const Dimension& value)
     CHECK_NULL_VOID(menuLayoutProps);
     menuLayoutProps->UpdateSelectModifiedHeight(menuMaxHeight);
 }
+
+void SelectPattern::SetMenuBackgroundColor(const Color& color)
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto renderContext = menu->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(color);
+}
+
+void SelectPattern::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto renderContext = menu->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackBlurStyle(blurStyle);
+}
 } // namespace OHOS::Ace::NG
