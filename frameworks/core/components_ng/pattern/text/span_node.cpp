@@ -263,6 +263,7 @@ void SpanItem::UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, con
     textStyle_ = textStyle;
 
     if (symbolUnicode != 0) {
+        textStyle_->isSymbolGlyph_ = true;
         builder->AddSymbol(symbolUnicode);
     }
 

@@ -1376,6 +1376,40 @@ void SubwindowOhos::HideEventColumn()
     manager->RemoveEventColumn();
 }
 
+void SubwindowOhos::ResizeWindowForFoldStatus(int32_t parentContainerId)
+{
+    auto callback = []() {
+        auto subwindowOhos =
+            AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
+        CHECK_NULL_VOID(subwindowOhos);
+        auto childContainerId = subwindowOhos->GetChildContainerId();
+        ContainerScope scope(childContainerId);
+        auto window = Platform::DialogContainer::GetUIWindow(childContainerId);
+        CHECK_NULL_VOID(window);
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplaySync();
+        CHECK_NULL_VOID(defaultDisplay);
+        auto ret = window->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+        if (ret != Rosen::WMError::WM_OK) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
+                static_cast<int32_t>(ret));
+            return;
+        }
+        auto container = Platform::DialogContainer::GetContainer(childContainerId);
+        CHECK_NULL_VOID(container);
+        // get ace_view
+        auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
+        CHECK_NULL_VOID(aceView);
+        Platform::AceViewOhos::SurfaceChanged(aceView, defaultDisplay->GetWidth(), defaultDisplay->GetHeight(), 0);
+    };
+    if (parentContainerId > 0) {
+        ResizeWindowForFoldStatus();
+        return;
+    }
+    if (!handler_->PostTask(callback)) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize Toast Window failed");
+    }
+}
+
 void SubwindowOhos::ResizeWindowForFoldStatus()
 {
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplaySync();

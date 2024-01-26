@@ -1468,8 +1468,7 @@ HWTEST_F(ListScrollerTestNg, Pattern016, TestSize.Level1)
     Rect activeRectBot = Rect(LIST_WIDTH, LIST_HEIGHT - activeRectInit.Height(), 0, activeRectInit.Height());
 
     std::vector<int32_t> scrollFromVector = { SCROLL_FROM_NONE, SCROLL_FROM_UPDATE, SCROLL_FROM_ANIMATION,
-        SCROLL_FROM_JUMP, SCROLL_FROM_ANIMATION_SPRING, SCROLL_FROM_BAR, SCROLL_FROM_ANIMATION_CONTROLLER,
-        SCROLL_FROM_BAR_FLING };
+        SCROLL_FROM_JUMP, SCROLL_FROM_ANIMATION_SPRING, SCROLL_FROM_BAR, SCROLL_FROM_BAR_FLING };
 
     for (int32_t form : scrollFromVector) {
         bool isAtBottom = pattern_->IsAtBottom();

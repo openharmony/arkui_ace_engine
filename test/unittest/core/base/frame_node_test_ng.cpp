@@ -1206,10 +1206,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnVisibleAreaChangeCallback31, TestSize.Level
      * @tc.steps: step1. callback RemoveLastHotZoneRect.
      * @tc.expected: step1. expect The function is run ok.
      */
-    VisibleCallbackInfo callbackInfo;
+    std::unordered_map<double, VisibleCallbackInfo> map;
+    VisibleCallbackInfo info;
     bool isHandled = false;
-    FRAME_NODE2->OnVisibleAreaChangeCallback(callbackInfo, true, 1.0, isHandled);
-    EXPECT_TRUE(callbackInfo.isCurrentVisible);
+    FRAME_NODE2->OnVisibleAreaChangeCallback(map, true, 1.0, isHandled);
+    EXPECT_TRUE(map.empty());
 }
 
 /**

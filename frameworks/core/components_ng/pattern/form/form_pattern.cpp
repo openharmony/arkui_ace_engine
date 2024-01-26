@@ -52,6 +52,7 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
 constexpr double TRANSPARENT_VAL = 0;
+constexpr int32_t MAX_CLICK_DURATION = 500000000; // ns
 constexpr int32_t DOUBLE = 2;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
@@ -113,7 +114,18 @@ void FormPattern::OnAttachToFrameNode()
             DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE);
     });
 
+    InitClickEvent();
+
+    scopeId_ = Container::CurrentId();
+
+    RegistVisibleAreaChangeCallback();
+}
+
+void FormPattern::InitClickEvent()
+{
     // Init click event for static form.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto formPattern = weak.Upgrade();
@@ -123,9 +135,39 @@ void FormPattern::OnAttachToFrameNode()
     };
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gestureEventHub->AddClickEvent(clickEvent);
-    scopeId_ = Container::CurrentId();
 
-    RegistVisibleAreaChangeCallback();
+    // check touch duration in click event
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto formPattern = weak.Upgrade();
+        CHECK_NULL_VOID(formPattern);
+        auto touchType = info.GetTouches().front().GetTouchType();
+        if (touchType == TouchType::DOWN) {
+            formPattern->HandleTouchDownEvent(info);
+            return;
+        }
+        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+            formPattern->HandleTouchUpEvent(info);
+            return;
+        }
+    };
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gestureEventHub->AddTouchEvent(touchEvent);
+}
+
+void FormPattern::HandleTouchDownEvent(const TouchEventInfo& event)
+{
+    touchDownTime_ = event.GetTimeStamp();
+    shouldResponseClick_ = true;
+}
+
+void FormPattern::HandleTouchUpEvent(const TouchEventInfo& event)
+{
+    auto duration = event.GetTimeStamp().time_since_epoch().count() - touchDownTime_.time_since_epoch().count();
+    if (duration > MAX_CLICK_DURATION) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "reject click. duration is %{public}lld.", duration);
+        shouldResponseClick_ = false;
+        return;
+    }
 }
 
 void FormPattern::HandleUnTrustForm()
@@ -193,7 +235,7 @@ void FormPattern::HandleSnapshot(uint32_t delayTime)
 
 void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
 {
-    if (formLinkInfos_.empty() || isDynamic_) {
+    if (formLinkInfos_.empty() || isDynamic_ || !shouldResponseClick_) {
         return;
     }
     for (const auto& info : formLinkInfos_) {

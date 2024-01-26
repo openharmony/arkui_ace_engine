@@ -181,6 +181,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         isScrollEnd_ = false;
     }
     currentDelta_ = 0.0f;
+    isNeedCheckOffset_ = false;
     float prevStartOffset = startMainPos_;
     float prevEndOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
     float prevContentSize = contentMainSize_ - contentStartOffset_ - contentEndOffset_;
@@ -489,6 +490,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     }
     listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
+    listLayoutAlgorithm->SetIsNeedCheckOffset(isNeedCheckOffset_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
     if (IsOutOfBoundary(false) && GetScrollSource() != SCROLL_FROM_AXIS) {
@@ -705,6 +707,9 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     SetScrollSource(source);
     FireAndCleanScrollingListener();
     currentDelta_ = currentDelta_ - offset;
+    if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING) {
+        isNeedCheckOffset_ = true;
+    }
     MarkDirtyNodeSelf();
     if (!IsOutOfBoundary() || !scrollable_) {
         return true;

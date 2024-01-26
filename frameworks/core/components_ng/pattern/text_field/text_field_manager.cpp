@@ -55,7 +55,8 @@ RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const Ref
     return {};
 }
 
-void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset)
+void TextFieldManagerNG::ScrollToSafeAreaHelper(
+    const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard)
 {
     auto node = onFocusTextField_.Upgrade();
     CHECK_NULL_VOID(node);
@@ -73,14 +74,19 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bot
     }
 
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
-    CHECK_NULL_VOID(scrollableRect.Top() < bottomInset.start);
+    if (isShowKeyboard) {
+        CHECK_NULL_VOID(scrollableRect.Top() < bottomInset.start);
+    }
 
     auto caretRect = textBase->GetCaretRect() + frameNode->GetOffsetRelativeToWindow();
     auto diffTop = caretRect.Top() - scrollableRect.Top();
     // caret height larger scroll's content region
-    if (diffTop <= 0 && LessNotEqual(bottomInset.start, caretRect.Bottom())) {
-        return;
+    if (isShowKeyboard) {
+        if (diffTop <= 0 && LessNotEqual(bottomInset.start, caretRect.Bottom())) {
+            return;
+        }
     }
+    
 
     // caret above scroll's content region
     if (diffTop < 0) {
@@ -89,12 +95,20 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bot
     }
 
     // caret inner scroll's content region
-    if (LessNotEqual(caretRect.Bottom(), bottomInset.start)) {
-        return;
+    if (isShowKeyboard) {
+        if (LessNotEqual(caretRect.Bottom(), bottomInset.start)) {
+            return;
+        }
     }
+    
 
     // caret below safeArea
-    auto diffBot = bottomInset.start - caretRect.Bottom();
+    float diffBot = 0.0f;
+    if (isShowKeyboard) {
+        diffBot = bottomInset.start - caretRect.Bottom();
+    } else {
+        diffBot = scrollableRect.Bottom() - caretRect.Bottom();
+    }
     CHECK_NULL_VOID(diffBot < 0);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
 }
@@ -104,11 +118,15 @@ void TextFieldManagerNG::ScrollTextFieldToSafeArea()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
-    // only scroll when keyboard shows
-    CHECK_NULL_VOID(keyboardInset.IsValid());
-    auto bottomInset = pipeline->GetSafeArea().bottom_.Combine(keyboardInset);
-    CHECK_NULL_VOID(bottomInset.IsValid());
-    ScrollToSafeAreaHelper(bottomInset);
+    bool isShowKeyboard = keyboardInset.IsValid();
+    if (isShowKeyboard) {
+        auto bottomInset = pipeline->GetSafeArea().bottom_.Combine(keyboardInset);
+        CHECK_NULL_VOID(bottomInset.IsValid());
+        ScrollToSafeAreaHelper(bottomInset, isShowKeyboard);
+    } else if (pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled()) {
+        // hide keyboard only scroll when keyboard avoid mode is resize
+        ScrollToSafeAreaHelper({0, 0}, isShowKeyboard);
+    }
 }
 
 void TextFieldManagerNG::SetHeight(float height)

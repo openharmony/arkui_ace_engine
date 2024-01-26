@@ -14,6 +14,7 @@
  */
 #include "node_loading_progress_modifier.h"
 
+#include "base/error/error_code.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -22,6 +23,13 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+ArkUI_Uint32 GetLoadingProgressColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0x0);
+    return LoadingProgressModelNG::GetColor(frameNode);
+}
+
 void SetLoadingProgressColor(ArkUINodeHandle node, uint32_t colorValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -42,6 +50,13 @@ void ResetLoadingProgressColor(ArkUINodeHandle node)
     }
 }
 
+ArkUI_Bool GetEnableLoading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    return LoadingProgressModelNG::GetEnableLoading(frameNode);
+}
+
 void SetEnableLoading(ArkUINodeHandle node, ArkUI_Bool enableLoadingValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -60,8 +75,9 @@ void ResetEnableLoading(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUILoadingProgressModifier* GetLoadingProgressModifier()
 {
-    static const ArkUILoadingProgressModifier modifier = { SetLoadingProgressColor, ResetLoadingProgressColor,
-        SetEnableLoading, ResetEnableLoading };
+    static const ArkUILoadingProgressModifier modifier = {
+        GetLoadingProgressColor, SetLoadingProgressColor, ResetLoadingProgressColor,
+        GetEnableLoading, SetEnableLoading, ResetEnableLoading };
 
     return &modifier;
 }

@@ -77,7 +77,7 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     auto navBarNode = hostNode->GetNavBarNode();
     CHECK_NULL_RETURN(navBarNode, 0.0f);
     auto index = hostNode->GetChildIndexById(navBarNode->GetId());
-    auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index, false);
+    auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(navBarWrapper, 0.0f);
     auto geometryNode = navBarWrapper->GetGeometryNode();
     auto navigationGeometryNode = layoutWrapper->GetGeometryNode();
@@ -279,7 +279,7 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
             usrNavigationMode = NavigationMode::SPLIT;
             auto navBarNode = hostNode->GetNavBarNode();
             if (navBarNode) {
-                navBarNode->SetActive(true);
+                navBarNode->SetJSViewActive(true);
             }
         } else {
             usrNavigationMode = NavigationMode::STACK;
@@ -414,7 +414,7 @@ void NavigationLayoutAlgorithm::MeasureNavBar(LayoutWrapper* layoutWrapper, cons
     auto navBarNode = hostNode->GetNavBarNode();
     CHECK_NULL_VOID(navBarNode);
     auto index = hostNode->GetChildIndexById(navBarNode->GetId());
-    auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index, false);
+    auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(navBarWrapper);
     auto constraint = navigationLayoutProperty->CreateChildConstraint();
     if (IsAutoHeight(navigationLayoutProperty)) {

@@ -133,6 +133,10 @@ private:
     void RegistVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);
 
+    void InitClickEvent();
+    void HandleTouchDownEvent(const TouchEventInfo& event);
+    void HandleTouchUpEvent(const TouchEventInfo& event);
+
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -154,6 +158,8 @@ private:
     int32_t scopeId_;
     std::string localeTag_ = AceApplicationInfo::GetInstance().GetLocaleTag();
     std::vector<std::string> formLinkInfos_;
+    TimeStamp touchDownTime_;
+    bool shouldResponseClick_ = false;
 
     bool isJsCard_ = true;
 };

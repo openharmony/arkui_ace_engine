@@ -47,6 +47,7 @@ ohos_unittest("security_component_test_ng") {
     external_deps = [
       "ability_runtime:abilitykit_native",
       "c_utils:utils",
+      "input:libmmi-client",
       "napi:ace_napi",
     ]
   }

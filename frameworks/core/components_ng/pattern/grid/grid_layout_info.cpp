@@ -281,7 +281,7 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
         if (line == gridMatrix_.end()) {
             continue;
         }
-        if (line->second.empty()) {
+        if (line->second.empty() || LessOrEqual(item.second, 0.0f)) {
             continue;
         }
         auto lineStart = line->second.begin()->second;

@@ -81,7 +81,7 @@ public:
     }
 
 private:
-    void ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset);
+    void ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
 
     bool hasMove_ = false;

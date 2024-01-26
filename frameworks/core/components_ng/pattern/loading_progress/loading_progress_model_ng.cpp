@@ -50,12 +50,26 @@ void LoadingProgressModelNG::SetEnableLoading(bool enable)
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, EnableLoading, enable);
 }
 
+uint32_t LoadingProgressModelNG::GetColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, value, frameNode);
+    return value.GetValue();
+}
+
 void LoadingProgressModelNG::SetColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, value, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+}
+
+bool LoadingProgressModelNG::GetEnableLoading(FrameNode* frameNode)
+{
+    bool enable = true;
+    ACE_GET_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, EnableLoading, enable, frameNode);
+    return enable;
 }
 
 void LoadingProgressModelNG::SetEnableLoading(FrameNode* frameNode, bool enable)

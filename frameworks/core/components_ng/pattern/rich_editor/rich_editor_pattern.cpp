@@ -2361,6 +2361,7 @@ bool RichEditorPattern::CloseCustomKeyboard()
 
 void RichEditorPattern::InsertValue(const std::string& insertValue)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{public}s]", StringUtils::RestoreEscape(insertValue).c_str());
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_ + moveLength_;
     if (textSelector_.IsValid()) {
@@ -2375,9 +2376,6 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
 
 void RichEditorPattern::InsertValueOperation(const std::string& insertValue, OperationRecord* const record)
 {
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Insert value '%{public}s'", insertValue.c_str());
-    }
     bool isSelector = textSelector_.IsValid();
     if (isSelector) {
         SetCaretPosition(textSelector_.GetTextStart());
@@ -3264,8 +3262,8 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
             float caretHeight = 0.0f;
             OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
             auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
-            newPos = paragraphs_.GetIndex(
-                Offset(caretOffset.GetX() - GetTextRect().GetX(), caretOffset.GetY() - GetTextRect().GetY() - minDet));
+            newPos = paragraphs_.GetIndex(Offset(caretOffset.GetX() - GetTextRect().GetX(),
+                caretOffset.GetY() - GetTextRect().GetY() - minDet), true);
             break;
         }
         case CaretMoveIntent::Down: {
@@ -3273,7 +3271,7 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
             OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
             auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
             newPos = paragraphs_.GetIndex(Offset(caretOffset.GetX() - GetTextRect().GetX(),
-                caretOffset.GetY() - GetTextRect().GetY() + caretHeight + minDet / 2.0));
+                caretOffset.GetY() - GetTextRect().GetY() + caretHeight + minDet / 2.0), true);
             break;
         }
         default:
@@ -4189,6 +4187,7 @@ void RichEditorPattern::HandleOnPaste()
 
 void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{public}s]", StringUtils::RestoreEscape(insertValue).c_str());
     RefPtr<UINode> child;
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
