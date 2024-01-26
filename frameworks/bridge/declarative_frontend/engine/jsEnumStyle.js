@@ -1683,7 +1683,7 @@ class NavPathInfo {
     this.param = param;
     this.onPop = onPop;
     // index that if check navdestination exists first
-    this.flag = false;
+    this.checkNavDestinationFlag = false;
   }
 }
 
@@ -1751,7 +1751,7 @@ class NavPathStack {
     } else {
       info = new NavPathInfo(name, param, onPop);
     }
-    info.flag = true;
+    info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
@@ -1767,7 +1767,7 @@ class NavPathStack {
     if (!promise) {
       this.pathArray.pop();
       return new Promise((resolve, reject)=>{
-        reject({ message: "Internal error.", code: 100001 });
+        reject({ message: 'Internal error.', code: 100001 });
       })
     }
     this.nativeStack?.onStateChanged();
@@ -1785,7 +1785,7 @@ class NavPathStack {
     this.nativeStack?.onStateChanged();
   }
   pushDestination(info, animated) {
-    info.flag = true;
+    info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
@@ -1798,7 +1798,7 @@ class NavPathStack {
     if (!promise) {
       this.pathArray.pop();
       promise = new Promise((resolve, reject)=>{
-        reject({ message: "Internal error.", code: 100001 });
+        reject({ message: 'Internal error.', code: 100001 });
       })
     }
     this.nativeStack?.onStateChanged();
@@ -1999,7 +1999,8 @@ class NavPathStack {
   }
   removeInvalidPage(name, param) {
     for (let i = 0; i < this.pathArray.length; i++) {
-      if (this.pathArray[i].flag && this.pathArray[i].name === name && this.pathArray[i].param === param) {
+      if (this.pathArray[i].checkNavDestinationFlag && this.pathArray[i].name === name &&
+        this.pathArray[i].param === param) {
         this.pathArray.splice(i, 1);
         return;
       }
@@ -2040,6 +2041,13 @@ class NavPathStack {
       return undefined;
     }
     return item.name;
+  }
+  getCheckNavDestinationFlagByIndex(index) {
+    let item = this.pathArray[index];
+    if (item === undefined) {
+      return undefined;
+    }
+    return item.checkNavDestinationFlag;
   }
   getOnPopByIndex(index) {
     let item = this.pathArray[index];

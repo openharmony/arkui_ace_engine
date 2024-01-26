@@ -617,7 +617,7 @@ bool JSNavigationStack::GetFlagByIndex(int32_t index) const
     if (dataSourceObj_->IsEmpty()) {
         return false;
     }
-    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getFlagByIndex"));
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getCheckNavDestinationFlagByIndex"));
     JSRef<JSVal> params[1];
     params[0] = JSRef<JSVal>::Make(ToJSValue(index));
     auto res = func->Call(dataSourceObj_, 1, params);
