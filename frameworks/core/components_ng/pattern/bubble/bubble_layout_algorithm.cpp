@@ -289,6 +289,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto targetOffset = targetNode->GetPaintRectOffset();
         auto constrainHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
         auto constrainWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+        float maxWidth = constrainWidth - targetSecurity_ * DOUBLE;
         auto placement = bubbleLayoutProperty->GetPlacement().value_or(Placement::BOTTOM);
         std::unordered_set<Placement> setHorizontal = { Placement::LEFT, Placement::LEFT_BOTTOM, Placement::LEFT_TOP,
             Placement::RIGHT, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP };
@@ -311,6 +312,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                     targetOffset.GetY() - scaledBubbleSpacing);
             }
         }
+        constrainWidth = std::min(constrainWidth, maxWidth);
         SizeF size = SizeF(constrainWidth, constrainHeight);
         childLayoutConstraint.UpdateMaxSizeWithCheck(size);
         child->Measure(childLayoutConstraint);
