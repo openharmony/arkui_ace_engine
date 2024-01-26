@@ -113,7 +113,6 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
         case TouchType::CANCEL: {
             if (activeRecognizer_ && activeRecognizer_->CheckTouchId(point.id)) {
                 auto saveRecognizer = activeRecognizer_;
-                activeRecognizer_->SetEventImportGestureGroup(WeakClaim(this));
                 activeRecognizer_->HandleEvent(point);
                 AddGestureProcedure(point, saveRecognizer);
                 int32_t count = 0;
@@ -123,7 +122,6 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
                        activeRecognizer_->CheckTouchId(point.id) &&
                        count < static_cast<int32_t>(recognizers_.size()) - 1) {
                     saveRecognizer = activeRecognizer_;
-                    activeRecognizer_->SetEventImportGestureGroup(WeakClaim(this));
                     activeRecognizer_->HandleEvent(point);
                     AddGestureProcedure(point, saveRecognizer);
                     count++;
@@ -138,7 +136,6 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
                     !blockRecognizer->CheckTouchId(point.id)) {
                     break;
                 }
-                blockRecognizer->SetEventImportGestureGroup(WeakClaim(this));
                 blockRecognizer->HandleEvent(point);
                 AddGestureProcedure(point, blockRecognizer);
             } else {
@@ -146,7 +143,6 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
                 for (const auto& recognizer : copyRecognizers) {
                     if (recognizer && recognizer->CheckTouchId(point.id)) {
                         auto saveRecognizer = recognizer;
-                        recognizer->SetEventImportGestureGroup(WeakClaim(this));
                         recognizer->HandleEvent(point);
                         AddGestureProcedure(point, saveRecognizer);
                     }
