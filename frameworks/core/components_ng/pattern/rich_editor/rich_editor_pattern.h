@@ -554,6 +554,7 @@ private:
     bool EraseEmoji();
     bool EraseEmoji(const RefPtr<SpanItem>& spanItem);
     void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
+    void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
