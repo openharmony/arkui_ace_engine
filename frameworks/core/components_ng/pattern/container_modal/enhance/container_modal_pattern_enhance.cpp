@@ -286,7 +286,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
             [floatingContext, buttonsContext, titlePopupDistance, height]() {
                 floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(titlePopupDistance)- height,
                     0.0f });
-                buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance) - height,
+                buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(titlePopupDistance) - height,
                     0.0f });
             },
             [floatingLayoutProperty]() {

@@ -136,7 +136,6 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (container && container->IsScenceBoardWindow()) {
         autoResize = props->GetAutoResize().value_or(true);
     }
-
     ImageFit imageFit = props->GetImageFit().value_or(ImageFit::COVER);
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
     bool hasValidSlice = false;
@@ -160,8 +159,7 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto altLoadingCtx = altLoadingCtx_.Upgrade();
     if (altLoadingCtx) {
-        altLoadingCtx->MakeCanvasImageIfNeed(dstSize, !altLoadingCtx->GetAutoResize(),
-            imageFit, sourceSize, hasValidSlice);
+        altLoadingCtx->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     } else {
         auto host = layoutWrapper->GetHostNode();
         if (host && host->GetPattern<ImagePattern>()) {
@@ -169,8 +167,7 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             altLoadingCtx_ = pattern->GetAltImageLoadingContext();
             auto ctx = altLoadingCtx_.Upgrade();
             if (ctx) {
-                ctx->MakeCanvasImageIfNeed(dstSize, !ctx->GetAutoResize(),
-                    imageFit, sourceSize, hasValidSlice);
+                ctx->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
             }
         }
     }

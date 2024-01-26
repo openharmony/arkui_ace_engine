@@ -70,7 +70,7 @@ public:
 
     static RefPtr<PipelineContext> GetCurrentContext();
 
-    static RefPtr<PipelineContext> GetCurrentContextWithoutScope();
+    static RefPtr<PipelineContext> GetCurrentContextSafely();
 
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
@@ -591,6 +591,8 @@ public:
     const SerializedGesture& GetSerializedGesture() const override;
     // return value means whether it has printed info
     bool PrintVsyncInfoIfNeed() const override;
+
+    void CheckVirtualKeyboardHeight() override;
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,

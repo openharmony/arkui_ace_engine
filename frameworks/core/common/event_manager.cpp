@@ -35,6 +35,7 @@
 namespace OHOS::Ace {
 constexpr uint8_t KEYS_MAX_VALUE = 3;
 constexpr int32_t DUMP_START_NUMBER = 4;
+constexpr int32_t DUMP_LIMIT_SIZE = 500;
 constexpr int64_t EVENT_CLEAR_DURATION = 1000;
 constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
 const std::string SHORT_CUT_VALUE_X = "X";
@@ -177,7 +178,14 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "Touch test result is empty.");
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
+        int32_t dumpCount = 0;
         for (auto& item : dumpList) {
+            dumpCount++;
+            if (dumpCount > DUMP_LIMIT_SIZE) {
+                TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+                    "EventTreeDumpInfo size is over limit, the following info is dropped!");
+                return;
+            }
             TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
         }
     }

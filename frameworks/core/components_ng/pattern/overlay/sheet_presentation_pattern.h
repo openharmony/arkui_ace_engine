@@ -306,6 +306,7 @@ protected:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnColorConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void InitPageHeight();

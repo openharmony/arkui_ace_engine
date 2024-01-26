@@ -224,10 +224,10 @@ private:
     float realArrowWidth_ = 20.0f;
     float realArrowHeight_ = 10.0f;
 
-    float paddingStart_ = 0.0f;
-    float paddingEnd_ = 0.0f;
-    float paddingTop_ = 0.0f;
-    float paddingBottom_ = 0.0f;
+    float marginStart_ = 0.0f;
+    float marginEnd_ = 0.0f;
+    float marginTop_ = 0.0f;
+    float marginBottom_ = 0.0f;
     float top_ = 0.0f;
     float bottom_ = 0.0f;
     bool bHorizontal_ = false;

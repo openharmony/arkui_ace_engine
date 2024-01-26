@@ -306,8 +306,6 @@ public:
     std::function<void(Offset)> GetThumbnailCallback() override;
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
-    void AdjustHandleRect(OffsetF& firstHandleOffset, OffsetF& secondHandleOffset, SizeF& firstHandlePaintSize,
-        SizeF& secondHandlePaintSize);
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
@@ -555,6 +553,7 @@ private:
     bool IsClickBoundary(const int32_t position);
     bool EraseEmoji();
     bool EraseEmoji(const RefPtr<SpanItem>& spanItem);
+    void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

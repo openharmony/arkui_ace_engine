@@ -53,10 +53,10 @@ public:
     static ArkUINativeModuleValue Invalidate(ArkUIRuntimeCallInfo* runtimeCallInfo);
 private:
     template <typename T>
-    static T GetNumber(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, int index)
+    static T GetNumber(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, int index, T defaultValue)
     {
         Local<JSValueRef> jsValueRef = runtimeCallInfo->GetCallArgRef(index);
-        T value = 0;
+        T value = defaultValue;
         if (jsValueRef->IsNumber()) {
             if (std::is_same<T, uint32_t>::value) {
                 value = jsValueRef->Uint32Value(vm);

@@ -426,7 +426,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 
     /* set initial status of animation */
     preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
-    preNode->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, preFrameSize.Width(), preFrameSize.Height()),
+    preNode->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, preFrameSize.Width(), REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -448,7 +448,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start");
         /* preNode */
         preNode->GetRenderContext()->ClipWithRRect(
-            RectF(preFrameSize.Width() * HALF, 0.0f, preFrameSize.Width(), preFrameSize.Height()),
+            RectF(preFrameSize.Width() * HALF, 0.0f, preFrameSize.Width(), REMOVE_CLIP_SIZE),
             RadiusF(EdgeF(0.0f, 0.0f)));
         preNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * HALF, 0.0f });
         preTitleNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * HALF, 0.0f });
@@ -540,13 +540,13 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             if (needSetInvisible) {
                 if (!isNavBar) {
                     preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                    preNode->SetActive(false);
+                    preNode->SetJSViewActive(false);
                 } else {
                     // navigation mode could be transformed to split mode in the process of animation and
                     // navBar will be invisible only under the stack mode
                     if (navigation->GetNavigationMode() == NavigationMode::STACK) {
                         preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                        preNode->SetActive(false);
+                        preNode->SetJSViewActive(false);
                         navigation->NotifyPageHide();
                     }
                 }
@@ -570,7 +570,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     /* curNode */
     curNode->GetRenderContext()->ClipWithRRect(
-        RectF(curFrameSize.Width() * HALF, 0.0f, curFrameSize.Width(), curFrameSize.Height()),
+        RectF(curFrameSize.Width() * HALF, 0.0f, curFrameSize.Width(), REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     curNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF, 0.0f });
     curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF, 0.0f });
@@ -587,7 +587,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         preTitleNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * PARENT_TITLE_OFFSET, 0.0f });
         // curNode
         curNode->GetRenderContext()->ClipWithRRect(
-            RectF(0.0f, 0.0f, curFrameSize.Width(), curFrameSize.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
+            RectF(0.0f, 0.0f, curFrameSize.Width(), REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
         curNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         curTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     }, option.GetOnFinishEvent());
@@ -789,7 +789,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
         // process shallow builder
         navDestination->ProcessShallowBuilder();
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);
-        navDestination->SetActive(true);
+        navDestination->SetJSViewActive(true);
         navDestination->GetEventHub<EventHub>()->SetEnabledInternal(true);
         // for the navDestination at the top, FireChangeEvent
         eventHub->FireChangeEvent(true);
@@ -811,7 +811,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
                 NavigationPattern::FireNavigationStateChange(navDestination, false);
             }
             navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-            navDestination->SetActive(false);
+            navDestination->SetJSViewActive(false);
         }
         return false;
     }
@@ -819,7 +819,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild &&
         !navDestination->IsOnAnimation()) {
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-        navDestination->SetActive(true);
+        navDestination->SetJSViewActive(true);
     }
     return false;
 }

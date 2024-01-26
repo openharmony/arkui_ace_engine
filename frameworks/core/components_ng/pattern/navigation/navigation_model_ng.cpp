@@ -596,7 +596,7 @@ bool NavigationModelNG::CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNod
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVBAR_ETS_TAG, navBarNodeId);
         auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
             V2::NAVBAR_ETS_TAG, navBarNodeId, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-        navBarNode->SetActive(true);
+        navBarNode->SetJSViewActive(true);
         auto navBarRenderContext = navBarNode->GetRenderContext();
         CHECK_NULL_RETURN(navBarRenderContext, false);
         navBarRenderContext->UpdateClipEdge(true);
@@ -1055,7 +1055,7 @@ void NavigationModelNG::SetHideNavBar(bool hideNavBar)
     auto navBarNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetNavBarNode());
     auto layoutProperty = navBarNode->GetLayoutProperty();
     layoutProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE, true);
-    navBarNode->SetActive(!hideNavBar);
+    navBarNode->SetJSViewActive(!hideNavBar);
     if (pattern->GetNavBarVisibilityChange()) {
         navBarNode->MarkDirtyNode();
     }

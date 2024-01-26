@@ -608,12 +608,10 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
                 } else {
                     frameSize = previewSize;
                 }
-
                 if (LessOrEqual(frameSize.Width(), maxWidth)) {
                     geometryNode->SetFrameSize(SizeF(frameSize.Width(), frameSize.Height()));
                 } else {
-                    auto maxHeight = frameSize.Height() / frameSize.Width() * maxWidth;
-                    geometryNode->SetFrameSize(SizeF(maxWidth, maxHeight));
+                    geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
                 }
             } else {
                 geometryNode->SetFrameSize(frameSize);
@@ -1274,6 +1272,9 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             position_ += offset;
         }
         auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
+        if (menuPattern->IsSelectOverlayRightClickMenu()) {
+            AdjustSelectOverlayMenuPosition(menuPosition, geometryNode);
+        }
         SetMenuPlacementForAnimation(layoutWrapper);
         arrowPosition_ = GetArrowPositionWithPlacement(size);
         if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
@@ -1306,6 +1307,23 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
         translate += OffsetF(0, child->GetGeometryNode()->GetFrameSize().Height());
+    }
+}
+
+void MenuLayoutAlgorithm::AdjustSelectOverlayMenuPosition(
+    OffsetF& menuPosition, const RefPtr<GeometryNode>& geometryNode)
+{
+    auto pipelineContext = GetCurrentPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    auto size = geometryNode->GetFrameSize();
+    auto start = static_cast<float>(keyboardInsert.start);
+    if (GreatNotEqual(menuPosition.GetY() + size.Height(), start) && GreatOrEqual(start, size.Height())) {
+        menuPosition.SetY(menuPosition.GetY() - margin_ - size.Height());
+    } else if (GreatNotEqual(menuPosition.GetY() + size.Height(), start) && LessNotEqual(start, size.Height()) &&
+               GreatNotEqual(start, 0)) {
+        menuPosition.SetY(menuPosition.GetY() - margin_ - size.Height() / 2);
     }
 }
 
@@ -1746,8 +1764,8 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
-void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
-    const RefPtr<MenuPattern>& menuPattern)
+void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
+    const LayoutWrapper* layoutWrapper, bool isContextMenu, const RefPtr<MenuPattern>& menuPattern)
 {
     CHECK_NULL_VOID(layoutWrapper);
     CHECK_NULL_VOID(menuPattern);
@@ -1757,6 +1775,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     CHECK_NULL_VOID(geometryNode);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
+    bool expandDisplay = menuPattern->GetMenuExpandDisplay();
     if (props->GetIsRectInTargetValue(false)) {
         targetSize_ = props->GetTargetSizeValue(SizeF());
         targetOffset_ = props->GetMenuOffsetValue(OffsetF());
@@ -1767,12 +1786,14 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     menuPattern->SetTargetSize(targetSize_);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    if ((isContextMenu || hierarchicalParameters_) && (targetTag_ != V2::SELECT_ETS_TAG)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        expandDisplay = true;
+    }
+    if (((isContextMenu && expandDisplay) || hierarchicalParameters_) && (targetTag_ != V2::SELECT_ETS_TAG)) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
         float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
         targetOffset_ += OffsetF(windowsOffsetX, windowsOffsetY);
-
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
         targetOffset_ -= offset;
         return;

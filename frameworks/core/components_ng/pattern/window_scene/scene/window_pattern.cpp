@@ -113,7 +113,8 @@ void WindowPattern::OnAttachToFrameNode()
             return;
         }
         if (session_->GetShowRecent() && session_->GetScenePersistence() &&
-            session_->GetScenePersistence()->IsSnapshotExisted()) {
+            (session_->GetScenePersistence()->IsSnapshotExisted() ||
+            session_->GetScenePersistence()->IsSavingSnapshot())) {
             CreateSnapshotNode();
             host->AddChild(snapshotNode_);
             return;
@@ -124,7 +125,8 @@ void WindowPattern::OnAttachToFrameNode()
     }
 
     if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
-        session_->GetScenePersistence()->IsSnapshotExisted()) {
+        (session_->GetScenePersistence()->IsSnapshotExisted() ||
+        session_->GetScenePersistence()->IsSavingSnapshot())) {
         CreateSnapshotNode();
         host->AddChild(snapshotNode_);
         return;
@@ -199,7 +201,16 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     } else {
         snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-        ImageSourceInfo sourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
+        ImageSourceInfo sourceInfo;
+        if (session_->GetScenePersistence()->IsSavingSnapshot()) {
+            auto snapshotPixelMap = session_->GetSnapshotPixelMap();
+            CHECK_NULL_VOID(snapshotPixelMap);
+            auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
+            sourceInfo = ImageSourceInfo(pixelMap);
+        } else {
+            sourceInfo = ImageSourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
+        }
+
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);

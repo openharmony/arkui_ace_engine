@@ -523,6 +523,9 @@ public:
     void SetJSViewActive(bool active)
     {
         for (const auto& node : cachedItems_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
             node.second.second->SetJSViewActive(active);
         }
         for (const auto& node : expiringItem_) {

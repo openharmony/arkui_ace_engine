@@ -381,13 +381,6 @@ std::string TextLayoutAlgorithm::StringOutBoundProtection(int32_t position, int3
     }
 }
 
-void TextLayoutAlgorithm::SetNodeForAnimation(const TextStyle& symbolTextStyle, RefPtr<FrameNode>& frameNode)
-{
-    if (symbolTextStyle.GetEffectStrategy() > 0) {
-        paragraph_->SetParagraphSymbolAnimation(frameNode);
-    }
-}
-
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
@@ -414,7 +407,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
         paragraph_->PopStyle();
         paragraph_->Build();
-        SetNodeForAnimation(symbolTextStyle, frameNode);
+        paragraph_->SetParagraphSymbolAnimation(frameNode);
         return true;
     }
     paragraph_->PushStyle(textStyle);
@@ -445,7 +438,7 @@ void TextLayoutAlgorithm::UpdateSymbolSpanEffect(RefPtr<FrameNode>& frameNode)
         if (!child || child->unicode == 0) {
             continue;
         }
-        if (child->GetTextStyle()->GetEffectStrategy() > 0) {
+        if (child->GetTextStyle()->isSymbolGlyph_) {
             paragraph_->SetParagraphSymbolAnimation(frameNode);
             return;
         }

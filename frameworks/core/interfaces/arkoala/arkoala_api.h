@@ -29,6 +29,7 @@ extern "C" {
 #define ARKUI_EXTENDED_API_VERSION 2
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 5
+#define ARKUI_AUTO_GENERATE_NODE_ID -2
 
 enum ArkUIAPIVariantKind {
     BASIC = 1,
@@ -488,7 +489,8 @@ enum ArkUIAsyncEventKind {
     ON_VISIBLE_AREA_CHANGE = 9,
     ON_GESTURE = 10,
     ON_FOCUS = 11,
-
+    ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
+    ON_IMAGE_ERROR,
     // components events
     ON_LIST_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_LIST,
     ON_LIST_SCROLL_INDEX,
@@ -509,9 +511,6 @@ enum ArkUIAsyncEventKind {
     ON_SWIPER_ANIMATION_START,
     ON_SWIPER_ANIMATION_END,
     ON_SWIPER_GESTURE_SWIPE,
-
-    ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
-    ON_IMAGE_ERROR,
 
     ON_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_SCROLL,
     ON_SCROLL_FRAME_BEGIN,
@@ -1860,8 +1859,10 @@ struct ArkUIAlphabetIndexerModifier {
 };
 
 struct ArkUILoadingProgressModifier {
+    ArkUI_Uint32 (*getColor)(ArkUINodeHandle node);
     void (*setColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetColor)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableLoading)(ArkUINodeHandle node);
     void (*setEnableLoading)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableLoading)(ArkUINodeHandle node);
 };

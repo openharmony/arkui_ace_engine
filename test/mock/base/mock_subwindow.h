@@ -70,6 +70,7 @@ public:
     MOCK_METHOD2(OpenCustomDialog, void(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback));
     MOCK_METHOD1(CloseCustomDialog, void(const int32_t dialogId));
     MOCK_METHOD0(ResizeWindowForFoldStatus, void());
+    MOCK_METHOD1(ResizeWindowForFoldStatus, void(int32_t parentContainerId));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

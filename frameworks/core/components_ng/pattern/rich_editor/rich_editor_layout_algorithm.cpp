@@ -55,6 +55,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
     if (!spans.empty()) {
         spans_.push_back(std::move(spans));
     }
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{public}s", SpansToString().c_str());
 }
 
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(

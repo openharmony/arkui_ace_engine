@@ -15,6 +15,7 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_SCOPE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_SCOPE_H
+#include <set>
 #include <array>
 #include <atomic>
 #include <cinttypes>
@@ -24,11 +25,13 @@
 
 namespace OHOS::Ace {
 
-enum class ID_GENERATE_METHOD {
+enum class InstanceIdGenReason : uint32_t {
     SCOPE = 0,
-    RECENT,
+    ACTIVE,
+    DEFAULT,
     SINGLETON,
-    UNDEFINED
+    FOREGROUND,
+    UNDEFINED,
 };
 
 class ACE_EXPORT ContainerScope {
@@ -44,18 +47,22 @@ public:
     }
 
     static int32_t CurrentId();
+    static int32_t DefaultId();
     static int32_t SingletonId();
     static int32_t RecentActiveId();
-    static const char* CurrentIdGenerateMethod();
+    static int32_t RecentForegroundId();
+    static std::pair<int32_t, InstanceIdGenReason> CurrentIdWithReason();
 
-    static void AddCount();
-    static void MinusCount();
+    static void Add(int32_t id);
+    static void Remove(int32_t id);
+    static void RemoveAndCheck(int32_t id);
+
     static uint32_t ContainerCount();
 
     static void UpdateCurrent(int32_t id);
     static void UpdateSingleton(int32_t id);
     static void UpdateRecentActive(int32_t id);
-    static void UpdateIdGenerateMethod(ID_GENERATE_METHOD method);
+    static void UpdateRecentForeground(int32_t id);
 private:
     int32_t restoreId_ = CurrentId();
 

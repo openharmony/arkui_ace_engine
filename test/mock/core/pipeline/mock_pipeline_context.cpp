@@ -87,7 +87,7 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return MockPipelineContext::GetCurrent();
 }
 
-RefPtr<PipelineContext> PipelineContext::GetCurrentContextWithoutScope()
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
 {
     return MockPipelineContext::GetCurrent();
 }
@@ -220,6 +220,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 void PipelineContext::OnVirtualKeyboardHeightChange(
     float keyboardHeight, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
+
+void PipelineContext::CheckVirtualKeyboardHeight() {}
 
 void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus) {}
 
@@ -530,7 +532,7 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return NG::MockPipelineContext::GetCurrent();
 }
 
-RefPtr<PipelineBase> PipelineBase::GetCurrentContextWithoutScope()
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
 {
     return NG::MockPipelineContext::GetCurrent();
 }

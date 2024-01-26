@@ -577,7 +577,7 @@ std::pair<float, float> DotIndicatorPaintMethod::ForwardCalculation(
             startCenterX += itemWidth;
         } else {
             if (IsCustomSizeValue_) {
-                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
+                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 pointCenter.startLongPointLeftCenterX = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 pointCenter.startLongPointRightCenterX = pointCenter.startLongPointLeftCenterX;
                 startCenterX += selectedItemWidth;
@@ -593,7 +593,7 @@ std::pair<float, float> DotIndicatorPaintMethod::ForwardCalculation(
             endCenterX += itemWidth;
         } else {
             if (IsCustomSizeValue_) {
-                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
+                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 pointCenter.endLongPointLeftCenterX = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 pointCenter.endLongPointRightCenterX = pointCenter.endLongPointLeftCenterX;
                 endCenterX += selectedItemWidth;

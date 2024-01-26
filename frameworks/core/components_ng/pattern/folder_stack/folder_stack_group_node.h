@@ -63,6 +63,17 @@ public:
     void SetItemId(const std::vector<std::string>& itemId)
     {
         itemId_ = itemId;
+        isChangeItemId_ = true;
+    }
+
+    bool GetIsChangeItemId()
+    {
+        return isChangeItemId_;
+    }
+
+    void SetIsChangeItemId(bool isChangeItemId)
+    {
+        isChangeItemId_ = isChangeItemId;
     }
 
     const std::vector<RefPtr<UINode>>& GetChildNode() const
@@ -75,6 +86,7 @@ private:
     RefPtr<UINode> desktopNode_;
     std::vector<std::string> itemId_;
     std::vector<RefPtr<UINode>> childNode_;
+    bool isChangeItemId_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif

@@ -737,15 +737,11 @@ void Scrollable::StartSpringMotion(
         return;
     }
     currentPos_ = mainPosition;
-    bool validPos = false;
     if (mainPosition > initExtent.Trailing() || NearEqual(mainPosition, initExtent.Trailing(), 0.01f)) {
         finalPosition_ = extent.Trailing();
-        validPos = true;
     } else if (mainPosition <  initExtent.Leading() || NearEqual(mainPosition, initExtent.Leading(), 0.01f)) {
         finalPosition_ = extent.Leading();
-        validPos = true;
-    }
-    if (!validPos) {
+    } else {
         return;
     }
 
@@ -776,6 +772,61 @@ void Scrollable::StartSpringMotion(
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();
     });
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+    isSpringAnimationStop_ = false;
+    skipRestartSpring_ = false;
+}
+
+void Scrollable::UpdateSpringMotion(
+    double mainPosition, const ExtentPair& extent, const ExtentPair& initExtent)
+{
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}lf, minExtent is "
+        "%{public}lf, maxExtent is %{public}lf, initMinExtent is %{public}lf, initMaxExtent is %{public}lf",
+        mainPosition, extent.Leading(), extent.Trailing(), initExtent.Leading(), initExtent.Trailing());
+    if (isSpringAnimationStop_) {
+        return;
+    }
+    float finalPosition = 0.0f;
+    if (mainPosition > initExtent.Trailing() || NearEqual(mainPosition, initExtent.Trailing())) {
+        finalPosition = extent.Trailing();
+    } else if (mainPosition <  initExtent.Leading() || NearEqual(mainPosition, initExtent.Leading())) {
+        finalPosition = extent.Leading();
+    } else {
+        return;
+    }
+
+    finalPosition_ = finalPosition_ + (finalPosition - mainPosition) - (finalPosition_ - currentPos_);
+    springAnimationCount_++;
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
+    option.SetCurve(curve);
+    option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
+    springOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
+    ACE_DEBUG_SCOPED_TRACE(
+        "Scrollable update spring animation, start:%f, end:%f", mainPosition, finalPosition_);
+    AnimationUtils::StartAnimation(
+        option,
+        [weak = AceType::WeakClaim(this)]() {
+            auto scroll = weak.Upgrade();
+            CHECK_NULL_VOID(scroll);
+            scroll->springOffsetProperty_->Set(scroll->finalPosition_);
+            scroll->isSpringAnimationStop_ = false;
+        },
+        [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
+            ContainerScope scope(id);
+            auto scroll = weak.Upgrade();
+            CHECK_NULL_VOID(scroll);
+            scroll->springAnimationCount_--;
+            // avoid current animation being interrupted by the prev animation's finish callback
+            if (scroll->springAnimationCount_ > 0) {
+                return;
+            }
+            ACE_DEBUG_SCOPED_TRACE("Scrollable spring animation finish");
+            scroll->isSpringAnimationStop_ = true;
+            scroll->currentVelocity_ = 0.0;
+            scroll->OnAnimateStop();
+    });
+    
     ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
     isSpringAnimationStop_ = false;
     skipRestartSpring_ = false;
@@ -834,6 +885,12 @@ void Scrollable::ProcessSpringMotion(double position)
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
         moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
+        if ((currentPos_ - finalPosition_) * (position - finalPosition_) < 0) {
+            double currentVelocity = currentVelocity_;
+            scrollPause_ = true;
+            StopSpringAnimation();
+            StartScrollAnimation(position, currentVelocity);
+        }
         if (!moved_) {
             StopSpringAnimation();
         } else if (!touchUp_) {

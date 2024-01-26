@@ -101,7 +101,7 @@ public:
 
     static RefPtr<PipelineBase> GetCurrentContext();
 
-    static RefPtr<PipelineBase> GetCurrentContextWithoutScope();
+    static RefPtr<PipelineBase> GetCurrentContextSafely();
 
     static RefPtr<PipelineBase> GetMainPipelineContext();
 
@@ -1110,6 +1110,8 @@ public:
     {
         return false;
     }
+
+    virtual void CheckVirtualKeyboardHeight() {}
 
 protected:
     virtual bool MaybeRelease() override;

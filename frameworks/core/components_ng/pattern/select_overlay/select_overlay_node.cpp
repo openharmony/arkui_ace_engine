@@ -1079,7 +1079,7 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
     }
     if (info->menuInfo.menuDisable || !info->menuInfo.menuIsShow) {
         (noAnimation) ? HideFrameNodeImmediately(FrameNodeType::SELECTMENU)
-            : ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
+                      : ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
     } else {
         ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::SHOW);
     }
@@ -1158,7 +1158,8 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
 {
     RefPtr<FrameNode> menuWrapper;
     std::vector<OptionParam> params = GetOptionsParams(info);
-    menuWrapper = MenuView::Create(std::move(params), -1);
+    menuWrapper = MenuView::Create(
+        std::move(params), -1, "SelectOverlayMenuByRightClick", MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU);
     CHECK_NULL_RETURN(menuWrapper, nullptr);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     // set click position to menu
