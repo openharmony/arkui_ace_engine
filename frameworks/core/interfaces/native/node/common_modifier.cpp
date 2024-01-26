@@ -841,9 +841,7 @@ void SetOpacity(NodeHandle node, double opacity)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        opacity = 1.0f;
-    }
+    opacity = std::clamp(opacity, 0.0, 1.0);
     ViewAbstract::SetOpacity(frameNode, opacity);
 }
 
@@ -851,7 +849,7 @@ void ResetOpacity(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetOpacity(frameNode, 1.0f);
+    ViewAbstract::SetOpacity(frameNode, 0.0f);
 }
 
 void SetAlign(NodeHandle node, int32_t align)
@@ -1217,7 +1215,7 @@ void SetOverlay(NodeHandle node, const char* text, const double* options, int32_
             }
         }
     } else {
-        overlay.align = Alignment::CENTER;
+        overlay.align = Alignment::TOP_LEFT;
         overlay.x = CalcDimension(0);
         overlay.y = CalcDimension(0);
     }
@@ -1311,8 +1309,8 @@ void SetForegroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMod
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption fgBlurStyle;
     if (blurStyle >= 0) {
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+        if (blurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             fgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
@@ -1405,8 +1403,8 @@ void SetBackgroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMod
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption bgBlurStyle;
     if (blurStyle >= 0) {
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+        if (blurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             bgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
@@ -2020,13 +2018,7 @@ void SetFocusable(NodeHandle node, bool focusable)
     ViewAbstract::SetFocusable(frameNode, focusable);
 }
 
-void ResetFocusable(NodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    bool focusable = false;
-    ViewAbstract::SetFocusable(frameNode, focusable);
-}
+void ResetFocusable(NodeHandle node) {}
 
 void SetTouchable(NodeHandle node, bool touchable)
 {
