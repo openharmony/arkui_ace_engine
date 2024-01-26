@@ -411,7 +411,7 @@ public:
         return geometryNode->GetFrameRect();
     }
 
-    void FlushReload(const OnConfigurationChange& configurationChange) override;
+    void FlushReload(const ConfigurationChange& configurationChange) override;
 
     int32_t RegisterSurfaceChangedCallback(
         std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)

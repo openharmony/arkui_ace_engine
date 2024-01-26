@@ -39,6 +39,7 @@
 #include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -471,7 +472,7 @@ public:
     void UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(
-        bool needReloadTransition, const OnConfigurationChange& configurationChange = { false, false }) override;
+        bool needReloadTransition, const ConfigurationChange& configurationChange = { false, false }) override;
     void HotReload() override;
 
     bool IsUseStageModel() const override

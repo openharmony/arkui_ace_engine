@@ -1066,7 +1066,7 @@ void AceContainer::LoadDocument(const std::string& url, const std::string& compo
         TaskExecutor::TaskType::JS);
 }
 
-void AceContainer::NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange)
+void AceContainer::NotifyConfigurationChange(bool, const ConfigurationChange& configurationChange)
 {
     taskExecutor_->PostTask(
         [weakContext = WeakPtr<PipelineBase>(pipelineContext_), configurationChange]() {
