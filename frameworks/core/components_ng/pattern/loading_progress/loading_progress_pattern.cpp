@@ -98,7 +98,6 @@ void LoadingProgressPattern::RegisterVisibleAreaChange()
     if (hasVisibleChangeRegistered_) {
         return;
     }
-
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {

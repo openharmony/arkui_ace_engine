@@ -29,6 +29,7 @@ extern "C" {
 #define ARKUI_EXTENDED_API_VERSION 2
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 5
+#define ARKUI_AUTO_GENERATE_NODE_ID -2
 
 enum ArkUIAPIVariantKind {
     BASIC = 1,
@@ -1858,8 +1859,10 @@ struct ArkUIAlphabetIndexerModifier {
 };
 
 struct ArkUILoadingProgressModifier {
+    ArkUI_Uint32 (*getColor)(ArkUINodeHandle node);
     void (*setColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetColor)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableLoading)(ArkUINodeHandle node);
     void (*setEnableLoading)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableLoading)(ArkUINodeHandle node);
 };
