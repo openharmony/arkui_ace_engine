@@ -2800,6 +2800,14 @@ void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& 
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeRef));
 }
 
+void ViewAbstract::SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAppear(std::move(onAppear));
+}
+
 void ViewAbstract::SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback)
 {
     CHECK_NULL_VOID(frameNode);

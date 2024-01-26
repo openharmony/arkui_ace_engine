@@ -307,6 +307,13 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
         TaskExecutor::TaskType::UI);
 }
 
+void TimePickerModelNG::SetSelectedTime(FrameNode* frameNode, const PickerTime& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetSelectedTime(value);
+}
+
 void TimePickerModelNG::SetDisappearTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {
@@ -1636,7 +1637,8 @@ void ResetTranslate(ArkUINodeHandle node)
  * values[2]: scaleX;values[3]: scaleY;values[4]: scaleZ
  * @param length shadows length
  */
-void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, int valLength, const int* units, int unitLength)
+void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, int valLength,
+    const int* units, int unitLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1664,6 +1666,31 @@ void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, int valLength, 
         center.SetZ(centerZ);
     }
     ViewAbstract::SetPivot(frameNode, center);
+}
+
+/**
+ * @param values
+ * values[0]: scaleX;values[1]: scaleY;values[2]: scaleZ
+ * @param length shadows length
+ */
+void SetScaleWithoutTransformCenter(ArkUINodeHandle node, const ArkUI_Float32* values, int valLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (valLength != NUM_3) {
+        return;
+    }
+    auto x = values[NUM_0];
+    auto y = values[NUM_1];
+    // NOT support Z in source code
+    if (x < 0) {
+        x = 1;
+    }
+    if (y < 0) {
+        y = 1;
+    }
+    VectorF scale(x, y);
+    ViewAbstract::SetScale(frameNode, scale);
 }
 
 void ResetScale(ArkUINodeHandle node)
@@ -1713,6 +1740,28 @@ void SetRotate(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 va
         center.SetZ(centerZ);
     }
     ViewAbstract::SetPivot(frameNode, center);
+}
+
+/**
+ * @param values
+ * values[0]: xDirection;values[1]: yDirection;values[2]: zDirection
+ * values[3]: angle;values[4]:perspective
+ * @param length shadows length
+ */
+void SetRotateWithoutTransformCenter(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (valLength != NUM_5) {
+        return;
+    }
+
+    auto xDirection = values[NUM_0];
+    auto yDirection = values[NUM_1];
+    auto zDirection = values[NUM_2];
+    auto angle = values[NUM_3];
+    auto perspective = values[NUM_4];
+    ViewAbstract::SetRotate(frameNode, NG::Vector5F(xDirection, yDirection, zDirection, angle, perspective));
 }
 
 void ResetRotate(ArkUINodeHandle node)
@@ -3108,40 +3157,73 @@ void SetTranslateTransition(ArkUINodeHandle node, float xValue, ArkUI_Int32 xUni
 namespace NodeModifier {
 const ArkUICommonModifier* GetCommonModifier()
 {
-    static const ArkUICommonModifier modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
-        SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
-        ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetBorderStyle, ResetBorderStyle,
-        SetBackShadow, ResetBackShadow, SetHitTestBehavior, ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity,
-        ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur, ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert,
-        ResetInvert, SetSepia, ResetSepia, SetSaturate, ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale,
-        ResetGrayscale, SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur, ResetBlur,
-        SetLinearGradient, ResetLinearGradient, SetSweepGradient, ResetSweepGradient, SetRadialGradient,
-        ResetRadialGradient, SetOverlay, ResetOverlay, SetBorderImage, ResetBorderImage, SetBorderImageGradient,
-        SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur, ResetLinearGradientBlur,
-        SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder, ResetBorder, SetBackgroundImagePosition,
-        ResetBackgroundImagePosition, SetBackgroundImageSize, ResetBackgroundImageSize, SetBackgroundImage,
-        ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale, ResetScale, SetRotate, ResetRotate,
-        SetGeometryTransition, ResetGeometryTransition, SetPixelStretchEffect, ResetPixelStretchEffect,
-        SetLightUpEffect, ResetLightUpEffect, SetSphericalEffect, ResetSphericalEffect, SetRenderGroup,
-        ResetRenderGroup, SetRenderFit, ResetRenderFit, SetUseEffect, ResetUseEffect, SetForegroundColor,
-        ResetForegroundColor, SetMotionPath, ResetMotionPath, SetGroupDefaultFocus, ResetGroupDefaultFocus,
-        SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable, ResetTouchable, SetDefaultFocus,
-        ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset, ResetOffset, SetPadding, ResetPadding,
-        SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor, SetVisibility, ResetVisibility, SetAccessibilityText,
-        ResetAccessibilityText, SetAllowDrop, ResetAllowDrop, SetAccessibilityLevel, ResetAccessibilityLevel,
-        SetDirection, ResetDirection, SetLayoutWeight, ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth,
-        ResetMaxWidth, SetMinHeight, ResetMinHeight, SetMaxHeight, ResetMaxHeight, SetSize, ResetSize,
-        ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf, SetAspectRatio, ResetAspectRatio, SetFlexGrow, ResetFlexGrow,
-        SetFlexShrink, ResetFlexShrink, SetGridOffset, ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea,
-        ResetExpandSafeArea, SetFlexBasis, ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription,
-        ResetAccessibilityDescription, SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex,
-        ResetTabIndex, SetObscured, ResetObscured, SetResponseRegion, ResetResponseRegion, SetMouseResponseRegion,
-        ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetDraggable, ResetDraggable, SetAccessibilityGroup,
-        ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect,
-        SetKeyBoardShortCut, ResetKeyBoardShortCut, SetClip, SetClipShape, SetClipPath, SetTransitionCenter,
-        SetOpacityTransition, SetRotateTransition, SetScaleTransition, SetTranslateTransition };
+    static const ArkUICommonModifier modifier = {
+        SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth, SetHeight,
+        ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth,
+        ResetBorderWidth, SetTransform, ResetTransform, SetBorderColor,
+        ResetBorderColor, SetPosition, ResetPosition, SetBorderStyle,
+        ResetBorderStyle, SetBackShadow, ResetBackShadow, SetHitTestBehavior,
+        ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity, ResetOpacity,
+        SetAlign, ResetAlign, SetBackdropBlur, ResetBackdropBlur, SetHueRotate,
+        ResetHueRotate, SetInvert, ResetInvert, SetSepia, ResetSepia, SetSaturate,
+        ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale, ResetGrayscale,
+        SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur,
+        ResetBlur, SetLinearGradient, ResetLinearGradient, SetSweepGradient,
+        ResetSweepGradient, SetRadialGradient, ResetRadialGradient, SetOverlay,
+        ResetOverlay, SetBorderImage, ResetBorderImage, SetBorderImageGradient,
+        SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur,
+        ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle,
+        SetBorder, ResetBorder, SetBackgroundImagePosition,
+        ResetBackgroundImagePosition, SetBackgroundImageSize,
+        ResetBackgroundImageSize, SetBackgroundImage, ResetBackgroundImage,
+        SetTranslate, ResetTranslate, SetScale, SetScaleWithoutTransformCenter,
+        ResetScale, SetRotate, SetRotateWithoutTransformCenter, ResetRotate,
+        SetGeometryTransition, ResetGeometryTransition, SetPixelStretchEffect,
+        ResetPixelStretchEffect, SetLightUpEffect, ResetLightUpEffect,
+        SetSphericalEffect, ResetSphericalEffect, SetRenderGroup, ResetRenderGroup,
+        SetRenderFit, ResetRenderFit, SetUseEffect, ResetUseEffect,
+        SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath,
+        SetGroupDefaultFocus, ResetGroupDefaultFocus, SetFocusOnTouch,
+        ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,ResetTouchable,
+        SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority,
+        SetOffset, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin,
+        SetMarkAnchor, ResetMarkAnchor, SetVisibility, ResetVisibility,
+        SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
+        SetAccessibilityLevel, ResetAccessibilityLevel, SetDirection, ResetDirection,
+        SetLayoutWeight, ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth,
+        ResetMaxWidth, SetMinHeight, ResetMinHeight, SetMaxHeight, ResetMaxHeight,
+        SetSize, ResetSize, ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf,
+        SetAspectRatio, ResetAspectRatio, SetFlexGrow, ResetFlexGrow, SetFlexShrink,
+        ResetFlexShrink, SetGridOffset, ResetGridOffset, SetGridSpan, ResetGridSpan,
+        SetExpandSafeArea, ResetExpandSafeArea, SetFlexBasis, ResetFlexBasis,
+        SetAlignRules, ResetAlignRules, SetAccessibilityDescription,
+        ResetAccessibilityDescription, SetId, ResetId, SetKey, ResetKey,
+        SetRestoreId, ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured,
+        ResetObscured, SetResponseRegion, ResetResponseRegion, SetMouseResponseRegion,
+        ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetDraggable,
+        ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup,
+        SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect,
+        SetKeyBoardShortCut, ResetKeyBoardShortCut, SetClip, SetClipShape,
+        SetClipPath, SetTransitionCenter, SetOpacityTransition, SetRotateTransition,
+        SetScaleTransition, SetTranslateTransition
+    };
 
     return &modifier;
+}
+
+void SetOnAppear(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onAppear = [frameNode, eventId, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = ON_APPEAR;
+        event.eventId = eventId;
+        event.extraParam = extraParam;
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
 }
 
 void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
@@ -3170,6 +3252,42 @@ void SetOnBlur(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
+}
+
+void SetOnAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onAreaChanged = [frameNode, eventId, extraParam](
+        const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin
+    ) {
+        ArkUINodeEvent event;
+        event.kind = ON_AREA_CHANGE;
+        event.eventId = eventId;
+        event.extraParam = extraParam;
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        auto oldLocalOffset = oldRect.GetOffset();
+        event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Width());
+        event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Height());
+        event.componentAsyncEvent.data[2].f32 = PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetX());
+        event.componentAsyncEvent.data[3].f32 = PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetY());
+        event.componentAsyncEvent.data[4].f32 = PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetX() +
+            oldOrigin.GetX());
+        event.componentAsyncEvent.data[5].f32 = PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetY() +
+            oldOrigin.GetY());
+
+        auto localOffset = rect.GetOffset();
+        event.componentAsyncEvent.data[6].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Width());
+        event.componentAsyncEvent.data[7].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Height());
+        event.componentAsyncEvent.data[8].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
+        event.componentAsyncEvent.data[9].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+        event.componentAsyncEvent.data[10].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX() +
+            origin.GetX());
+        event.componentAsyncEvent.data[11].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() +
+            origin.GetY());
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged));
 }
 
 } // namespace NodeModifier

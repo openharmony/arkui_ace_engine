@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -278,6 +278,22 @@ void SetScrollEdge(ArkUINodeHandle node, ArkUI_Int32 value)
     scrollControllerBase->ScrollToEdge(static_cast<ScrollEdgeType>(value), true);
 }
 
+void SetScrollEnablePaging(ArkUINodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    ScrollModelNG::SetEnablePaging(frameNode, value);
+}
+
+void ResetScrollEnablePaging(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    ScrollModelNG::SetEnablePaging(frameNode, false);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -307,6 +323,8 @@ const ArkUIScrollModifier* GetScrollModifier()
         ResetEnableScrollInteraction,
         SetScrollTo,
         SetScrollEdge,
+        SetScrollEnablePaging,
+        ResetScrollEnablePaging,
     };
     /* clang-format on */
     return &modifier;

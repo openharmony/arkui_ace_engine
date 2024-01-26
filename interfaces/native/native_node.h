@@ -4336,7 +4336,7 @@ typedef enum {
      * <b>ArkUI_NodeComponent.data[11].f32</b>表示 new Area
      * 目标元素目标元素左上角相对页面左上角的位置的y轴坐标，类型为number，单位vp。\n
      */
-    NODE_EVENT_ON_ON_AREA_CHANGE,
+    NODE_EVENT_ON_AREA_CHANGE,
     NODE_ON_FOCUS,
     NODE_ON_BLUR,
     NODE_ON_CLICK,
