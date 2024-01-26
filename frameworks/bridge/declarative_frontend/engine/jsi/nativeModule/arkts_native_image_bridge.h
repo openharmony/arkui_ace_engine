@@ -57,6 +57,8 @@ public:
     static ArkUINativeModuleValue ResetImageOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetImageTransition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetImageTransition(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetEdgeAntialiasing(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetEdgeAntialiasing(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 
