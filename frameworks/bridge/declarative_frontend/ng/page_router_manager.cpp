@@ -152,7 +152,7 @@ void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std:
     LoadPage(GenerateNextPageId(), info);
 }
 
-void PageRouterManager::RunCard(
+UIContentErrorCode PageRouterManager::RunCard(
     const std::string& url, const std::string& params, int64_t cardId, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
@@ -165,7 +165,7 @@ void PageRouterManager::RunCard(
         info.url = manifestParser_->GetRouter()->GetEntry("");
     }
 #endif
-    LoadCard(0, info, params, cardId, false, true, entryPoint);
+    return LoadCard(0, info, params, cardId, false, true, entryPoint);
 }
 
 void PageRouterManager::Push(const RouterPageInfo& target)
@@ -600,23 +600,23 @@ std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo()
     return jsonRouterStack;
 }
 
-std::string PageRouterManager::RestoreRouterStack(std::unique_ptr<JsonValue> stackInfo)
+std::pair<std::string, UIContentErrorCode> PageRouterManager::RestoreRouterStack(std::unique_ptr<JsonValue> stackInfo)
 {
     if (!stackInfo->IsValid() || !stackInfo->IsArray()) {
-        return "";
+        return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
     }
     int32_t stackSize = stackInfo->GetArraySize();
     if (stackSize < 1) {
-        return "";
+        return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
     }
 
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, "");
+    CHECK_NULL_RETURN(container, std::make_pair("", UIContentErrorCode::NULL_POINTER));
     auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipeline, "");
+    CHECK_NULL_RETURN(pipeline, std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER));
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
-    CHECK_NULL_RETURN(stageManager, "");
+    CHECK_NULL_RETURN(stageManager, std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER));
 
     for (int32_t index = 0; index < stackSize - 1; ++index) {
         std::string url = stackInfo->GetArrayItem(index)->GetValue("url")->ToString();
@@ -626,7 +626,7 @@ std::string PageRouterManager::RestoreRouterStack(std::unique_ptr<JsonValue> sta
     }
     std::string startUrl = stackInfo->GetArrayItem(stackSize - 1)->GetValue("url")->ToString();
     // remove 2 useless character, as "XXX" to XXX
-    return startUrl.substr(1, startUrl.size() - 2);
+    return std::make_pair(startUrl.substr(1, startUrl.size() - 2), UIContentErrorCode::NO_ERRORS);
 }
 
 int32_t PageRouterManager::GenerateNextPageId()
@@ -974,7 +974,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     LOGI("LoadPage Success");
 }
 
-void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
+UIContentErrorCode PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
     int64_t cardId, bool /* isRestore */, bool needHideLast, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
@@ -986,20 +986,21 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
     pageRouterStack_.emplace_back(pageNode);
 
     if (!loadCard_) {
-        return;
+        return UIContentErrorCode::NULL_CARD_CALLBACK;
     }
     auto result = loadCard_(target.url, cardId, entryPoint);
     if (!result) {
         pageRouterStack_.pop_back();
-        return;
+        return UIContentErrorCode::NULL_CARD_RES;
     }
 
     if (!OnPageReady(pageNode, needHideLast, false, isCardRouter_, cardId)) {
         LOGE("LoadCard OnPageReady Failed");
         pageRouterStack_.pop_back();
-        return;
+        return UIContentErrorCode::CARD_PAGE_NOT_READY;
     }
     LOGI("LoadCard Success");
+    return UIContentErrorCode::NO_ERRORS;
 }
 
 void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const RouterPageInfo& target,
