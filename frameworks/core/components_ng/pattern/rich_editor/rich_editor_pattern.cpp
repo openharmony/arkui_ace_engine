@@ -1823,6 +1823,17 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         CloseSelectOverlay();
     }
     selectionMenuOffset_ = info.GetGlobalLocation();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!textSelectInfo.GetSelection().resultObjects.empty()) {
+        eventHub->FireOnSelect(&textSelectInfo);
+    }
+    SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
+    focusHub->RequestFocusImmediately();
+    if (overlayMod_) {
+        RequestKeyboard(false, true, true);
+    }
     if (info.GetSourceDevice() != SourceType::MOUSE || caretUpdateType_ != CaretUpdateType::DOUBLE_CLICK) {
         if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()
             && caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
@@ -1834,17 +1845,6 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         StartTwinkling();
     } else {
         StopTwinkling();
-    }
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto eventHub = host->GetEventHub<RichEditorEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    if (!textSelectInfo.GetSelection().resultObjects.empty()) {
-        eventHub->FireOnSelect(&textSelectInfo);
-    }
-    SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
-    focusHub->RequestFocusImmediately();
-    if (overlayMod_) {
-        RequestKeyboard(false, true, true);
     }
 }
 
