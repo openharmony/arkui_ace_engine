@@ -232,6 +232,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         CHECK_NULL_VOID(actuator->userCallback_);
+        auto gestureHub = actuator->gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        if (gestureHub->GetTextDraggable()) {
+            actuator->HideTextAnimation();
+        }
         auto userActionEnd = actuator->userCallback_->GetActionEndEventFunc();
         if (userActionEnd) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag end event set by user.");
@@ -323,6 +328,13 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 800ms.");
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
+
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        if (overlayManager->GetHasPixelMap()) {
+            return;
+        }
+        
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
