@@ -1811,6 +1811,10 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     if (mouseStatus_ != MouseStatus::NONE && IsNormalInlineState()) {
         return;
     }
+    if (!isUsingMouse_ && SelectOverlayIsOn() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+        UpdateSelectMenuVisibility(true);
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2730,6 +2734,7 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFi
         proxy->UpdateSecondSelectHandleInfo(handleInfo);
     }
     UpdateOverlaySelectArea();
+    UpdateSelectMenuVisibility(true);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -4176,6 +4181,7 @@ void TextFieldPattern::OnAreaChangedInner()
                 CloseSelectOverlay();
             } else {
                 ProcessOverlay(false);
+                UpdateSelectMenuVisibility(false);
             }
         }
     }
@@ -6631,6 +6637,10 @@ RectF TextFieldPattern::GetSelectArea()
     }
     auto contentRect = contentRect_;
     contentRect.SetOffset(contentRect.GetOffset() + GetTextPaintOffset());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RectF(0, 0, 0, 0));
+    auto parent = host->GetAncestorNodeOfFrame();
+    contentRect = GetVisibleContentRect(parent, contentRect);
     return res.IntersectRectT(contentRect);
 }
 
