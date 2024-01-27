@@ -6389,6 +6389,13 @@ void TextFieldPattern::CleanNodeResponseKeyEvent()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void TextFieldPattern::OnVirtualKeyboardAreaChanged()
+{
+    CHECK_NULL_VOID(SelectOverlayIsOn());
+    selectController_->CalculateHandleOffset();
+    ProcessOverlay(false);
+}
+
 void TextFieldPattern::PasswordResponseKeyEvent()
 {
     auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);

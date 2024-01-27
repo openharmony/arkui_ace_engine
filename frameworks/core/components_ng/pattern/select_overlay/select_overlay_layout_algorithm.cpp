@@ -273,16 +273,17 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
                 static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
         }
     }
-    if (LessNotEqual(menuPosition.GetY(), viewPort.GetY() - menuSpacingBetweenText - menuHeight) ||
+    auto spaceBetweenViewPort = menuSpacingBetweenText + menuSpacingBetweenHandle;
+    if (LessNotEqual(menuPosition.GetY(), viewPort.GetY() - spaceBetweenViewPort - menuHeight) ||
         LessNotEqual(menuPosition.GetY(), menuSpacingBetweenText)) {
-        auto menuOffsetY = viewPort.GetY() - menuSpacingBetweenText - menuHeight;
+        auto menuOffsetY = viewPort.GetY() - spaceBetweenViewPort - menuHeight;
         if (menuOffsetY > menuSpacingBetweenText) {
             menuPosition.SetY(menuOffsetY);
         } else {
             menuPosition.SetY(menuSpacingBetweenText);
         }
-    } else if (GreatOrEqual(menuPosition.GetY(), viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText)) {
-        menuPosition.SetY(viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText);
+    } else if (GreatOrEqual(menuPosition.GetY(), viewPort.GetY() + viewPort.Height() + spaceBetweenViewPort)) {
+        menuPosition.SetY(viewPort.GetY() + viewPort.Height() + spaceBetweenViewPort);
     }
 
     auto safeAreaManager = pipeline->GetSafeAreaManager();

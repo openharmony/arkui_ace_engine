@@ -404,6 +404,8 @@ public:
         return host->GetChildren();
     }
 
+    void OnVirtualKeyboardAreaChanged() override;
+
 protected:
     bool CanStartAITask() override;
 
