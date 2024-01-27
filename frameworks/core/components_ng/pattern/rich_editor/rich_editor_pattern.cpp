@@ -1823,14 +1823,6 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         CloseSelectOverlay();
     }
     selectionMenuOffset_ = info.GetGlobalLocation();
-    if (info.GetSourceDevice() != SourceType::MOUSE || caretUpdateType_ != CaretUpdateType::DOUBLE_CLICK) {
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-        StopTwinkling();
-    } else if (selectStart == selectEnd) {
-        StartTwinkling();
-    } else {
-        StopTwinkling();
-    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1841,6 +1833,14 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     focusHub->RequestFocusImmediately();
     if (overlayMod_) {
         RequestKeyboard(false, true, true);
+    }
+    if (info.GetSourceDevice() != SourceType::MOUSE || caretUpdateType_ != CaretUpdateType::DOUBLE_CLICK) {
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        StopTwinkling();
+    } else if (selectStart == selectEnd) {
+        StartTwinkling();
+    } else {
+        StopTwinkling();
     }
 }
 
