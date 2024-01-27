@@ -87,6 +87,13 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     return result;
 }
 
+void GridPattern::BeforeCreateLayoutWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    gridLayoutInfo_.childrenCount_ = host->GetTotalChildCount();
+}
+
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
     auto paint = MakeRefPtr<GridPaintMethod>(GetScrollBar());
@@ -416,7 +423,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     gridLayoutInfo_.reachStart_ =
         gridLayoutInfo_.startIndex_ == 0 && GreatOrEqual(gridLayoutInfo_.currentOffset_, 0.0f);
 
-    gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
     currentHeight_ = EstimateHeight();
     if (!offsetEnd && gridLayoutInfo_.offsetEnd_) {
         endHeight_ = currentHeight_;

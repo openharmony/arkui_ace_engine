@@ -1804,6 +1804,7 @@ HWTEST_F(GridLayoutTestNg, Layout001, TestSize.Level1)
         { 3, { { 0, 8 }, { 1, -1 }, { 2, 9 } } },  // 8 | 6 | 9
     };
     info.lineHeightMap_ = { { 0, 20.0f }, { 1, 20.0f }, { 2, 10.0f }, { 3, 15.0f } };
+    info.childrenCount_ = 10;
     info.crossCount_ = 3;
     info.startMainLineIndex_ = 0;
     info.endMainLineIndex_ = 3;
@@ -1863,6 +1864,7 @@ HWTEST_F(GridLayoutTestNg, FillMatrixOnly001, TestSize.Level1)
     info.gridMatrix_ = {
         { 0, { { 0, 0 }, { 1, -1 }, { 2, 1 } } }, // 0 | 0 | 1
     };
+    info.childrenCount_ = 7;
 
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
     filler.FillMatrixOnly(0, 6);
