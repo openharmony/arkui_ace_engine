@@ -5218,14 +5218,12 @@ void RichEditorPattern::AdjustPlaceholderSelection(int32_t& start, int32_t& end,
         return;
     }
     auto it = std::find_if(spans_.begin(), spans_.end(), [start](const RefPtr<SpanItem>& spanItem) {
-        int32_t startPosition =
-            spanItem->position - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
-        return startPosition == start;
+        return spanItem->position == start;
     });
     if (it != spans_.end()) {
         // adjust selection if touch right of image or placeholder
         auto spanIndex = std::distance(spans_.begin(), it);
-        auto spanNodeBefore = DynamicCast<FrameNode>(GetChildByIndex(spanIndex - 1));
+        auto spanNodeBefore = DynamicCast<FrameNode>(GetChildByIndex(spanIndex));
         if (spanNodeBefore && (spanNodeBefore->GetTag() == V2::IMAGE_ETS_TAG ||
             spanNodeBefore->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG)) {
             end = start;
