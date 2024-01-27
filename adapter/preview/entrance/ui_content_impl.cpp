@@ -431,6 +431,16 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     viewPtr->NotifySurfaceChanged(config.Width(), config.Height());
 }
 
+void UIContentImpl::NotifyRotationAnimationEnd()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        pipelineContext->StopWindowAnimation();
+    }
+}
+
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     auto container = AceContainer::GetContainerInstance(instanceId_);

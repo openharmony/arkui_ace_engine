@@ -135,6 +135,7 @@ public:
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
     virtual void ProcessFormVisibleChange(bool isVisible) {};
+    virtual void NotifyRotationAnimationEnd() {};
 
     // only vaild in ContainerModalPatternEnhance
     virtual void UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;

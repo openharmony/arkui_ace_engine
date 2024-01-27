@@ -77,6 +77,7 @@ public:
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override {}
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override {}
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override {}
+    void NotifyRotationAnimationEnd() override;
 
     // Window color
     uint32_t GetBackgroundColor() override;

@@ -89,6 +89,7 @@ public:
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
     void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
+    void NotifyRotationAnimationEnd() override;
 
     // Window color
     uint32_t GetBackgroundColor() override;
