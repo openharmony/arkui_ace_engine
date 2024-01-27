@@ -475,7 +475,7 @@ decltype(GridLayoutInfo::gridMatrix_)::const_iterator GridLayoutInfo::FindInMatr
     while (count > 0) {
         it = left;
         step = count / 2;
-        std::advance(it, step); 
+        std::advance(it, step);
 
         // with irregular items, only the max index on each row is guaranteed to be in order.
         int32_t maxV = 0;
