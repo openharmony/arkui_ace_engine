@@ -196,7 +196,6 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         }
         dotIndicatorModifier_->UpdateAllPointCenterXAnimation(
             gestureState_, vectorBlackPointCenterX_, longPointCenterX_);
-        longPointIsHover_ = true;
         mouseClickIndex_ = std::nullopt;
     }
     if (dotIndicatorModifier_->GetLongPointIsHover() != longPointIsHover_) {
@@ -398,9 +397,10 @@ void DotIndicatorPaintMethod::CalculateHoverIndex(const LinearVector<float>& ite
             break;
         }
     }
+    auto longPointCenterX = dotIndicatorModifier_->GetLongPointCenterX();
 
-    OffsetF leftCenter = { longPointCenterX_.first, centerY_ };
-    OffsetF rightCenter = { longPointCenterX_.second, centerY_ };
+    OffsetF leftCenter = { longPointCenterX.first, centerY_ };
+    OffsetF rightCenter = { longPointCenterX.second, centerY_ };
     longPointIsHover_ = isHoverPoint(hoverPoint_, leftCenter, rightCenter, itemHalfSizes);
 }
 

@@ -269,10 +269,9 @@ public:
         vectorBlackPointCenterX_->Set(value);
     }
 
-    inline void UpdateLongPointCenterX(const std::pair<float, float>& value)
+    std::pair<float, float> GetLongPointCenterX()
     {
-        longPointLeftCenterX_->Set(value.first);
-        longPointRightCenterX_->Set(value.second);
+        return { longPointLeftCenterX_->Get(), longPointRightCenterX_->Get() };
     }
 
 private:
