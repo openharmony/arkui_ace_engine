@@ -246,6 +246,7 @@ public:
     void ProcessScrollSnapStop();
     void StartSpringMotion(
         double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent);
+    void UpdateSpringMotion(double mainPosition, const ExtentPair& extent, const ExtentPair& initExtent);
 
     void UpdateScrollSnapStartOffset(double offset);
     void StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity);
@@ -485,6 +486,7 @@ private:
     double lastVelocity_ = 0.0;
     double friction_ = -1.0;
     double velocityScale_ = 0.0;
+    double preGain_ = 1.0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif

@@ -2309,11 +2309,14 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea1, TestSize.Level1)
 HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create sheet node and initialize sheet pattern.
+     * @tc.steps: step1. create sheet node and parent node ,then sheet node mount to parent node and initialize
+     * sheet pattern.
      */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto sheetNode = FrameNode::CreateFrameNode(
         V2::SHEET_PAGE_TAG, 1, AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
     ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
     auto dragBarNode = FrameNode::CreateFrameNode(
         "SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
     ASSERT_NE(dragBarNode, nullptr);
@@ -2327,11 +2330,8 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
     contentNode->MountToParent(scroll);
     scroll->MountToParent(sheetNode);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
     auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
-    ASSERT_NE(safeAreaManager, nullptr);
     auto geometryNode = sheetNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     SheetStyle sheetStyle;

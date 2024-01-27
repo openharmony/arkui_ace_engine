@@ -443,4 +443,8 @@ void SelectModelImpl::SetOptionHeight(const Dimension& value) {}
 void SelectModelImpl::SetOptionWidthFitTrigger(bool isFitTrigger) {}
 
 void SelectModelImpl::SetHasOptionWidth(bool haveOptionWidth) {}
+
+void SelectModelImpl::SetMenuBackgroundColor(const Color& color) {}
+
+void SelectModelImpl::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) {}
 } // namespace OHOS::Ace::Framework

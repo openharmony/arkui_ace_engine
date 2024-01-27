@@ -564,7 +564,7 @@ float ListLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper
 
 void ListLayoutAlgorithm::CheckJumpToIndex()
 {
-    if (jumpIndex_.has_value()) {
+    if (jumpIndex_.has_value() || !isNeedCheckOffset_) {
         return;
     }
     if (LessOrEqual(std::abs(currentDelta_), contentMainSize_ * 2.0f) || itemPosition_.empty()) {
@@ -646,6 +646,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     float midItemMidPos = contentMainSize_ / 2.0f;
     float startPos = 0.0f;
     float endPos = 0.0f;
+    float itemTotalSize = 0.0f;
     float jumpIndexStartPos = 0.0f;
     int32_t jumpIndex = 0;
 
@@ -680,6 +681,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     if (!itemPosition_.empty()) {
         startPos = itemPosition_.begin()->second.startPos;
         endPos = itemPosition_.rbegin()->second.endPos;
+        itemTotalSize = endPos - startPos;
         startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
         endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
         if (GetStartIndex() > totalItemCount_ - 1 && !jumpIndex_.has_value()) {
@@ -741,7 +743,8 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             midItemHeight = MeasureAndGetChildHeight(layoutWrapper, midIndex);
         }
         if (NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
-            (overScrollFeature_ && overScrollTop)) {
+            (overScrollFeature_ && overScrollTop) ||
+            LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_)) {
             if (overScrollTop && !canOverScroll_) {
                 startPos = startMainPos_ + contentStartOffset_;
             }

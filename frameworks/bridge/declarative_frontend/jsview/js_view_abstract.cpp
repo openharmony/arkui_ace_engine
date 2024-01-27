@@ -50,6 +50,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_animatable_arithmetic.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -70,6 +71,7 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
@@ -2309,12 +2311,11 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
     if (info.Length() == 0) {
         return;
     }
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
     EffectOption option;
-    ParseEffectOption(jsOption, option);
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
+        ParseEffectOption(jsOption, option);
+    }
     ViewAbstractModel::GetInstance()->SetBackgroundEffect(option);
 }
 
@@ -2777,6 +2778,26 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         };
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
     }
+}
+
+uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& menuParam)
+{
+    size_t builderIndex = 0;
+    if (info[0]->IsBoolean()) {
+        menuParam.isShow = info[0]->ToBoolean();
+        menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+        builderIndex = 1;
+    } else if (info[0]->IsObject()) {
+        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+        menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj);
+        auto isShowObj = callbackObj->GetProperty("value");
+        if (isShowObj->IsBoolean()) {
+            menuParam.isShow = isShowObj->IsBoolean();
+            menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+            builderIndex = 1;
+        }
+    }
+    return builderIndex;
 }
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
@@ -3477,7 +3498,7 @@ void JSViewAbstract::ParseOuterBorderColor(const JSRef<JSVal>& args)
 
         ViewAbstractModel::GetInstance()->SetOuterBorderColor(leftColor, rightColor, topColor, bottomColor);
     } else {
-        return;
+        ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color::BLACK);
     }
 }
 
@@ -3781,17 +3802,12 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundBrightness(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     double rate = 0.0;
     double lightUpDegree = 0.0;
-    if (!ParseJsDouble(jsObj->GetProperty("rate"), rate)) {
-        return;
-    }
-    if (!ParseJsDouble(jsObj->GetProperty("lightUpDegree"), lightUpDegree)) {
-        return;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        ParseJsDouble(jsObj->GetProperty("rate"), rate);
+        ParseJsDouble(jsObj->GetProperty("lightUpDegree"), lightUpDegree);
     }
     SetDynamicLightUp(rate, lightUpDegree);
 }
@@ -5932,11 +5948,17 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 {
+    NG::MenuParam menuParam;
     // Check the parameters
-    if (info.Length() <= 0 || !info[0]->IsObject()) {
+    if (info.Length() <= 0) {
         return;
     }
-    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
+    size_t builderIndex = ParseBindContextMenuShow(info, menuParam);
+    if (!info[builderIndex]->IsObject()) {
+        return;
+    }
+
+    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[builderIndex]);
     auto builder = menuObj->GetProperty("builder");
     if (!builder->IsFunction()) {
         return;
@@ -5945,7 +5967,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     ResponseType responseType = ResponseType::LONG_PRESS;
-    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
+    if (!info[0]->IsBoolean() && info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto response = info[1]->ToNumber<int32_t>();
         responseType = static_cast<ResponseType>(response);
     }
@@ -5958,12 +5980,12 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         func->Execute();
     };
 
-    NG::MenuParam menuParam;
     menuParam.previewMode = MenuPreviewMode::NONE;
     std::function<void()> previewBuildFunc = nullptr;
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
+
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
     }
@@ -6680,6 +6702,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("accessibilityVirtualNode", &JSViewAbstract::JsAccessibilityVirtualNode);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
+    JSClass<JSViewAbstract>::StaticMethod("chainStyle", &JSViewAbstract::JsChainStyle);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
@@ -6794,6 +6817,20 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
 
     ViewAbstractModel::GetInstance()->SetAlignRules(alignRules);
     ViewAbstractModel::GetInstance()->SetBias(biasPair);
+}
+
+void JSViewAbstract::JsChainStyle(const JSCallbackInfo& info)
+{
+    ChainInfo chainInfo;
+    if (info.Length() >= 1 && info[0]->IsNumber()) {
+        auto direction = info[0]->ToNumber<int32_t>();
+        chainInfo.direction = static_cast<LineDirection>(direction);
+    }
+    if (info.Length() >= 2 && info[1]->IsNumber()) { // 2 : two args
+        auto style = info[1]->ToNumber<int32_t>();
+        chainInfo.style = static_cast<ChainStyle>(style);
+    }
+    ViewAbstractModel::GetInstance()->SetChainStyle(chainInfo);
 }
 
 void JSViewAbstract::SetMarginTop(const JSCallbackInfo& info)

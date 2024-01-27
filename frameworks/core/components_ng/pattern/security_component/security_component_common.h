@@ -22,6 +22,7 @@
 
 namespace OHOS::Ace {
 enum class SecurityComponentHandleResult : int32_t {
+    DROP_CLICK = -100, // do not call js function
     CLICK_SUCCESS = 0,
     CLICK_GRANT_FAILED = 1,
 };

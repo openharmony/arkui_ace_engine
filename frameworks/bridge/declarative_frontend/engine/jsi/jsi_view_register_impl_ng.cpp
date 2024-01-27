@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,6 +165,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
 #endif
 #ifdef WINDOW_SCENE_SUPPORTED
+#include "frameworks/bridge/declarative_frontend/jsview/js_embedded_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ui_extension.h"
 #endif
 #ifdef ABILITY_COMPONENT_SUPPORTED
@@ -269,6 +270,24 @@ void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
     NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(customNode);
 }
 
+void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
+{
+    if (pageNode->GetChildren().empty()) {
+        return;
+    }
+
+    auto oldChild = AceType::DynamicCast<NG::CustomNode>(pageNode->GetChildren().front());
+    if (oldChild) {
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+        if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
+            oldChild->FireOnDisappear();
+        }
+#endif
+        oldChild->Reset();
+    }
+    pageNode->Clean();
+}
+
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
@@ -299,13 +318,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
         CHECK_NULL_VOID(pageNode);
     }
     Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
-    if (!pageNode->GetChildren().empty()) {
-        auto oldChild = AceType::DynamicCast<NG::CustomNode>(pageNode->GetChildren().front());
-        if (oldChild) {
-            oldChild->Reset();
-        }
-        pageNode->Clean();
-    }
+    CleanPageNode(pageNode);
     auto pageRootNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode());
     CHECK_NULL_VOID(pageRootNode);
     pageRootNode->MountToParent(pageNode);
@@ -419,6 +432,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSCounter::JSBind(globalObj);
     JSCalendarPicker::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
+    JSRichEditor::JSBind(globalObj);
+    JSRichEditorController::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
@@ -448,6 +463,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSSceneView::JSBind(globalObj);
 #endif
 #if defined(WINDOW_SCENE_SUPPORTED)
+    JSEmbeddedComponent::JSBind(globalObj);
     JSWindowScene::JSBind(globalObj);
     JSRootScene::JSBind(globalObj);
     JSScreen::JSBind(globalObj);
@@ -580,8 +596,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSLocationButton::JSBind(globalObj);
     JSPasteButton::JSBind(globalObj);
     JSProfiler::JSBind(globalObj);
-    JSRichEditor::JSBind(globalObj);
-    JSRichEditorController::JSBind(globalObj);
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
     JSSaveButton::JSBind(globalObj);

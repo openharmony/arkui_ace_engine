@@ -47,12 +47,12 @@ struct NavgationAsyncContext {
 std::string ErrorToMessage(int32_t code)
 {
     switch (code) {
-        case ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED:
-            return "Builder function not exists";
         case ERROR_CODE_INTERNAL_ERROR:
             return "Internal error.";
         case ERROR_CODE_DESTINATION_NOT_FOUND:
             return "NavDestination not found.";
+        case ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED:
+            return "Builder function not registered.";
         case ERROR_CODE_PARAM_INVALID:
             return "Paramter error.";
         default:
@@ -197,6 +197,7 @@ void JSNavPathStack::OnPushDestination(const JSCallbackInfo& info)
         return;
     }
 
+    ContainerScope scope(containerCurrentId_);
     auto context = PipelineContext::GetCurrentContext();
     if (context == nullptr) {
         ProcessPromiseCallback(asyncContext, ERROR_CODE_INTERNAL_ERROR);

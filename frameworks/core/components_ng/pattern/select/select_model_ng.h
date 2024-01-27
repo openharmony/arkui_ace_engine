@@ -61,6 +61,8 @@ public:
     void SetOptionHeight(const Dimension& value) override;
     void SetOptionWidthFitTrigger(bool isFitTrigger) override;
     void SetHasOptionWidth(bool hasOptionWidth) override;
+    void SetMenuBackgroundColor(const Color& color) override;
+    void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
 
     static void SetArrowPosition(FrameNode* frameNode, const ArrowPosition value);
     static void SetSpace(FrameNode* frameNode, const Dimension& value);

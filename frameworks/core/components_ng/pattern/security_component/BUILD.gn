@@ -43,6 +43,7 @@ build_component_ng("security_component_pattern_ng") {
       external_deps += [
         "ability_runtime:abilitykit_native",
         "access_token:libaccesstoken_sdk",
+        "input:libmmi-client",
         "napi:ace_napi",
         "security_component_manager:libsecurity_component_framework",
         "security_component_manager:libsecurity_component_sdk",

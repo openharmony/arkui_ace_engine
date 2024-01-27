@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "ui/rs_surface_node.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/geometry/offset.h"
@@ -44,8 +45,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-UIExtensionPattern::UIExtensionPattern(bool isTransferringCaller, bool isModal, bool isAsyncModalBinding)
-    : isTransferringCaller_(isTransferringCaller), isModal_(isModal), isAsyncModalBinding_(isAsyncModalBinding)
+UIExtensionPattern::UIExtensionPattern(bool isTransferringCaller, bool isModal, bool isAsyncModalBinding,
+    int32_t embeddedType) : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
+    isAsyncModalBinding_(isAsyncModalBinding), embeddedType_(embeddedType)
 {
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
         SessionTye::UI_EXTENSION_ABILITY, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
@@ -499,6 +501,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     } else {
         Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
     }
+    AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();

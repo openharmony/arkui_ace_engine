@@ -257,6 +257,12 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             averageDistance_.Reset();
         }
     }
+
+    if (refereeState_ == RefereeState::FAIL) {
+        if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
+            (*onActionCancel_)();
+        }
+    }
 }
 
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)

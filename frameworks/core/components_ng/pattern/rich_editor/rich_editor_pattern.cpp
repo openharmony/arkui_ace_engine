@@ -1824,6 +1824,10 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     }
     selectionMenuOffset_ = info.GetGlobalLocation();
     if (info.GetSourceDevice() != SourceType::MOUSE || caretUpdateType_ != CaretUpdateType::DOUBLE_CLICK) {
+        if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()
+            && caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
+            selectOverlayProxy_.Reset();
+        }
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
         StopTwinkling();
     } else if (selectStart == selectEnd) {
@@ -2357,6 +2361,7 @@ bool RichEditorPattern::CloseCustomKeyboard()
 
 void RichEditorPattern::InsertValue(const std::string& insertValue)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{public}s]", StringUtils::RestoreEscape(insertValue).c_str());
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_ + moveLength_;
     if (textSelector_.IsValid()) {
@@ -2371,9 +2376,6 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
 
 void RichEditorPattern::InsertValueOperation(const std::string& insertValue, OperationRecord* const record)
 {
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Insert value '%{public}s'", insertValue.c_str());
-    }
     bool isSelector = textSelector_.IsValid();
     if (isSelector) {
         SetCaretPosition(textSelector_.GetTextStart());
@@ -3260,8 +3262,8 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
             float caretHeight = 0.0f;
             OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
             auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
-            newPos = paragraphs_.GetIndex(
-                Offset(caretOffset.GetX() - GetTextRect().GetX(), caretOffset.GetY() - GetTextRect().GetY() - minDet));
+            newPos = paragraphs_.GetIndex(Offset(caretOffset.GetX() - GetTextRect().GetX(),
+                caretOffset.GetY() - GetTextRect().GetY() - minDet), true);
             break;
         }
         case CaretMoveIntent::Down: {
@@ -3269,7 +3271,7 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
             OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
             auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
             newPos = paragraphs_.GetIndex(Offset(caretOffset.GetX() - GetTextRect().GetX(),
-                caretOffset.GetY() - GetTextRect().GetY() + caretHeight + minDet / 2.0));
+                caretOffset.GetY() - GetTextRect().GetY() + caretHeight + minDet / 2.0), true);
             break;
         }
         default:
@@ -3936,9 +3938,11 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
         }
         if (isFirstHandle) {
             handleInfo.paintRect = textSelector_.firstHandle;
+            CheckHandles(handleInfo);
             selectOverlayProxy_->UpdateFirstSelectHandleInfo(handleInfo);
         } else {
             handleInfo.paintRect = textSelector_.secondHandle;
+            CheckHandles(handleInfo);
             selectOverlayProxy_->UpdateSecondSelectHandleInfo(handleInfo);
         }
 
@@ -4185,6 +4189,7 @@ void RichEditorPattern::HandleOnPaste()
 
 void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{public}s]", StringUtils::RestoreEscape(insertValue).c_str());
     RefPtr<UINode> child;
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
@@ -4396,7 +4401,13 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     SizeF secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
     OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
     OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
-    AdjustHandleRect(firstHandleOffset, secondHandleOffset, firstHandlePaintSize, secondHandlePaintSize);
+    if (GetTextContentLength() == 0) {
+        float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
+        secondHandlePaintSize.SetHeight(caretHeight);
+        // only show the second handle.
+        firstHandlePaintSize = SizeF{};
+        firstHandleOffset = OffsetF{};
+    }
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
     RectF firstHandle;
@@ -4407,19 +4418,6 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     secondHandle.SetOffset(secondHandleOffset);
     secondHandle.SetSize(secondHandlePaintSize);
     textSelector_.secondHandle = secondHandle;
-}
-
-void RichEditorPattern::AdjustHandleRect(
-    OffsetF& firstHandleOffset, OffsetF& secondHandleOffset, SizeF& firstHandlePaintSize, SizeF& secondHandlePaintSize)
-{
-    if (GetTextContentLength() == 0) {
-        float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
-        secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight / 2 };
-        secondHandleOffset = OffsetF(secondHandleOffset.GetX(), secondHandleOffset.GetY() + caretHeight / 2);
-        // only show the second handle.
-        firstHandlePaintSize = SizeF{};
-        firstHandleOffset = OffsetF{};
-    }
 }
 
 void RichEditorPattern::ResetSelection()
@@ -5473,6 +5471,17 @@ void RichEditorPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
     caretOffset += offset;
     caretCaretMetric.offset = caretOffset;
     caretCaretMetric.height = caretHeight;
+}
+
+void RichEditorPattern::OnVirtualKeyboardAreaChanged()
+{
+    CHECK_NULL_VOID(SelectOverlayIsOn());
+    float selectLineHeight = 0.0f;
+    textSelector_.selectionBaseOffset.SetX(
+        CalcCursorOffsetByPosition(textSelector_.GetStart(), selectLineHeight).GetX());
+    textSelector_.selectionDestinationOffset.SetX(
+        CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
+    CreateHandles();
 }
 
 void RichEditorPattern::ResetDragOption()

@@ -64,5 +64,5 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
     return nullptr;
 }
 
-void SubwindowManager::ResizeWindowForFoldStatus() {}
+void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId) {}
 } // namespace OHOS::Ace

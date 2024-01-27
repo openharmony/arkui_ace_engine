@@ -319,6 +319,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != TotalCount()) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
         if (HasIndicatorNode()) {
+            StopIndicatorAnimation();
             auto host = GetHost();
             CHECK_NULL_VOID(host);
             auto indicatorNode = DynamicCast<FrameNode>(
@@ -1462,6 +1463,7 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     if (itemPosition_.empty()) {
+        MarkDirtyNodeSelf();
         return;
     }
     if (!IsLoop() && (isDragging_ || childScrolling_)) {

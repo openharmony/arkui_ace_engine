@@ -293,5 +293,4 @@ bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& ge
     gestureGroup_ = gestureGroup;
     return true;
 }
-
 } // namespace OHOS::Ace::NG

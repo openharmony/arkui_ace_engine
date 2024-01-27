@@ -736,14 +736,16 @@ bool SubwindowManager::GetShown()
     return subwindow->GetShown();
 }
 
-void SubwindowManager::ResizeWindowForFoldStatus()
+void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId)
 {
     auto containerId = Container::CurrentId();
-    auto subwindow = GetSubwindow(containerId);
+    auto subwindow = parentContainerId < 0 ? GetDialogSubwindow(parentContainerId) : GetSubwindow(containerId);
     if (!subwindow) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Get Subwindow error, containerId = %{public}d.", containerId);
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
+            "Get Subwindow error, containerId = %{public}d, parentContainerId = %{public}d", containerId,
+            parentContainerId);
         return;
     }
-    subwindow->ResizeWindowForFoldStatus();
+    subwindow->ResizeWindowForFoldStatus(parentContainerId);
 }
 } // namespace OHOS::Ace

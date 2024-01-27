@@ -2373,15 +2373,6 @@ void WebDelegate::InitWebViewWithWindow()
                 delegate->nweb_->Load(src.value());
             }
             delegate->window_->Show();
-            if (delegate->accessibilityState_) {
-                delegate->nweb_->SetAccessibilityState(true);
-                auto accessibilityEventListenerImpl =
-                    std::make_shared<AccessibilityEventListenerImpl>(Container::CurrentId());
-                CHECK_NULL_VOID(accessibilityEventListenerImpl);
-                accessibilityEventListenerImpl->SetWebDelegate(weak);
-                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
-                delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
-            }
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -2668,15 +2659,6 @@ void WebDelegate::InitWebViewWithSurface()
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->SetNWebHandler(nweb_handler);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
-            if (delegate->accessibilityState_) {
-                delegate->nweb_->SetAccessibilityState(true);
-                auto accessibilityEventListenerImpl =
-                    std::make_shared<AccessibilityEventListenerImpl>(Container::CurrentId());
-                CHECK_NULL_VOID(accessibilityEventListenerImpl);
-                accessibilityEventListenerImpl->SetWebDelegate(weak);
-                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
-                delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
-            }
 #ifdef OHOS_STANDARD_SYSTEM
             delegate->nweb_->RegisterScreenLockFunction(delegate->GetRosenWindowId(), [context](bool key) {
                 auto weakContext = context.Upgrade();
@@ -3366,6 +3348,38 @@ void WebDelegate::UpdateDefaultFixedFontSize(int32_t defaultFixedFontSize)
                 if (setting) {
                     setting->PutDefaultFixedFontSize(defaultFixedFontSize);
                 }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnConfigurationUpdated(const std::string& colorMode)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+
+    executor->PostTask(
+        [weak = WeakClaim(this), colorMode]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto nweb = delegate->GetNweb();
+            CHECK_NULL_VOID(nweb);
+            auto setting = nweb->GetPreference();
+            CHECK_NULL_VOID(setting);
+
+            if (colorMode == "dark") {
+                setting->PutDarkSchemeEnabled(true);
+                if (delegate->GetForceDarkMode()) {
+                    setting->PutForceDarkModeEnabled(true);
+                }
+                return;
+            }
+            if (colorMode == "light") {
+                setting->PutDarkSchemeEnabled(false);
+                setting->PutForceDarkModeEnabled(false);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -5735,6 +5749,9 @@ void WebDelegate::JavaScriptOnDocumentEnd()
 
 void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action)
 {
+    if (!accessibilityState_) {
+        return;
+    }
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     uint32_t nwebAction = static_cast<uint32_t>(action);
@@ -5748,13 +5765,11 @@ void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action)
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void WebDelegate::UpdateAccessibilityState(bool state)
-{
-    accessibilityState_ = state;
-}
-
 void WebDelegate::SetAccessibilityState(bool state)
 {
+    if (state == accessibilityState_) {
+        return;
+    }
     accessibilityState_ = state;
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
@@ -5780,6 +5795,9 @@ bool WebDelegate::GetFocusedAccessibilityNodeInfo(
     int64_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
 {
     CHECK_NULL_RETURN(nweb_, false);
+    if (!accessibilityState_) {
+        return false;
+    }
     return nweb_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus, nodeInfo);
 }
 
@@ -5787,6 +5805,9 @@ bool WebDelegate::GetAccessibilityNodeInfoById(
     int64_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
 {
     CHECK_NULL_RETURN(nweb_, false);
+    if (!accessibilityState_) {
+        return false;
+    }
     return nweb_->GetAccessibilityNodeInfoById(accessibilityId, nodeInfo);
 }
 
@@ -5794,6 +5815,9 @@ bool WebDelegate::GetAccessibilityNodeInfoByFocusMove(
     int64_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
 {
     CHECK_NULL_RETURN(nweb_, false);
+    if (!accessibilityState_) {
+        return false;
+    }
     return nweb_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction, nodeInfo);
 }
 

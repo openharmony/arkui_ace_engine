@@ -16,7 +16,7 @@
 class BuilderNodeFinalizationRegisterProxy {
   constructor() {
     this.finalizationRegistry_ = new FinalizationRegistry((heldValue: RegisterParams) => {
-      if (heldValue.name === "BuilderNode") {
+      if (heldValue.name === 'BuilderNode') {
         const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
         BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
         builderNode.dispose();
@@ -24,7 +24,7 @@ class BuilderNodeFinalizationRegisterProxy {
     });
   }
   public static register(target: BuilderNode, heldValue: RegisterParams) {
-    BuilderNodeFinalizationRegisterProxy.instance_.finalizationRegistry_.register(target, heldValue)
+    BuilderNodeFinalizationRegisterProxy.instance_.finalizationRegistry_.register(target, heldValue);
   }
 
   public static instance_: BuilderNodeFinalizationRegisterProxy = new BuilderNodeFinalizationRegisterProxy();

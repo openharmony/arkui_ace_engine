@@ -181,14 +181,20 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         isScrollEnd_ = false;
     }
     currentDelta_ = 0.0f;
+    isNeedCheckOffset_ = false;
     float prevStartOffset = startMainPos_;
     float prevEndOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
+    float prevContentSize = contentMainSize_ - contentStartOffset_ - contentEndOffset_;
+    float prevTotalSize = endMainPos_ - startMainPos_;
     contentMainSize_ = listLayoutAlgorithm->GetContentMainSize();
     contentStartOffset_ = listLayoutAlgorithm->GetContentStartOffset();
     contentEndOffset_ = listLayoutAlgorithm->GetContentEndOffset();
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
+    bool sizeDiminished =
+        LessNotEqual(endMainPos_ - startMainPos_, contentMainSize_ - contentStartOffset_ - contentEndOffset_) &&
+        GreatOrEqual(prevTotalSize, prevContentSize) && LessNotEqual(endMainPos_ - startMainPos_, prevTotalSize);
     auto lanesLayoutAlgorithm = DynamicCast<ListLanesLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     if (lanesLayoutAlgorithm) {
         lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
@@ -226,7 +232,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
-    CheckRestartSpring();
+    CheckRestartSpring(sizeDiminished);
 
     DrivenRender(dirty);
 
@@ -484,6 +490,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     }
     listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
+    listLayoutAlgorithm->SetIsNeedCheckOffset(isNeedCheckOffset_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
     if (IsOutOfBoundary(false) && GetScrollSource() != SCROLL_FROM_AXIS) {
@@ -700,6 +707,9 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     SetScrollSource(source);
     FireAndCleanScrollingListener();
     currentDelta_ = currentDelta_ - offset;
+    if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING) {
+        isNeedCheckOffset_ = true;
+    }
     MarkDirtyNodeSelf();
     if (!IsOutOfBoundary() || !scrollable_) {
         return true;
@@ -887,13 +897,17 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     });
 }
 
-void ListPattern::CheckRestartSpring()
+void ListPattern::CheckRestartSpring(bool sizeDiminished)
 {
-    if (!ScrollableIdle() || !IsOutOfBoundary()) {
-        return;
-    }
     auto edgeEffect = GetScrollEdgeEffect();
     if (!edgeEffect || !edgeEffect->IsSpringEffect()) {
+        return;
+    }
+    // Check if need update Spring when itemTotalSize diminishes.
+    if (IsScrollableSpringMotionRunning() && sizeDiminished) {
+        edgeEffect->ProcessSpringUpdate();
+    }
+    if (!ScrollableIdle() || !IsOutOfBoundary()) {
         return;
     }
     if (AnimateRunning()) {

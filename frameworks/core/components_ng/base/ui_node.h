@@ -29,6 +29,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/export_texture_info/export_texture_info.h"
@@ -86,8 +87,8 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     void AttachToMainTree(bool recursive = false);
     void DetachFromMainTree(bool recursive = false);
-    void UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange);
-    virtual void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) {}
+    void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
+    virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);

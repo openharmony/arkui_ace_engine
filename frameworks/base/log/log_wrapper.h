@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,13 +25,11 @@
 #include "base/utils/system_properties.h"
 
 #ifdef ACE_INSTANCE_LOG
-#define ACE_FMT_PREFIX "[%{public}s(%{public}s)-(%{public}d:%{public}s)] "
-#define ACE_LOG_ID , OHOS::Ace::LogWrapper::GetId()
-#define ACE_GET_INSTANCE_METHOD , OHOS::Ace::LogWrapper::GetIdMethod()
+#define ACE_FMT_PREFIX "[%{public}s(%{public}s)-(%{public}s)] "
+#define ACE_LOG_ID_WITH_REASON , OHOS::Ace::LogWrapper::GetIdWithReason().c_str()
 #else
 #define ACE_FMT_PREFIX "[%{private}s(%{private}s)] "
-#define ACE_LOG_ID
-#define ACE_GET_INSTANCE_METHOD
+#define ACE_LOG_ID_WITH_REASON
 #endif
 
 #define PRINT_LOG(level, tag, fmt, ...)                                                                       \
@@ -39,7 +37,7 @@
         if (OHOS::Ace::LogWrapper::JudgeLevel(OHOS::Ace::LogLevel::level)) {                                  \
             OHOS::Ace::LogWrapper::PrintLog(OHOS::Ace::LogDomain::FRAMEWORK, OHOS::Ace::LogLevel::level, tag, \
                 ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),                        \
-                __FUNCTION__ ACE_LOG_ID ACE_GET_INSTANCE_METHOD, ##__VA_ARGS__);                              \
+                __FUNCTION__ ACE_LOG_ID_WITH_REASON, ##__VA_ARGS__);                                          \
         }                                                                                                     \
     } while (0)
 
@@ -136,6 +134,7 @@ enum class AceLogTag : uint8_t {
     ACE_DYNAMIC_COMPONENT,    // C0393E
     ACE_MARQUEE,              // C0393F
     ACE_OBSERVER,             // C03940
+    ACE_EMBEDDED_COMPONENT,   // C03941
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use
@@ -209,7 +208,7 @@ public:
     static void PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, va_list args);
 #ifdef ACE_INSTANCE_LOG
     static int32_t GetId();
-    static const char* GetIdMethod();
+    static const std::string GetIdWithReason();
 #endif
 
 private:

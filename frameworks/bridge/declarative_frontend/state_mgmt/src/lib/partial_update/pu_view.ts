@@ -523,7 +523,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected abstract rerender(): void;
   protected abstract updateRecycleElmtId(oldElmtId: number, newElmtId: number): void;
   protected updateStateVars(params: {}): void {
-    stateMgmtConsole.error(`${this.debugInfo__()}: updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version. Application error.`)
+    stateMgmtConsole.error(`${this.debugInfo__()}: updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version. Application error.`);
   }
 
   protected initialRenderView(): void {
@@ -702,7 +702,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
             }
           }
 
-          stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate: all elmtIds that need re-render [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
+          stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate: all elmtIds that need re-render [${Array.from(this.dirtDescendantElementIds_).toString()}].`);
 
           const cb = this.watchedProps.get(varName)
           if (cb) {
@@ -892,7 +892,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // avoid the incompatible change that move set function before updateFunc.
       this.updateFuncByElmtId.delete(elmtId);
       UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmtId);
-      stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in update func: ${(error as Error).message}`)
+      stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in update func: ${(error as Error).message}`);
       throw error;
     }
   }

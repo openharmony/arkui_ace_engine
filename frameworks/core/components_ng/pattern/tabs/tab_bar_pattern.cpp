@@ -99,12 +99,12 @@ void TabBarPattern::InitSurfaceChangedCallback()
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
             [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
                 WindowSizeChangeReason type) {
-                if (type == WindowSizeChangeReason::UNDEFINED) {
-                    return;
-                }
                 auto pattern = weak.Upgrade();
                 if (!pattern) {
                     return;
+                }
+                if (type == WindowSizeChangeReason::UNDEFINED) {
+                    pattern->windowSizeChangeReason_ = type;
                 }
 
                 if (type == WindowSizeChangeReason::ROTATION) {
@@ -706,12 +706,18 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     isFirstLayout_ = false;
 
-    if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION &&
-        animationTargetIndex_.has_value() && animationTargetIndex_ != indicator) {
-        swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
-        windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    if (windowSizeChangeReason_) {
+        if (*windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION && animationTargetIndex_.has_value() &&
+            animationTargetIndex_ != indicator) {
+            swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
+            animationTargetIndex_.reset();
+        } else if (*windowSizeChangeReason_ == WindowSizeChangeReason::UNDEFINED) {
+            // UNDEFINED currently implies window change on foldable
+            TriggerTranslateAnimation(layoutProperty, indicator_, indicator_);
+            UpdateIndicator(indicator_);
+        }
+        windowSizeChangeReason_.reset();
     }
-    animationTargetIndex_.reset();
     UpdateGradientRegions(!swiperPattern->IsUseCustomAnimation());
     if (!swiperPattern->IsUseCustomAnimation() && isTouchingSwiper_ &&
         layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -1456,6 +1462,7 @@ void TabBarPattern::TriggerTranslateAnimation(
         PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
             targetPaintRect.GetX() + targetPaintRect.Width() / 2, targetOffset);
     }
+    swiperStartIndex_ = indicator;
     animationTargetIndex_ = index;
     UpdateTextColorAndFontWeight(index);
 }
@@ -1479,10 +1486,19 @@ void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float t
     auto weak = AceType::WeakClaim(this);
     const auto& pattern = weak.Upgrade();
     auto host = pattern->GetHost();
+    indicatorStartPos_ = startPos;
+    indicatorEndPos_ = endPos;
+    turnPageRate_ = 0.0f;
 
     host->CreateAnimatablePropertyFloat("tabbarindicator", 0, [weak](float value) {
         auto tabBarPattern = weak.Upgrade();
         CHECK_NULL_VOID(tabBarPattern);
+        if (!tabBarPattern->isAnimating_ ||
+            NearZero(tabBarPattern->indicatorEndPos_ - tabBarPattern->indicatorStartPos_)) {
+            return;
+        }
+        tabBarPattern->turnPageRate_ = (value - tabBarPattern->indicatorStartPos_) /
+            (tabBarPattern->indicatorEndPos_ - tabBarPattern->indicatorStartPos_);
         tabBarPattern->UpdateIndicatorCurrentOffset(static_cast<float>(value - tabBarPattern->currentIndicatorOffset_));
     });
     host->UpdateAnimatablePropertyFloat("tabbarindicator", startPos);
@@ -1649,7 +1665,7 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
         indicatorStyle.width = Dimension(layoutProperty->GetIndicatorRect(indicator_).Width());
     }
 
-    if (!isTouchingSwiper_ || axis_ != Axis::HORIZONTAL) {
+    if ((!isTouchingSwiper_ && !isAnimating_) || axis_ != Axis::HORIZONTAL) {
         return;
     }
 
@@ -1668,8 +1684,7 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
         return;
     }
 
-    auto nextIndex = swiperStartIndex_ + 1;
-
+    auto nextIndex = isTouchingSwiper_ ? swiperStartIndex_ + 1 : animationTargetIndex_.value_or(-1);
     if (nextIndex < 0 || nextIndex >= static_cast<int32_t>(tabBarStyles_.size()) ||
         tabBarStyles_[nextIndex] != TabBarStyle::SUBTABBATSTYLE ||
         nextIndex >= static_cast<int32_t>(selectedModes_.size()) ||
@@ -2125,7 +2140,7 @@ void TabBarPattern::InitTurnPageRateEvent()
             if (!pattern->CheckSwiperDisable() && pattern->axis_ == Axis::HORIZONTAL && pattern->isTouchingSwiper_) {
                 pattern->swiperStartIndex_ = swipingIndex;
                 pattern->ApplyTurnPageRateToIndicator(turnPageRate);
-            } else {
+            } else if (!pattern->isAnimating_) {
                 pattern->turnPageRate_ = 0.0f;
             }
         }

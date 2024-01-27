@@ -90,10 +90,7 @@ public:
 
     void OnAddBaseNode();
 
-    RefPtr<UINode> GetExportTextureNode() const
-    {
-        return exportTextureNode_.Upgrade();
-    }
+    RefPtr<FrameNode> GetExportTextureNode() const;
 
     uint64_t GetSurfaceId() const
     {
@@ -103,8 +100,10 @@ public:
     void ResetExportTextureInfo();
 
 private:
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnMountToParentDone() override;
     void SetExportTextureInfoIfNeeded();
+    bool HandleTextureExport(bool isStop);
     std::function<void()> resetFunc_;
     std::function<RefPtr<UINode>()> makeFunc_;
     std::function<void(const SizeF& size)> resizeFunc_;

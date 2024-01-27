@@ -118,6 +118,8 @@ std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const
     overlayInfo.secondHandle = secondHandleInfo.has_value() ? *secondHandleInfo : overlayInfo.secondHandle;
     overlayInfo.isSingleHandle = !firstHandleInfo && secondHandleInfo;
     overlayInfo.isSelectRegionVisible = CheckSelectionRectVisible();
+    overlayInfo.selectArea = clientInfo.selectArea;
+    overlayInfo.isNewAvoid = clientInfo.isNewAvoid;
     if (!clientInfo.isUpdateMenu) {
         return overlayInfo;
     }

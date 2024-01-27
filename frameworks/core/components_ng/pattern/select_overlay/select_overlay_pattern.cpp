@@ -342,7 +342,7 @@ void SelectOverlayPattern::CheckHandleReverse()
 {
     bool handleReverseChanged = false;
     double epsilon = std::max(info_->firstHandle.paintRect.Height(), info_->secondHandle.paintRect.Height());
-    epsilon = std::max(static_cast<double>(info_->singleLineHeight), epsilon) - 0.001f;
+    epsilon = std::max(static_cast<double>(info_->singleLineHeight), epsilon) - 0.5f;
     if (NearEqual(info_->firstHandle.paintRect.Top(), info_->secondHandle.paintRect.Top(), epsilon)) {
         if (info_->firstHandle.paintRect.Left() > info_->secondHandle.paintRect.Left()) {
             if (!info_->handleReverse) {
@@ -573,5 +573,10 @@ void SelectOverlayPattern::HiddenHandle()
 void SelectOverlayPattern::StopHiddenHandleTask()
 {
     hiddenHandleTask_.Cancel();
+}
+
+void SelectOverlayPattern::UpdateSelectArea(const RectF& selectArea)
+{
+    info_->selectArea = selectArea;
 }
 } // namespace OHOS::Ace::NG

@@ -23,6 +23,7 @@ const ComposeTitleBar = composetitlebar.ComposeTitleBar;
 const EditableTitleBar = editabletitlebar.EditableTitleBar;
 const EditableLeftIconType = editabletitlebar.EditableLeftIconType;
 const SubHeader = subheader.SubHeader;
+const OperationType = subheader.OperationType;
 
 const COL_IMAGE_TEXT = 3;
 const COL_TEXT = 4;
@@ -32,7 +33,7 @@ const IMAGE_DEFAULT = 56;
 const TEXT_PADDING_LEFT_RIGHT = 12;
 const MARGIN_EIGHT = 8;
 const ROW_GAP = 16;
-const DURATION = 300;
+const SUBTITLE_HEIGHT = 56;
 const ENTER_EXIT_ICON_DURATION = 200;
 const COMMON_BEZIER = curves.cubicBezierCurve(.33, 0, .67, 1);
 const DRAG_SPRING = curves.interpolatingSpring(0, 1, 400, 38);
@@ -80,21 +81,23 @@ export class GridObjectSortComponent extends ViewPU {
         this.__insertIndex = new ObservedPropertySimplePU(-1, this, "insertIndex");
         this.__editGridDataLength = new ObservedPropertySimplePU(-1, this, "editGridDataLength");
         this.__isTouchDown = new ObservedPropertySimplePU(!1, this, "isTouchDown");
-        this.__endX = new ObservedPropertySimplePU(0, this, "endX");
-        this.__endY = new ObservedPropertySimplePU(0, this, "endY");
+        this.__addItemMoveX = new ObservedPropertySimplePU(0, this, "addItemMoveX");
+        this.__addItemMoveY = new ObservedPropertySimplePU(0, this, "addItemMoveY");
+        this.__editItemMoveX = new ObservedPropertySimplePU(0, this, "editItemMoveX");
+        this.__editItemMoveY = new ObservedPropertySimplePU(0, this, "editItemMoveY");
         this.__unSelectedIndex = new ObservedPropertySimplePU(0, this, "unSelectedIndex");
         this.__clickAddBtn = new ObservedPropertySimplePU(!1, this, "clickAddBtn");
         this.__selectedIndex = new ObservedPropertySimplePU(-1, this, "selectedIndex");
-        this.__gridHeight = new ObservedPropertySimplePU(0, this, "gridHeight");
         this.__clickRemoveBtn = new ObservedPropertySimplePU(!1, this, "clickRemoveBtn");
         this.__addAreaLongPressGesture = new ObservedPropertySimplePU(!1, this, "addAreaLongPressGesture");
-        this.__itemMoveX = new ObservedPropertySimplePU(0, this, "itemMoveX");
-        this.__itemMoveY = new ObservedPropertySimplePU(0, this, "itemMoveY");
         this.__arraySelectIsChange = new ObservedPropertySimplePU(0, this, "arraySelectIsChange");
         this.__arrayUnSelectIsChange = new ObservedPropertySimplePU(0, this, "arrayUnSelectIsChange");
         this.__textItemEditWidth = new ObservedPropertySimplePU(0, this, "textItemEditWidth");
         this.__imageItemWidth = new ObservedPropertySimplePU(0, this, "imageItemWidth");
         this.__saveClick = new ObservedPropertySimplePU(!1, this, "saveClick");
+        this.__imageTextAddIconShow = new ObservedPropertySimplePU(!1, this, "imageTextAddIconShow");
+        this.__imageTextRemoveIconShow = new ObservedPropertySimplePU(!1, this, "imageTextRemoveIconShow");
+        this.__firstIn = new ObservedPropertySimplePU(!0, this, "firstIn");
         this.colNum = 3;
         this.vibrationDone = !1;
         this.touchDown = {
@@ -126,10 +129,6 @@ export class GridObjectSortComponent extends ViewPU {
             moduleName: ""
         };
         this.imageText = !1;
-        this.initPosition = [];
-        this.scroller = new Scroller;
-        this.onSave = void 0;
-        this.onCancel = void 0;
         this.menuItems = [new MenuItem({
             id: -1,
             type: 2e4,
@@ -139,6 +138,8 @@ export class GridObjectSortComponent extends ViewPU {
         }, !0, (() => {
             this.goEdit()
         }))];
+        this.onSave = void 0;
+        this.onCancel = void 0;
         this.setInitiallyProvidedValue(t);
         this.declareWatch("gridComState", this.onGridComStateChange)
     }
@@ -167,21 +168,23 @@ export class GridObjectSortComponent extends ViewPU {
         void 0 !== e.insertIndex && (this.insertIndex = e.insertIndex);
         void 0 !== e.editGridDataLength && (this.editGridDataLength = e.editGridDataLength);
         void 0 !== e.isTouchDown && (this.isTouchDown = e.isTouchDown);
-        void 0 !== e.endX && (this.endX = e.endX);
-        void 0 !== e.endY && (this.endY = e.endY);
+        void 0 !== e.addItemMoveX && (this.addItemMoveX = e.addItemMoveX);
+        void 0 !== e.addItemMoveY && (this.addItemMoveY = e.addItemMoveY);
+        void 0 !== e.editItemMoveX && (this.editItemMoveX = e.editItemMoveX);
+        void 0 !== e.editItemMoveY && (this.editItemMoveY = e.editItemMoveY);
         void 0 !== e.unSelectedIndex && (this.unSelectedIndex = e.unSelectedIndex);
         void 0 !== e.clickAddBtn && (this.clickAddBtn = e.clickAddBtn);
         void 0 !== e.selectedIndex && (this.selectedIndex = e.selectedIndex);
-        void 0 !== e.gridHeight && (this.gridHeight = e.gridHeight);
         void 0 !== e.clickRemoveBtn && (this.clickRemoveBtn = e.clickRemoveBtn);
         void 0 !== e.addAreaLongPressGesture && (this.addAreaLongPressGesture = e.addAreaLongPressGesture);
-        void 0 !== e.itemMoveX && (this.itemMoveX = e.itemMoveX);
-        void 0 !== e.itemMoveY && (this.itemMoveY = e.itemMoveY);
         void 0 !== e.arraySelectIsChange && (this.arraySelectIsChange = e.arraySelectIsChange);
         void 0 !== e.arrayUnSelectIsChange && (this.arrayUnSelectIsChange = e.arrayUnSelectIsChange);
         void 0 !== e.textItemEditWidth && (this.textItemEditWidth = e.textItemEditWidth);
         void 0 !== e.imageItemWidth && (this.imageItemWidth = e.imageItemWidth);
         void 0 !== e.saveClick && (this.saveClick = e.saveClick);
+        void 0 !== e.imageTextAddIconShow && (this.imageTextAddIconShow = e.imageTextAddIconShow);
+        void 0 !== e.imageTextRemoveIconShow && (this.imageTextRemoveIconShow = e.imageTextRemoveIconShow);
+        void 0 !== e.firstIn && (this.firstIn = e.firstIn);
         void 0 !== e.colNum && (this.colNum = e.colNum);
         void 0 !== e.vibrationDone && (this.vibrationDone = e.vibrationDone);
         void 0 !== e.touchDown && (this.touchDown = e.touchDown);
@@ -189,11 +192,9 @@ export class GridObjectSortComponent extends ViewPU {
         void 0 !== e.hoverBackgroundColor && (this.hoverBackgroundColor = e.hoverBackgroundColor);
         void 0 !== e.focusBorder && (this.focusBorder = e.focusBorder);
         void 0 !== e.imageText && (this.imageText = e.imageText);
-        void 0 !== e.initPosition && (this.initPosition = e.initPosition);
-        void 0 !== e.scroller && (this.scroller = e.scroller);
+        void 0 !== e.menuItems && (this.menuItems = e.menuItems);
         void 0 !== e.onSave && (this.onSave = e.onSave);
-        void 0 !== e.onCancel && (this.onCancel = e.onCancel);
-        void 0 !== e.menuItems && (this.menuItems = e.menuItems)
+        void 0 !== e.onCancel && (this.onCancel = e.onCancel)
     }
 
     updateStateVars(e) {
@@ -223,21 +224,23 @@ export class GridObjectSortComponent extends ViewPU {
         this.__insertIndex.purgeDependencyOnElmtId(e);
         this.__editGridDataLength.purgeDependencyOnElmtId(e);
         this.__isTouchDown.purgeDependencyOnElmtId(e);
-        this.__endX.purgeDependencyOnElmtId(e);
-        this.__endY.purgeDependencyOnElmtId(e);
+        this.__addItemMoveX.purgeDependencyOnElmtId(e);
+        this.__addItemMoveY.purgeDependencyOnElmtId(e);
+        this.__editItemMoveX.purgeDependencyOnElmtId(e);
+        this.__editItemMoveY.purgeDependencyOnElmtId(e);
         this.__unSelectedIndex.purgeDependencyOnElmtId(e);
         this.__clickAddBtn.purgeDependencyOnElmtId(e);
         this.__selectedIndex.purgeDependencyOnElmtId(e);
-        this.__gridHeight.purgeDependencyOnElmtId(e);
         this.__clickRemoveBtn.purgeDependencyOnElmtId(e);
         this.__addAreaLongPressGesture.purgeDependencyOnElmtId(e);
-        this.__itemMoveX.purgeDependencyOnElmtId(e);
-        this.__itemMoveY.purgeDependencyOnElmtId(e);
         this.__arraySelectIsChange.purgeDependencyOnElmtId(e);
         this.__arrayUnSelectIsChange.purgeDependencyOnElmtId(e);
         this.__textItemEditWidth.purgeDependencyOnElmtId(e);
         this.__imageItemWidth.purgeDependencyOnElmtId(e);
-        this.__saveClick.purgeDependencyOnElmtId(e)
+        this.__saveClick.purgeDependencyOnElmtId(e);
+        this.__imageTextAddIconShow.purgeDependencyOnElmtId(e);
+        this.__imageTextRemoveIconShow.purgeDependencyOnElmtId(e);
+        this.__firstIn.purgeDependencyOnElmtId(e)
     }
 
     aboutToBeDeleted() {
@@ -263,21 +266,23 @@ export class GridObjectSortComponent extends ViewPU {
         this.__insertIndex.aboutToBeDeleted();
         this.__editGridDataLength.aboutToBeDeleted();
         this.__isTouchDown.aboutToBeDeleted();
-        this.__endX.aboutToBeDeleted();
-        this.__endY.aboutToBeDeleted();
+        this.__addItemMoveX.aboutToBeDeleted();
+        this.__addItemMoveY.aboutToBeDeleted();
+        this.__editItemMoveX.aboutToBeDeleted();
+        this.__editItemMoveY.aboutToBeDeleted();
         this.__unSelectedIndex.aboutToBeDeleted();
         this.__clickAddBtn.aboutToBeDeleted();
         this.__selectedIndex.aboutToBeDeleted();
-        this.__gridHeight.aboutToBeDeleted();
         this.__clickRemoveBtn.aboutToBeDeleted();
         this.__addAreaLongPressGesture.aboutToBeDeleted();
-        this.__itemMoveX.aboutToBeDeleted();
-        this.__itemMoveY.aboutToBeDeleted();
         this.__arraySelectIsChange.aboutToBeDeleted();
         this.__arrayUnSelectIsChange.aboutToBeDeleted();
         this.__textItemEditWidth.aboutToBeDeleted();
         this.__imageItemWidth.aboutToBeDeleted();
         this.__saveClick.aboutToBeDeleted();
+        this.__imageTextAddIconShow.aboutToBeDeleted();
+        this.__imageTextRemoveIconShow.aboutToBeDeleted();
+        this.__firstIn.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal()
     }
@@ -458,20 +463,36 @@ export class GridObjectSortComponent extends ViewPU {
         this.__isTouchDown.set(e)
     }
 
-    get endX() {
-        return this.__endX.get()
+    get addItemMoveX() {
+        return this.__addItemMoveX.get()
     }
 
-    set endX(e) {
-        this.__endX.set(e)
+    set addItemMoveX(e) {
+        this.__addItemMoveX.set(e)
     }
 
-    get endY() {
-        return this.__endY.get()
+    get addItemMoveY() {
+        return this.__addItemMoveY.get()
     }
 
-    set endY(e) {
-        this.__endY.set(e)
+    set addItemMoveY(e) {
+        this.__addItemMoveY.set(e)
+    }
+    
+    get editItemMoveX() {
+        return this.__editItemMoveX.get()
+    }
+
+    set editItemMoveX(e) {
+        this.__editItemMoveX.set(e)
+    }
+
+    get editItemMoveY() {
+        return this.__editItemMoveY.get()
+    }
+
+    set editItemMoveY(e) {
+        this.__editItemMoveY.set(e)
     }
 
     get unSelectedIndex() {
@@ -498,14 +519,6 @@ export class GridObjectSortComponent extends ViewPU {
         this.__selectedIndex.set(e)
     }
 
-    get gridHeight() {
-        return this.__gridHeight.get()
-    }
-
-    set gridHeight(e) {
-        this.__gridHeight.set(e)
-    }
-
     get clickRemoveBtn() {
         return this.__clickRemoveBtn.get()
     }
@@ -520,22 +533,6 @@ export class GridObjectSortComponent extends ViewPU {
 
     set addAreaLongPressGesture(e) {
         this.__addAreaLongPressGesture.set(e)
-    }
-
-    get itemMoveX() {
-        return this.__itemMoveX.get()
-    }
-
-    set itemMoveX(e) {
-        this.__itemMoveX.set(e)
-    }
-
-    get itemMoveY() {
-        return this.__itemMoveY.get()
-    }
-
-    set itemMoveY(e) {
-        this.__itemMoveY.set(e)
     }
 
     get arraySelectIsChange() {
@@ -578,6 +575,30 @@ export class GridObjectSortComponent extends ViewPU {
         this.__saveClick.set(e)
     }
 
+    get imageTextAddIconShow() {
+        return this.__imageTextAddIconShow.get()
+    }
+
+    set imageTextAddIconShow(e) {
+        this.__imageTextAddIconShow.set(e)
+    }
+
+    get imageTextRemoveIconShow() {
+        return this.__imageTextRemoveIconShow.get()
+    }
+
+    set imageTextRemoveIconShow(e) {
+        this.__imageTextRemoveIconShow.set(e)
+    }
+
+    get firstIn() {
+        return this.__firstIn.get()
+    }
+
+    set firstIn(e) {
+        this.__firstIn.set(e)
+    }
+
     aboutToAppear() {
         this.dataList.length = 50;
         this.selected = this.dataList && this.deduplicate(this.dataList).filter((e => e.selected)).sort(this.sortBy());
@@ -586,7 +607,19 @@ export class GridObjectSortComponent extends ViewPU {
         this.copyUnSelected = this.unSelected.slice();
         this.editGridDataLength = this.selected.length;
         this.imageText = this.options.type === GridObjectSortComponentType.IMAGE_TEXT;
-        this.colNum = this.imageText ? 3 : 4
+        this.colNum = this.imageText ? 3 : 4;
+        setTimeout((() => {
+            this.firstIn =!1
+        }), 500)
+    }
+
+    aboutToDisappear() {
+        Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
+            this.gridComState = !1
+        }));
+        this.menuSwitch = !1;
+        this.selected = this.copySelected;
+        this.unSelected = this.copyUnSelected
     }
 
     deduplicate(e) {
@@ -607,17 +640,19 @@ export class GridObjectSortComponent extends ViewPU {
     }
 
     cancelEdit() {
-        Context.animateTo({ duration: 200, curve: LONG_TOUCH_SCALE }, (() => {
-            this.longScaleOnePointTwo = 1
-        }));
-        Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-            this.gridComState = !1
-        }));
-        this.menuSwitch = !1;
-        this.selected = this.copySelected.slice();
-        this.unSelected = this.copyUnSelected.slice();
-        this.editGridDataLength = this.selected.length;
-        this.onCancel && this.onCancel()
+        if(!(this.isStartDrag || this.clickAddBtn || this.clickRemoveBtn)) {
+            Context.animateTo({ duration: 200, curve: LONG_TOUCH_SCALE }, (() => {
+                this.longScaleOnePointTwo = 1
+            }));
+            Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
+                this.gridComState = !1
+            }));
+            this.menuSwitch = !1;
+            this.selected = this.copySelected.slice();
+            this.unSelected = this.copyUnSelected.slice();
+            this.editGridDataLength = this.selected.length;
+            this.onCancel && this.onCancel()
+        }
     }
 
     goEdit() {
@@ -648,13 +683,34 @@ export class GridObjectSortComponent extends ViewPU {
         this.menuSwitch = !1
     }
 
-    aboutToDisappear() {
-        Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-            this.gridComState = !1
-        }));
-        this.menuSwitch = !1;
-        this.selected = this.copySelected;
-        this.unSelected = this.copyUnSelected
+    onDragMoveEvent(e, t, i) {
+        if (!this.gridComState || e.x < this.blockWidth / 3 && e.y < this.blockHeight / 3) return;
+        let o = i;
+        i < 0 && (o = this.selected.length - 1);
+        this.insertIndex = i
+    }
+
+    handleDeleteClick(e) {
+        if (this.clickAddBtn || this.clickRemoveBtn) return;
+        this.clickRemoveBtn = !0;
+        this.scaleIcon = 0;
+        this.arraySelectIsChange = 1;
+        let t = this.selected.findIndex((t => t.id === e.id));
+        this.content = e;
+        this.selectedIndex = t;
+        Context.animateTo({ curve: REMOVE_ADD_SPRING, onFinish: ()=> {
+            this.scaleIcon = 1;
+            this.selected.splice(t, 1);
+            this.unSelected.unshift(e);
+            this.editGridDataLength = this.editGridDataLength - 1;
+            this.editItemMoveX = 0;
+            this.editItemMoveY = 0;
+            this.arraySelectIsChange = 2;
+            this.clickRemoveBtn = !1
+        } }, (() => {
+            this.editItemMoveX = this.getAddItemGridPosition().x;
+            this.editItemMoveY = this.getAddItemGridPosition().y
+        }))
     }
 
     customColumnsTemplate() {
@@ -672,8 +728,96 @@ export class GridObjectSortComponent extends ViewPU {
     }
 
     getBlockWidth() {
-        const e = (this.areaWidth - 32) / this.colNum;
-        return e
+        return (this.areaWidth - 32) / this.colNum
+    }
+
+    getGridHeight(e, t) {
+        let i = 0;
+        let o = e.length;
+        let s = 0;
+        let n = o % this.colNum == 0;
+        s = this.clickAddBtn && n || this.isStartDrag && n && t || this.clickRemoveBtn && n && !t ? 1 : 0;
+        let d = Math.ceil(o / this.colNum) + s;
+        i = this.blockHeight * d;
+        0 === o && (i = 0);
+        return i
+    }
+
+    imageTextRemoveIcon(e) {
+        return this.clickRemoveBtn && this.content.id === e.id ? {
+            id: -1,
+            type: 2e4,
+            params: ["sys.media.ohos_ic_public_add_norm_filled"],
+            bundleName: "",
+            moduleName: ""
+        } : {
+            id: -1,
+            type: 2e4,
+            params: ["sys.media.ohos_ic_public_remove_filled"],
+            bundleName: "",
+            moduleName: ""
+        }
+    }
+
+    imageTextAddIcon(e) {
+        return this.clickAddBtn && this.content.id === e.id && this.gridComState ? {
+            id: -1,
+            type: 2e4,
+            params: ["sys.media.ohos_ic_public_remove_filled"],
+            bundleName: "",
+            moduleName: ""
+        } : {
+            id: -1,
+            type: 2e4,
+            params: ["sys.media.ohos_ic_public_add_norm_filled"],
+            bundleName: "",
+            moduleName: ""
+        }
+    }
+
+    imageTextAddIconVisible(e) {
+        return this.clickAddBtn && this.content.id === e.id && !this.gridComState ? Visibility.Hidden : Visibility.Visible
+    }
+
+    getCoodXY(e) {
+        let t = 0;
+        let i = 0;
+        const o = this.colNum;
+        const s = Math.trunc(e % o);
+        if (e >= this.insertIndex) if (s === o - 1) {
+            t -= this.blockWidth * (o - 1);
+            i += this.blockHeight
+        } else t += this.blockWidth;
+        if (!this.isStartDrag) {
+            t = 0;
+            i = 0
+        }
+        return { x: t, y: i }
+    }
+
+    getAddItemGridPosition() {
+        const e = this.selected.length;
+        const t = this.colNum;
+        const i = (this.selectedIndex + 1) % t;
+        const o = Math.ceil((this.selectedIndex + 1) / t);
+        const s = Math.ceil(e / t);
+        const n = this.imageText;
+        let d = 0;
+        d = 0 === i ? n ? 2 * -this.blockWidth : 3 * -this.blockWidth : -this.blockWidth * (i - 1);
+        let a = 0;
+        const r = s - o;
+        a = (1 === e % t ? r : r + 1) * this.blockHeight + 56;
+        return { x: d, y: a }
+    }
+
+    getCoveringGridPosition(e) {
+        let t = 0;
+        let i = 0;
+        if (e > this.selectedIndex && 2 !== this.arraySelectIsChange) {
+            t = e % this.colNum == 0 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
+            i = e % this.colNum == 0 ? -this.blockHeight : 0
+        }
+        return { x: t, y: i }
     }
 
     getEditItemGridPosition(e, t) {
@@ -684,160 +828,53 @@ export class GridObjectSortComponent extends ViewPU {
         let d = Math.abs(s - n) * this.blockWidth;
         s < n ? d = -d : s > n || (d = 0);
         let a = 0;
-        a = (Math.trunc(t / this.colNum) + 1) * this.blockHeight + 56;
-        return { x: d, y: a }
-    }
-
-    getAddItemGridPosition(e) {
-        const t = this.unSelected.length;
-        const i = this.colNum;
-        const o = Math.trunc(t % i);
-        const s = Math.trunc(e % i);
-        const n = o;
-        let d = Math.abs(n - s) * this.blockWidth;
-        n < s ? d = -d : n > s || (d = 0);
-        let a = 0;
-        let r = Math.trunc(e / this.colNum);
-        const h = t % i == 0 ? 0 : 1;
-        let l = Math.trunc(t / this.colNum) + h;
-        const c = this.selected.length;
-        const m = c % i == 0 ? 0 : 1;
-        let g = Math.trunc(c / this.colNum) + m;
-        a = 0 === o ? (l + (g - r)) * this.blockHeight + 56 : (l - 1 + (g - r)) * this.blockHeight + 56;
-        return { x: d, y: a }
-    }
-
-    getAddItemGridFirstPosition(e) {
-        const t = this.selected.length;
-        const i = this.colNum;
-        const o = (e + 1) % i;
-        const s = Math.ceil((e + 1) / i);
-        const n = Math.ceil(t / i);
-        const d = this.imageText;
-        let a = 0;
-        a = 0 === o ? d ? 2 * -this.blockWidth : 3 * -this.blockWidth : -this.blockWidth * (o - 1);
         let r = 0;
-        const h = n - s;
-        r = (h + 1) * this.blockHeight + 56;
-        return { x: a, y: r }
+        let h = Math.trunc(t / this.colNum) ;
+        r = !this.imageText && this.gridComState && t > 3 ? (h + 1) * (this.blockHeight - 8) + 8 : (h + 1) * this.blockHeight;
+        a = r + 56;
+        return { x: d, y: a }
     }
 
-    getCoveringGridPosition(e, t, i) {
-        const o = e.length;
-        let s = 0;
-        let n = 0;
-        if (t > i) if (i === o - 1) {
-            s = 0;
-            n = 0
-        } else if (2 !== this.arraySelectIsChange) {
-            s = t % this.colNum == 0 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
-            n = t % this.colNum == 0 ? -this.blockHeight : 0
-        }
-        return { x: s, y: n }
-    }
-
-    onDragMoveEvent(e, t, i) {
-        if (!this.gridComState || e.x < this.blockWidth / 3 && e.y < this.blockHeight / 3) return;
-        let o = i;
-        i < 0 && (o = this.selected.length - 1);
-        this.insertIndex = i
-    }
-
-    handleDeleteClick(e) {
-        if (this.clickRemoveBtn) return;
-        this.scaleIcon = 0;
-        this.clickRemoveBtn = !0;
-        this.arraySelectIsChange = 1;
+    getCoveringGridPositionBottom(e) {
         let t = 0;
-        this.content = e;
-        this.selected.forEach(((i, o) => {
-            i.id === e.id && (t = o)
-        }));
-        this.selectedIndex = t;
-        setTimeout((() => {
-            this.scaleIcon = 1;
-            this.arraySelectIsChange = 2;
-            this.unSelected.push(e);
-            this.selected.splice(t, 1);
-            this.editGridDataLength = this.editGridDataLength - 1;
-            this.clickRemoveBtn = !1
-        }), 500)
-    }
-
-    getCoodXY(e) {
-        const t = this.colNum;
         let i = 0;
-        let o = 0;
-        if (e >= this.insertIndex) if (Math.trunc(e % t) === t - 1) {
-            i -= this.blockWidth * (t - 1);
-            o += this.blockHeight
-        } else i += this.blockWidth;
-        if (!this.isStartDrag) {
-            i = 0;
-            o = 0
+        const o = e % this.colNum == 0;
+        const s = this.gridComState && !this.imageText ? 8 - this.blockHeight : -this.blockHeight;
+        if (e > this.unSelectedIndex && 2 !== this.arrayUnSelectIsChange) {
+            t = o ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
+            i = o ? s : 0
         }
-        return { x: i, y: o }
+        return { x: t, y: i }
     }
 
-    getGridNum(e, t) {
-        let i = e.length;
-        let o = 0;
-        t ? (this.isStartDrag || 0 !== Math.trunc(i % this.colNum) && this.editGridDataLength === i || this.clickAddBtn) && (o = 1) : 0 !== Math.trunc(i % this.colNum) && (o = 1);
-        return o
-    }
-
-    getGridHeight(e, t) {
+    getAddItemRightMove(e) {
+        let t = this.blockWidth;
         let i = 0;
-        let o = e.length;
-        let s = e;
-        const n = Math.trunc(o / this.colNum) + this.getGridNum(s, t);
-        i = this.blockHeight * n;
-        0 === o && (i = 0);
-        t && (this.gridHeight = i);
-        return i
+        if((e + 1) % this.colNum == 0) {
+            t = -this.blockWidth * (this.colNum - 1);
+            i = this.imageText ? this.blockHeight : this.blockHeight - 8
+        }
+        return { x: t, y: i }
     }
 
-    getXY(e, t, i) {
-        let o = 0;
-        let s = 0;
-        if (this.isStartDrag) {
-            o = this.getCoodXY(t).x;
-            s = this.getCoodXY(t).y
-        } else if (this.clickRemoveBtn) if (t === i) {
-            o = this.getAddItemGridPosition(i).x;
-            s = this.getAddItemGridPosition(i).y
-        } else {
-            o = this.getCoveringGridPosition(e, t, i).x;
-            s = this.getCoveringGridPosition(e, t, i).y
-        }
-        return { x: o, y: s }
+    getShowAreaItemTranslate(e) {
+        return this.isStartDrag ? {
+            x: this.getCoodXY(e).x,
+            y: this.getCoodXY(e).y
+        } : this.isStartDrag || e !== this.selectedIndex ? !this.isStartDrag && e !== this.selectedIndex && this.clickRemoveBtn ? {
+            x: this.getCoveringGridPosition(e).x,
+            y: this.getCoveringGridPosition(e).y
+        } : { x: 0, y: 0 } : { x: this.editItemMoveX, y: this.editItemMoveY }
     }
 
-    getCoveringGridPositionBottom(e, t, i) {
-        const o = e.length;
-        let s = 0;
-        let n = 0;
-        if (t > i) if (i === o - 1) {
-            s = 0;
-            n = 0
-        } else if (2 !== this.arrayUnSelectIsChange) {
-            s = t % this.colNum == 0 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
-            n = t % this.colNum == 0 ? -this.blockHeight : 0
-        }
-        return { x: s, y: n }
-    }
-
-    getUnSelectXY(e, t, i) {
-        let o = 0;
-        let s = 0;
-        if (this.clickAddBtn) if (t === this.unSelectedIndex) {
-            o = this.endX;
-            s = -this.endY
-        } else {
-            o = this.getCoveringGridPositionBottom(e, t, i).x;
-            s = this.getCoveringGridPositionBottom(e, t, i).y
-        }
-        return { x: o, y: s }
+    getAddAreaItemTranslate(e) {
+        return this.clickRemoveBtn ? {
+            x: this.getAddItemRightMove(e).x,
+            y: this.getAddItemRightMove(e).y
+        } : this.clickRemoveBtn || e !== this.unSelectedIndex ? !this.clickRemoveBtn && e !== this.unSelectedIndex && this.clickAddBtn ? {
+            x: this.getCoveringGridPositionBottom(e).x,
+            y: this.getCoveringGridPositionBottom(e).y
+        } : { x: 0, y: 0 } : { x: this.addItemMoveX, y: -this.addItemMoveY }
     }
 
     PixelMapBuilder(e = null) {
@@ -845,7 +882,7 @@ export class GridObjectSortComponent extends ViewPU {
             Stack.create({ alignContent: Alignment.Center });
             Stack.clip(!1);
             Stack.height(1.5 * this.blockHeight);
-            Stack.width(1.2 * this.blockWidth);
+            Stack.width(1.2 * this.blockWidth)
         }), Stack);
         this.observeComponentCreation2(((e, t) => {
             If.create();
@@ -859,13 +896,13 @@ export class GridObjectSortComponent extends ViewPU {
                     Column.padding({ left: 8, right: 8 });
                     Column.backgroundColor(this.touchDown);
                     Column.borderRadius(this.touchBorderRadius);
-                    Column.scale({ x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo });
+                    Column.scale({ x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo })
                 }), Column);
                 this.observeComponentCreation2(((e, t) => {
                     Image.create(this.content.url);
                     Image.draggable(!1);
                     Image.height(this.options.imageSize || 56);
-                    Image.width(this.options.imageSize || 56);
+                    Image.width(this.options.imageSize || 56)
                 }), Image);
                 this.observeComponentCreation2(((e, t) => {
                     Text.create(this.content.text);
@@ -880,7 +917,7 @@ export class GridObjectSortComponent extends ViewPU {
                     Text.margin({ top: 2 });
                     Text.maxLines(1);
                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                    Text.textAlign(TextAlign.Center);
+                    Text.textAlign(TextAlign.Center)
                 }), Text);
                 Text.pop();
                 this.observeComponentCreation2(((e, t) => {
@@ -901,7 +938,7 @@ export class GridObjectSortComponent extends ViewPU {
                     });
                     Image.width(24);
                     Image.height(24);
-                    Image.position({ x: this.blockWidth - 40, y: -8 });
+                    Image.position({ x: this.blockWidth - 40, y: -8 })
                 }), Image);
                 Column.pop()
             })) : this.ifElseBranchUpdateFunction(1, (() => {
@@ -920,7 +957,7 @@ export class GridObjectSortComponent extends ViewPU {
                         moduleName: ""
                     });
                     Row.width(this.textItemEditWidth);
-                    Row.height(28);
+                    Row.height(28)
                 }), Row);
                 this.observeComponentCreation2(((e, t) => {
                     Text.create(this.content.text);
@@ -940,7 +977,7 @@ export class GridObjectSortComponent extends ViewPU {
                     });
                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                     Text.textAlign(TextAlign.Center);
-                    Text.maxLines(1);
+                    Text.maxLines(1)
                 }), Text);
                 Text.pop();
                 this.observeComponentCreation2(((e, t) => {
@@ -961,138 +998,10 @@ export class GridObjectSortComponent extends ViewPU {
                     });
                     Image.width(24);
                     Image.height(24);
-                    Image.position({ x: this.blockWidth - 52, y: -8 });
+                    Image.position({ x: this.blockWidth - 52, y: -8 })
                 }), Image);
                 Row.pop()
-            }));
-        }), If);
-        If.pop();
-        Stack.pop()
-    }
-
-
-    MoveMask(e = null) {
-        this.observeComponentCreation2(((e, t) => {
-            Stack.create({ alignContent: Alignment.Center });
-            Stack.height(this.blockHeight);
-            Stack.width(this.blockWidth);
-        }), Stack);
-        this.observeComponentCreation2(((e, t) => {
-            If.create();
-            this.imageText ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation2(((e, t) => {
-                    Column.create();
-                    Column.alignItems(HorizontalAlign.Center);
-                    Column.justifyContent(FlexAlign.Center);
-                    Column.width(this.imageItemWidth);
-                    Column.height(this.imageItemWidth);
-                    Column.padding({ left: 8, right: 8 });
-                    Column.backgroundColor(this.touchDown);
-                    Column.borderRadius(this.touchBorderRadius);
-                }), Column);
-                this.observeComponentCreation2(((e, t) => {
-                    Image.create(this.content.url);
-                    Image.draggable(!1);
-                    Image.height(this.options.imageSize || 56);
-                    Image.width(this.options.imageSize || 56);
-                }), Image);
-                this.observeComponentCreation2(((e, t) => {
-                    Text.create(this.content.text);
-                    Text.textAlign(TextAlign.Center);
-                    Text.fontSize({
-                        id: -1,
-                        type: 10002,
-                        params: ["sys.float.ohos_id_text_size_button3"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Text.margin({ top: 2 });
-                    Text.maxLines(1);
-                    Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                    Text.textAlign(TextAlign.Center);
-                }), Text);
-                Text.pop();
-                this.observeComponentCreation2(((e, t) => {
-                    Image.create({
-                        id: -1,
-                        type: 2e4,
-                        params: ["sys.media.ohos_ic_public_remove_filled"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Image.draggable(!1);
-                    Image.fillColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_secondary"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Image.width(24);
-                    Image.height(24);
-                    Image.position({ x: this.blockWidth - 40, y: -8 });
-                }), Image);
-                Column.pop()
-            })) : this.ifElseBranchUpdateFunction(1, (() => {
-                this.observeComponentCreation2(((e, t) => {
-                    Row.create();
-                    Row.borderRadius(50);
-                    Row.padding({ left: 12, right: 12 });
-                    Row.alignItems(VerticalAlign.Center);
-                    Row.justifyContent(FlexAlign.Center);
-                    Row.backgroundColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_button_normal"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Row.width(this.textItemEditWidth);
-                    Row.height(28);
-                }), Row);
-                this.observeComponentCreation2(((e, t) => {
-                    Text.create(this.content.text);
-                    Text.fontColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_text_primary"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Text.fontSize({
-                        id: -1,
-                        type: 10002,
-                        params: ["sys.float.ohos_id_text_size_button3"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                    Text.textAlign(TextAlign.Center);
-                    Text.maxLines(1);
-                }), Text);
-                Text.pop();
-                this.observeComponentCreation2(((e, t) => {
-                    Image.create({
-                        id: -1,
-                        type: 2e4,
-                        params: ["sys.media.ohos_ic_public_remove_filled"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Image.draggable(!1);
-                    Image.fillColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_secondary"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Image.width(24);
-                    Image.height(24);
-                    Image.position({ x: this.blockWidth - 52, y: -8 });
-                }), Image);
-                Row.pop()
-            }));
+            }))
         }), If);
         If.pop();
         Stack.pop()
@@ -1179,7 +1088,7 @@ export class GridObjectSortComponent extends ViewPU {
         this.observeComponentCreation2(((e, t) => {
             Column.create();
             Column.padding({ left: 8, right: 8 });
-            Column.width("100%");
+            Column.width("100%")
         }), Column);
         this.observeComponentCreation2(((t, i) => {
             Column.create();
@@ -1190,13 +1099,13 @@ export class GridObjectSortComponent extends ViewPU {
             Column.padding({ left: 8, right: 8 });
             Column.borderRadius(this.isTouchDown && e.id === this.content.id || e.id === this.hoverId ? this.touchBorderRadius : 0);
             Column.backgroundColor(this.isTouchDown && e.id === this.content.id ? this.touchDown : e.id === this.hoverId ? this.hoverBackgroundColor : "");
-            Column.scale(e.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
+            Column.scale(e.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {})
         }), Column);
         this.observeComponentCreation2(((t, i) => {
             Image.create(e.url);
             Image.draggable(!1);
             Image.height(this.options.imageSize || 56);
-            Image.width(this.options.imageSize || 56);
+            Image.width(this.options.imageSize || 56)
         }), Image);
         this.observeComponentCreation2(((t, i) => {
             Text.create(e.text);
@@ -1211,20 +1120,13 @@ export class GridObjectSortComponent extends ViewPU {
             Text.margin({ top: 2 });
             Text.maxLines(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            Text.textAlign(TextAlign.Center);
+            Text.textAlign(TextAlign.Center)
         }), Text);
         Text.pop();
         this.observeComponentCreation2(((i, o) => {
-            Image.create({
-                id: -1,
-                type: 2e4,
-                params: ["sys.media.ohos_ic_public_add_norm_filled"],
-                bundleName: "",
-                moduleName: ""
-            });
-            Context.animation({ duration: 300, curve: Curve.Linear, iterations: 1, playMode: PlayMode.Normal });
+            Image.create(this.imageTextAddIcon(e)); 
             Image.draggable(!1);
-            Image.visibility("add" === t ? Visibility.Visible : Visibility.Hidden);
+            Image.visibility("add" === t ? this.imageTextAddIconVisible(e) : Visibility.Hidden);
             Image.fillColor({
                 id: -1,
                 type: 10001,
@@ -1234,41 +1136,36 @@ export class GridObjectSortComponent extends ViewPU {
             });
             Image.width(24);
             Image.height(24);
-            Context.animation(null);
             Image.position({ x: this.blockWidth - 40, y: -8 });
             Image.onClick((() => {
-                if (this.clickAddBtn) return;
+                if (this.clickAddBtn || this.clickRemoveBtn) return;
                 this.scaleIcon = 0;
                 this.content = e;
                 const t = this.unSelected.findIndex((t => t.id === e.id));
                 this.editGridDataLength = this.selected.length + 1;
                 const i = this.getEditItemGridPosition(ObservedObject.GetRawObject(this.selected), t);
                 this.unSelectedIndex = t;
-                this.endX = i.x;
-                this.endY = i.y;
                 this.arrayUnSelectIsChange = 1;
                 this.clickAddBtn = !0;
-                setTimeout((() => {
-                    this.arrayUnSelectIsChange = 2;
-                    this.scaleIcon = 1;
-                    this.selected.push(e);
-                    this.unSelected.splice(t, 1);
-                    this.endX = 0;
-                    this.endY = 0;
-                    this.gridComState || this.onSaveEdit();
-                    this.clickAddBtn = !1
-                }), 500)
-            }));
+                Context.animateTo({ curve: REMOVE_ADD_SPRING, onFinish: ()=> {
+                    if (!this.selected.some((t => t.id === e.id))) {
+                        this.arrayUnSelectIsChange = 2;
+                        this.scaleIcon = 1;
+                        this.selected.push(e);
+                        this.unSelected.splice(t, 1);
+                        this.addItemMoveX = 0;
+                        this.addItemMoveY = 0;
+                        this.gridComState || this.onSaveEdit();
+                        this.clickAddBtn = !1
+                    }
+                } }, (() => {
+                    this.addItemMoveX = i.x;
+                    this.addItemMoveY = i.y
+                }))
+            }))
         }), Image);
         this.observeComponentCreation2(((i, o) => {
-            Image.create({
-                id: -1,
-                type: 2e4,
-                params: ["sys.media.ohos_ic_public_remove_filled"],
-                bundleName: "",
-                moduleName: ""
-            });
-            Context.animation({ duration: 300, curve: Curve.Linear });
+            Image.create(this.imageTextRemoveIcon(e));
             Image.draggable(!1);
             Image.fillColor({
                 id: -1,
@@ -1280,10 +1177,8 @@ export class GridObjectSortComponent extends ViewPU {
             Image.visibility("delete" === t && this.gridComState ? Visibility.Visible : Visibility.Hidden);
             Image.width(24);
             Image.height(24);
-            Image.transition({ type: TransitionType.All, scale: { x: 0, y: 0 } });
             Image.position({ x: this.blockWidth - 40, y: -8 });
-            Context.animation(null);
-            Image.onClick((() => this.handleDeleteClick(e)));
+            Image.onClick((() => this.handleDeleteClick(e)))
         }), Image);
         Column.pop();
         Column.pop()
@@ -1294,11 +1189,14 @@ export class GridObjectSortComponent extends ViewPU {
             Stack.create();
             Stack.scale(e.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
             Stack.padding({ left: 8, right: 8 });
-            Stack.height(28);
+            Stack.height(28)
         }), Stack);
         this.observeComponentCreation2(((t, i) => {
             Row.create();
-            Context.animation({ duration: 200, curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER });
+            Context.animation(this.firstIn ? { duration: 0 } : {
+                duration: 200,
+                curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
+            });
             Row.borderRadius(50);
             Row.width(this.clickRemoveBtn && e.id === this.content.id ? this.textItemEditWidth + 8 : this.textItemEditWidth);
             Row.translate(this.gridComState ? this.clickRemoveBtn && e.id === this.content.id ? { x: 0 } : { x: -4 } : {
@@ -1312,12 +1210,15 @@ export class GridObjectSortComponent extends ViewPU {
                 params: ["sys.color.ohos_id_color_button_normal"],
                 bundleName: "",
                 moduleName: ""
-            });
+            })
         }), Row);
         Row.pop();
         this.observeComponentCreation2(((t, i) => {
             Flex.create({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center });
-            Context.animation({ duration: 200, curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER });
+            Context.animation(this.firstIn ? { duration: 0 } : {
+                duration: 200,
+                curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
+            });
             Flex.borderRadius(50);
             Flex.padding({ left: 12, right: 12 });
             Flex.backgroundColor(this.isTouchDown && e.id === this.content.id ? this.touchDown : e.id === this.hoverId ? this.hoverBackgroundColor : "");
@@ -1326,7 +1227,7 @@ export class GridObjectSortComponent extends ViewPU {
                 x: -4
             } : { x: 0 });
             Flex.height("100%");
-            Context.animation(null);
+            Context.animation(null)
         }), Flex);
         this.observeComponentCreation2(((t, i) => {
             Image.create({
@@ -1335,7 +1236,7 @@ export class GridObjectSortComponent extends ViewPU {
                 params: ["sys.media.ohos_ic_public_add"],
                 bundleName: "",
                 moduleName: ""
-            })
+            });
             Context.animation({ duration: 200, curve: COMMON_BEZIER });
             Image.width(12);
             Image.height(12);
@@ -1370,7 +1271,8 @@ export class GridObjectSortComponent extends ViewPU {
             });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.textAlign(TextAlign.Center);
-            Text.maxLines(1)
+            Text.maxLines(1);
+            Text.constraintSize(this.clickRemoveBtn && e.id === this.content.id ?  { maxWidth: 26 } : {})
         }), Text);
         Text.pop();
         this.observeComponentCreation2(((t, i) => {
@@ -1391,15 +1293,10 @@ export class GridObjectSortComponent extends ViewPU {
                 moduleName: ""
             });
             Image.width(24);
-            Image.transition({ type: TransitionType.All, scale: { x: 0, y: 0 } });
-            Image.scale(e.id === this.content.id ? { x: this.scaleIcon, y: this.scaleIcon, centerX: "0" } : {
-                centerX: "0"
-            });
+            Image.transition({ type: TransitionType.All, scale: { x: 0, y: 0, centerX: "50%" } });
+            Image.scale(e.id === this.content.id ? { x: this.scaleIcon, y: this.scaleIcon} : {});
             Image.visibility(this.gridComState ? 0 : 1);
-            Image.position({ x: this.blockWidth - 44, y: -8 });
-            Image.translate(this.gridComState ? this.clickRemoveBtn && e.id === this.content.id ? { x: 8 } : {
-                x: -8
-            } : { x: 0 });
+            Image.position({ x: this.blockWidth - 52, y: -8 });
             Context.animation(null);
             Image.onClick((() => this.handleDeleteClick(e)))
         }), Image);
@@ -1476,8 +1373,8 @@ export class GridObjectSortComponent extends ViewPU {
                 moduleName: ""
             });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            Text.textAlign(TextAlign.Center);
-            Text.maxLines(1)
+            Text.textAlign(TextAlign.Start);
+            Text.maxLines(1);
             Text.constraintSize({ maxWidth: 26 })
         }), Text);
         Text.pop();
@@ -1516,32 +1413,31 @@ export class GridObjectSortComponent extends ViewPU {
     AddTagBuilder(e = null) {
         this.observeComponentCreation2(((e, t) => {
             Grid.create();
-            Context.animation({ duration: 100, curve: Curve.Ease });
+            Context.animation({ duration: 200, curve:this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER });
+            Grid.translate(this.clickRemoveBtn && this.selected.length % this.colNum == 1 ? { y: -this.blockHeight } : {
+            });
+            Context.animation(null);
             Grid.columnsTemplate(this.customColumnsTemplate());
             Grid.padding({ left: 16, right: 16 });
             Grid.clip(!1);
-            Grid.height(this.getGridHeight(ObservedObject.GetRawObject(this.unSelected)) + 120);
-            Context.animation(null);
+            Grid.height(this.getGridHeight(ObservedObject.GetRawObject(this.unSelected)))
         }), Grid);
         this.observeComponentCreation2(((e, t) => {
             ForEach.create();
             this.forEachUpdateFunction(e, this.unSelected, ((e, t) => {
                 const i = e;
                 {
-                    const e = (e, o) => {
+                    const e = (e, i) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(e);
                         GridItem.create((() => {
                         }), !1);
-                        Context.animation({ curve: REMOVE_ADD_SPRING, onFinish: () => {
-                                i.id === this.content.id && this.clickAddBtn && console.log("animationOnFinish", t, JSON.stringify(i))
-                            } });
-                        GridItem.clip(!1);
-                        GridItem.translate({
-                            x: this.getUnSelectXY(ObservedObject.GetRawObject(this.unSelected), t, this.unSelectedIndex).x,
-                            y: this.getUnSelectXY(ObservedObject.GetRawObject(this.unSelected), t, this.unSelectedIndex).y
+                        Context.animation({ 
+                            curve: this.clickRemoveBtn ? DRAG_SPRING : t === this.unSelectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING 
                         });
+                        GridItem.clip(!1);
+                        GridItem.translate(this.getAddAreaItemTranslate(t));
                         Context.animation(null);
-                        o || GridItem.pop();
+                        i || GridItem.pop();
                         ViewStackProcessor.StopGetAccessRecording()
                     };
                     const o = () => {
@@ -1551,10 +1447,10 @@ export class GridObjectSortComponent extends ViewPU {
                             Stack.onHover((e => {
                                 this.hoverId = e ? i.id : ""
                             }));
-                            Stack.margin({ bottom: this.imageText || this.gridComState ? 16 : 8 });
+                            Stack.margin({ bottom: this.imageText ? 16 : 8 });
                             Stack.clickEffect({ level: ClickEffectLevel.LIGHT });
                             Stack.onTouch((e => {
-                                if (!this.clickAddBtn) {
+                                if (!this.clickAddBtn && !this.clickRemoveBtn) {
                                     if (e.type === TouchType.Down) {
                                         this.content = i;
                                         this.isTouchDown = !0
@@ -1572,24 +1468,27 @@ export class GridObjectSortComponent extends ViewPU {
                                         const t = this.getEditItemGridPosition(ObservedObject.GetRawObject(this.selected), e);
                                         this.content = i;
                                         this.unSelectedIndex = e;
-                                        this.endX = t.x;
-                                        this.endY = t.y;
                                         this.clickAddBtn = !0;
                                         this.arrayUnSelectIsChange = 1;
-                                        setTimeout((() => {
-                                            this.scaleIcon = 1;
-                                            this.scaleAddIcon = 0;
-                                            this.selected.push(i);
-                                            this.unSelected.splice(e, 1);
-                                            this.arrayUnSelectIsChange = 2;
-                                            this.endX = 0;
-                                            this.endY = 0;
-                                            this.gridComState || this.onSaveEdit();
-                                            Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-                                                this.addIconShow = !1
-                                            }));
-                                            this.clickAddBtn = !1
-                                        }), 500)
+                                        Context.animateTo({ curve: REMOVE_ADD_SPRING, onFinish: ()=> {
+                                            if (!this.selected.some((e => e.id === i.id))) {
+                                                this.scaleIcon = 1;
+                                                this.scaleAddIcon = 0;
+                                                this.selected.push(i);
+                                                this.unSelected.splice(e, 1);
+                                                this.arrayUnSelectIsChange = 2;
+                                                this.addItemMoveX = 0;
+                                                this.addItemMoveY = 0;
+                                                this.gridComState || this.onSaveEdit();
+                                                Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
+                                                    this.addIconShow = !1
+                                                }));
+                                                this.clickAddBtn = !1
+                                            }
+                                        } }, (() => {
+                                            this.addItemMoveX = t.x;
+                                            this.addItemMoveY = t.y
+                                        }))
                                     }
                                 }
                             }));
@@ -1616,7 +1515,7 @@ export class GridObjectSortComponent extends ViewPU {
                                 }))
                             }));
                             LongPressGesture.pop();
-                            Gesture.pop();
+                            Gesture.pop()
                         }), Stack);
                         this.observeComponentCreation2(((e, t) => {
                             If.create();
@@ -1624,15 +1523,15 @@ export class GridObjectSortComponent extends ViewPU {
                                 this.ImageTextBuilder.bind(this)(i, "add")
                             })) : this.ifElseBranchUpdateFunction(1, (() => {
                                 this.TextBlockAddItemBuilder.bind(this)(i)
-                            }));
+                            }))
                         }), If);
                         If.pop();
                         Stack.pop();
                         GridItem.pop()
                     };
-                    o();
+                    o()
                 }
-            }), (e => e.id.toString()), !0, !1);
+            }), (e => e.id.toString()), !0, !1)
         }), ForEach);
         ForEach.pop();
         Grid.pop()
@@ -1640,11 +1539,14 @@ export class GridObjectSortComponent extends ViewPU {
 
     EditTagBuilder(e = null) {
         this.observeComponentCreation2(((e, t) => {
-            Column.create();
+            Column.create()
         }), Column);
         this.observeComponentCreation2(((e, t) => {
             Grid.create();
-            Context.animation({ duration: 100, curve: Curve.Ease });
+            Context.animation(this.firstIn ? { duration: 0 } : { 
+                duration: 200, 
+                curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER
+            });
             Gesture.create(GesturePriority.Parallel);
             LongPressGesture.create({ repeat: !0 });
             LongPressGesture.onAction((e => {
@@ -1681,8 +1583,8 @@ export class GridObjectSortComponent extends ViewPU {
                 this.selectedIndex = -1;
                 if (this.gridComState) {
                     this.isStartDrag = !0;
-                    this.selected.splice(t, 1);
                     this.editGridDataLength = this.selected.length + 1;
+                    this.selected.splice(t, 1);
                     return { builder: () => {
                             this.PixelMapBuilder.call(this)
                     } }
@@ -1698,41 +1600,24 @@ export class GridObjectSortComponent extends ViewPU {
                     this.selected.splice(-1 === i ? t : i, 0, ObservedObject.GetRawObject(this.content))
                 }
             }));
-            Grid.onItemDragMove(((e, t, i) => this.onDragMoveEvent(e, t, i)));
+            Grid.onItemDragMove(((e, t, i) => this.onDragMoveEvent(e, t, i)))
         }), Grid);
         this.observeComponentCreation2(((e, t) => {
             ForEach.create();
             this.forEachUpdateFunction(e, this.selected, ((e, t) => {
                 const i = e;
                 {
-                    const e = (e, o) => {
+                    const e = (e, i) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(e);
                         GridItem.create((() => {
-                        }), !1)
-                        Context.animation({ curve: this.isStartDrag ? DRAG_SPRING : REMOVE_ADD_SPRING });
-                        GridItem.clip(!1);
-                        GridItem.translate({
-                            x: this.getXY(ObservedObject.GetRawObject(this.selected), t, this.selectedIndex).x,
-                            y: this.getXY(ObservedObject.GetRawObject(this.selected), t, this.selectedIndex).y
+                        }), !1);
+                        Context.animation({
+                            curve: this.isStartDrag ? DRAG_SPRING : t === this.selectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING
                         });
+                        GridItem.clip(!1);
+                        GridItem.translate(this.getShowAreaItemTranslate(t));
                         Context.animation(null);
-                        GridItem.onAreaChange(((e, o) => {
-                            if (!this.isStartDrag) {
-                                if (this.initPosition.some((e => e.id === i.id))) {
-                                    const e = this.initPosition.findIndex((e => e.id === i.id));
-                                    this.initPosition[e] = {
-                                        id: i.id,
-                                        globalPositionX: o.position.x,
-                                        globalPositionY: o.position.y
-                                    }
-                                } else this.initPosition.push({
-                                    id: i.id,
-                                    globalPositionX: o.position.x,
-                                    globalPositionY: o.position.y
-                                })
-                            }
-                        }));
-                        o || GridItem.pop();
+                        i || GridItem.pop();
                         ViewStackProcessor.StopGetAccessRecording()
                     };
                     (() => {
@@ -1746,17 +1631,19 @@ export class GridObjectSortComponent extends ViewPU {
                             Stack.clip(!1);
                             Stack.margin({ bottom: this.imageText || this.gridComState ? 16 : 8 });
                             Stack.onTouch((e => {
-                                if (e.type === TouchType.Down) {
-                                    this.content = i;
-                                    this.isTouchDown = !0
+                                if (!this.clickAddBtn && !this.clickRemoveBtn) {
+                                    if (e.type === TouchType.Down) {
+                                        this.content = i;
+                                        this.isTouchDown = !0
+                                    }
+                                    if (e.type === TouchType.Up) {
+                                        this.isTouchDown = !1;
+                                        Context.animateTo({ duration: 200, curve: LONG_TOUCH_SCALE }, (() => {
+                                            this.longScaleOnePointTwo = 1
+                                        }))
+                                    }
                                 }
-                                if (e.type === TouchType.Up) {
-                                    this.isTouchDown = !1;
-                                    Context.animateTo({ duration: 200, curve: LONG_TOUCH_SCALE }, (() => {
-                                        this.longScaleOnePointTwo = 1
-                                    }))
-                                }
-                            }));
+                            }))
                         }), Stack);
                         this.observeComponentCreation2(((e, t) => {
                             If.create();
@@ -1764,14 +1651,14 @@ export class GridObjectSortComponent extends ViewPU {
                                 this.ImageTextBuilder.bind(this)(i, "delete")
                             })) : this.ifElseBranchUpdateFunction(1, (() => {
                                 this.TextBlockBuilder.bind(this)(i)
-                            }));
+                            }))
                         }), If);
                         If.pop();
                         Stack.pop();
                         GridItem.pop()
-                    })();
+                    })()
                 }
-            }), (e => e.id.toString()), !0, !1);
+            }), (e => e.id.toString()), !0, !1)
         }), ForEach);
         ForEach.pop();
         Grid.pop();
@@ -1782,11 +1669,11 @@ export class GridObjectSortComponent extends ViewPU {
         this.observeComponentCreation2(((e, t) => {
             Column.create();
             Column.width("100%");
-            Column.height("90%");
+            Column.height("90%")
         }), Column);
         this.HeaderTitleBuilder.bind(this)();
         this.observeComponentCreation2(((e, t) => {
-            Scroll.create();
+            Scroll.create()
         }), Scroll);
         this.observeComponentCreation2(((e, t) => {
             Column.create();
@@ -1795,9 +1682,9 @@ export class GridObjectSortComponent extends ViewPU {
                 this.blockWidth = this.getBlockWidth();
                 this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
                 this.imageItemWidth = this.blockWidth - 16;
-                this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ? 44 : 36;
+                this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ? 44 : 36
             }));
-            Column.width("100%");
+            Column.width("100%")
         }), Column);
         this.observeComponentCreation2(((e, t) => {
             __Common__.create();
@@ -1806,69 +1693,92 @@ export class GridObjectSortComponent extends ViewPU {
         this.observeComponentCreation2(((e, t) => {
             if (t) {
                 let t = () => ({
+                    primaryTitle: "",
                     secondaryTitle: this.options.showAreaTitle || {
                         id: -1,
                         type: 10003,
                         params: ["sys.string.ohos_grid_edit_subtitle_sort"],
                         bundleName: "",
                         moduleName: ""
-                    }
+                    },
+                    icon: "",
+                    operationType: OperationType.BUTTON
                 });
                 ViewPU.create(new SubHeader(this, {
+                    primaryTitle: "",
                     secondaryTitle: this.options.showAreaTitle || {
                         id: -1,
                         type: 10003,
                         params: ["sys.string.ohos_grid_edit_subtitle_sort"],
                         bundleName: "",
                         moduleName: ""
-                    }
+                    },
+                    icon: "",
+                    operationType: OperationType.BUTTON
                 }, void 0, e, t))
             } else this.updateStateVarsOfChildByElmtId(e, {
+                primaryTitle: "",
                 secondaryTitle: this.options.showAreaTitle || {
                     id: -1,
                     type: 10003,
                     params: ["sys.string.ohos_grid_edit_subtitle_sort"],
                     bundleName: "",
                     moduleName: ""
-                }
+                },
+                icon: "",
+                operationType: OperationType.BUTTON
             })
-        }), null)
+        }), null);
         __Common__.pop();
         this.EditTagBuilder.bind(this)();
         this.observeComponentCreation2(((e, t) => {
             __Common__.create();
+            Context.animation({ duration: 200, curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER });
+            __Common__.translate(this.clickRemoveBtn && this.selected.length % this.colNum == 1 ? {
+                y: -this.blockHeight
+            } : {});
+            Context.animation(null);
             __Common__.margin({ bottom: 8 })
         }), __Common__);
         this.observeComponentCreation2(((e, t) => {
             if (t) {
                 let t = () => ({
+                    primaryTitle: "",
                     secondaryTitle: this.options.addAreaTitle || {
                         id: -1,
                         type: 10003,
                         params: ["sys.string.ohos_grid_edit_subtitle_add"],
                         bundleName: "",
                         moduleName: ""
-                    }
+                    },
+                    icon: "",
+                    operationType: OperationType.BUTTON
                 });
                 ViewPU.create(new SubHeader(this, {
+                    primaryTitle: "",
                     secondaryTitle: this.options.addAreaTitle || {
                         id: -1,
                         type: 10003,
                         params: ["sys.string.ohos_grid_edit_subtitle_add"],
                         bundleName: "",
                         moduleName: ""
-                    }
+                    },
+                    icon: "",
+                    operationType: OperationType.BUTTON
                 }, void 0, e, t))
             } else this.updateStateVarsOfChildByElmtId(e, {
+                primaryTitle: "",
                 secondaryTitle: this.options.addAreaTitle || {
                     id: -1,
                     type: 10003,
                     params: ["sys.string.ohos_grid_edit_subtitle_add"],
                     bundleName: "",
                     moduleName: ""
-                }
+                },
+                icon: "",
+                operationType: OperationType.BUTTON
             })
-        }), null)
+        }), null);
         __Common__.pop();
         this.AddTagBuilder.bind(this)();
         Column.pop();

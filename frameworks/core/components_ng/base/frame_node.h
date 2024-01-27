@@ -31,6 +31,7 @@
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/common/recorder/exposure_processor.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -167,7 +168,7 @@ public:
 
     void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp);
 
-    void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) override;
+    void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
     void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
     {
@@ -729,7 +730,8 @@ private:
     void ProcessAllVisibleCallback(
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
     void OnVisibleAreaChangeCallback(
-        VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled);
+        std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks,
+        bool visibleType, double currentVisibleRatio, bool isHandled);
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
 

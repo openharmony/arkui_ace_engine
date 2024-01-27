@@ -27,6 +27,8 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
 
 void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller) {}
 
+void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, int32_t embeddedType) {}
+
 void UIExtensionModelNG::Create() {}
 
 void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<NG::FrameNode>& frameNode, const std::string& hapPath,

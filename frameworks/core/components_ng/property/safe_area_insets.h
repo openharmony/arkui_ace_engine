@@ -43,6 +43,11 @@ struct SafeAreaInsets {
         {
             return start < end;
         }
+        inline bool LessOrNearEqual(float left, float right) const
+        {
+            constexpr float epsilon = 0.01f;
+            return (left - right) < epsilon;
+        }
 
         /**
          * @brief Checks if the given position is overlapped by the safe area insets.

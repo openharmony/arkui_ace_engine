@@ -48,6 +48,9 @@ public:
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetShowLunar(FrameNode* frameNode, bool lunar);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetStartDate(FrameNode* frameNode, const PickerDate& value);
+    static void SetEndDate(FrameNode* frameNode, const PickerDate& value);
+    static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

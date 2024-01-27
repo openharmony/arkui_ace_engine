@@ -30,6 +30,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
@@ -1206,10 +1207,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnVisibleAreaChangeCallback31, TestSize.Level
      * @tc.steps: step1. callback RemoveLastHotZoneRect.
      * @tc.expected: step1. expect The function is run ok.
      */
-    VisibleCallbackInfo callbackInfo;
+    std::unordered_map<double, VisibleCallbackInfo> map;
+    VisibleCallbackInfo info;
     bool isHandled = false;
-    FRAME_NODE2->OnVisibleAreaChangeCallback(callbackInfo, true, 1.0, isHandled);
-    EXPECT_TRUE(callbackInfo.isCurrentVisible);
+    FRAME_NODE2->OnVisibleAreaChangeCallback(map, true, 1.0, isHandled);
+    EXPECT_TRUE(map.empty());
 }
 
 /**
@@ -1461,7 +1463,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0039, TestSize.Level1)
      * @tc.steps: step2. call SetIsOverlayNode.
      * @tc.expected: change IsOverlayNode().
      */
-    AccessibilityManager::OnConfigurationChange configurationChange;
+    ConfigurationChange configurationChange;
     childNode->OnConfigurationUpdate(configurationChange);
     configurationChange.languageUpdate = true;
     childNode->OnConfigurationUpdate(configurationChange);

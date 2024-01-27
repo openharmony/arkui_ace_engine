@@ -43,9 +43,10 @@ namespace {
 constexpr double HALF = 2.0;
 constexpr double DOUBLE = 2.0;
 constexpr Dimension ARROW_RADIUS = 2.0_vp;
+constexpr Dimension MARGIN_SPACE = 6.0_vp;
 constexpr Dimension DRAW_EDGES_SPACE = 1.0_vp;
 constexpr double BUBBLE_ARROW_HALF = 2.0;
-constexpr size_t ALIGNMENT_STEP_OFFSET = 2;
+constexpr size_t ALIGNMENT_STEP_OFFSET = 1;
 
 // help value to calculate p2 p4 position
 constexpr Dimension DEFAULT_BUBBLE_ARROW_WIDTH = 16.0_vp;
@@ -288,6 +289,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto targetOffset = targetNode->GetPaintRectOffset();
         auto constrainHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
         auto constrainWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+        float maxWidth = constrainWidth - targetSecurity_ * DOUBLE;
         auto placement = bubbleLayoutProperty->GetPlacement().value_or(Placement::BOTTOM);
         std::unordered_set<Placement> setHorizontal = { Placement::LEFT, Placement::LEFT_BOTTOM, Placement::LEFT_TOP,
             Placement::RIGHT, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP };
@@ -300,7 +302,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
             constrainWidth = rootW - scaledBubbleSpacing;
         }
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             if (setVertical.find(placement) != setVertical.end()) {
                 if (childHeight + targetOffset.GetY() + targetSize.Height() + scaledBubbleSpacing <= rootH &&
                     targetOffset.GetY() - childHeight - scaledBubbleSpacing >= 0) {
@@ -310,6 +312,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                     targetOffset.GetY() - scaledBubbleSpacing);
             }
         }
+        constrainWidth = std::min(constrainWidth, maxWidth);
         SizeF size = SizeF(constrainWidth, constrainHeight);
         childLayoutConstraint.UpdateMaxSizeWithCheck(size);
         child->Measure(childLayoutConstraint);
@@ -383,7 +386,7 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
     borderRadius_.SetValue(radiusPx);
     borderRadius_.SetUnit(DimensionUnit::PX);
     border_.SetBorderRadius(Radius(borderRadius_));
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         childOffset_ = GetChildPosition(childSize_, bubbleProp, UseArrowOffset); // bubble's offset
         placement_ = arrowPlacement_;
         UpdateChildPosition(childOffset_);
@@ -516,13 +519,13 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     CHECK_NULL_VOID(safeAreaManager);
     top_ = safeAreaManager->GetSystemSafeArea().top_.Length();
     bottom_ = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-    paddingStart_ = DRAW_EDGES_SPACE.ConvertToPx();
-    paddingEnd_ = DRAW_EDGES_SPACE.ConvertToPx();
-    paddingTop_ = top_ + DRAW_EDGES_SPACE.ConvertToPx();
+    marginStart_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
+    marginEnd_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
+    marginTop_ = top_ + DRAW_EDGES_SPACE.ConvertToPx();
     if (showInSubWindow) {
-        paddingBottom_ = bottom_ + DRAW_EDGES_SPACE.ConvertToPx();
+        marginBottom_ = bottom_ + DRAW_EDGES_SPACE.ConvertToPx();
     } else {
-        paddingBottom_ = DRAW_EDGES_SPACE.ConvertToPx();
+        marginBottom_ = DRAW_EDGES_SPACE.ConvertToPx();
     }
     showArrow_ = false;
 }
@@ -534,161 +537,97 @@ OffsetF BubbleLayoutAlgorithm::GetChildPositionNew(
         { Placement::BOTTOM_LEFT,
             {
                 Placement::BOTTOM_LEFT,
-                Placement::BOTTOM_RIGHT,
                 Placement::TOP_LEFT,
-                Placement::TOP_RIGHT,
                 Placement::RIGHT_TOP,
-                Placement::RIGHT_BOTTOM,
                 Placement::LEFT_TOP,
-                Placement::LEFT_BOTTOM,
                 Placement::NONE,
             } },
         { Placement::BOTTOM,
             {
                 Placement::BOTTOM,
-                Placement::BOTTOM_RIGHT,
-                Placement::BOTTOM_LEFT,
                 Placement::TOP,
-                Placement::TOP_RIGHT,
-                Placement::TOP_LEFT,
                 Placement::RIGHT,
-                Placement::RIGHT_TOP,
-                Placement::RIGHT_BOTTOM,
                 Placement::LEFT,
-                Placement::LEFT_TOP,
-                Placement::LEFT_BOTTOM,
                 Placement::NONE,
             } },
         { Placement::BOTTOM_RIGHT,
             {
                 Placement::BOTTOM_RIGHT,
-                Placement::BOTTOM_LEFT,
                 Placement::TOP_RIGHT,
-                Placement::TOP_LEFT,
                 Placement::RIGHT_BOTTOM,
-                Placement::RIGHT_TOP,
                 Placement::LEFT_BOTTOM,
-                Placement::LEFT_TOP,
                 Placement::NONE,
             } },
         { Placement::TOP_LEFT,
             {
                 Placement::TOP_LEFT,
-                Placement::TOP_RIGHT,
                 Placement::BOTTOM_LEFT,
-                Placement::BOTTOM_RIGHT,
                 Placement::RIGHT_TOP,
-                Placement::RIGHT_BOTTOM,
                 Placement::LEFT_TOP,
-                Placement::LEFT_BOTTOM,
                 Placement::NONE,
             } },
         { Placement::TOP,
             {
                 Placement::TOP,
-                Placement::TOP_RIGHT,
-                Placement::TOP_LEFT,
                 Placement::BOTTOM,
-                Placement::BOTTOM_RIGHT,
-                Placement::BOTTOM_LEFT,
                 Placement::RIGHT,
-                Placement::RIGHT_TOP,
-                Placement::RIGHT_BOTTOM,
                 Placement::LEFT,
-                Placement::LEFT_TOP,
-                Placement::LEFT_BOTTOM,
                 Placement::NONE,
             } },
         { Placement::TOP_RIGHT,
             {
                 Placement::TOP_RIGHT,
-                Placement::TOP_LEFT,
                 Placement::BOTTOM_RIGHT,
-                Placement::BOTTOM_LEFT,
                 Placement::RIGHT_BOTTOM,
-                Placement::RIGHT_TOP,
                 Placement::LEFT_BOTTOM,
-                Placement::LEFT_TOP,
                 Placement::NONE,
             } },
         { Placement::LEFT_TOP,
             {
                 Placement::LEFT_TOP,
-                Placement::LEFT_BOTTOM,
                 Placement::RIGHT_TOP,
-                Placement::RIGHT_BOTTOM,
                 Placement::BOTTOM_LEFT,
-                Placement::BOTTOM_RIGHT,
                 Placement::TOP_LEFT,
-                Placement::TOP_RIGHT,
                 Placement::NONE,
             } },
         { Placement::LEFT,
             {
                 Placement::LEFT,
-                Placement::LEFT_TOP,
-                Placement::LEFT_BOTTOM,
                 Placement::RIGHT,
-                Placement::RIGHT_TOP,
-                Placement::RIGHT_BOTTOM,
                 Placement::BOTTOM,
-                Placement::BOTTOM_RIGHT,
-                Placement::BOTTOM_LEFT,
                 Placement::TOP,
-                Placement::TOP_RIGHT,
-                Placement::TOP_LEFT,
                 Placement::NONE,
             } },
         { Placement::LEFT_BOTTOM,
             {
                 Placement::LEFT_BOTTOM,
-                Placement::LEFT_TOP,
                 Placement::RIGHT_BOTTOM,
-                Placement::RIGHT_TOP,
                 Placement::BOTTOM_RIGHT,
-                Placement::BOTTOM_LEFT,
                 Placement::TOP_RIGHT,
-                Placement::TOP_LEFT,
                 Placement::NONE,
             } },
         { Placement::RIGHT_TOP,
             {
                 Placement::RIGHT_TOP,
-                Placement::RIGHT_BOTTOM,
                 Placement::LEFT_TOP,
-                Placement::LEFT_BOTTOM,
                 Placement::BOTTOM_LEFT,
-                Placement::BOTTOM_RIGHT,
                 Placement::TOP_LEFT,
-                Placement::TOP_RIGHT,
                 Placement::NONE,
             } },
         { Placement::RIGHT,
             {
                 Placement::RIGHT,
-                Placement::RIGHT_TOP,
-                Placement::RIGHT_BOTTOM,
                 Placement::LEFT,
-                Placement::LEFT_TOP,
-                Placement::LEFT_BOTTOM,
                 Placement::BOTTOM,
-                Placement::BOTTOM_RIGHT,
-                Placement::BOTTOM_LEFT,
                 Placement::TOP,
-                Placement::TOP_RIGHT,
-                Placement::TOP_LEFT,
                 Placement::NONE,
             } },
         { Placement::RIGHT_BOTTOM,
             {
                 Placement::RIGHT_BOTTOM,
-                Placement::RIGHT_TOP,
                 Placement::LEFT_BOTTOM,
-                Placement::LEFT_TOP,
                 Placement::BOTTOM_RIGHT,
-                Placement::BOTTOM_LEFT,
                 Placement::TOP_RIGHT,
-                Placement::TOP_LEFT,
                 Placement::NONE,
             } },
     };
@@ -708,9 +647,6 @@ OffsetF BubbleLayoutAlgorithm::GetChildPositionNew(
         currentPlacementStates = PLACEMENT_STATES.find(placement_)->second;
     }
     size_t step = ALIGNMENT_STEP_OFFSET;
-    if (placement_ <= Placement::BOTTOM) {
-        step += 1;
-    }
     bVertical_ = false;
     bHorizontal_ = false;
     for (size_t i = 0, len = currentPlacementStates.size(); i < len;) {
@@ -772,8 +708,8 @@ OffsetF BubbleLayoutAlgorithm::GetChildPositionNew(
             position = AdjustPosition(defaultPosition, childSize.Width(), childSize.Height(), targetSecurity_);
             if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
                 auto x = std::clamp(
-                    defaultPosition.GetX(), paddingStart_, wrapperSize_.Width() - childSize.Width() - paddingEnd_);
-                auto y = paddingTop_;
+                    defaultPosition.GetX(), marginStart_, wrapperSize_.Width() - childSize.Width() - marginEnd_);
+                auto y = marginTop_;
                 position = OffsetF(x, y);
             }
         }
@@ -846,10 +782,10 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
         case Placement::LEFT: {
-            xMin = paddingStart_;
-            xMax = std::min(targetOffset_.GetX() - width - space, wrapperSize_.Width() - paddingEnd_ - width);
-            yMin = paddingTop_;
-            yMax = wrapperSize_.Height() - height - paddingBottom_;
+            xMin = marginStart_;
+            xMax = std::min(targetOffset_.GetX() - width - space, wrapperSize_.Width() - marginEnd_ - width);
+            yMin = marginTop_;
+            yMax = wrapperSize_.Height() - height - marginBottom_;
             break;
         }
         case Placement::RIGHT_TOP:
@@ -858,19 +794,19 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
             if (showArrow_) {
                 space = space + BUBBLE_ARROW_HEIGHT.ConvertToPx();
             }
-            xMin = std::max(targetOffset_.GetX() + targetSize_.Width() + space, paddingStart_);
-            xMax = wrapperSize_.Width() - width - paddingEnd_;
-            yMin = paddingTop_;
-            yMax = wrapperSize_.Height() - height - paddingBottom_;
+            xMin = std::max(targetOffset_.GetX() + targetSize_.Width() + space, marginStart_);
+            xMax = wrapperSize_.Width() - width - marginEnd_;
+            yMin = marginTop_;
+            yMax = wrapperSize_.Height() - height - marginBottom_;
             break;
         }
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
         case Placement::TOP: {
-            xMin = paddingStart_;
-            xMax = wrapperSize_.Width() - width - paddingEnd_;
-            yMin = paddingTop_;
-            yMax = std::min(targetOffset_.GetY() - height - space, wrapperSize_.Height() - paddingBottom_ - height);
+            xMin = marginStart_;
+            xMax = wrapperSize_.Width() - width - marginEnd_;
+            yMin = marginTop_;
+            yMax = std::min(targetOffset_.GetY() - height - space, wrapperSize_.Height() - marginBottom_ - height);
             break;
         }
         case Placement::BOTTOM_LEFT:
@@ -879,17 +815,17 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
             if (showArrow_) {
                 space = space + BUBBLE_ARROW_HEIGHT.ConvertToPx();
             }
-            xMin = paddingStart_;
-            xMax = wrapperSize_.Width() - width - paddingEnd_;
-            yMin = std::max(targetOffset_.GetY() + targetSize_.Height() + space, paddingTop_);
-            yMax = wrapperSize_.Height() - height - paddingBottom_;
+            xMin = marginStart_;
+            xMax = wrapperSize_.Width() - width - marginEnd_;
+            yMin = std::max(targetOffset_.GetY() + targetSize_.Height() + space, marginTop_);
+            yMax = wrapperSize_.Height() - height - marginBottom_;
             break;
         }
         case Placement::NONE: {
-            xMin = paddingStart_;
-            xMax = wrapperSize_.Width() - width - paddingEnd_;
-            yMin = paddingTop_;
-            yMax = wrapperSize_.Height() - height - paddingBottom_;
+            xMin = marginStart_;
+            xMax = wrapperSize_.Width() - width - marginEnd_;
+            yMin = marginTop_;
+            yMax = wrapperSize_.Height() - height - marginBottom_;
             break;
         }
         default:
@@ -985,7 +921,7 @@ void BubbleLayoutAlgorithm::UpdateChildPosition(OffsetF& childOffset)
     double arrowWidth = BUBBLE_ARROW_WIDTH.ConvertToPx();
     double twoRadiusPx = borderRadius_.ConvertToPx() * 2.0;
     float movingDistance = BUBBLE_ARROW_HEIGHT.ConvertToPx() + BUBBLE_ARROW_HEIGHT.ConvertToPx();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         movingDistance = BUBBLE_ARROW_HEIGHT.ConvertToPx();
     }
     switch (placement_) {
@@ -1148,10 +1084,10 @@ bool BubbleLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& 
         case Placement::BOTTOM_RIGHT:
         case Placement::BOTTOM: {
             targetOffsetY += (userSetTargetSpace_.ConvertToPx());
-            auto y = std::max(targetOffsetY + targetSize_.Height(), paddingTop_);
-            auto height = std::min(wrapperSize_.Height() - paddingBottom_ - targetOffsetY - targetSize_.Height(),
-                wrapperSize_.Height() - paddingBottom_ - paddingTop_);
-            rect.SetRect(paddingStart_, y, wrapperSize_.Width() - paddingEnd_ - paddingStart_, height);
+            auto y = std::max(targetOffsetY + targetSize_.Height(), marginTop_);
+            auto height = std::min(wrapperSize_.Height() - marginBottom_ - targetOffsetY - targetSize_.Height(),
+                wrapperSize_.Height() - marginBottom_ - marginTop_);
+            rect.SetRect(marginStart_, y, wrapperSize_.Width() - marginEnd_ - marginStart_, height);
             if (childSize.Height() > height) {
                 i += step;
                 return false;
@@ -1164,8 +1100,8 @@ bool BubbleLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& 
         case Placement::TOP_RIGHT:
         case Placement::TOP: {
             targetOffsetY += (-userSetTargetSpace_.ConvertToPx());
-            auto height = std::min(targetOffsetY - paddingTop_, wrapperSize_.Height() - paddingTop_ - paddingBottom_);
-            rect.SetRect(paddingStart_, paddingTop_, wrapperSize_.Width() - paddingEnd_ - paddingStart_, height);
+            auto height = std::min(targetOffsetY - marginTop_, wrapperSize_.Height() - marginTop_ - marginBottom_);
+            rect.SetRect(marginStart_, marginTop_, wrapperSize_.Width() - marginEnd_ - marginStart_, height);
             if (childSize.Height() > height) {
                 i += step;
                 return false;
@@ -1178,10 +1114,10 @@ bool BubbleLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& 
         case Placement::RIGHT_BOTTOM:
         case Placement::RIGHT: {
             targetOffsetX += (userSetTargetSpace_.ConvertToPx());
-            auto x = std::max(targetOffsetX + targetSize_.Width(), paddingStart_);
-            auto width = std::min(wrapperSize_.Width() - targetOffsetX - targetSize_.Width() - paddingEnd_,
-                wrapperSize_.Width() - paddingStart_ - paddingEnd_);
-            rect.SetRect(x, paddingTop_, width, wrapperSize_.Height() - paddingBottom_ - paddingTop_);
+            auto x = std::max(targetOffsetX + targetSize_.Width(), marginStart_);
+            auto width = std::min(wrapperSize_.Width() - targetOffsetX - targetSize_.Width() - marginEnd_,
+                wrapperSize_.Width() - marginStart_ - marginEnd_);
+            rect.SetRect(x, marginTop_, width, wrapperSize_.Height() - marginBottom_ - marginTop_);
             if (childSize.Width() > width) {
                 i += step;
                 return false;
@@ -1194,8 +1130,8 @@ bool BubbleLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& 
         case Placement::LEFT_BOTTOM:
         case Placement::LEFT: {
             targetOffsetX += (-userSetTargetSpace_.ConvertToPx());
-            auto width = std::min(targetOffsetX - paddingStart_, wrapperSize_.Width() - paddingEnd_ - paddingStart_);
-            rect.SetRect(paddingStart_, paddingTop_, width, wrapperSize_.Height() - paddingBottom_ - paddingTop_);
+            auto width = std::min(targetOffsetX - marginStart_, wrapperSize_.Width() - marginEnd_ - marginStart_);
+            rect.SetRect(marginStart_, marginTop_, width, wrapperSize_.Height() - marginBottom_ - marginTop_);
             if (childSize.Width() > width) {
                 i += step;
                 return false;

@@ -19,11 +19,13 @@
 #include <dirent.h>
 #include <fstream>
 #include <functional>
+#include <memory>
 #include <regex>
 
 #include "ability_context.h"
 #include "ability_info.h"
 #include "auto_fill_manager.h"
+#include "base/json/json_util.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
 #include "window_manager.h"
@@ -895,10 +897,11 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
     // unregister watchdog before stop thread to avoid UI_BLOCK report
     AceEngine::Get().UnRegisterFromWatchDog(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
-    if (taskExecutor) {
-        taskExecutor->PostSyncTask([] { LOGI("Wait UI thread..."); }, TaskExecutor::TaskType::UI);
-        taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS);
-    }
+    CHECK_NULL_VOID(taskExecutor);
+
+    taskExecutor->PostSyncTask([] { LOGI("Wait UI thread..."); }, TaskExecutor::TaskType::UI);
+    taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS);
+
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
     auto removeContainerTask = [instanceId, destroyCallback] {
         LOGI("Remove on Platform thread...");
@@ -934,7 +937,7 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
 }
 
 void AceContainer::SetViewNew(
-    AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow)
+    AceView* view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(view);
@@ -1383,8 +1386,8 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
     assetManagerImpl->SetLibPath("default", libPath);
 }
 
-void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width,
-    int32_t height, uint32_t windowId, UIEnvCallback callback)
+void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, float width,
+    float height, uint32_t windowId, UIEnvCallback callback)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
@@ -1887,7 +1890,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
         return;
     }
-    OnConfigurationChange configurationChange;
+    ConfigurationChange configurationChange;
     CHECK_NULL_VOID(pipelineContext_);
     auto themeManager = pipelineContext_->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
@@ -1933,11 +1936,15 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         configurationChange.dpiUpdate = true;
     }
     if (!parsedConfig.themeTag.empty()) {
-        if (ParseThemeConfig(parsedConfig.themeTag)) {
-            configurationChange.defaultFontUpdate = true;
+        std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(parsedConfig.themeTag);
+        int fontUpdate = json->GetInt("font");
+        configurationChange.fontUpdate = fontUpdate;
+        int iconUpdate = json->GetInt("icons");
+        configurationChange.iconUpdate = iconUpdate;
+        int skinUpdate = json->GetInt("skin");
+        configurationChange.skinUpdate = skinUpdate;
+        if (fontUpdate) {
             CheckAndSetFontFamily();
-        } else {
-            LOGE("AceContainer::ParseThemeConfig false");
         }
     }
     SetResourceConfiguration(resConfig);
@@ -1956,7 +1963,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
 }
 
 void AceContainer::NotifyConfigurationChange(
-    bool needReloadTransition, const OnConfigurationChange& configurationChange)
+    bool needReloadTransition, const ConfigurationChange& configurationChange)
 {
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -2016,7 +2023,7 @@ void AceContainer::HotReload()
 
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->FlushReload(OnConfigurationChange());
+            pipeline->FlushReload(ConfigurationChange());
         },
         TaskExecutor::TaskType::UI);
 }

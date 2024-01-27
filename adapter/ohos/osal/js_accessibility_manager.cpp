@@ -770,9 +770,11 @@ std::vector<RefPtr<NG::FrameNode>> GetWebs(const RefPtr<NG::FrameNode>& root)
         if (frameNode != nullptr && frameNode->GetTag() == V2::WEB_ETS_TAG) {
             results.emplace_back(frameNode);
         }
-        const auto& children = current->GetChildren();
-        for (const auto& child : children) {
-            nodes.push(child);
+        if (current != nullptr) {
+            const auto& children = current->GetChildren();
+            for (const auto& child : children) {
+                nodes.push(child);
+            }
         }
     }
     return results;
@@ -1387,12 +1389,16 @@ void UpdateUiExtensionParentIdForFocus(const RefPtr<NG::FrameNode>& rootNode, co
 }
 
 void GetChildrenFromWebNode(
-    const RefPtr<NG::FrameNode>& node, std::list<std::variant<RefPtr<NG::FrameNode>, int64_t>>& children)
+    const RefPtr<NG::FrameNode>& node, std::list<std::variant<RefPtr<NG::FrameNode>, int64_t>>& children,
+    const RefPtr<NG::PipelineContext>& ngPipeline)
 {
 #ifdef WEB_SUPPORTED
     std::list<int64_t> webNodeChildren;
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         if (node->GetTag() == V2::WEB_ETS_TAG) {
+            if (!ngPipeline->GetOnFoucs()) {
+                return;
+            }
             auto webPattern = node->GetPattern<NG::WebPattern>();
             CHECK_NULL_VOID(webPattern);
             auto webAccessibilityNode = webPattern->GetAccessibilityNodeById(-1);
@@ -1472,6 +1478,17 @@ void SearchExtensionElementInfoNG(const SearchParameter& searchParam,
     }
 }
 
+bool IsNodeInRoot(const RefPtr<NG::FrameNode>& node, const RefPtr<NG::PipelineContext>& ngPipeline)
+{
+    CHECK_NULL_RETURN(node, false);
+    CHECK_NULL_RETURN(ngPipeline, false);
+    auto rect = node->GetTransformRectRelativeToWindow();
+    auto root = ngPipeline->GetRootElement();
+    CHECK_NULL_RETURN(root, false);
+    auto rootRect = root->GetTransformRectRelativeToWindow();
+    return rect.IsWrappedBy(rootRect);
+}
+
 void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::FrameNode>& node,
     const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
     const SearchParameter& searchParam)
@@ -1483,7 +1500,7 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<
         return;
     }
     GetChildrenFromFrameNode(node, children, commonProperty.pageId);
-    GetChildrenFromWebNode(node, children);
+    GetChildrenFromWebNode(node, children, ngPipeline);
     while (!children.empty()) {
         std::variant<RefPtr<NG::FrameNode>, int64_t> parent = children.front();
         children.pop_front();
@@ -1494,6 +1511,9 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<
             auto accessibilityProperty = frameNodeParent->GetAccessibilityProperty<NG::AccessibilityProperty>();
             auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
             UpdateAccessibilityElementInfo(frameNodeParent, commonProperty, nodeInfo, ngPipeline);
+            if (nodeInfo.GetComponentType() == V2::WEB_ETS_TAG && !IsNodeInRoot(frameNodeParent, ngPipeline)) {
+                continue;
+            }
             if (uiVirtualNode != nullptr) {
                 auto virtualNode = AceType::DynamicCast<NG::FrameNode>(uiVirtualNode);
                 if (virtualNode == nullptr) {
@@ -1519,7 +1539,7 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<
             if (frameNodeParent->GetTag() != V2::UI_EXTENSION_COMPONENT_TAG) {
                 infos.push_back(nodeInfo);
                 GetChildrenFromFrameNode(frameNodeParent, children, commonProperty.pageId);
-                GetChildrenFromWebNode(frameNodeParent, children);
+                GetChildrenFromWebNode(frameNodeParent, children, ngPipeline);
                 continue;
             }
             if (!((frameNodeParent->GetUiExtensionId() > NG::UI_EXTENSION_UNKNOW_ID) &&
@@ -1535,7 +1555,7 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<
             // Handle the parent when its type is WebNode
             int64_t intParent = std::get<1>(parent);
             RefPtr<NG::FrameNode> frameNode = GetInspectorById(node, intParent);
-            GetChildrenFromWebNode(frameNode, children);
+            GetChildrenFromWebNode(frameNode, children, ngPipeline);
             UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
         }
         infos.push_back(nodeInfo);
@@ -3474,6 +3494,7 @@ void JsAccessibilityManager::SetWebAccessibilityState(bool state)
     auto rootNode = ngPipeline->GetRootElement();
     auto webs = GetWebs(rootNode);
     for (auto& web : webs) {
+        CHECK_NULL_VOID(web);
         auto webPattern = web->GetPattern<NG::WebPattern>();
         CHECK_NULL_VOID(webPattern);
         webPattern->SetAccessibilityState(state);

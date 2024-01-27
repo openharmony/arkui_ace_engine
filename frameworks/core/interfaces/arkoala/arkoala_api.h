@@ -29,6 +29,7 @@ extern "C" {
 #define ARKUI_EXTENDED_API_VERSION 2
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 5
+#define ARKUI_AUTO_GENERATE_NODE_ID -2
 
 enum ArkUIAPIVariantKind {
     BASIC = 1,
@@ -459,6 +460,9 @@ enum ArkUINodeType {
     ARKUI_CUSTOM,
     ARKUI_CUSTOM_CONTAINER,
     ARKUI_LIST_ITEM_GROUP,
+    ARKUI_DATE_PICKER,
+    ARKUI_TIME_PICKER,
+    ARKUI_TEXT_PICKER,
 };
 
 enum ArkUIEventCategory {
@@ -488,7 +492,8 @@ enum ArkUIAsyncEventKind {
     ON_VISIBLE_AREA_CHANGE = 9,
     ON_GESTURE = 10,
     ON_FOCUS = 11,
-
+    ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
+    ON_IMAGE_ERROR,
     // components events
     ON_LIST_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_LIST,
     ON_LIST_SCROLL_INDEX,
@@ -509,9 +514,6 @@ enum ArkUIAsyncEventKind {
     ON_SWIPER_ANIMATION_START,
     ON_SWIPER_ANIMATION_END,
     ON_SWIPER_GESTURE_SWIPE,
-
-    ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
-    ON_IMAGE_ERROR,
 
     ON_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_SCROLL,
     ON_SCROLL_FRAME_BEGIN,
@@ -537,7 +539,9 @@ enum ArkUIAsyncEventKind {
     ON_XCOMPONENT_DESTROY,
 
     ON_REFRESH_STATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_REFRESH,
-    ON_REFRESH_REFRESHING
+    ON_REFRESH_REFRESHING,
+    ON_DATE_PICKER_DATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_DATE_PICKER,
+    ON_TIME_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TIME_PICKER
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -802,9 +806,11 @@ struct ArkUICommonModifier {
     void (*setScale)(
         ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength, const ArkUI_Int32* units,
         ArkUI_Int32 unitLength);
+    void (*setScaleWithoutTransformCenter)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength);
     void (*resetScale)(ArkUINodeHandle node);
     void (*setRotate)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength,
         const ArkUI_Int32* units, ArkUI_Int32 unitLength);
+    void (*setRotateWithoutTransformCenter)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength);
     void (*resetRotate)(ArkUINodeHandle node);
     void (*setGeometryTransition)(ArkUINodeHandle node, ArkUI_CharPtr id);
     void (*resetGeometryTransition)(ArkUINodeHandle node);
@@ -1179,7 +1185,9 @@ struct ArkUIListModifier {
     void (*setListScrollBar)(ArkUINodeHandle node, ArkUI_Int32 barState);
     void (*resetListScrollBar)(ArkUINodeHandle node);
     void (*setListScrollBarWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetListScrollBarWidth)(ArkUINodeHandle node);
     void (*setListScrollBarColor)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetListScrollBarColor)(ArkUINodeHandle node);
     void (*setAlignListItem)(ArkUINodeHandle node, ArkUI_Int32 listItemAlign);
     void (*resetAlignListItem)(ArkUINodeHandle node);
     void (*setScrollSnapAlign)(ArkUINodeHandle node, ArkUI_Int32 scrollSnapAlign);
@@ -1191,6 +1199,7 @@ struct ArkUIListModifier {
         ArkUINodeHandle node, const struct ArkUIChainAnimationOptionsType* chainAnimationOptions);
     void (*resetChainAnimationOptions)(ArkUINodeHandle node);
     void (*setListSpace)(ArkUINodeHandle node, ArkUI_Float32 space);
+    void (*resetListSpace)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -1266,6 +1275,8 @@ struct ArkUINodeContainerModifier {
 };
 
 struct ArkUITimepickerModifier {
+    void (*setTimepickerSelected)(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute);
+    void (*resetTimepickerSelected)(ArkUINodeHandle node);
     void (*setTimepickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setTimepickerDisappearTextStyle)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
@@ -1277,6 +1288,8 @@ struct ArkUITimepickerModifier {
     void (*resetTimepickerTextStyle)(ArkUINodeHandle node);
     void (*resetTimepickerSelectedTextStyle)(ArkUINodeHandle node);
     void (*resetTimepickerBackgroundColor)(ArkUINodeHandle node);
+    void (*SetTimepickerUseMilitaryTime)(ArkUINodeHandle node, ArkUI_Bool isUseMilitaryTime);
+    void (*ResetTimepickerUseMilitaryTime)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoModifier {
@@ -1380,6 +1393,10 @@ struct ArkUIScrollModifier {
     void (*resetEnableScrollInteraction)(ArkUINodeHandle node);
     void (*setScrollTo)(ArkUINodeHandle node, const ArkUI_Float32* values);
     void (*setScrollEdge)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetScrollTo)(ArkUINodeHandle node);
+    void (*resetScrollEdge)(ArkUINodeHandle node);
+    void (*setScrollEnablePaging)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetScrollEnablePaging)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemModifier {
@@ -1860,8 +1877,10 @@ struct ArkUIAlphabetIndexerModifier {
 };
 
 struct ArkUILoadingProgressModifier {
+    ArkUI_Uint32 (*getColor)(ArkUINodeHandle node);
     void (*setColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetColor)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableLoading)(ArkUINodeHandle node);
     void (*setEnableLoading)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableLoading)(ArkUINodeHandle node);
 };
@@ -2051,6 +2070,14 @@ struct ArkUIDatePickerModifier {
     void (*resetDisappearTextStyle)(ArkUINodeHandle node);
     void (*setLunar)(ArkUINodeHandle node, ArkUI_Bool isLunar);
     void (*resetLunar)(ArkUINodeHandle node);
+    void (*setStartDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetStartDate)(ArkUINodeHandle node);
+    void (*setEndDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetEndDate)(ArkUINodeHandle node);
+    void (*setSelectedDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetSelectedDate)(ArkUINodeHandle node);
+    void (*setDatePickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetDatePickerBackgroundColor)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {

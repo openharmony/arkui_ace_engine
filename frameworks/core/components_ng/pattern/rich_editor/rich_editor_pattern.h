@@ -306,8 +306,6 @@ public:
     std::function<void(Offset)> GetThumbnailCallback() override;
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
-    void AdjustHandleRect(OffsetF& firstHandleOffset, OffsetF& secondHandleOffset, SizeF& firstHandlePaintSize,
-        SizeF& secondHandlePaintSize);
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
@@ -405,6 +403,8 @@ public:
         CHECK_NULL_RETURN(host, TextPattern::GetAllChildren());
         return host->GetChildren();
     }
+
+    void OnVirtualKeyboardAreaChanged() override;
 
 protected:
     bool CanStartAITask() override;

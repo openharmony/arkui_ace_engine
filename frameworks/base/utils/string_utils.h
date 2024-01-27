@@ -142,6 +142,28 @@ inline void ReplaceTabAndNewLine(std::string& data)
     ReplaceSpace(data);
 }
 
+inline std::string RestoreEscape(const std::string& src)
+{
+    std::string res;
+    for (auto &c : src) {
+        switch (c) {
+            case '\n':
+                res += "\\n";
+                break;
+            case '\r':
+                res += "\\r";
+                break;
+            case '\t':
+                res += "\\t";
+                break;
+            default:
+                res.push_back(c);
+                break;
+        }
+    }
+    return res;
+}
+
 inline int32_t StringToInt(const std::string& value)
 {
     errno = 0;

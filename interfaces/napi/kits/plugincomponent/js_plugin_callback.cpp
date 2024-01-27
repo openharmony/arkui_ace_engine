@@ -320,11 +320,14 @@ void JSPluginCallback::OnRequestEvent(const AAFwk::Want& want, const std::string
     if (!taskExecutor) {
         return;
     }
+
+    std::weak_ptr<PluginComponentCallBack> weak = weak_from_this();
     taskExecutor->PostTask(
-        [uvWorkData = &uvWorkData_]() {
-            JSPluginCallback* context = (JSPluginCallback*)uvWorkData->that;
-            if (context) {
-                context->OnRequestEventInner(&context->uvWorkData_);
+        [weak]() {
+            auto callBack = weak.lock();
+            if (callBack) {
+                auto jsCallback = std::static_pointer_cast<JSPluginCallback>(callBack);
+                jsCallback->OnRequestEventInner(&jsCallback->uvWorkData_);
             }
         },
         TaskExecutor::TaskType::JS);

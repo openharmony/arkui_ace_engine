@@ -87,7 +87,7 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return MockPipelineContext::GetCurrent();
 }
 
-RefPtr<PipelineContext> PipelineContext::GetCurrentContextWithoutScope()
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
 {
     return MockPipelineContext::GetCurrent();
 }
@@ -221,6 +221,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     float keyboardHeight, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
 
+void PipelineContext::CheckVirtualKeyboardHeight() {}
+
 void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus) {}
 
 void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
@@ -242,7 +244,7 @@ void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
-void PipelineContext::FlushReload(const OnConfigurationChange& configurationChange) {}
+void PipelineContext::FlushReload(const ConfigurationChange& configurationChange) {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 
@@ -530,7 +532,7 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return NG::MockPipelineContext::GetCurrent();
 }
 
-RefPtr<PipelineBase> PipelineBase::GetCurrentContextWithoutScope()
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
 {
     return NG::MockPipelineContext::GetCurrent();
 }

@@ -1558,8 +1558,6 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
-        accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
-        delegate_->UpdateAccessibilityState(accessibilityState_);
         delegate_->SetBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         if (isEnhanceSurface_) {
@@ -1646,6 +1644,10 @@ void WebPattern::OnModifyDone()
             webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(host);
         }
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
+        accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+        if (accessibilityState_) {
+            delegate_->SetAccessibilityState(true);
+        }
     }
 
     // Initialize events such as keyboard, focus, etc.

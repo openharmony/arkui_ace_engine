@@ -191,6 +191,8 @@ public:
             return nullptr;
         }
     }
+    void SetChainStyle(const ChainInfo& chainInfo) {}
+
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules)
     {
         alignRules_ = alignRules;

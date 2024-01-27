@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,9 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICommonModifier* GetCommonModifier();
 
+void SetOnAppear(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 void SetOnBlur(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+void SetOnAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 
 } // namespace OHOS::Ace::NG::NodeModifier

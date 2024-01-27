@@ -36,6 +36,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_SCROLL_STOP;
         case NODE_EVENT_ON_APPEAR:
             return ON_APPEAR;
+        case NODE_EVENT_ON_AREA_CHANGE:
+            return ON_AREA_CHANGE;
         case NODE_TEXT_AREA_ON_CHANGE:
             return ON_TEXTAREA_CHANGE;
         case NODE_ON_FOCUS:
@@ -52,6 +54,14 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_SCROLL_EDGE;
         case NODE_TOGGLE_ON_CHANGE:
             return ON_TOGGLE_CHANGE;
+        case NODE_IMAGE_ON_COMPLETE:
+            return ON_IMAGE_COMPLETE;
+        case NODE_IMAGE_ON_ERROR:
+            return ON_IMAGE_ERROR;
+        case NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE:
+            return ON_DATE_PICKER_DATE_CHANGE;
+        case NODE_TIME_PICKER_EVENT_ON_CHANGE:
+            return ON_TIME_PICKER_CHANGE;
         default:
             return -1;
     }
@@ -72,6 +82,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
         case ON_APPEAR:
             return NODE_EVENT_ON_APPEAR;
+        case ON_AREA_CHANGE:
+            return NODE_EVENT_ON_AREA_CHANGE;
         case ON_TEXTAREA_CHANGE:
             return NODE_TEXT_AREA_ON_CHANGE;
         case ON_FOCUS:
@@ -88,6 +100,14 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_SCROLL_EVENT_ON_SCROLL_EDGE;
         case ON_TOGGLE_CHANGE:
             return NODE_TOGGLE_ON_CHANGE;
+        case ON_IMAGE_COMPLETE:
+            return NODE_IMAGE_ON_COMPLETE;
+        case ON_IMAGE_ERROR:
+            return NODE_IMAGE_ON_ERROR;
+        case ON_DATE_PICKER_DATE_CHANGE:
+            return NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE;
+        case ON_TIME_PICKER_CHANGE:
+            return NODE_TIME_PICKER_EVENT_ON_CHANGE;
         default:
             return -1;
     }

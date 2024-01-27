@@ -27,6 +27,8 @@
 namespace OHOS::Ace::NG {
 using AlignRulesItem = std::map<AlignDirection, AlignRule>;
 using BiasPair = std::pair<float, float>;
+using GuidelineItem = std::vector<GuidelineInfo>;
+using BarrierItem = std::vector<BarrierInfo>;
 struct FlexItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexGrow, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexShrink, float);
@@ -34,6 +36,8 @@ struct FlexItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexBasis, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DisplayIndex, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignRules, AlignRulesItem);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HorizontalChainStyle, ChainInfo);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(VerticalChainStyle, ChainInfo);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignLeft, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignMiddle, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignRight, float);
@@ -41,6 +45,8 @@ struct FlexItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignCenter, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignBottom, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Bias, BiasPair);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Barrier, BarrierItem);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Guideline, GuidelineItem);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {

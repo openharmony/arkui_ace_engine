@@ -468,7 +468,7 @@ void FrameNode::DumpCommonInfo()
     }
     if (geometryNode_->GetParentLayoutConstraint().has_value())
         DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
-                                           .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
+            .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
     if (!(NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX()))) {
         DumpLog::GetInstance().AddDesc(std::string("top: ")
                                            .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
@@ -745,7 +745,7 @@ void FrameNode::OnAttachToBuilderNode(NodeStatus nodeStatus)
     pattern_->OnAttachToBuilderNode(nodeStatus);
 }
 
-void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
+void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.languageUpdate) {
         pattern_->OnLanguageConfigurationUpdate();
@@ -767,7 +767,16 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (configurationChange.defaultFontUpdate) {
+    if (configurationChange.fontUpdate) {
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    if (configurationChange.iconUpdate) {
+        pattern_->OnIconConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    if (configurationChange.skinUpdate) {
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -1024,45 +1033,56 @@ void FrameNode::ProcessAllVisibleCallback(
     std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio)
 {
     bool isHandled = false;
+    bool isVisible = false;
     for (auto& nodeCallbackInfo : visibleAreaCallbacks) {
         auto callbackRatio = nodeCallbackInfo.first;
         auto callbackIsVisible = nodeCallbackInfo.second.isCurrentVisible;
         if (GreatNotEqual(currentVisibleRatio, callbackRatio) && !callbackIsVisible) {
-            OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, currentVisibleRatio, isHandled);
+            nodeCallbackInfo.second.isCurrentVisible = true;
+            isVisible = (!isHandled) ? true : isVisible;
             isHandled = true;
             continue;
         }
 
         if (LessNotEqual(currentVisibleRatio, callbackRatio) && callbackIsVisible) {
-            OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, currentVisibleRatio, isHandled);
+            nodeCallbackInfo.second.isCurrentVisible = false;
+            isVisible = (!isHandled) ? false : isVisible;
             isHandled = true;
             continue;
         }
 
         if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MIN)) {
             if (callbackIsVisible) {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, VISIBLE_RATIO_MIN, isHandled);
+                nodeCallbackInfo.second.isCurrentVisible = false;
+                isVisible = (!isHandled) ? false : isVisible;
             } else {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, VISIBLE_RATIO_MIN, isHandled);
+                nodeCallbackInfo.second.isCurrentVisible = true;
+                isVisible = (!isHandled) ? true : isVisible;
             }
             isHandled = true;
         } else if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MAX)) {
             if (!callbackIsVisible) {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, true, VISIBLE_RATIO_MAX, isHandled);
+                nodeCallbackInfo.second.isCurrentVisible = true;
+                isVisible = (!isHandled) ? true : isVisible;
             } else {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo.second, false, VISIBLE_RATIO_MAX, isHandled);
+                nodeCallbackInfo.second.isCurrentVisible = false;
+                isVisible = (!isHandled) ? false : isVisible;
             }
             isHandled = true;
         }
     }
+
+    OnVisibleAreaChangeCallback(visibleAreaCallbacks, isVisible, currentVisibleRatio, isHandled);
 }
 
 void FrameNode::OnVisibleAreaChangeCallback(
-    VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled)
+    std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks,
+    bool visibleType, double currentVisibleRatio, bool isHandled)
 {
-    callbackInfo.isCurrentVisible = visibleType;
-    if (callbackInfo.callback && !isHandled) {
-        callbackInfo.callback(visibleType, currentVisibleRatio);
+    auto iter = visibleAreaCallbacks.begin();
+    if (isHandled && iter != visibleAreaCallbacks.end() && iter->second.callback) {
+        auto callback = iter->second.callback;
+        callback(visibleType, currentVisibleRatio);
     }
 }
 

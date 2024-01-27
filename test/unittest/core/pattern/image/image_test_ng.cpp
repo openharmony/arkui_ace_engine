@@ -1800,7 +1800,7 @@ HWTEST_F(ImageTestNg, MeasureContent001, TestSize.Level1)
     std::vector<std::vector<SizeF>> cases = {
         { {0, 0}, {720, 1440}, {0, 0} },
         { {720, 480}, {720, 480}, {720, 480} },
-        { {0, 0}, {720, 720}, {0, 0} }
+        { {0, 0}, {720, 1440}, {0, 0} }
     };
 
     for (int i = 0; i < 3; ++i) {

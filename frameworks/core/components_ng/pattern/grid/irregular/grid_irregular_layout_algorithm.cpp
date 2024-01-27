@@ -88,7 +88,7 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
     }
 
     const float crossSize = contentSize.CrossSize(gridLayoutInfo_.axis_);
-    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap_, wrapper_->GetTotalChildCount());
+    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap_, gridLayoutInfo_.childrenCount_);
 
     crossLens_ = std::vector<float>(res.first.begin(), res.first.end());
     if (crossLens_.empty()) {
@@ -126,7 +126,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     auto& info = gridLayoutInfo_;
 
     if (info.jumpIndex_ == LAST_ITEM) {
-        info.jumpIndex_ = wrapper_->GetTotalChildCount() - 1;
+        info.jumpIndex_ = info.childrenCount_ - 1;
     }
 
     if (info.scrollAlign_ == ScrollAlign::AUTO) {
@@ -158,7 +158,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 bool GridIrregularLayoutAlgorithm::ReachedEnd() const
 {
     const auto& info = gridLayoutInfo_;
-    if (info.endIndex_ < wrapper_->GetTotalChildCount() - 1) {
+    if (info.endIndex_ < info.childrenCount_ - 1) {
         return false;
     }
     auto child = wrapper_->GetChildByIndex(info.endIndex_);
@@ -176,7 +176,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 
     info.reachStart_ = info.startIndex_ == 0 && info.currentOffset_ >= 0;
     // GridLayoutInfo::reachEnd_ has a different meaning
-    info.reachEnd_ = info.endIndex_ == wrapper_->GetTotalChildCount() - 1;
+    info.reachEnd_ = info.endIndex_ == info.childrenCount_ - 1;
 
     info.offsetEnd_ = ReachedEnd();
 

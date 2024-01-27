@@ -29,24 +29,28 @@ int32_t Container::CurrentId()
     return ContainerScope::CurrentId();
 }
 
-int32_t Container::CurrentIdWithoutScope()
+int32_t Container::CurrentIdSafely()
 {
     int32_t currentId = ContainerScope::CurrentId();
-    if (currentId != INSTANCE_ID_UNDEFINED) {
-        ContainerScope::UpdateIdGenerateMethod(ID_GENERATE_METHOD::SCOPE);
+    if (currentId >= 0) {
         return currentId;
     }
     uint32_t containerCount = ContainerScope::ContainerCount();
     if (containerCount == 0) {
-        ContainerScope::UpdateIdGenerateMethod(ID_GENERATE_METHOD::UNDEFINED);
         return INSTANCE_ID_UNDEFINED;
     }
     if (containerCount == 1) {
-        ContainerScope::UpdateIdGenerateMethod(ID_GENERATE_METHOD::SINGLETON);
         return ContainerScope::SingletonId();
     }
-    ContainerScope::UpdateIdGenerateMethod(ID_GENERATE_METHOD::RECENT);
-    return ContainerScope::RecentActiveId();
+    currentId = ContainerScope::RecentActiveId();
+    if (currentId >= 0) {
+        return currentId;
+    }
+    currentId = ContainerScope::RecentForegroundId();
+    if (currentId >= 0) {
+        return currentId;
+    }
+    return ContainerScope::DefaultId();
 }
 
 RefPtr<Container> Container::Current()
@@ -54,9 +58,9 @@ RefPtr<Container> Container::Current()
     return AceEngine::Get().GetContainer(ContainerScope::CurrentId());
 }
 
-RefPtr<Container> Container::CurrentWithoutScope()
+RefPtr<Container> Container::CurrentSafely()
 {
-    return AceEngine::Get().GetContainer(Container::CurrentIdWithoutScope());
+    return AceEngine::Get().GetContainer(Container::CurrentIdSafely());
 }
 
 RefPtr<Container> Container::GetContainer(int32_t containerId)

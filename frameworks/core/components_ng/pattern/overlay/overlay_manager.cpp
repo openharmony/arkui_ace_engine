@@ -932,13 +932,16 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
     popupPattern->StartExitingAnimation(
-        [isShowInSubWindow, isTypeWithOption, isUseCustom, focusable, popupNodeWk = WeakPtr<FrameNode>(popupNode),
+        [isShowInSubWindow, isTypeWithOption, isUseCustom, focusable,
+            targetId, popupNodeWk = WeakPtr<FrameNode>(popupNode),
             rootNodeWk = WeakPtr<UINode>(rootNode), weak = WeakClaim(this)]() {
             auto rootNode = rootNodeWk.Upgrade();
             auto popupNode = popupNodeWk.Upgrade();
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(rootNode && popupNode && overlayManager);
-
+            if (overlayManager->popupMap_[targetId].isCurrentOnShow) {
+                return;
+            }
             auto popupPattern = popupNode->GetPattern<BubblePattern>();
             CHECK_NULL_VOID(popupPattern);
             popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
@@ -1189,6 +1192,9 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     SetShowMenuAnimation(menu, true);
     menu->MarkModifyDone();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto pattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetShow(true);
 
     // set subwindow container id in menu.
     auto menuPattern = menu->GetPattern<PopupBasePattern>();
@@ -1200,6 +1206,9 @@ void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t 
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide menu insubwindow enter");
     CHECK_NULL_VOID(menu);
+    auto pattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetShow(false);
     PopMenuAnimation(menu);
 }
 
@@ -3484,12 +3493,12 @@ void OverlayManager::RemoveFilter()
         return;
     }
     auto columnNode = filterColumnNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(columnNode);
-    auto rootNode = columnNode->GetParent();
-    CHECK_NULL_VOID(rootNode);
-    auto children = columnNode->GetChildren();
-    rootNode->RemoveChild(columnNode);
-    rootNode->RebuildRenderContextTree();
+    if (columnNode) {
+        auto rootNode = columnNode->GetParent();
+        CHECK_NULL_VOID(rootNode);
+        rootNode->RemoveChild(columnNode);
+        rootNode->RebuildRenderContextTree();
+    }
     hasFilter_ = false;
 }
 

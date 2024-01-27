@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,6 +237,7 @@
 #endif
 
 #if defined(WINDOW_SCENE_SUPPORTED)
+#include "bridge/declarative_frontend/jsview/js_embedded_component.h"
 #include "bridge/declarative_frontend/jsview/js_ui_extension.h"
 #include "bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
 #include "bridge/declarative_frontend/jsview/window_scene/js_screen.h"
@@ -304,6 +305,24 @@ void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
     NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(customNode);
 }
 
+void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
+{
+    if (pageNode->GetChildren().empty()) {
+        return;
+    }
+
+    auto oldChild = AceType::DynamicCast<NG::CustomNode>(pageNode->GetChildren().front());
+    if (oldChild) {
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+        if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
+            oldChild->FireOnDisappear();
+        }
+#endif
+        oldChild->Reset();
+    }
+    pageNode->Clean();
+}
+
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
@@ -354,13 +373,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
             CHECK_NULL_VOID(pageNode);
         }
         Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
-        if (!pageNode->GetChildren().empty()) {
-            auto oldChild = AceType::DynamicCast<NG::CustomNode>(pageNode->GetChildren().front());
-            if (oldChild) {
-                oldChild->Reset();
-            }
-            pageNode->Clean();
-        }
+        CleanPageNode(pageNode);
         auto pageRootNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode());
         CHECK_NULL_VOID(pageRootNode);
         // root custom component
@@ -754,6 +767,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Component3D", JSSceneView::JSBind },
 #endif
 #if defined(WINDOW_SCENE_SUPPORTED)
+    { "EmbeddedComponent", JSEmbeddedComponent::JSBind },
     { "RootScene", JSRootScene::JSBind },
     { "Screen", JSScreen::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
