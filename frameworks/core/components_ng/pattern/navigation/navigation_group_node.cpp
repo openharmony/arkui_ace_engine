@@ -425,11 +425,10 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
                 auto parent = preNavDesNode->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(preNavDesNode);
-                parent->RebuildRenderContextTree();
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
                 context->MarkNeedFlushMouseEvent();
-                context->RequestFrame();
+                parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             };
             taskExecutor->PostTask(onFinishCallback, TaskExecutor::TaskType::UI);
         };

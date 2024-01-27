@@ -25,11 +25,16 @@ void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto childSize = layoutWrapper->GetTotalChildCount();
     std::list<RefPtr<LayoutWrapper>> children;
-    for (auto index = 0; index < childSize; index++) {
-        auto child = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (child->GetHostNode() && child->GetHostNode()->IsVisible()) {
-            child->Measure(layoutConstraint);
-            children.emplace_back(child);
+    if (childSize == 0) {
+        layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0), CalcLength(0.0)));
+    } else {
+        layoutWrapper->GetLayoutProperty()->ClearUserDefinedIdealSize(true, true);
+        for (auto index = 0; index < childSize; index++) {
+            auto child = layoutWrapper->GetOrCreateChildByIndex(index, false);
+            if (child->GetHostNode() && child->GetHostNode()->IsVisible()) {
+                child->Measure(layoutConstraint);
+                children.emplace_back(child);
+            }
         }
     }
     PerformMeasureSelfWithChildList(layoutWrapper, { children });
