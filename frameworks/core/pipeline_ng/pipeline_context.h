@@ -604,6 +604,16 @@ public:
 
     void CheckVirtualKeyboardHeight() override;
 
+    void StartWindowAnimation() override
+    {
+        isWindowAnimation_ = true;
+    }
+
+    void StopWindowAnimation() override
+    {
+        isWindowAnimation_ = false;
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -760,6 +770,7 @@ private:
     bool isDensityChanged_ = false;
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
+    bool isWindowAnimation_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;

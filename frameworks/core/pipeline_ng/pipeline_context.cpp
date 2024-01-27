@@ -2882,7 +2882,7 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
 
 void PipelineContext::OnIdle(int64_t deadline)
 {
-    if (deadline == 0) {
+    if (deadline == 0 || isWindowAnimation_) {
         canUseLongPredictTask_ = false;
         return;
     }
