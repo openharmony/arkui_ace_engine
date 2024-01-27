@@ -311,11 +311,18 @@ void ResetTextAreaFontStyle(ArkUINodeHandle node)
     TextFieldModelNG::SetFontStyle(frameNode, OHOS::Ace::FontStyle::NORMAL);
 }
 
-void SetTextAreaFontWeight(ArkUINodeHandle node, const char *fontWeight)
+void SetTextAreaFontWeightStr(ArkUINodeHandle node, const char *fontWeight)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeight));
+}
+
+void SetTextAreaFontWeight(ArkUINodeHandle node, ArkUI_Int32 fontWeight)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(fontWeight));
 }
 
 void ResetTextAreaFontWeight(ArkUINodeHandle node)
@@ -422,6 +429,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaPlaceholderString,
         SetTextAreaTextString,
         StopTextAreaTextEditing,
+        SetTextAreaFontWeightStr,
     };
     return &modifier;
 }

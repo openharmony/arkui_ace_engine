@@ -379,7 +379,7 @@ void JSXComponent::JsBackgroundImageSize(const JSCallbackInfo& args)
     if (type != XComponentType::NODE) {
         return;
     }
-    JSViewAbstract::JsHueRotate(args);
+    JSViewAbstract::JsBackgroundImageSize(args);
 }
 
 void JSXComponent::JsBackgroundImagePosition(const JSCallbackInfo& args)

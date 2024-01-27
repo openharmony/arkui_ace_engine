@@ -837,7 +837,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_AttributeItem item = { .string = "5; 10; 10; COLOR; 0xACCCCC; true" };
+     * ArkUI_AttributeItem item = { .string = "5; 10; 10; COLOR; #FFF00FFF; true" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_CUSTOM_SHADOW, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_CUSTOM_SHADOW);
      * auto nodeCustomShadow = item->string;
@@ -849,8 +849,8 @@ typedef enum {
      * @brief 背景图片的宽高属性，支持属性设置，属性重置，属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32 表示图片的宽度值，单位为vp。\n
-     * .value[1].f32 表示图片的高度值，单位为vp。\n
+     * .value[0].f32 表示图片的宽度值，取值范围[0,+∞)，单位为vp。\n
+     * .value[1].f32 表示图片的高度值，取值范围[0,+∞)，单位为vp。\n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
      * .value[0].f32 表示图片的宽度值，单位为vp。\n
@@ -926,9 +926,9 @@ typedef enum {
      * .value[0]?.f32 表示中心点X轴坐标值，单位为vp \n
      * .value[1]?.f32 表示中心点Y轴坐标，单位为vp \n
      * .value[2]?.f32 表示中心点Z轴坐标，单位为vp \n
-     * .value[3]?.f32 表示中心点X轴坐标的百分比位置，如0.2表示百分之20的位置，该属性覆盖value[0].f32。\n
-     * .value[4]?.f32 表示中心点Y轴坐标的百分比位置，如0.2表示百分之20的位置，该属性覆盖value[1].f32。\n
-     * .value[5]?.f32 表示中心点Z轴坐标的百分比位置，如0.2表示百分之20的位置，该属性覆盖value[2].f32。\n
+     * .value[3]?.f32 表示中心点X轴坐标的百分比位置，如0.2表示百分之20的位置，该属性覆盖value[0].f32，默认值:0.5f。\n
+     * .value[4]?.f32 表示中心点Y轴坐标的百分比位置，如0.2表示百分之20的位置，该属性覆盖value[1].f32，默认值:0.5f。\n
+     * .value[5]?.f32 表示中心点Z轴坐标的百分比位置，如0.2表示百分之20的位置，该属性覆盖value[2].f32，默认值:0.0f。\n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
      * .value[0]?.f32 表示中心点X轴坐标，单位为vp \n
@@ -988,7 +988,7 @@ typedef enum {
      * .value[1].f32 表示纵向的旋转分量。\n
      * .value[2].f32 表示竖向的旋转分量。\n
      * .value[3].f32 表示角度。\n
-     * .value[4].f32 表示视距。\n
+     * .value[4].f32 表示视距，默认值：0.0f。\n
      * .value[5].i32 表示动画时长，单位ms。\n
      * .value[6].i32 表示动画曲线类型，取{@link ArkUI_AnimationCurve}枚举值。\n
      * .value[7]?.i32 表示动画延迟时长，单位ms。\n
