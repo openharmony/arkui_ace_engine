@@ -184,7 +184,7 @@ void SelectOverlayModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(firstHandleIsShow_);
     CHECK_NULL_VOID(secondHandleIsShow_);
 
-    if (!firstHandleIsShow_->Get() && !secondHandleIsShow_->Get()) {
+    if (!isNewAvoid_ && !firstHandleIsShow_->Get() && !secondHandleIsShow_->Get()) {
         return;
     }
 

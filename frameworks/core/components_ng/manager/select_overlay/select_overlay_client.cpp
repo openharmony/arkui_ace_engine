@@ -149,6 +149,9 @@ void SelectOverlayClient::UpdateShowingSelectOverlay(ClientOverlayInfo& clientIn
     CHECK_NULL_VOID(selectOverlayInfo);
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
+    if (clientInfo.isNewAvoid) {
+        proxy->UpdateSelectArea(selectOverlayInfo->selectArea);
+    }
     if (hasRequestSingleHandle) {
         if (clientInfo.isUpdateMenu) {
             proxy->UpdateSelectMenuInfo([newMenuInfo = selectOverlayInfo->menuInfo](SelectMenuInfo& menuInfo) {
@@ -282,7 +285,10 @@ void SelectOverlayClient::OnParentScrollStartOrEnd(bool isEnd, bool noAnimation)
     if (proxy->IsSingleHandle() && !proxy->IsSingleHandleMenuShow()) {
         UpdateSelectMenuInfo([](SelectMenuInfo& menuInfo) { menuInfo.menuIsShow = false; });
     } else {
-        proxy->ShowOrHiddenMenu(!originIsMenuShow_);
+        auto info = proxy->GetSelectOverlayMangerInfo();
+        if (!info.isNewAvoid) {
+            proxy->ShowOrHiddenMenu(!originIsMenuShow_);
+        }
     }
 }
 
