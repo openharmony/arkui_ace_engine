@@ -611,6 +611,11 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             preTopNavDestination->GetContentNode()->Clean(false, true);
         }
         parent->RemoveChild(preTopNavDestination, true);
+        navigationNode->SetNeedSetInvisible(false);
+        auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
+        if (navBar) {
+            navBar->SetTransitionType(PageTransitionType::ENTER_POP);
+        }
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
