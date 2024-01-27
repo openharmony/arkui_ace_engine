@@ -15,6 +15,7 @@
 
 #include "style_modifier.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <map>
 #include <regex>
@@ -1084,7 +1085,7 @@ int32_t SetAccessibilityGroup(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityGroup(
         node->uiNodeHandle, item->value[0].i32);
-    return ERROR_CODE_NO_ERROR;    
+    return ERROR_CODE_NO_ERROR;
 }
 
 void ResetAccessibilityGroup(ArkUI_NodeHandle node)
@@ -1096,6 +1097,9 @@ void ResetAccessibilityGroup(ArkUI_NodeHandle node)
 
 int32_t SetAccessibilityText(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    if (item->string == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityText(
         node->uiNodeHandle, item->string);
@@ -1111,6 +1115,9 @@ void ResetAccessibilityText(ArkUI_NodeHandle node)
 
 int32_t SetAccessibilityLevel(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    if (item->string == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityLevel(
         node->uiNodeHandle, item->string);
@@ -1126,6 +1133,9 @@ void ResetAccessibilityLevel(ArkUI_NodeHandle node)
 
 int32_t SetAccessibilityDescription(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    if (item->string == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityDescription(
         node->uiNodeHandle, item->string);
@@ -1187,7 +1197,7 @@ void ResetResponseRegion(ArkUI_NodeHandle node)
 
 int32_t SetOverlay(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    if (item->string == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1982,8 +1992,8 @@ int32_t SetScrollNestedScroll(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     if (item->size > ALLOW_SIZE_1) {
         second = item->value[NUM_1].i32;
     }
-    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollNestedScroll(node->uiNodeHandle,
-        first,second);
+    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollNestedScroll(
+        node->uiNodeHandle, first, second);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1999,7 +2009,6 @@ int32_t SetScrollTo(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size < 2) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "SetScrollTo:%{public}d", item->size);
     auto* fullImpl = GetFullImpl();
     ArkUI_Float32 values[ALLOW_SIZE_7] = { 0.0, UNIT_VP, 0.0, UNIT_VP, DEFAULT_DURATION, 1, 0.0 };
     values[0] = item->value[0].f32;
@@ -2900,12 +2909,14 @@ void SetTextOverflow(ArkUI_NodeHandle node, const char* value)
 
 int32_t SetTextFontFamily(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    if (item->string == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto* fullImpl = GetFullImpl();
     std::string value(item->string);
     std::vector<std::string> fontFamilies;
     StringUtils::StringSplitter(value, ',', fontFamilies);
-
-    auto families = std::make_unique<char*[]>(fontFamilies.size());
+    auto families = std::make_unique<char* []>(fontFamilies.size());
     for (uint32_t i = 0; i < fontFamilies.size(); i++) {
         families[i] = const_cast<char*>(fontFamilies.at(i).c_str());
     }
@@ -4395,7 +4406,8 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetBackgroundImageSize,
         ResetBackgroundBlurStyle, ResetTransitionCenter, ResetOpacityTransition, ResetRotateTransition,
         ResetScaleTransition, ResetTranslateTransition,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        ResetFocusable, ResetAccessibilityGroup, ResetAccessibilityText, ResetAccessibilityLevel,
+        ResetAccessibilityDescription, ResetDefaultFocus, ResetResponseRegion, ResetOverlay,
         ResetBackgroundImagePosition, ResetOffset, ResetMarkAnchor, ResetAlignRules };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

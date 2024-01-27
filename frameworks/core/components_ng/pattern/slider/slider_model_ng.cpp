@@ -442,7 +442,7 @@ void SliderModelNG::SetReverse(FrameNode* frameNode, bool value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Reverse, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Reverse, value, frameNode);
 }
-void SliderModelNG::SetStep(FrameNode* frameNode, float value) 
+void SliderModelNG::SetStep(FrameNode* frameNode, float value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Step, value, frameNode);
 }

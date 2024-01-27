@@ -22,7 +22,6 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "core/components/scroll/scroll_position_controller.h"
 #include "core/animation/curves.h"
-#include <vector>
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,13 +32,6 @@ constexpr double FRICTION_DEFAULT = 0.6;
 constexpr double DEFAULT_DIMENSION_VALUE = 0.0;
 constexpr double DEFAULT_SCROLLBARWIDTH_VALUE = 4.0;
 constexpr int32_t PARAM_SIZE = 4;
-constexpr int32_t SCROLL_TO_INDEX_0 = 0;
-constexpr int32_t SCROLL_TO_INDEX_1 = 1;
-constexpr int32_t SCROLL_TO_INDEX_2 = 2;
-constexpr int32_t SCROLL_TO_INDEX_3 = 3;
-constexpr int32_t SCROLL_TO_INDEX_4 = 4;
-constexpr int32_t SCROLL_TO_INDEX_5 = 5;
-constexpr int32_t SCROLL_TO_INDEX_6 = 6;
 constexpr float DEFAULT_OFFSET_VALUE = 0.0;
 
 const std::vector<RefPtr<Curve>> CurvesVector = { Curves::LINEAR, Curves::EASE, Curves::EASE_IN,
@@ -260,6 +252,17 @@ void ResetEnableScrollInteraction(ArkUINodeHandle node) {}
 
 void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32* values)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    RefPtr<ScrollControllerBase> scrollControllerBase = ScrollModelNG::GetOrCreateController(frameNode);
+
+    Dimension xOffset(values[0], static_cast<OHOS::Ace::DimensionUnit>(values[1]));
+    Dimension yOffset(values[2], static_cast<OHOS::Ace::DimensionUnit>(values[3]));
+    float duration = values[4];
+    RefPtr<Curve> curve = CurvesVector[static_cast<int>(values[5])];
+    auto smooth = static_cast<bool>(values[6]);
+    auto direction = scrollControllerBase->GetScrollDirection();
+    auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
+    scrollControllerBase->AnimateTo(position, duration, curve, smooth);
 }
 
 void SetScrollEdge(ArkUINodeHandle node, ArkUI_Int32 value)
