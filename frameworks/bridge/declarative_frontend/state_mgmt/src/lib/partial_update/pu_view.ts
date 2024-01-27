@@ -958,6 +958,16 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
     this.recycleManager_ = new RecycleManager;
   }
+  rebuildUpdateFunc(elmtId, compilerAssignedUpdateFunc) {
+    const updateFunc = (elmtId, isFirstRender) => {
+        this.currentlyRenderedElmtIdStack_.push(elmtId);
+        compilerAssignedUpdateFunc(elmtId, isFirstRender);
+        this.currentlyRenderedElmtIdStack_.pop();
+    };
+    if (this.updateFuncByElmtId.has(elmtId)) {
+        this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc });
+    }
+  }
 
   /**
    * @function observeRecycleComponentCreation
@@ -984,6 +994,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const oldElmtId: number = node.id__();
     this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
     this.hasBeenRecycled_ = true;
+    this.rebuildUpdateFunc(oldElmtId, compilerAssignedUpdateFunc);
     recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
   }
 
@@ -1448,6 +1459,10 @@ class UpdateFuncsByElmtId {
 
   public get(elmtId: number): UpdateFuncRecord | undefined {
     return this.map_.get(elmtId);
+  }
+
+  public has(elmtId: number): boolean {
+    return this.map_.has(elmtId);
   }
 
   public keys(): IterableIterator<number> {
