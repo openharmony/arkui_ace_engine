@@ -50,6 +50,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_animatable_arithmetic.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -70,6 +71,7 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
@@ -2776,6 +2778,26 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         };
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
     }
+}
+
+uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& menuParam)
+{
+    size_t builderIndex = 0;
+    if (info[0]->IsBoolean()) {
+        menuParam.isShow = info[0]->ToBoolean();
+        menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+        builderIndex = 1;
+    } else if (info[0]->IsObject()) {
+        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+        menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj);
+        auto isShowObj = callbackObj->GetProperty("value");
+        if (isShowObj->IsBoolean()) {
+            menuParam.isShow = isShowObj->IsBoolean();
+            menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+            builderIndex = 1;
+        }
+    }
+    return builderIndex;
 }
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
@@ -5926,11 +5948,17 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 {
+    NG::MenuParam menuParam;
     // Check the parameters
-    if (info.Length() <= 0 || !info[0]->IsObject()) {
+    if (info.Length() <= 0) {
         return;
     }
-    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
+    size_t builderIndex = ParseBindContextMenuShow(info, menuParam);
+    if (!info[builderIndex]->IsObject()) {
+        return;
+    }
+
+    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[builderIndex]);
     auto builder = menuObj->GetProperty("builder");
     if (!builder->IsFunction()) {
         return;
@@ -5939,7 +5967,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     ResponseType responseType = ResponseType::LONG_PRESS;
-    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
+    if (!info[0]->IsBoolean() && info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto response = info[1]->ToNumber<int32_t>();
         responseType = static_cast<ResponseType>(response);
     }
@@ -5952,12 +5980,12 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         func->Execute();
     };
 
-    NG::MenuParam menuParam;
     menuParam.previewMode = MenuPreviewMode::NONE;
     std::function<void()> previewBuildFunc = nullptr;
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
+
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
     }
