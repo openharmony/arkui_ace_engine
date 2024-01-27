@@ -75,6 +75,7 @@ int32_t testOnIMEInputComplete = 0;
 int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
 int32_t testOnSelect = 0;
+SelectionRangeInfo testSelectionRange(0, 0);
 int32_t callBack1 = 0;
 int32_t callBack2 = 0;
 int32_t callBack3 = 0;
@@ -442,6 +443,105 @@ HWTEST_F(RichEditorTestNg, RichEditorModel008, TestSize.Level1)
     SelectionInfo selection;
     eventHub->FireOnSelect(&selection);
     EXPECT_EQ(testOnSelect, 1);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: RichEditorModel009
+ * @tc.desc: test set on text selection change
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorModel009, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto func = [](const BaseEventInfo* info) {
+        const auto* selectionRange = TypeInfoHelper::DynamicCast<SelectionRangeInfo>(info);
+        ASSERT_NE(selectionRange, nullptr);
+        testSelectionRange = *selectionRange;
+    };
+    richEditorModel.SetOnSelectionChange(std::move(func));
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // insert value 1
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+    EXPECT_EQ(testSelectionRange.start_, 6);
+    EXPECT_EQ(testSelectionRange.end_, 6);
+
+    // insert value 2
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+    EXPECT_EQ(testSelectionRange.start_, 12);
+    EXPECT_EQ(testSelectionRange.end_, 12);
+
+    // set caret position
+    richEditorPattern->SetCaretPosition(3);
+    EXPECT_EQ(testSelectionRange.start_, 3);
+    EXPECT_EQ(testSelectionRange.end_, 3);
+
+    // update selector
+    richEditorPattern->textSelector_.Update(0, 10);
+    EXPECT_EQ(testSelectionRange.start_, 0);
+    EXPECT_EQ(testSelectionRange.end_, 10);
+
+    // update selector, reverse handle
+    richEditorPattern->textSelector_.Update(10, 8);
+    EXPECT_EQ(testSelectionRange.start_, 8);
+    EXPECT_EQ(testSelectionRange.end_, 10);
+
+    // select all
+    richEditorPattern->HandleOnSelectAll();
+    EXPECT_EQ(testSelectionRange.start_, 0);
+    EXPECT_EQ(testSelectionRange.end_, 12);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: RichEditorModel010
+ * @tc.desc: test set on text/image/symbol selection change
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorModel010, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto func = [](const BaseEventInfo* info) {
+        const auto* selectionRange = TypeInfoHelper::DynamicCast<SelectionRangeInfo>(info);
+        ASSERT_NE(selectionRange, nullptr);
+        testSelectionRange = *selectionRange;
+    };
+    richEditorModel.SetOnSelectionChange(std::move(func));
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // insert value
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+
+    // add image
+    AddImageSpan();
+    richEditorPattern->HandleOnSelectAll();
+    EXPECT_EQ(testSelectionRange.start_, 0);
+    EXPECT_EQ(testSelectionRange.end_, 7);
+
+    // add symbol
+    SymbolSpanOptions options;
+    options.symbolId = SYMBOL_ID;
+    auto richEditorController =  richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorController->AddSymbolSpan(options);
+    richEditorPattern->HandleOnSelectAll();
+    EXPECT_EQ(testSelectionRange.start_, 0);
+    EXPECT_EQ(testSelectionRange.end_, 9);
+
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
