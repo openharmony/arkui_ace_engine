@@ -1951,7 +1951,7 @@ void UIContentImpl::NotifyRotationAnimationEnd()
                 pipelineContext->StopWindowAnimation();
             }
         },
-    TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
