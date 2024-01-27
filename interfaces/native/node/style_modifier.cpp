@@ -1710,17 +1710,17 @@ int32_t SetScrollScrollSnap(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     auto enableSnapToStart = item->value[NUM_1].i32;
     auto enableSnapToEnd = item->value[NUM_2].i32;
 
-    ArkUI_Float32 paginations[item->size];
-    ArkUI_Int32 paginationParams[item->size + 1];
+    ArkUI_Float32 paginations[item->size - NUM_3];
+    ArkUI_Int32 paginationParams[item->size + NUM_1];
     for (int i = 0; i < item->size - NUM_3; ++i) {
-        paginations[i] = item->value[i].f32;
+        paginations[i] = item->value[i + NUM_3].f32;
         paginationParams[i] = UNIT_VP;
     }
 
-    paginationParams[item->size + NUM_0] = snapAlign;
-    paginationParams[item->size + NUM_1] = enableSnapToStart;
-    paginationParams[item->size + NUM_2] = enableSnapToEnd;
-    paginationParams[item->size + NUM_3] = (item->size - NUM_3 > 1) ? true : false;
+    paginationParams[item->size - NUM_3 + NUM_0] = snapAlign;
+    paginationParams[item->size - NUM_3 + NUM_1] = enableSnapToStart;
+    paginationParams[item->size - NUM_3 + NUM_2] = enableSnapToEnd;
+    paginationParams[item->size] = (item->size - NUM_3 > 1) ? true : false;
 
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollSnap(
         node->uiNodeHandle, paginations, item->size - NUM_3, paginationParams, item->size + NUM_1);
@@ -1964,8 +1964,13 @@ int32_t SetScrollEnableScrollInteraction(ArkUI_NodeHandle node, const ArkUI_Attr
         return ERROR_CODE_PARAM_INVALID;
     }
     bool enableScrollInteraction = item->value[NUM_0].i32;
-    fullImpl->getNodeModifiers()->getScrollModifier()->setEnableScrollInteraction(
-        node->uiNodeHandle, enableScrollInteraction);
+    if (node->type == ARKUI_NODE_LIST) {
+        fullImpl->getNodeModifiers()->getListModifier()->setEnableScrollInteraction(
+            node->uiNodeHandle, enableScrollInteraction);
+    } else if (node->type == ARKUI_NODE_SCROLL) {
+        fullImpl->getNodeModifiers()->getScrollModifier()->setEnableScrollInteraction(
+            node->uiNodeHandle, enableScrollInteraction);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
