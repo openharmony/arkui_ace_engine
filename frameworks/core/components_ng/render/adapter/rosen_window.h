@@ -77,6 +77,11 @@ public:
         return rsUIDirector_->FlushAnimation(timeStamp, vsyncPeriod);
     }
 
+    void FlushAnimationStartTime(uint64_t timeStamp) override
+    {
+        rsUIDirector_->FlushAnimationStartTime(timeStamp);
+    }
+
     void FlushModifier() override
     {
         rsUIDirector_->FlushModifier();

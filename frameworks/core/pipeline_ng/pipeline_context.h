@@ -493,6 +493,11 @@ public:
         isNeedFlushMouseEvent_ = true;
     }
 
+    void MarkNeedFlushAnimationStartTime()
+    {
+        isNeedFlushAnimationStartTime_ = true;
+    }
+
     // font
     void AddFontNodeNG(const WeakPtr<UINode>& node);
     void RemoveFontNodeNG(const WeakPtr<UINode>& node);
@@ -749,6 +754,7 @@ private:
     bool isTabJustTriggerOnKeyEvent_ = false;
     bool onShow_ = false;
     bool isNeedFlushMouseEvent_ = false;
+    bool isNeedFlushAnimationStartTime_ = false;
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;

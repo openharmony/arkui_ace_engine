@@ -27,6 +27,7 @@
 #include "core/common/container.h"
 #include "core/common/layout_inspector.h"
 #include "core/event/ace_events.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -523,6 +524,13 @@ void Scrollable::SetDelayedTask()
     taskExecutor.PostDelayedTask(task_, DRAG_INTERVAL_TIME);
 }
 
+void Scrollable::MarkNeedFlushAnimationStartTime()
+{
+    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->MarkNeedFlushAnimationStartTime();
+}
+
 double Scrollable::ComputeCap(int dragCount)
 {
     if (dragCount < FIRST_THRESHOLD) {
@@ -694,6 +702,7 @@ void Scrollable::ProcessScrollSnapMotion(double position)
     if (outBoundaryCallback_ && outBoundaryCallback_()  && !isSnapScrollAnimationStop_) {
         scrollPause_ = true;
         skipRestartSpring_ = true;
+        MarkNeedFlushAnimationStartTime();
         StopSnapAnimation();
     }
 }
@@ -875,7 +884,8 @@ void Scrollable::ProcessScrollMotionStop(bool stopFriction)
 
 void Scrollable::ProcessSpringMotion(double position)
 {
-    position = Round(position);
+    // Do not round when the current position is less than 0.5 px from the final position.
+    position = NearEqual(position, finalPosition_, 0.5) ? position : Round(position);
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
         currentPos_, position);
     auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
@@ -893,6 +903,7 @@ void Scrollable::ProcessSpringMotion(double position)
         if ((currentPos_ - finalPosition_) * (position - finalPosition_) < 0) {
             double currentVelocity = currentVelocity_;
             scrollPause_ = true;
+            MarkNeedFlushAnimationStartTime();
             StopSpringAnimation();
             StartScrollAnimation(position, currentVelocity);
         }
@@ -940,6 +951,7 @@ void Scrollable::ProcessScrollMotion(double position)
         (!Container::IsCurrentUseNewPipeline() && outBoundaryCallback_ && outBoundaryCallback_())) {
         scrollPause_ = true;
         skipRestartSpring_ = true;
+        MarkNeedFlushAnimationStartTime();
         StopFrictionAnimation();
     }
 }
