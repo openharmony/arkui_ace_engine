@@ -342,11 +342,13 @@ public:
     void HandleTouchUp(const int32_t& id, const double& x, const double& y, bool from_overlay) override;
     void HandleTouchMove(const int32_t& id, const double& x, const double& y, bool from_overlay) override;
     void HandleTouchCancel() override;
+    void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction) override;
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count) override;
     void OnFocus() override;
     void OnBlur() override;
     void UpdateLocale() override;
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height) override;
     void OnInactive() override;
     void OnActive() override;
     void ShowWebView() override;

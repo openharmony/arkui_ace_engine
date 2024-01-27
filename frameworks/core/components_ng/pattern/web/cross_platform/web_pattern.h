@@ -79,8 +79,10 @@ public:
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
     WebPattern();
-    WebPattern(std::string webSrc, const RefPtr<WebController>& webController, WebType type = WebType::SURFACE);
-    WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback, WebType type = WebType::SURFACE);
+    WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, WebType type = WebType::SURFACE,
+               bool incognitoMode = false);
+    WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, WebType type = WebType::SURFACE,
+               bool incognitoMode = false);
 
     ~WebPattern() override;
 
@@ -200,6 +202,16 @@ public:
     WebType GetWebType()
     {
         return type_;
+    }
+
+    void SetIncognitoMode(bool incognitoMode)
+    {
+        incognitoMode_ = incognitoMode;
+    }
+
+    bool GetIncognitoMode() const
+    {
+        return incognitoMode_;
     }
 
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
@@ -330,9 +342,8 @@ public:
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     void UpdateJavaScriptOnDocumentStart();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
-    bool NotifyStartDragTask();
+    void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
     bool IsImageDrag();
-    DragRet GetDragAcceptableStatus();
     Offset GetDragOffset() const;
     void SetLayoutMode(WebLayoutMode mode)
     {
@@ -439,22 +450,6 @@ private:
     void InitScrollUpdateListener();
     void CalculateHorizontalDrawRect(const SizeF frameSize);
     void CalculateVerticalDrawRect(const SizeF frameSize);
-    void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub);
-    void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
-    void HandleDragMove(const GestureEvent& event);
-    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragStart(int32_t x, int32_t y);
-    void HandleDragEnd(int32_t x, int32_t y);
-    void HandleDragCancel();
-    void ClearDragData();
-    bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
-    NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
-    void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
-    void HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info);
-    void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
-    void HandleOnDragLeave(int32_t x, int32_t y);
-    void HandleOnDragEnd(int32_t x, int32_t y);
     int onDragMoveCnt = 0;
     std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
@@ -491,6 +486,7 @@ private:
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     WebType type_;
+    bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
