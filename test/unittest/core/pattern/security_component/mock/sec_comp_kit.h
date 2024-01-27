@@ -79,6 +79,11 @@ public:
         return 0;
     };
 
+    static int32_t PreRegisterSecCompProcess()
+    {
+        return 0;
+    };
+
     static int32_t ReportSecurityComponentClickEvent(int32_t scId,
         std::string& componentInfo, const SecCompClickEvent& clickInfo, sptr<IRemoteObject> callerToken = nullptr)
     {
