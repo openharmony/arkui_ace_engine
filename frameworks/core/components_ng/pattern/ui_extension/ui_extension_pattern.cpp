@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,8 +45,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-UIExtensionPattern::UIExtensionPattern(bool isTransferringCaller, bool isModal, bool isAsyncModalBinding)
-    : isTransferringCaller_(isTransferringCaller), isModal_(isModal), isAsyncModalBinding_(isAsyncModalBinding)
+UIExtensionPattern::UIExtensionPattern(bool isTransferringCaller, bool isModal, bool isAsyncModalBinding,
+    int32_t embeddedType) : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
+    isAsyncModalBinding_(isAsyncModalBinding), embeddedType_(embeddedType)
 {
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
         SessionTye::UI_EXTENSION_ABILITY, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
