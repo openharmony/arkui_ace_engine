@@ -182,10 +182,16 @@ public:
     }
     bool IsCurrentSwiperItem(WeakPtr<ListItemPattern> swiperItem)
     {
+        if (!swiperItem_.Upgrade()) {
+            return true;
+        }
         return swiperItem == swiperItem_;
     }
     bool CanReplaceSwiperItem()
     {
+        if (!swiperItem_.Upgrade()) {
+            canReplaceSwiperItem_ = true;
+        }
         return canReplaceSwiperItem_;
     }
 
