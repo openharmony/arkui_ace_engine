@@ -580,8 +580,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
                 preTopNavDestination->GetContentNode()->Clean(false, true);
             }
             parent->RemoveChild(preTopNavDestination, true);
-            parent->RebuildRenderContextTree();
-            pipeline->RequestFrame();
+            parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else {
             auto layoutProperty = preTopNavDestination->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
@@ -608,8 +607,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             preTopNavDestination->GetContentNode()->Clean(false, true);
         }
         parent->RemoveChild(preTopNavDestination, true);
-        parent->RebuildRenderContextTree();
-        pipeline->RequestFrame();
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
 }
@@ -635,8 +633,7 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
                 preTopNavDestination->GetContentNode()->Clean();
             }
             parent->RemoveChild(preTopNavDestination);
-            parent->RebuildRenderContextTree();
-            pipeline->RequestFrame();
+            parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         return;
     }
