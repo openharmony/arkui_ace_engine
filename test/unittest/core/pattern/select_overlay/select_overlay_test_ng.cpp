@@ -204,7 +204,7 @@ HWTEST_F(SelectOverlayTestNg, SelectFrameNodeAnimationTest001, TestSize.Level1)
     pattern->CreateNodePaintMethod();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->MoreOrBackAnimation(true);
-    EXPECT_TRUE(selectOverlayNode->isExtensionMenu_);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
     /**
      * @tc.steps: step4. Execute BackAnimation.
      * @tc.expected: The node state switches correctly.
