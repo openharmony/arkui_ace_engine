@@ -1016,7 +1016,7 @@ struct ArkUIShapeModifier {
 
 struct ArkUITextModifier {
     void (*setContent)(ArkUINodeHandle node, ArkUI_CharPtr value);
-    void (*setFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr weight);
+    void (*setFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
     void (*resetFontWeight)(ArkUINodeHandle node);
     void (*setFontStyle)(ArkUINodeHandle node, ArkUI_Uint32 fontStyle);
     void (*resetFontStyle)(ArkUINodeHandle node);
@@ -1059,6 +1059,7 @@ struct ArkUITextModifier {
     void (*resetTextLetterSpacing)(ArkUINodeHandle node);
     void (*setTextFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
     void (*resetTextFont)(ArkUINodeHandle node);
+    void (*setFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr weight);
 };
 
 struct ArkUIButtonModifier {
@@ -1572,7 +1573,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaFontColor)(ArkUINodeHandle node);
     void (*setTextAreaFontStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextAreaFontStyle)(ArkUINodeHandle node);
-    void (*setTextAreaFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
+    void (*setTextAreaFontWeight)(ArkUINodeHandle node, ArkUI_Int32 fontWeight);
     void (*resetTextAreaFontWeight)(ArkUINodeHandle node);
     void (*setTextAreaFontSize)(ArkUINodeHandle node, const struct ArkUIResourceLength* size);
     void (*resetTextAreaFontSize)(ArkUINodeHandle node);
@@ -1580,6 +1581,7 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaPlaceholderString)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setTextAreaTextString)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*stopTextAreaTextEditing)(ArkUINodeHandle node);
+    void (*setTextAreaFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
 };
 
 struct ArkUITextInputModifier {
@@ -1615,7 +1617,7 @@ struct ArkUITextInputModifier {
     void (*resetTextInputBarState)(ArkUINodeHandle node);
     void (*setTextInputEnterKeyType)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextInputEnterKeyType)(ArkUINodeHandle node);
-    void (*setTextInputFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
+    void (*setTextInputFontWeight)(ArkUINodeHandle node, ArkUI_Int32 fontWeight);
     void (*resetTextInputFontWeight)(ArkUINodeHandle node);
     void (*setTextInputFontSize)(ArkUINodeHandle node, const struct ArkUILengthType* value);
     void (*resetTextInputFontSize)(ArkUINodeHandle node);
@@ -1635,6 +1637,7 @@ struct ArkUITextInputModifier {
     void (*resetTextInputFontFamily)(ArkUINodeHandle node);
     void (*setTextInputPlaceholderString)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setTextInputTextString)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setTextInputFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
 };
 
 struct ArkUIWebModifier {
@@ -2084,7 +2087,7 @@ struct ArkUISpanModifier {
     void (*setContent)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setSpanTextCase)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSpanTextCase)(ArkUINodeHandle node);
-    void (*setSpanFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setSpanFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSpanFontWeight)(ArkUINodeHandle node);
     void (*setSpanLineHeight)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit);
     void (*resetSpanLineHeight)(ArkUINodeHandle node);
@@ -2103,6 +2106,7 @@ struct ArkUISpanModifier {
     void (*resetSpanLetterSpacing)(ArkUINodeHandle node);
     void (*setSpanFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
     void (*resetSpanFont)(ArkUINodeHandle node);
+    void (*setSpanFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr value);
 };
 
 struct ArkUISelectModifier {

@@ -60,11 +60,18 @@ void SetTextContext(ArkUINodeHandle node, const char* value)
     TextModelNG::InitText(frameNode, content);
 }
 
-void SetFontWeight(ArkUINodeHandle node, const char* weight)
+void SetFontWeightStr(ArkUINodeHandle node, const char* weight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetFontWeight(frameNode, ConvertStrToFontWeight(weight));
+}
+
+void SetFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
 }
 
 void ResetFontWeight(ArkUINodeHandle node)
@@ -473,7 +480,7 @@ const ArkUITextModifier* GetTextModifier()
         SetTextFontFamily, ResetTextFontFamily, SetTextCopyOption, ResetTextCopyOption, SetTextTextShadow,
         ResetTextTextShadow, SetTextHeightAdaptivePolicy, ResetTextHeightAdaptivePolicy, SetTextTextIndent,
         ResetTextTextIndent, SetTextBaselineOffset, ResetTextBaselineOffset, SetTextLetterSpacing,
-        ResetTextLetterSpacing, SetTextFont, ResetTextFont };
+        ResetTextLetterSpacing, SetTextFont, ResetTextFont, SetFontWeightStr };
 
     return &modifier;
 }
