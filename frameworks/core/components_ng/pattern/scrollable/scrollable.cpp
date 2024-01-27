@@ -32,7 +32,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr double CAP_COEFFICIENT = 0.45;
-constexpr int32_t FIRST_THRESHOLD = 5;
+constexpr int32_t FIRST_THRESHOLD = 4;
 constexpr int32_t SECOND_THRESHOLD = 10;
 constexpr double CAP_FIXED_VALUE = 16.0;
 constexpr uint32_t DRAG_INTERVAL_TIME = 900;
