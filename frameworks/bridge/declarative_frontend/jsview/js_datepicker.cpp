@@ -638,7 +638,7 @@ void JSDatePickerDialog::JSBind(BindingTarget globalObj)
 
 void JSDatePickerDialog::Show(const JSCallbackInfo& info)
 {
-    auto scopedDelegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
     if (!info[0]->IsObject()) {
         return;
@@ -872,7 +872,7 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     const std::map<std::string, NG::DialogEvent>& dialogEvent,
     const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
-    auto container = Container::CurrentWithoutScope();
+    auto container = Container::CurrentSafely();
     if (!container) {
         return;
     }
@@ -1221,7 +1221,7 @@ void JSTimePickerDialog::JSBind(BindingTarget globalObj)
 
 void JSTimePickerDialog::Show(const JSCallbackInfo& info)
 {
-    auto scopedDelegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
     if (!info[0]->IsObject()) {
         return;
@@ -1342,7 +1342,7 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     const std::map<std::string, NG::DialogEvent>& dialogEvent,
     const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
-    auto container = Container::CurrentWithoutScope();
+    auto container = Container::CurrentSafely();
     if (!container) {
         return;
     }

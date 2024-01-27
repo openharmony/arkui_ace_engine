@@ -26,13 +26,10 @@ constexpr int32_t DEFAULT_ID = 0;
 constexpr int32_t DEFAULT_ID = INSTANCE_ID_UNDEFINED;
 #endif
 
-const std::array<const char*, 4> ID_GENERATE_METHODS { "scope", "recent", "singelton", "undefined" };
-
-std::atomic<uint32_t> containerCount_(0);
+std::set<int32_t> containerSet_;
 thread_local int32_t currentId_(DEFAULT_ID);
-std::atomic<int32_t> singletonId_(DEFAULT_ID);
 std::atomic<int32_t> recentActiveId_(DEFAULT_ID);
-std::atomic<uint32_t> idGenerateMethod_(static_cast<uint32_t>(ID_GENERATE_METHOD::SCOPE));
+std::atomic<int32_t> recentForegroundId_(DEFAULT_ID);
 }
 
 int32_t ContainerScope::CurrentId()
@@ -40,19 +37,20 @@ int32_t ContainerScope::CurrentId()
     return currentId_;
 }
 
-const char* ContainerScope::CurrentIdGenerateMethod()
+int32_t ContainerScope::DefaultId()
 {
-    return ID_GENERATE_METHODS[idGenerateMethod_.load(std::memory_order_relaxed)];
-}
-
-void ContainerScope::UpdateIdGenerateMethod(ID_GENERATE_METHOD method)
-{
-    idGenerateMethod_.store(static_cast<uint32_t>(method), std::memory_order_relaxed);
+    if (ContainerCount() > 0) {
+        return *containerSet_.end();
+    }
+    return INSTANCE_ID_UNDEFINED;
 }
 
 int32_t ContainerScope::SingletonId()
 {
-    return singletonId_.load(std::memory_order_relaxed);
+    if (ContainerCount() != 1) {
+        return INSTANCE_ID_UNDEFINED;
+    }
+    return *containerSet_.begin();
 }
 
 int32_t ContainerScope::RecentActiveId()
@@ -60,14 +58,38 @@ int32_t ContainerScope::RecentActiveId()
     return recentActiveId_.load(std::memory_order_relaxed);
 }
 
+int32_t ContainerScope::RecentForegroundId()
+{
+    return recentForegroundId_.load(std::memory_order_relaxed);
+}
+
+std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
+{
+    int32_t currentId = CurrentId();
+    if (currentId >= 0) {
+        return { currentId, InstanceIdGenReason::SCOPE };
+    }
+    uint32_t containerCount = ContainerCount();
+    if (containerCount == 0) {
+        return { INSTANCE_ID_UNDEFINED, InstanceIdGenReason::UNDEFINED };
+    }
+    if (containerCount == 1) {
+        return { SingletonId(), InstanceIdGenReason::SINGLETON };
+    }
+    currentId = ContainerScope::RecentActiveId();
+    if (currentId >= 0) {
+        return { currentId, InstanceIdGenReason::ACTIVE };
+    }
+    currentId = ContainerScope::RecentForegroundId();
+    if (currentId >= 0) {
+        return { currentId, InstanceIdGenReason::FOREGROUND };
+    }
+    return { ContainerScope::DefaultId(), InstanceIdGenReason::DEFAULT };
+}
+
 void ContainerScope::UpdateCurrent(int32_t id)
 {
     currentId_ = id;
-}
-
-void ContainerScope::UpdateSingleton(int32_t id)
-{
-    singletonId_.store(id, std::memory_order_relaxed);
 }
 
 void ContainerScope::UpdateRecentActive(int32_t id)
@@ -75,19 +97,35 @@ void ContainerScope::UpdateRecentActive(int32_t id)
     recentActiveId_.store(id, std::memory_order_relaxed);
 }
 
+void ContainerScope::UpdateRecentForeground(int32_t id)
+{
+    recentForegroundId_.store(id, std::memory_order_relaxed);
+}
+
 uint32_t ContainerScope::ContainerCount()
 {
-    return containerCount_.load(std::memory_order_relaxed);
+    return static_cast<uint32_t>(containerSet_.size());
 }
 
-void ContainerScope::AddCount()
+void ContainerScope::Add(int32_t id)
 {
-    containerCount_.fetch_add(1, std::memory_order_relaxed);
+    containerSet_.emplace(id);
 }
 
-void ContainerScope::MinusCount()
+void ContainerScope::Remove(int32_t id)
 {
-    containerCount_.fetch_sub(1, std::memory_order_relaxed);
+    containerSet_.erase(id);
+}
+
+void ContainerScope::RemoveAndCheck(int32_t id)
+{
+    Remove(id);
+    if (RecentActiveId() == id) {
+        UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    }
+    if (RecentForegroundId() == id) {
+        UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+    }
 }
 
 } // namespace OHOS::Ace

@@ -102,7 +102,7 @@ void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context)
 
 bool Animator::AttachSchedulerOnContainer()
 {
-    auto pipeline = PipelineBase::GetCurrentContextWithoutScope();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     AttachScheduler(pipeline);
     return true;
@@ -808,7 +808,7 @@ bool Animator::StartInnerAsync()
         }
     };
 
-    auto stopCallback = [weak = AceType::WeakClaim(this), id = Container::CurrentIdWithoutScope()]() -> void {
+    auto stopCallback = [weak = AceType::WeakClaim(this), id = Container::CurrentIdSafely()]() -> void {
         ContainerScope scope(id);
         auto controller = weak.Upgrade();
         if (controller == nullptr) {

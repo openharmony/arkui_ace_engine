@@ -34,7 +34,7 @@ JsiContextModule* JsiContextModule::GetInstance()
 std::shared_ptr<JsValue> JsiContextModule::GetContext(const std::shared_ptr<JsRuntime>& runtime,
     const std::shared_ptr<JsValue>& thisObj, const std::vector<std::shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    int32_t currentInstance = Container::CurrentIdWithoutScope();
+    int32_t currentInstance = Container::CurrentIdSafely();
     if (argc > 0) {
         const auto& obj = argv[0];
         if (obj && obj->IsObject(runtime) && obj->HasProperty(runtime, "getInstanceId")) {

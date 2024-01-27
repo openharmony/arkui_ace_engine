@@ -69,9 +69,9 @@ RefPtr<Framework::JsEngine> EngineHelper::GetCurrentEngine()
     return GetEngine(Container::CurrentId());
 }
 
-RefPtr<Framework::JsEngine> EngineHelper::GetCurrentEngineWithoutScope()
+RefPtr<Framework::JsEngine> EngineHelper::GetCurrentEngineSafely()
 {
-    return GetEngine(Container::CurrentIdWithoutScope());
+    return GetEngine(Container::CurrentIdSafely());
 }
 
 ScopedDelegate EngineHelper::GetCurrentDelegate()
@@ -84,13 +84,13 @@ ScopedDelegate EngineHelper::GetCurrentDelegate()
     return GetDelegateByContainer(container);
 }
 
-ScopedDelegate EngineHelper::GetCurrentDelegateWithoutScope()
+ScopedDelegate EngineHelper::GetCurrentDelegateSafely()
 {
-    auto engine = GetCurrentEngineWithoutScope();
+    auto engine = GetCurrentEngineSafely();
     if (engine) {
-        return { engine->GetFrontend(), Container::CurrentIdWithoutScope() };
+        return { engine->GetFrontend(), Container::CurrentIdSafely() };
     }
-    auto container = Container::GetActive();
+    auto container = Container::CurrentSafely();
     return GetDelegateByContainer(container);
 }
 
