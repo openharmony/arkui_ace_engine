@@ -119,6 +119,8 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("optionWidth", &JSSelect::SetOptionWidth, opt);
     JSClass<JSSelect>::StaticMethod("optionHeight", &JSSelect::SetOptionHeight, opt);
     JSClass<JSSelect>::StaticMethod("optionWidthFitTrigger", &JSSelect::SetOptionWidthFitTrigger, opt);
+    JSClass<JSSelect>::StaticMethod("menuBackgroundColor", &JSSelect::SetMenuBackgroundColor, opt);
+    JSClass<JSSelect>::StaticMethod("menuBackgroundBlurStyle", &JSSelect::SetMenuBackgroundBlurStyle, opt);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -838,5 +840,39 @@ void JSSelect::SetOptionWidthFitTrigger(const JSCallbackInfo& info)
     }
     
     SelectModel::GetInstance()->SetOptionWidthFitTrigger(isFitTrigger);
+}
+
+void JSSelect::SetMenuBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color menuBackgroundColor;
+    if (!ParseJsColor(info[0], menuBackgroundColor)) {
+        if (info[0]->IsNull() || info[0]->IsUndefined()) {
+            menuBackgroundColor = Color::TRANSPARENT;
+        } else {
+            return;
+        }
+    }
+
+    SelectModel::GetInstance()->SetMenuBackgroundColor(menuBackgroundColor);
+}
+
+void JSSelect::SetMenuBackgroundBlurStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    BlurStyleOption styleOption;
+    if (info[0]->IsNumber()) {
+        auto blurStyle = info[0]->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+            SelectModel::GetInstance()->SetMenuBackgroundBlurStyle(styleOption);
+        }
+    }
 }
 } // namespace OHOS::Ace::Framework
