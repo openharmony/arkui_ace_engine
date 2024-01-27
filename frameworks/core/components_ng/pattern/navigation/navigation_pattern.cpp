@@ -1446,7 +1446,7 @@ void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& naviga
     if (navigationStack_) {
         WeakPtr<NavigationPattern> weakPattern = WeakClaim(this);
         auto id = Container::CurrentId();
-        auto uiTask = [weakPattern, id]() {
+        auto callback = [weakPattern, id]() {
             ContainerScope scope(id);
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1466,14 +1466,6 @@ void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& naviga
                 host->MarkDirtyNode();
             });
             context->RequestFrame();
-        };
-        auto callback = [id, task = std::move(uiTask)]() {
-            ContainerScope scope(id);
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
         };
         navigationStack_->SetOnStateChangedCallback(callback);
     }
