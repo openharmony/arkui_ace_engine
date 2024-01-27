@@ -72,9 +72,9 @@ public:
     {
         isUriPureNumber_ = isUriPureNumber;
     }
-    void SetIsSystemColorChange(bool isSystemColorChange = false)
+    void SetIsConfigurationChange(bool isConfigurationChange)
     {
-        isSystemColorChange_ = isSystemColorChange;
+        isConfigurationChange_ = isConfigurationChange;
     }
     void Reset();
 
@@ -99,9 +99,9 @@ public:
     {
         return isUriPureNumber_;
     }
-    bool GetIsOnSystemColorChange() const
+    bool GetIsConfigurationChange() const
     {
-        return isSystemColorChange_;
+        return isConfigurationChange_;
     }
 
     bool SupportObjCache() const;
@@ -126,7 +126,7 @@ private:
     bool isSvg_ = false;
     bool isPng_ = false;
     bool needCache_ = true;
-    bool isSystemColorChange_ = false;
+    bool isConfigurationChange_ = false;
     bool isUriPureNumber_ = false;
     [[deprecated("in NG")]]
     std::optional<Color> fillColor_;

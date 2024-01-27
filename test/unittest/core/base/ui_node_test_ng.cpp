@@ -1446,7 +1446,7 @@ HWTEST_F(UINodeTestNg, UpdateConfigurationUpdate001, TestSize.Level1)
      * @tc.steps: step2.  construct parameter configurationChange and call UpdateConfigurationUpdate
      * @tc.expected: cover branch needCallChildrenUpdate_ is true
      */
-    OHOS::Ace::NG::UINode::OnConfigurationChange configurationChange;
+    ConfigurationChange configurationChange;
     parent->UINode::UpdateConfigurationUpdate(configurationChange);
     EXPECT_TRUE(parent->needCallChildrenUpdate_);
 

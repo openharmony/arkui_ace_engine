@@ -242,7 +242,7 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool sile
     }
 }
 
-void UINode::UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange)
+void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     OnConfigurationUpdate(configurationChange);
     if (needCallChildrenUpdate_) {
