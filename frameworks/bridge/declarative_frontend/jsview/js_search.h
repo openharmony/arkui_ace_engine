@@ -16,8 +16,8 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEARCH_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEARCH_H
 
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/core/components/text_field/text_field_controller.h"
 #include "frameworks/core/components_ng/pattern/search/search_model_ng.h"
 
@@ -67,23 +67,8 @@ public:
     ~JSSearchController() override = default;
 
     static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSSearchController* scroller);
-    void CaretPosition(int32_t caretPosition);
-    void StopEditing();
-    void SetController(const RefPtr<TextFieldControllerBase>& controller)
-    {
-        controller_ = controller;
-    }
-
-    void GetTextContentRect(const JSCallbackInfo& info);
-    void GetTextContentLinesNum(const JSCallbackInfo& info);
-    void GetCaretOffset(const JSCallbackInfo& info);
 
 private:
-    JSRef<JSObject> CreateRectangle(const Rect& info);
-
-    WeakPtr<TextFieldControllerBase> controller_;
     ACE_DISALLOW_COPY_AND_MOVE(JSSearchController);
 };
 
