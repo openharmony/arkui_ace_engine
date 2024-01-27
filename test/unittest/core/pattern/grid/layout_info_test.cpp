@@ -370,13 +370,24 @@ HWTEST_F(GridLayoutInfoTest, FindItemInRange001, TestSize.Level1)
     };
     info.startMainLineIndex_ = 0;
     info.endMainLineIndex_ = 3;
-    EXPECT_EQ(info.FindItemInRange(5), 2);
-    EXPECT_EQ(info.FindItemInRange(7), 3);
-    EXPECT_EQ(info.FindItemInRange(3), 1);
-    EXPECT_EQ(info.FindItemInRange(10), -1);
+    auto res = info.FindItemInRange(5);
+    EXPECT_EQ(res.first, 2);
+    EXPECT_EQ(res.second, 0);
+
+    res = info.FindItemInRange(7);
+    EXPECT_EQ(res.first, 3);
+    EXPECT_EQ(res.second, 0);
+
+    res = info.FindItemInRange(3);
+    EXPECT_EQ(res.first, 1);
+    EXPECT_EQ(res.second, 1);
+
+    res = info.FindItemInRange(10);
+    EXPECT_EQ(res.first, -1);
+    EXPECT_EQ(res.second, -1);
 
     info.gridMatrix_.clear();
-    EXPECT_EQ(info.FindItemInRange(7), -1);
+    EXPECT_EQ(info.FindItemInRange(7).first, -1);
 }
 
 /**

@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
+#include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -905,6 +906,96 @@ HWTEST_F(GridLayoutTestNg, ChangeItemNumber001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ItemAboveViewport001
+ * @tc.desc: Test GridLayoutInfo::ItemAboveViewport
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, ItemAboveViewport001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 1 } } },
+        { 1, { { 0, 2 }, { 1, 3 } } },
+        { 2, { { 0, 4 }, { 1, 5 } } },
+    };
+    info.lineHeightMap_ = { { 0, 200.0f }, { 1, 500.0f }, { 2, 300.0f } };
+    info.crossCount_ = 2;
+
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 2;
+    info.startIndex_ = 0;
+    info.endIndex_ = 5;
+
+    info.currentOffset_ = 0.0f;
+    EXPECT_FALSE(info.ItemAboveViewport(1, 5.0f));
+
+    info.currentOffset_ = -50.0f;
+    EXPECT_TRUE(info.ItemAboveViewport(1, 5.0f));
+
+    info.currentOffset_ = -200.0f;
+    EXPECT_TRUE(info.ItemAboveViewport(1, 5.0f));
+    EXPECT_FALSE(info.ItemAboveViewport(2, 5.0f));
+
+    // adding gap length
+    info.currentOffset_ = -205.0f;
+    EXPECT_TRUE(info.ItemAboveViewport(1, 5.0f));
+    EXPECT_FALSE(info.ItemAboveViewport(2, 5.0f));
+
+    EXPECT_TRUE(info.ItemAboveViewport(2, 0.0f));
+
+    info.startMainLineIndex_ = 1;
+    info.endMainLineIndex_ = 1;
+    info.startIndex_ = 2;
+    info.endIndex_ = 3;
+
+    info.currentOffset_ = 0.0f;
+    EXPECT_FALSE(info.ItemAboveViewport(2, 5.0f));
+
+    info.currentOffset_ = -1.0f;
+    EXPECT_TRUE(info.ItemAboveViewport(3, 5.0f));
+}
+
+/**
+ * @tc.name: ItemBelowViewport001
+ * @tc.desc: Test GridLayoutInfo::ItemBelowViewport
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, ItemBelowViewport001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 1 } } },
+        { 1, { { 0, 2 }, { 1, 3 } } },
+        { 2, { { 0, 4 }, { 1, -1 } } },
+    };
+    info.lineHeightMap_ = { { 0, 200.0f }, { 1, 500.0f }, { 2, 300.0f } };
+    info.crossCount_ = 2;
+
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 2;
+    info.startIndex_ = 0;
+    info.endIndex_ = 4;
+
+    info.currentOffset_ = 0.0f;
+    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 100.0f, 5.0f));
+    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 700.0f, 5.0f));
+    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 705.0f, 5.0f));
+    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 710.0f, 5.0f));
+    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 1005.0f, 5.0f));
+    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 1010.0f, 5.0f));
+
+    info.currentOffset_ = -50.0f;
+    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 100.0f, 5.0f));
+    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 700.0f, 5.0f));
+    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 705.0f, 5.0f));
+    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 710.0f, 5.0f));
+    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 955.0f, 5.0f));
+    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 960.0f, 5.0f));
+    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 1005.0f, 5.0f));
+    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 1010.0f, 5.0f));
+}
+
+/**
  * @tc.name: UpdateGridMatrix001
  * @tc.desc: Test UpdateGridMatrix
  * @tc.type: FUNC
@@ -1042,8 +1133,8 @@ HWTEST_F(GridLayoutTestNg, UpdateLength001, TestSize.Level1)
 }
 
 /**
- * @tc.name: IrregularFiller::GetItemSize001
- * @tc.desc: Test IrregularFiller::GetItemSize
+ * @tc.name: LayoutUtils::GetItemSize001
+ * @tc.desc: Test LayoutUtils::GetItemSize
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutTestNg, GetItemSize001, TestSize.Level1)
@@ -1068,29 +1159,29 @@ HWTEST_F(GridLayoutTestNg, GetItemSize001, TestSize.Level1)
     });
 
     GridLayoutInfo info;
-    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+    auto* wrapper = AceType::RawPtr(frameNode_);
 
     info.crossCount_ = 2;
-    EXPECT_EQ(filler.GetItemSize(0).rows, 1);
-    EXPECT_EQ(filler.GetItemSize(0).columns, 2);
-    EXPECT_EQ(filler.GetItemSize(1).rows, 2);
-    EXPECT_EQ(filler.GetItemSize(1).columns, 1);
-    EXPECT_EQ(filler.GetItemSize(2).rows, 1);
-    EXPECT_EQ(filler.GetItemSize(2).columns, 2);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 0).rows, 1);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 0).columns, 2);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 1).rows, 2);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 1).columns, 1);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 2).rows, 1);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 2).columns, 2);
 
     info.axis_ = Axis::HORIZONTAL;
     // rows and columns should be flipped when horizontal
-    EXPECT_EQ(filler.GetItemSize(0).rows, 2);
-    EXPECT_EQ(filler.GetItemSize(0).columns, 1);
-    EXPECT_EQ(filler.GetItemSize(1).rows, 1);
-    EXPECT_EQ(filler.GetItemSize(1).columns, 2);
-    EXPECT_EQ(filler.GetItemSize(2).rows, 2);
-    EXPECT_EQ(filler.GetItemSize(2).columns, 1);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 0).rows, 2);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 0).columns, 1);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 1).rows, 1);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 1).columns, 2);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 2).rows, 2);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 2).columns, 1);
 }
 
 /**
- * @tc.name: IrregularFiller::GetItemSize002
- * @tc.desc: Test IrregularFiller::GetItemSize with null callback
+ * @tc.name: LayoutUtils::GetItemSize002
+ * @tc.desc: Test LayoutUtils::GetItemSize with null callback
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutTestNg, GetItemSize002, TestSize.Level1)
@@ -1109,15 +1200,15 @@ HWTEST_F(GridLayoutTestNg, GetItemSize002, TestSize.Level1)
     });
 
     GridLayoutInfo info;
-    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+    auto* wrapper = AceType::RawPtr(frameNode_);
     info.crossCount_ = 3;
 
-    EXPECT_EQ(filler.GetItemSize(0).rows, 1);
-    EXPECT_EQ(filler.GetItemSize(0).columns, 3);
-    EXPECT_EQ(filler.GetItemSize(1).rows, 1);
-    EXPECT_EQ(filler.GetItemSize(1).columns, 3);
-    EXPECT_EQ(filler.GetItemSize(2).rows, 1);
-    EXPECT_EQ(filler.GetItemSize(2).columns, 3);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 0).rows, 1);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 0).columns, 3);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 1).rows, 1);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 1).columns, 3);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 2).rows, 1);
+    EXPECT_EQ(GridLayoutUtils::GetItemSize(&info, wrapper, 2).columns, 3);
 }
 
 /**
@@ -2125,6 +2216,110 @@ HWTEST_F(GridLayoutTestNg, PrepareLineHeights001, TestSize.Level1)
 
     EXPECT_EQ(cmp, info.gridMatrix_);
     EXPECT_EQ(cmpH, info.lineHeightMap_);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::TransformAutoScrollAlign001
+ * @tc.desc: Test IrregularLayout::TransformAutoScrollAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, TransformAutoScrollAlign001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        0, // [2 x 1]
+        2, // [3 x 2]
+        5, // [1 x 3]
+        6, // [2 x 1]
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 2) {
+            return { .rows = 2, .columns = 3 };
+        }
+        if (index == 5) {
+            return { .rows = 3, .columns = 1 };
+        }
+        return { .rows = 1, .columns = 2 };
+    };
+
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+    });
+
+    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    algo->wrapper_ = AceType::RawPtr(frameNode_);
+
+    auto& info = algo->gridLayoutInfo_;
+    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 300.0f }, { 2, 30.0f }, { 3, 50.0f }, { 4, 80.0f } };
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, -1 }, { 2, 1 } } },   // 0 | 0 | 1
+        { 1, { { 0, 2 }, { 1, -1 }, { 2, -1 } } },  // 2 | 2 | 2
+        { 2, { { 0, -1 }, { 1, -1 }, { 2, -1 } } }, // 2 | 2 | 2
+        { 3, { { 0, 3 }, { 1, 4 }, { 2, 5 } } },    // 3 | 4 | 5
+        { 4, { { 0, 6 }, { 1, -1 }, { 2, -1 } } },  // 6 | 6 | 5
+    };
+    algo->mainGap_ = 5.0f;
+
+    info.jumpIndex_ = 2;
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 4;
+    info.startIndex_ = 0;
+    info.endIndex_ = 6;
+    EXPECT_EQ(algo->TransformAutoScrollAlign(500.0f), ScrollAlign::NONE);
+
+    info.jumpIndex_ = 0;
+    info.startMainLineIndex_ = 3;
+    info.endMainLineIndex_ = 4;
+    info.startIndex_ = 3;
+    info.endIndex_ = 6;
+    info.currentOffset_ = -10.0f;
+    EXPECT_EQ(algo->TransformAutoScrollAlign(100.0f), ScrollAlign::START);
+
+    info.jumpIndex_ = 2;
+    info.startMainLineIndex_ = 1;
+    info.endMainLineIndex_ = 2;
+    info.startIndex_ = 2;
+    info.endIndex_ = 2;
+    info.currentOffset_ = -25.0f;
+    EXPECT_EQ(algo->TransformAutoScrollAlign(310.0f), ScrollAlign::NONE);
+
+    // line 3 now matches with the end of the viewport, should endMainlineIndex_ be updated to 3?
+    info.currentOffset_ = -30.0f;
+    info.endMainLineIndex_ = 3;
+    info.endIndex_ = 5;
+    EXPECT_EQ(algo->TransformAutoScrollAlign(310.0f), ScrollAlign::START);
+    info.currentOffset_ = -31.0f;
+    EXPECT_EQ(algo->TransformAutoScrollAlign(310.0f), ScrollAlign::START);
+
+    info.jumpIndex_ = 0;
+    info.startMainLineIndex_ = 3;
+    info.endMainLineIndex_ = 4;
+    info.startIndex_ = 3;
+    info.endIndex_ = 6;
+    EXPECT_EQ(algo->TransformAutoScrollAlign(100.0f), ScrollAlign::START);
+
+    info.jumpIndex_ = 4;
+    info.startMainLineIndex_ = 1;
+    info.endMainLineIndex_ = 4;
+    info.startIndex_ = 2;
+    info.endIndex_ = 6;
+
+    info.currentOffset_ = -379.0f;
+    algo->mainGap_ = 50.0f;
+    EXPECT_EQ(algo->TransformAutoScrollAlign(152.0f), ScrollAlign::NONE);
+
+    algo->mainGap_ = 5.0f;
+    // emulate init
+    info.lineHeightMap_.clear();
+    info.gridMatrix_.clear();
+    info.jumpIndex_ = 3;
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 0;
+    info.startIndex_ = 0;
+    info.endIndex_ = -1;
+    EXPECT_EQ(algo->TransformAutoScrollAlign(300.0f), ScrollAlign::END);
 }
 
 /**
