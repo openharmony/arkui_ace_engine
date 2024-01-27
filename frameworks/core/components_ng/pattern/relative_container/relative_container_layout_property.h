@@ -35,13 +35,20 @@ public:
     {
         auto value = MakeRefPtr<RelativeContainerLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propBarrier_ = CloneBarrier();
+        value->propGuideline_ = CloneGuideline();
         return value;
     }
 
     void Reset() override
     {
         LayoutProperty::Reset();
+        ResetBarrier();
+        ResetGuideline();
     }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Barrier, std::vector<BarrierInfo>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Guideline, std::vector<GuidelineInfo>, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

@@ -21,9 +21,9 @@ class BuilderNode {
   constructor(uiContext: UIContext, options: RenderOptions) {
     let jsBuilderNode = new JSBuilderNode(uiContext, options);
     this._JSBuilderNode = jsBuilderNode;
-    let id = Symbol("BuilderNode");
+    let id = Symbol('BuilderNode');
     BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
-    BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderNode', idOfNode: id })
+    BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderNode', idOfNode: id });
   }
   public update(params: Object) {
     this._JSBuilderNode.update(params);

@@ -136,6 +136,33 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     canvas.DetachBrush();
 }
 
+std::pair<float, float> DotIndicatorModifier::GetTouchBottomCenterX(ContentProperty& contentProperty)
+{
+    float leftCenterX = contentProperty.longPointLeftCenterX;
+    float rightCenterX = contentProperty.longPointRightCenterX;
+
+    if (isCustomSize_) {
+        return { leftCenterX, rightCenterX };
+    }
+    auto totalCount = contentProperty.vectorBlackPointCenterX.size();
+    // 2.0 means get the long point radius
+    float radius = (rightCenterX - leftCenterX) / 2.0f;
+    bool isLeftTouchBottom = (currentIndex_ == totalCount - 1);
+    bool isRightTouchBottom = (currentIndex_ == 0);
+
+    if ((animationState_ == TouchBottomAnimationStage::STAGE_SHRINKT_TO_BLACK_POINT && isLeftTouchBottom) ||
+        (animationState_ == TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT && isRightTouchBottom)) {
+        leftCenterX = contentProperty.vectorBlackPointCenterX[0] - radius;
+        rightCenterX = contentProperty.vectorBlackPointCenterX[0] + radius;
+    } else if ((animationState_ == TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT && isLeftTouchBottom) ||
+        (animationState_ == TouchBottomAnimationStage::STAGE_SHRINKT_TO_BLACK_POINT && isRightTouchBottom)) {
+        leftCenterX = contentProperty.vectorBlackPointCenterX[totalCount - 1] - radius;
+        rightCenterX = contentProperty.vectorBlackPointCenterX[totalCount - 1] + radius;
+    }
+
+    return { leftCenterX, rightCenterX };
+}
+
 void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty& contentProperty)
 {
     RSCanvas& canvas = context.canvas;
@@ -154,13 +181,15 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
         }
     }
 
-    OffsetF leftCenter = { contentProperty.longPointLeftCenterX, centerY_ };
-    OffsetF rightCenter = { contentProperty.longPointRightCenterX, centerY_ };
+    auto [leftCenterX, rightCenterX] = GetTouchBottomCenterX(contentProperty);
+
+    OffsetF leftCenter = { leftCenterX, centerY_ };
+    OffsetF rightCenter = { rightCenterX, centerY_ };
     OffsetF centerDistance = rightCenter - leftCenter;
     OffsetF centerDilateDistance = centerDistance * contentProperty.longPointDilateRatio;
     leftCenter -= (centerDilateDistance - centerDistance) * 0.5;
     rightCenter += (centerDilateDistance - centerDistance) * 0.5;
-    PaintSelectedIndicator(canvas, selectedCenter, leftCenter, rightCenter,
+    PaintSelectedIndicator(canvas, leftCenter, rightCenter,
         contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
 
     bool isLeftTouchBottom = (currentIndex_ == totalCount - 1);
@@ -231,7 +260,7 @@ void DotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, const Offs
     canvas.DetachBrush();
 }
 
-void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& center, const OffsetF& leftCenter,
+void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter,
     const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes)
 {
     RSBrush brush;
@@ -511,7 +540,7 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(GestureState gestureSt
         longPointLeftAnimEnd_ = false;
         longPointRightAnimEnd_ = false;
         auto weak = WeakClaim(this);
-        longPointLeftAnimation_ = AnimationUtils::StartAnimation(optionLeft, [weak, longPointCenterX]() {
+        AnimationUtils::StartAnimation(optionLeft, [weak, longPointCenterX]() {
                 auto modifier = weak.Upgrade();
                 CHECK_NULL_VOID(modifier);
                 modifier->longPointLeftCenterX_->Set(longPointCenterX.first);
@@ -521,7 +550,7 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(GestureState gestureSt
                 modifier->longPointLeftAnimEnd_ = true;
             });
 
-        longPointRightAnimation_ = AnimationUtils::StartAnimation(optionRight, [weak, longPointCenterX]() {
+        AnimationUtils::StartAnimation(optionRight, [weak, longPointCenterX]() {
                 auto modifier = weak.Upgrade();
                 CHECK_NULL_VOID(modifier);
                 modifier->longPointRightCenterX_->Set(longPointCenterX.second);
@@ -624,9 +653,11 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
                                               touchBottomTypeLoop]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
+        modifier->animationState_ = TouchBottomAnimationStage::STAGE_NONE;
         if (!(modifier->ifNeedFinishCallback_)) {
             return;
         }
+        modifier->animationState_ = TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT;
         modifier->PlayOpacityAnimation();
         if (touchBottomTypeLoop == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT) {
             modifier->longPointLeftCenterX_->Set(vectorBlackPointCenterX[vectorBlackPointCenterX.size() - 1]);
@@ -650,12 +681,14 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
             CHECK_NULL_VOID(modifier);
             modifier->longPointLeftAnimEnd_ = true;
             modifier->longPointRightAnimEnd_ = true;
+            modifier->animationState_ = TouchBottomAnimationStage::STAGE_NONE;
         });
     };
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         longPointLeftAnimEnd_ = false;
         longPointRightAnimEnd_ = false;
         ifNeedFinishCallback_ = true;
+        animationState_ = TouchBottomAnimationStage::STAGE_SHRINKT_TO_BLACK_POINT;
         touchBottomPointColor_->Set(LinearColor(selectedColor_->Get()));
         AnimationUtils::StartAnimation(optionBottom, [weak, longPointCenterX]() {
             auto modifier = weak.Upgrade();
@@ -704,7 +737,7 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
         longPointLeftAnimEnd_ = false;
         longPointRightAnimEnd_ = false;
         auto weak = WeakClaim(this);
-        longPointLeftAnimation_ = AnimationUtils::StartAnimation(optionLeft, [weak, longPointCenterX]() {
+        AnimationUtils::StartAnimation(optionLeft, [weak, longPointCenterX]() {
                 auto modifier = weak.Upgrade();
                 CHECK_NULL_VOID(modifier);
                 modifier->longPointLeftCenterX_->Set(longPointCenterX[0].first);
@@ -714,7 +747,7 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
                 modifier->longPointLeftAnimEnd_ = true;
             });
 
-        longPointRightAnimation_ = AnimationUtils::StartAnimation(optionRight, [weak, longPointCenterX]() {
+        AnimationUtils::StartAnimation(optionRight, [weak, longPointCenterX]() {
                 auto modifier = weak.Upgrade();
                 CHECK_NULL_VOID(modifier);
                 modifier->longPointRightCenterX_->Set(longPointCenterX[0].second);
@@ -732,16 +765,25 @@ void DotIndicatorModifier::PlayIndicatorAnimation(const LinearVector<float>& vec
 {
     StopAnimation();
     isTouchBottomLoop_ = false;
+    animationState_ = TouchBottomAnimationStage::STAGE_NONE;
     PlayBlackPointsAnimation(vectorBlackPointCenterX);
     PlayLongPointAnimation(longPointCenterX, gestureState, touchBottomTypeLoop, vectorBlackPointCenterX);
 }
 
 void DotIndicatorModifier::StopAnimation()
 {
+    AnimationOption option;
+    option.SetDuration(0);
+    option.SetCurve(Curves::LINEAR);
+    AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->longPointLeftCenterX_->Set(modifier->longPointLeftCenterX_->Get());
+        modifier->longPointRightCenterX_->Set(modifier->longPointRightCenterX_->Get());
+    });
+
     AnimationUtils::StopAnimation(blackPointsAnimation_);
-    AnimationUtils::StopAnimation(longPointLeftAnimation_);
     longPointLeftAnimEnd_ = true;
-    AnimationUtils::StopAnimation(longPointRightAnimation_);
     longPointRightAnimEnd_ = true;
     ifNeedFinishCallback_ = false;
 }

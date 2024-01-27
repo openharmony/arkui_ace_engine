@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_DATE_PICKER_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_DATE_PICKER_MODIFIER_H
 
-#include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-const ArkUICommonModifier* GetCommonModifier();
+const ArkUIDatePickerModifier* GetDatePickerModifier();
+void SetDatePickerOnDateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+}
 
-void SetOnAppear(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnBlur(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-
-} // namespace OHOS::Ace::NG::NodeModifier
+#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_DATE_PICKER_MODIFIER_H

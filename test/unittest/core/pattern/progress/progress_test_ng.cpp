@@ -123,7 +123,6 @@ constexpr Dimension DEFAULT_RING_DIAMETER = 72.0_vp;
 constexpr Dimension DEFAULT_CAPSULE_WIDTH = 28.0_vp;
 constexpr Dimension TEST_PROGRESS_THICKNESS = 4.0_vp;
 constexpr Dimension TEST_PROGRESS_STROKE_WIDTH = 10.0_vp;
-constexpr Dimension TEST_PROGRESS_DEFAULT_WIDTH = 300.0_vp;
 constexpr Dimension TEST_PROGRESS_DEFAULT_DIAMETER = 72.0_vp;
 constexpr Dimension TEST_PROGRESS_SCALE_WIDTH = 2.0_vp;
 constexpr Dimension DEFAULT_STROKE_WIDTH = 2.0_vp;
@@ -168,7 +167,6 @@ void ProgressTestNg::SetUpTestSuite()
     progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->trackThickness_ = TEST_PROGRESS_THICKNESS;
     progressTheme->scaleLength_ = TEST_PROGRESS_STROKE_WIDTH;
-    progressTheme->trackWidth_ = TEST_PROGRESS_DEFAULT_WIDTH;
     progressTheme->ringDiameter_ = TEST_PROGRESS_DEFAULT_DIAMETER;
     progressTheme->trackBgColor_ = BG_COLOR;
     progressTheme->trackSelectedColor_ = FRONT_COLOR;
@@ -593,7 +591,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
     EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_LINEAR);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), STROKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Height(), STROKE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Width(), TEST_PROGRESS_DEFAULT_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_MAXSIZE_WIDTH);
 
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
     contentConstraint.selfIdealSize.SetHeight(PROGRESS_COMPONENT_HEIGHT);
@@ -667,7 +665,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator002, TestSize.Level1)
     EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_LINEAR);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), LARG_STROKE_WIDTH.ConvertToPx());
     EXPECT_EQ(size->Height(), LARG_STROKE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Width(), TEST_PROGRESS_DEFAULT_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_MAXSIZE_WIDTH);
 
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
     contentConstraint.selfIdealSize.SetHeight(PROGRESS_COMPONENT_HEIGHT);

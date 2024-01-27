@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/node_api.h"
 
 #include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
@@ -25,9 +26,10 @@
 #include "core/interfaces/native/node/node_stack_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
+#include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/interfaces/native/node/node_xcomponent_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
-#include "core/interfaces/native/node/node_text_modifier.h"
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
 
@@ -49,8 +51,8 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetTimepickerModifier,
+    NodeModifier::GetTextpickerModifier,
     nullptr,
     nullptr,
     nullptr,
@@ -87,7 +89,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::GetDatePickerModifier,
     nullptr,
     nullptr,
     nullptr,

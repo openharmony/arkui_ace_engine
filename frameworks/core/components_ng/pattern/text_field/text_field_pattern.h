@@ -86,6 +86,7 @@ enum class DragStatus { DRAGGING, ON_DROP, NONE };
 enum class CaretStatus { SHOW, HIDE, NONE };
 
 enum class InputOperation {
+    INIT,
     INSERT,
     DELETE_BACKWARD,
     DELETE_FORWARD,
@@ -518,6 +519,8 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
+    void InitValueText(std::string content);
+    void InitValueOperation(std::string content);
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
@@ -1409,6 +1412,7 @@ private:
     std::queue<int32_t> deleteBackwardOperations_;
     std::queue<int32_t> deleteForwardOperations_;
     std::queue<std::string> insertValueOperations_;
+    std::queue<std::string> initValueOperations_;
     std::queue<InputOperation> inputOperations_;
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;

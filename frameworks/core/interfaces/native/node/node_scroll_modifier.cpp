@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -260,17 +260,6 @@ void ResetEnableScrollInteraction(ArkUINodeHandle node) {}
 
 void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32* values)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    RefPtr<ScrollControllerBase> scrollControllerBase =  ScrollModelNG::GetOrCreateController(frameNode);
-
-    Dimension xOffset(values[SCROLL_TO_INDEX_0], static_cast<OHOS::Ace::DimensionUnit>(values[SCROLL_TO_INDEX_1]));
-    Dimension yOffset(values[SCROLL_TO_INDEX_2], static_cast<OHOS::Ace::DimensionUnit>(values[SCROLL_TO_INDEX_3]));
-    float duration = values[SCROLL_TO_INDEX_4];
-    RefPtr<Curve> curve = CurvesVector[static_cast<int>(values[SCROLL_TO_INDEX_5])];
-    auto smooth = static_cast<bool>(values[SCROLL_TO_INDEX_6]);
-    auto direction = scrollControllerBase->GetScrollDirection();
-    auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
-    scrollControllerBase->AnimateTo(position, duration, curve, smooth);
 }
 
 void SetScrollEdge(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -291,6 +280,22 @@ void ResetScrollEdge(ArkUINodeHandle node)
 {
     SetScrollEdge(node, DEFAULT_SNAP_ALIGN_VALUE);
 }
+void SetScrollEnablePaging(ArkUINodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    ScrollModelNG::SetEnablePaging(frameNode, value);
+}
+
+void ResetScrollEnablePaging(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    ScrollModelNG::SetEnablePaging(frameNode, false);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -321,8 +326,9 @@ const ArkUIScrollModifier* GetScrollModifier()
         SetScrollTo,
         SetScrollEdge,
         ResetScrollTo,
-        ResetScrollEdge
-
+        ResetScrollEdge,
+        SetScrollEnablePaging,
+        ResetScrollEnablePaging,
     };
     /* clang-format on */
     return &modifier;

@@ -319,6 +319,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != TotalCount()) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
         if (HasIndicatorNode()) {
+            StopIndicatorAnimation();
             auto host = GetHost();
             CHECK_NULL_VOID(host);
             auto indicatorNode = DynamicCast<FrameNode>(

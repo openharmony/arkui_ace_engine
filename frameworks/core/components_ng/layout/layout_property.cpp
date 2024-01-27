@@ -940,6 +940,22 @@ void LayoutProperty::UpdateAlignRules(const std::map<AlignDirection, AlignRule>&
     }
 }
 
+void LayoutProperty::UpdateChainStyle(const ChainInfo& chainInfo)
+{
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
+    if (chainInfo.direction == LineDirection::HORIZONTAL) {
+        if (flexItemProperty_->UpdateHorizontalChainStyle(chainInfo)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    } else {
+        if (flexItemProperty_->UpdateVerticalChainStyle(chainInfo)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+}
+
 void LayoutProperty::UpdateBias(const BiasPair& biasPair)
 {
     if (!flexItemProperty_) {

@@ -274,6 +274,21 @@ var Alignment;
   Alignment[Alignment["BottomEnd"] = 8] = "BottomEnd";
 })(Alignment || (Alignment = {}));
 
+var ChainStyle;
+(function (ChainStyle) {
+  ChainStyle[ChainStyle["SPREAD"] = 0] = "SPREAD";
+  ChainStyle[ChainStyle["SPREAD_INSIDE"] = 1] = "SPREAD_INSIDE";
+  ChainStyle[ChainStyle["PACKED"] = 2] = "PACKED";
+})(ChainStyle || (ChainStyle = {}));
+
+var BarrierDirection;
+(function (BarrierDirection) {
+  BarrierDirection[BarrierDirection["LEFT"] = 0] = "LEFT";
+  BarrierDirection[BarrierDirection["RIGHT"] = 1] = "RIGHT";
+  BarrierDirection[BarrierDirection["TOP"] = 2] = "TOP";
+  BarrierDirection[BarrierDirection["BOTTOM"] = 3] = "BOTTOM";
+})(BarrierDirection || (BarrierDirection = {}));
+
 var BlendMode;
 (function (BlendMode) {
   BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";

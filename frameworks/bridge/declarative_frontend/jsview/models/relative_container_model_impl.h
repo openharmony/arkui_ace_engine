@@ -24,6 +24,8 @@ namespace OHOS::Ace::Framework {
 class ACE_EXPORT RelativeContainerModelImpl : public OHOS::Ace::RelativeContainerModel {
 public:
     void Create() override;
+    void SetBarrier(const std::vector<BarrierInfo>& barrierInfo) override {}
+    void SetGuideline(const std::vector<GuidelineInfo>& guidelineInfo) override {}
 };
 
 } // namespace OHOS::Ace::Framework

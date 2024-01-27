@@ -172,7 +172,7 @@ bool IsNavigationBlurEnabled()
 
 bool IsGridCacheEnabled()
 {
-    return (system::GetParameter("persist.ace.grid.cache.enabled", "0") == "1");
+    return (system::GetParameter("persist.ace.grid.cache.enabled", "1") == "1");
 }
 
 bool IsSideBarContainerBlurEnable()
