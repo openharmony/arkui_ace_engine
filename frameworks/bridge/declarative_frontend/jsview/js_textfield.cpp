@@ -491,6 +491,9 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
     if (!ParseJsString(info[0], inputFilter)) {
         return;
     }
+    if (!CheckRegexValid(inputFilter)) {
+        inputFilter = "";
+    }
     if (info.Length() > 1 && info[1]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(info[1]));
         WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
