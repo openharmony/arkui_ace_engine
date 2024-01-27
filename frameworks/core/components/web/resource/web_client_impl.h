@@ -103,7 +103,9 @@ private:
     int32_t instanceId_ = -1;
 };
 
-class WebClientImpl : public OHOS::NWeb::NWebHandler {
+class WebClientImpl :
+    public std::enable_shared_from_this<WebClientImpl>,
+    public OHOS::NWeb::NWebHandler {
 public:
     WebClientImpl() = default;
     explicit WebClientImpl(int32_t instanceId) : instanceId_(instanceId) {}
