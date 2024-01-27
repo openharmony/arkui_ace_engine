@@ -393,11 +393,11 @@ void PluginFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& task
     }
 }
 
-void PluginFrontend::RunPage(const std::string& url, const std::string& params)
+UIContentErrorCode PluginFrontend::RunPage(const std::string& url, const std::string& params)
 {
     // Not use this pageId from backend, manage it in PluginFrontendDelegate.
-    CHECK_NULL_VOID(delegate_);
-    delegate_->RunPage(url, params);
+    CHECK_NULL_RETURN(delegate_, UIContentErrorCode::NULL_POINTER);
+    return delegate_->RunPage(url, params);
 }
 
 void PluginFrontend::ReplacePage(const std::string& url, const std::string& params)

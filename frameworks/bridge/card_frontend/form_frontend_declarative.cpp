@@ -45,31 +45,33 @@ std::string FormFrontendDeclarative::GetFormSrcPath(const std::string& uri, cons
     return "";
 }
 
-void FormFrontendDeclarative::RunPage(const std::string& url, const std::string& params)
+UIContentErrorCode FormFrontendDeclarative::RunPage(const std::string& url, const std::string& params)
 {
-    RunDynamicPage(url, params, "");
+    return RunDynamicPage(url, params, "");
 }
 
-void FormFrontendDeclarative::RunDynamicPage(
+UIContentErrorCode FormFrontendDeclarative::RunDynamicPage(
     const std::string& url, const std::string& params, const std::string& entryPoint)
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "FormFrontendDeclarative run page url = %{public}s, entryPoint = %{public}s",
         url.c_str(), entryPoint.c_str());
     std::string urlPath = GetFormSrcPath(url, FILE_TYPE_BIN);
     if (urlPath.empty()) {
-        return;
+        return UIContentErrorCode::NULL_URL;
     }
     if (delegate_) {
         auto container = Container::Current();
         if (!container) {
-            return;
+            return UIContentErrorCode::NULL_POINTER;
         }
         container->SetCardFrontend(AceType::WeakClaim(this), cardId_);
         auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
         if (delegate) {
-            delegate->RunCard(urlPath, params, "", cardId_, entryPoint);
+            return delegate->RunCard(urlPath, params, "", cardId_, entryPoint);
         }
     }
+
+    return UIContentErrorCode::NULL_POINTER;
 }
 
 void FormFrontendDeclarative::UpdateData(const std::string& dataList)

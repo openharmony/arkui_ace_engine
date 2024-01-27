@@ -85,7 +85,7 @@ void CardFrontendDeclarative::SetAssetManager(const RefPtr<AssetManager>& assetM
     }
 }
 
-void CardFrontendDeclarative::RunPage(const std::string& url, const std::string& params)
+UIContentErrorCode CardFrontendDeclarative::RunPage(const std::string& url, const std::string& params)
 {
     std::string urlPath;
     if (GetFormSrc().empty()) {
@@ -100,17 +100,19 @@ void CardFrontendDeclarative::RunPage(const std::string& url, const std::string&
         urlPath = GetFormSrcPath(GetFormSrc(), FILE_TYPE_BIN);
     }
     if (urlPath.empty()) {
-        return;
+        return UIContentErrorCode::NULL_URL;
     }
 
     if (delegate_) {
         auto container = Container::Current();
         if (!container) {
-            return;
+            return UIContentErrorCode::NULL_POINTER;
         }
         container->SetCardFrontend(AceType::WeakClaim(this), cardId_);
-        delegate_->RunCard(urlPath, params, "", cardId_);
+        return delegate_->RunCard(urlPath, params, "", cardId_);
     }
+
+    return UIContentErrorCode::NULL_POINTER;
 }
 
 void CardFrontendDeclarative::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)

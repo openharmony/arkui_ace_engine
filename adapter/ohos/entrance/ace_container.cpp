@@ -936,15 +936,15 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
     container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), callback);
 }
 
-void AceContainer::SetViewNew(
+UIContentErrorCode AceContainer::SetViewNew(
     AceView* view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    CHECK_NULL_VOID(view);
+    CHECK_NULL_RETURN(view, UIContentErrorCode::NULL_POINTER);
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
+    CHECK_NULL_RETURN(taskExecutor, UIContentErrorCode::NULL_POINTER);
     AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
     if (container->isFormRender_) {
@@ -954,6 +954,8 @@ void AceContainer::SetViewNew(
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
         container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), nullptr);
     }
+
+    return UIContentErrorCode::NO_ERRORS;
 #endif
 }
 
@@ -979,32 +981,30 @@ OHOS::AppExecFwk::Ability* AceContainer::GetAbility(int32_t instanceId)
     return container->GetAbilityInner().lock().get();
 }
 
-bool AceContainer::RunPage(
+UIContentErrorCode AceContainer::RunPage(
     int32_t instanceId, const std::string& content, const std::string& params, bool isNamedRouter)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, false);
+    CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN(front, false);
+    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
     if (isNamedRouter) {
-        front->RunPageByNamedRouter(content);
-    } else {
-        front->RunPage(content, params);
+        return front->RunPageByNamedRouter(content);
     }
-    return true;
+
+    return front->RunPage(content, params);
 }
 
-bool AceContainer::RunPage(
+UIContentErrorCode AceContainer::RunPage(
     int32_t instanceId, const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, false);
+    CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN(front, false);
-    front->RunPage(content, params);
-    return true;
+    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
+    return front->RunPage(content, params);
 }
 
 bool AceContainer::RunDynamicPage(
@@ -1677,13 +1677,14 @@ void AceContainer::SetDialogCallback(int32_t instanceId, FrontendDialogCallback 
     }
 }
 
-std::string AceContainer::RestoreRouterStack(int32_t instanceId, const std::string& contentInfo)
+std::pair<std::string, UIContentErrorCode> AceContainer::RestoreRouterStack(
+    int32_t instanceId, const std::string& contentInfo)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, "");
+    CHECK_NULL_RETURN(container, std::make_pair("", UIContentErrorCode::NULL_POINTER));
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN(front, "");
+    CHECK_NULL_RETURN(front, std::make_pair("", UIContentErrorCode::NULL_POINTER));
     return front->RestoreRouterStack(contentInfo);
 }
 

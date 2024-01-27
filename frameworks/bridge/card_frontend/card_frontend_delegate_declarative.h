@@ -40,7 +40,8 @@ public:
     {}
     ~CardFrontendDelegateDeclarative() override;
 
-    void RunCard(const std::string& url, const std::string& params, const std::string& profile, int64_t cardId);
+    UIContentErrorCode RunCard(
+        const std::string& url, const std::string& params, const std::string& profile, int64_t cardId);
 
     void FireCardEvent(const EventMarker& eventMarker, const std::string& params = "");
 

@@ -55,10 +55,11 @@ public:
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
-    void RunPage(const std::string& url, const std::string& params) override;
-    void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content,  const std::string& params) override;
-    
-    void RunPageByNamedRouter(const std::string& name) override;
+    UIContentErrorCode RunPage(const std::string& url, const std::string& params) override;
+    UIContentErrorCode RunPage(
+        const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params) override;
+
+    UIContentErrorCode RunPageByNamedRouter(const std::string& name) override;
 
     void ReplacePage(const std::string& url, const std::string& params) override;
 
@@ -171,7 +172,7 @@ public:
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) override;
 
     // distribute
-    std::string RestoreRouterStack(const std::string& contentInfo) override;
+    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo) override;
     std::string GetContentInfo() const override;
     int32_t GetRouterSize() const override;
 

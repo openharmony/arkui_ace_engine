@@ -51,10 +51,11 @@ public:
     }
 
     // UI content lifeCycles
-    void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
-    void Initialize(OHOS::Rosen::Window* window,
-        const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
-    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
+    UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    UIContentErrorCode Initialize(
+        OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
+    UIContentErrorCode InitializeByName(
+        OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
     void InitializeDynamic(
         const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint) override;
     void Initialize(
@@ -67,7 +68,8 @@ public:
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
     // distribute
-    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override;
+    UIContentErrorCode Restore(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override;
     std::string GetContentInfo() const override;
     void DestroyUIDirector() override;
 
@@ -251,10 +253,12 @@ public:
     SerializedGesture GetFormSerializedGesture() override;
 
 private:
-    void InitializeInner(
+    UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
-    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
-    void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
+    UIContentErrorCode CommonInitialize(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
+    UIContentErrorCode CommonInitializeForm(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);

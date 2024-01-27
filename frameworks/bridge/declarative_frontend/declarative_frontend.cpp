@@ -573,14 +573,14 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     }
 }
 
-void DeclarativeFrontend::RunPage(const std::string& url, const std::string& params)
+UIContentErrorCode DeclarativeFrontend::RunPage(const std::string& url, const std::string& params)
 {
     auto container = Container::Current();
     auto isStageModel = container ? container->IsUseStageModel() : false;
     if (!isStageModel && Container::IsCurrentUseNewPipeline()) {
         // In NG structure and fa mode, first load app.js
         auto taskExecutor = container ? container->GetTaskExecutor() : nullptr;
-        CHECK_NULL_VOID(taskExecutor);
+        CHECK_NULL_RETURN(taskExecutor, UIContentErrorCode::NULL_POINTER);
         taskExecutor->PostTask(
             [weak = AceType::WeakClaim(this)]() {
                 auto frontend = weak.Upgrade();
@@ -594,32 +594,41 @@ void DeclarativeFrontend::RunPage(const std::string& url, const std::string& par
     if (delegate_) {
         if (isFormRender_) {
             auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
-            delegate->RunCard(url, params, pageProfile_, 0);
+            return delegate->RunCard(url, params, pageProfile_, 0);
         } else {
             delegate_->RunPage(url, params, pageProfile_);
+            return UIContentErrorCode::NO_ERRORS;
         }
     }
+
+    return UIContentErrorCode::NULL_POINTER;
 }
 
-void DeclarativeFrontend::RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+UIContentErrorCode DeclarativeFrontend::RunPage(
+    const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
 {
     auto container = Container::Current();
     auto isStageModel = container ? container->IsUseStageModel() : false;
     if (!isStageModel) {
         LOGE("RunPage by buffer must be run under stage model.");
-        return;
+        return UIContentErrorCode::NO_STAGE;
     }
 
     if (delegate_) {
         delegate_->RunPage(content, params, pageProfile_);
+        return UIContentErrorCode::NO_ERRORS;
     }
+
+    return UIContentErrorCode::NULL_POINTER;
 }
 
-void DeclarativeFrontend::RunPageByNamedRouter(const std::string& name)
+UIContentErrorCode DeclarativeFrontend::RunPageByNamedRouter(const std::string& name)
 {
     if (delegate_) {
-        delegate_->RunPage(name, "", pageProfile_, true);
+        return delegate_->RunPage(name, "", pageProfile_, true);
     }
+
+    return UIContentErrorCode::NULL_POINTER;
 }
 
 void DeclarativeFrontend::ReplacePage(const std::string& url, const std::string& params)
@@ -691,12 +700,12 @@ RefPtr<NG::PageRouterManager> DeclarativeFrontend::GetPageRouterManager() const
     return delegate_->GetPageRouterManager();
 }
 
-std::string DeclarativeFrontend::RestoreRouterStack(const std::string& contentInfo)
+std::pair<std::string, UIContentErrorCode> DeclarativeFrontend::RestoreRouterStack(const std::string& contentInfo)
 {
     if (delegate_) {
         return delegate_->RestoreRouterStack(contentInfo);
     }
-    return "";
+    return std::make_pair("", UIContentErrorCode::NULL_POINTER);
 }
 
 std::string DeclarativeFrontend::GetContentInfo() const

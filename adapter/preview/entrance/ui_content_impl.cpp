@@ -224,10 +224,14 @@ void UIContentImpl::DestroyCallback() const
     pipelineContext->SetNextFrameLayoutCallback(nullptr);
 }
 
-void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
+UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url,
+    napi_value storage)
 {
-    CommonInitialize(window, url, storage);
-    AceContainer::RunPage(instanceId_, url, "");
+    auto errorCode = UIContentErrorCode::NO_ERRORS;
+    errorCode = CommonInitialize(window, url, storage);
+    CHECK_ERROR_CODE_RETURN(errorCode);
+    errorCode = AceContainer::RunPage(instanceId_, url, "");
+    return errorCode;
 }
 
 std::string UIContentImpl::GetContentInfo() const
@@ -235,7 +239,8 @@ std::string UIContentImpl::GetContentInfo() const
     return AceContainer::GetContentInfo(instanceId_);
 }
 
-void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
+UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
+    const std::string& contentInfo, napi_value storage)
 {
     static std::once_flag onceFlag;
     std::call_once(onceFlag, []() {
@@ -259,7 +264,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     LOGI("CreateContainer with JSDECLARATIVE frontend, set MinPlatformVersion to %{public}d", compatibleVersion_);
     AceContainer::CreateContainer(instanceId_, FrontendType::DECLARATIVE_JS, useNewPipeline_);
     auto container = AceContainer::GetContainerInstance(instanceId_);
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetContainerSdkPath(containerSdkPath_);
     container->SetIsFRSCardContainer(false);
     container->SetBundleName(bundleName_);
@@ -329,6 +334,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
     view->NotifySurfaceChanged(deviceWidth_, deviceHeight_);
     view->NotifyDensityChanged(deviceConfig_.density);
+    return UIContentErrorCode::NO_ERRORS;
 }
 
 void UIContentImpl::Destroy()

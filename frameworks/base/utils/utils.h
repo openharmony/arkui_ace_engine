@@ -36,6 +36,13 @@
         }                                 \
     } while (0)                           \
 
+#define CHECK_ERROR_CODE_RETURN(code) \
+    do {                                  \
+        if ((code) > 0) {                     \
+            return code;                   \
+        }                                 \
+    } while (0)                           \
+
 #define PRIMITIVE_CAT(x, y) x##y
 #define CAT(x, y) PRIMITIVE_CAT(x, y)
 

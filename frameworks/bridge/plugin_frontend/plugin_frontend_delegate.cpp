@@ -126,7 +126,7 @@ int32_t PluginFrontendDelegate::GetMinPlatformVersion()
     return manifestParser_->GetMinPlatformVersion();
 }
 
-void PluginFrontendDelegate::RunPage(const std::string& url, const std::string& params)
+UIContentErrorCode PluginFrontendDelegate::RunPage(const std::string& url, const std::string& params)
 {
     ACE_SCOPED_TRACE("PluginFrontendDelegate::RunPage");
     std::string jsonContent;
@@ -143,7 +143,7 @@ void PluginFrontendDelegate::RunPage(const std::string& url, const std::string& 
     } else {
         mainPagePath_ = manifestParser_->GetRouter()->GetEntry();
     }
-    LoadPage(GenerateNextPageId(), PageTarget(mainPagePath_), false, params);
+    return LoadPage(GenerateNextPageId(), PageTarget(mainPagePath_), false, params);
 }
 
 void PluginFrontendDelegate::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
@@ -1072,7 +1072,7 @@ std::string PluginFrontendDelegate::GetAssetPath(const std::string& url)
     return GetAssetPathImpl(assetManager_, url);
 }
 
-void PluginFrontendDelegate::LoadPage(
+UIContentErrorCode PluginFrontendDelegate::LoadPage(
     int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params)
 {
     {
@@ -1084,12 +1084,12 @@ void PluginFrontendDelegate::LoadPage(
     if (pageId == INVALID_PAGE_ID) {
         LOGE("PluginFrontendDelegate, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, url);
-        return;
+        return UIContentErrorCode::INVALID_PAGE_ID;
     }
     if (isStagingPageExist_) {
         LOGE("PluginFrontendDelegate, load page failed, waiting for current page loading finish.");
         RecyclePageId(pageId);
-        return;
+        return UIContentErrorCode::STAGING_PAGE_EXIST;
     }
     isStagingPageExist_ = true;
     auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
@@ -1103,6 +1103,7 @@ void PluginFrontendDelegate::LoadPage(
         }
     });
     LoadJS(page, url, isMainPage);
+    return UIContentErrorCode::NO_ERRORS;
 }
 
 void PluginFrontendDelegate::LoadJS(

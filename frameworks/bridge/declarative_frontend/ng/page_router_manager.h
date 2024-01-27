@@ -28,6 +28,7 @@
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
 #include "core/components_ng/base/frame_node.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
+#include "interfaces/inner_api/ace/constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -66,8 +67,8 @@ public:
     void RunPage(const std::string& url, const std::string& params);
     void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params);
     void RunPageByNamedRouter(const std::string& name, const std::string& params);
-    void RunCard(const std::string& url, const std::string& params, int64_t cardId,
-        const std::string& entryPoint = "");
+    UIContentErrorCode RunCard(
+        const std::string& url, const std::string& params, int64_t cardId, const std::string& entryPoint = "");
 
     void SetManifestParser(const RefPtr<Framework::ManifestParser>& manifestParser)
     {
@@ -145,7 +146,7 @@ public:
 
     std::unique_ptr<JsonValue> GetStackInfo();
 
-    std::string RestoreRouterStack(std::unique_ptr<JsonValue> stackInfo);
+    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(std::unique_ptr<JsonValue> stackInfo);
 
 private:
     class RouterOptScope {
@@ -193,7 +194,7 @@ private:
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
 
-    void LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, int64_t cardId,
+    UIContentErrorCode LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, int64_t cardId,
         bool isRestore = false, bool needHideLast = true, const std::string& entryPoint = "");
 
     RefPtr<Framework::ManifestParser> manifestParser_;

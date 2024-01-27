@@ -43,8 +43,9 @@ public:
     void UpdatePageData(const std::string& dataList);
     void OnMediaFeatureUpdate();
 
-    void RunPage(const std::string& url, const std::string& params) override;
-    void RunDynamicPage(const std::string& url, const std::string& params, const std::string& entryPoint) override;
+    UIContentErrorCode RunPage(const std::string& url, const std::string& params) override;
+    UIContentErrorCode RunDynamicPage(
+        const std::string& url, const std::string& params, const std::string& entryPoint) override;
 
     void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) override;

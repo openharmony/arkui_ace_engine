@@ -41,9 +41,9 @@ public:
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
     void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
     // distribute
-    std::string RestoreRouterStack(const std::string& contentInfo) override
+    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo) override
     {
-        return "";
+        return std::make_pair("", UIContentErrorCode::NO_ERRORS);
     }
     std::string GetContentInfo() override;
     // JSFrontend delegate NG functions.

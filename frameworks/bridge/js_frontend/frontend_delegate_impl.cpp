@@ -123,7 +123,7 @@ void FrontendDelegateImpl::ParseManifest()
     });
 }
 
-void FrontendDelegateImpl::RunPage(const std::string& url, const std::string& params)
+UIContentErrorCode FrontendDelegateImpl::RunPage(const std::string& url, const std::string& params)
 {
     ACE_SCOPED_TRACE("FrontendDelegateImpl::RunPage");
 
@@ -167,7 +167,7 @@ void FrontendDelegateImpl::RunPage(const std::string& url, const std::string& pa
     } else {
         mainPagePath_ = manifestParser_->GetRouter()->GetEntry();
     }
-    LoadPage(GenerateNextPageId(), mainPagePath_, true, params);
+    return LoadPage(GenerateNextPageId(), mainPagePath_, true, params);
 }
 
 void FrontendDelegateImpl::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
@@ -1168,7 +1168,8 @@ std::string FrontendDelegateImpl::GetAssetPath(const std::string& url)
     return GetAssetPathImpl(assetManager_, url);
 }
 
-void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool isMainPage, const std::string& params)
+UIContentErrorCode FrontendDelegateImpl::LoadPage(
+    int32_t pageId, const std::string& url, bool isMainPage, const std::string& params)
 {
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -1178,12 +1179,12 @@ void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool
     if (pageId == INVALID_PAGE_ID) {
         LOGE("FrontendDelegateImpl, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, url);
-        return;
+        return UIContentErrorCode::INVALID_PAGE_ID;
     }
     if (isStagingPageExist_) {
         LOGE("FrontendDelegateImpl, load page failed, waiting for current page loading finish.");
         RecyclePageId(pageId);
-        return;
+        return UIContentErrorCode::STAGING_PAGE_EXIST;
     }
     isStagingPageExist_ = true;
     auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
@@ -1229,6 +1230,8 @@ void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool
                 TaskExecutor::TaskType::UI);
         },
         TaskExecutor::TaskType::JS);
+
+    return UIContentErrorCode::NO_ERRORS;
 }
 
 void FrontendDelegateImpl::OnSurfaceChanged()
