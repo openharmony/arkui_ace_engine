@@ -375,7 +375,8 @@ void DatePickerColumnPattern::FlushCurrentOptions(
             textNode->MarkDirtyNode();
             continue;
         }
-        auto optionValue = datePickerPattern->GetAllOptions(host)[optionIndex];
+        auto date = datePickerPattern->GetAllOptions(host)[optionIndex];
+        auto optionValue = DatePickerPattern::GetFormatString(date);
         textLayoutProperty->UpdateContent(optionValue);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textNode->MarkModifyDone();
