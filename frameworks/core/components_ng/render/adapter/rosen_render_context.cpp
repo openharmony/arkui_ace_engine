@@ -176,7 +176,7 @@ std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(
     auto saturation = (blurParam->saturation - 1) * ratio + 1.0;
     auto brightness = (blurParam->brightness - 1) * ratio + 1.0;
     return Rosen::RSFilter::CreateMaterialFilter(radiusBlur, saturation, brightness, maskColor.GetValue(),
-        static_cast<Rosen::BLUR_COLOR_MODE>(blurStyleOption.colorMode));
+        static_cast<Rosen::BLUR_COLOR_MODE>(blurStyleOption.adaptiveColor));
 }
 
 RSPen GetRsPen(uint32_t strokeColor, float strokeWidth)
@@ -4107,7 +4107,7 @@ void RosenRenderContext::DumpInfo()
                 std::string("Alpha:").append(std::to_string(rsNode_->GetStagingProperties().GetAlpha())));
         }
         auto translate = rsNode_->GetStagingProperties().GetTranslate();
-        if (!(NearZero(translate[0]) && NearZero(translate[0]))) {
+        if (!(NearZero(translate[0]) && NearZero(translate[1]))) {
             DumpLog::GetInstance().AddDesc(
                 std::string("translate(x,y): ")
                     .append(std::to_string(translate[0]).append(",").append(std::to_string(translate[1]))));
