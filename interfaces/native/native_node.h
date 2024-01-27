@@ -1268,7 +1268,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_AttributeItem item = { .string = "5,10;60;180;60;0xFFFFFFFF,0xFFFFF000,0xFFFFFFFF,0xFFFFF000;true" };
+     * ArkUI_AttributeItem item = { .string = "5,10;60;180;60;#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;true" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SWEEP_GRADIENT, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWEEP_GRADIENT);
      * auto nodeCustomShadow = item->string;
@@ -1296,7 +1296,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_AttributeItem item = { .string = "5,10;50;0xFFFFFFFF,0xFFFFF000,0xFFFFFFFF,0xFFFFF000;true" };
+     * ArkUI_AttributeItem item = { .string = "5,10;50;#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;true" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_RADIAL_GRADIENT, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_RADIAL_GRADIENT);
      * auto nodeCustomShadow = item->string;
@@ -1305,7 +1305,7 @@ typedef enum {
      */
     NODE_RADIAL_GRADIENT,
     /**
-     * @brief 组件上加上指定形状的遮罩，支持属性设置，属性重置和属性获取接口。
+     * @brief 组件上加上指定形状的遮罩，支持属性设置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
      * .string:形状描述，可选： \n

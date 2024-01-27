@@ -983,20 +983,6 @@ typedef enum {
 } ArkUI_ColoringStrategy;
 
 /**
- * @brief 定义水平方向对齐方式。
- *
- * @since 12
- */
-typedef enum {
-    /** 按照语言方向起始端对齐。 */
-    ARKUI_HORIZONTAL_ALIGN_START = 0,
-    /** 居中对齐，默认对齐方式。 */
-    ARKUI_HORIZONTAL_ALIGN_CENTER,
-    /** 按照语言方向末端对齐。 */
-    ARKUI_HORIZONTAL_ALIGN_END,
-} ArkUI_HorizontalAlign;
-
-/**
  * @brief 定义垂直方向对齐方式。
  *
  * @since 12

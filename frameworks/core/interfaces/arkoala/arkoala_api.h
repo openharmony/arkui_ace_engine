@@ -922,9 +922,9 @@ struct ArkUICommonModifier {
     void (*resetKeyBoardShortCut)(ArkUINodeHandle node);
 
     void (*setClip)(ArkUINodeHandle node, ArkUI_Int32 isClip);
-    void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_Int32 length);
-    void (*setClipPath)(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute,
-        ArkUI_CharPtr commands);
+    void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr type,const ArkUI_Float32* attribute, ArkUI_Int32 length);
+    void (*setClipPath)(ArkUINodeHandle node, ArkUI_CharPtr type,const ArkUI_Float32* attribute, ArkUI_CharPtr commands);
+    void (*resetClip)(ArkUINodeHandle node);
     void (*setTransitionCenter)(ArkUINodeHandle node, ArkUI_Float32 centerX, ArkUI_Int32 centerXUnit,
         ArkUI_Float32 centerY, ArkUI_Int32 centerYUnit, ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit);
     void (*setOpacityTransition)(
@@ -935,6 +935,12 @@ struct ArkUICommonModifier {
         const ArkUIAnimationOptionType* opacityOption);
     void (*setTranslateTransition)(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue,
         ArkUI_Int32 yUnit, ArkUI_Float32 zValue, ArkUI_Int32 zUnit, const ArkUIAnimationOptionType* opacityOption);
+    void (*setBlendMode)(ArkUINodeHandle node, ArkUI_Int32 blendMode);
+    void (*resetBlendMode)(ArkUINodeHandle node);
+    void (*setConstraintSize)(ArkUINodeHandle node, const ArkUI_Float64* values, const ArkUI_Int32* units);
+    void (*resetConstraintSize)(ArkUINodeHandle node);
+    void (*setMaskShape)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Float64* attribute, ArkUI_Int32 length);
+    void (*setMaskPath)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Float64* attribute, ArkUI_CharPtr commands);
 };
 
 struct ArkUICommonShapeModifier {
