@@ -105,6 +105,7 @@ public:
     virtual bool IsFocused() = 0;
     virtual void RequestFocus() = 0;
     virtual void ResizeWindowForFoldStatus() = 0;
+    virtual void ResizeWindowForFoldStatus(int32_t parentContainerId) = 0;
 private:
     int32_t subwindowId_ = 0;
     bool isAboveApps_ = false;

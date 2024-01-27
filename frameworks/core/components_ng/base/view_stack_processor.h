@@ -44,6 +44,22 @@
         }                                                                       \
     } while (false)
 
+#define ACE_GET_NODE_LAYOUT_PROPERTY(target, name, value, frameNode)            \
+    do {                                                                        \
+        auto cast##target = frameNode->GetLayoutProperty<target>();             \
+        if (cast##target) {                                                     \
+            value = cast##target->Get##name##Value();                           \
+        }                                                                       \
+    } while (false)
+
+#define ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(target, name, value, frameNode, defaultValue)   \
+    do {                                                                                                \
+        auto cast##target = frameNode->GetLayoutProperty<target>();                                     \
+        if (cast##target) {                                                                             \
+            value = cast##target->Get##name##Value(defaultValue);                                       \
+        }                                                                                               \
+    } while (false)
+
 #define ACE_UPDATE_PAINT_PROPERTY(target, name, value)                          \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
@@ -56,6 +72,22 @@
         if (cast##target) {                                                     \
             cast##target->Update##name(value);                                  \
         }                                                                       \
+    } while (false)
+
+#define ACE_GET_NODE_PAINT_PROPERTY(target, name, value, frameNode)             \
+    do {                                                                        \
+        auto cast##target = frameNode->GetPaintProperty<target>();              \
+        if (cast##target) {                                                     \
+            value = cast##target->Get##name##Value();                           \
+        }                                                                       \
+    } while (false)
+
+#define ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(target, name, value, frameNode, defaultValue) \
+    do {                                                                                             \
+        auto cast##target = frameNode->GetPaintProperty<target>();                                   \
+        if (cast##target) {                                                                          \
+            value = cast##target->Get##name##Value(defaultValue);                                    \
+        }                                                                                            \
     } while (false)
 
 #define ACE_UPDATE_RENDER_CONTEXT(name, value)                                  \

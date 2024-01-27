@@ -190,20 +190,27 @@ void ToastPattern::OnColorConfigurationUpdate()
 
 void ToastPattern::OnAttachToFrameNode()
 {
-    auto pipeline = PipelineContext::GetMainPipelineContext();
+    auto containerId = Container::CurrentId();
+    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+    auto pipeline =
+        parentContainerId < 0 ? PipelineContext::GetCurrentContext() : PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
-    auto callbackId = pipeline->RegisterFoldDisplayModeChangedCallback([](FoldDisplayMode foldDisplayMode) {
-        if (foldDisplayMode == FoldDisplayMode::FULL || foldDisplayMode == FoldDisplayMode::MAIN) {
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Window status changes, displayMode is %{public}d", foldDisplayMode);
-            SubwindowManager::GetInstance()->ResizeWindowForFoldStatus();
-        }
-    });
+    auto callbackId =
+        pipeline->RegisterFoldDisplayModeChangedCallback([parentContainerId](FoldDisplayMode foldDisplayMode) {
+            if (foldDisplayMode == FoldDisplayMode::FULL || foldDisplayMode == FoldDisplayMode::MAIN) {
+                TAG_LOGI(AceLogTag::ACE_OVERLAY, "Window status changes, displayMode is %{public}d", foldDisplayMode);
+                SubwindowManager::GetInstance()->ResizeWindowForFoldStatus(parentContainerId);
+            }
+        });
     UpdateFoldDisplayModeChangedCallbackId(callbackId);
 }
 
 void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto pipeline = PipelineContext::GetMainPipelineContext();
+    auto containerId = Container::CurrentId();
+    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+    auto pipeline =
+        parentContainerId < 0 ? PipelineContext::GetCurrentContext() : PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));

@@ -431,6 +431,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSCounter::JSBind(globalObj);
     JSCalendarPicker::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
+    JSRichEditor::JSBind(globalObj);
+    JSRichEditorController::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
@@ -592,8 +594,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSLocationButton::JSBind(globalObj);
     JSPasteButton::JSBind(globalObj);
     JSProfiler::JSBind(globalObj);
-    JSRichEditor::JSBind(globalObj);
-    JSRichEditorController::JSBind(globalObj);
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
     JSSaveButton::JSBind(globalObj);

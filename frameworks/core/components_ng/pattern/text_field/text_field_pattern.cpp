@@ -669,7 +669,7 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(context);
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
-    needToRequestKeyboardInner_ = !isLongPress_ && (dragRecipientStatus_!= DragStatus::DRAGGING);
+    needToRequestKeyboardInner_ = !isLongPress_ && (dragRecipientStatus_ != DragStatus::DRAGGING);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2489,6 +2489,8 @@ void TextFieldPattern::StartRequestSelectOverlay(const ShowSelectOverlayParams& 
     }
     overlayInfo.isShowPaste = isShowPaste;
     overlayInfo.isMenuShow = params.isShowMenu;
+    overlayInfo.isNewAvoid = true;
+    overlayInfo.selectArea = GetSelectArea();
     RequestOpenSelectOverlay(overlayInfo);
     auto start = GetTextSelectController()->GetStartIndex();
     auto end = GetTextSelectController()->GetEndIndex();
@@ -2721,6 +2723,7 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFi
         handleInfo.paintRect.SetWidth(selectController_->GetCaretRect().Width());
         proxy->UpdateSecondSelectHandleInfo(handleInfo);
     }
+    UpdateOverlaySelectArea();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -4150,7 +4153,11 @@ void TextFieldPattern::OnAreaChangedInner()
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
         selectController_->CalculateHandleOffset();
         if (SelectOverlayIsOn()) {
-            ProcessOverlay(false);
+            if (IsUsingMouse()) {
+                CloseSelectOverlay();
+            } else {
+                ProcessOverlay(false);
+            }
         }
     }
     RequestKeyboardOnFocus();
@@ -4395,8 +4402,12 @@ void TextFieldPattern::HandleSelectionUp()
         UpdateSelection(selectController_->GetCaretIndex());
     }
     auto newOffsetY = selectController_->GetCaretRect().GetY() - PreferredLineHeight() * 0.5 - textRect_.GetY();
-    selectController_->MoveSecondHandleByKeyBoard(static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(
-        Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY))));
+    if (GreatOrEqual(newOffsetY, 0.0)) {
+        selectController_->MoveSecondHandleByKeyBoard(paragraph_->GetGlyphIndexByCoordinate(
+            Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY)));
+    } else {
+        selectController_->MoveSecondHandleByKeyBoard(0);
+    }
     AfterSelection();
 }
 
@@ -4409,8 +4420,12 @@ void TextFieldPattern::HandleSelectionDown()
         UpdateSelection(selectController_->GetCaretIndex());
     }
     auto newOffsetY = selectController_->GetCaretRect().GetY() + PreferredLineHeight() * 1.5 - textRect_.GetY();
-    selectController_->MoveSecondHandleByKeyBoard(static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(
-        Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY))));
+    if (LessOrEqual(newOffsetY, textRect_.Height())) {
+        selectController_->MoveSecondHandleByKeyBoard(paragraph_->GetGlyphIndexByCoordinate(
+            Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY)));
+    } else {
+        selectController_->MoveSecondHandleByKeyBoard(static_cast<int32_t>(contentController_->GetWideText().length()));
+    }
     AfterSelection();
 }
 
@@ -6084,6 +6099,7 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
             selectController_->UpdateCaretOffset(carectOffset);
             UpdateSelectOverlaySecondHandle();
         }
+        UpdateOverlaySelectArea();
     } else {
         auto caretOffset = selectController_->GetCaretRect().GetOffset() +
                            (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
@@ -6567,5 +6583,35 @@ void TextFieldPattern::UpdatePasswordModeState()
 void TextFieldPattern::FireSelectEvent()
 {
     selectController_->FireSelectEvent();
+}
+
+RectF TextFieldPattern::GetSelectArea()
+{
+    auto selectRects = selectController_->GetSelectedRects();
+    if (selectRects.empty()) {
+        return { 0, 0, 0, 0 };
+    }
+    auto frontRect = selectRects.front();
+    auto backRect = selectRects.back();
+    RectF res;
+    if (GreatNotEqual(backRect.Bottom(), frontRect.Bottom())) {
+        res.SetRect(contentRect_.GetX() + GetTextPaintOffset().GetX(),
+            frontRect.GetY() + textRect_.GetY() + GetTextPaintOffset().GetY(), contentRect_.Width(),
+            backRect.Bottom() - frontRect.Top());
+    } else {
+        res.SetRect(frontRect.GetX() + textRect_.GetX() + GetTextPaintOffset().GetX(),
+            frontRect.GetY() + textRect_.GetY() + GetTextPaintOffset().GetY(), backRect.Right() - frontRect.Left(),
+            backRect.Bottom() - frontRect.Top());
+    }
+    auto contentRect = contentRect_;
+    contentRect.SetOffset(contentRect.GetOffset() + GetTextPaintOffset());
+    return res.IntersectRectT(contentRect);
+}
+
+void TextFieldPattern::UpdateOverlaySelectArea()
+{
+    auto proxy = GetSelectOverlayProxy();
+    CHECK_NULL_VOID(proxy);
+    proxy->UpdateSelectArea(GetSelectArea());
 }
 } // namespace OHOS::Ace::NG

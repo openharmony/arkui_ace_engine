@@ -557,13 +557,13 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 if (needSetInvisible) {
                     if (!isNavBar) {
                         preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                        preNode->SetActive(false);
+                        preNode->SetJSViewActive(false);
                     } else {
                         // navigation mode could be transformed to split mode in the process of animation and
                         // navBar will be invisible only under the stack mode
                         if (navigation->GetNavigationMode() == NavigationMode::STACK) {
                             preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                            preNode->SetActive(false);
+                            preNode->SetJSViewActive(false);
                             navigation->NotifyPageHide();
                         }
                     }
@@ -817,7 +817,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
         // process shallow builder
         navDestination->ProcessShallowBuilder();
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);
-        navDestination->SetActive(true);
+        navDestination->SetJSViewActive(true);
         navDestination->GetEventHub<EventHub>()->SetEnabledInternal(true);
         // for the navDestination at the top, FireChangeEvent
         eventHub->FireChangeEvent(true);
@@ -839,7 +839,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
                 NavigationPattern::FireNavigationStateChange(navDestination, false);
             }
             navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-            navDestination->SetActive(false);
+            navDestination->SetJSViewActive(false);
         }
         return false;
     }
@@ -847,7 +847,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild &&
         !navDestination->IsOnAnimation()) {
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-        navDestination->SetActive(true);
+        navDestination->SetJSViewActive(true);
     }
     return false;
 }

@@ -1213,15 +1213,15 @@ typedef enum {
      * .string 遮罩文本；\n
      * .value[0]?.i32：可选值，浮层相对于组件的位置，参数类型{@link ArkUI_Alignment}，
      *  默认值为ARKUI_ALIGNMENT_TOP_START。 \n
-     * .value[1]?.i32：可选值，浮层基于自身左上角的偏移量X，单位为vp。 \n
-     * .value[2]?.i32：可选值，浮层基于自身左上角的偏移量Y，单位为vp。
+     * .value[1]?.f32：可选值，浮层基于自身左上角的偏移量X，单位为vp。 \n
+     * .value[2]?.f32：可选值，浮层基于自身左上角的偏移量Y，单位为vp。
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
      * .string 遮罩文本； \n
      * .value[0]?.i32：可选值，浮层相对于组件的位置，参数类型{@link ArkUI_Alignment}，
      *  默认值为ARKUI_ALIGNMENT_TOP_START。 \n
-     * .value[1]?.i32：可选值，浮层基于自身左上角的偏移量X，单位为vp。 \n
-     * .value[2]?.i32：可选值，浮层基于自身左上角的偏移量Y，单位为vp。
+     * .value[1]?.f32：可选值，浮层基于自身左上角的偏移量X，单位为vp。 \n
+     * .value[2]?.f32：可选值，浮层基于自身左上角的偏移量Y，单位为vp。
      * 
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =

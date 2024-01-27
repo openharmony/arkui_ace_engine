@@ -118,6 +118,9 @@ void JsSaveButtonClickFunction::Execute(GestureEvent& info)
     auto secEventValue = info.GetSecCompHandleEvent();
     if (secEventValue != nullptr) {
         res = secEventValue->GetInt("handleRes", res);
+        if (res == static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK)) {
+            return;
+        }
     }
 #endif
     JSRef<JSVal> errorParam = JSRef<JSVal>::Make(ToJSValue(res));

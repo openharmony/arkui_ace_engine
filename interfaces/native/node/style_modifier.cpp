@@ -153,6 +153,19 @@ const std::vector<std::string> STROKE_LINE_JOIN = { "bevel", "miter", "round" };
 typedef std::map<const std::string, ArkUI_Int32> AttrStringToIntMap;
 constexpr int32_t TWO = 2;
 constexpr float HUNDRED = 100.0f;
+constexpr int32_t MAX_ATTRIBUTE_ITEM_LEN = 12;
+ArkUI_NumberValue g_numberValues[MAX_ATTRIBUTE_ITEM_LEN] = { 0 };
+ArkUI_AttributeItem g_attributeItem = { g_numberValues, MAX_ATTRIBUTE_ITEM_LEN, nullptr, nullptr };
+
+void ResetAttributeItem()
+{
+    for (int i = 0; i < MAX_ATTRIBUTE_ITEM_LEN; ++i) {
+        g_numberValues[i].i32 = 0;
+    }
+    g_attributeItem.size = 0;
+    g_attributeItem.string = nullptr;
+    g_attributeItem.object = nullptr;
+}
 
 uint32_t StringToColorInt(const char* string, uint32_t defaultValue = 0)
 {
@@ -290,7 +303,7 @@ int32_t SetBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     }
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundColor(node->uiNodeHandle, item->value[0].i32);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundColor(node->uiNodeHandle, item->value[0].u32);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -932,10 +945,9 @@ int32_t SetOverlay(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "SetOverlay:%{public}s", item->string);
     auto* fullImpl = GetFullImpl();
 
-    ArkUI_Float32 values[ALLOW_SIZE_10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1 };
+    ArkUI_Float32 values[ALLOW_SIZE_10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
     if (item->size > 0) {
         values[0] = 1;
@@ -944,13 +956,13 @@ int32_t SetOverlay(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 
     if (item->size > 1) {
         values[2] = 1;
-        values[3] = item->value[1].i32;
+        values[3] = item->value[1].f32;
         values[4] = UNIT_VP;
     }
 
     if (item->size > 2) {
         values[5] = 1;
-        values[6] = item->value[2].i32;
+        values[6] = item->value[2].f32;
         values[7] = UNIT_VP;
     }
     values[8] = item->size > 0 ? 1 : 0;
@@ -1455,8 +1467,9 @@ int32_t SetScrollTo(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size < 2) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "SetScrollTo:%{public}d", item->size);
     auto* fullImpl = GetFullImpl();
-    ArkUI_Float32 values[ALLOW_SIZE_7] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    ArkUI_Float32 values[ALLOW_SIZE_7] = { 0.0, UNIT_VP, 0.0, UNIT_VP, DEFAULT_DURATION, 1, 0.0 };
     values[0] = item->value[0].f32;
     values[1] = UNIT_VP;
     values[2] = item->value[1].f32;
@@ -1802,13 +1815,70 @@ void SetLoadingProgressColor(ArkUI_NodeHandle node, const char* value)
     fullImpl->getNodeModifiers()->getLoadingProgressModifier()->setColor(node->uiNodeHandle, StringToColorInt(value));
 }
 
-void SetLoadingProgressEnableLoading(ArkUI_NodeHandle node, const char* value)
+const ArkUI_AttributeItem* GetLoadingProgressColor(ArkUI_NodeHandle node)
+{
+    auto modifier = GetFullImpl()->getNodeModifiers()->getLoadingProgressModifier();
+
+    g_numberValues[0].u32 = modifier->getColor(node->uiNodeHandle);
+    return &g_attributeItem;
+}
+
+int32_t SetLoadingProgressColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     // already check in entry point.
-    auto* fullImpl = GetFullImpl();
+    auto fullImpl = GetFullImpl();
+
+    if (!item && item->size != NUM_1) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "item is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    fullImpl->getNodeModifiers()->getLoadingProgressModifier()->setColor(node->uiNodeHandle, item->value[0].u32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetLoadingProgressColor(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getLoadingProgressModifier()->resetColor(node->uiNodeHandle);
+}
+
+void SetLoadingProgressEnableLoading(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
 
     fullImpl->getNodeModifiers()->getLoadingProgressModifier()->setEnableLoading(
         node->uiNodeHandle, std::strcmp(value, "false"));
+}
+
+const ArkUI_AttributeItem* GetLoadingProgressEnableLoading(ArkUI_NodeHandle node)
+{
+    auto modifier = GetFullImpl()->getNodeModifiers()->getLoadingProgressModifier();
+
+    g_numberValues[0].i32 = modifier->getEnableLoading(node->uiNodeHandle);
+    return &g_attributeItem;
+}
+
+int32_t SetLoadingProgressEnableLoading(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto fullImpl = GetFullImpl();
+
+    if (!item && item->size != NUM_1) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "item is invalid");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    fullImpl->getNodeModifiers()->getLoadingProgressModifier()->setEnableLoading(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetLoadingProgressEnableLoading(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getLoadingProgressModifier()->resetEnableLoading(node->uiNodeHandle);
 }
 
 void SetSwiperLoop(ArkUI_NodeHandle node, const char* value)
@@ -3113,6 +3183,39 @@ void SetLoadingProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const
     setters[subTypeId](node, value);
 }
 
+int32_t SetLoadingProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
+{
+    using Setter = int32_t(ArkUI_NodeHandle node, const ArkUI_AttributeItem* value);
+    static Setter* setters[] = { SetLoadingProgressColor, SetLoadingProgressEnableLoading };
+    if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+    }
+    return setters[subTypeId](node, item);
+}
+
+void ResetLoadingProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
+{
+    using Resetter = void(ArkUI_NodeHandle node);
+    static Resetter* resetters[] = { ResetLoadingProgressColor, ResetLoadingProgressEnableLoading };
+    if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    return resetters[subTypeId](node);
+}
+
+const ArkUI_AttributeItem* GetLoadingProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
+{
+    using Getter = const ArkUI_AttributeItem*(ArkUI_NodeHandle node);
+    static Getter* getters[] = { GetLoadingProgressColor, GetLoadingProgressEnableLoading };
+    if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return &g_attributeItem;
+    }
+    return getters[subTypeId](node);
+}
+
 void SetListItemGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
 {
     static Setter* setters[] = { SetListItemGroupHeader, SetListItemGroupFooter, SetListItemGroupDivider };
@@ -3261,7 +3364,7 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
 {
     using AttributeSetterClass = int32_t(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item);
     static AttributeSetterClass* setterClasses[] = { SetCommonAttribute, SetTextAttribute, nullptr,
-        nullptr, nullptr, SetToggleAttribute, nullptr,
+        nullptr, nullptr, SetToggleAttribute, SetLoadingProgressAttribute,
         nullptr, nullptr, SetScrollAttribute, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr,
@@ -3279,27 +3382,85 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
     return result;
 }
 
-const char* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
+const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
 {
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "the GetNodeAttribute  not impl");
-    return "";
+    ResetAttributeItem();
+    using AttributeGetterClass = const ArkUI_AttributeItem*(ArkUI_NodeHandle node, int32_t subTypeId);
+    static AttributeGetterClass* getterClasses[] = {
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        GetLoadingProgressAttribute,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr
+    };
+    int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
+    int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
+    if (subTypeClass > sizeof(getterClasses) / sizeof(AttributeGetterClass*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node attribute: %{public}d NOT IMPLEMENT", type);
+        return &g_attributeItem;
+    }
+    return getterClasses[subTypeClass](node, subTypeId);
 }
 
 void ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
 {
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "the reset attribute not impl: %{public}d", type);
-    using AttributeResetClass = void(ArkUI_NodeHandle node, int32_t subTypeId);
-    static AttributeResetClass* resetClasses[] = { ResetCommonAttribute, ResetTextAttribute, ResetSpanAttribute,
-        ResetImageSpanAttribute, ResetImageAttribute, ResetToggleAttribute, nullptr, nullptr, nullptr, SetScrollAttribute, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr };
+    using AttributeResetterClass = void(ArkUI_NodeHandle node, int32_t subTypeId);
+    static AttributeResetterClass* resetterClasses[] = {
+        ResetCommonAttribute,
+        ResetTextAttribute,
+        ResetSpanAttribute,
+        ResetImageSpanAttribute,
+        ResetImageAttribute,
+        ResetToggleAttribute,
+        ResetLoadingProgressAttribute,
+        nullptr,
+        nullptr,
+        SetScrollAttribute,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr
+    };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
-    if (subTypeClass > sizeof(resetClasses) / sizeof(AttributeResetClass*)) {
+    if (subTypeClass > sizeof(resetterClasses) / sizeof(AttributeResetterClass*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node attribute: %{public}d NOT IMPLEMENT", type);
         return;
     }
-    resetClasses[subTypeClass](node, subTypeId);
+    resetterClasses[subTypeClass](node, subTypeId);
 }
 
 } // namespace OHOS::Ace::NodeModel

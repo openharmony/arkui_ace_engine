@@ -14,8 +14,9 @@
  */
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 
-#include "surface_utils.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
+#include "surface_utils.h"
+#include "sync_fence.h"
 
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
@@ -35,6 +36,19 @@ const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 const std::vector<int32_t> DEFAULT_HEIGHT_GEAR { 7998, 7999, 8001, 8002, 8003 };
 const std::vector<int32_t> DEFAULT_ORIGN_GEAR { 0, 2000, 4000, 6000, 8000 };
 } // namespace
+
+#ifdef OHOS_PLATFORM
+struct SurfaceBufferNode {
+    SurfaceBufferNode(sptr<SurfaceBuffer> buf, sptr<SyncFence> fence, OffsetF orgin)
+        : buffer_(std::move(buf)), fence_(std::move(fence)), orgin_(orgin)
+    {}
+    ~SurfaceBufferNode() noexcept = default;
+
+    sptr<SurfaceBuffer> buffer_;
+    sptr<SyncFence> fence_;
+    OffsetF orgin_ { 0, 0 };
+};
+#endif
 RosenRenderSurface::~RosenRenderSurface()
 {
     if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
@@ -43,11 +57,6 @@ RosenRenderSurface::~RosenRenderSurface()
         if (nativeWindow_) {
             DestoryNativeWindow(nativeWindow_);
             nativeWindow_ = nullptr;
-        }
-        while (!availableBuffers_.empty()) {
-            auto bufferNode = availableBuffers_.front();
-            bufferNode.reset();
-            availableBuffers_.pop();
         }
         CHECK_NULL_VOID(producerSurface_);
         auto* surfaceUtils = SurfaceUtils::GetInstance();
@@ -59,7 +68,7 @@ RosenRenderSurface::~RosenRenderSurface()
         while (!availableBuffers_.empty()) {
             auto surfaceNode = availableBuffers_.front();
             availableBuffers_.pop();
-            consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, surfaceNode->fence_);
+            consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
         }
     }
 }
@@ -243,7 +252,7 @@ void RosenRenderSurface::ConsumeWebBuffer()
     CHECK_NULL_VOID(consumerSurface_);
 
     sptr<SurfaceBuffer> surfaceBuffer = nullptr;
-    int32_t fence = -1;
+    sptr<SyncFence> fence = SyncFence::INVALID_FENCE;
     int64_t timestamp = 0;
     OHOS::Rect damage;
 
@@ -280,7 +289,7 @@ void RosenRenderSurface::ConsumeWebBuffer()
         if (availableBuffers_.size() >= MAX_BUFFER_SIZE) {
             surfaceNode = availableBuffers_.front();
             availableBuffers_.pop();
-            consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, surfaceNode->fence_);
+            consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
         }
         availableBuffers_.push(std::make_shared<SurfaceBufferNode>(surfaceBuffer, fence, orgin_));
     }
@@ -306,7 +315,7 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
     CHECK_NULL_VOID(consumerSurface_);
 
     sptr<SurfaceBuffer> surfaceBuffer = nullptr;
-    int32_t fence = -1;
+    sptr<SyncFence> fence = SyncFence::INVALID_FENCE;
     int64_t timestamp = 0;
     OHOS::Rect damage;
 
@@ -331,7 +340,7 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
         if (availableBuffers_.size() >= MAX_BUFFER_SIZE) {
             surfaceNode = availableBuffers_.front();
             availableBuffers_.pop();
-            surfaceErr = consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, surfaceNode->fence_);
+            surfaceErr = consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
             if (surfaceErr != SURFACE_ERROR_OK) {
                 TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent release buffer error = %{public}d", surfaceErr);
             }

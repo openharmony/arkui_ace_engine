@@ -113,6 +113,7 @@ struct SelectOverlayInfo {
     // Used to determine the range of judgment that is parallel to the first and second handles.
     float singleLineHeight = 10.0f;
     bool isSelectRegionVisible = false;
+    bool isNewAvoid = false;
     SelectHandleInfo firstHandle;
     SelectHandleInfo secondHandle;
     HitTestMode hitTestMode = HitTestMode::HTMTRANSPARENT_SELF;
@@ -120,6 +121,7 @@ struct SelectOverlayInfo {
     // show area
     bool useFullScreen = true;
     RectF showArea;
+    RectF selectArea;
 
     OffsetF rightClickOffset;
 

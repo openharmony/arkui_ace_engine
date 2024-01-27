@@ -128,6 +128,7 @@ public:
         return window_;
     }
     void ResizeWindowForFoldStatus() override;
+    void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);

@@ -885,6 +885,12 @@ void Scrollable::ProcessSpringMotion(double position)
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
         moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
+        if ((currentPos_ - finalPosition_) * (position - finalPosition_) < 0) {
+            double currentVelocity = currentVelocity_;
+            scrollPause_ = true;
+            StopSpringAnimation();
+            StartScrollAnimation(position, currentVelocity);
+        }
         if (!moved_) {
             StopSpringAnimation();
         } else if (!touchUp_) {

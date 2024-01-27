@@ -490,10 +490,10 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
     BuildTitleBar(hostNode, titleBarNode, navBarLayoutProperty);
     if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        titleBarNode->SetActive(false);
+        titleBarNode->SetJSViewActive(false);
     } else {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        titleBarNode->SetActive(true);
+        titleBarNode->SetJSViewActive(true);
 
         auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
         if (opts && opts->Expansive()) {

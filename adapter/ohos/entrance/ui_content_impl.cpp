@@ -236,11 +236,14 @@ public:
             CHECK_NULL_VOID(container);
             auto taskExecutor = container->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
-            auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            auto context = container->GetPipelineContext();
             CHECK_NULL_VOID(context);
-            auto uiExtMgr = context->GetUIExtensionManager();
-            if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
-                return;
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+            if (pipeline) {
+                auto uiExtMgr = pipeline->GetUIExtensionManager();
+                if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
+                    return;
+                }
             }
             auto curWindow = context->GetCurrentWindowRect();
             positionY -= curWindow.Top();
@@ -391,11 +394,29 @@ private:
 
 class FoldDisplayModeListener : public OHOS::Rosen::DisplayManager::IDisplayModeListener {
 public:
-    explicit FoldDisplayModeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    explicit FoldDisplayModeListener(int32_t instanceId, bool isDialog = false)
+        : instanceId_(instanceId), isDialog_(isDialog)
+    {}
     ~FoldDisplayModeListener() = default;
     void OnDisplayModeChanged(OHOS::Rosen::FoldDisplayMode displayMode) override
     {
-        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        if (!isDialog_) {
+            auto container = Platform::AceContainer::GetContainer(instanceId_);
+            CHECK_NULL_VOID(container);
+            auto taskExecutor = container->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            ContainerScope scope(instanceId_);
+            taskExecutor->PostTask(
+                [container, displayMode] {
+                    auto context = container->GetPipelineContext();
+                    CHECK_NULL_VOID(context);
+                    auto aceDisplayMode = static_cast<FoldDisplayMode>(static_cast<uint32_t>(displayMode));
+                    context->OnFoldDisplayModeChanged(aceDisplayMode);
+                },
+                TaskExecutor::TaskType::UI);
+            return;
+        }
+        auto container = Platform::DialogContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -412,6 +433,7 @@ public:
 
 private:
     int32_t instanceId_ = -1;
+    bool isDialog_ = false;
 };
 
 class TouchOutsideListener : public OHOS::Rosen::ITouchOutsideListener {
@@ -1306,10 +1328,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
-    ContainerScope::AddCount();
-    if (ContainerScope::ContainerCount() == 1) {
-        ContainerScope::UpdateSingleton(instanceId_);
-    }
+    ContainerScope::Add(instanceId_);
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
         container->SetSharedRuntime(runtime_);
@@ -1495,6 +1514,7 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 void UIContentImpl::Foreground()
 {
     LOGI("[%{public}s][%{public}s]: window foreground", bundleName_.c_str(), moduleName_.c_str());
+    ContainerScope::UpdateRecentForeground(instanceId_);
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1542,8 +1562,8 @@ SerializedGesture UIContentImpl::GetFormSerializedGesture()
 void UIContentImpl::Focus()
 {
     LOGI("%{public}s window focus", bundleName_.c_str());
-    Platform::AceContainer::OnActive(instanceId_);
     ContainerScope::UpdateRecentActive(instanceId_);
+    Platform::AceContainer::OnActive(instanceId_);
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, instanceId_);
@@ -1553,9 +1573,6 @@ void UIContentImpl::UnFocus()
 {
     LOGI("%{public}s window unfocus", bundleName_.c_str());
     Platform::AceContainer::OnInactive(instanceId_);
-    if (ContainerScope::RecentActiveId() == instanceId_) {
-        ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
-    }
 }
 
 void UIContentImpl::Destroy()
@@ -1570,13 +1587,7 @@ void UIContentImpl::Destroy()
     } else {
         Platform::AceContainer::DestroyContainer(instanceId_);
     }
-    if (ContainerScope::RecentActiveId() == instanceId_) {
-        ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
-    }
-    ContainerScope::MinusCount();
-    if (ContainerScope::ContainerCount() == 1) {
-        ContainerScope::UpdateSingleton(AceEngine::Get().SingletonId());
-    }
+    ContainerScope::RemoveAndCheck(instanceId_);
 }
 
 void UIContentImpl::OnNewWant(const OHOS::AAFwk::Want& want)
@@ -1653,10 +1664,11 @@ bool UIContentImpl::ProcessBackPressed()
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_RETURN(pipeline, false);
-    auto uiExtMgr = pipeline->GetUIExtensionManager();
-    if (uiExtMgr && uiExtMgr->OnBackPressed()) {
-        return true;
+    if (pipeline) {
+        auto uiExtMgr = pipeline->GetUIExtensionManager();
+        if (uiExtMgr && uiExtMgr->OnBackPressed()) {
+            return true;
+        }
     }
     bool ret = false;
     taskExecutor->PostSyncTask(
@@ -2000,7 +2012,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
     foldStatusListener_ = new FoldScreenListener(instanceId_);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
-    foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_);
+    foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_, isDialog);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterDisplayModeListener(foldDisplayModeListener_);
 }
 

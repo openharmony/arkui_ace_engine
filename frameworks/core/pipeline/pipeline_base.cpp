@@ -116,16 +116,16 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return currentContainer->GetPipelineContext();
 }
 
-RefPtr<PipelineBase> PipelineBase::GetCurrentContextWithoutScope()
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
 {
-    auto currentContainer = Container::CurrentWithoutScope();
+    auto currentContainer = Container::CurrentSafely();
     CHECK_NULL_RETURN(currentContainer, nullptr);
     return currentContainer->GetPipelineContext();
 }
 
 double PipelineBase::GetCurrentDensity()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     if (!pipelineContext) {
         auto container = Container::GetActive();
         pipelineContext = container ? container->GetPipelineContext() : nullptr;

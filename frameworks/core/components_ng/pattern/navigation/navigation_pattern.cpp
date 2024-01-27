@@ -383,7 +383,7 @@ void NavigationPattern::CheckTopNavPathChange(
             hostNode->GetLayoutProperty());
         if (!navigationLayoutProperty->GetHideNavBarValue(false)) {
             navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-            navBarNode->SetActive(true);
+            navBarNode->SetJSViewActive(true);
         }
         auto stageManager = context->GetStageManager();
         if (stageManager != nullptr) {
@@ -412,7 +412,7 @@ void NavigationPattern::CheckTopNavPathChange(
                 auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
                 auto layoutProperty = navBarNode->GetLayoutProperty();
                 layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-                navBarNode->SetActive(true);
+                navBarNode->SetJSViewActive(true);
             }
         }
         auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(preTopNavDestination->GetPattern());
@@ -574,6 +574,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     // navDestination push/pop navDestination
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
+            newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
             if (preTopNavDestination->GetContentNode()) {
@@ -583,9 +584,9 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             parent->RebuildRenderContextTree();
             pipeline->RequestFrame();
         } else {
-            auto layoutProperty = preTopNavDestination->GetLayoutProperty();
-            CHECK_NULL_VOID(layoutProperty);
-            layoutProperty->UpdateVisibility(needVisible ? VisibleType::VISIBLE : VisibleType::INVISIBLE, true);
+            preTopNavDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
+            newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
+            DealTransitionVisibility(preTopNavDestination, needVisible, false);
         }
         navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
         return;
@@ -594,9 +595,12 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     // navBar push navDestination
     if (newTopNavDestination && newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD &&
         navigationMode_ == NavigationMode::STACK) {
-        auto layoutProperty = navBarNode->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
+        auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
+        if (navBar) {
+            navBar->SetTransitionType(PageTransitionType::EXIT_PUSH);
+        }
+        newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
+        DealTransitionVisibility(navBarNode, false, true);
         navigationNode->SetNeedSetInvisible(true);
     }
 
@@ -610,6 +614,10 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         parent->RemoveChild(preTopNavDestination, true);
         parent->RebuildRenderContextTree();
         pipeline->RequestFrame();
+        auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
+        if (navBar) {
+            navBar->SetTransitionType(PageTransitionType::ENTER_POP);
+        }
     }
     navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
 }
@@ -812,11 +820,11 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
                     (pattern->GetNavigationMode() == NavigationMode::STACK && isSetInvisible)) {
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-                    navBarNode->SetActive(false);
+                    navBarNode->SetJSViewActive(false);
                 } else {
                     navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
                     navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-                    navBarNode->SetActive(true);
+                    navBarNode->SetJSViewActive(true);
                 }
                 if (navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&
                     navDestinationPattern->GetBackButtonState()) {
@@ -858,8 +866,8 @@ void NavigationPattern::UpdateContextRect(
     auto navigationLayoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(navigationLayoutProperty);
     auto navBarProperty = navBarNode->GetLayoutProperty();
-    navBarProperty->UpdateVisibility(navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE));
-    navBarNode->SetActive(navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE);
+    navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
+    navBarNode->SetJSViewActive(true);
     if (!curDestination->IsOnAnimation()) {
         curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
         curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
@@ -1322,7 +1330,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
             }
             auto property = node->GetLayoutProperty();
             property->UpdateVisibility(VisibleType::INVISIBLE);
-            node->SetActive(false);
+            node->SetJSViewActive(false);
             if (!preTopNavDestination) {
                 hostNode->NotifyPageHide();
             }
@@ -1503,4 +1511,34 @@ void NavigationPattern::DetachNavigationStackFromParent()
         navigationStack_->OnDetachFromParent();
     }
 }
+
+void NavigationPattern::DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBar)
+{
+    auto renderContext = node->GetRenderContext();
+    if (!renderContext->HasDisappearTransition()) {
+        auto layoutProperty = node->GetLayoutProperty();
+        layoutProperty->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+        node->SetJSViewActive(isVisible);
+        return;
+    }
+    auto layoutProperty = node->GetLayoutProperty();
+    layoutProperty->UpdateVisibility(isVisible ? VisibleType::VISIBLE : VisibleType::INVISIBLE, true);
+    renderContext->SetTransitionOutCallback([weakNode = WeakPtr<FrameNode>(node), isVisible, isNavBar] {
+        auto curNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(curNode);
+        if (isNavBar) {
+            auto navBarNode = AceType::DynamicCast<NavBarNode>(curNode);
+            if (navBarNode->GetTransitionType() != PageTransitionType::EXIT_PUSH) {
+                return;
+            }
+        } else {
+            auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+            if (navDestinationNode->GetTransitionType() != PageTransitionType::EXIT_PUSH) {
+                return;
+            }
+        }
+        curNode->SetJSViewActive(isVisible);
+    });
+}
+
 } // namespace OHOS::Ace::NG

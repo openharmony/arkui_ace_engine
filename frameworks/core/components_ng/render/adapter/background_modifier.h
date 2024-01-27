@@ -34,6 +34,7 @@ public:
     {
         CHECK_NULL_VOID(pixelMap_);
         std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap_->GetPixelMapSharedPtr();
+        CHECK_NULL_VOID(context.canvas);
         std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
         auto* recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(skCanvas.get());
         SkSamplingOptions samplingOptions;
@@ -62,6 +63,7 @@ public:
     {
         CHECK_NULL_VOID(pixelMap_);
         std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap_->GetPixelMapSharedPtr();
+        CHECK_NULL_VOID(context.canvas);
         auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(*context.canvas);
         RSSamplingOptions samplingOptions;
         RSBrush brush;
