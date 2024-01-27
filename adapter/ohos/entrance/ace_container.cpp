@@ -937,7 +937,7 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
 }
 
 void AceContainer::SetViewNew(
-    AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow)
+    AceView* view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(view);
@@ -1386,8 +1386,8 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
     assetManagerImpl->SetLibPath("default", libPath);
 }
 
-void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width,
-    int32_t height, uint32_t windowId, UIEnvCallback callback)
+void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, float width,
+    float height, uint32_t windowId, UIEnvCallback callback)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
