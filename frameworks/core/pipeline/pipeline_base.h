@@ -1112,6 +1112,10 @@ public:
         return false;
     }
 
+    virtual void StartWindowAnimation() {}
+
+    virtual void StopWindowAnimation() {}
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
