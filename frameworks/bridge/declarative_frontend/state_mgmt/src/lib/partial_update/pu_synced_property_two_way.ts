@@ -34,6 +34,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     if (this.source_) {
       // register to the parent property
       this.source_.addSubscriber(this);
+      this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_.getUnmonitored());
     } else {
       throw new SyntaxError(`${this.debugInfo()}: constructor: source variable in parent/ancestor @Component must be defined. Application error!`);
     }
@@ -77,7 +78,8 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
     if (this.checkIsSupportedValue(newValue)) {
       // the source_ ObservedProperty will call: this.syncPeerHasChanged(newValue);
-      this.source_.set(newValue)
+      this.source_.set(newValue);
+      this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(newValue);
     }
   }
 
