@@ -47,6 +47,7 @@ private:
     void DeduplicateDisplayInfo();
     void UpdateToInputManager(float rotation);
     void InputManagerUpdateDisplayInfo(RectF paintRect, MMI::DisplayInfo displayInfo, MMI::WindowInfo windowInfo);
+    float GetDensityInCurrentResolution();
 
     static float screenMaxWidth_;
     static float screenMaxHeight_;
