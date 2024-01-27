@@ -46,8 +46,28 @@ public:
         }
     }
 
+    void SetSysJudge(const GestureJudgeFunc& sysJudge)
+    {
+        sysJudge_ = sysJudge;
+    }
+
+    bool HasSysGestureJudge() const
+    {
+        return sysJudge_.has_value();
+    }
+
+    std::optional<GestureJudgeFunc> GetSysJudge() const
+    {
+        if (sysJudge_.has_value()) {
+            return sysJudge_.value();
+        }
+        return nullptr;
+    }
+
 private:
     GestureEventFunc callback_;
+
+    std::optional<GestureJudgeFunc> sysJudge_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(ClickEvent);
 };
@@ -102,6 +122,7 @@ public:
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
     GestureEventFunc GetClickEvent();
+    std::optional<GestureJudgeFunc> GetSysJudgeFunc() const;
 
     const RefPtr<ClickRecognizer>& GetClickRecognizer()
     {
