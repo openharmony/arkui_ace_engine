@@ -1953,10 +1953,17 @@ void UIContentImpl::NotifyRotationAnimationEnd()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    if (pipelineContext) {
-        pipelineContext->StopWindowAnimation();
-    }
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (pipelineContext) {
+                pipelineContext->StopWindowAnimation();
+            }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
