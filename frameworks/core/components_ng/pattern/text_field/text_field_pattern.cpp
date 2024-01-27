@@ -426,11 +426,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         mouseStatus_ = MouseStatus::NONE;
     }
     StopScrollable();
-    if (IsTextArea()) {
-        CheckScrollable();
-    } else {
-        SetScrollEnable(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
-    }
+    CheckScrollable();
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
@@ -5017,21 +5013,16 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 
 void TextFieldPattern::CheckScrollable()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    if (contentController_->IsEmpty()) {
-        scrollable_ = false;
+    if (IsTextArea()) {
+        if (contentController_->IsEmpty()) {
+            scrollable_ = false;
+        } else {
+            scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height());
+        }
+        SetScrollEnable(scrollable_);
     } else {
-        scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height());
+        SetScrollEnable(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
     }
-    SetScrollEnable(scrollable_);
 }
 
 bool TextFieldPattern::HasStateStyle(UIState state) const
