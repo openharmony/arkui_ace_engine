@@ -90,6 +90,7 @@ public:
     void ResetAspectRatio() override {};
     void SetAlign(const Alignment& alignment) override;
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override;
+    void SetChainStyle(const ChainInfo& chainInfo) override {}
     void SetBias(const BiasPair& biasPair) override {}
     void SetUseAlign(
         AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset) override;

@@ -468,7 +468,7 @@ void FrameNode::DumpCommonInfo()
     }
     if (geometryNode_->GetParentLayoutConstraint().has_value())
         DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
-                                           .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
+            .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
     if (!(NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX()))) {
         DumpLog::GetInstance().AddDesc(std::string("top: ")
                                            .append(std::to_string(GetOffsetRelativeToWindow().GetY()))

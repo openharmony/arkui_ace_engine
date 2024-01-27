@@ -430,6 +430,11 @@ public:
         ViewAbstract::SetAlignRules(alignRules);
     }
 
+    void SetChainStyle(const ChainInfo& chainInfo) override
+    {
+        ViewAbstract::SetChainStyle(chainInfo);
+    }
+
     void SetBias(const BiasPair& biasPair) override
     {
         ViewAbstract::SetBias(biasPair);
@@ -983,6 +988,9 @@ public:
     }
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
+
+    void BindMenuGesture(
+        std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
 
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;

@@ -133,6 +133,7 @@ public:
     virtual void ResetAspectRatio() = 0;
     virtual void SetAlign(const Alignment& alignment) = 0;
     virtual void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) = 0;
+    virtual void SetChainStyle(const ChainInfo& chainInfo) = 0;
     virtual void SetBias(const BiasPair& biasPair) = 0;
     virtual void SetUseAlign(
         AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset) = 0;

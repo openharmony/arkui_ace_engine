@@ -30,7 +30,8 @@ public:
     virtual ~RelativeContainerModel() = default;
 
     virtual void Create();
-
+    virtual void SetBarrier(const std::vector<BarrierInfo>& barrierInfo) = 0;
+    virtual void SetGuideline(const std::vector<GuidelineInfo>& guidelineInfo) = 0;
 private:
     static std::unique_ptr<RelativeContainerModel> instance_;
     static std::mutex mutex_;

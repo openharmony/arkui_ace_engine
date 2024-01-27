@@ -99,12 +99,12 @@ void TabBarPattern::InitSurfaceChangedCallback()
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
             [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
                 WindowSizeChangeReason type) {
-                if (type == WindowSizeChangeReason::UNDEFINED) {
-                    return;
-                }
                 auto pattern = weak.Upgrade();
                 if (!pattern) {
                     return;
+                }
+                if (type == WindowSizeChangeReason::UNDEFINED) {
+                    pattern->windowSizeChangeReason_ = type;
                 }
 
                 if (type == WindowSizeChangeReason::ROTATION) {
@@ -706,11 +706,17 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     isFirstLayout_ = false;
 
-    if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION &&
-        animationTargetIndex_.has_value() && animationTargetIndex_ != indicator) {
-        swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
-        windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
-        animationTargetIndex_.reset();
+    if (windowSizeChangeReason_) {
+        if (*windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION && animationTargetIndex_.has_value() &&
+            animationTargetIndex_ != indicator) {
+            swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
+            animationTargetIndex_.reset();
+        } else if (*windowSizeChangeReason_ == WindowSizeChangeReason::UNDEFINED) {
+            // UNDEFINED currently implies window change on foldable
+            TriggerTranslateAnimation(layoutProperty, indicator_, indicator_);
+            UpdateIndicator(indicator_);
+        }
+        windowSizeChangeReason_.reset();
     }
     UpdateGradientRegions(!swiperPattern->IsUseCustomAnimation());
     if (!swiperPattern->IsUseCustomAnimation() && isTouchingSwiper_ &&

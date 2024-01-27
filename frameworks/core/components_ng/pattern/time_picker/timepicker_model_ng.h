@@ -36,6 +36,7 @@ public:
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(TimeChangeEvent&& onChange) override;
 
+    static void SetSelectedTime(FrameNode* frameNode, const PickerTime& value);
     static void SetDisappearTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetNormalTextStyle(

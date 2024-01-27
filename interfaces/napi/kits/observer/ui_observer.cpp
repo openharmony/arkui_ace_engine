@@ -183,10 +183,8 @@ void UIObserver::UnRegisterRouterPageCallback(napi_env env, napi_value uiAbility
                         holder.end(),
                         [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
                             return registeredListener->NapiEqual(callback);
-                        }
-                    ),
-                    holder.end()
-                );
+                        }),
+                    holder.end());
             }
             if (holder.empty()) {
                 infos_.erase(ref);
@@ -218,10 +216,8 @@ void UIObserver::UnRegisterRouterPageCallback(int32_t uiContextInstanceId, napi_
             holder.end(),
             [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
                 return registeredListener->NapiEqual(callback);
-            }
-        ),
-        holder.end()
-    );
+            }),
+        holder.end());
 }
 
 void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_value context, int32_t index,

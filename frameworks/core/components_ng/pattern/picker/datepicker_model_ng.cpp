@@ -275,6 +275,33 @@ void DatePickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& co
     datePickerPattern->SetBackgroundColor(color);
 }
 
+void DatePickerModelNG::SetStartDate(FrameNode* frameNode, const PickerDate& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetStartDate(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, StartDate, datePickerPattern->GetStartDateLunar());
+}
+
+void DatePickerModelNG::SetEndDate(FrameNode* frameNode, const PickerDate& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetEndDate(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, EndDate, datePickerPattern->GetEndDateLunar());
+}
+
+void DatePickerModelNG::SetSelectedDate(FrameNode* frameNode, const PickerDate& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetSelectDate(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedDate, datePickerPattern->GetSelectDate());
+}
+
 void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {
@@ -343,8 +344,8 @@ bool SetCalcDimension(std::optional<CalcDimension>& optDimension, const ArkUIStr
     return true;
 }
 
-void SetOptionalBorder(std::optional<Dimension>& optionalDimension, const ArkUI_Float32* values,
-    ArkUI_Int32 valuesSize, ArkUI_Int32& offset)
+void SetOptionalBorder(std::optional<Dimension>& optionalDimension, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
+    ArkUI_Int32& offset)
 {
     bool hasValue = static_cast<bool>(values[offset]);
     if (hasValue) {
@@ -431,8 +432,8 @@ void SetBorderImageOutset(RefPtr<BorderImage>& borderImage, const std::vector<Bo
     offset += NUM_12;
 }
 
-void SetBorderImageFill(RefPtr<BorderImage>& borderImage, const ArkUIStringAndFloat* options,
-    ArkUI_Int32 optionsLength, ArkUI_Int32& offset)
+void SetBorderImageFill(RefPtr<BorderImage>& borderImage, const ArkUIStringAndFloat* options, ArkUI_Int32 optionsLength,
+    ArkUI_Int32& offset)
 {
     if ((options == nullptr) || (offset < 0) || ((offset + NUM_2) >= optionsLength)) {
         return;
@@ -494,8 +495,8 @@ void SetBorderImageGradientValues(NG::Gradient& gradient, const ArkUI_Float32* v
     gradient.SetRepeat(static_cast<bool>(repeating));
 }
 
-void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY,
-    ArkUI_Float32 valueX, ArkUI_Float32 valueY, BackgroundImagePosition& bgImgPosition)
+void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, ArkUI_Float32 valueX,
+    ArkUI_Float32 valueY, BackgroundImagePosition& bgImgPosition)
 {
     OHOS::Ace::AnimationOption option;
     bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
@@ -668,8 +669,8 @@ void ResetTransform(ArkUINodeHandle node)
                        matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
 
-void SetBorderColor(ArkUINodeHandle node, uint32_t leftColorInt, uint32_t rightColorInt,
-    uint32_t topColorInt, uint32_t bottomColorInt)
+void SetBorderColor(
+    ArkUINodeHandle node, uint32_t leftColorInt, uint32_t rightColorInt, uint32_t topColorInt, uint32_t bottomColorInt)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1259,8 +1260,8 @@ void ResetOverlay(ArkUINodeHandle node)
  * option[offset + 40]: bitset
  * @param optionsLength options length
  */
-void SetBorderImage(ArkUINodeHandle node, const char* src,
-    const ArkUIStringAndFloat* options, ArkUI_Int32 optionsLength)
+void SetBorderImage(
+    ArkUINodeHandle node, const char* src, const ArkUIStringAndFloat* options, ArkUI_Int32 optionsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1666,6 +1667,31 @@ void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, int valLength, 
     ViewAbstract::SetPivot(frameNode, center);
 }
 
+/**
+ * @param values
+ * values[0]: scaleX;values[1]: scaleY;values[2]: scaleZ
+ * @param length shadows length
+ */
+void SetScaleWithoutTransformCenter(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (valLength != NUM_3) {
+        return;
+    }
+    auto x = values[NUM_0];
+    auto y = values[NUM_1];
+    // NOT support Z in source code
+    if (x < 0) {
+        x = 1;
+    }
+    if (y < 0) {
+        y = 1;
+    }
+    VectorF scale(x, y);
+    ViewAbstract::SetScale(frameNode, scale);
+}
+
 void ResetScale(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1690,8 +1716,8 @@ void ResetScale(ArkUINodeHandle node)
  * values[7]: angle;values[8]:perspective
  * @param length shadows length
  */
-void SetRotate(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength,
-    const int* units, ArkUI_Int32 unitLength)
+void SetRotate(
+    ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength, const int* units, ArkUI_Int32 unitLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1713,6 +1739,28 @@ void SetRotate(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 va
         center.SetZ(centerZ);
     }
     ViewAbstract::SetPivot(frameNode, center);
+}
+
+/**
+ * @param values
+ * values[0]: xDirection;values[1]: yDirection;values[2]: zDirection
+ * values[3]: angle;values[4]:perspective
+ * @param length shadows length
+ */
+void SetRotateWithoutTransformCenter(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (valLength != NUM_5) {
+        return;
+    }
+
+    auto xDirection = values[NUM_0];
+    auto yDirection = values[NUM_1];
+    auto zDirection = values[NUM_2];
+    auto angle = values[NUM_3];
+    auto perspective = values[NUM_4];
+    ViewAbstract::SetRotate(frameNode, NG::Vector5F(xDirection, yDirection, zDirection, angle, perspective));
 }
 
 void ResetRotate(ArkUINodeHandle node)
@@ -2126,8 +2174,8 @@ void ResetMargin(ArkUINodeHandle node)
     ViewAbstract::SetMargin(frameNode, NG::CalcLength(0.0));
 }
 
-void SetMarkAnchor(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit,
-    ArkUI_Float32 yValue, ArkUI_Int32 yUnit)
+void SetMarkAnchor(
+    ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue, ArkUI_Int32 yUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2694,8 +2742,8 @@ void ResetResponseRegion(ArkUINodeHandle node)
     ViewAbstract::SetResponseRegion(frameNode, region);
 }
 
-void SetMouseResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values,
-    const ArkUI_Int32* units, ArkUI_Int32 length)
+void SetMouseResponseRegion(
+    ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2898,8 +2946,8 @@ void SetAnimationOption(std::shared_ptr<AnimationOption>& option, const ArkUIAni
     option->SetTempo(animationOption->tempo);
 }
 
-void SetTransitionCenter(ArkUINodeHandle node, ArkUI_Float32 centerXValue, ArkUI_Int32 centerXUnit, ArkUI_Float32 centerYValue,
-    int32_t centerYUnit, ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit)
+void SetTransitionCenter(ArkUINodeHandle node, ArkUI_Float32 centerXValue, ArkUI_Int32 centerXUnit,
+    ArkUI_Float32 centerYValue, int32_t centerYUnit, ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2982,8 +3030,8 @@ void SetOpacityTransition(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI
     ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
 }
 
-void SetRotateTransition(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length, ArkUI_Float32 perspective, ArkUI_Float32 angle,
-    const ArkUIAnimationOptionType* animationOption)
+void SetRotateTransition(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length, ArkUI_Float32 perspective,
+    ArkUI_Float32 angle, const ArkUIAnimationOptionType* animationOption)
 {
     CHECK_NULL_VOID(arrayValue);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3026,8 +3074,8 @@ void SetRotateTransition(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_
     ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
 }
 
-void SetScaleTransition(
-    ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length, const ArkUIAnimationOptionType* animationOption)
+void SetScaleTransition(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length,
+    const ArkUIAnimationOptionType* animationOption)
 {
     CHECK_NULL_VOID(arrayValue);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3069,8 +3117,8 @@ void SetScaleTransition(
     ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
 }
 
-void SetTranslateTransition(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue, ArkUI_Int32 yUnit,
-    ArkUI_Float32 zValue, ArkUI_Int32 zUnit, const ArkUIAnimationOptionType* animationOption)
+void SetTranslateTransition(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue,
+    ArkUI_Int32 yUnit, ArkUI_Float32 zValue, ArkUI_Int32 zUnit, const ArkUIAnimationOptionType* animationOption)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3129,10 +3177,10 @@ void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float64* values, const 
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetMinWidth(frameNode,CalcLength(values[NUM_0], DimensionUnit::VP));
-    ViewAbstract::SetMaxWidth(frameNode,CalcLength(values[NUM_1], DimensionUnit::VP));
-    ViewAbstract::SetMinHeight(frameNode,CalcLength(values[NUM_2], DimensionUnit::VP));
-    ViewAbstract::SetMaxHeight(frameNode,CalcLength(values[NUM_3], DimensionUnit::VP));
+    ViewAbstract::SetMinWidth(frameNode, CalcLength(values[NUM_0], DimensionUnit::VP));
+    ViewAbstract::SetMaxWidth(frameNode, CalcLength(values[NUM_1], DimensionUnit::VP));
+    ViewAbstract::SetMinHeight(frameNode, CalcLength(values[NUM_2], DimensionUnit::VP));
+    ViewAbstract::SetMaxHeight(frameNode, CalcLength(values[NUM_3], DimensionUnit::VP));
 }
 
 void ResetConstraintSize(ArkUINodeHandle node)
@@ -3218,29 +3266,45 @@ const ArkUICommonModifier* GetCommonModifier()
         SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur, ResetLinearGradientBlur,
         SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder, ResetBorder, SetBackgroundImagePosition,
         ResetBackgroundImagePosition, SetBackgroundImageSize, ResetBackgroundImageSize, SetBackgroundImage,
-        ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale, ResetScale, SetRotate, ResetRotate,
-        SetGeometryTransition, ResetGeometryTransition, SetPixelStretchEffect, ResetPixelStretchEffect,
-        SetLightUpEffect, ResetLightUpEffect, SetSphericalEffect, ResetSphericalEffect, SetRenderGroup,
-        ResetRenderGroup, SetRenderFit, ResetRenderFit, SetUseEffect, ResetUseEffect, SetForegroundColor,
-        ResetForegroundColor, SetMotionPath, ResetMotionPath, SetGroupDefaultFocus, ResetGroupDefaultFocus,
-        SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable, ResetTouchable, SetDefaultFocus,
-        ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset, ResetOffset, SetPadding, ResetPadding,
-        SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor, SetVisibility, ResetVisibility, SetAccessibilityText,
-        ResetAccessibilityText, SetAllowDrop, ResetAllowDrop, SetAccessibilityLevel, ResetAccessibilityLevel,
-        SetDirection, ResetDirection, SetLayoutWeight, ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth,
-        ResetMaxWidth, SetMinHeight, ResetMinHeight, SetMaxHeight, ResetMaxHeight, SetSize, ResetSize,
-        ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf, SetAspectRatio, ResetAspectRatio, SetFlexGrow, ResetFlexGrow,
-        SetFlexShrink, ResetFlexShrink, SetGridOffset, ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea,
-        ResetExpandSafeArea, SetFlexBasis, ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription,
-        ResetAccessibilityDescription, SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex,
-        ResetTabIndex, SetObscured, ResetObscured, SetResponseRegion, ResetResponseRegion, SetMouseResponseRegion,
-        ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetDraggable, ResetDraggable, SetAccessibilityGroup,
-        ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect,
-        SetKeyBoardShortCut, ResetKeyBoardShortCut, SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter,
-        SetOpacityTransition, SetRotateTransition, SetScaleTransition, SetTranslateTransition, SetBlendMode, ResetBlendMode,
-        SetConstraintSize, ResetConstraintSize, SetMaskShape, SetMaskPath };
+        ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale, SetScaleWithoutTransformCenter, ResetScale,
+        SetRotate, SetRotateWithoutTransformCenter, ResetRotate, SetGeometryTransition, ResetGeometryTransition,
+        SetPixelStretchEffect, ResetPixelStretchEffect, SetLightUpEffect, ResetLightUpEffect, SetSphericalEffect,
+        ResetSphericalEffect, SetRenderGroup, ResetRenderGroup, SetRenderFit, ResetRenderFit, SetUseEffect,
+        ResetUseEffect, SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath, SetGroupDefaultFocus,
+        ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
+        ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
+        ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor, SetVisibility,
+        ResetVisibility, SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
+        SetAccessibilityLevel, ResetAccessibilityLevel, SetDirection, ResetDirection, SetLayoutWeight,
+        ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth, ResetMaxWidth, SetMinHeight, ResetMinHeight,
+        SetMaxHeight, ResetMaxHeight, SetSize, ResetSize, ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf,
+        SetAspectRatio, ResetAspectRatio, SetFlexGrow, ResetFlexGrow, SetFlexShrink, ResetFlexShrink, SetGridOffset,
+        ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea, ResetExpandSafeArea, SetFlexBasis,
+        ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription, ResetAccessibilityDescription,
+        SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured,
+        ResetObscured, SetResponseRegion, ResetResponseRegion, SetMouseResponseRegion, ResetMouseResponseRegion,
+        SetEnabled, ResetEnabled, SetDraggable, ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup,
+        SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut,
+        SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition, SetRotateTransition,
+        SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetBlendMode, ResetBlendMode,
+        SetConstraintSize, ResetConstraintSize };
 
     return &modifier;
+}
+
+void SetOnAppear(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onAppear = [frameNode, eventId, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = ON_APPEAR;
+        event.eventId = eventId;
+        event.extraParam = extraParam;
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
 }
 
 void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
@@ -3269,6 +3333,41 @@ void SetOnBlur(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
+}
+
+void SetOnAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onAreaChanged = [frameNode, eventId, extraParam](
+                             const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
+        ArkUINodeEvent event;
+        event.kind = ON_AREA_CHANGE;
+        event.eventId = eventId;
+        event.extraParam = extraParam;
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        auto oldLocalOffset = oldRect.GetOffset();
+        event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Width());
+        event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Height());
+        event.componentAsyncEvent.data[2].f32 = PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetX());
+        event.componentAsyncEvent.data[3].f32 = PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetY());
+        event.componentAsyncEvent.data[4].f32 =
+            PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetX() + oldOrigin.GetX());
+        event.componentAsyncEvent.data[5].f32 =
+            PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetY() + oldOrigin.GetY());
+
+        auto localOffset = rect.GetOffset();
+        event.componentAsyncEvent.data[6].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Width());
+        event.componentAsyncEvent.data[7].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Height());
+        event.componentAsyncEvent.data[8].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
+        event.componentAsyncEvent.data[9].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+        event.componentAsyncEvent.data[10].f32 =
+            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX() + origin.GetX());
+        event.componentAsyncEvent.data[11].f32 =
+            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() + origin.GetY());
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged));
 }
 
 } // namespace NodeModifier
