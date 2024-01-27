@@ -1106,6 +1106,11 @@ public:
         return magnifierController_;
     }
 
+    void NeedRequestKeyboard()
+    {
+        needToRequestKeyboardInner_ = true;
+    }
+
     void CleanNodeResponseKeyEvent();
     void FireSelectEvent();
 
@@ -1274,6 +1279,8 @@ private:
     void InitDragDropCallBack();
     void InitDragDropEventWithOutDragStart();
     void UpdateBlurReason();
+    RectF GetSelectArea();
+    void UpdateOverlaySelectArea();
 
     RectF frameRect_;
     RectF contentRect_;
