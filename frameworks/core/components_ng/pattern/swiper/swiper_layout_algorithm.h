@@ -259,6 +259,9 @@ private:
     void SetInactiveOnBackward(LayoutWrapper* layoutWrapper, Axis axis);
     void AdjustStartInfoOnSwipeByGroup(
         int32_t startIndex, const PositionMap& itemPosition, int32_t& startIndexInVisibleWindow, float& startPos);
+    bool HasCustomIndicatorOffset(const RefPtr<LayoutWrapper>& indicatorWrapper);
+    const OffsetF CalculateCustomOffset(
+        const RefPtr<LayoutWrapper>& indicatorWrapper, const OffsetF& currentOffset);
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
@@ -300,6 +303,7 @@ private:
     bool swipeByGroup_ = false;
     int32_t realTotalCount_ = 0;
     std::optional<float> placeItemWidth_;
+    bool useCustomIndicatorOffset = false;
 };
 
 } // namespace OHOS::Ace::NG
