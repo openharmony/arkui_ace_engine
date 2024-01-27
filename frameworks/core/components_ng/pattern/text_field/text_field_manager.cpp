@@ -64,6 +64,7 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
     CHECK_NULL_VOID(frameNode);
     auto textBase = DynamicCast<TextBase>(node);
     CHECK_NULL_VOID(textBase);
+    textBase->OnVirtualKeyboardAreaChanged();
 
     auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
     CHECK_NULL_VOID(scrollableNode);
