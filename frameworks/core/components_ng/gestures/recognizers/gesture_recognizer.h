@@ -158,6 +158,13 @@ public:
 
     bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
 
+    void SetEventImportGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
+
+    void ResetEventImportGestureGroup()
+    {
+        eventImportGestureGroup_.Reset();
+    }
+
     const WeakPtr<NGGestureRecognizer>& GetGestureGroup() const
     {
         return gestureGroup_;
@@ -350,6 +357,7 @@ protected:
     GestureJudgeFunc sysJudge_ = nullptr;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
+    WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;
 };
 
 } // namespace OHOS::Ace::NG

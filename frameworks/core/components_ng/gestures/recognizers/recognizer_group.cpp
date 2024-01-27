@@ -167,6 +167,7 @@ void RecognizerGroup::OnResetStatus()
         for (const auto& child : recognizers_) {
             if (child) {
                 child->SetGestureGroup(nullptr);
+                child->ResetEventImportGestureGroup();
             }
         }
         recognizers_.clear();
