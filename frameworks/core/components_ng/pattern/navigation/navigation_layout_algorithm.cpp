@@ -231,7 +231,8 @@ void NavigationLayoutAlgorithm::RangeCalculation(
         maxNavBarWidth =
             static_cast<float>(userSetMaxNavBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f)));
     }
-    maxNavBarWidthValue_ = Dimension(std::max(maxNavBarWidth, minNavBarWidth), DimensionUnit::PX);
+    maxNavBarWidthValue_ = Dimension(Dimension(std::max(maxNavBarWidth, minNavBarWidth)).ConvertToVp(),
+        DimensionUnit::VP);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
         auto minNavBarWidth = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
@@ -463,7 +464,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size =
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
     FitScrollFullWindow(size);
-    
+
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
 
