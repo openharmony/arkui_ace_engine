@@ -941,7 +941,6 @@ template("declarative_js_engine_ng") {
         "interfaces/profiler/js_profiler.cpp",
         "jsview/js_location_button.cpp",
         "jsview/js_paste_button.cpp",
-        "jsview/js_richeditor.cpp",
         "jsview/js_save_button.cpp",
         "jsview/js_sec_button_base.cpp",
         "jsview/menu/js_context_menu.cpp",
