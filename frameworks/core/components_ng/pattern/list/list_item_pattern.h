@@ -275,7 +275,6 @@ private:
     bool isHover_ = false;
     bool isPressed_ = false;
     std::optional<double> enableOpacity_;
-    double lastOpacity_ = 0.0;
     OnFinishFunc onFinishEvent_;
     bool isLayouted_ = false;
 
