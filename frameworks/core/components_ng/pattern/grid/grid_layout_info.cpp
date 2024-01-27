@@ -353,20 +353,42 @@ void GridLayoutInfo::UpdateStartIdxToLastItem()
     startMainLineIndex_ = 0;
 }
 
-int32_t GridLayoutInfo::FindItemInRange(int32_t target) const
+std::pair<int32_t, int32_t> GridLayoutInfo::FindItemInRange(int32_t target) const
 {
     if (gridMatrix_.empty()) {
-        return -1;
+        return { -1, -1 };
     }
     for (int r = startMainLineIndex_; r <= endMainLineIndex_; ++r) {
         const auto& row = gridMatrix_.at(r);
         for (auto it : row) {
             if (it.second == target) {
-                return r;
+                return { r, it.first };
             }
         }
     }
-    return -1;
+    return { -1, -1 };
+}
+
+bool GridLayoutInfo::ItemAboveViewport(int32_t idx, float mainGap) const
+{
+    auto [line, _] = FindItemInRange(idx);
+    float len = currentOffset_;
+    for (int i = startMainLineIndex_; i < line; ++i) {
+        len += lineHeightMap_.at(i) + mainGap;
+    }
+    return len < 0.0f;
+}
+
+bool GridLayoutInfo::ItemBelowViewport(int32_t idx, int32_t itemHeight, float mainSize, float mainGap) const
+{
+    auto [line, col] = FindItemInRange(idx);
+
+    float len = currentOffset_;
+    for (int i = startMainLineIndex_; i < line + itemHeight; ++i) {
+        len += lineHeightMap_.at(i) + mainGap;
+    }
+    len -= mainGap;
+    return len > mainSize;
 }
 
 // Use the index to get the line number where the item is located

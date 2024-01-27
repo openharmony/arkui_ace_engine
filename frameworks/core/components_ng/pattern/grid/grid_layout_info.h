@@ -104,6 +104,31 @@ struct GridLayoutInfo {
         return (removeLastGap) ? totalHeight - mainGap : totalHeight;
     }
 
+
+    /**
+     * Checks if the item at the specified index is partially or fully above the viewport.
+     *
+     * REQUIRES: Item is between startIndex_ and endIndex_. Otherwise, the result is undefined.
+     *
+     * @param idx The index of the item.
+     * @param mainGap The gap between lines.
+     * @return True if the item is at least partially above the viewport, false otherwise.
+     */
+    bool ItemAboveViewport(int32_t idx, float mainGap) const;
+
+    /**
+     * Checks if the item at the specified index is partially or fully below the viewport.
+     *
+     * REQUIRES: Item is between startIndex_ and endIndex_. Otherwise, the result is undefined.
+     *
+     * @param idx The index of the item.
+     * @param itemHeight The number of rows the item occupies.
+     * @param mainSize The size of the viewport on the main axis.
+     * @param mainGap The gap between items in the main axis.
+     * @return True if the item is at least partially below the viewport, false otherwise.
+     */
+    bool ItemBelowViewport(int32_t idx, int32_t itemHeight, float mainSize, float mainGap) const;
+
     /**
      * @brief Finds the index of the last item in the grid matrix, and update startIndex_ and startMainLineIndex_ to
      * that last item.
@@ -115,9 +140,9 @@ struct GridLayoutInfo {
      * @brief Tries to find the item between startMainLine and endMainLine.
      *
      * @param target The target item to find.
-     * @return The line index of the found item.
+     * @return The line index and column index of the found item.
      */
-    int32_t FindItemInRange(int32_t target) const;
+    std::pair<int32_t, int32_t> FindItemInRange(int32_t target) const;
 
     /**
      * @brief clears gridMatrix_ and lineHeightMap_ starting from line [idx]

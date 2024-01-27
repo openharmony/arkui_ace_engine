@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 
 #include "base/geometry/ng/size_t.h"
-#include "core/components_ng/pattern/grid/grid_layout_options.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 
 namespace OHOS::Ace::NG {
 GridIrregularFiller::GridIrregularFiller(GridLayoutInfo* info, LayoutWrapper* wrapper) : info_(info), wrapper_(wrapper)
@@ -95,40 +95,13 @@ int32_t GridIrregularFiller::FitItem(const decltype(GridLayoutInfo::gridMatrix_)
     return -1;
 }
 
-GridItemSize GridIrregularFiller::GetItemSize(int32_t idx)
-{
-    GridItemSize size { 1, 1 };
-    auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
-    const auto& opts = *props->GetLayoutOptions();
-    if (opts.irregularIndexes.find(idx) != opts.irregularIndexes.end()) {
-        if (!opts.getSizeByIndex) {
-            // default irregular size = [1, full cross length]
-            return { 1, info_->crossCount_ };
-        }
-
-        size = opts.getSizeByIndex(idx);
-
-        // assume [row] represents crossLength and [column] represents mainLength in this class, so flip sides if
-        // horizontal
-        if (info_->axis_ == Axis::HORIZONTAL) {
-            std::swap(size.rows, size.columns);
-        }
-    }
-
-    // handle illegal size
-    if (size.columns > info_->crossCount_) {
-        size.columns = info_->crossCount_;
-    }
-    return size;
-}
-
 void GridIrregularFiller::FillOne()
 {
     /* alias */
     const int32_t& idx = info_->endIndex_;
     int32_t row = posY_;
 
-    auto size = GetItemSize(idx);
+    auto size = GridLayoutUtils::GetItemSize(info_, wrapper_, idx);
 
     auto it = info_->gridMatrix_.find(row);
     int32_t col = FitItem(it, size.columns);
@@ -202,7 +175,7 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t col,
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
 
-    auto itemSize = GetItemSize(info_->endIndex_);
+    auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, info_->endIndex_);
     // should cache child constraint result
     float crossLen = 0.0f;
     for (int32_t i = 0; i < itemSize.columns; ++i) {
@@ -260,7 +233,7 @@ float GridIrregularFiller::MeasureBackward(const FillParameters& params, int32_t
 
             if (measured.find(row.at(c)) != measured.end()) {
                 // skip all columns of a measured irregular item
-                c += GetItemSize(row.at(c)).columns - 1;
+                c += GridLayoutUtils::GetItemSize(info_, wrapper_, row.at(c)).columns - 1;
                 continue;
             }
 
@@ -272,7 +245,7 @@ float GridIrregularFiller::MeasureBackward(const FillParameters& params, int32_t
                 measured.insert(info_->endIndex_);
             }
             // skip all columns of this item
-            c += GetItemSize(info_->endIndex_).columns - 1;
+            c += GridLayoutUtils::GetItemSize(info_, wrapper_, info_->endIndex_).columns - 1;
         }
         len += params.mainGap + info_->lineHeightMap_.at(posY_);
     }

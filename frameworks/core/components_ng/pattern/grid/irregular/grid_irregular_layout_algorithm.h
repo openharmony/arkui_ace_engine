@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,11 +81,17 @@ private:
     inline bool ReachedEnd() const;
 
     /**
-     * @brief Transforms GridLayoutInfo::scrollAlign_ into other ScrollAlign values.
+     * @brief Transforms GridLayoutInfo::scrollAlign_ into other ScrollAlign values, based on current position of
+     * jumpIdx_ item.
+     *
+     * REQUIRES: scrollAlign_ is set to AUTO.
+     * @param mainSize The main-axis length of the grid.
+     * @return ScrollAlign value transformed from AUTO.
      */
-    void TransformAutoScrollAlign();
+    ScrollAlign TransformAutoScrollAlign(float mainSize) const;
 
     /**
+     * @brief Find the line the jumpIdx item resides in. If not in matrix, fill the matrix up to [jumpIdx].
      *
      * @param jumpIdx The GridItem index to jump to.
      * @return The line index of the item in GridMatrix.
