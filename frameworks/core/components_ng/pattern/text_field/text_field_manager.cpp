@@ -86,7 +86,6 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
             return;
         }
     }
-    
 
     // caret above scroll's content region
     if (diffTop < 0) {
@@ -100,7 +99,6 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
             return;
         }
     }
-    
 
     // caret below safeArea
     float diffBot = 0.0f;

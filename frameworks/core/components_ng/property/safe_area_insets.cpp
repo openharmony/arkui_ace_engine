@@ -61,6 +61,7 @@ std::string SafeAreaInsets::ToString() const
 
 bool SafeAreaInsets::Inset::IsOverlapped(float pos) const
 {
-    return IsValid() && pos >= static_cast<float>(start) && pos <= static_cast<float>(end);
+    return IsValid() && LessOrNearEqual(static_cast<float>(start), pos) &&
+        LessOrNearEqual(pos, static_cast<float>(end));
 }
 } // namespace OHOS::Ace::NG
