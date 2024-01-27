@@ -1103,6 +1103,11 @@ public:
         return magnifierController_;
     }
 
+    void NeedRequestKeyboard()
+    {
+        needToRequestKeyboardInner_ = true;
+    }
+
     void CleanNodeResponseKeyEvent();
     void FireSelectEvent();
 

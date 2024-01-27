@@ -436,7 +436,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(float menuWidth, floa
     if ((hasKeyboard && (menuPosition.GetY() + menuHeight) > keyboardInsert.start) ||
         (menuPosition.GetY() + menuHeight) > viewPort.Bottom()) { // 底部避让失败，实行选中区避让
         selectArea = selectArea.IntersectRectT(viewPort);
-        menuPosition = OffsetF(positionX, (selectArea.Top() + selectArea.Bottom() - - menuHeight) / 2.0f);
+        menuPosition = OffsetF(positionX, (selectArea.Top() + selectArea.Bottom() - menuHeight) / 2.0f);
     }
     return menuPosition;
 }
