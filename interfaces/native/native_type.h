@@ -555,17 +555,6 @@ typedef enum {
     ARKUI_TEXT_COPY_OPTIONS_CROSS_DEVICE,
 } ArkUI_TextCopyOptions;
 
-/**
- * @brief 定义字体样式。
- *
- * @since 12
- */
-typedef enum {
-    /** 标准的字体样式。*/
-    ARKUI_TEXT_FONT_STYLE_NORMAL = 0,
-    /** 斜体的字体样式。*/
-    ARKUI_TEXT_FONT_STYLE_ITALIC,
-} ArkUI_TextFontStyle;
 
 /**
  * @brief 定义文本自适应高度的方式。

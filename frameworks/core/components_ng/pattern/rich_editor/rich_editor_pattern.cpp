@@ -3938,9 +3938,11 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
         }
         if (isFirstHandle) {
             handleInfo.paintRect = textSelector_.firstHandle;
+            CheckHandles(handleInfo);
             selectOverlayProxy_->UpdateFirstSelectHandleInfo(handleInfo);
         } else {
             handleInfo.paintRect = textSelector_.secondHandle;
+            CheckHandles(handleInfo);
             selectOverlayProxy_->UpdateSecondSelectHandleInfo(handleInfo);
         }
 
@@ -5469,6 +5471,17 @@ void RichEditorPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
     caretOffset += offset;
     caretCaretMetric.offset = caretOffset;
     caretCaretMetric.height = caretHeight;
+}
+
+void RichEditorPattern::OnVirtualKeyboardAreaChanged()
+{
+    CHECK_NULL_VOID(SelectOverlayIsOn());
+    float selectLineHeight = 0.0f;
+    textSelector_.selectionBaseOffset.SetX(
+        CalcCursorOffsetByPosition(textSelector_.GetStart(), selectLineHeight).GetX());
+    textSelector_.selectionDestinationOffset.SetX(
+        CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
+    CreateHandles();
 }
 
 void RichEditorPattern::ResetDragOption()

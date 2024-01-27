@@ -929,7 +929,7 @@ struct ArkUICommonModifier {
     void (*resetKeyBoardShortCut)(ArkUINodeHandle node);
 
     void (*setClip)(ArkUINodeHandle node, ArkUI_Int32 isClip);
-    void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr type,const ArkUI_Float32* attribute, ArkUI_Int32 length);
+    void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_Int32 length);
     void (*setClipPath)(
         ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_CharPtr commands);
     void (*resetClip)(ArkUINodeHandle node);
@@ -1400,6 +1400,8 @@ struct ArkUIScrollModifier {
     void (*resetEnableScrollInteraction)(ArkUINodeHandle node);
     void (*setScrollTo)(ArkUINodeHandle node, const ArkUI_Float32* values);
     void (*setScrollEdge)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetScrollTo)(ArkUINodeHandle node);
+    void (*resetScrollEdge)(ArkUINodeHandle node);
     void (*setScrollEnablePaging)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetScrollEnablePaging)(ArkUINodeHandle node);
 };

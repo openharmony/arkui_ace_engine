@@ -32,7 +32,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr double CAP_COEFFICIENT = 0.45;
-constexpr int32_t FIRST_THRESHOLD = 5;
+constexpr int32_t FIRST_THRESHOLD = 4;
 constexpr int32_t SECOND_THRESHOLD = 10;
 constexpr double CAP_FIXED_VALUE = 16.0;
 constexpr uint32_t DRAG_INTERVAL_TIME = 900;
@@ -537,29 +537,34 @@ double Scrollable::GetGain(double delta)
     auto cap = 1.0;
     auto gain = 1.0;
     if (!continuousSlidingCallback_) {
+        preGain_ = gain;
         return gain;
     }
     auto screenHeight = continuousSlidingCallback_();
     if (delta == 0 || screenHeight == 0) {
+        preGain_ = gain;
         return gain;
     }
     if (dragCount_ >= FIRST_THRESHOLD && dragCount_ < SECOND_THRESHOLD) {
         if (Negative(lastPos_ / delta)) {
             ResetContinueDragCount();
+            preGain_ = gain;
             return gain;
         }
-        cap = ComputeCap(dragCount_);
-        gain = (LessNotEqual(cap, std::abs(delta) / screenHeight * (dragCount_ - 1))) ? cap :
-            std::abs(delta) / screenHeight * (dragCount_ - 1);
+        cap = CAP_COEFFICIENT * (dragCount_ - 1);
+        gain = (LessNotEqual(cap, std::abs(delta) / screenHeight * (dragCount_ - 1))) ? preGain_ + cap :
+            preGain_ + std::abs(delta) / screenHeight * (dragCount_ - 1);
     } else if (dragCount_ >= SECOND_THRESHOLD) {
         if (Negative(lastPos_ / delta)) {
             ResetContinueDragCount();
+            preGain_ = gain;
             return gain;
         }
         cap = CAP_FIXED_VALUE;
-        gain = (LessNotEqual(cap, std::abs(delta) / screenHeight * (dragCount_ - 1))) ? cap :
-            std::abs(delta) / screenHeight * (dragCount_ - 1);
+        gain = (LessNotEqual(cap, preGain_ + std::abs(delta) / screenHeight * (dragCount_ - 1))) ? cap :
+            preGain_ + std::abs(delta) / screenHeight * (dragCount_ - 1);
     }
+    preGain_ = gain;
     return gain;
 }
 

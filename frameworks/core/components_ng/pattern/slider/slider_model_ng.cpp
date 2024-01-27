@@ -394,4 +394,57 @@ void SliderModelNG::ResetBlockImage(FrameNode* frameNode)
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
         SliderPaintProperty, BlockImageModuleName, PROPERTY_UPDATE_RENDER, frameNode);
 }
+
+RefPtr<FrameNode> SliderModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SLIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SliderPattern>(); });
+    return frameNode;
+}
+
+void SliderModelNG::SetOnChange(FrameNode* frameNode, SliderOnChangeEvent&& eventOnChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(eventOnChange));
+}
+
+void SliderModelNG::SetSliderValue(FrameNode* frameNode, float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateValue(value);
+}
+
+void SliderModelNG::SetMinLabel(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Min, value, frameNode);
+}
+void SliderModelNG::SetMaxLabel(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Max, value, frameNode);
+}
+
+void SliderModelNG::SetSliderMode(FrameNode* frameNode, const SliderMode& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, SliderMode, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SliderMode, value, frameNode);
+}
+void SliderModelNG::SetDirection(FrameNode* frameNode, Axis value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Direction, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Direction, value, frameNode);
+}
+void SliderModelNG::SetReverse(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Reverse, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Reverse, value, frameNode);
+}
+void SliderModelNG::SetStep(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Step, value, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

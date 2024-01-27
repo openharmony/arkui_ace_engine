@@ -244,7 +244,7 @@ void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
-void PipelineContext::FlushReload(const OnConfigurationChange& configurationChange) {}
+void PipelineContext::FlushReload(const ConfigurationChange& configurationChange) {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 
@@ -525,7 +525,7 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
 
 void PipelineBase::OnActionEvent(const std::string& action) {}
 
-void PipelineBase::SetRootSize(double density, int32_t width, int32_t height) {}
+void PipelineBase::SetRootSize(double density, float width, float height) {}
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {

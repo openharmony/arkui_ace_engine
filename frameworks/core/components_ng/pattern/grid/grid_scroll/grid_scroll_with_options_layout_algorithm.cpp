@@ -118,7 +118,7 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
 {
     auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, std::make_pair(-1, 1));
-    auto options = layoutProperty->GetLayoutOptions().value();
+    const auto& options = *layoutProperty->GetLayoutOptions();
     if (options.irregularIndexes.empty()) {
         return std::make_pair(itemIndex % crossCount_, 1);
     }

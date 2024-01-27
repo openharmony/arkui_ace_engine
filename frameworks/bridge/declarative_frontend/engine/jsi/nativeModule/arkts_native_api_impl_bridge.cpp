@@ -1970,6 +1970,10 @@ void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetImageTransition));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetImageTransition));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEdgeAntialiasing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetEdgeAntialiasing));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEdgeAntialiasing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetEdgeAntialiasing));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "image"), image);
 }
 

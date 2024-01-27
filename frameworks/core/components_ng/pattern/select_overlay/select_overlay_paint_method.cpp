@@ -46,6 +46,7 @@ void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     selectOverlayModifier_->SetMenuOptionOffset(offset);
     selectOverlayModifier_->SetFirstHandleIsShow(info_.firstHandle.isShow);
     selectOverlayModifier_->SetSecondHandleIsShow(info_.secondHandle.isShow);
+    selectOverlayModifier_->SetIsNewAvoid(info_.isNewAvoid);
 }
 
 void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)

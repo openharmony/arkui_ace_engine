@@ -65,11 +65,17 @@ struct OptionParam {
     ~OptionParam() = default;
 };
 
+enum class ContextMenuRegisterType : char {
+    NORMAL_TYPE = 0,
+    CUSTOM_TYPE = 1,
+};
+
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
     bool setShow = false;
     bool isShow = false;
+    ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
     std::function<void(const std::string&)> onStateChange;
     std::optional<Placement> placement;
     std::function<void()> onAppear;

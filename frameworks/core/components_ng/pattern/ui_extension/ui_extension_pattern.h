@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,13 +52,17 @@ class AvoidArea;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
+enum EmbeddedType : int32_t {
+    DEFAULT_TYPE = -1,
+    UI_EXTENSION = 0
+};
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
 
 public:
-    explicit UIExtensionPattern(
-        bool isTransferringCaller = false, bool isModal = false, bool isAsyncModalBinding = false);
+    explicit UIExtensionPattern(bool isTransferringCaller = false, bool isModal = false,
+        bool isAsyncModalBinding = false, int32_t embeddedType = EmbeddedType::DEFAULT_TYPE);
     ~UIExtensionPattern() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
@@ -215,6 +219,7 @@ private:
     int32_t uiExtensionId_ = 0;
     int32_t callbackId_ = 0;
     RectF displayArea_;
+    int32_t embeddedType_ = EmbeddedType::DEFAULT_TYPE;
 
     // for DynamicComponent
     ComponentType componentType_ = ComponentType::UI_EXTENSION;

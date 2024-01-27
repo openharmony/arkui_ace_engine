@@ -85,6 +85,16 @@ public:
     static void ResetStepSize(FrameNode* frameNode);
     static void ResetBlockColor(FrameNode* frameNode);
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    void SetOnChange(FrameNode* frameNode, SliderOnChangeEvent&& eventOnChange);
+    void SetSliderValue(FrameNode* frameNode, float value);
+    void SetMinLabel(FrameNode* frameNode, float value);
+    void SetMaxLabel(FrameNode* frameNode, float value);
+    void SetDirection(FrameNode* frameNode, Axis value);
+    void SetStep(FrameNode* frameNode, float value);
+    void SetReverse(FrameNode* frameNode, bool value);
+    void SetSliderMode(FrameNode* frameNode, const SliderMode& value);
+
 private:
     void SetSliderValue(float value);
 };

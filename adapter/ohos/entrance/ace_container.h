@@ -39,6 +39,7 @@
 #include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -407,7 +408,7 @@ public:
     static void SetView(AceView* view, double density, int32_t width, int32_t height,
         sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback = nullptr);
     static void SetViewNew(
-        AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow);
+        AceView* view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
@@ -471,7 +472,7 @@ public:
     void UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(
-        bool needReloadTransition, const OnConfigurationChange& configurationChange = { false, false }) override;
+        bool needReloadTransition, const ConfigurationChange& configurationChange = { false, false }) override;
     void HotReload() override;
 
     bool IsUseStageModel() const override
@@ -553,7 +554,7 @@ private:
     std::string GetFontFamilyName(std::string path);
     bool endsWith(std::string str, std::string suffix);
 
-    void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
+    void AttachView(std::shared_ptr<Window> window, AceView* view, double density, float width, float height,
         uint32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;

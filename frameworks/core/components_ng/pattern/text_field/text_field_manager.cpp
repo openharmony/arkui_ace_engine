@@ -64,6 +64,7 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
     CHECK_NULL_VOID(frameNode);
     auto textBase = DynamicCast<TextBase>(node);
     CHECK_NULL_VOID(textBase);
+    textBase->OnVirtualKeyboardAreaChanged();
 
     auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
     CHECK_NULL_VOID(scrollableNode);
@@ -86,7 +87,6 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
             return;
         }
     }
-    
 
     // caret above scroll's content region
     if (diffTop < 0) {
@@ -100,7 +100,6 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
             return;
         }
     }
-    
 
     // caret below safeArea
     float diffBot = 0.0f;

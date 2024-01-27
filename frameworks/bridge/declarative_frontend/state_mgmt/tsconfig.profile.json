@@ -16,6 +16,9 @@
     "src/lib/common/i_environment_backend.ts",
     "src/lib/common/i_storage.ts",
 
+    // ark runtime debug tools
+    "src/lib/common/ark_tools.d.ts",
+
     // sdk
     "src/lib/sdk/i_animatable_arithmetic.ts",
     "src/lib/sdk/i_data_source.d.ts",

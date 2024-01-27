@@ -39,6 +39,7 @@
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/layout/constants.h"
@@ -311,7 +312,7 @@ public:
         return nullptr;
     }
 
-    void SetRootSize(double density, int32_t width, int32_t height);
+    void SetRootSize(double density, float width, float height);
 
     void UpdateFontWeightScale();
 
@@ -758,7 +759,7 @@ public:
 
     void PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    virtual void FlushReload(const OnConfigurationChange& configurationChange) {}
+    virtual void FlushReload(const ConfigurationChange& configurationChange) {}
     virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
