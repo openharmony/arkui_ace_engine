@@ -76,6 +76,11 @@ public:
         secondHandleIsShow_->Set(isShow);
     }
 
+    void SetIsNewAvoid(bool value)
+    {
+        isNewAvoid_ = value;
+    }
+
 private:
     void SetDefaultCircleAndLineEndOffset();
 
@@ -94,6 +99,7 @@ private:
 
     Color iconColor_ = Color::BLACK;
     bool hasExtensionMenu_ = false;
+    bool isNewAvoid_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayModifier);
 };
