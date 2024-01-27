@@ -284,7 +284,7 @@ public:
         containerSdkPath_ = containerSdkPath;
     }
 
-    void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange) override;
+    void NotifyConfigurationChange(bool, const ConfigurationChange& configurationChange) override;
 
     // Support to execute the ets code mocked by developer
     void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo)

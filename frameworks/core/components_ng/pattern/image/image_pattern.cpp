@@ -905,13 +905,23 @@ void ImagePattern::OnLanguageConfigurationUpdate()
 
 void ImagePattern::OnColorConfigurationUpdate()
 {
+    OnConfigurationUpdate();
+}
+
+void ImagePattern::OnIconConfigurationUpdate()
+{
+    OnConfigurationUpdate();
+}
+
+void ImagePattern::OnConfigurationUpdate()
+{
     CHECK_NULL_VOID(loadingCtx_);
 
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
-    src.SetIsSystemColorChange(true);
+    src.SetIsConfigurationChange(true);
 
     LoadImage(src);
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
@@ -919,7 +929,7 @@ void ImagePattern::OnColorConfigurationUpdate()
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
             altLoadingCtx_.Reset();
         }
-        altImageSourceInfo.SetIsSystemColorChange(true);
+        altImageSourceInfo.SetIsConfigurationChange(true);
         LoadAltImage(altImageSourceInfo);
     }
 }

@@ -30,6 +30,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
@@ -1462,7 +1463,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0039, TestSize.Level1)
      * @tc.steps: step2. call SetIsOverlayNode.
      * @tc.expected: change IsOverlayNode().
      */
-    AccessibilityManager::OnConfigurationChange configurationChange;
+    ConfigurationChange configurationChange;
     childNode->OnConfigurationUpdate(configurationChange);
     configurationChange.languageUpdate = true;
     childNode->OnConfigurationUpdate(configurationChange);
