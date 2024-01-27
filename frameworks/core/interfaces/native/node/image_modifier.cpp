@@ -27,6 +27,7 @@
 namespace OHOS::Ace::NG {
 constexpr CopyOptions DEFAULT_IMAGE_COPYOPTION = CopyOptions::None;
 constexpr bool DEFAULT_IMAGE_AUTORESIZE = true;
+constexpr float DEFAULT_IMAGE_EDGEANTIALIASING = 0;
 constexpr bool DEFAULT_SYNC_LOAD_VALUE = false;
 constexpr ImageFit DEFAULT_OBJECT_FIT_VALUE = ImageFit::COVER;
 constexpr bool DEFAULT_FIT_ORIGINAL_SIZE = false;
@@ -64,6 +65,20 @@ void ResetAutoResize(NodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetAutoResize(frameNode, DEFAULT_IMAGE_AUTORESIZE);
+}
+
+void SetEdgeAntialiasing(NodeHandle node, float edgeAntialiasing)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetSmoothEdge(frameNode, edgeAntialiasing);
+}
+
+void ResetEdgeAntialiasing(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetSmoothEdge(frameNode, DEFAULT_IMAGE_EDGEANTIALIASING);
 }
 
 void SetObjectRepeat(NodeHandle node, int32_t imageRepeat)
@@ -369,7 +384,7 @@ ArkUIImageModifierAPI GetImageModifier()
         ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad,
         SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable,
         ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder, ResetImageBorder,
-        SetImageOpacity, ResetImageOpacity };
+        SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing };
     return modifier;
 }
 } // namespace OHOS::Ace::NG
