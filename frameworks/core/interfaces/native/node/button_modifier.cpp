@@ -348,12 +348,12 @@ void SetButtonStringParameters(
 {
     CHECK_NULL_VOID(stringParameters);
     buttonParameters.fontWeight = std::nullopt;
-    if (stringParameters[INDEX_STRING_FONT_WEIGHT_0] != nullptr && INDEX_STRING_FONT_WEIGHT_0 < dataCount) {
+    if (INDEX_STRING_FONT_WEIGHT_0 < dataCount && stringParameters[INDEX_STRING_FONT_WEIGHT_0] != nullptr) {
         std::string fontWeightStr = stringParameters[INDEX_STRING_FONT_WEIGHT_0];
         buttonParameters.fontWeight = Framework::ConvertStrToFontWeight(fontWeightStr);
     }
     buttonParameters.fontFamily = std::nullopt;
-    if (stringParameters[INDEX_STRING_FONT_FAMILY_1] != nullptr && INDEX_STRING_FONT_FAMILY_1 < dataCount) {
+    if (INDEX_STRING_FONT_FAMILY_1 < dataCount && stringParameters[INDEX_STRING_FONT_FAMILY_1] != nullptr) {
         std::string familiesStr = stringParameters[INDEX_STRING_FONT_FAMILY_1];
         std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
         if (fontFamilyResult.size() == 1 &&
