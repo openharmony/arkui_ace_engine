@@ -567,7 +567,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
-    FlushFrameTrace();
     resampleTimeStamp_ = nanoTimestamp - window_->GetVSyncPeriod() + ONE_MS_IN_NS;
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
@@ -633,9 +632,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     needRenderNode_.clear();
     taskScheduler_->FlushAfterRenderTask();
     // Keep the call sent at the end of the function
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().FlushEnd();
-    }
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
 }
 
@@ -672,13 +668,6 @@ void PipelineContext::ProcessDelayTasks()
             delayedTask.task();
         }
     });
-}
-
-void PipelineContext::FlushFrameTrace()
-{
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().FlushBegin();
-    }
 }
 
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
