@@ -2947,6 +2947,110 @@ int32_t SetTextTextShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     return ERROR_CODE_NO_ERROR;
 }
 
+// text add
+int32_t SetTextMinFontSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextMinFontSize(
+        node->uiNodeHandle, item->value[0].f32, UNIT_FP);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextMinFontSize(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextMinFontSize(
+        node->uiNodeHandle);
+}
+
+int32_t SetTextMaxFontSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextMaxFontSize(
+        node->uiNodeHandle, item->value[0].f32, UNIT_FP);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextMaxFontSize(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextMaxFontSize(
+        node->uiNodeHandle);
+}
+
+int32_t SetTextFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    // size
+    double size = item->value[0].f32;
+    // weight
+    int weight = 10; //default
+    if (item->size > 1) {
+        weight = item->value[1].i32;
+    }
+    // style
+    int style = 0;
+    if (item->size > 2) {
+        weight = item->value[2].i32;
+    }
+    // family
+    std::vector<std::string> familyArray;
+    if (item->string == nullptr) {
+        std::string value(item->string);
+        StringUtils::StringSplitter(value, ',', familyArray);
+    }
+    
+    ArkUIFontStruct fontStruct;
+    fontStruct.fontSizeNumber = size;
+    fontStruct.fontSizeUnit = UNIT_FP;
+    fontStruct.fontWeight = weight;
+    if (familyArray.size() > 0) {
+        std::vector<const char*> fontFamilies;
+        for (const auto& element : familyArray) {
+            fontFamilies.push_back(element.c_str());
+        }
+        fontStruct.fontFamilies = fontFamilies.data();
+    }
+    fontStruct.fontStyle = style;
+    ArkUIFontStruct* fontInfo = &fontStruct;
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextFont(node->uiNodeHandle, fontInfo);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextFont(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextFont(
+        node->uiNodeHandle);
+}
+
+int32_t SetTextHeightAdaptivePolicy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextHeightAdaptivePolicy(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextHeightAdaptivePolicy(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextHeightAdaptivePolicy(
+        node->uiNodeHandle);
+}
+
 // Toggle Attributes functions
 int32_t SetToggleSelectedColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -5227,7 +5331,8 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
     using Setter = int32_t(ArkUI_NodeHandle node, const ArkUI_AttributeItem* value);
     static Setter* setters[] = { SetTextContent, SetFontColor, SetFontSize, SetFontStyle, SetFontWeight, SetLineHeight,
         SetDecoration, SetTextCase, SetLetterSpacing, SetMaxLines, SetTextAlign, SetTextOverflow, SetTextFontFamily,
-        SetTextCopyOption, SetTextBaselineOffset, SetTextTextShadow, nullptr, nullptr, nullptr, nullptr,
+        SetTextCopyOption, SetTextBaselineOffset, SetTextTextShadow, SetTextMinFontSize,
+        SetTextMaxFontSize, SetTextFont, SetTextHeightAdaptivePolicy,
         SetTextIndent };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -5596,7 +5701,8 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetTextContent, nullptr, nullptr, nullptr, nullptr, ResetLineHeight,
         ResetDecoration, ResetTextCase, ResetLetterSpacing, ResetMaxLines, ResetTextAlign, ResetTextOverflow, nullptr,
-        ResetTextFontFamily, ResetTextCopyOption, nullptr, nullptr };
+        ResetTextFontFamily, ResetTextCopyOption, nullptr, ResetTextMinFontSize,
+        ResetTextMaxFontSize, ResetTextFont, ResetTextHeightAdaptivePolicy };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
