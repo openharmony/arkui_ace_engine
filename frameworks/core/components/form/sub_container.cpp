@@ -121,8 +121,7 @@ void SubContainer::UpdateRootElementSize()
     surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidth);
     surfaceHeight_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootHeight);
     if (pipelineContext_) {
-        pipelineContext_->SetRootSize(
-            density_, static_cast<int32_t>(rootWidth.Value()), static_cast<int32_t>(rootHeight.Value()));
+        pipelineContext_->SetRootSize(density_, rootWidth.Value(), rootHeight.Value());
     }
 }
 
