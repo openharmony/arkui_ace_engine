@@ -152,7 +152,10 @@ void OptionView::CreatePasteButton(const RefPtr<FrameNode>& option, const RefPtr
     row->MarkModifyDone();
     auto eventHub = option->GetEventHub<OptionEventHub>();
     CHECK_NULL_VOID(eventHub);
-    pasteNode->GetOrCreateGestureEventHub()->SetUserOnClick([onClickFunc](GestureEvent& /* info */) {
+    pasteNode->GetOrCreateGestureEventHub()->SetUserOnClick([onClickFunc](GestureEvent& info) {
+        if (!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info)) {
+            return;
+        }
         if (onClickFunc) {
             onClickFunc();
         }
