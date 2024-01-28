@@ -483,6 +483,8 @@ public:
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
     static void SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear);
+    static void SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
+        const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
 private:

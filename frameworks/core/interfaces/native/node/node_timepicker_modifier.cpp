@@ -179,6 +179,8 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
 
 void SetTimePickerOnChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     auto onChange = [eventId, extraParam](const BaseEventInfo* info) {
         ArkUINodeEvent event;
         event.kind = ON_TIME_PICKER_CHANGE;
@@ -200,7 +202,7 @@ void SetTimePickerOnChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extr
         }
         SendArkUIAsyncEvent(&event);
     };
-    TimePickerModel::GetInstance()->SetOnChange(std::move(onChange));
+    TimePickerModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 }
 }

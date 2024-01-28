@@ -2822,6 +2822,15 @@ void ViewAbstract::SetOnAppear(FrameNode* frameNode, std::function<void()> &&onA
     eventHub->SetOnAppear(std::move(onAppear));
 }
 
+void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
+    const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAreaChanged(std::move(onAreaChanged));
+}
+
 void ViewAbstract::SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback)
 {
     CHECK_NULL_VOID(frameNode);
