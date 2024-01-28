@@ -85,6 +85,11 @@ public:
         FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
     static void SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static bool IsSingle(FrameNode* frameNode);
+    static bool GetSingleRange(FrameNode* frameNode, std::vector<NG::RangeContent>& rangeValue);
+    static bool IsCascade(FrameNode* frameNode);
+    static bool GetMultiOptions(FrameNode* frameNode, std::vector<NG::TextCascadePickerOptions>& options);
+    static uint32_t GetMaxCount(FrameNode* frameNode);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

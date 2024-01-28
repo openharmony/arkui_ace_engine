@@ -67,7 +67,7 @@ void SetTextpickerSelectedIndex(ArkUINodeHandle node, uint32_t* values, int32_t 
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    if (TextPickerModel::GetInstance()->IsSingle()) {
+    if (TextPickerModelNG::IsSingle(frameNode)) {
         NodeModifier::SetSelectedIndexSingle(frameNode, values, size);
     } else {
         NodeModifier::SetSelectedIndexMulti(frameNode, values, size);
@@ -78,7 +78,7 @@ void ResetTextpickerSelectedIndex(ArkUINodeHandle node) {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    if (TextPickerModel::GetInstance()->IsSingle()) {
+    if (TextPickerModelNG::IsSingle(frameNode)) {
         NodeModifier::SetSelectedIndexSingle(frameNode, 0, 0);
     } else {
         NodeModifier::SetSelectedIndexMulti(frameNode, 0, 0);
@@ -231,7 +231,7 @@ void GetPickerTextStyle(uint32_t color, const char* fontInfo, int32_t styleVal, 
 void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues, const int32_t size)
 {
     std::vector<NG::RangeContent> rangeResult;
-    TextPickerModel::GetInstance()->GetSingleRange(rangeResult);
+    TextPickerModelNG::GetSingleRange(frameNode, rangeResult);
     if (selectedValues[0] >= rangeResult.size()) {
         TextPickerModelNG::SetSelected(frameNode, 0);
     } else {
@@ -242,12 +242,12 @@ void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues, cons
 void SetSelectedIndexMultiInternal(FrameNode* frameNode,
     uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
-    if (!TextPickerModel::GetInstance()->IsCascade()) {
+    if (!TextPickerModelNG::IsCascade(frameNode)) {
         NodeModifier::SetSelectedInternal(count, options, selectedValues);
     } else {
         TextPickerModelNG::SetHasSelectAttr(frameNode, true);
         NodeModifier::ProcessCascadeSelected(options, 0, selectedValues);
-        uint32_t maxCount = TextPickerModel::GetInstance()->GetMaxCount();
+        uint32_t maxCount = TextPickerModelNG::GetMaxCount(frameNode);
         if (selectedValues.size() < maxCount) {
             auto differ = maxCount - selectedValues.size();
             for (uint32_t i = 0; i < differ; i++) {
@@ -292,10 +292,10 @@ void SetSelectedInternal(
 void SetSelectedIndexMulti(FrameNode* frameNode, uint32_t* inputs, const int32_t size)
 {
     std::vector<NG::TextCascadePickerOptions> options;
-    TextPickerModel::GetInstance()->GetMultiOptions(options);
+    TextPickerModelNG::GetMultiOptions(frameNode, options);
 
     auto count =
-        TextPickerModel::GetInstance()->IsCascade() ? TextPickerModel::GetInstance()->GetMaxCount() : options.size();
+        TextPickerModelNG::IsCascade(frameNode) ? TextPickerModelNG::GetMaxCount(frameNode) : options.size();
     std::vector<uint32_t> selectedValues;
 
     if (size >= 0) {
