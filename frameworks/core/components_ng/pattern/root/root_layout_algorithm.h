@@ -22,18 +22,16 @@
 
 namespace OHOS::Ace::NG {
 // not in use, Root is using BoxLayoutAlgorithm
-class [[deprecated]] RootLayoutAlgorithm : public BoxLayoutAlgorithm {
+class RootLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(RootLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
     RootLayoutAlgorithm() = default;
     ~RootLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    SafeAreaInsets childInsets_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RootLayoutAlgorithm);
 };
