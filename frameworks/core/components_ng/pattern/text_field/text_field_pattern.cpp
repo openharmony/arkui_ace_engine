@@ -4232,9 +4232,6 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
             CloseSelectOverlay();
         }
     }
-    if (HasFocus() && IsSingleHandle()) {
-        StartTwinkling();
-    }
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
