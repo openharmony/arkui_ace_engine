@@ -1518,6 +1518,20 @@ struct ArkUISliderModifier {
     void (*resetShowSteps)(ArkUINodeHandle node);
     void (*setThickness)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetThickness)(ArkUINodeHandle node);
+    void (*setSliderValue)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setMinLabel)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setMaxLabel)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setDirection)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setStep)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setReverse)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setSliderStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetSliderValue)(ArkUINodeHandle node);
+    void (*resetMinLabel)(ArkUINodeHandle node);
+    void (*resetMaxLabel)(ArkUINodeHandle node);
+    void (*resetDirection)(ArkUINodeHandle node);
+    void (*resetStep)(ArkUINodeHandle node);
+    void (*resetReverse)(ArkUINodeHandle node);
+    void (*resetSliderStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIProgressModifier {
@@ -1682,6 +1696,8 @@ struct ArkUICheckboxModifier {
     void (*resetCheckboxWidth)(ArkUINodeHandle node);
     void (*resetCheckboxHeight)(ArkUINodeHandle node);
     void (*resetMark)(ArkUINodeHandle node);
+    void (*setCheckboxShape)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetCheckboxShape)(ArkUINodeHandle node);
 };
 
 struct ArkUICheckboxGroupModifier {
