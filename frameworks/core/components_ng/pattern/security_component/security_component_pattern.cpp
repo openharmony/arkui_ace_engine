@@ -410,17 +410,8 @@ void SecurityComponentPattern::OnModifyDone()
     InitOnKeyEvent(frameNode);
     InitAppearCallback(frameNode);
     InitOnTouch(frameNode);
-    RegisterOrUpdateSecurityComponent(frameNode, scId_);
-}
-
-void SecurityComponentPattern::RegisterOrUpdateSecurityComponent(RefPtr<FrameNode>& frameNode, int32_t& scId)
-{
 #ifdef SECURITY_COMPONENT_ENABLE
-    if (scId == -1) {
-        SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId);
-    } else {
-        SecurityComponentHandler::UpdateSecurityComponent(frameNode, scId);
-    }
+    SecurityComponentHandler::TryLoadSecurityComponentIfNotExist();
 #endif
 }
 
@@ -437,8 +428,7 @@ void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
         auto securityComponentPattern = weak.Upgrade();
         CHECK_NULL_VOID(securityComponentPattern);
         auto frameNode = securityComponentPattern->GetHost();
-        securityComponentPattern->RegisterOrUpdateSecurityComponent(frameNode,
-            securityComponentPattern->scId_);
+        SecurityComponentHandler::TryLoadSecurityComponentIfNotExist();
 #endif
     };
 

@@ -86,7 +86,6 @@ protected:
     void SetNodeHitTestMode(RefPtr<FrameNode>& node, HitTestMode mode);
     void InitOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
         RefPtr<FrameNode>& text, RefPtr<FrameNode>& button);
-    void RegisterOrUpdateSecurityComponent(RefPtr<FrameNode>& frameNode, int32_t& scId);
     void UnregisterSecurityComponent();
     void InitAppearCallback(RefPtr<FrameNode>& frameNode);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
