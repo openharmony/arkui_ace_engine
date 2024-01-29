@@ -487,6 +487,8 @@ public:
         const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
+    static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc);
+    static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
 private:
     static void AddDragFrameNodeToManager();
 };

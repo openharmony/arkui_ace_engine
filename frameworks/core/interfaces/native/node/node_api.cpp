@@ -96,8 +96,8 @@ typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eve
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     nullptr,
     nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::SetOnTouch,
+    NodeModifier::SetOnClick,
     nullptr,
     NodeModifier::SetOnBlur,
     nullptr,

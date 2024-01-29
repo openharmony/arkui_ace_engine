@@ -673,6 +673,7 @@ struct ArkUINodeEvent {
         ArkUIAPIEventTextInput textInputEvent;
         ArkUIAPIEventGestureAsyncEvent gestureAsyncEvent;
         ArkUIStringAsyncEvent stringAsyncEvent;
+        ArkUITouchEvent touchEvent;
     };
 };
 
