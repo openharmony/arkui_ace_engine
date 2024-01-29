@@ -25,6 +25,7 @@
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
+#include "base/error/error_code.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/event/event_hub.h"
@@ -106,9 +107,28 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
     UpdateWant(want);
 }
 
+bool UIExtensionPattern::CheckCascadeStatus()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_RETURN(uiExtensionManager, false);
+    bool isUIExtProcess = uiExtensionManager->IsWindowTypeUIExtension(pipeline);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Current process type is uiextension: %{private}d.",
+        isUIExtProcess);
+    return isUIExtProcess && IsEmbeddedComponentType();
+}
+
 void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
     CHECK_NULL_VOID(sessionWrapper_);
+    if (CheckCascadeStatus()) {
+        TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "This is embedded component, not allowed to pull up another.");
+        std::string name = "extension_pulling_up_fail";
+        std::string message = "pulling another embedded component failed, not allowed to cascade.";
+        FireOnErrorCallback(ERROR_CODE_UIEXTENSION_FORBID_CASCADE, name, message);
+        return;
+    }
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
         if (sessionWrapper_->GetWant()->IsEquals(want)) {
@@ -788,6 +808,21 @@ void UIExtensionPattern::OnVisibleChange(bool visible)
     }
 }
 
+void UIExtensionPattern::OnMountToParentDone()
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetNodeStatus() == NodeStatus::NORMAL_NODE) {
+        TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Frame node status is normal.");
+        return;
+    }
+    auto wantWrap = GetWantWrap();
+    CHECK_NULL_VOID(wantWrap);
+    UpdateWant(wantWrap);
+    SetWantWrap(nullptr);
+    TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Current node mount down.");
+}
+
 void UIExtensionPattern::RegisterVisibleAreaChange()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -848,6 +883,21 @@ void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidAr
 {
     CHECK_NULL_VOID(sessionWrapper_);
     sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type);
+}
+
+bool UIExtensionPattern::IsEmbeddedComponentType()
+{
+    return embeddedType_ == EmbeddedType::UI_EXTENSION;
+}
+
+void UIExtensionPattern::SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
+{
+    curWant_ = wantWrap;
+}
+
+RefPtr<OHOS::Ace::WantWrap> UIExtensionPattern::GetWantWrap()
+{
+    return curWant_;
 }
 
 int64_t UIExtensionPattern::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)

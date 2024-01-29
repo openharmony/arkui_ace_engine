@@ -5694,7 +5694,8 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
     using Setter = int32_t(ArkUI_NodeHandle node, const ArkUI_AttributeItem* value);
     static Setter* setters[] = { SetTextContent, SetFontColor, SetFontSize, SetFontStyle, SetFontWeight, SetLineHeight,
         SetDecoration, SetTextCase, SetLetterSpacing, SetMaxLines, SetTextAlign, SetTextOverflow, SetTextFontFamily,
-        SetTextCopyOption, SetTextBaselineOffset, SetTextTextShadow, SetTextMinFontSize, SetTextMaxFontSize, SetTextFont, SetTextHeightAdaptivePolicy,
+        SetTextCopyOption, SetTextBaselineOffset, SetTextTextShadow, SetTextMinFontSize,
+        SetTextMaxFontSize, SetTextFont, SetTextHeightAdaptivePolicy,
         SetTextIndent };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -6063,7 +6064,8 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetTextContent, nullptr, nullptr, nullptr, nullptr, ResetLineHeight,
         ResetDecoration, ResetTextCase, ResetLetterSpacing, ResetMaxLines, ResetTextAlign, ResetTextOverflow, nullptr,
-        ResetTextFontFamily, ResetTextCopyOption, nullptr, ResetTextMinFontSize, ResetTextMaxFontSize, ResetTextFont, ResetTextHeightAdaptivePolicy };
+        ResetTextFontFamily, ResetTextCopyOption, nullptr, ResetTextMinFontSize,
+        ResetTextMaxFontSize, ResetTextFont, ResetTextHeightAdaptivePolicy };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

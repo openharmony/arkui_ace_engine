@@ -544,35 +544,27 @@ std::function<void()> PipelineBase::GetWrappedAnimationCallback(const std::funct
     auto wrapFinishCallback = [weak = AceType::WeakClaim(this),
                                   finishWeak = std::weak_ptr<std::function<void()>>(finishPtr)]() {
         auto context = weak.Upgrade();
-        if (!context) {
+        CHECK_NULL_VOID(context);
+        auto finishPtr = finishWeak.lock();
+        CHECK_NULL_VOID(finishPtr);
+        context->finishFunctions_.erase(finishPtr);
+        if (!(*finishPtr)) {
+            if (context->IsFormRender()) {
+                TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
+                context->SetIsFormAnimation(false);
+            }
             return;
         }
-        context->GetTaskExecutor()->PostTask(
-            [weak, finishWeak]() {
-                auto context = weak.Upgrade();
-                CHECK_NULL_VOID(context);
-                auto finishPtr = finishWeak.lock();
-                CHECK_NULL_VOID(finishPtr);
-                context->finishFunctions_.erase(finishPtr);
-                if (!(*finishPtr)) {
-                    if (context->IsFormRender()) {
-                        TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
-                        context->SetIsFormAnimation(false);
-                    }
-                    return;
-                }
-                if (context->IsFormRender()) {
-                    TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
-                    context->SetFormAnimationFinishCallback(true);
-                    (*finishPtr)();
-                    context->FlushBuild();
-                    context->SetFormAnimationFinishCallback(false);
-                    context->SetIsFormAnimation(false);
-                    return;
-                }
-                (*finishPtr)();
-            },
-            TaskExecutor::TaskType::UI);
+        if (context->IsFormRender()) {
+            TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
+            context->SetFormAnimationFinishCallback(true);
+            (*finishPtr)();
+            context->FlushBuild();
+            context->SetFormAnimationFinishCallback(false);
+            context->SetIsFormAnimation(false);
+            return;
+        }
+        (*finishPtr)();
     };
     return wrapFinishCallback;
 }

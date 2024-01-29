@@ -75,6 +75,7 @@ public:
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
     void OnAreaChangedInner() override;
+    void OnMountToParentDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     // for DynamicComponent
@@ -130,6 +131,9 @@ public:
     int32_t GetUiExtensionId() override;
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
+    bool IsEmbeddedComponentType();
+    void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
+    RefPtr<OHOS::Ace::WantWrap> GetWantWrap();
 
     virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
@@ -190,6 +194,7 @@ private:
     void RegisterVisibleAreaChange();
     void UpdateTextFieldManager(const Offset& offset, float height);
     bool IsCurrentFocus() const;
+    bool CheckCascadeStatus();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -207,6 +212,7 @@ private:
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::function<void()> bindModalCallback_;
 
+    RefPtr<OHOS::Ace::WantWrap> curWant_;
     RefPtr<FrameNode> contentNode_;
     RefPtr<SessionWrapper> sessionWrapper_;
     ErrorMsg lastError_;

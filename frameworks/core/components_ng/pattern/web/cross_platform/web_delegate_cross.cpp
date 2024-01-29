@@ -900,6 +900,11 @@ void WebDelegateCross::HandleTouchCancel()
     CallResRegisterMethod(touchCancelMethod_, "", nullptr);
 }
 
+void WebDelegateCross::HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY)
+{
+    // cross platform is not support now;
+}
+
 bool WebDelegateCross::OnKeyEvent(int32_t keyCode, int32_t keyAction)
 {
     return true;

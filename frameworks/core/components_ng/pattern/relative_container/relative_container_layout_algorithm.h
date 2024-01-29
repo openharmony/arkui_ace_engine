@@ -69,8 +69,10 @@ private:
     void GetDependencyRelationship();
     void GetDependencyRelationshipInChain(const std::string& anchor, const std::string& nodeName);
     void GetDependencyRelationshipInBarrier();
-    void CalcHorizontalGuideline(std::optional<CalcSize>& selfIdealSize, const GuidelineInfo& guidelineInfo);
-    void CalcVerticalGuideline(std::optional<CalcSize>& selfIdealSize, const GuidelineInfo& guidelineInfo);
+    void CalcHorizontalGuideline(std::optional<CalcSize>& selfIdealSize, const float& containerHeight,
+        const GuidelineInfo& guidelineInfo);
+    void CalcVerticalGuideline(std::optional<CalcSize>& selfIdealSize, const float& containerWidth,
+        const GuidelineInfo& guidelineInfo);
     void CalcGuideline(LayoutWrapper* layoutWrapper);
     void CalcBarrier(LayoutWrapper* layoutWrapper);
     bool IsGuideline(const std::string& id);
@@ -112,23 +114,13 @@ private:
     float CalcVerticalOffsetAlignBottom(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);
     float CalcVerticalOffset(
         AlignDirection alignDirection, const AlignRule& alignRule, float containerHeight, const std::string& nodeName);
-
     bool IsValidBias(float bias);
     void CalcBiasTowDirection(std::pair<TwoAlignedValues, TwoAlignedValues>& alignedValuesOnTwoDirections,
         ChildIdealSize& childIdealSize, BiasPair& biasPair, float& horizontalOffset, float& verticalOffset);
     OffsetF CalcBias(const std::string& nodeName);
-
     std::pair<TwoAlignedValues, TwoAlignedValues> GetFirstTwoAlignValues(const RefPtr<LayoutWrapper>& childWrapper,
         const std::unique_ptr<FlexItemProperty>& flexItemProperty, const ChildIdealSize& childIdealSize);
-
-    float GetVerticalAlignTopValue(std::string& anchor, std::optional<float>& marginTop);
-    float GetVerticalAlignCenterValue(std::string& anchor, std::optional<float>& marginTop);
-    float GetVerticalAlignBottomValue(std::string& anchor, std::optional<float>& marginTop);
-    float GetHorizontalAlignStartValue(std::string& anchor, std::optional<float>& marginLeft);
-    float GetHorizontalAlignCenterValue(std::string& anchor, std::optional<float>& marginLeft);
-    float GetHorizontalAlignEndValue(std::string& anchor, std::optional<float>& marginLeft);
-    void UpdateVerticalTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule);
-    void UpdateHorizontalTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule);
+    void UpdateTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule, LineDirection direction);
     void UpdateSizeWhenChildrenEmpty(LayoutWrapper* layoutWrapper);
 
     bool isHorizontalRelyOnContainer_ = false;

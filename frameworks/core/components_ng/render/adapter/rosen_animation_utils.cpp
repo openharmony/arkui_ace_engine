@@ -17,6 +17,7 @@
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/animation/native_curve_helper.h"
+#include "core/common/container.h"
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace {
@@ -51,6 +52,23 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
     }
     return timingProtocol;
 }
+std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
+{
+    if (!callback) {
+        return nullptr;
+    }
+    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentId()]() {
+        ContainerScope scope(instanceId);
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+            onFinish();
+            return;
+        }
+        taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI);
+    };
+    return wrappedOnFinish;
+}
 } // namespace
 
 class AnimationUtils::Animation {
@@ -64,7 +82,8 @@ void AnimationUtils::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
 {
     const auto& timingProtocol = OptionToTimingProtocol(option);
-    Rosen::RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), finishCallback);
+    auto wrappedOnFinish = GetWrappedCallback(finishCallback);
+    Rosen::RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), wrappedOnFinish);
 }
 
 bool AnimationUtils::CloseImplicitAnimation()
@@ -82,14 +101,17 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
     const auto& timingProtocol = OptionToTimingProtocol(option);
-    Rosen::RSNode::Animate(
-        timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback, repeatCallback);
+    auto wrappedOnFinish = GetWrappedCallback(finishCallback);
+    auto wrappedOnRepeat = GetWrappedCallback(repeatCallback);
+    Rosen::RSNode::Animate(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback,
+        wrappedOnFinish, wrappedOnRepeat);
 }
 
 void AnimationUtils::AnimateWithCurrentOptions(
     const PropertyCallback& callback, const FinishCallback& finishCallback, bool timingSensitive)
 {
-    Rosen::RSNode::AnimateWithCurrentOptions(callback, finishCallback, timingSensitive);
+    auto wrappedOnFinish = GetWrappedCallback(finishCallback);
+    Rosen::RSNode::AnimateWithCurrentOptions(callback, wrappedOnFinish, timingSensitive);
 }
 
 void AnimationUtils::AnimateWithCurrentCallback(const AnimationOption& option, const PropertyCallback& callback)
@@ -120,8 +142,10 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
     std::shared_ptr<AnimationUtils::Animation> animation = std::make_shared<AnimationUtils::Animation>();
     CHECK_NULL_RETURN(animation, nullptr);
     const auto& timingProtocol = OptionToTimingProtocol(option);
-    animation->animations_ = Rosen::RSNode::Animate(
-        timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback, repeatCallback);
+    auto wrappedOnFinish = GetWrappedCallback(finishCallback);
+    auto wrappedOnRepeat = GetWrappedCallback(repeatCallback);
+    animation->animations_ = Rosen::RSNode::Animate(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()),
+        callback, wrappedOnFinish, wrappedOnRepeat);
     if (!animation->animations_.empty()) {
         return animation;
     }
