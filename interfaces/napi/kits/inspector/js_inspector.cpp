@@ -156,7 +156,7 @@ void ComponentObserver::FunctionOn(napi_env& env, napi_value result, const char*
 {
     napi_value funcValue = nullptr;
     auto On = [](napi_env env, napi_callback_info info) -> napi_value {
-        auto jsEngine = EngineHelper::GetCurrentEngineWithoutScope();
+        auto jsEngine = EngineHelper::GetCurrentEngineSafely();
         if (!jsEngine) {
             return nullptr;
         }
@@ -285,7 +285,7 @@ static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info inf
     auto drawCallback = [observer]() { observer->callUserFunction(observer->cbDrawList_); };
     observer->drawEvent_ = AceType::MakeRefPtr<InspectorEvent>(std::move(drawCallback));
 
-    auto jsEngine = EngineHelper::GetCurrentEngineWithoutScope();
+    auto jsEngine = EngineHelper::GetCurrentEngineSafely();
     if (!jsEngine) {
         return nullptr;
     }

@@ -115,9 +115,9 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
-RefPtr<PipelineContext> PipelineContext::GetCurrentContextWithoutScope()
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
 {
-    auto currentContainer = Container::CurrentWithoutScope();
+    auto currentContainer = Container::CurrentSafely();
     CHECK_NULL_RETURN(currentContainer, nullptr);
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
@@ -617,6 +617,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     window_->FlushModifier();
     FlushFrameRate();
+    if (dragWindowVisibleCallback_) {
+        dragWindowVisibleCallback_();
+        dragWindowVisibleCallback_ = nullptr;
+    }
     FlushMessages();
     InspectDrew();
     if (!isFormRender_ && onShow_ && onFocus_) {
@@ -2855,7 +2859,7 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
 
 void PipelineContext::OnIdle(int64_t deadline)
 {
-    if (deadline == 0) {
+    if (deadline == 0 || isWindowAnimation_) {
         canUseLongPredictTask_ = false;
         return;
     }

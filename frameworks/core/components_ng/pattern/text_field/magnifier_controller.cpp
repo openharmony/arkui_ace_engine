@@ -28,26 +28,21 @@ void MagnifierController::OpenMagnifier()
     auto textFieldpattern = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFieldpattern);
     auto magnifierRect = textFieldpattern->GetMagnifierRect();
-
-    if (!haveChildNode_) {
+    if (!magnifierFrameNode_) {
         CreateMagnifierChildNode();
     }
-
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
     CHECK_NULL_VOID(rootUINode);
-
-    auto index = rootUINode->GetChildIndexById(magnifierRect.childNodeId);
-    auto childUINode = rootUINode->GetChildAtIndex(index);
-    CHECK_NULL_VOID(childUINode);
-    auto childNode = AceType::DynamicCast<FrameNode>(childUINode);
-    CHECK_NULL_VOID(childNode);
-    auto childPattern = childNode->GetPattern<TextFieldPattern>();
+    if (rootUINode->GetChildIndexById(magnifierFrameNode_->GetId()) == -1) {
+        magnifierFrameNode_->MountToParent(rootUINode);
+    }
+    auto childPattern = magnifierFrameNode_->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(childPattern);
-    auto childContext = childNode->GetRenderContext();
+    auto childContext = magnifierFrameNode_->GetRenderContext();
     CHECK_NULL_VOID(childContext);
     childContext->UpdatePosition(OffsetT<Dimension>(Dimension(textFieldpattern->GetTextPaintOffset().GetX()),
         Dimension(textFieldpattern->GetTextPaintOffset().GetY())));
@@ -55,72 +50,48 @@ void MagnifierController::OpenMagnifier()
         textFieldpattern->GetTextPaintOffset().GetX(), textFieldpattern->GetTextPaintOffset().GetY(), 0.0f, 0.0f));
 
     SetMagnifierRect(childPattern);
-    childNode->ForceSyncGeometryNode();
-    childNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    magnifierFrameNode_->ForceSyncGeometryNode();
+    magnifierFrameNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return;
 }
 
 void MagnifierController::CloseMagnifier()
 {
-    if (!haveChildNode_) {
-        return;
-    }
+    CHECK_NULL_VOID(magnifierFrameNode_);
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto textFieldpattern = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFieldpattern);
     auto magnifierRect = textFieldpattern->GetMagnifierRect();
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto rootUINode = overlayManager->GetRootNode().Upgrade();
-    CHECK_NULL_VOID(rootUINode);
-    auto index = rootUINode->GetChildIndexById(magnifierRect.childNodeId);
-    if (index != -1) {
-        auto child = rootUINode->GetChildAtIndex(index);
-        CHECK_NULL_VOID(child);
-        rootUINode->RemoveChild(child);
-    }
-    haveChildNode_ = false;
+    auto childContext = magnifierFrameNode_->GetRenderContext();
+    CHECK_NULL_VOID(childContext);
+    childContext->UpdatePosition(OffsetT<Dimension>(Dimension(textFieldpattern->GetTextPaintOffset().GetX()),
+        Dimension(textFieldpattern->GetTextPaintOffset().GetY())));
+    childContext->SetContentRectToFrame(RectF(
+        textFieldpattern->GetTextPaintOffset().GetX(), textFieldpattern->GetTextPaintOffset().GetY(), 0.0f, 0.0f));
+    magnifierFrameNode_->ForceSyncGeometryNode();
+    magnifierFrameNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void MagnifierController::CreateMagnifierChildNode()
 {
-    if (haveChildNode_) {
-        return;
-    }
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto textFieldpattern = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFieldpattern);
     auto host = textFieldpattern->GetHost();
     CHECK_NULL_VOID(host);
-
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTINPUT_ETS_TAG, nodeId);
     auto childNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     CHECK_NULL_VOID(childNode);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto rootUINode = overlayManager->GetRootNode().Upgrade();
-    CHECK_NULL_VOID(rootUINode);
-    if (rootUINode->GetChildIndexById(childNode->GetId()) == -1) {
-        childNode->MountToParent(rootUINode);
-    }
-    haveChildNode_ = true;
-
+    magnifierFrameNode_ = childNode;
     auto childPattern = childNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(childPattern);
     auto magnifierRect = textFieldpattern->GetMagnifierRect();
     magnifierRect.parent = pattern_;
     magnifierRect.childNodeId = childNode->GetId();
-
     magnifierRect.isChildNode = true;
     childPattern->SetMagnifierRect(magnifierRect);
     magnifierRect.isChildNode = false;
@@ -137,14 +108,7 @@ void MagnifierController::SetMagnifierRect(const RefPtr<Pattern>& childTextField
     auto textFieldpattern = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFieldpattern);
     auto magnifierRect = textFieldpattern->GetMagnifierRect();
-    auto host = textFieldpattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto textFieldTheme = textFieldpattern->GetTheme();
-    CHECK_NULL_VOID(textFieldTheme);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     magnifierRect.localOffset = textFieldpattern->GetLocalOffset();
-    magnifierRect.pixelMap = textFieldpattern->GetPixelMap();
     magnifierRect.cursorOffset = textFieldpattern->GetCaretOffset();
     magnifierRect.contentSize =
         SizeF(textFieldpattern->GetContentRect().Width(), textFieldpattern->GetContentRect().Height());

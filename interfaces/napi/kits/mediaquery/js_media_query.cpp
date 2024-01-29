@@ -120,7 +120,7 @@ public:
 
     static napi_value On(napi_env env, napi_callback_info info)
     {
-        auto jsEngine = EngineHelper::GetCurrentEngineWithoutScope();
+        auto jsEngine = EngineHelper::GetCurrentEngineSafely();
         if (!jsEngine) {
             return nullptr;
         }
@@ -250,7 +250,7 @@ private:
             env_ = env;
         }
         napi_close_handle_scope(env, scope);
-        auto jsEngine = EngineHelper::GetCurrentEngineWithoutScope();
+        auto jsEngine = EngineHelper::GetCurrentEngineSafely();
         if (!jsEngine) {
             return;
         }

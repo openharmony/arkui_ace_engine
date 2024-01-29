@@ -64,11 +64,11 @@ public:
 
     static RefPtr<Framework::JsEngine> GetCurrentEngine();
 
-    static RefPtr<Framework::JsEngine> GetCurrentEngineWithoutScope();
+    static RefPtr<Framework::JsEngine> GetCurrentEngineSafely();
 
     static ScopedDelegate GetCurrentDelegate();
 
-    static ScopedDelegate GetCurrentDelegateWithoutScope();
+    static ScopedDelegate GetCurrentDelegateSafely();
 
     static ScopedDelegate GetDefaultDelegate();
 

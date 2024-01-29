@@ -879,7 +879,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
-            pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
+            pipeline->AddDragWindowVisibleTask([]() {
+                InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+            });
         }
         dragDropManager->SetIsDragWindowShow(true);
     }
@@ -903,7 +905,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask([dragDropManager]() {
             dragDropManager->HideDragPreviewOverlay();
-        }, TaskExecutor::TaskType::UI);
+            }, TaskExecutor::TaskType::UI);
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }

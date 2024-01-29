@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_content_modifier.h"
+#include <algorithm>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
@@ -72,9 +73,7 @@ void SelectOverlayContentModifier::onDraw(DrawingContext& drawingContext)
 
     auto& canvas = drawingContext.canvas;
     canvas.Save();
-    RSRect clipInnerRect = RSRect(viewPort_->Get().GetX(), viewPort_->Get().GetY(),
-        viewPort_->Get().Width() + viewPort_->Get().GetX(), viewPort_->Get().Height() + viewPort_->Get().GetY());
-    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+    ClipViewPort(canvas);
 
     if (isSingleHandle_->Get()) {
         // Paint one handle.
@@ -92,6 +91,44 @@ void SelectOverlayContentModifier::onDraw(DrawingContext& drawingContext)
         }
     }
     canvas.Restore();
+}
+
+void SelectOverlayContentModifier::ClipViewPort(RSCanvas& canvas)
+{
+    auto left = viewPort_->Get().Left();
+    auto top = viewPort_->Get().Top();
+    auto right = viewPort_->Get().Right();
+    auto bottom = viewPort_->Get().Bottom();
+    auto upHandle = firstHandle_->Get();
+    auto upHandleIsShow = firstHandleIsShow_->Get();
+    auto downHandle = secondHandle_->Get();
+    auto downHandleIsShow = secondHandleIsShow_->Get();
+    if (isSingleHandle_->Get()) {
+        upHandleIsShow = false;
+        downHandleIsShow = firstHandleIsShow_->Get() || secondHandleIsShow_->Get();
+        downHandle = firstHandleIsShow_->Get() ? firstHandle_->Get()
+                                               : (secondHandleIsShow_->Get() ? secondHandle_->Get() : downHandle);
+    } else if (handleReverse_->Get()) {
+        upHandle = secondHandle_->Get();
+        upHandleIsShow = secondHandleIsShow_->Get();
+        downHandle = firstHandle_->Get();
+        downHandleIsShow = firstHandleIsShow_->Get();
+    }
+    auto handleDiameter = handleRadius_->Get() * 2;
+    if (upHandleIsShow) {
+        left = std::min(upHandle.Left() + upHandle.Width() / 2 - handleRadius_->Get(), left);
+    }
+    if (downHandleIsShow) {
+        right = std::max(downHandle.Right() - downHandle.Width() / 2 + handleRadius_->Get(), right);
+    }
+    if (upHandleIsShow) {
+        top = std::min(upHandle.Top() - handleDiameter, top);
+    }
+    if (downHandleIsShow) {
+        bottom = std::max(downHandle.Bottom() + handleDiameter, bottom);
+    }
+    RSRect clipInnerRect = RSRect(left, top, right, bottom);
+    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
 }
 
 void SelectOverlayContentModifier::PaintHandle(

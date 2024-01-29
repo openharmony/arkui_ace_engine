@@ -32,7 +32,7 @@ int32_t LogWrapper::GetId()
     return 0;
 }
 
-const char* LogWrapper::GetIdMethod()
+const std::string LogWrapper::GetIdWithReason()
 {
     return "";
 }

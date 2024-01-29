@@ -63,6 +63,8 @@ Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
 Dimension SIDEBAR_WIDTH_NEGATIVE = -1.0_vp;
 constexpr static Dimension DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
+constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
+constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER = 1;
 constexpr static int32_t DEFAULT_CONTROL_BUTTON_ZINDEX = 3;
 constexpr static int32_t DEFAULT_SIDE_BAR_ZINDEX_EMBED = 0;
@@ -1047,7 +1049,9 @@ void SideBarContainerPattern::OnHover(bool isHover)
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
-    if (dividerStrokeWidth.Value() < 0.0f) {
+    auto minSideBarWidth = layoutProperty->GetMinSideBarWidthValue(DEFAULT_MIN_SIDE_BAR_WIDTH);
+    auto maxSideBarWidth = layoutProperty->GetMaxSideBarWidthValue(DEFAULT_MAX_SIDE_BAR_WIDTH);
+    if (Negative(dividerStrokeWidth.Value()) || GreatOrEqual(minSideBarWidth.Value(), maxSideBarWidth.Value())) {
         return;
     }
 
@@ -1057,9 +1061,9 @@ void SideBarContainerPattern::OnHover(bool isHover)
     auto windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     int32_t currentPointerStyle = 0;
-    mouseStyle->GetPointerStyle(windowId, currentPointerStyle);
+    mouseStyle->GetPointerStyle(static_cast<int32_t>(windowId), currentPointerStyle);
     if (currentPointerStyle != static_cast<int32_t>(format)) {
-        mouseStyle->SetPointerStyle(windowId, format);
+        mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
     }
 }
 

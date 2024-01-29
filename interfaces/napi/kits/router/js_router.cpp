@@ -149,7 +149,7 @@ static void CommonRouterProcess(napi_env env, napi_callback_info info, const Rou
 static napi_value JSRouterPush(napi_env env, napi_callback_info info)
 {
     auto callback = [](const std::string& uri, const std::string& params, uint32_t mode) {
-        auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+        auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (!delegate) {
             return;
         }
@@ -166,7 +166,7 @@ static napi_value JSRouterPush(napi_env env, napi_callback_info info)
 static napi_value JSRouterReplace(napi_env env, napi_callback_info info)
 {
     auto callback = [](const std::string& uri, const std::string& params, uint32_t mode) {
-        auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+        auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (!delegate) {
             return;
         }
@@ -310,7 +310,7 @@ static napi_value CommonRouterWithCallbackProcess(
 static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info)
 {
     auto callback = [](std::shared_ptr<RouterAsyncContext> context, const ErrorCallback& errorCallback) {
-        auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+        auto delegate = EngineHelper::GetCurrentDelegateSafely();
         auto defaultDelegate = EngineHelper::GetDefaultDelegate();
         if (!delegate && !defaultDelegate) {
             NapiThrow(context->env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
@@ -328,7 +328,7 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
 static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info info)
 {
     auto callback = [](std::shared_ptr<RouterAsyncContext> context, const ErrorCallback& errorCallback) {
-        auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+        auto delegate = EngineHelper::GetCurrentDelegateSafely();
         auto defaultDelegate = EngineHelper::GetDefaultDelegate();
         if (!delegate && !defaultDelegate) {
             NapiThrow(context->env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
@@ -347,7 +347,7 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
 static napi_value JSPushNamedRoute(napi_env env, napi_callback_info info)
 {
     auto callback = [](std::shared_ptr<RouterAsyncContext> context, const ErrorCallback& errorCallback) {
-        auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+        auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (!delegate) {
             NapiThrow(context->env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
             return;
@@ -360,7 +360,7 @@ static napi_value JSPushNamedRoute(napi_env env, napi_callback_info info)
 static napi_value JSReplaceNamedRoute(napi_env env, napi_callback_info info)
 {
     auto callback = [](std::shared_ptr<RouterAsyncContext> context, const ErrorCallback& errorCallback) {
-        auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+        auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (!delegate) {
             NapiThrow(context->env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
             return;
@@ -378,7 +378,7 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
 
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
@@ -412,7 +412,7 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
 
 static napi_value JSRouterClear(napi_env env, napi_callback_info info)
 {
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     auto defaultDelegate = EngineHelper::GetDefaultDelegate();
     if (!delegate && !defaultDelegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
@@ -428,7 +428,7 @@ static napi_value JSRouterClear(napi_env env, napi_callback_info info)
 
 static napi_value JSRouterGetLength(napi_env env, napi_callback_info info)
 {
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
@@ -446,7 +446,7 @@ static napi_value JSRouterGetState(napi_env env, napi_callback_info info)
     int32_t routeIndex = 0;
     std::string routeName;
     std::string routePath;
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
@@ -549,7 +549,7 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
         return nullptr;
     }
 
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
@@ -557,7 +557,7 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
 
     auto context = std::make_shared<RouterAsyncContext>();
     context->env = env;
-    context->instanceId = Container::CurrentIdWithoutScope();
+    context->instanceId = Container::CurrentIdSafely();
     napi_value successFunc = nullptr;
     napi_value failFunc = nullptr;
     napi_value completeFunc = nullptr;
@@ -599,7 +599,7 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
 
 static napi_value JSRouterDisableAlertBeforeBackPage(napi_env env, napi_callback_info info)
 {
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (delegate) {
         delegate->DisableAlertBeforeBackPage();
     } else {
@@ -639,7 +639,7 @@ static napi_value JSRouterDisableAlertBeforeBackPage(napi_env env, napi_callback
 
 static napi_value JSRouterGetParams(napi_env env, napi_callback_info info)
 {
-    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;

@@ -35,7 +35,7 @@ int32_t Container::CurrentId()
     return g_id;
 }
 
-int32_t Container::CurrentIdWithoutScope()
+int32_t Container::CurrentIdSafely()
 {
     return g_id;
 }
@@ -61,7 +61,7 @@ RefPtr<Container> Container::Current()
     return MockContainer::Current();
 }
 
-RefPtr<Container> Container::CurrentWithoutScope()
+RefPtr<Container> Container::CurrentSafely()
 {
     return MockContainer::Current();
 }

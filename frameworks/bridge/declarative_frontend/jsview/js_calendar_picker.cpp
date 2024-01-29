@@ -400,7 +400,7 @@ void JSCalendarPickerDialog::JSBind(BindingTarget globalObj)
 
 void JSCalendarPickerDialog::Show(const JSCallbackInfo& info)
 {
-    auto scopedDelegate = EngineHelper::GetCurrentDelegateWithoutScope();
+    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
     if (!info[0]->IsObject()) {
         return;
@@ -508,7 +508,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     const std::map<std::string, NG::DialogEvent>& dialogEvent,
     const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
-    auto container = Container::CurrentWithoutScope();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
     auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipelineContext);

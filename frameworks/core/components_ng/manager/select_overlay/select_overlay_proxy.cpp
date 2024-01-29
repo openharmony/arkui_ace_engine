@@ -177,4 +177,14 @@ SelectOverlayInfo SelectOverlayProxy::GetSelectOverlayMangerInfo()
     CHECK_NULL_RETURN(manager, SelectOverlayInfo());
     return manager->GetSelectOverlayInfo();
 }
+
+void SelectOverlayProxy::UpdateSelectArea(const RectF& selectArea)
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateSelectArea(selectArea);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
 } // namespace OHOS::Ace::NG

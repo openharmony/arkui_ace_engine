@@ -1106,8 +1106,15 @@ public:
         return magnifierController_;
     }
 
+    void NeedRequestKeyboard()
+    {
+        needToRequestKeyboardInner_ = true;
+    }
+
     void CleanNodeResponseKeyEvent();
     void FireSelectEvent();
+
+    void OnVirtualKeyboardAreaChanged() override;
 
 protected:
     virtual void InitDragEvent();
@@ -1272,6 +1279,8 @@ private:
     void InitDragDropCallBack();
     void InitDragDropEventWithOutDragStart();
     void UpdateBlurReason();
+    RectF GetSelectArea();
+    void UpdateOverlaySelectArea();
 
     RectF frameRect_;
     RectF contentRect_;

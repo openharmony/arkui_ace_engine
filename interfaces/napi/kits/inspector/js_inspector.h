@@ -50,7 +50,7 @@ public:
             napi_delete_reference(env_, thisVarRef_);
         }
 
-        auto jsEngine = EngineHelper::GetCurrentEngineWithoutScope();
+        auto jsEngine = EngineHelper::GetCurrentEngineSafely();
         if (!jsEngine) {
             return;
         }

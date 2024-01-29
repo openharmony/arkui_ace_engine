@@ -116,16 +116,16 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return currentContainer->GetPipelineContext();
 }
 
-RefPtr<PipelineBase> PipelineBase::GetCurrentContextWithoutScope()
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
 {
-    auto currentContainer = Container::CurrentWithoutScope();
+    auto currentContainer = Container::CurrentSafely();
     CHECK_NULL_RETURN(currentContainer, nullptr);
     return currentContainer->GetPipelineContext();
 }
 
 double PipelineBase::GetCurrentDensity()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     if (!pipelineContext) {
         auto container = Container::GetActive();
         pipelineContext = container ? container->GetPipelineContext() : nullptr;
@@ -214,9 +214,9 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
     return imageCache_;
 }
 
-void PipelineBase::SetRootSize(double density, int32_t width, int32_t height)
+void PipelineBase::SetRootSize(double density, float width, float height)
 {
-    ACE_SCOPED_TRACE("SetRootSize(%lf, %d, %d)", density, width, height);
+    ACE_SCOPED_TRACE("SetRootSize(%lf, %f, %f)", density, width, height);
     density_ = density;
     auto task = [weak = AceType::WeakClaim(this), width, height]() {
         auto context = weak.Upgrade();

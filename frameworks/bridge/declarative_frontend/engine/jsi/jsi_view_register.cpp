@@ -898,7 +898,7 @@ panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo
     double density = PipelineBase::GetCurrentDensity();
     double fpValue = firstArg->ToNumber(vm)->Value();
 
-    auto container = Container::CurrentWithoutScope();
+    auto container = Container::CurrentSafely();
     if (!container) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -928,7 +928,7 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo* runtimeCallInfo
     }
 
     double pxValue = firstArg->ToNumber(vm)->Value();
-    auto container = Container::CurrentWithoutScope();
+    auto container = Container::CurrentSafely();
     if (!container) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -953,7 +953,7 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
     if (!firstArg->IsNumber()) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto container = Container::CurrentWithoutScope();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     auto window = container->GetWindow();
     CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
@@ -980,7 +980,7 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
     if (!firstArg->IsNumber()) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto container = Container::CurrentWithoutScope();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     auto window = container->GetWindow();
     CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
@@ -1033,7 +1033,7 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     std::string inspectorKey = firstArg->ToString(vm)->ToString();
 
     bool result = false;
-    auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, panda::BooleanRef::New(vm, result));
     if (!pipelineContext->GetTaskExecutor()) {
         return panda::BooleanRef::New(vm, result);
@@ -1057,7 +1057,7 @@ panda::Local<panda::JSValueRef> SetCursor(panda::JsiRuntimeCallInfo* runtimeCall
     }
     int32_t intValue = firstArg->Int32Value(vm);
 
-    auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
     if (!pipelineContext->GetTaskExecutor()) {
         return panda::JSValueRef::Undefined(vm);
@@ -1075,7 +1075,7 @@ panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
 
-    auto pipelineContext = PipelineContext::GetCurrentContextWithoutScope();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
     if (!pipelineContext->GetTaskExecutor()) {
         return panda::JSValueRef::Undefined(vm);

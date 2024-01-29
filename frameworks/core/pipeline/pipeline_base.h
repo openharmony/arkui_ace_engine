@@ -102,7 +102,7 @@ public:
 
     static RefPtr<PipelineBase> GetCurrentContext();
 
-    static RefPtr<PipelineBase> GetCurrentContextWithoutScope();
+    static RefPtr<PipelineBase> GetCurrentContextSafely();
 
     static RefPtr<PipelineBase> GetMainPipelineContext();
 
@@ -312,7 +312,7 @@ public:
         return nullptr;
     }
 
-    void SetRootSize(double density, int32_t width, int32_t height);
+    void SetRootSize(double density, float width, float height);
 
     void UpdateFontWeightScale();
 
@@ -1111,6 +1111,10 @@ public:
     {
         return false;
     }
+
+    virtual void StartWindowAnimation() {}
+
+    virtual void StopWindowAnimation() {}
 
 protected:
     virtual bool MaybeRelease() override;

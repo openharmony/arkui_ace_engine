@@ -161,6 +161,7 @@ public:
     }
 
     void StartHiddenHandleTask(bool isDelay = true);
+    void UpdateSelectArea(const RectF& selectArea);
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

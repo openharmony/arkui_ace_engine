@@ -242,8 +242,12 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
 ModalSheetCoordinationMode ScrollablePattern::CoordinateWithSheet(double& offset, int32_t source, bool isAtTop)
 {
     auto coordinationMode = ModalSheetCoordinationMode::UNKNOWN;
-    if ((!sheetPattern_) && (source == SCROLL_FROM_START)) {
-        GetParentModalSheet();
+    if (source == SCROLL_FROM_START) {
+        isSheetInReactive_ = false;
+
+        if (!sheetPattern_) {
+            GetParentModalSheet();
+        }
     }
     auto overOffsets = GetOverScrollOffset(offset);
     if (IsAtTop() && (source == SCROLL_FROM_UPDATE) && !isSheetInReactive_ && (axis_ == Axis::VERTICAL)) {

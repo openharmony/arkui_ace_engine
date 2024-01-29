@@ -136,6 +136,7 @@ public:
 
 private:
     void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, bool isHandleLineShow = true);
+    void ClipViewPort(RSCanvas& canvas);
 
     RefPtr<PropertyBool> inShowArea_;
     RefPtr<PropertyBool> handleReverse_;

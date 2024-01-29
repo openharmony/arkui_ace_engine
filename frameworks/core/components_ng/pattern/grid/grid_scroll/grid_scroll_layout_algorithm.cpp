@@ -1633,7 +1633,7 @@ void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const
     }
     auto oldConstraint = childLayoutProperty->GetLayoutConstraint();
     if (oldConstraint.has_value() && !NearEqual(GetCrossAxisSize(oldConstraint.value().maxSize, axis_),
-                                         GetCrossAxisSize(childConstraint.maxSize, axis_))) {
+        GetCrossAxisSize(childConstraint.maxSize, axis_))) {
         auto layoutAlgorithmWrapper = childLayoutWrapper->GetLayoutAlgorithm();
         if (layoutAlgorithmWrapper->SkipMeasure()) {
             layoutAlgorithmWrapper->SetNeedMeasure();

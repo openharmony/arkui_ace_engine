@@ -179,6 +179,8 @@ public:
     }
 
     virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
+
+    virtual void OnVirtualKeyboardAreaChanged() {}
     
 protected:
     TextSelector textSelector_;

@@ -87,7 +87,7 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return MockPipelineContext::GetCurrent();
 }
 
-RefPtr<PipelineContext> PipelineContext::GetCurrentContextWithoutScope()
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
 {
     return MockPipelineContext::GetCurrent();
 }
@@ -523,14 +523,14 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
 
 void PipelineBase::OnActionEvent(const std::string& action) {}
 
-void PipelineBase::SetRootSize(double density, int32_t width, int32_t height) {}
+void PipelineBase::SetRootSize(double density, float width, float height) {}
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {
     return NG::MockPipelineContext::GetCurrent();
 }
 
-RefPtr<PipelineBase> PipelineBase::GetCurrentContextWithoutScope()
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
 {
     return NG::MockPipelineContext::GetCurrent();
 }

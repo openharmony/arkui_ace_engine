@@ -70,7 +70,7 @@ public:
 
     static RefPtr<PipelineContext> GetCurrentContext();
 
-    static RefPtr<PipelineContext> GetCurrentContextWithoutScope();
+    static RefPtr<PipelineContext> GetCurrentContextSafely();
 
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
@@ -254,6 +254,11 @@ public:
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
     void AddAfterRenderTask(std::function<void()>&& task);
+
+    void AddDragWindowVisibleTask(std::function<void()>&& task)
+    {
+        dragWindowVisibleCallback_ = std::move(task);
+    }
 
     void FlushDirtyNodeUpdate();
 
@@ -592,6 +597,16 @@ public:
     // return value means whether it has printed info
     bool PrintVsyncInfoIfNeed() const override;
 
+    void StartWindowAnimation() override
+    {
+        isWindowAnimation_ = true;
+    }
+
+    void StopWindowAnimation() override
+    {
+        isWindowAnimation_ = false;
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -747,9 +762,11 @@ private:
     bool isDensityChanged_ = false;
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
+    bool isWindowAnimation_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
+    std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;
     std::optional<bool> windowFocus_;

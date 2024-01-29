@@ -121,6 +121,17 @@ constexpr LogType LOG_TYPES[] = {
     LOG_APP,
 };
 
+#ifdef ACE_INSTANCE_LOG
+constexpr const char* INSTANCE_ID_GEN_REASONS[] = {
+    "scope",
+    "active",
+    "default",
+    "singleton",
+    "foreground",
+    "undefined",
+};
+#endif
+
 } // namespace
 
 // initial static member object
@@ -152,9 +163,12 @@ int32_t LogWrapper::GetId()
     return ContainerScope::CurrentId();
 }
 
-const char* LogWrapper::GetIdMethod()
+const std::string LogWrapper::GetIdWithReason()
 {
-    return ContainerScope::CurrentIdGenerateMethod();
+    int32_t currentId = ContainerScope::CurrentId();
+    std::pair<int32_t, InstanceIdGenReason> idWithReason = ContainerScope::CurrentIdWithReason();
+    return std::to_string(currentId) + ":" + std::to_string(idWithReason.first) + ":" +
+           INSTANCE_ID_GEN_REASONS[static_cast<uint32_t>(idWithReason.second)];
 }
 #endif
 

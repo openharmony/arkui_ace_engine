@@ -398,10 +398,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
     CHECK_NULL_RETURN(placeholderSpanNode, 0);
     customNode->MountToParent(placeholderSpanNode);
-    auto frameNode = DynamicCast<FrameNode>(customNode);
-    if (frameNode) {
-        frameNode->SetDraggable(false);
-    }
+    SetSelfAndChildDraggableFalse(customNode);
     auto focusHub = placeholderSpanNode->GetOrCreateFocusHub();
     focusHub->SetFocusable(false);
     int32_t spanIndex = 0;
@@ -438,6 +435,18 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return spanIndex;
+}
+
+void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
+{
+    CHECK_NULL_VOID(customNode);
+    auto frameNode = DynamicCast<FrameNode>(customNode);
+    if (frameNode) {
+        frameNode->SetDraggable(false);
+    }
+    for (const auto& child : customNode->GetChildren()) {
+        SetSelfAndChildDraggableFalse(child);
+    }
 }
 
 int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPaste, int32_t index)
@@ -3934,9 +3943,11 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
         }
         if (isFirstHandle) {
             handleInfo.paintRect = textSelector_.firstHandle;
+            CheckHandles(handleInfo);
             selectOverlayProxy_->UpdateFirstSelectHandleInfo(handleInfo);
         } else {
             handleInfo.paintRect = textSelector_.secondHandle;
+            CheckHandles(handleInfo);
             selectOverlayProxy_->UpdateSecondSelectHandleInfo(handleInfo);
         }
 
@@ -5472,6 +5483,17 @@ void RichEditorPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
     caretOffset += offset;
     caretCaretMetric.offset = caretOffset;
     caretCaretMetric.height = caretHeight;
+}
+
+void RichEditorPattern::OnVirtualKeyboardAreaChanged()
+{
+    CHECK_NULL_VOID(SelectOverlayIsOn());
+    float selectLineHeight = 0.0f;
+    textSelector_.selectionBaseOffset.SetX(
+        CalcCursorOffsetByPosition(textSelector_.GetStart(), selectLineHeight).GetX());
+    textSelector_.selectionDestinationOffset.SetX(
+        CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
+    CreateHandles();
 }
 
 void RichEditorPattern::ResetDragOption()
