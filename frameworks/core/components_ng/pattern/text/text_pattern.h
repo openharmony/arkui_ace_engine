@@ -377,7 +377,7 @@ public:
     {
         return isCustomFont_;
     }
-    void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
+    virtual void UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, bool animation = false);
     virtual void CheckHandles(SelectHandleInfo& handleInfo);
     OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
