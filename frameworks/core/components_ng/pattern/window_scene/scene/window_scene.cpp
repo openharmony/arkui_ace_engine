@@ -286,8 +286,7 @@ void WindowScene::OnActivation()
             self->CreateStartingNode();
             host->AddChild(self->startingNode_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        } else if (self->session_->GetShowRecent() &&
-            self->session_->GetSessionState() != Rosen::SessionState::STATE_DISCONNECT && self->startingNode_) {
+        } else if (self->session_->GetSessionState() != Rosen::SessionState::STATE_DISCONNECT && self->startingNode_) {
             auto surfaceNode = self->session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
             auto host = self->GetHost();
