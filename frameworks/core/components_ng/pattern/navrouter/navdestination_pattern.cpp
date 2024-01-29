@@ -256,7 +256,7 @@ bool NavDestinationPattern::GetBackButtonState()
     if (targetFontSize == currentFontSize) {
         return showBackButton;
     }
-    textLayoutProperty->UpdateFontSize(targetFontSize);
+    textLayoutProperty->UpdateAdaptMaxFontSize(targetFontSize);
     textLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     return showBackButton;
 }
