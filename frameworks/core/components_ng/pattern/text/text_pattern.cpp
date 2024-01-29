@@ -2145,6 +2145,9 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, boo
         auto start = textSelector_.GetTextStart();
         auto end = textSelector_.GetTextEnd();
         selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+        if (selectInfo.isNewAvoid) {
+            selectOverlayProxy_->UpdateSelectArea(selectInfo.selectArea);
+        }
         selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
         selectOverlayProxy_->ShowOrHiddenMenu(!firstHandleInfo.isShow && !secondHandleInfo.isShow);
     } else {
