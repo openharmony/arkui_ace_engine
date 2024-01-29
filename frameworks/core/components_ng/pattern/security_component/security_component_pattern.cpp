@@ -111,6 +111,11 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
 #ifdef SECURITY_COMPONENT_ENABLE
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    if (!IsParentMenu(host)) {
+        return;
+    }
+
     auto pointerEvent = info.GetPointerEvent();
     CHECK_NULL_VOID(pointerEvent);
 
