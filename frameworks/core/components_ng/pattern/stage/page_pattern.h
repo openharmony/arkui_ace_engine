@@ -220,7 +220,7 @@ private:
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;
-    RouterPageState state_;
+    RouterPageState state_ = RouterPageState::ABOUT_TO_APPEAR;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

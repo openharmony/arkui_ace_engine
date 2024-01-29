@@ -195,7 +195,7 @@ void ContentController::FilterValueType(std::string& value)
     if (!hasInputFilter) {
         FilterTextInputStyle(textChanged, result);
     } else {
-        textChanged |= FilterWithEvent(property->GetInputFilter().value(), result);
+        textChanged = FilterWithEvent(property->GetInputFilter().value(), result) || textChanged;
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             FilterTextInputStyle(textChanged, result);
         }

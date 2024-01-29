@@ -5170,7 +5170,7 @@ bool RichEditorPattern::NeedAiAnalysis(
         return false;
     }
 
-    if (pos == content.length()) {
+    if (pos == static_cast<int32_t>(content.length())) {
         return false;
     }
 
