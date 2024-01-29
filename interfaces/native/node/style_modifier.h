@@ -26,6 +26,6 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
 
 const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type);
 
-void ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type);
+int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type);
 
 }; // namespace OHOS::Ace::NodeModel
