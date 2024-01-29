@@ -494,10 +494,6 @@ bool TransformUtil::DecomposeTransform(DecomposedTransform& out, const Matrix4& 
     }
     perspectiveMatrix.Set(3, 3, 1.0);
 
-    if (NearZero(std::abs(perspectiveMatrix.Determinant()))) {
-        return false;
-    }
-
     if (!NearZero(matrix.Get(3, 0)) || !NearZero(matrix.Get(3, 1)) || !NearZero(matrix.Get(3, 2))) {
         double rhs[4] = { matrix.Get(3, 0), matrix.Get(3, 1), matrix.Get(3, 2), matrix.Get(3, 3) };
 
@@ -532,7 +528,7 @@ bool TransformUtil::DecomposeTransform(DecomposedTransform& out, const Matrix4& 
 
     // Compute X scale factor and normalize first column.
     out.scale[0] = Length3(column[0]);
-    if (out.scale[0] != 0.0) {
+    if (!NearZero(out.scale[0])) {
         column[0][0] /= out.scale[0];
         column[0][1] /= out.scale[0];
         column[0][2] /= out.scale[0];
@@ -544,13 +540,12 @@ bool TransformUtil::DecomposeTransform(DecomposedTransform& out, const Matrix4& 
 
     // Now, compute Y scale and normalize 2nd column.
     out.scale[1] = Length3(column[1]);
-    if (out.scale[1] != 0.0) {
+    if (!NearZero(out.scale[1])) {
         column[1][0] /= out.scale[1];
         column[1][1] /= out.scale[1];
         column[1][2] /= out.scale[1];
+        out.skew[0] /= out.scale[1];
     }
-
-    out.skew[0] /= out.scale[1];
 
     // Compute XZ and YZ shears, orthogonalize the 3rd column.
     out.skew[1] = Dot<3>(column[0], column[2]);
@@ -560,14 +555,13 @@ bool TransformUtil::DecomposeTransform(DecomposedTransform& out, const Matrix4& 
 
     // Next, get Z scale and normalize the 3rd column.
     out.scale[2] = Length3(column[2]);
-    if (out.scale[2] != 0.0) {
+    if (!NearZero(out.scale[2])) {
         column[2][0] /= out.scale[2];
         column[2][1] /= out.scale[2];
         column[2][2] /= out.scale[2];
+        out.skew[1] /= out.scale[2];
+        out.skew[2] /= out.scale[2];
     }
-
-    out.skew[1] /= out.scale[2];
-    out.skew[2] /= out.scale[2];
 
     // At this point, the matrix is orthonormal.
     // Check for a coordinate system flip.  If the determinant
