@@ -314,11 +314,6 @@ void TextFieldPattern::BeforeCreateLayoutWrapper()
         auto operation = inputOperations_.front();
         inputOperations_.pop();
         switch (operation) {
-            case InputOperation::INIT: {
-                InitValueOperation(initValueOperations_.front());
-                initValueOperations_.pop();
-                break;
-            }
             case InputOperation::INSERT: {
                 InsertValueOperation(insertValueOperations_.front());
                 insertValueOperations_.pop();
@@ -2759,12 +2754,9 @@ void TextFieldPattern::InitEditingValueText(std::string content)
 
 void TextFieldPattern::InitValueText(std::string content)
 {
-    inputOperations_.emplace(InputOperation::INIT);
-    initValueOperations_.emplace(content);
-}
-
-void TextFieldPattern::InitValueOperation(std::string content)
-{
+    if (HasInputOperation() && content != "") {
+        return;
+    }
     contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetWideText().length());
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
