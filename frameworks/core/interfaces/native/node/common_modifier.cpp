@@ -849,7 +849,7 @@ void ResetOpacity(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetOpacity(frameNode, 0.0f);
+    ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
 
 void SetAlign(NodeHandle node, int32_t align)
