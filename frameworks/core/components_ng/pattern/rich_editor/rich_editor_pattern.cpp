@@ -1039,28 +1039,47 @@ bool RichEditorPattern::SetCaretPosition(int32_t pos)
     auto correctPos = std::clamp(pos, 0, GetTextContentLength());
     ResetLastClickOffset();
     if (pos == correctPos) {
-        if (caretVisible_ && caretPosition_ != correctPos && !textSelector_.IsValid()) {
-            FireOnSelectionChange(correctPos, correctPos);
-        }
+        FireOnSelectionChange(correctPos);
         caretPosition_ = correctPos;
         return true;
     }
     return false;
 }
 
+void RichEditorPattern::FireOnSelectionChange(const int32_t caretPosition)
+{
+    if (!textSelector_.SelectNothing() || caretPosition == caretPosition_) {
+        return;
+    }
+    FireOnSelectionChange(caretPosition, caretPosition);
+}
+
+void RichEditorPattern::FireOnSelectionChange(const TextSelector& selector)
+{
+    if (selector.SelectNothing()) {
+        return;
+    }
+    FireOnSelectionChange(selector.GetStart(), selector.GetEnd());
+}
+
 void RichEditorPattern::FireOnSelectionChange(int32_t start, int32_t end)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d]", start, end);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_VOID(HasFocus());
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], caretTwinkling_=%{public}d",
+        start, end, caretTwinkling_);
     if (start < 0 || end < 0) {
+        return;
+    }
+    if (start == end && !caretTwinkling_) {
         return;
     }
     if (start > end) {
         std::swap(start, end);
     }
-    auto eventHub = host->GetEventHub<RichEditorEventHub>();
-    CHECK_NULL_VOID(eventHub);
     auto rangeInfo = SelectionRangeInfo(start, end);
     eventHub->FireOnSelectionChange(&rangeInfo);
 }
@@ -1415,7 +1434,8 @@ void RichEditorPattern::StartTwinkling()
 {
     caretTwinklingTask_.Cancel();
     // Fire on selecion change when caret invisible -> visible
-    if (!caretVisible_) {
+    if (!caretTwinkling_) {
+        caretTwinkling_ = true;
         FireOnSelectionChange(caretPosition_, caretPosition_);
     }
     caretVisible_ = true;
@@ -1435,6 +1455,7 @@ void RichEditorPattern::OnCaretTwinkling()
 
 void RichEditorPattern::StopTwinkling()
 {
+    caretTwinkling_ = false;
     caretTwinklingTask_.Cancel();
     if (caretVisible_) {
         caretVisible_ = false;
@@ -1910,11 +1931,7 @@ void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
-        auto start = selector.GetStart();
-        auto end = selector.GetEnd();
-        if (start != end) {
-            pattern->FireOnSelectionChange(start, end);
-        }
+        pattern->FireOnSelectionChange(selector);
     };
     textSelector_.SetOnAccessibility(std::move(onTextSelectorChange));
 }

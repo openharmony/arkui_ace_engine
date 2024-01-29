@@ -441,6 +441,8 @@ private:
     void HandleDoubleClickOrLongPress(GestureEvent& info);
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
+    void FireOnSelectionChange(const int32_t caretPosition);
+    void FireOnSelectionChange(const TextSelector& selector);
     void FireOnSelectionChange(int32_t selectStart, int32_t selectEnd);
     void MouseRightFocus(const MouseInfo& info);
     bool IsScrollBarPressed(const MouseInfo& info);
@@ -575,6 +577,7 @@ private:
 #endif
     bool isTextChange_ = false;
     bool caretVisible_ = false;
+    bool caretTwinkling_ = false;
     bool isRichEditorInit_ = false;
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
