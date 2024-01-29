@@ -303,7 +303,7 @@ Offset PinchRecognizer::ComputePinchCenter()
     double focalY = sumOfY / fingers_;
 
     PointF localPoint(focalX, focalY);
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
     Offset pinchCenter = Offset(localPoint.GetX(), localPoint.GetY());
 
     return pinchCenter;
