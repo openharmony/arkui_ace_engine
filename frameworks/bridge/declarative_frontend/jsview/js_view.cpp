@@ -40,6 +40,7 @@
 #include "core/components_ng/base/view_partial_update_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace {
@@ -715,6 +716,16 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
     }
 
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));
+    auto customMeasureLayoutNode = DynamicCast<NG::CustomMeasureLayoutNode>(node);
+    if (customMeasureLayoutNode) {
+        auto updateParamFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+            auto jsView = weak.Upgrade();
+            CHECK_NULL_VOID(jsView);
+            ContainerScope scope(jsView->GetInstanceId());
+            jsView->jsViewFunction_->InitJsParam(layoutWrapper);
+        };
+        customMeasureLayoutNode->SetUpdateParamFunc(updateParamFunc);
+    }
 #ifdef PREVIEW
     auto uiNode = AceType::DynamicCast<NG::UINode>(node);
     if (uiNode) {
