@@ -3375,7 +3375,13 @@ void SetOnAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
             PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() + origin.GetY());
         SendArkUIAsyncEvent(&event);
     };
-    ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged));
+    auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
+                                    const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+        areaChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
+            Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
+            Offset(origin.GetX(), origin.GetY()));
+    };
+    ViewAbstract::SetOnAreaChanged(frameNode, std::move(areaChangeCallback));
 }
 
 } // namespace NodeModifier

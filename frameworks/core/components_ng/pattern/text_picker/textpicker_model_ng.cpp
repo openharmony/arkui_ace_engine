@@ -439,6 +439,14 @@ bool TextPickerModelNG::IsSingle()
     return rangeValue_.size() > 0;
 }
 
+bool TextPickerModelNG::IsSingle(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, false);
+    return textPickerPattern->GetRange().size() > 0;
+}
+
 bool TextPickerModelNG::GetSingleRange(std::vector<NG::RangeContent>& rangeValue)
 {
     rangeValue.clear();
@@ -448,6 +456,26 @@ bool TextPickerModelNG::GetSingleRange(std::vector<NG::RangeContent>& rangeValue
     return true;
 }
 
+bool TextPickerModelNG::GetSingleRange(FrameNode* frameNode, std::vector<NG::RangeContent>& rangeValue)
+{
+    rangeValue.clear();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, false);
+    for (auto& item : textPickerPattern->GetRange()) {
+        rangeValue.emplace_back(std::move(item));
+    }
+    return true;
+}
+
+bool TextPickerModelNG::IsCascade(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, false);
+    return textPickerPattern->GetIsCascade();
+}
+
 bool TextPickerModelNG::GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options)
 {
     options.clear();
@@ -455,6 +483,24 @@ bool TextPickerModelNG::GetMultiOptions(std::vector<NG::TextCascadePickerOptions
         options.emplace_back(std::move(item));
     }
     return true;
+}
+
+bool TextPickerModelNG::GetMultiOptions(FrameNode* frameNode, std::vector<NG::TextCascadePickerOptions>& options)
+{
+    options.clear();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, false);
+    for (auto& item : textPickerPattern->GetMultiOptions()) {
+        options.emplace_back(std::move(item));
+    }
+    return true;
+}
+
+uint32_t TextPickerModelNG::GetMaxCount(FrameNode* frameNode)
+{
+    // TODO
+    return 1;
 }
 
 void TextPickerModelNG::SetValues(const std::vector<std::string>& values)
