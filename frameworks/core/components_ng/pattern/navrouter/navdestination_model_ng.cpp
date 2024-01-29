@@ -244,7 +244,10 @@ void NavDestinationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
 
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    textLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
+    // max title font size should be 20.0 vp, because of backbutton
+    textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
+    // min title font size should be 14.0 vp
+    textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     if (!hasSubTitle) {
@@ -309,7 +312,10 @@ void NavDestinationModelNG::SetSubtitle(const std::string& subtitle)
     auto textLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(subtitle);
-    textLayoutProperty->UpdateFontSize(SUBTITLE_FONT_SIZE);
+    // max title font size should be 14.0 vp
+    textLayoutProperty->UpdateAdaptMaxFontSize(NavigationGetTheme()->GetSubTitleFontSize());
+    // min title font size should be 10.0 vp
+    textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
     textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
