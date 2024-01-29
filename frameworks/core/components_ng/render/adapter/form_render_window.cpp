@@ -65,6 +65,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos, void* data) {
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos, refreshPeriod] {
+            std::lock_guard<std::mutex> lock(globalMutex_);
             ContainerScope scope(id);
             // use container to get window can make sure the window is valid
             auto container = Container::Current();

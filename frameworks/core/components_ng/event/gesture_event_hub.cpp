@@ -882,7 +882,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
-            pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
+            pipeline->AddDragWindowVisibleTask([]() {
+                InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+            });
         }
         dragDropManager->SetIsDragWindowShow(true);
     }

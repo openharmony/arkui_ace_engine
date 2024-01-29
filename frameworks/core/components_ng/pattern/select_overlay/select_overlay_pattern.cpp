@@ -479,7 +479,8 @@ void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden, bool noAnimation)
         info_->menuInfo.menuIsShow = false;
         host->UpdateToolBar(false, noAnimation);
     } else if (!info_->menuInfo.menuIsShow && !isHidden &&
-               (info_->firstHandle.isShow || info_->secondHandle.isShow || info_->isSelectRegionVisible)) {
+               (info_->firstHandle.isShow || info_->secondHandle.isShow || info_->isSelectRegionVisible ||
+               (info_->isNewAvoid && !info_->isSingleHandle))) {
         info_->menuInfo.menuIsShow = true;
         host->UpdateToolBar(false, noAnimation);
     }

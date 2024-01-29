@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/interfaces/native/node/button_modifier.h"
+
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 #include <unordered_map>
 
@@ -87,7 +88,6 @@ const std::vector<FontWeight> BUTTON_FONT_WEIGHTS = {
     FontWeight::NORMAL,
     FontWeight::REGULAR,
 };
-} // namespace
 
 void SetOptionalBorderRadius(
     std::optional<Dimension>& optioalDimension, const double* values, int32_t valuesSize, int32_t& offset)
@@ -100,7 +100,7 @@ void SetOptionalBorderRadius(
     offset = offset + OFFSET_3;
 }
 
-void SetButtonType(NodeHandle node, int type)
+void SetButtonType(ArkUINodeHandle node, int type)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -110,7 +110,7 @@ void SetButtonType(NodeHandle node, int type)
     }
 }
 
-void ResetButtonType(NodeHandle node)
+void ResetButtonType(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -118,28 +118,28 @@ void ResetButtonType(NodeHandle node)
     return;
 }
 
-void SetButtonStateEffect(NodeHandle node, bool stateEffect)
+void SetButtonStateEffect(ArkUINodeHandle node, bool stateEffect)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetStateEffect(frameNode, stateEffect);
 }
 
-void ResetButtonStateEffect(NodeHandle node)
+void ResetButtonStateEffect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetStateEffect(frameNode, DEFAULT_STATE_EFFECT);
 }
 
-void SetButtonFontColor(NodeHandle node, uint32_t fontColor)
+void SetButtonFontColor(ArkUINodeHandle node, uint32_t fontColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetFontColor(frameNode, Color(fontColor));
 }
 
-void ResetButtonFontColor(NodeHandle node)
+void ResetButtonFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -151,7 +151,7 @@ void ResetButtonFontColor(NodeHandle node)
     ButtonModelNG::SetFontColor(frameNode, textColor);
 }
 
-void ResetButtonFontSizeInternal(NodeHandle node)
+void ResetButtonFontSizeInternal(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -163,7 +163,7 @@ void ResetButtonFontSizeInternal(NodeHandle node)
     ButtonModelNG::SetFontSize(frameNode, fontSize);
 }
 
-void SetButtonFontSize(NodeHandle node, double fontSizeValue, int fontSizeUnit)
+void SetButtonFontSize(ArkUINodeHandle node, double fontSizeValue, int fontSizeUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -174,12 +174,12 @@ void SetButtonFontSize(NodeHandle node, double fontSizeValue, int fontSizeUnit)
     }
 }
 
-void ResetButtonFontSize(NodeHandle node)
+void ResetButtonFontSize(ArkUINodeHandle node)
 {
     ResetButtonFontSizeInternal(node);
 }
 
-void SetButtonFontWeight(NodeHandle node, const char* fontWeight)
+void SetButtonFontWeight(ArkUINodeHandle node, const char* fontWeight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -187,14 +187,14 @@ void SetButtonFontWeight(NodeHandle node, const char* fontWeight)
     ButtonModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeightStr));
 }
 
-void ResetButtonFontWeight(NodeHandle node)
+void ResetButtonFontWeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetFontWeight(frameNode, DEFAULT_FONT_WEIGHT);
 }
 
-void SetButtonFontStyle(NodeHandle node, int32_t fontStyle)
+void SetButtonFontStyle(ArkUINodeHandle node, int32_t fontStyle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -205,14 +205,14 @@ void SetButtonFontStyle(NodeHandle node, int32_t fontStyle)
     }
 }
 
-void ResetButtonFontStyle(NodeHandle node)
+void ResetButtonFontStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
 }
 
-void SetButtonFontFamily(NodeHandle node, const char* fontFamily)
+void SetButtonFontFamily(ArkUINodeHandle node, const char* fontFamily)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -221,7 +221,7 @@ void SetButtonFontFamily(NodeHandle node, const char* fontFamily)
     ButtonModelNG::SetFontFamily(frameNode, fontFamilyResult);
 }
 
-void ResetButtonFontFamily(NodeHandle node)
+void ResetButtonFontFamily(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -348,12 +348,12 @@ void SetButtonStringParameters(
 {
     CHECK_NULL_VOID(stringParameters);
     buttonParameters.fontWeight = std::nullopt;
-    if (INDEX_STRING_FONT_WEIGHT_0 < dataCount && stringParameters[INDEX_STRING_FONT_WEIGHT_0] != nullptr) {
+    if (stringParameters[INDEX_STRING_FONT_WEIGHT_0] != nullptr && INDEX_STRING_FONT_WEIGHT_0 < dataCount) {
         std::string fontWeightStr = stringParameters[INDEX_STRING_FONT_WEIGHT_0];
         buttonParameters.fontWeight = Framework::ConvertStrToFontWeight(fontWeightStr);
     }
     buttonParameters.fontFamily = std::nullopt;
-    if (INDEX_STRING_FONT_FAMILY_1 < dataCount && stringParameters[INDEX_STRING_FONT_FAMILY_1] != nullptr) {
+    if (stringParameters[INDEX_STRING_FONT_FAMILY_1] != nullptr && INDEX_STRING_FONT_FAMILY_1 < dataCount) {
         std::string familiesStr = stringParameters[INDEX_STRING_FONT_FAMILY_1];
         std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
         if (fontFamilyResult.size() == 1 &&
@@ -364,7 +364,7 @@ void SetButtonStringParameters(
     }
 }
 
-void SetButtonLabelStyle(NodeHandle node, const char** stringParameters, const int32_t* valueArray,
+void SetButtonLabelStyle(ArkUINodeHandle node, const char** stringParameters, const int32_t* valueArray,
     const double* dimensionArray, const size_t* dataCountArray)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -377,19 +377,19 @@ void SetButtonLabelStyle(NodeHandle node, const char** stringParameters, const i
     ButtonModelNG::SetLableStyle(frameNode, buttonParameters);
 }
 
-void ResetButtonLabelStyle(NodeHandle node)
+void ResetButtonLabelStyle(ArkUINodeHandle node)
 {
     return;
 }
 
-void SetButtonBackgroundColor(NodeHandle node, uint32_t color)
+void SetButtonBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::BackgroundColor(frameNode, Color(color), true);
 }
 
-void ResetButtonBackgroundColor(NodeHandle node)
+void ResetButtonBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -411,7 +411,7 @@ void ResetButtonBackgroundColor(NodeHandle node)
  * values[offset + 9], option[offset + 10], option[offset + 11]: borderRadius bottomRight(hasValue, value, unit)
  * @param optionsLength options valuesSize
  */
-void SetButtonBorderRadius(NodeHandle node, const double* values, int32_t valuesSize)
+void SetButtonBorderRadius(ArkUINodeHandle node, const double* values, int32_t valuesSize)
 {
     if ((values == nullptr) || (valuesSize != BORDERRADIUS_SIZE)) {
         return;
@@ -431,7 +431,7 @@ void SetButtonBorderRadius(NodeHandle node, const double* values, int32_t values
     ButtonModelNG::SetBorderRadius(frameNode, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
 }
 
-void ResetButtonBorderRadius(NodeHandle node)
+void ResetButtonBorderRadius(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -439,40 +439,33 @@ void ResetButtonBorderRadius(NodeHandle node)
     ButtonModelNG::SetBorderRadius(frameNode, reset);
 }
 
-void SetButtonSize(
-    NodeHandle node, const char* widthValue, int32_t widthUnit, const char* heightValue, int32_t heightUnit)
+void SetButtonSize(ArkUINodeHandle node, double widthValue, int32_t widthUnit, double heightValue, int32_t heightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string widthValueStr = std::string(widthValue);
-    std::string heightValueStr = std::string(heightValue);
-    std::optional<CalcDimension> widthInfo;
-    std::optional<CalcDimension> heightInfo;
-    if (widthValueStr != "undefined") {
-        widthInfo = CalcDimension(StringUtils::StringToDouble(widthValueStr), (DimensionUnit)widthUnit);
-    }
-    if (heightValueStr != "undefined") {
-        heightInfo = CalcDimension(StringUtils::StringToDouble(heightValueStr), (DimensionUnit)heightUnit);
-    }
-    ButtonModelNG::SetSize(frameNode, widthInfo, heightInfo);
+    ButtonModelNG::SetSize(frameNode, CalcDimension(widthValue, (DimensionUnit)widthUnit),
+        CalcDimension(heightValue, (DimensionUnit)heightUnit));
 }
 
-void ResetButtonSize(NodeHandle node)
+void ResetButtonSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value(0.0, DimensionUnit::VP);
     ButtonModelNG::SetSize(frameNode, value, value);
 }
+} // namespace
 
-ArkUIButtonModifierAPI GetButtonModifier()
+namespace NodeModifier {
+const ArkUIButtonModifier* GetButtonModifier()
 {
-    static const ArkUIButtonModifierAPI modifier = { SetButtonType, ResetButtonType, SetButtonStateEffect,
+    static const ArkUIButtonModifier modifier = { SetButtonType, ResetButtonType, SetButtonStateEffect,
         ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize, ResetButtonFontSize,
         SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle, SetButtonFontFamily,
         ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle, SetButtonBackgroundColor,
         ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius, SetButtonSize, ResetButtonSize };
 
-    return modifier;
+    return &modifier;
 }
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

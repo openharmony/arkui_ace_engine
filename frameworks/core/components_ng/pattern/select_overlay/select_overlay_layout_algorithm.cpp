@@ -114,9 +114,10 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if ((!CheckInShowArea(*info_) ||
-            (!info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible)) &&
-        !info_->isUsingMouse) {
+    auto isNewAvoid = info_->isNewAvoid && !info_->isSingleHandle;
+    auto shouldInActiveByHandle =
+        !info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible;
+    if ((!CheckInShowArea(*info_) || (!isNewAvoid && shouldInActiveByHandle)) && !info_->isUsingMouse) {
         menu->SetActive(false);
         return;
     } else {
@@ -435,6 +436,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(float menuWidth, floa
     if (LessNotEqual(menuPosition.GetY(), topArea)) { // 顶部避让失败，实行底部避让
         menuPosition = OffsetF(positionX, selectArea.Bottom() + menuSpacing);
     }
+    menuPosition = OffsetF(positionX, std::max((float)topArea, menuPosition.GetY()));
     auto viewPort = pipeline->GetRootRect();
     if ((hasKeyboard && (menuPosition.GetY() + menuHeight) > keyboardInsert.start) ||
         (menuPosition.GetY() + menuHeight) > viewPort.Bottom()) { // 底部避让失败，实行选中区避让

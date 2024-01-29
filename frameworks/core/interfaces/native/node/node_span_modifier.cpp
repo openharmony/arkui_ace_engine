@@ -61,11 +61,18 @@ void ResetSpanTextCase(ArkUINodeHandle node)
     SpanModelNG::SetTextCase(frameNode, DEFAULT_TEXT_CASE);
 }
 
-void SetSpanFontWeight(ArkUINodeHandle node, const char* value)
+void SetSpanFontWeightStr(ArkUINodeHandle node, const char* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SpanModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(value));
+}
+
+void SetSpanFontWeight(ArkUINodeHandle node, ArkUI_Int32 fontWeight)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SpanModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(fontWeight));
 }
 
 void ResetSpanFontWeight(ArkUINodeHandle node)
@@ -241,7 +248,7 @@ const ArkUISpanModifier* GetSpanModifier()
         ResetSpanFontWeight, SetSpanLineHeight, ReSetSpanLineHeight, SetSpanFontStyle, ReSetSpanFontStyle,
         SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily, SetSpanDecoration,
         ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing, ResetSpanLetterSpacing,
-        SetSpanFont, ResetSpanFont };
+        SetSpanFont, ResetSpanFont, SetSpanFontWeightStr };
     return &modifier;
 }
 } // namespace NodeModifier

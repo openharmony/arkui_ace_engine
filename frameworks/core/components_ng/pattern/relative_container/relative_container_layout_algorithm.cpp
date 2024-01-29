@@ -40,159 +40,17 @@ inline bool IsAnchorContainer(const std::string& anchor)
 }
 } // namespace
 
-float RelativeContainerLayoutAlgorithm::GetVerticalAlignTopValue(
-    std::string& anchor, std::optional<float>& marginTop)
-{
-    auto result = 0.0f;
-    auto extraMargin = Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ? 0.0f : marginTop.value_or(0);
-    result = IsAnchorContainer(anchor) ? 0.0f : recordOffsetMap_[anchor].GetY() + extraMargin;
-    return result;
-}
-
-float RelativeContainerLayoutAlgorithm::GetVerticalAlignCenterValue(
-    std::string& anchor, std::optional<float>& marginTop)
-{
-    auto result = 0.0f;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        result = IsAnchorContainer(anchor)
-                 ? containerSizeWithoutPaddingBorder_.Height() / 2.0f
-                 : idNodeMap_[anchor]->GetGeometryNode()->GetMarginFrameSize().Height() / 2.0f +
-                    recordOffsetMap_[anchor].GetY();
-    } else {
-        result = IsAnchorContainer(anchor)
-                 ? containerSizeWithoutPaddingBorder_.Height() / 2.0f
-                 : idNodeMap_[anchor]->GetGeometryNode()->GetFrameSize().Height() / 2.0f +
-                    recordOffsetMap_[anchor].GetY() + marginTop.value_or(0);
-    }
-    return result;
-}
-
-float RelativeContainerLayoutAlgorithm::GetVerticalAlignBottomValue(
-    std::string& anchor, std::optional<float>& marginTop)
-{
-    auto result = 0.0f;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        result = IsAnchorContainer(anchor)
-                 ? containerSizeWithoutPaddingBorder_.Height()
-                 : idNodeMap_[anchor]->GetGeometryNode()->GetMarginFrameSize().Height() +
-                    recordOffsetMap_[anchor].GetY();
-    } else {
-        result = IsAnchorContainer(anchor)
-                 ? containerSizeWithoutPaddingBorder_.Height()
-                 : idNodeMap_[anchor]->GetGeometryNode()->GetFrameSize().Height() +
-                    recordOffsetMap_[anchor].GetY() + marginTop.value_or(0);
-    }
-    return result;
-}
-
-void RelativeContainerLayoutAlgorithm::UpdateVerticalTwoAlignValues(
-    TwoAlignedValues& twoAlignedValues, AlignRule alignRule)
+void RelativeContainerLayoutAlgorithm::UpdateTwoAlignValues(
+    TwoAlignedValues& twoAlignedValues, AlignRule alignRule, LineDirection direction)
 {
     if (twoAlignedValues.first.has_value() && twoAlignedValues.second.has_value()) {
         return;
     }
-    auto result = 0.0f;
-    std::optional<float> marginTop;
-    if (!IsAnchorContainer(alignRule.anchor)) {
-        auto anchorWrapper = idNodeMap_[alignRule.anchor];
-        if (anchorWrapper->GetGeometryNode()->GetMargin()) {
-            marginTop = anchorWrapper->GetGeometryNode()->GetMargin()->top;
-        }
-    }
-    switch (alignRule.vertical) {
-        case VerticalAlign::TOP:
-            result = GetVerticalAlignTopValue(alignRule.anchor, marginTop);
-            break;
-        case VerticalAlign::CENTER:
-            result = GetVerticalAlignCenterValue(alignRule.anchor, marginTop);
-            break;
-        case VerticalAlign::BOTTOM:
-            result = GetVerticalAlignBottomValue(alignRule.anchor, marginTop);
-            break;
-        default:
-            break;
-    }
-    if (!twoAlignedValues.first.has_value()) {
-        twoAlignedValues.first = result;
-        return;
-    }
-    if (!twoAlignedValues.second.has_value()) {
-        twoAlignedValues.second = result;
-    }
-}
 
-float RelativeContainerLayoutAlgorithm::GetHorizontalAlignStartValue(
-    std::string& anchor, std::optional<float>& marginLeft)
-{
-    auto result = 0.0f;
-    auto extraMargin = Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ? 0.0f : marginLeft.value_or(0);
-    result = IsAnchorContainer(anchor) ? 0.0f : recordOffsetMap_[anchor].GetX() + extraMargin;
-    return result;
-}
+    auto result = (direction == LineDirection::HORIZONTAL)
+                    ? GetHorizontalAnchorValueByAlignRule(alignRule)
+                    : GetVerticalAnchorValueByAlignRule(alignRule);
 
-float RelativeContainerLayoutAlgorithm::GetHorizontalAlignCenterValue(
-    std::string& anchor, std::optional<float>& marginLeft)
-{
-    auto result = 0.0f;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        result = IsAnchorContainer(anchor)
-                 ? containerSizeWithoutPaddingBorder_.Width() / 2.0f
-                 : idNodeMap_[anchor]->GetGeometryNode()->GetMarginFrameSize().Width() / 2.0f +
-                    recordOffsetMap_[anchor].GetX();
-    } else {
-        result = IsAnchorContainer(anchor)
-                 ? containerSizeWithoutPaddingBorder_.Width() / 2.0f
-                 : idNodeMap_[anchor]->GetGeometryNode()->GetFrameSize().Width() / 2.0f +
-                    recordOffsetMap_[anchor].GetX() + marginLeft.value_or(0);
-    }
-    return result;
-}
-
-float RelativeContainerLayoutAlgorithm::GetHorizontalAlignEndValue(
-    std::string& anchor, std::optional<float>& marginLeft)
-{
-    auto result = 0.0f;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        result = IsAnchorContainer(anchor)
-                 ? containerSizeWithoutPaddingBorder_.Width()
-                 : idNodeMap_[anchor]->GetGeometryNode()->GetMarginFrameSize().Width() +
-                    recordOffsetMap_[anchor].GetX();
-    } else {
-        result = IsAnchorContainer(anchor)
-                 ? containerSizeWithoutPaddingBorder_.Width()
-                 : idNodeMap_[anchor]->GetGeometryNode()->GetFrameSize().Width() +
-                    recordOffsetMap_[anchor].GetX() + marginLeft.value_or(0);
-    }
-    return result;
-}
-
-void RelativeContainerLayoutAlgorithm::UpdateHorizontalTwoAlignValues(
-    TwoAlignedValues& twoAlignedValues, AlignRule alignRule)
-{
-    if (twoAlignedValues.first.has_value() && twoAlignedValues.second.has_value()) {
-        return;
-    }
-    auto result = 0.0f;
-    std::optional<float> marginLeft;
-    if (!IsAnchorContainer(alignRule.anchor)) {
-        auto anchorWrapper = idNodeMap_[alignRule.anchor];
-        if (anchorWrapper->GetGeometryNode()->GetMargin()) {
-            marginLeft = anchorWrapper->GetGeometryNode()->GetMargin()->left;
-        }
-    }
-    switch (alignRule.horizontal) {
-        case HorizontalAlign::START:
-            result = GetHorizontalAlignStartValue(alignRule.anchor, marginLeft);
-            break;
-        case HorizontalAlign::CENTER:
-            result = GetHorizontalAlignCenterValue(alignRule.anchor, marginLeft);
-            break;
-        case HorizontalAlign::END:
-            result = GetHorizontalAlignEndValue(alignRule.anchor, marginLeft);
-            break;
-        default:
-            break;
-    }
     if (!twoAlignedValues.first.has_value()) {
         twoAlignedValues.first = result;
         return;
@@ -265,51 +123,47 @@ void RelativeContainerLayoutAlgorithm::UpdateSizeWhenChildrenEmpty(LayoutWrapper
 }
 
 void RelativeContainerLayoutAlgorithm::CalcHorizontalGuideline(
-    std::optional<CalcSize>& selfIdealSize, const GuidelineInfo& guidelineInfo)
+    std::optional<CalcSize>& selfIdealSize, const float& containerHeight, const GuidelineInfo& guidelineInfo)
 {
     ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty();
-    bool widthAuto = (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO);
+    bool heightAuto = (selfIdealSize->Height()->GetDimension().Unit() == DimensionUnit::AUTO);
     if (guidelineInfo.start.has_value()) {
-        if (guidelineInfo.start.value().Unit() == DimensionUnit::PERCENT && widthAuto) {
+        if ((guidelineInfo.start.value().Unit() == DimensionUnit::PERCENT) && heightAuto) {
             guidelines_[guidelineInfo.id] = std::make_pair(LineDirection::HORIZONTAL, 0.0f);
         } else {
-            auto start = ConvertToPx(guidelineInfo.start.value(),
-                scaleProperty, selfIdealSize->Width()->GetDimension().Value());
+            auto start = ConvertToPx(guidelineInfo.start.value(), scaleProperty, containerHeight);
             guidelines_[guidelineInfo.id] = std::make_pair(LineDirection::HORIZONTAL, start.value_or(0));
         }
     } else if (guidelineInfo.end.has_value()) {
-        if (widthAuto) {
+        if (heightAuto) {
             guidelines_[guidelineInfo.id] = std::make_pair(LineDirection::HORIZONTAL, 0.0f);
         } else {
-            auto end = ConvertToPx(guidelineInfo.end.value(),
-                scaleProperty, selfIdealSize->Width()->GetDimension().Value());
+            auto end = ConvertToPx(guidelineInfo.end.value(), scaleProperty, containerHeight);
             guidelines_[guidelineInfo.id] = std::make_pair(
-                LineDirection::HORIZONTAL, (selfIdealSize->Width()->GetDimension().Value() - end.value_or(0)));
+                LineDirection::HORIZONTAL, (containerHeight - end.value_or(0)));
         }
     }
 }
 
 void RelativeContainerLayoutAlgorithm::CalcVerticalGuideline(
-    std::optional<CalcSize>& selfIdealSize, const GuidelineInfo& guidelineInfo)
+    std::optional<CalcSize>& selfIdealSize, const float& containerWidth, const GuidelineInfo& guidelineInfo)
 {
     ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty();
-    bool heightAuto = (selfIdealSize->Height()->GetDimension().Unit() == DimensionUnit::AUTO);
+    bool widthAuto = (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO);
     if (guidelineInfo.start.has_value()) {
-        if (guidelineInfo.start.value().Unit() == DimensionUnit::PERCENT && heightAuto) {
+        if ((guidelineInfo.start.value().Unit() == DimensionUnit::PERCENT) && widthAuto) {
             guidelines_[guidelineInfo.id] = std::make_pair(LineDirection::VERTICAL, 0.0f);
         } else {
-            auto start = ConvertToPx(guidelineInfo.start.value(), scaleProperty,
-                selfIdealSize->Height()->GetDimension().Value());
+            auto start = ConvertToPx(guidelineInfo.start.value(), scaleProperty, containerWidth);
             guidelines_[guidelineInfo.id] = std::make_pair(LineDirection::VERTICAL, start.value_or(0));
         }
     } else if (guidelineInfo.end.has_value()) {
-        if (heightAuto) {
+        if (widthAuto) {
             guidelines_[guidelineInfo.id] = std::make_pair(LineDirection::VERTICAL, 0.0f);
         } else {
-            auto end = ConvertToPx(guidelineInfo.end.value(), scaleProperty,
-                selfIdealSize->Height()->GetDimension().Value());
+            auto end = ConvertToPx(guidelineInfo.end.value(), scaleProperty, containerWidth);
             guidelines_[guidelineInfo.id] = std::make_pair(
-                LineDirection::VERTICAL, (selfIdealSize->Height()->GetDimension().Value() - end.value_or(0)));
+                LineDirection::VERTICAL, (containerWidth - end.value_or(0)));
         }
     }
 }
@@ -329,6 +183,9 @@ void RelativeContainerLayoutAlgorithm::CalcBarrier(LayoutWrapper* layoutWrapper)
     }
 
     for (const auto& barrierInfo : layoutProperty->GetBarrierValue()) {
+        if (barrierInfo.id.empty() || (idNodeMap_.find(barrierInfo.id) != idNodeMap_.end())) {
+            continue;
+        }
         barriers_[barrierInfo.id] = std::make_pair(barrierInfo.direction, barrierInfo.referencedId);
     }
 }
@@ -343,7 +200,10 @@ void RelativeContainerLayoutAlgorithm::CalcGuideline(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(layoutProperty);
     const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     CHECK_NULL_VOID(calcLayoutConstraint);
-    auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
+    auto calcSelfIdealSize = calcLayoutConstraint->selfIdealSize;
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    auto selfIdealSize = layoutConstraint->selfIdealSize;
 
     guidelines_.clear();
     if (!layoutProperty->HasGuideline()) {
@@ -351,10 +211,13 @@ void RelativeContainerLayoutAlgorithm::CalcGuideline(LayoutWrapper* layoutWrappe
     }
 
     for (const auto& guidelineInfo : layoutProperty->GetGuidelineValue()) {
+        if (guidelineInfo.id.empty() || (idNodeMap_.find(guidelineInfo.id) != idNodeMap_.end())) {
+            continue;
+        }
         if (guidelineInfo.direction == LineDirection::HORIZONTAL) {
-            CalcHorizontalGuideline(selfIdealSize, guidelineInfo);
+            CalcHorizontalGuideline(calcSelfIdealSize, selfIdealSize.Height().value_or(0), guidelineInfo);
         } else {
-            CalcVerticalGuideline(selfIdealSize, guidelineInfo);
+            CalcVerticalGuideline(calcSelfIdealSize, selfIdealSize.Width().value_or(0), guidelineInfo);
         }
     }
 
@@ -427,6 +290,10 @@ RelativeContainerLayoutAlgorithm::BarrierRect RelativeContainerLayoutAlgorithm::
                 default:
                     break;
             }
+            continue;
+        }
+
+        if (idNodeMap_.find(nodeName) == idNodeMap_.end()) {
             continue;
         }
 
@@ -705,11 +572,13 @@ float RelativeContainerLayoutAlgorithm::GetHorizontalAnchorValueByAlignRule(Alig
     if (IsAnchorContainer(alignRule.anchor)) {
         anchorWidth = containerSizeWithoutPaddingBorder_.Width();
     } else {
-        anchorWidth = idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Width();
+        anchorWidth = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
+                        ? idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Width()
+                        : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Width();
     }
 
     std::optional<float> marginLeft;
-    if (!IsAnchorContainer(alignRule.anchor)) {
+    if (!IsAnchorContainer(alignRule.anchor) && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto anchorWrapper = idNodeMap_[alignRule.anchor];
         if (anchorWrapper->GetGeometryNode()->GetMargin()) {
             marginLeft = anchorWrapper->GetGeometryNode()->GetMargin()->left;
@@ -746,13 +615,15 @@ float RelativeContainerLayoutAlgorithm::GetVerticalAnchorValueByAlignRule(AlignR
     if (IsAnchorContainer(alignRule.anchor)) {
         anchorHeight = containerSizeWithoutPaddingBorder_.Height();
     } else {
-        anchorHeight = idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Height();
+        anchorHeight = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
+                        ? idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Height()
+                        : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Height();
     }
 
     std::optional<float> marginTop;
-    if (!IsAnchorContainer(alignRule.anchor)) {
+    if (!IsAnchorContainer(alignRule.anchor) && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto anchorWrapper = idNodeMap_[alignRule.anchor];
-        if (anchorWrapper->GetGeometryNode()->GetMargin()->top) {
+        if (anchorWrapper->GetGeometryNode()->GetMargin()) {
             marginTop = anchorWrapper->GetGeometryNode()->GetMargin()->top;
         }
     }
@@ -873,7 +744,6 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    CalcGuideline(layoutWrapper);
     DetermineTopologicalOrder(layoutWrapper);
     if (SystemProperties::GetDebugEnabled()) {
         std::string result = "[";
@@ -1002,7 +872,6 @@ void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWrapper)
 {
     idNodeMap_.clear();
-    CalcBarrier(layoutWrapper);
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     auto left = padding_.left.value_or(0);
     auto top = padding_.top.value_or(0);
@@ -1028,6 +897,8 @@ void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWra
             childWrapper->SetActive(false);
         }
     }
+    CalcGuideline(layoutWrapper);
+    CalcBarrier(layoutWrapper);
 }
 
 void RelativeContainerLayoutAlgorithm::GetDependencyRelationshipInChain(
@@ -1135,22 +1006,21 @@ void RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetectionGetAnchorSet(c
     const AlignRulesItem& alignRulesItem, std::set<std::string>& anchorSet)
 {
     for (const auto& alignRule : alignRulesItem) {
-        std::string anchor;
+        std::string anchor = alignRule.second.anchor;
         std::string chainName;
         if (IsNodeInHorizontalChain(nodeName, chainName)) {
             if (alignRule.first == AlignDirection::LEFT) {
                 anchor = horizontalChains_[chainName].anchorHead.anchor;
-            } else {
+            } else if (alignRule.first == AlignDirection::RIGHT) {
                 anchor = horizontalChains_[chainName].anchorTail.anchor;
             }
-        } else if (IsNodeInVerticalChain(nodeName, chainName)) {
+        }
+        if (IsNodeInVerticalChain(nodeName, chainName)) {
             if (alignRule.first == AlignDirection::TOP) {
                 anchor = verticalChains_[chainName].anchorHead.anchor;
-            } else {
+            } else if (alignRule.first == AlignDirection::BOTTOM) {
                 anchor = verticalChains_[chainName].anchorTail.anchor;
             }
-        } else {
-            anchor = alignRule.second.anchor;
         }
 
         if (IsBarrier(anchor)) {
@@ -1369,10 +1239,10 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
         return;
     }
 
-    if (childIdealWidth.has_value() && !horizontalHasIdealSize) {
+    if (childIdealWidth.has_value() && !horizontalHasIdealSize && !IsNodeInHorizontalChain(nodeName, chainName)) {
         childConstraint.selfIdealSize.SetWidth(childIdealWidth.value());
     }
-    if (childIdealHeight.has_value() && !verticalHasIdealSize) {
+    if (childIdealHeight.has_value() && !verticalHasIdealSize && !IsNodeInVerticalChain(nodeName, chainName)) {
         childConstraint.selfIdealSize.SetHeight(childIdealHeight.value());
     }
     childWrapper->Measure(childConstraint);
@@ -1486,7 +1356,7 @@ OffsetF RelativeContainerLayoutAlgorithm::CalcBias(const std::string& nodeName)
     auto verticalOffset = 0.0f;
     CalcBiasTowDirection(alignedValuesOnTwoDirections, childIdealSize, biasPair, horizontalOffset, verticalOffset);
     horizontalOffset = (IsNodeInHorizontalChain(nodeName, chainName)) ? 0.0f : horizontalOffset;
-    verticalOffset = ((IsNodeInHorizontalChain(nodeName, chainName))) ? 0.0f : verticalOffset;
+    verticalOffset = ((IsNodeInVerticalChain(nodeName, chainName))) ? 0.0f : verticalOffset;
     return OffsetF(horizontalOffset, verticalOffset);
 }
 
@@ -1511,10 +1381,10 @@ std::pair<TwoAlignedValues, TwoAlignedValues> RelativeContainerLayoutAlgorithm::
         }
         if (static_cast<uint32_t>(alignRule.first) < HORIZONTAL_DIRECTION_RANGE && !horizontalCheckTwoSidesAligned &&
             childIdealSize.first.has_value()) {
-            UpdateHorizontalTwoAlignValues(horizontalValues, alignRule.second);
+            UpdateTwoAlignValues(horizontalValues, alignRule.second, LineDirection::HORIZONTAL);
         } else if (static_cast<uint32_t>(alignRule.first) >= HORIZONTAL_DIRECTION_RANGE &&
                    !verticalCheckTwoSidesAligned && childIdealSize.second.has_value()) {
-            UpdateVerticalTwoAlignValues(verticalValues, alignRule.second);
+            UpdateTwoAlignValues(verticalValues, alignRule.second, LineDirection::VERTICAL);
         }
     }
     return { horizontalValues, verticalValues };

@@ -19,6 +19,7 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -327,11 +328,18 @@ void ResetTextInputEnterKeyType(ArkUINodeHandle node)
     TextFieldModelNG::SetEnterKeyType(frameNode, TextInputAction::DONE);
 }
 
-void SetTextInputFontWeight(ArkUINodeHandle node, const char *fontWeight)
+void SetTextInputFontWeightStr(ArkUINodeHandle node, const char *fontWeight)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeight));
+}
+
+void SetTextInputFontWeight(ArkUINodeHandle node, ArkUI_Int32 fontWeight)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(fontWeight));
 }
 
 void ResetTextInputFontWeight(ArkUINodeHandle node)
@@ -595,6 +603,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         ResetTextInputFontFamily,
         SetTextInputPlaceholderString,
         SetTextInputTextString,
+        SetTextInputFontWeightStr,
     };
     return &modifier;
 }

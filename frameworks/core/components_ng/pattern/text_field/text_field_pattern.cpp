@@ -426,11 +426,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         mouseStatus_ = MouseStatus::NONE;
     }
     StopScrollable();
-    if (IsTextArea()) {
-        CheckScrollable();
-    } else {
-        SetScrollEnable(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
-    }
+    CheckScrollable();
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
@@ -1811,6 +1807,10 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     if (mouseStatus_ != MouseStatus::NONE && IsNormalInlineState()) {
         return;
     }
+    if (!isUsingMouse_ && SelectOverlayIsOn() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+        UpdateSelectMenuVisibility(true);
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2730,6 +2730,7 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFi
         proxy->UpdateSecondSelectHandleInfo(handleInfo);
     }
     UpdateOverlaySelectArea();
+    UpdateSelectMenuVisibility(true);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -4176,6 +4177,7 @@ void TextFieldPattern::OnAreaChangedInner()
                 CloseSelectOverlay();
             } else {
                 ProcessOverlay(false);
+                UpdateSelectMenuVisibility(false);
             }
         }
     }
@@ -5011,21 +5013,16 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 
 void TextFieldPattern::CheckScrollable()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    if (contentController_->IsEmpty()) {
-        scrollable_ = false;
+    if (IsTextArea()) {
+        if (contentController_->IsEmpty()) {
+            scrollable_ = false;
+        } else {
+            scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height());
+        }
+        SetScrollEnable(scrollable_);
     } else {
-        scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height());
+        SetScrollEnable(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
     }
-    SetScrollEnable(scrollable_);
 }
 
 bool TextFieldPattern::HasStateStyle(UIState state) const
@@ -6631,6 +6628,10 @@ RectF TextFieldPattern::GetSelectArea()
     }
     auto contentRect = contentRect_;
     contentRect.SetOffset(contentRect.GetOffset() + GetTextPaintOffset());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RectF(0, 0, 0, 0));
+    auto parent = host->GetAncestorNodeOfFrame();
+    contentRect = GetVisibleContentRect(parent, contentRect);
     return res.IntersectRectT(contentRect);
 }
 

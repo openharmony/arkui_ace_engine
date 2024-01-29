@@ -1814,6 +1814,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             }
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
                 pipelineContext->FlushBuild();
+                pipelineContext->StartWindowAnimation();
             }
         }
         auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
@@ -1944,6 +1945,23 @@ void UIContentImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateTitleInTargetPos(isShow, height);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::NotifyRotationAnimationEnd()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (pipelineContext) {
+                pipelineContext->StopWindowAnimation();
+            }
         },
         TaskExecutor::TaskType::UI);
 }

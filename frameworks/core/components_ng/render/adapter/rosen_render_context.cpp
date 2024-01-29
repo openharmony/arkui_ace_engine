@@ -176,7 +176,7 @@ std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(
     auto saturation = (blurParam->saturation - 1) * ratio + 1.0;
     auto brightness = (blurParam->brightness - 1) * ratio + 1.0;
     return Rosen::RSFilter::CreateMaterialFilter(radiusBlur, saturation, brightness, maskColor.GetValue(),
-        static_cast<Rosen::BLUR_COLOR_MODE>(blurStyleOption.colorMode));
+        static_cast<Rosen::BLUR_COLOR_MODE>(blurStyleOption.adaptiveColor));
 }
 
 RSPen GetRsPen(uint32_t strokeColor, float strokeWidth)
@@ -4107,7 +4107,7 @@ void RosenRenderContext::DumpInfo()
                 std::string("Alpha:").append(std::to_string(rsNode_->GetStagingProperties().GetAlpha())));
         }
         auto translate = rsNode_->GetStagingProperties().GetTranslate();
-        if (!(NearZero(translate[0]) && NearZero(translate[0]))) {
+        if (!(NearZero(translate[0]) && NearZero(translate[1]))) {
             DumpLog::GetInstance().AddDesc(
                 std::string("translate(x,y): ")
                     .append(std::to_string(translate[0]).append(",").append(std::to_string(translate[1]))));
@@ -4323,21 +4323,10 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 transitionEffect_->Appear();
                 ++appearingTransitionCount_;
             },
-            [weakThis = WeakClaim(this), nodeId = frameNode->GetId(), id = Container::CurrentId()]() {
+            [weakThis = WeakClaim(this)]() {
                 auto context = weakThis.Upgrade();
                 CHECK_NULL_VOID(context);
-                ContainerScope scope(id);
-                auto pipeline = PipelineBase::GetCurrentContext();
-                CHECK_NULL_VOID(pipeline);
-                auto taskExecutor = pipeline->GetTaskExecutor();
-                CHECK_NULL_VOID(taskExecutor);
-                taskExecutor->PostTask(
-                    [weakThis]() {
-                        auto context = weakThis.Upgrade();
-                        CHECK_NULL_VOID(context);
-                        context->OnTransitionInFinish();
-                    },
-                    TaskExecutor::TaskType::UI);
+                context->OnTransitionInFinish();
             },
             false);
     } else {
@@ -4368,20 +4357,8 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
             [weakThis = WeakClaim(this), nodeId = frameNode->GetId(), id = Container::CurrentId()]() {
                 auto context = weakThis.Upgrade();
                 CHECK_NULL_VOID(context);
-                ContainerScope scope(id);
-                auto pipeline = PipelineBase::GetCurrentContext();
-                CHECK_NULL_VOID(pipeline);
-                auto taskExecutor = pipeline->GetTaskExecutor();
-                CHECK_NULL_VOID(taskExecutor);
-                taskExecutor->PostTask(
-                    [id, nodeId, weakThis]() {
-                        auto context = weakThis.Upgrade();
-                        CHECK_NULL_VOID(context);
-                        ContainerScope scope(id);
-                        // update transition out count
-                        context->OnTransitionOutFinish();
-                    },
-                    TaskExecutor::TaskType::UI);
+                // update transition out count
+                context->OnTransitionOutFinish();
             },
             false);
     }

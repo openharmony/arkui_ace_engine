@@ -6702,7 +6702,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("accessibilityVirtualNode", &JSViewAbstract::JsAccessibilityVirtualNode);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
-    JSClass<JSViewAbstract>::StaticMethod("chainStyle", &JSViewAbstract::JsChainStyle);
+    JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
@@ -6819,7 +6819,7 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBias(biasPair);
 }
 
-void JSViewAbstract::JsChainStyle(const JSCallbackInfo& info)
+void JSViewAbstract::JsChainMode(const JSCallbackInfo& info)
 {
     ChainInfo chainInfo;
     if (info.Length() >= 1 && info[0]->IsNumber()) {

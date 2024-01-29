@@ -398,10 +398,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
     CHECK_NULL_RETURN(placeholderSpanNode, 0);
     customNode->MountToParent(placeholderSpanNode);
-    auto frameNode = DynamicCast<FrameNode>(customNode);
-    if (frameNode) {
-        frameNode->SetDraggable(false);
-    }
+    SetSelfAndChildDraggableFalse(customNode);
     auto focusHub = placeholderSpanNode->GetOrCreateFocusHub();
     focusHub->SetFocusable(false);
     int32_t spanIndex = 0;
@@ -438,6 +435,18 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return spanIndex;
+}
+
+void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
+{
+    CHECK_NULL_VOID(customNode);
+    auto frameNode = DynamicCast<FrameNode>(customNode);
+    if (frameNode) {
+        frameNode->SetDraggable(false);
+    }
+    for (const auto& child : customNode->GetChildren()) {
+        SetSelfAndChildDraggableFalse(child);
+    }
 }
 
 int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPaste, int32_t index)
@@ -1823,6 +1832,17 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         CloseSelectOverlay();
     }
     selectionMenuOffset_ = info.GetGlobalLocation();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!textSelectInfo.GetSelection().resultObjects.empty()) {
+        eventHub->FireOnSelect(&textSelectInfo);
+    }
+    SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
+    focusHub->RequestFocusImmediately();
+    if (overlayMod_) {
+        RequestKeyboard(false, true, true);
+    }
     if (info.GetSourceDevice() != SourceType::MOUSE || caretUpdateType_ != CaretUpdateType::DOUBLE_CLICK) {
         if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()
             && caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
@@ -1834,17 +1854,6 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         StartTwinkling();
     } else {
         StopTwinkling();
-    }
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto eventHub = host->GetEventHub<RichEditorEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    if (!textSelectInfo.GetSelection().resultObjects.empty()) {
-        eventHub->FireOnSelect(&textSelectInfo);
-    }
-    SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
-    focusHub->RequestFocusImmediately();
-    if (overlayMod_) {
-        RequestKeyboard(false, true, true);
     }
 }
 
@@ -4286,6 +4295,7 @@ void RichEditorPattern::HandleOnCut()
 
 void RichEditorPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 {
+    CHECK_NULL_VOID(HasFocus());
     TextPattern::OnHandleMove(handleRect, isFirstHandle);
     if (!isFirstHandle) {
         SetCaretPosition(textSelector_.destinationOffset);
@@ -5160,7 +5170,7 @@ bool RichEditorPattern::NeedAiAnalysis(
         return false;
     }
 
-    if (pos == content.length()) {
+    if (pos == static_cast<int32_t>(content.length())) {
         return false;
     }
 
@@ -5220,14 +5230,12 @@ void RichEditorPattern::AdjustPlaceholderSelection(int32_t& start, int32_t& end,
         return;
     }
     auto it = std::find_if(spans_.begin(), spans_.end(), [start](const RefPtr<SpanItem>& spanItem) {
-        int32_t startPosition =
-            spanItem->position - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
-        return startPosition == start;
+        return spanItem->position == start;
     });
     if (it != spans_.end()) {
         // adjust selection if touch right of image or placeholder
         auto spanIndex = std::distance(spans_.begin(), it);
-        auto spanNodeBefore = DynamicCast<FrameNode>(GetChildByIndex(spanIndex - 1));
+        auto spanNodeBefore = DynamicCast<FrameNode>(GetChildByIndex(spanIndex));
         if (spanNodeBefore && (spanNodeBefore->GetTag() == V2::IMAGE_ETS_TAG ||
             spanNodeBefore->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG)) {
             end = start;

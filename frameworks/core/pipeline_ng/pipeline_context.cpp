@@ -617,6 +617,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     window_->FlushModifier();
     FlushFrameRate();
+    if (dragWindowVisibleCallback_) {
+        dragWindowVisibleCallback_();
+        dragWindowVisibleCallback_ = nullptr;
+    }
     FlushMessages();
     InspectDrew();
     if (!isFormRender_ && onShow_ && onFocus_) {
@@ -629,6 +633,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (isNeedFlushMouseEvent_) {
         FlushMouseEvent();
         isNeedFlushMouseEvent_ = false;
+    }
+    if (isNeedFlushAnimationStartTime_) {
+        window_->FlushAnimationStartTime(nanoTimestamp);
+        isNeedFlushAnimationStartTime_ = false;
     }
     needRenderNode_.clear();
     taskScheduler_->FlushAfterRenderTask();
@@ -2874,7 +2882,7 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
 
 void PipelineContext::OnIdle(int64_t deadline)
 {
-    if (deadline == 0) {
+    if (deadline == 0 || isWindowAnimation_) {
         canUseLongPredictTask_ = false;
         return;
     }
