@@ -346,6 +346,31 @@ void ResetSliderStyle(ArkUINodeHandle node)
     SliderModelNG::SetSliderMode(frameNode, SliderModel::SliderMode::OUTSET);
 }
 
+void SetSliderBlockImage(
+    ArkUINodeHandle node, const char* src, const char* bundle, const char* module)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string srcStr(src);
+    std::string bundleStr(bundle);
+    std::string moduleStr(module);
+    SliderModelNG::SetBlockImage(frameNode, srcStr, bundleStr, moduleStr);
+}
+
+void SetClipPath(ArkUINodeHandle node, const char* type, const ArkUI_Float32* attribute, const char* commands)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto path = AceType::MakeRefPtr<Path>();
+    auto width = Dimension(attribute[0], static_cast<OHOS::Ace::DimensionUnit>(1));
+    auto height = Dimension(attribute[1], static_cast<OHOS::Ace::DimensionUnit>(1));
+    std::string pathCommands(commands);
+    path->SetWidth(width);
+    path->SetHeight(height);
+    path->SetValue(StringUtils::TrimStr(pathCommands));
+    SliderModelNG::SetBlockShape(frameNode, path);
+}
+
 namespace NodeModifier{
 const ArkUISliderModifier *GetSliderModifier()
 {
@@ -387,6 +412,7 @@ const ArkUISliderModifier *GetSliderModifier()
                                                ResetStep,
                                                ResetReverse,
                                                ResetSliderMode,
+                                               SetSliderBlockImage,
                                                };
 
   return &modifier;

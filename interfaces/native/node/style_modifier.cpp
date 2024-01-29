@@ -5445,55 +5445,51 @@ int32_t SetSliderBlockStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    // auto fullImpl = GetFullImpl();
-    // if (!fullImpl) {
-    //     TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
-    //     return;
-    // }
-    // int style = item->value[0].i32;
+    auto fullImpl = GetFullImpl();
+    int style = item->value[0].i32;
 
-    // if (style == NUM_1) {
-    //     if (item->string == nullptr) {
-    //         return ERROR_CODE_PARAM_INVALID;
-    //     }
-    //     // image
-    //     std::string src(item->string);
-    //     std::string bundle;
-    //     std::string module;
-    //     fullImpl->getNodeModifiers()->getSliderModifier()->setSliderBlockImage(
-    //         node->uiNodeHandle, src.c_str(), bundle.c_str(), module.c_str());
-    // } else if (style == NUM_2) {
-    //     if (item->string == nullptr) {
-    //         return ERROR_CODE_PARAM_INVALID;
-    //     }
-    //     std::string clipStr(item->string);;
-    //     StringUtils::TrimStr(clipStr);
-    //     if (std::regex_search(clipStr, BRACKETS)) {
-    //         std::size_t pos1 = clipStr.find_first_of('(');
-    //         std::size_t pos2 = clipStr.find_first_of(')');
-    //         std::string shape = clipStr.substr(0, pos1);
-    //         std::string content = clipStr.substr(pos1 + 1, pos2 - pos1 - 1);
-    //         std::vector<std::string> attributeProps;
-    //         StringUtils::StringSplitter(content.c_str(), ',', attributeProps);
-    //         if (std::string("path") == shape) {
-    //             double pathAttributes[NUM_2];
-    //             for (int i = 0; i < NUM_2; ++i) {
-    //                 pathAttributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
-    //             }
-    //             std::string commands(attributeProps[NUM_2]);
-    //             fullImpl->getNodeModifiers()->getSliderModifier()->setSliderBlockPath(
-    //                 node->uiNodeHandle, shape.c_str(), pathAttributes, commands.c_str());
-    //         } else {
-    //             double attributes[attributeProps.size()];
-    //             for (int i = 0; i < attributeProps.size(); ++i) {
-    //                 attributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
-    //             }
-    //             fullImpl->getNodeModifiers()->getSliderModifier()->setSliderBlockShape(
-    //                 node->uiNodeHandle, shape.c_str(), attributes, attributeProps.size());
-    //         }
-    //     }
-    // }
-    // fullImpl->getNodeModifiers()->getSliderModifier()->setSliderBlockType(node->uiNodeHandle, style);
+    if (style == NUM_1) {
+        if (item->string == nullptr) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        // image
+        std::string src(item->string);
+        std::string bundle;
+        std::string module;
+        fullImpl->getNodeModifiers()->getSliderModifier()->setSliderBlockImage(
+            node->uiNodeHandle, src.c_str(), bundle.c_str(), module.c_str());
+    } else if (style == NUM_2) {
+        if (item->string == nullptr) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        std::string clipStr(item->string);;
+        StringUtils::TrimStr(clipStr);
+        if (std::regex_search(clipStr, BRACKETS)) {
+            std::size_t pos1 = clipStr.find_first_of('(');
+            std::size_t pos2 = clipStr.find_first_of(')');
+            std::string shape = clipStr.substr(0, pos1);
+            std::string content = clipStr.substr(pos1 + 1, pos2 - pos1 - 1);
+            std::vector<std::string> attributeProps;
+            StringUtils::StringSplitter(content.c_str(), ',', attributeProps);
+            if (std::string("path") == shape) {
+                double pathAttributes[NUM_2];
+                for (int i = 0; i < NUM_2; ++i) {
+                    pathAttributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
+                }
+                std::string commands(attributeProps[NUM_2]);
+                fullImpl->getNodeModifiers()->getSliderModifier()->setSliderBlockPath(
+                    node->uiNodeHandle, shape.c_str(), pathAttributes, commands.c_str());
+            } else {
+                double attributes[attributeProps.size()];
+                for (int i = 0; i < attributeProps.size(); ++i) {
+                    attributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
+                }
+                fullImpl->getNodeModifiers()->getSliderModifier()->setSliderBlockShape(
+                    node->uiNodeHandle, shape.c_str(), attributes, attributeProps.size());
+            }
+        }
+    }
+    fullImpl->getNodeModifiers()->getSliderModifier()->setSliderBlockType(node->uiNodeHandle, style);
     return ERROR_CODE_NO_ERROR;
 }
 
