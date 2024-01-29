@@ -289,13 +289,8 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance) - height,
                     0.0f });
             },
-            [floatingLayoutProperty, id = Container::CurrentId()]() {
-                ContainerScope scope(id);
-                auto taskExecutor = Container::CurrentTaskExecutor();
-                CHECK_NULL_VOID(taskExecutor);
-                taskExecutor->PostTask(
-                    [floatingLayoutProperty]() { floatingLayoutProperty->UpdateVisibility(VisibleType::GONE); },
-                    TaskExecutor::TaskType::UI);
+            [floatingLayoutProperty]() {
+                floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
             });
     }
 }
