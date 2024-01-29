@@ -85,7 +85,7 @@ void GridScrollWithOptionsLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
         int32_t crossGridReserve = gridLayoutInfo_.crossCount_;
         /* go through a new line */
         while ((crossGridReserve > 0) && (currentIndex <= targetIndex)) {
-            auto crossPos = GetCrossStartAndSpan(layoutWrapper, targetIndex);
+            auto crossPos = GetCrossStartAndSpan(layoutWrapper, currentIndex);
             auto gridSpan = crossPos.second;
             if (crossGridReserve >= gridSpan) {
                 crossGridReserve -= gridSpan;
