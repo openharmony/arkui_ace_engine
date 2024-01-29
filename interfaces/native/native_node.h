@@ -66,14 +66,6 @@ typedef enum {
     ARKUI_NODE_LOADING_PROGRESS,
     /** 单行文本输入。 */
     ARKUI_NODE_TEXT_INPUT,
-    /** 堆叠容器。 */
-    ARKUI_NODE_STACK,
-    /** 滚动容器。 */
-    ARKUI_NODE_SCROLL,
-    /** 列表。 */
-    ARKUI_NODE_LIST,
-    /** 翻页容器。 */
-    ARKUI_NODE_SWIPER,
     /** 多行文本。 */
     ARKUI_NODE_TEXT_AREA,
     /** 按钮。 */
@@ -82,20 +74,8 @@ typedef enum {
     ARKUI_NODE_PROGRESS,
     /** 复选框。 */
     ARKUI_NODE_CHECKBOX,
-    /** 垂直布局容器。 */
-    ARKUI_NODE_COLUMN,
-    /** 水平布局容器。 */
-    ARKUI_NODE_ROW,
-    /** 弹性布局容器。 */
-    ARKUI_NODE_FLEX,
-    /** 列表项。 */
-    ARKUI_NODE_LIST_ITEM,
-    /** 刷新组件。 */
-    ARKUI_NODE_REFRESH,
     /** XComponent。 */
     ARKUI_NODE_XCOMPONENT,
-    /** 列表item分组。 */
-    ARKUI_NODE_LIST_ITEM_GROUP,
     /** 日期选择器组件。 */
     ARKUI_NODE_DATE_PICKER,
     /** 时间选择组件。 */
@@ -104,6 +84,26 @@ typedef enum {
     ARKUI_NODE_TEXT_PICKER,
     /** 滑动条组件 */
     ARKUI_NODE_SLIDER,
+    /** 堆叠容器。 */
+    ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
+    /** 翻页容器。 */
+    ARKUI_NODE_SWIPER,
+    /** 滚动容器。 */
+    ARKUI_NODE_SCROLL,
+    /** 列表。 */
+    ARKUI_NODE_LIST,
+    /** 列表项。 */
+    ARKUI_NODE_LIST_ITEM,
+    /** 列表item分组。 */
+    ARKUI_NODE_LIST_ITEM_GROUP,
+    /** 垂直布局容器。 */
+    ARKUI_NODE_COLUMN,
+    /** 水平布局容器。 */
+    ARKUI_NODE_ROW,
+    /** 弹性布局容器。 */
+    ARKUI_NODE_FLEX,
+    /** 刷新组件。 */
+    ARKUI_NODE_REFRESH,
 } ArkUI_NodeType;
 
 /**
@@ -415,13 +415,13 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { 1.0 };
      * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SATURATE, &item);
-     * auto item = basicNodeApi->getAttribute(nodeHandle, NODE_SATURATE);
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SATURATION, &item);
+     * auto item = basicNodeApi->getAttribute(nodeHandle, NODE_SATURATION);
      * auto nodeSaturate = item->value[0].f32;
      * @endcode
      *
      */
-    NODE_SATURATE,
+    NODE_SATURATION,
     /**
      * @brief 设置组件内容模糊效果，支持属性设置，属性重置和属性获取接口。
      *
@@ -481,13 +481,13 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = ARKUI_ALIGNMENT_CENTER } };
      * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ALIGN, "center");
-     * auto item = basicNodeApi->getAttribute(nodeHandle, NODE_ALIGN);
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ALIGNMENT, "center");
+     * auto item = basicNodeApi->getAttribute(nodeHandle, NODE_ALIGNMENT);
      * auto nodeAlign = item->value[0].i32;
      * @endcode
      *
      */
-    NODE_ALIGN,
+    NODE_ALIGNMENT,
     /**
      * @brief 透明度属性，支持属性设置，属性重置和属性获取接口。
      *
@@ -648,13 +648,13 @@ typedef enum {
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { 2 };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_ZINDEX, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ZINDEX);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_Z_INDEX, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_Z_INDEX);
      * auto nodeZIndex = item->value[0].f32;
      * @endcode
      *
      */
-    NODE_ZINDEX,
+    NODE_Z_INDEX,
     /**
      * @brief 组件是否可见属性，支持属性设置，属性重置和属性获取接口。
      *
@@ -1119,95 +1119,6 @@ typedef enum {
     NODE_FOCUSABLE,
 
     /**
-     * @brief 无障碍组属性, 支持属性设置，属性重置和属性获取。
-     *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[0].i32：为1时表示该组件及其所有子组件为一整个可以选中的组件
-     * 无障碍服务将不再关注其子组件内容。参数类型为1或者0。
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：为1时表示该组件及其所有子组件为一整个可以选中的组件
-     * 无障碍服务将不再关注其子组件内容。参数类型为1或者0。
-     *
-     * @code {.c}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { { .i32 = 1 } };
-     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_GROUP, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ACCESSIBILITY_GROUP);
-     * auto value = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_ACCESSIBILITY_GROUP,
-
-    /**
-     * @brief 无障碍文本属性，支持属性设置，属性重置和属性获取。
-     *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .string：无障碍文本。
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：为1时表示该组件及其所有子组件为一整个可以选中的组件
-     * 无障碍服务将不再关注其子组件内容。参数类型为1或者0。
-     * 
-     * @code {.c}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_AttributeItem item = {.string = "test"};
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_TEXT, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ACCESSIBILITY_TEXT);
-     * auto value = item->string;
-     * @endcode
-     *
-     */
-    NODE_ACCESSIBILITY_TEXT,
-
-    /**
-     * @brief 无障碍重要性属性，支持属性设置，属性重置和属性获取。
-     *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[0].i32：障碍重要性，参数类型{@link ArkUI_AccessibilityLevel}。
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：障碍重要性，参数类型{@link ArkUI_AccessibilityLevel}。
-     * 
-     * @code {.c}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_ACCESSIBILITY_LEVEL_AUTO } };
-     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_LEVEL, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ACCESSIBILITY_LEVEL);
-     * auto value = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_ACCESSIBILITY_LEVEL,
-
-    /**
-     * @brief 无障碍说明属性，支持属性设置，属性重置和属性获取。
-     *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .string：无障碍说明。
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .string：无障碍说明。
-     * 
-     * @code {.c}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_AttributeItem item = { .string = "test" };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_DESCRIPTION, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ACCESSIBILITY_DESCRIPTION);
-     * auto value = item->string;
-     * @endcode
-     *
-     */
-    NODE_ACCESSIBILITY_DESCRIPTION,
-
-    /**
      * @brief 默认焦点属性，支持属性设置，属性重置和属性获取。
      *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
@@ -1295,27 +1206,6 @@ typedef enum {
      *
      */
     NODE_OVERLAY,
-     /**
-     * @brief 背景图在组件中显示位置，即相对于组件左上角的坐标，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32 表示x轴方向的位置, 单位为vp。 \n
-     * .value[1].f32 表示y轴方向的位置, 单位为vp。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32 表示x轴方向的位置, 单位为vp。 \n
-     * .value[1].f32 表示y轴方向的位置, 单位为vp。 \n
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue possitionArray[] = { 20, 0 }
-     * ARKUI_AttributeItem item = { .value = possitionArray, .size = 2};
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_POSITION , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_POSITION);
-     * auto offsetX = item->value[0].f32
-     * @endcode
-     */
-    NODE_BACKGROUND_IMAGE_POSITION,
     /**
      * @brief 角度渐变效果，支持属性设置，属性重置和属性获取接口。
      *
@@ -1380,6 +1270,9 @@ typedef enum {
      * @brief 组件上加上指定形状的遮罩，支持属性设置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0]?.u32：可选填充颜色，0xargb类型；\n
+     * .value[1]?.u32：可选描边颜色，0xargb类型；\n
+     * .value[2]?.f32：可选描边宽度，单位为vp；\n
      * .string:形状描述，可选： \n
      * "progressMask(10,10,#ff0000ff)"括号内分别为进度遮罩的当前值，进度遮罩的最大值与进度遮罩的颜色; \n
      * "rect(10,10,10,10)"括号内分别为width、height、radiusWidth与radiusHeight"; \n
@@ -1388,6 +1281,9 @@ typedef enum {
      * "path(10,10,M0 0 L600 0)"括号内分别为width、height、commands; \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].u32：填充颜色，0xargb类型；\n
+     * .value[1].u32：描边颜色，0xargb类型；\n
+     * .value[2].f32：描边宽度，单位为vp；\n
      * .string:形状描述： \n
      * "progressMask(10,10,#ff0000ff)"括号内分别为进度遮罩的当前值，进度遮罩的最大值与进度遮罩的颜色; \n
      * "rect(10,10,10,10)"括号内分别为width、height、radiusWidth与radiusHeight"; \n
@@ -1450,92 +1346,6 @@ typedef enum {
      *
      */
     NODE_DIRECTION,
-    /**
-     * @brief 设置子组件在父容器交叉轴的对齐格式，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：设置子组件在父容器交叉轴的对齐格式类型， \n
-     * 参数类型{@link ArkUI_ItemAlign}，默认值为ARKUI_ITEM_ALIGN_AUTO。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：设置子组件在父容器交叉轴的对齐格式类型， \n
-     * 参数类型{@link ArkUI_ItemAlign}，默认值为ARKUI_ITEM_ALIGN_AUTO。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { {.i32=ARKUI_ITEM_ALIGN_STRETCH} };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_ALIGN_SELF, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ALIGN_SELF);
-     * auto nodeHitTestBehavior = item->value[0].f32;
-     * @endcode
-     *
-     */
-    NODE_ALIGN_SELF,
-    /**
-     * @brief 组件的基准尺寸，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：组件的基准尺寸数值。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：组件的基准尺寸数值。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { 2 };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_FLEX_GROW, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_FLEX_GROW);
-     * auto nodeZIndex = item->value[0].f32;
-     * @endcode
-     *
-     */
-    NODE_FLEX_GROW,
-    /**
-     * @brief 父容器压缩尺寸分配给此属性所在组件的比例，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：父容器压缩尺寸分配给此属性所在组件的比例数值。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：父容器压缩尺寸分配给此属性所在组件的比例数值。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { 2 };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_FLEX_SHRINK, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_FLEX_SHRINK);
-     * auto nodeZIndex = item->value[0].f32;
-     * @endcode
-     *
-     */
-    NODE_FLEX_SHRINK,
-    /**
-     * @brief 设置组件的基准尺寸，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：组件的基准尺寸数值。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：组件的基准尺寸数值。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { 2 };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_FLEX_BASIS, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_FLEX_BASIS);
-     * auto nodeZIndex = item->value[0].f32;
-     * @endcode
-     *
-     */
-    NODE_FLEX_BASIS,
     /**
      * @brief 约束尺寸属性，组件布局时，进行尺寸范围限制，支持属性设置，属性重置和属性获取接口。
      *
@@ -1707,37 +1517,58 @@ typedef enum {
      */
     NODE_MARK_ANCHOR,
     /**
+     * @brief 背景图在组件中显示位置，即相对于组件左上角的坐标，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32 表示x轴方向的位置, 单位为vp。 \n
+     * .value[1].f32 表示y轴方向的位置, 单位为vp。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32 表示x轴方向的位置, 单位为vp。 \n
+     * .value[1].f32 表示y轴方向的位置, 单位为vp。 \n
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue possitionArray[] = { 20, 0 }
+     * ARKUI_AttributeItem item = { .value = possitionArray, .size = 2};
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_POSITION , &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_POSITION);
+     * auto offsetX = item->value[0].f32
+     * @endcode
+     */
+    NODE_BACKGROUND_IMAGE_POSITION,
+    /**
      * @brief 相对容器中子组件的对齐规则属性，支持属性设置，属性重置，获取属性接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
      * .value[0]?.i32 左对齐规则锚点组件id。\n
-     * .value[1]?.i32 左对齐规则相对锚点组件的对齐方式，取{@link ArkUI_HorizontalAlign}枚举值。\n
+     * .value[1]?.i32 左对齐规则相对锚点组件的对齐方式，取{@link ArkUI_HorizontalAlignment}枚举值。\n
      * .value[2]?.i32 横向居中规则锚点组件id。\n
-     * .value[3]?.i32 横向居中规则相对锚点组件的对齐方式，取{@link ArkUI_HorizontalAlign}枚举值。\n
+     * .value[3]?.i32 横向居中规则相对锚点组件的对齐方式，取{@link ArkUI_HorizontalAlignment}枚举值。\n
      * .value[4]?.i32 右对齐规则锚点组件id。\n
-     * .value[5]?.i32 右对齐规则相对锚点组件的对齐方式，取{@link ArkUI_HorizontalAlign}枚举值。\n
+     * .value[5]?.i32 右对齐规则相对锚点组件的对齐方式，取{@link ArkUI_HorizontalAlignment}枚举值。\n
      * .value[6]?.i32 顶部对齐规则锚点组件id。\n
-     * .value[7]?.i32 顶部对齐规则相对锚点组件的对齐方式，取{@link ArkUI_VerticalAlign}枚举值。\n
+     * .value[7]?.i32 顶部对齐规则相对锚点组件的对齐方式，取{@link ArkUI_VerticalAlignment}枚举值。\n
      * .value[8]?.i32 纵向居中规则锚点组件id。\n
-     * .value[9]?.i32 纵向居中规则相对锚点组件的对齐方式，取{@link ArkUI_VerticalAlign}枚举值。\n
+     * .value[9]?.i32 纵向居中规则相对锚点组件的对齐方式，取{@link ArkUI_VerticalAlignment}枚举值。\n
      * .value[10]?.i32 底部对齐规则锚点组件id。\n
-     * .value[11]?.i32 底部对齐规则相对锚点组件的对齐方式，取{@link ArkUI_VerticalAlign}枚举值。\n
+     * .value[11]?.i32 底部对齐规则相对锚点组件的对齐方式，取{@link ArkUI_VerticalAlignment}枚举值。\n
      * .value[12]?.f32 水平方向的bias值。\n
      * .value[13]?.f32 垂直方向的bias值。\n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
      * .value[0]?.i32 左对齐规则锚点组件id。\n
-     * .value[1]?.i32 左对齐规则相对锚点组件的对齐方式，取{@link ArkUI_HorizontalAlign}枚举值。\n
+     * .value[1]?.i32 左对齐规则相对锚点组件的对齐方式，取{@link ArkUI_HorizontalAlignment}枚举值。\n
      * .value[2]?.i32 横向居中规则锚点组件id。\n
-     * .value[3]?.i32 横向居中规则相对锚点组件的对齐方式，取{@link ArkUI_HorizontalAlign}枚举值。\n
+     * .value[3]?.i32 横向居中规则相对锚点组件的对齐方式，取{@link ArkUI_HorizontalAlignment}枚举值。\n
      * .value[4]?.i32 右对齐规则锚点组件id。\n
-     * .value[5]?.i32 右对齐规则相对锚点组件的对齐方式，取{@link ArkUI_HorizontalAlign}枚举值。\n
+     * .value[5]?.i32 右对齐规则相对锚点组件的对齐方式，取{@link ArkUI_HorizontalAlignment}枚举值。\n
      * .value[6]?.i32 顶部对齐规则锚点组件id。\n
-     * .value[7]?.i32 顶部对齐规则相对锚点组件的对齐方式，取{@link ArkUI_VerticalAlign}枚举值。\n
+     * .value[7]?.i32 顶部对齐规则相对锚点组件的对齐方式，取{@link ArkUI_VerticalAlignment}枚举值。\n
      * .value[8]?.i32 纵向居中规则锚点组件id。\n
-     * .value[9]?.i32 纵向居中规则相对锚点组件的对齐方式，取{@link ArkUI_VerticalAlign}枚举值。\n
+     * .value[9]?.i32 纵向居中规则相对锚点组件的对齐方式，取{@link ArkUI_VerticalAlignment}枚举值。\n
      * .value[10]?.i32 底部对齐规则锚点组件id。\n
-     * .value[11]?.i32 底部对齐规则相对锚点组件的对齐方式，取{@link ArkUI_VerticalAlign}枚举值。\n
+     * .value[11]?.i32 底部对齐规则相对锚点组件的对齐方式，取{@link ArkUI_VerticalAlignment}枚举值。\n
      * .value[12]?.f32 水平方向的bias值。\n
      * .value[13]?.f32 垂直方向的bias值。\n
      *
@@ -1745,15 +1576,190 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue alignRulesArray[] = { { .i32 = 2000}, { .i32 =
-     * static_cast<int32>(ArkUI_HorizontalAlign.ARKUI_HORIZONTAL_ALIGN_START)}}
+     * static_cast<int32>(ArkUI_HorizontalAlign.ARKUI_HORIZONTAL_ALIGNMENT_START)}}
      * ARKUI_AttributeItem item = { .value = alignRulesArray, .size = 2};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_ALIGN_RULES , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ALIGN_RULES);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ALIGNMENT_RULES);
      * auto id = item->value[0].i32
      * @endcode
      *
      */
     NODE_ALIGN_RULES,
+    /**
+     * @brief 设置子组件在父容器交叉轴的对齐格式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：设置子组件在父容器交叉轴的对齐格式类型， \n
+     * 参数类型{@link ArkUI_ItemAlign}，默认值为ARKUI_ITEM_ALIGN_AUTO。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：设置子组件在父容器交叉轴的对齐格式类型， \n
+     * 参数类型{@link ArkUI_ItemAlign}，默认值为ARKUI_ITEM_ALIGN_AUTO。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.i32=ARKUI_ITEM_ALIGN_STRETCH} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_ALIGN_SELF, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ALIGN_SELF);
+     * auto nodeHitTestBehavior = item->value[0].f32;
+     * @endcode
+     *
+     */
+    NODE_ALIGN_SELF,
+    /**
+     * @brief 组件的基准尺寸，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：组件的基准尺寸数值。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：组件的基准尺寸数值。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { 2 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_FLEX_GROW, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_FLEX_GROW);
+     * auto nodeZIndex = item->value[0].f32;
+     * @endcode
+     *
+     */
+    NODE_FLEX_GROW,
+    /**
+     * @brief 父容器压缩尺寸分配给此属性所在组件的比例，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：父容器压缩尺寸分配给此属性所在组件的比例数值。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：父容器压缩尺寸分配给此属性所在组件的比例数值。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { 2 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_FLEX_SHRINK, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_FLEX_SHRINK);
+     * auto nodeZIndex = item->value[0].f32;
+     * @endcode
+     *
+     */
+    NODE_FLEX_SHRINK,
+    /**
+     * @brief 设置组件的基准尺寸，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：组件的基准尺寸数值。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：组件的基准尺寸数值。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { 2 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_FLEX_BASIS, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_FLEX_BASIS);
+     * auto nodeZIndex = item->value[0].f32;
+     * @endcode
+     *
+     */
+    NODE_FLEX_BASIS,
+    /**
+     * @brief 无障碍组属性, 支持属性设置，属性重置和属性获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[0].i32：为1时表示该组件及其所有子组件为一整个可以选中的组件
+     * 无障碍服务将不再关注其子组件内容。参数类型为1或者0。
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：为1时表示该组件及其所有子组件为一整个可以选中的组件
+     * 无障碍服务将不再关注其子组件内容。参数类型为1或者0。
+     *
+     * @code {.c}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { { .i32 = 1 } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_GROUP, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ACCESSIBILITY_GROUP);
+     * auto value = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_ACCESSIBILITY_GROUP,
+
+    /**
+     * @brief 无障碍文本属性，支持属性设置，属性重置和属性获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .string：无障碍文本。
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：为1时表示该组件及其所有子组件为一整个可以选中的组件
+     * 无障碍服务将不再关注其子组件内容。参数类型为1或者0。
+     * 
+     * @code {.c}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_AttributeItem item = {.string = "test"};
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_TEXT, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ACCESSIBILITY_TEXT);
+     * auto value = item->string;
+     * @endcode
+     *
+     */
+    NODE_ACCESSIBILITY_TEXT,
+
+    /**
+     * @brief 无障碍重要性属性，支持属性设置，属性重置和属性获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[0].i32：障碍重要性，参数类型{@link ArkUI_AccessibilityLevel}。
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：障碍重要性，参数类型{@link ArkUI_AccessibilityLevel}。
+     * 
+     * @code {.c}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_ACCESSIBILITY_LEVEL_AUTO } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_LEVEL, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ACCESSIBILITY_LEVEL);
+     * auto value = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_ACCESSIBILITY_LEVEL,
+
+    /**
+     * @brief 无障碍说明属性，支持属性设置，属性重置和属性获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .string：无障碍说明。
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .string：无障碍说明。
+     * 
+     * @code {.c}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_AttributeItem item = { .string = "test" };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_DESCRIPTION, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ACCESSIBILITY_DESCRIPTION);
+     * auto value = item->string;
+     * @endcode
+     *
+     */
+    NODE_ACCESSIBILITY_DESCRIPTION,
+
     /**
      * @brief text组件设置文本内容属性，支持属性设置，属性重置，属性获取接口。
      *
@@ -1962,15 +1968,15 @@ typedef enum {
      * @brief 文本水平对齐方式, 支持属性设置，属性重置，属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：表示文本水平对齐方式，取{@link ArkUI_TextAlign}枚举值。\n
+     * .value[0].i32：表示文本水平对齐方式，取{@link ArkUI_TextAlignment}枚举值。\n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：表示文本水平对齐方式，取{@link ArkUI_TextAlign}枚举值。\n
+     * .value[0].i32：表示文本水平对齐方式，取{@link ArkUI_TextAlignment}枚举值。\n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue alignMent[] = { { .i32 = static_cast<int_32>(ArkUI_TextAlign.ARKUI_TEXT_ALIGN_CENTER) } };
+     * ArkUI_NumberValue alignMent[] = {{.i32 = static_cast<int_32>(ArkUI_TextAlignment.ARKUI_TEXT_ALIGNMENT_CENTER)}};
      * ARKUI_AttributeItem item = { .value = alignMent, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_ALIGN , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_ALIGN);
@@ -1990,15 +1996,15 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue textOverFlow[] = { { .i32 = static_cast<int_32>(ArkUI_TextOverFlow.ARKUI_TEXT_OVERFLOW_CLIP) }
+     * ArkUI_NumberValue textOverFlow[] = { { .i32 = static_cast<int_32>(ArkUI_TextOverflow.ARKUI_TEXT_OVERFLOW_CLIP) }
      * };
      * ARKUI_AttributeItem item = { .value = textOverFlow, .size = 1};
-     * nativeNodeApi->setAttribute(nodeHandle,NODE_TEXT_OVER_FLOW , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_OVER_FLOW);
+     * nativeNodeApi->setAttribute(nodeHandle,NODE_TEXT_OVERFLOW , &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_OVERFLOW);
      * auto textOverFlow = item->value[0].i32
      * @endcode
      */
-    NODE_TEXT_OVER_FLOW,
+    NODE_TEXT_OVERFLOW,
     /**
      * @brief Text字体列表属性，支持属性设置，属性重置和属性获取。
      * 
@@ -2806,606 +2812,6 @@ typedef enum {
     NODE_TEXT_INPUT_CANCEL_BUTTON,
 
     /**
-     * @brief 设置子组件在容器内的对齐方式，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 对齐方式，数据类型{@link ArkUI_Alignment}，默认值ARKUI_ALIGNMENT_CENTER。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 对齐方式，数据类型{@link ArkUI_Alignment}。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_ALIGNMENT_CENTER } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT);
-     * auto nodeStackAlignContent = item->value[0].i32;
-     * @endcode
-     */
-    NODE_STACK_ALIGN_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_STACK,
-
-    /**
-     * @brief 设置滚动条状态，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 滚动条状态，数据类型{@link
-     * ArkUI_ScrollBarDisplayMode}，默认值ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 滚动条状态，数据类型{@link ArkUI_ScrollBarDisplayMode}。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_BAR_DISPLAY_MODE, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_BAR_DISPLAY_MODE);
-     * auto nodeScrollBarDisplayMode = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SCROLL_BAR_DISPLAY_MODE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SCROLL,
-    /**
-     * @brief 设置滚动条的宽度，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32： 滚动条宽度，单位vp，默认值4。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32： 滚动条宽度，单位vp。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { 20 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_BAR_WIDTH, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_BAR_WIDTH);
-     * auto nodeScrollBarWidth = item->value[0].f32;
-     * @endcode
-     *
-     */
-    NODE_SCROLL_BAR_WIDTH,
-    /**
-     * @brief 设置滚动条的颜色，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .data[0].i32： 滚动条颜色，0xargb类型。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .data[0].i32： 滚动条颜色，0xargb类型。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = 0xFFFFFFFF } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_BAR_COLOR, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_BAR_COLOR);
-     * auto nodeScrollBarColor = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SCROLL_BAR_COLOR,
-    /**
-     * @brief 设置滚动方向，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：滚动方向，数据类型{@link ArkUI_Axis}，默认值ARKUI_AXIS_VERTICAL。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：滚动方向，数据类型{@link ArkUI_Axis}。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_AXIS_VERTICAL } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_DIRECTION, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_SCROLL_DIRECTION);
-     * auto nodeScrollBarDirection = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SCROLL_SCROLL_DIRECTION,
-    /**
-     * @brief 设置边缘滑动效果，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 边缘滑动效果，参数类型{@link ArkUI_EdgeEffect}，默认值ARKUI_EDGE_EFFECT_NONE；\n
-     * .value[1]?.i32： 可选值，组件内容大小小于组件自身时，设置是否开启滑动效果，开启为1，关闭为0，默认值1。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 边缘滑动效果，参数类型{@link ArkUI_EdgeEffect}；\n
-     * .value[1]?.i32： 可选值，组件内容大小小于组件自身时，设置是否开启滑动效果，开启为1，关闭为0。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_EDGE_EFFECT_NONE }, { .i32 = 1 } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_EDGE_EFFECT, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_EDGE_EFFECT);
-     * auto nodeScrollEdgeEffect = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SCROLL_EDGE_EFFECT,
-    /**
-     * @brief 设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 是否支持滚动手势，默认值true。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 是否支持滚动手势。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = true } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_ENABLE_SCROLL_INTERACTION, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_ENABLE_SCROLL_INTERACTION);
-     * auto nodeScrollEnableScroll = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SCROLL_ENABLE_SCROLL_INTERACTION,
-    /**
-     * @brief 设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32： 摩擦系数，默认值：非可穿戴设备为0.6，可穿戴设备为0.9。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32： 摩擦系数。
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { 0.6 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_FRICTION, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_FRICTION);
-     * auto nodeScrollFriction = item->value[0].f32;
-     * @endcode
-     *
-     */
-    NODE_SCROLL_FRICTION,
-    /**
-     * @brief 设置Scroll组件的限位滚动模式，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： Scroll组件限位滚动时的对其方式，数据类型{@link ArkUI_ScrollSnapAlign}，默认值ARKUI_SCROLL_SNAP_ALIGN_NONE；\n
-     * .value[1].i32： 在Scroll组件限位滚动模式下，该属性设置为false后，运行Scroll在开头和第一个限位点间自由滑动。默认值true，仅在限位点为多个时生效；\n
-     * .value[2].i32： 在Scroll组件限位滚动模式下，该属性设置为false后，运行Scroll在最后一个限位点和末尾间自由滑动。默认值true，仅在限位点为多个时生效；\n
-     * .value[3...].f32： Scroll组件限位滚动时的限位点，限位点即为Scroll组件能滑动停靠的偏移量。可以1个或多个。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： Scroll组件限位滚动时的对其方式，数据类型{@link ArkUI_ScrollSnapAlign}；\n
-     * .value[1].i32： 在Scroll组件限位滚动模式下，该属性设置为false后，运行Scroll在开头和第一个限位点间自由滑动；\n
-     * .value[2].i32： 在Scroll组件限位滚动模式下，该属性设置为false后，运行Scroll在最后一个限位点和末尾间自由滑动；\n
-     * .value[3...].f32： Scroll组件限位滚动时的限位点，限位点即为Scroll组件能滑动停靠的偏移量。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = {
-     *     { .i32=ARKUI_SCROLL_SNAP_ALIGN_NONE }, { .i32=true }, { .i32=true },
-     *     { .f32=0 }, { .f32=500 }, { .f32=1000 }, { .f32=1500 }
-     * };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SNAP, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_SNAP);
-     * auto nodeScrollSnap = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SCROLL_SNAP,
-
-    /**
-     * @brief Scroll嵌套滚动选项，支持属性设置，属性重置和属性获取。
-     *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[0]?.i32：可滚动组件往末尾端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。\n
-     * .value[1]?.i32：可滚动组件往起始端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0]?.i32：可滚动组件往末尾端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。\n
-     * .value[1]?.i32：可滚动组件往起始端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。
-     * 
-     * @code {.c}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_SCROLL_NESTED_MODE_SELF_ONLY },
-     * { .i32 = ARKUI_SCROLL_NESTED_OPTIONS_SELF_ONLY } };
-     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_NESTED_SCROLL, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SCROLL_NESTED_SCROLL);
-     * auto first = item->value[0].i32;
-     * auto second = item->value[1].i32;
-     * @endcode
-     *
-     */
-    NODE_SCROLL_NESTED_SCROLL,
-    /**
-     * @brief Scroll滑动到指定位置，支持属性设置，属性重置和属性获取。
-     * 
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[0].f32：水平滑动偏移，单位为vp。\n
-     * .value[1].f32：垂直滑动偏移，单位为vp。\n
-     * .value[2]?.i32：可选值，滚动时长，单位为毫秒。\n
-     * .value[3]?.i32：可选值，滚动曲线，参数类型{@link ArkUI_AnimationCurve}。默认值为ARKUI_CURVE_EASE。\n
-     * .value[4]?.i32：可选值，是否使能默认弹簧动效，默认值为0不使能。
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32：水平滑动偏移，单位为vp。\n
-     * .value[1].f32：垂直滑动偏移，单位为vp。\n
-     * 
-     * @code {.c}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { 10, 100, { .i32 = 1000 }, { .i32 = ARKUI_CURVE_EASE },
-     * { .i32 = 1 } };
-     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_OFFSET, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SCROLL_OFFSET);
-     * auto x = item->value[0].f32;
-     * auto y = item->value[1].f32;
-     * @endcode
-     *
-     */
-    NODE_SCROLL_OFFSET,
-
-    /**
-     * @brief Scroll滚动到容器边缘，支持属性设置，属性重置和属性获取。
-     *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[0].i32：容器边缘，参数类型{@link ArkUI_ScrollEdge}。
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：容器边缘，参数类型{@link ArkUI_ScrollEdge}。
-     * 
-     * @code {.c}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_SCROLL_EDGE_TOP } };
-     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_EDGE, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SCROLL_EDGE);
-     * auto value = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SCROLL_EDGE,
-
-    /**
-     * @brief 设置是否支持滑动翻页，支持属性设置，属性重置和属性获取接口。
-     * @note 如果同时设置了划动翻页 enablePaging 和限位滚动 scrollSnap，则 scrollSnap 优先生效，enablePaging 不生效。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 是否支持划动翻页，默认值false。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 是否支持划动翻页。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = true } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_ENABLE_PAGING, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_ENABLE_PAGING);
-     * auto nodeScrollEnablePaging = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SCROLL_ENABLE_PAGING,
-
-    /**
-     * @brief 设置List组件排列方向，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：List组件排列方向，数据类型{@link ArkUI_Axis}，默认值ARKUI_AXIS_VERTICAL。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：List组件排列方向，数据类型{@link ArkUI_Axis}。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_AXIS_VERTICAL } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_LIST_DIRECTION, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_LIST_LIST_DIRECTION);
-     * auto nodeListDirection = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_LIST_LIST_DIRECTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
-    /**
-     * @brief 配合ListItemGroup组件使用，设置 ListItemGroup 中 header 和 footer 是否要吸顶或吸底，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：配合ListItemGroup组件使用，设置ListItemGroup中header和footer是否要吸顶或吸底。数据类型{@link ArkUI_StickyStyle}，默认值
-     *     ARKUI_STICKYSTYLE_NONE。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：配合ListItemGroup组件使用，设置ListItemGroup中header和footer是否要吸顶或吸底。数据类型{@link ArkUI_StickyStyle}。
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_STICKYSTYLE_NONE } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_STICKY, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_LIST_STICKY);
-     * auto nodeListSticky = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_LIST_STICKY,
-    /**
-     * @brief 设置列表项间距，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32： 子组件主轴方向的间隔。默认值0。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32： 子组件主轴方向的间隔。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { 10 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_SPACE, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_LIST_SPACE);
-     * auto nodeListSpace = item->value[0].f32;
-     * @endcode
-     *
-     */
-    NODE_LIST_SPACE,
-
-    /**
-     * @brief Swiper是否开启循环，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：控制是否开启循环，0表示不循环，1表示循环，默认值为1。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：控制是否开启循环，0表示不循环，1表示循环，默认值为1。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { {.i32 = 0} };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_LOOP, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_LOOP);
-     * auto nodeSwiperLoop = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SWIPER_LOOP = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SWIPER,
-    /**
-     * @brief Swiper子组件是否自动播放，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：控制子组件是否自动播放，0表示不自动播放，1表示自动播放，默认值为0。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：控制子组件是否自动播放，0表示不自动播放，1表示自动播放，默认值为0。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { {.i32 = 1} };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_AUTO_PLAY, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_AUTO_PLAY);
-     * auto nodeSwiperLoop = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SWIPER_AUTO_PLAY,
-    /**
-     * @brief Swiper是否显示导航点指示器，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：是否显示导航点指示器，0表示不显示导航点指示器，1表示显示导航点指示器，默认值为1。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：是否显示导航点指示器，0表示不显示导航点指示器，1表示显示导航点指示器，默认值为1。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { {.i32 = 0} };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_SHOW_INDICATOR, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_SHOW_INDICATOR);
-     * auto nodeSwiperShowIndicator = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SWIPER_SHOW_INDICATOR,
-    /**
-     * @brief 设置Swiper自动播放时播放的时间间隔，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：使用自动播放时播放的时间间隔，单位为毫秒。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：使用自动播放时播放的时间间隔，单位为毫秒。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { 3000 };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INTERVAL, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_INTERVAL);
-     * auto nodeSwiperInterval = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SWIPER_INTERVAL,
-    /**
-     * @brief 设置Swiper是否为纵向滑动，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：是否为纵向滑动，0表示横向滑动，1表示纵向滑动，默认值为0。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：是否为纵向滑动，0表示横向滑动，1表示纵向滑动，默认值为0。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { {.i32 = 1} };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_VERTICAL, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_VERTICAL);
-     * auto nodeSwiperVertical = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SWIPER_VERTICAL,
-
-    /**
-     * @brief 设置Swiper子组件切换的动画时长，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：子组件切换的动画时长，单位为毫秒, 默认值为400。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：子组件切换的动画时长，单位为毫秒, 默认值为400。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { {.i32 = 10000} };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DURATION, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_DURATION);
-     * auto nodeSwiperVertical = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SWIPER_DURATION,
-
-    /**
-     * @brief 设置Swiper的动画曲线，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：设置动画曲线参数，参数类型{@link ArkUI_AnimationCurve}，默认值为ARKUI_CURVE_LINEAR。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：设置动画曲线参数，参数类型{@link ArkUI_AnimationCurve}，默认值为ARKUI_CURVE_LINEAR。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_CURVE_SHARP} };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_CURVE, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_CURVE);
-     * auto nodeSwiperVertical = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SWIPER_CURVE,
-
-    /**
-     * @brief 设置Swiper子组件与子组件之间间隙，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：子组件与子组件之间间隙数值。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：子组件与子组件之间间隙数值。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { 10 };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE);
-     * auto nodeSwiperVertical = item->value[0].f32;
-     * @endcode
-     *
-     */
-    NODE_SWIPER_ITEM_SPACE,
-
-    /**
-     * @brief 设置Swiper当前在容器中显示的子组件的索引值，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：子组件的索引值。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：子组件的索引值。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { {i32 = 3} };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INDEX, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE);
-     * auto nodeSwiperIndex = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SWIPER_INDEX,
-
-    /**
-     * @brief 设置Swiper一页内元素显示个数，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：子组件的索引值。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：子组件的索引值。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { {i32 = 3} };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISPLAY_COUNT, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE);
-     * auto nodeSwiperDisplayCount = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SWIPER_DISPLAY_COUNT,
-
-    /**
-     * @brief 设置Swiper禁用组件滑动切换功能，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：是否禁用组件滑动切换功能，0表示不禁用滑动切换功能，1表示禁用滑动切换功能，默认值为0。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：是否禁用组件滑动切换功能，0表示不禁用滑动切换功能，1表示禁用滑动切换功能，默认值为0。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { {.i32 = 1} };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISABLE_SWIPE, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_DISABLE_SWIPE);
-     * auto nodeSwiperDisplayCount = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SWIPER_DISABLE_SWIPE,
-
-    /**
-     * @brief 设置Swiper是否显示导航点箭头，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：设置是否显示导航点箭头，参数类型{@link ArkUI_SwiperDisplayArrow}， \n
-     * 默认值为ARKUI_SWIPER_ARROW_FALSE。 \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：设置是否显示导航点箭头，参数类型{@link ArkUI_SwiperDisplayArrow}， \n
-     * 默认值为ARKUI_SWIPER_ARROW_FALSE。 \n
-     *
-     * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_SWIPER_ARROW_SHOW_ON_HOVER} };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_SHOW_DISPLAY_ARROW, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_SHOW_DISPLAY_ARROW);
-     * auto nodeSwiperDisplayCount = item->value[0].i32;
-     * @endcode
-     *
-     */
-    NODE_SWIPER_SHOW_DISPLAY_ARROW,
-
-    /**
      * @brief 多行文本输入框的默认提示文本内容属性，支持属性设置，属性重置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
@@ -3825,66 +3231,6 @@ typedef enum {
      */
     NODE_XCOMPONENT_SURFACE_SIZE,
 
-    /**
-     * @brief 设置 ListItemGroup 头部组件，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .object：使用{@link ArkUI_NodeHandle}对象作为ListItemGroup头部组件。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .object：使用{@link ArkUI_NodeHandle}对象作为ListItemGroup头部组件。\n
-     *
-     * @code {.cpp}
-     * auto header = nodeAPI->createNode(ARKUI_NODE_TEXT);
-     * ARKUI_AttributeItem item = { .object = header };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_HEADER, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_HEADER);
-     * auto nodeListItemGroupSetHeader = item->object;
-     * @endcode
-     */
-    NODE_LIST_ITEM_GROUP_SET_HEADER = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST_ITEM_GROUP,
-    /**
-     * @brief 设置 ListItemGroup 尾部组件，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .object：使用{@link ArkUI_NodeHandle}对象作为ListItemGroup尾部组件。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .object：使用{@link ArkUI_NodeHandle}对象作为ListItemGroup尾部组件。\n
-     *
-     * @code {.cpp}
-     * auto footer = nodeAPI->createNode(ARKUI_NODE_TEXT);
-     * ARKUI_AttributeItem item = { .object = footer };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_FOOTER, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_FOOTER);
-     * auto nodeListItemGroupSetFooter = item->value[0].object;
-     * @endcode
-     */
-    NODE_LIST_ITEM_GROUP_SET_FOOTER,
-    /**
-     * @brief 设置ListItem分割线样式，默认无分割线，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 颜色，0xargb类型；\n
-     * .value[1].f32： 分割线宽，单位vp；\n
-     * .value[2].f32： 分割线距离列表侧边起始端的距离，单位vp；\n
-     * .value[3].f32： 分割线距离列表侧边结束端的距离，单位vp。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 颜色，0xargb类型；\n
-     * .value[1].f32： 分割线宽，单位vp；\n
-     * .value[2].f32： 分割线距离列表侧边起始端的距离，单位vp；\n
-     * .value[3].f32： 分割线距离列表侧边结束端的距离，单位vp。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = 0xFFFFFFFF }, 1, 0, 0 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE);
-     * auto nodeXcomponentSurfaceSize = item->value[0].i32;
-     * @endcode
-     */
-    NODE_LIST_ITEM_GROUP_SET_DIVIDER,
     /**
      * @brief 设置日期选择器组件的日期是否显示农历，支持属性设置，属性重置和属性获取接口。
      *
@@ -4648,6 +3994,666 @@ typedef enum {
      */
     NODE_SLIDER_STYLE,
 
+    /**
+     * @brief 设置子组件在容器内的对齐方式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 对齐方式，数据类型{@link ArkUI_Alignment}，默认值ARKUI_ALIGNMENT_CENTER。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 对齐方式，数据类型{@link ArkUI_Alignment}。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_ALIGNMENT_CENTER } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT);
+     * auto nodeStackAlignContent = item->value[0].i32;
+     * @endcode
+     */
+    NODE_STACK_ALIGN_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_STACK,
+
+    /**
+     * @brief 设置滚动条状态，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 滚动条状态，数据类型{@link
+     * ArkUI_ScrollBarDisplayMode}，默认值ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 滚动条状态，数据类型{@link ArkUI_ScrollBarDisplayMode}。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_BAR_DISPLAY_MODE, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_BAR_DISPLAY_MODE);
+     * auto nodeScrollBarDisplayMode = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SCROLL_BAR_DISPLAY_MODE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SCROLL,
+    /**
+     * @brief 设置滚动条的宽度，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32： 滚动条宽度，单位vp，默认值4。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32： 滚动条宽度，单位vp。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { 20 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_BAR_WIDTH, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_BAR_WIDTH);
+     * auto nodeScrollBarWidth = item->value[0].f32;
+     * @endcode
+     *
+     */
+    NODE_SCROLL_BAR_WIDTH,
+    /**
+     * @brief 设置滚动条的颜色，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .data[0].u32： 滚动条颜色，0xargb类型。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .data[0].u32： 滚动条颜色，0xargb类型。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .u32 = 0xFFFFFFFF } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_BAR_COLOR, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_BAR_COLOR);
+     * auto nodeScrollBarColor = item->value[0].u32;
+     * @endcode
+     *
+     */
+    NODE_SCROLL_BAR_COLOR,
+    /**
+     * @brief 设置滚动方向，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：滚动方向，数据类型{@link ArkUI_Axis}，默认值ARKUI_AXIS_VERTICAL。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：滚动方向，数据类型{@link ArkUI_Axis}。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_AXIS_VERTICAL } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_DIRECTION, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_SCROLL_DIRECTION);
+     * auto nodeScrollBarDirection = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SCROLL_SCROLL_DIRECTION,
+    /**
+     * @brief 设置边缘滑动效果，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 边缘滑动效果，参数类型{@link ArkUI_EdgeEffect}，默认值ARKUI_EDGE_EFFECT_NONE；\n
+     * .value[1]?.i32： 可选值，组件内容大小小于组件自身时，设置是否开启滑动效果，开启为1，关闭为0，默认值1。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 边缘滑动效果，参数类型{@link ArkUI_EdgeEffect}；\n
+     * .value[1]?.i32： 可选值，组件内容大小小于组件自身时，设置是否开启滑动效果，开启为1，关闭为0。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_EDGE_EFFECT_NONE }, { .i32 = 1 } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_EDGE_EFFECT, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_EDGE_EFFECT);
+     * auto nodeScrollEdgeEffect = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SCROLL_EDGE_EFFECT,
+    /**
+     * @brief 设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 是否支持滚动手势，默认值true。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 是否支持滚动手势。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = true } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_ENABLE_SCROLL_INTERACTION, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_ENABLE_SCROLL_INTERACTION);
+     * auto nodeScrollEnableScroll = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SCROLL_ENABLE_SCROLL_INTERACTION,
+    /**
+     * @brief 设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32： 摩擦系数，默认值：非可穿戴设备为0.6，可穿戴设备为0.9。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32： 摩擦系数。
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { 0.6 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_FRICTION, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_FRICTION);
+     * auto nodeScrollFriction = item->value[0].f32;
+     * @endcode
+     *
+     */
+    NODE_SCROLL_FRICTION,
+    /**
+     * @brief 设置Scroll组件的限位滚动模式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： Scroll组件限位滚动时的对其方式，数据类型{@link ArkUI_ScrollSnapAlign}，默认值ARKUI_SCROLL_SNAP_ALIGN_NONE；\n
+     * .value[1].i32： 在Scroll组件限位滚动模式下，该属性设置为false后，运行Scroll在开头和第一个限位点间自由滑动。默认值true，仅在限位点为多个时生效；\n
+     * .value[2].i32： 在Scroll组件限位滚动模式下，该属性设置为false后，运行Scroll在最后一个限位点和末尾间自由滑动。默认值true，仅在限位点为多个时生效；\n
+     * .value[3...].f32： Scroll组件限位滚动时的限位点，限位点即为Scroll组件能滑动停靠的偏移量。可以1个或多个。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： Scroll组件限位滚动时的对其方式，数据类型{@link ArkUI_ScrollSnapAlign}；\n
+     * .value[1].i32： 在Scroll组件限位滚动模式下，该属性设置为false后，运行Scroll在开头和第一个限位点间自由滑动；\n
+     * .value[2].i32： 在Scroll组件限位滚动模式下，该属性设置为false后，运行Scroll在最后一个限位点和末尾间自由滑动；\n
+     * .value[3...].f32： Scroll组件限位滚动时的限位点，限位点即为Scroll组件能滑动停靠的偏移量。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = {
+     *     { .i32=ARKUI_SCROLL_SNAP_ALIGN_NONE }, { .i32=true }, { .i32=true },
+     *     { .f32=0 }, { .f32=500 }, { .f32=1000 }, { .f32=1500 }
+     * };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SNAP, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_SNAP);
+     * auto nodeScrollSnap = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SCROLL_SNAP,
+
+    /**
+     * @brief Scroll嵌套滚动选项，支持属性设置，属性重置和属性获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[0]?.i32：可滚动组件往末尾端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。\n
+     * .value[1]?.i32：可滚动组件往起始端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0]?.i32：可滚动组件往末尾端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。\n
+     * .value[1]?.i32：可滚动组件往起始端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。
+     * 
+     * @code {.c}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_SCROLL_NESTED_MODE_SELF_ONLY },
+     * { .i32 = ARKUI_SCROLL_NESTED_OPTIONS_SELF_ONLY } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_NESTED_SCROLL, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SCROLL_NESTED_SCROLL);
+     * auto first = item->value[0].i32;
+     * auto second = item->value[1].i32;
+     * @endcode
+     *
+     */
+    NODE_SCROLL_NESTED_SCROLL,
+    /**
+     * @brief Scroll滑动到指定位置，支持属性设置，属性重置和属性获取。
+     * 
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[0].f32：水平滑动偏移，单位为vp。\n
+     * .value[1].f32：垂直滑动偏移，单位为vp。\n
+     * .value[2]?.i32：可选值，滚动时长，单位为毫秒。\n
+     * .value[3]?.i32：可选值，滚动曲线，参数类型{@link ArkUI_AnimationCurve}。默认值为ARKUI_CURVE_EASE。\n
+     * .value[4]?.i32：可选值，是否使能默认弹簧动效，默认值为0不使能。
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：水平滑动偏移，单位为vp。\n
+     * .value[1].f32：垂直滑动偏移，单位为vp。\n
+     * 
+     * @code {.c}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { 10, 100, { .i32 = 1000 }, { .i32 = ARKUI_CURVE_EASE },
+     * { .i32 = 1 } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_OFFSET, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SCROLL_OFFSET);
+     * auto x = item->value[0].f32;
+     * auto y = item->value[1].f32;
+     * @endcode
+     *
+     */
+    NODE_SCROLL_OFFSET,
+
+    /**
+     * @brief Scroll滚动到容器边缘，支持属性设置，属性重置和属性获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[0].i32：容器边缘，参数类型{@link ArkUI_ScrollEdge}。
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：容器边缘，参数类型{@link ArkUI_ScrollEdge}。
+     * 
+     * @code {.c}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_SCROLL_EDGE_TOP } };
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_EDGE, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SCROLL_EDGE);
+     * auto value = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SCROLL_EDGE,
+
+    /**
+     * @brief 设置是否支持滑动翻页，支持属性设置，属性重置和属性获取接口。
+     * @note 如果同时设置了划动翻页 enablePaging 和限位滚动 scrollSnap，则 scrollSnap 优先生效，enablePaging 不生效。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 是否支持划动翻页，默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 是否支持划动翻页。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = true } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_ENABLE_PAGING, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_ENABLE_PAGING);
+     * auto nodeScrollEnablePaging = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SCROLL_ENABLE_PAGING,
+
+    /**
+     * @brief 设置List组件排列方向，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：List组件排列方向，数据类型{@link ArkUI_Axis}，默认值ARKUI_AXIS_VERTICAL。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：List组件排列方向，数据类型{@link ArkUI_Axis}。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_AXIS_VERTICAL } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_DIRECTION, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_LIST_DIRECTION);
+     * auto nodeListDirection = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_LIST_DIRECTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
+    /**
+     * @brief 配合ListItemGroup组件使用，设置 ListItemGroup 中 header 和 footer 是否要吸顶或吸底，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：配合ListItemGroup组件使用，设置ListItemGroup中header和footer是否要吸顶或吸底。数据类型{@link ArkUI_StickyStyle}，默认值
+     *     ARKUI_STICKYSTYLE_NONE。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：配合ListItemGroup组件使用，设置ListItemGroup中header和footer是否要吸顶或吸底。数据类型{@link ArkUI_StickyStyle}。
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_STICKYSTYLE_NONE } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_STICKY, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_LIST_STICKY);
+     * auto nodeListSticky = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_LIST_STICKY,
+    /**
+     * @brief 设置列表项间距，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32： 子组件主轴方向的间隔。默认值0。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32： 子组件主轴方向的间隔。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { 10 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_SPACE, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_LIST_SPACE);
+     * auto nodeListSpace = item->value[0].f32;
+     * @endcode
+     *
+     */
+    NODE_LIST_SPACE,
+
+    /**
+     * @brief Swiper是否开启循环，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：控制是否开启循环，0表示不循环，1表示循环，默认值为1。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：控制是否开启循环，0表示不循环，1表示循环，默认值为1。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { {.i32 = 0} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_LOOP, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_LOOP);
+     * auto nodeSwiperLoop = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SWIPER_LOOP = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SWIPER,
+    /**
+     * @brief Swiper子组件是否自动播放，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：控制子组件是否自动播放，0表示不自动播放，1表示自动播放，默认值为0。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：控制子组件是否自动播放，0表示不自动播放，1表示自动播放，默认值为0。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.i32 = 1} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_AUTO_PLAY, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_AUTO_PLAY);
+     * auto nodeSwiperLoop = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SWIPER_AUTO_PLAY,
+    /**
+     * @brief Swiper是否显示导航点指示器，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：是否显示导航点指示器，0表示不显示导航点指示器，1表示显示导航点指示器，默认值为1。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：是否显示导航点指示器，0表示不显示导航点指示器，1表示显示导航点指示器，默认值为1。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.i32 = 0} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_SHOW_INDICATOR, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_SHOW_INDICATOR);
+     * auto nodeSwiperShowIndicator = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SWIPER_SHOW_INDICATOR,
+    /**
+     * @brief 设置Swiper自动播放时播放的时间间隔，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：使用自动播放时播放的时间间隔，单位为毫秒。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：使用自动播放时播放的时间间隔，单位为毫秒。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { 3000 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INTERVAL, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_INTERVAL);
+     * auto nodeSwiperInterval = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SWIPER_INTERVAL,
+    /**
+     * @brief 设置Swiper是否为纵向滑动，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：是否为纵向滑动，0表示横向滑动，1表示纵向滑动，默认值为0。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：是否为纵向滑动，0表示横向滑动，1表示纵向滑动，默认值为0。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.i32 = 1} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_VERTICAL, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_VERTICAL);
+     * auto nodeSwiperVertical = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SWIPER_VERTICAL,
+
+    /**
+     * @brief 设置Swiper子组件切换的动画时长，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：子组件切换的动画时长，单位为毫秒, 默认值为400。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：子组件切换的动画时长，单位为毫秒, 默认值为400。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { 10000 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DURATION, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_DURATION);
+     * auto nodeSwiperVertical = item->value[0].f32;
+     * @endcode
+     *
+     */
+    NODE_SWIPER_DURATION,
+
+    /**
+     * @brief 设置Swiper的动画曲线，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：设置动画曲线参数，参数类型{@link ArkUI_AnimationCurve}，默认值为ARKUI_CURVE_LINEAR。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：设置动画曲线参数，参数类型{@link ArkUI_AnimationCurve}，默认值为ARKUI_CURVE_LINEAR。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_CURVE_SHARP} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_CURVE, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_CURVE);
+     * auto nodeSwiperVertical = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SWIPER_CURVE,
+
+    /**
+     * @brief 设置Swiper子组件与子组件之间间隙，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：子组件与子组件之间间隙数值。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：子组件与子组件之间间隙数值。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { 10 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE);
+     * auto nodeSwiperVertical = item->value[0].f32;
+     * @endcode
+     *
+     */
+    NODE_SWIPER_ITEM_SPACE,
+
+    /**
+     * @brief 设置Swiper当前在容器中显示的子组件的索引值，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：子组件的索引值。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：子组件的索引值。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {i32 = 3} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INDEX, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE);
+     * auto nodeSwiperIndex = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SWIPER_INDEX,
+
+    /**
+     * @brief 设置Swiper一页内元素显示个数，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：子组件的索引值。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：子组件的索引值。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {i32 = 3} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISPLAY_COUNT, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE);
+     * auto nodeSwiperDisplayCount = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SWIPER_DISPLAY_COUNT,
+
+    /**
+     * @brief 设置Swiper禁用组件滑动切换功能，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：是否禁用组件滑动切换功能，0表示不禁用滑动切换功能，1表示禁用滑动切换功能，默认值为0。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：是否禁用组件滑动切换功能，0表示不禁用滑动切换功能，1表示禁用滑动切换功能，默认值为0。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.i32 = 1} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISABLE_SWIPE, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_DISABLE_SWIPE);
+     * auto nodeSwiperDisplayCount = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SWIPER_DISABLE_SWIPE,
+
+    /**
+     * @brief 设置Swiper是否显示导航点箭头，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：设置是否显示导航点箭头，参数类型{@link ArkUI_SwiperArrow}， \n
+     * 默认值为ARKUI_SWIPER_ARROW_HIDE。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：设置是否显示导航点箭头，参数类型{@link ArkUI_SwiperArrow}， \n
+     * 默认值为ARKUI_SWIPER_ARROW_HIDE。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_SWIPER_ARROW_SHOW_ON_HOVER} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_SHOW_DISPLAY_ARROW, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_SHOW_DISPLAY_ARROW);
+     * auto nodeSwiperDisplayCount = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_SWIPER_SHOW_DISPLAY_ARROW,
+
+    /**
+     * @brief 设置 ListItemGroup 头部组件，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .object：使用{@link ArkUI_NodeHandle}对象作为ListItemGroup头部组件。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .object：使用{@link ArkUI_NodeHandle}对象作为ListItemGroup头部组件。\n
+     *
+     * @code {.cpp}
+     * auto header = nodeAPI->createNode(ARKUI_NODE_TEXT);
+     * ARKUI_AttributeItem item = { .object = header };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_HEADER, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_HEADER);
+     * auto nodeListItemGroupSetHeader = item->object;
+     * @endcode
+     */
+    NODE_LIST_ITEM_GROUP_SET_HEADER = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST_ITEM_GROUP,
+    /**
+     * @brief 设置 ListItemGroup 尾部组件，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .object：使用{@link ArkUI_NodeHandle}对象作为ListItemGroup尾部组件。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .object：使用{@link ArkUI_NodeHandle}对象作为ListItemGroup尾部组件。\n
+     *
+     * @code {.cpp}
+     * auto footer = nodeAPI->createNode(ARKUI_NODE_TEXT);
+     * ARKUI_AttributeItem item = { .object = footer };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_FOOTER, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_FOOTER);
+     * auto nodeListItemGroupSetFooter = item->value[0].object;
+     * @endcode
+     */
+    NODE_LIST_ITEM_GROUP_SET_FOOTER,
+    /**
+     * @brief 设置ListItem分割线样式，默认无分割线，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32： 颜色，0xargb类型；\n
+     * .value[1].f32： 分割线宽，单位vp；\n
+     * .value[2].f32： 分割线距离列表侧边起始端的距离，单位vp；\n
+     * .value[3].f32： 分割线距离列表侧边结束端的距离，单位vp。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32： 颜色，0xargb类型；\n
+     * .value[1].f32： 分割线宽，单位vp；\n
+     * .value[2].f32： 分割线距离列表侧边起始端的距离，单位vp；\n
+     * .value[3].f32： 分割线距离列表侧边结束端的距离，单位vp。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .u32 = 0xFFFFFFFF }, 1, 0, 0 };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE);
+     * auto nodeListItemDividerColor = item->value[0].u32;
+     * @endcode
+     */
+    NODE_LIST_ITEM_GROUP_SET_DIVIDER,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -4732,6 +4738,62 @@ typedef enum {
     NODE_TEXT_INPUT_ON_SUBMIT,
     NODE_TEXT_INPUT_ON_CUT,
     NODE_TEXT_INPUT_ON_PASTE,
+
+    NODE_TEXT_AREA_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_AREA,
+
+    NODE_REFRESH_STATE_CHANGE = 1000 * ARKUI_NODE_REFRESH + 1,
+    NODE_REFRESH_ON_REFRESH,
+
+    /**
+     * @brief 定义ARKUI_NODE_DATE_PICKER 列表组件的滚动触摸事件枚举值。
+     *
+     * 触发该事件的条件 ：选择日期时触发该事件。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>::ArkUI_NodeComponentEvent</b>中包含3个参数。\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>表示 选中时间的年。\n
+     * <b>ArkUI_NodeComponent.data[1].i32</b>表示 选中时间的月，取值范围：[0-11]。\n
+     * <b>ArkUI_NodeComponent.data[2].i32</b>表示 选中时间的天。\n
+     */
+    NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_DATE_PICKER,
+
+    /**
+     * @brief 定义ARKUI_NODE_TIME_PICKER 列表组件的滚动触摸事件枚举值。
+     *
+     * 触发该事件的条件 ：选择时间时触发该事件。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>::ArkUI_NodeComponentEvent</b>中包含2个参数。\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>表示 选中时间的时，取值范围：[0-23]。\n
+     * <b>ArkUI_NodeComponent.data[1].i32</b>表示 选中时间的分，取值范围：[0-59]。\n
+     */
+    NODE_TIME_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TIME_PICKER,
+
+    /**
+     * @brief 定义ARKUI_NODE_TEXT_PICKER 列表组件的滚动触摸事件枚举值。
+     *
+     * 触发该事件的条件 ：选择时间时触发该事件。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>::ArkUI_NodeComponentEvent</b>中包含2个参数。\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>表示 选中时间的时，取值范围：[0-23]。\n
+     * <b>ArkUI_NodeComponent.data[1].i32</b>表示 选中时间的分，取值范围：[0-59]。\n
+     */
+    NODE_TEXT_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_PICKER,
+
+    /**
+     * @brief 定义ARKUI_NODE_CHECKBOX当选中状态发生变化时，触发该回调。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>1:表示已选中, 0: 表示未选中\n
+     */
+    NODE_CHECKBOX_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX,
+    /**
+     * @brief 定义ARKUI_NODE_SLIDER拖动或点击时触发事件回调。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>ArkUI_NodeComponent.data[0].f32</b>当前滑动进度值。\n
+     * <b>ArkUI_NodeComponent.data[1].i32</b>事件触发的相关状态值\n
+     */
+    NODE_SLIDER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SLIDER,
+
     /**
      * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动事件枚举值。
      *
@@ -4792,62 +4854,6 @@ typedef enum {
      * <b>ArkUI_NodeComponent.data[0].i32</b>表示当前碰到的是上下左右哪个边。\n
      */
     NODE_SCROLL_EVENT_ON_SCROLL_EDGE,
-
-    NODE_TEXT_AREA_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_AREA,
-
-    NODE_REFRESH_STATE_CHANGE = 1000 * ARKUI_NODE_REFRESH + 1,
-    NODE_REFRESH_ON_REFRESH,
-
-    /**
-     * @brief 定义ARKUI_NODE_DATE_PICKER 列表组件的滚动触摸事件枚举值。
-     *
-     * 触发该事件的条件 ：选择日期时触发该事件。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * <b>::ArkUI_NodeComponentEvent</b>中包含3个参数。\n
-     * <b>ArkUI_NodeComponent.data[0].i32</b>表示 选中时间的年。\n
-     * <b>ArkUI_NodeComponent.data[1].i32</b>表示 选中时间的月，取值范围：[0-11]。\n
-     * <b>ArkUI_NodeComponent.data[2].i32</b>表示 选中时间的天。\n
-     */
-    NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_DATE_PICKER,
-
-    /**
-     * @brief 定义ARKUI_NODE_TIME_PICKER 列表组件的滚动触摸事件枚举值。
-     *
-     * 触发该事件的条件 ：选择时间时触发该事件。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * <b>::ArkUI_NodeComponentEvent</b>中包含2个参数。\n
-     * <b>ArkUI_NodeComponent.data[0].i32</b>表示 选中时间的时，取值范围：[0-23]。\n
-     * <b>ArkUI_NodeComponent.data[1].i32</b>表示 选中时间的分，取值范围：[0-59]。\n
-     */
-    NODE_TIME_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TIME_PICKER,
-
-    /**
-     * @brief 定义ARKUI_NODE_TEXT_PICKER 列表组件的滚动触摸事件枚举值。
-     *
-     * 触发该事件的条件 ：选择时间时触发该事件。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * <b>::ArkUI_NodeComponentEvent</b>中包含2个参数。\n
-     * <b>ArkUI_NodeComponent.data[0].i32</b>表示 选中时间的时，取值范围：[0-23]。\n
-     * <b>ArkUI_NodeComponent.data[1].i32</b>表示 选中时间的分，取值范围：[0-59]。\n
-     */
-    NODE_TEXT_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_PICKER,
-
-    /**
-     * @brief 定义ARKUI_NODE_CHECKBOX当选中状态发生变化时，触发该回调。
-     *
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * <b>ArkUI_NodeComponent.data[0].i32</b>1:表示已选中, 0: 表示未选中\n
-     */
-    NODE_CHECKBOX_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX,
-    /**
-     * @brief 定义ARKUI_NODE_SLIDER拖动或点击时触发事件回调。
-     *
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * <b>ArkUI_NodeComponent.data[0].f32</b>当前滑动进度值。\n
-     * <b>ArkUI_NodeComponent.data[1].i32</b>事件触发的相关状态值\n
-     */
-    NODE_SLIDER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SLIDER,
-    
 } ArkUI_NodeEventType;
 
 /**
@@ -4932,16 +4938,20 @@ typedef struct {
      *
      * @param parent 父节点指针。
      * @param child 子节点指针。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
      */
-    void (*addChild)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child);
+    int32_t (*addChild)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child);
 
     /**
      * @brief 将组件从父节点中移除。
      *
      * @param parent 父节点指针。
      * @param child 子节点指针。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
      */
-    void (*removeChild)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child);
+    int32_t (*removeChild)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child);
 
     /**
      * @brief 将组件挂载到某个父节点之下，挂载位置在<b>sibling</b>节点之后。
@@ -4949,8 +4959,10 @@ typedef struct {
      * @param parent 父节点指针。
      * @param child 子节点指针。
      * @param sibling 前一个兄弟节点指针，如果为空则插入位置在最前面。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
      */
-    void (*insertChildAfter)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child, ArkUI_NodeHandle sibling);
+    int32_t (*insertChildAfter)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child, ArkUI_NodeHandle sibling);
 
     /**
      * @brief 将组件挂载到某个父节点之下，挂载位置在<b>sibling</b>节点之前。
@@ -4958,8 +4970,10 @@ typedef struct {
      * @param parent 父节点指针。
      * @param child 子节点指针。
      * @param sibling 后一个兄弟节点指针，如果为空则插入位置在最后面。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
      */
-    void (*insertChildBefore)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child, ArkUI_NodeHandle sibling);
+    int32_t (*insertChildBefore)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child, ArkUI_NodeHandle sibling);
 
     /**
      * @brief 将组件挂载到某个父节点之下，挂载位置由<b>position</b>指定。
@@ -4967,8 +4981,10 @@ typedef struct {
      * @param parent 父节点指针。
      * @param child 子节点指针。
      * @param postion 插入位置，如果插入位置为负数或者不存在，则默认插入位置在最后面。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
      */
-    void (*insertChildAt)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child, int32_t position);
+    int32_t (*insertChildAt)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child, int32_t position);
 
     /**
      * @brief 属性设置函数。
@@ -4978,7 +4994,7 @@ typedef struct {
      * @param item 需要设置的属性值。
      * @return 0 - 成功。
      *         401 - 函数参数异常。
-     *         106101 - 系统中未找到Native接口的动态实现库。
+     *         106102 - 系统中未找到Native接口的动态实现库。
      */
     int32_t (*setAttribute)(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* item);
 
@@ -4998,8 +5014,11 @@ typedef struct {
      *
      * @param node 需要重置属性的节点对象。
      * @param attribute 需要重置的属性类型。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
+     *         106102 - 系统中未找到Native接口的动态实现库。
      */
-    void (*resetAttribute)(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
+    int32_t (*resetAttribute)(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
 
     /**
      * @brief 注册节点事件函数。
@@ -5009,7 +5028,7 @@ typedef struct {
      * @param eventId 自定义事件ID，当事件触发时在回调参数<@link ArkUI_NodeEvent>中携带回来。
      * @return 0 - 成功。
      *         401 - 函数参数异常。
-     *         106101 - 系统中未找到Native接口的动态实现库。
+     *         106102 - 系统中未找到Native接口的动态实现库。
      */
     int32_t (*registerNodeEvent)(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType, int32_t eventId);
 

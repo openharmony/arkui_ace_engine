@@ -55,7 +55,7 @@ typedef enum {
     NODE_TOOL_TYPE_FINGER = 0,
 
     /** 笔。 */
-    NODE_TOOL_TYPE_PEN = 1,
+    NODE_TOOL_TYPE_STYLUS = 1,
 } ArkUI_NodeToolType;
 
 /**
@@ -69,9 +69,9 @@ typedef enum {
     /** 触摸屏。 */
     NODE_SOURCE_TYPE_TOUCH_SCREEN = 0,
     /** 手写笔。 */
-    NODE_SOURCE_TYPE_PEN = 1,
+    NODE_SOURCE_TYPE_STYLUS = 1,
     /** 触控板。 */
-    NODE_SOURCE_TYPE_TOUCH_PAD = 2,
+    NODE_SOURCE_TYPE_TOUCHPAD = 2,
 } ArkUI_NodeSourceType;
 
 /**

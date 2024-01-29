@@ -102,7 +102,7 @@ typedef enum {
  */
 typedef enum {
     /** 不重复。 */
-    ARKUI_IMAGE_REPEAT_NO_REPEAT = 0,
+    ARKUI_IMAGE_REPEAT_NONE = 0,
     /** 在X轴方向重复。 */
     ARKUI_IMAGE_REPEAT_X,
     /** 在Y轴方向重复。 */
@@ -168,14 +168,14 @@ typedef enum {
  */
 typedef enum {
     /** 水平对齐首部。 */
-    ARKUI_TEXT_ALIGN_START = 0,
+    ARKUI_TEXT_ALIGNMENT_START = 0,
     /** 水平居中对齐。 */
-    ARKUI_TEXT_ALIGN_CENTER,
+    ARKUI_TEXT_ALIGNMENT_CENTER,
     /** 水平对齐尾部。 */
-    ARKUI_TEXT_ALIGN_END,
+    ARKUI_TEXT_ALIGNMENT_END,
     /** 双端对齐。 */
-    ARKUI_TEXT_ALIGN_JUSTIFY,
-} ArkUI_TextAlign;
+    ARKUI_TEXT_ALIGNMENT_JUSTIFY,
+} ArkUI_TextAlignment;
 
 /**
  * @brief 定义单行文本输入法回车键类型枚举值。
@@ -279,7 +279,7 @@ typedef enum {
     /** 文字上划线修饰。*/
     ARKUI_TEXT_DECORATION_TYPE_OVERLINE,
     /** 穿过文本的修饰线。*/
-    ARKUI_TEXT_DECORATION_TYPE_LINETHROUGH,
+    ARKUI_TEXT_DECORATION_TYPE_LINE_THROUGH,
 } ArkUI_TextDecorationType;
 
 typedef enum {
@@ -414,13 +414,13 @@ typedef enum {
  */
 typedef enum {
     /** ListItemGroup的header不吸顶，footer不吸底。*/
-    ARKUI_STICKYSTYLE_NONE = 0,
+    ARKUI_STICKY_STYLE_NONE = 0,
     /** ListItemGroup的header吸顶，footer不吸底。*/
-    ARKUI_STICKYSTYLE_HEADER = 1,
+    ARKUI_STICKY_STYLE_HEADER = 1,
     /** ListItemGroup的footer吸底，header不吸顶。*/
-    ARKUI_STICKYSTYLE_FOOTER = 2,
+    ARKUI_STICKY_STYLE_FOOTER = 2,
     /** ListItemGroup的footer吸底，header吸顶。*/
-    ARKUI_STICKYSTYLE_BOTH = 3,
+    ARKUI_STICKY_STYLE_BOTH = 3,
 } ArkUI_StickyStyle;
 
 
@@ -515,12 +515,12 @@ typedef enum {
  */
 typedef enum {
     /** 不显示swiper中导航点箭头。 */
-    ARKUI_SWIPER_ARROW_FALSE = 0,
+    ARKUI_SWIPER_ARROW_HIDE = 0,
     /** 显示swiper中导航点箭头。 */
-    ARKUI_SWIPER_ARROW_TRUE,
+    ARKUI_SWIPER_ARROW_SHOW,
     /** 在hover状态下显示swiper中导航点箭头。 */
-    ARKUI_SWIPER_ARROW__SHOW_ON_HOVER,
-} ArkUI_SwiperDisplayArrow;
+    ARKUI_SWIPER_ARROW_SHOW_ON_HOVER,
+} ArkUI_SwiperArrow;
 
 
 /**
@@ -670,13 +670,13 @@ typedef enum {
  */
 typedef enum {
     /** 动画正向播放。*/
-    ARKUI_PLAY_MODE_NORMAL = 0,
+    ARKUI_ANIMATION_PLAY_MODE_NORMAL = 0,
     /** 动画反向播放。*/
-    ARKUI_PLAY_MODE_REVERSE,
+    ARKUI_ANIMATION_PLAY_MODE_REVERSE,
     /** 动画在奇数次（1、3、5...）正向播放，在偶数次（2、4、6...）反向播放。*/
-    ARKUI_PLAY_MODE_ALTERNATE,
+    ARKUI_ANIMATION_PLAY_MODE_ALTERNATE,
     /** 动画在奇数次（1、3、5...）反向播放，在偶数次（2、4、6...）正向播放。*/
-    ARKUI_PLAY_MODE_ALTERNATE_REVERSE,
+    ARKUI_ANIMATION_PLAY_MODE_ALTERNATE_REVERSE,
 } ArkUI_AnimationPlayMode;
 
 /**
@@ -760,12 +760,12 @@ typedef enum {
  */
 typedef enum {
     /** 顶部对齐。 */
-    ARKUI_VERTICAL_ALIGN_TOP = 0,
+    ARKUI_VERTICAL_ALIGNMENT_TOP = 0,
     /** 居中对齐，默认对齐方式。 */
-    ARKUI_VERTICAL_ALIGN_CENTER,
+    ARKUI_VERTICAL_ALIGNMENT_CENTER,
     /** 底部对齐。 */
-    ARKUI_VERTICAL_ALIGN_BOTTOM,
-} ArkUI_VerticalAlign;
+    ARKUI_VERTICAL_ALIGNMENT_BOTTOM,
+} ArkUI_VerticalAlignment;
 
 /**
  * @brief 定义语言方向对齐方式。
@@ -774,12 +774,12 @@ typedef enum {
  */
 typedef enum {
     /** 按照语言方向起始端对齐。 */
-    ARKUI_HORIZONTAL_ALIGN_START = 0,
+    ARKUI_HORIZONTAL_ALIGNMENT_START = 0,
     /** 居中对齐，默认对齐方式。 */
-    ARKUI_HORIZONTAL_ALIGN_CENTER,
+    ARKUI_HORIZONTAL_ALIGNMENT_CENTER,
     /** 按照语言方向末端对齐。 */
-    ARKUI_HORIZONTAL_ALIGN_END,
-} ArkUI_HorizontalAlign;
+    ARKUI_HORIZONTAL_ALIGNMENT_END,
+} ArkUI_HorizontalAlignment;
 
 /**
  * @brief 定义文本超长时的显示方式。
@@ -795,7 +795,7 @@ typedef enum {
     ARKUI_TEXT_OVERFLOW_ELLIPSIS,
     /** 文本超长时以跑马灯的方式展示。 */
     ARKUI_TEXT_OVERFLOW_MARQUEE,
-} ArkUI_TextOverFlow;
+} ArkUI_TextOverflow;
 
 /**
  * @brief 定义图片基于文本的对齐方式。
@@ -840,13 +840,13 @@ typedef enum {
  */
 typedef enum {
     /** 不使用图片插值。*/
-    ARKUI_INTERPOLATION_NONE = 0,
+    ARKUI_IMAGE_INTERPOLATION_NONE = 0,
     /** 低图片插值。*/
-    ARKUI_INTERPOLATION_LOW,
+    ARKUI_IMAGE_INTERPOLATION_LOW,
     /** 中图片插值。*/
-    ARKUI_INTERPOLATION_MEDIUM,
+    ARKUI_IMAGE_INTERPOLATION_MEDIUM,
     /** 高图片插值，插值质量最高。*/
-    ARKUI_INTERPOLATION_HIGH,
+    ARKUI_IMAGE_INTERPOLATION_HIGH,
 } ArkUI_ImageInterpolation;
 
 
@@ -969,7 +969,7 @@ typedef enum {
     ARKUI_COLOR_STRATEGY_AVERAGE,
     /** 控件背景阴影色为控件背景阴影区域的主色。 */
     ARKUI_COLOR_STRATEGY_PRIMARY,
-} ArkUI_ColoringStrategy;
+} ArkUI_ColorStrategy;
 
 /**
  * @brief 定义垂直方向对齐方式。
