@@ -35,6 +35,9 @@
     "src/lib/common/custom_dialog_controller_native.d.ts",
     "src/lib/common/custom_dialog_controller.ts",
 
+    // ark runtime debug tools
+    "src/lib/common/ark_tools.d.ts",
+
     // full_update specific
     "src/lib/full_update/fu_view_native.d.ts",
     "src/lib/full_update/fu_observed_property_object_abstract.ts",
