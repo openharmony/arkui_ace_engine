@@ -55,6 +55,12 @@ public:
     {
         return children_[index];
     }
+
+    bool ChildIndexInRange(int32_t index)
+    {
+        return index >= 0 && index < static_cast<int32_t>(children_.size());
+    }
+
     LayoutWrapper* GetLayoutWrapper()
     {
         return layoutWrapper_;
