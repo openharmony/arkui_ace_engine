@@ -2131,7 +2131,7 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation)
+void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, bool animation)
 {
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         SelectHandleInfo firstHandleInfo;
