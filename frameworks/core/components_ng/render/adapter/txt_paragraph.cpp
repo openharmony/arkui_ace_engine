@@ -476,8 +476,8 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
         Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
 
-    while (boxes.empty() && !text_.empty()) {
-        graphemeClusterLength *= LENGTH_INCREMENT;
+    if (boxes.empty() && !text_.empty()) {
+        graphemeClusterLength = LENGTH_INCREMENT;
         next = extent + graphemeClusterLength;
 #ifndef USE_GRAPHIC_TEXT_GINE
         boxes = paragraph_->GetRectsForRange(
