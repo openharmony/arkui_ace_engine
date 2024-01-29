@@ -581,8 +581,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
                 preTopNavDestination->GetContentNode()->Clean(false, true);
             }
             parent->RemoveChild(preTopNavDestination, true);
-            parent->RebuildRenderContextTree();
-            pipeline->RequestFrame();
+            parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else {
             preTopNavDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
@@ -612,13 +611,12 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             preTopNavDestination->GetContentNode()->Clean(false, true);
         }
         parent->RemoveChild(preTopNavDestination, true);
-        parent->RebuildRenderContextTree();
         navigationNode->SetNeedSetInvisible(false);
-        pipeline->RequestFrame();
         auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
         if (navBar) {
             navBar->SetTransitionType(PageTransitionType::ENTER_POP);
         }
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
 }
@@ -644,8 +642,7 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
                 preTopNavDestination->GetContentNode()->Clean();
             }
             parent->RemoveChild(preTopNavDestination);
-            parent->RebuildRenderContextTree();
-            pipeline->RequestFrame();
+            parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         return;
     }
