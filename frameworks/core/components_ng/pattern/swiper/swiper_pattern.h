@@ -516,7 +516,7 @@ public:
         return finishCallbackType_;
     }
 
-    void SetStopIndicatorAnimationCb(const std::function<void(void)>& stopCallback)
+    void SetStopIndicatorAnimationCb(const std::function<void(bool)>& stopCallback)
     {
         stopIndicatorAnimationFunc_ = std::move(stopCallback);
     }
@@ -790,7 +790,7 @@ private:
     inline bool ChildFirst(NestedState state);
     void HandleTouchBottomLoop();
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
-    void StopIndicatorAnimation();
+    void StopIndicatorAnimation(bool ifImmediately = false);
     RefPtr<FrameNode> GetCurrentFrameNode(int32_t currentIndex) const;
     bool FadeOverScroll(float offset);
     int32_t ComputeSwipePageNextIndex(float velocity, bool onlyDistance = false) const;
@@ -827,7 +827,7 @@ private:
     bool indicatorAnimationIsRunning_ = false;
 
     // stop indicator animation callback
-    std::function<void(void)> stopIndicatorAnimationFunc_;
+    std::function<void(bool)> stopIndicatorAnimationFunc_;
 
     RefPtr<SwiperController> swiperController_;
     RefPtr<InputEvent> mouseEvent_;

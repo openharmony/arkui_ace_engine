@@ -1732,7 +1732,7 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
         childScrolling_ = false;
     }
 
-    StopIndicatorAnimation();
+    StopIndicatorAnimation(true);
     if (usePropertyAnimation_) {
         StopPropertyTranslateAnimation(isFinishAnimation_);
     }
@@ -4110,12 +4110,12 @@ void SwiperPattern::CleanScrollingListener()
     scrollingListener_.clear();
 }
 
-void SwiperPattern::StopIndicatorAnimation()
+void SwiperPattern::StopIndicatorAnimation(bool ifImmediately)
 {
     AnimationUtils::StopAnimation(indicatorAnimation_);
 
     if (stopIndicatorAnimationFunc_) {
-        stopIndicatorAnimationFunc_();
+        stopIndicatorAnimationFunc_(ifImmediately);
     }
 }
 
