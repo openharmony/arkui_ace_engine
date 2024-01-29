@@ -30,7 +30,7 @@ void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         layoutWrapper->GetLayoutProperty()->ClearUserDefinedIdealSize(true, true);
         for (auto index = 0; index < childSize; index++) {
-            auto child = layoutWrapper->GetOrCreateChildByIndex(index, false);
+            auto child = layoutWrapper->GetOrCreateChildByIndex(index);
             if (child->GetHostNode() && child->GetHostNode()->IsVisible()) {
                 child->Measure(layoutConstraint);
                 children.emplace_back(child);
