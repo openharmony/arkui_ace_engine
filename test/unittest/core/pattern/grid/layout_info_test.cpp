@@ -402,4 +402,55 @@ HWTEST_F(GridLayoutInfoTest, UpdateStartIdxToLastItem001, TestSize.Level1)
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.startMainLineIndex_, 0);
 }
+
+void CheckEachIndex(const GridLayoutInfo& info, int32_t maxIdx)
+{
+    for (int i = 0; i <= maxIdx; ++i) {
+        auto it = info.FindInMatrix(i);
+        EXPECT_NE(it, info.gridMatrix_.end());
+        bool foundFlag = false;
+        for (auto [_, item] : it->second) {
+            if (item == i) {
+                foundFlag = true;
+                break;
+            }
+        }
+        EXPECT_TRUE(foundFlag);
+    }
+}
+
+/**
+ * @tc.name: FindInMatrix001
+ * @tc.desc: Test GridLayoutInfo::FindInMatrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    auto nullIt = info.FindInMatrix(1);
+    EXPECT_EQ(nullIt, info.gridMatrix_.end());
+
+    info.gridMatrix_ = MATRIX_DEMO_2;
+
+    CheckEachIndex(info, 31);
+
+    nullIt = info.FindInMatrix(32);
+    EXPECT_EQ(nullIt, info.gridMatrix_.end());
+}
+
+/**
+ * @tc.name: FindInMatrix002
+ * @tc.desc: Test GridLayoutInfo::FindInMatrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = MATRIX_DEMO_1;
+
+    CheckEachIndex(info, 11);
+
+    auto nullIt = info.FindInMatrix(12);
+    EXPECT_EQ(nullIt, info.gridMatrix_.end());
+}
 } // namespace OHOS::Ace::NG
