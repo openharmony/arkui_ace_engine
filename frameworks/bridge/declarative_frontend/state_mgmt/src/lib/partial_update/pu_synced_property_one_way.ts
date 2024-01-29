@@ -267,19 +267,30 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   private resetLocalValue(newObservedObjectValue: C, needCopyObject: boolean): boolean {
     // note: We can not test for newObservedObjectValue == this.localCopyObservedObject_
     // here because the object might still be the same, but some property of it has changed
-
-    if (!this.checkIsSupportedValue(newObservedObjectValue)) {
-      return;
-    }
-    // unsubscribe from old local copy 
-    if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
-      (this.localCopyObservedObject_ as SubscribableAbstract).removeOwningProperty(this);
-    } else {
-      ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
-
-      // make sure the ObservedObject no longer has a read callback function
-      // assigned to it
-      ObservedObject.unregisterPropertyReadCb(this.localCopyObservedObject_);
+    // this is added for stability test: Target of target is not Object/is not callable/
+    // InstanceOf error when target is not Callable/Can not get Prototype on non ECMA Object
+    try {
+      if (!this.checkIsSupportedValue(newObservedObjectValue)) {
+        return;
+      }
+      // unsubscribe from old local copy
+      if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
+        (this.localCopyObservedObject_ as SubscribableAbstract).removeOwningProperty(this);
+      } else {
+        ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
+  
+        // make sure the ObservedObject no longer has a read callback function
+        // assigned to it
+        ObservedObject.unregisterPropertyReadCb(this.localCopyObservedObject_);
+      }
+    } catch (error) {
+      stateMgmtConsole.error(`${this.debugInfo()}, an error occurred in resetLocalValue: ${error.message}`);
+      ArkTools.print("resetLocalValue SubscribableAbstract", SubscribableAbstract);
+      ArkTools.print("resetLocalValue ObservedObject", ObservedObject);
+      ArkTools.print("resetLocalValue this", this);
+      let a = Reflect.getPrototypeOf(this);
+      ArkTools.print("resetLocalVale getPrototypeOf", a);
+      throw error;
     }
 
     // shallow/deep copy value 
