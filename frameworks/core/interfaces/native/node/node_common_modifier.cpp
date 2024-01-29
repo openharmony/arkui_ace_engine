@@ -24,12 +24,14 @@
 #include "core/animation/animation_pub.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
@@ -3195,7 +3197,8 @@ void ResetConstraintSize(ArkUINodeHandle node)
     ViewAbstract::ResetMinSize(frameNode, false);
 }
 
-void SetMaskShape(ArkUINodeHandle node, const char* type, double* attribute, int length)
+void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 Stroke,
+    ArkUI_Float32 StrokeWidth, ArkUI_Float64* attribute, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3211,6 +3214,8 @@ void SetMaskShape(ArkUINodeHandle node, const char* type, double* attribute, int
         shape->SetRadiusWidth(radiusWidth);
         shape->SetRadiusHeight(radiusHeight);
         ViewAbstract::SetMask(frameNode, shape);
+        ShapeAbstractModelNG::SetFill(frameNode, Color(fill));
+        ShapeAbstractModelNG::SetFill(frameNode, Color(Stroke));
     } else if (shapeType == "circle") {
         auto shape = AceType::MakeRefPtr<Circle>();
         auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
@@ -3238,7 +3243,8 @@ void SetMaskShape(ArkUINodeHandle node, const char* type, double* attribute, int
     }
 }
 
-void SetMaskPath(ArkUINodeHandle node, const char* type, double* attribute, const char* commands)
+void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 Stroke,
+    ArkUI_Float32 StrokeWidth, ArkUI_Float64* attribute, ArkUI_CharPtr commands)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

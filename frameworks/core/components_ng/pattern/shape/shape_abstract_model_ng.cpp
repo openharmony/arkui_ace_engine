@@ -29,11 +29,23 @@ void ShapeAbstractModelNG::SetStroke(const Color& color)
     ACE_UPDATE_PAINT_PROPERTY(ShapePaintProperty, Stroke, color);
 }
 
+void ShapeAbstractModelNG::SetStroke(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Stroke, color, frameNode);
+}
+
 void ShapeAbstractModelNG::SetFill(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(ShapePaintProperty, Fill, color);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+}
+
+void ShapeAbstractModelNG::SetFill(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }
 
 void ShapeAbstractModelNG::SetStrokeDashOffset(const Ace::Dimension& dashOffset)
@@ -69,6 +81,11 @@ void ShapeAbstractModelNG::SetFillOpacity(double opacity)
 void ShapeAbstractModelNG::SetStrokeWidth(const Dimension& lineWidth)
 {
     ACE_UPDATE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, lineWidth);
+}
+
+void ShapeAbstractModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& lineWidth)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, lineWidth, frameNode);
 }
 
 void ShapeAbstractModelNG::SetStrokeDashArray(const std::vector<Dimension>& segments)

@@ -857,7 +857,7 @@ typedef enum {
  */
 typedef enum {
     /** 将上层图像直接覆盖到下层图像上，不进行任何混合操作。 */
-    ARKUI_BLEND_MODE_NONE,
+    ARKUI_BLEND_MODE_NONE = 0,
     /** 将源像素覆盖的目标像素清除为完全透明。 */
     ARKUI_BLEND_MODE_CLEAR,
     /** r = s，只显示源像素。 */
