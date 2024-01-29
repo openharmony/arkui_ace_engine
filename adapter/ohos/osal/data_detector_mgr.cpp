@@ -26,6 +26,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
+constexpr int32_t UNSUPPORTED_CODE = 801;
+
 DataDetectorMgr& DataDetectorMgr::GetInstance()
 {
     static DataDetectorMgr instance;
@@ -53,6 +55,12 @@ bool DataDetectorMgr::IsDataDetectorSupported()
 
 void DataDetectorMgr::DataDetect(const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc)
 {
+    if (!IsDataDetectorSupported()) {
+        TextDataDetectResult result;
+        result.code = UNSUPPORTED_CODE;
+        resultFunc(result);
+        return;
+    }
     if (engine_) {
         engine_->DataDetect(info, resultFunc);
     }

@@ -200,10 +200,13 @@ public:
         onResult_ = std::move(onResult);
     }
 
-    void FireOnResult(const std::string& value)
+    void FireOnResult(const TextDataDetectResult& result)
     {
         if (onResult_) {
-            onResult_(value);
+            auto resultJson = JsonUtil::Create(true);
+            resultJson->Put("code", std::to_string(result.code).c_str());
+            resultJson->Put("entity", result.entity.c_str());
+            onResult_(resultJson->ToString());
         }
     }
 
