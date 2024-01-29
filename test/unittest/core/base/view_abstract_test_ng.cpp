@@ -1125,7 +1125,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     param2->SetUseCustomComponent(true);
     ViewAbstract::BindPopup(param2, targetNode2, customNode);
     ViewAbstract::BindPopup(param2, targetNode2, customNode);
-    param2->SetUseCustomComponent(false);
     param2->SetShowInSubWindow(true);
     ViewAbstract::BindPopup(param2, targetNode2, customNode);
     param2->SetIsShow(false);
