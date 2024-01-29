@@ -613,6 +613,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         }
         parent->RemoveChild(preTopNavDestination, true);
         parent->RebuildRenderContextTree();
+        navigationNode->SetNeedSetInvisible(false);
         pipeline->RequestFrame();
         auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
         if (navBar) {
