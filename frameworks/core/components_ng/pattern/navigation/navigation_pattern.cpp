@@ -239,8 +239,7 @@ void NavigationPattern::UpdateNavPathList()
     for (size_t i = 0; i < pathNames.size(); ++i) {
         auto pathName = pathNames[i];
         RefPtr<UINode> uiNode = navigationStack_->Get(pathName);
-        auto isSameWithLast = preTopNavPath && (replaceValue == 1) && (uiNode == preTopNavPath->second)
-            && (preTopNavPath->first == pathName);
+        auto isSameWithLast = (i == pathNames.size() - 1) && (replaceValue == 1);
         if (uiNode) {
             navigationStack_->RemoveInNavPathList(pathName, uiNode);
             navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
