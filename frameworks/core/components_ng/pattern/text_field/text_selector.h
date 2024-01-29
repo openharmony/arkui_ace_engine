@@ -153,6 +153,11 @@ struct TextSelector {
         return baseOffset > -1 && destinationOffset > -1;
     }
 
+    inline bool SelectNothing() const
+    {
+        return !IsValid() || baseOffset == destinationOffset;
+    }
+
     bool MoveSelectionLeft()
     {
         destinationOffset = std::max(0, destinationOffset - 1);
