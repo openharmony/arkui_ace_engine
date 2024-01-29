@@ -225,16 +225,7 @@ void ContainerModalPattern::InitContainerEvent()
             },
             [floatingLayoutProperty, id = Container::CurrentId()]() {
                 ContainerScope scope(id);
-                auto pipeline = PipelineBase::GetCurrentContext();
-                CHECK_NULL_VOID(pipeline);
-                auto taskExecutor = pipeline->GetTaskExecutor();
-                CHECK_NULL_VOID(taskExecutor);
-                taskExecutor->PostTask(
-                    [floatingLayoutProperty, id]() {
-                        ContainerScope scope(id);
-                        floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
-                    },
-                    TaskExecutor::TaskType::UI);
+                floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
             });
     });
 
@@ -277,18 +268,8 @@ void ContainerModalPattern::InitContainerEvent()
                     floatingContext->OnTransformTranslateUpdate(
                         { 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
                 },
-                [floatingLayoutProperty, id = Container::CurrentId()]() {
-                    ContainerScope scope(id);
-                    auto pipeline = PipelineBase::GetCurrentContext();
-                    CHECK_NULL_VOID(pipeline);
-                    auto taskExecutor = pipeline->GetTaskExecutor();
-                    CHECK_NULL_VOID(taskExecutor);
-                    taskExecutor->PostTask(
-                        [floatingLayoutProperty, id]() {
-                            ContainerScope scope(id);
-                            floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
-                        },
-                        TaskExecutor::TaskType::UI);
+                [floatingLayoutProperty]() {
+                    floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
                 });
         }
     });
