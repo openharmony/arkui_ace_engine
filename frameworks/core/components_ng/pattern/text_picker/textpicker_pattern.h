@@ -121,6 +121,11 @@ public:
         return range_;
     }
 
+    std::vector<NG::TextCascadePickerOptions> GetMultiOptions() const
+    {
+        return cascadeOriginptions_;
+    }
+
     void SetColumnsKind(uint32_t columnKind)
     {
         columnsKind_ = columnKind;

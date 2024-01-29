@@ -257,6 +257,8 @@ const ArkUIDatePickerModifier* GetDatePickerModifier()
 
 void SetDatePickerOnDateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     auto onDateChange = [eventId, extraParam](const BaseEventInfo* info) {
         ArkUINodeEvent event;
         event.kind = ON_DATE_PICKER_DATE_CHANGE;
@@ -293,7 +295,7 @@ void SetDatePickerOnDateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* 
         }
         SendArkUIAsyncEvent(&event);
     };
-    DatePickerModel::GetInstance()->SetOnDateChange(std::move(onDateChange));
+    DatePickerModelNG::SetOnDateChange(frameNode, std::move(onDateChange));
 }
 }
 } // namespace OHOS::Ace::NG
