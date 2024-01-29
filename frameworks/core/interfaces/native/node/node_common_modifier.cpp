@@ -1647,18 +1647,12 @@ void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, int valLength, 
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (valLength != NUM_5 || unitLength != NUM_2) {
+    if (valLength != NUM_2 || unitLength != NUM_2) {
         return;
     }
-    auto x = values[NUM_2];
-    auto y = values[NUM_3];
+    auto x = values[NUM_0];
+    auto y = values[NUM_1];
     // NOT support Z in source code
-    if (x < 0) {
-        x = 1;
-    }
-    if (y < 0) {
-        y = 1;
-    }
     VectorF scale(x, y);
     ViewAbstract::SetScale(frameNode, scale);
 
