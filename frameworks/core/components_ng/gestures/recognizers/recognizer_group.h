@@ -71,19 +71,6 @@ public:
         }
     }
 
-    void AssignNodeId(int id) override
-    {
-        if (nodeId_ != -1) {
-            return;
-        }
-
-        TouchEventTarget::AssignNodeId(id);
-        auto recognizers = GetGroupRecognizer();
-        for (const auto& recognizer : recognizers) {
-            recognizer->AssignNodeId(id);
-        }
-    }
-
     void AttachFrameNode(const WeakPtr<NG::FrameNode>& node) override
     {
         TouchEventTarget::AttachFrameNode(node);
