@@ -40,7 +40,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   // install when current value is ObservedObject and the value type is not using compatibility mode
   // note value may change for union type variables when switching an object from one class to another.
-  protected shouldInstallTrackedObjectReadCb : boolean = true;
+  protected shouldInstallTrackedObjectReadCb : boolean = false;
   private dependentElmtIdsByProperty_ = new PropertyDependencies();
 
   constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
