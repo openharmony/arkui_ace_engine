@@ -152,7 +152,6 @@ private:
         std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
         std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
     int32_t GetFirstSpanStartPositon();
-    void SetNodeForAnimation(const TextStyle& symbolTextStyle, RefPtr<FrameNode>& frameNode);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     RefPtr<Paragraph> paragraph_;
