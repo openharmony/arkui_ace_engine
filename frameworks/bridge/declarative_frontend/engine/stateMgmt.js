@@ -2077,8 +2077,16 @@ class SubscribableHandler {
                 return true;
                 break;
             default:
-                if (Reflect.get(target, property) == newValue) {
-                    return true;
+                // this is added for stability test: Reflect.get target is not object
+                try {
+                    if (Reflect.get(target, property) == newValue) {
+                        return true;
+                    }
+                }
+                catch (error) {
+                    ArkTools.print("SubscribableHandler: set", target);
+                    stateMgmtConsole.error(`An error occurred in SubscribableHandler set, target type is: ${typeof target}, ${error.message}`);
+                    throw error;
                 }
                 Reflect.set(target, property, newValue);
                 const propString = String(property);
@@ -4292,18 +4300,31 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
     resetLocalValue(newObservedObjectValue, needCopyObject) {
         // note: We can not test for newObservedObjectValue == this.localCopyObservedObject_
         // here because the object might still be the same, but some property of it has changed
-        if (!this.checkIsSupportedValue(newObservedObjectValue)) {
-            return;
+        // this is added for stability test: Target of target is not Object/is not callable/
+        // InstanceOf error when target is not Callable/Can not get Prototype on non ECMA Object
+        try {
+            if (!this.checkIsSupportedValue(newObservedObjectValue)) {
+                return;
+            }
+            // unsubscribe from old local copy
+            if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
+                this.localCopyObservedObject_.removeOwningProperty(this);
+            }
+            else {
+                ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
+                // make sure the ObservedObject no longer has a read callback function
+                // assigned to it
+                ObservedObject.unregisterPropertyReadCb(this.localCopyObservedObject_);
+            }
         }
-        // unsubscribe from old local copy 
-        if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
-            this.localCopyObservedObject_.removeOwningProperty(this);
-        }
-        else {
-            ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
-            // make sure the ObservedObject no longer has a read callback function
-            // assigned to it
-            ObservedObject.unregisterPropertyReadCb(this.localCopyObservedObject_);
+        catch (error) {
+            stateMgmtConsole.error(`${this.debugInfo()}, an error occurred in resetLocalValue: ${error.message}`);
+            ArkTools.print("resetLocalValue SubscribableAbstract", SubscribableAbstract);
+            ArkTools.print("resetLocalValue ObservedObject", ObservedObject);
+            ArkTools.print("resetLocalValue this", this);
+            let a = Reflect.getPrototypeOf(this);
+            ArkTools.print("resetLocalVale getPrototypeOf", a);
+            throw error;
         }
         // shallow/deep copy value 
         // needed whenever newObservedObjectValue comes from source
