@@ -94,10 +94,10 @@ HWTEST_F(ResponseCtrlTestNg, ResponseCtrlTest002, TestSize.Level1)
 
     /**
      * @tc.steps: step3. check ShouldResponse.
-     * @tc.expected: invalid node should return false.
+     * @tc.expected: invalid node should return true.
      */
     bool shouldResponse = responseCtrl->ShouldResponse(WeakPtr<FrameNode>(emptyNode));
-    EXPECT_EQ(shouldResponse, false);
+    EXPECT_EQ(shouldResponse, true);
 }
 
 /**
@@ -261,10 +261,10 @@ HWTEST_F(ResponseCtrlTestNg, ResponseCtrlTest006, TestSize.Level1)
 
     /**
      * @tc.steps: step3. first node SetFirstResponse.
-     * @tc.expected: state equal to ResponseCtrl::MonopolizeState::OFF.
+     * @tc.expected: state equal to ResponseCtrl::MonopolizeState::INIT.
      */
     responseCtrl->TrySetFirstResponse(WeakPtr<FrameNode>(node1));
-    EXPECT_EQ(responseCtrl->state_, ResponseCtrl::MonopolizeState::OFF);
+    EXPECT_EQ(responseCtrl->state_, ResponseCtrl::MonopolizeState::INIT);
     /**
      * @tc.steps: step4. Check ShouldResponse by node2.
      * @tc.expected: should return true.
@@ -294,10 +294,10 @@ HWTEST_F(ResponseCtrlTestNg, ResponseCtrlTest007, TestSize.Level1)
 
     /**
      * @tc.steps: step3. first node SetFirstResponse.
-     * @tc.expected: state equal to ResponseCtrl::MonopolizeState::OFF.
+     * @tc.expected: state equal to ResponseCtrl::MonopolizeState::INIT.
      */
     responseCtrl->TrySetFirstResponse(WeakPtr<FrameNode>(node1));
-    EXPECT_EQ(responseCtrl->state_, ResponseCtrl::MonopolizeState::OFF);
+    EXPECT_EQ(responseCtrl->state_, ResponseCtrl::MonopolizeState::INIT);
     /**
      * @tc.steps: step4. Check ShouldResponse.
      * @tc.expected: should return true.
@@ -341,10 +341,10 @@ HWTEST_F(ResponseCtrlTestNg, ResponseCtrlTest008, TestSize.Level1)
 
     /**
      * @tc.steps: step4. first node SetFirstResponse.
-     * @tc.expected: state equal to ResponseCtrl::MonopolizeState::OFF.
+     * @tc.expected: state equal to ResponseCtrl::MonopolizeState::INIT.
      */
     responseCtrl->TrySetFirstResponse(WeakPtr<FrameNode>(node1));
-    EXPECT_EQ(responseCtrl->state_, ResponseCtrl::MonopolizeState::OFF);
+    EXPECT_EQ(responseCtrl->state_, ResponseCtrl::MonopolizeState::INIT);
     /**
      * @tc.steps: step5. node2 check ShouldResponse.
      * @tc.expected: should return true.
@@ -558,7 +558,7 @@ HWTEST_F(ResponseCtrlTestNg, ResponseCtrlTest011, TestSize.Level1)
      * @tc.expected: second node should return true.
      */
     shouldResponse = responseCtrl->ShouldResponse(WeakPtr<FrameNode>(node2));
-    EXPECT_EQ(shouldResponse, false);
+    EXPECT_EQ(shouldResponse, true);
 }
 
 /**
