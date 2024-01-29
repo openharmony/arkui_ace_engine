@@ -34,7 +34,16 @@ constexpr bool DEFAULT_FIT_ORIGINAL_SIZE = false;
 constexpr ImageInterpolation DEFAULT_IMAGE_INTERPOLATION = ImageInterpolation::NONE;
 constexpr bool DEFAULT_DRAGGABLE = false;
 const std::vector<float> DEFAULT_COLOR_FILTER = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
-
+constexpr int32_t LOAD_ERROR_CODE = 401;
+constexpr int32_t IMAGE_LOAD_STATUS_INDEX = 0;
+constexpr int32_t IMAGE_WIDTH_INDEX = 1;
+constexpr int32_t IMAGE_HEIGHT_INDEX = 2;
+constexpr int32_t IMAGE_COMPONENT_WIDTH_INDEX = 3;
+constexpr int32_t IMAGE_COMPONENT_HEIGHT_INDEX = 4;
+constexpr int32_t IMAGE_CONTENT_OFFSET_X_INDEX = 5;
+constexpr int32_t IMAGE_CONTENT_OFFSET_Y_INDEX = 6;
+constexpr int32_t IMAGE_CONTENT_WIDTH_INDEX = 7;
+constexpr int32_t IMAGE_CONTENT_HEIGHT_INDEX = 8;
 void SetImageSrc(ArkUINodeHandle node, const char* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -349,6 +358,15 @@ void SetImageOnComplete(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraPa
         event.kind = ON_IMAGE_COMPLETE;
         event.eventId = eventId;
         event.extraParam = extraParam;
+        event.componentAsyncEvent.data[IMAGE_LOAD_STATUS_INDEX].i32 = info.GetLoadingStatus();
+        event.componentAsyncEvent.data[IMAGE_WIDTH_INDEX].f32 = info.GetWidth();
+        event.componentAsyncEvent.data[IMAGE_HEIGHT_INDEX].f32 = info.GetHeight();
+        event.componentAsyncEvent.data[IMAGE_COMPONENT_WIDTH_INDEX].f32 = info.GetComponentWidth();
+        event.componentAsyncEvent.data[IMAGE_COMPONENT_HEIGHT_INDEX].f32 = info.GetComponentHeight();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_OFFSET_X_INDEX].f32 = info.GetContentOffsetX();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_OFFSET_Y_INDEX].f32 = info.GetContentOffsetY();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_WIDTH_INDEX].f32 = info.GetContentWidth();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_HEIGHT_INDEX].f32 = info.GetContentHeight();
         SendArkUIAsyncEvent(&event);
     };
     ImageModelNG::SetOnComplete(frameNode, std::move(onEvent));
@@ -363,6 +381,7 @@ void SetImageOnError(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
         event.kind = ON_IMAGE_ERROR;
         event.eventId = eventId;
         event.extraParam = extraParam;
+        event.componentAsyncEvent.data[0].i32 = LOAD_ERROR_CODE;
         SendArkUIAsyncEvent(&event);
     };
     ImageModelNG::SetOnError(frameNode, std::move(onEvent));
