@@ -410,6 +410,8 @@ public:
 
     static bool GetGridCacheEnabled();
 
+    static bool GetGridIrregularLayoutEnabled();
+
     static bool GetSideBarContainerBlurEnable();
 
 private:

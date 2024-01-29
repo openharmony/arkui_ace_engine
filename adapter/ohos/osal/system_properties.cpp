@@ -584,6 +584,11 @@ bool SystemProperties::GetGridCacheEnabled()
     return gridCacheEnabled_;
 }
 
+bool SystemProperties::GetGridIrregularLayoutEnabled()
+{
+    return (system::GetParameter("persist.ace.grid.irregular.enabled", "0") == "1");
+}
+
 bool SystemProperties::GetSideBarContainerBlurEnable()
 {
     return sideBarContainerBlurEnable_;
