@@ -4291,6 +4291,7 @@ void RichEditorPattern::HandleOnCut()
 
 void RichEditorPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 {
+    CHECK_NULL_VOID(HasFocus());
     TextPattern::OnHandleMove(handleRect, isFirstHandle);
     if (!isFirstHandle) {
         SetCaretPosition(textSelector_.destinationOffset);
