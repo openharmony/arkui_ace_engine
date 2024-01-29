@@ -188,7 +188,9 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // set swiper cache info.
-    layoutWrapper->SetCacheCount(swiperPattern->GetCachedCount(), childLayoutConstraint);
+    auto displayCount = GetDisplayCount(layoutWrapper);
+    auto maxCachedCount = static_cast<int32_t>(std::ceil(static_cast<float>(totalItemCount_ - displayCount) / 2));
+    layoutWrapper->SetCacheCount(std::min(swiperPattern->GetCachedCount(), maxCachedCount), childLayoutConstraint);
     layoutWrapper->SetLongPredictTask();
 
     // Measure swiper indicator
