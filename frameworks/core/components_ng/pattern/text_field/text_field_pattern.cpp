@@ -403,7 +403,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         processOverlayDelayTask_();
         processOverlayDelayTask_ = nullptr;
     }
-    if (needToRefreshSelectOverlay_) {
+    if (needToRefreshSelectOverlay_ && SelectOverlayIsOn()) {
         StopTwinkling();
         ProcessOverlay();
         needToRefreshSelectOverlay_ = false;
@@ -6606,12 +6606,13 @@ void TextFieldPattern::FireSelectEvent()
 RectF TextFieldPattern::GetSelectArea()
 {
     auto selectRects = selectController_->GetSelectedRects();
+    RectF res(selectController_->GetCaretRect());
     if (selectRects.empty()) {
-        return { 0, 0, 0, 0 };
+        res.SetOffset(res.GetOffset() + GetTextPaintOffset());
+        return res;
     }
     auto frontRect = selectRects.front();
     auto backRect = selectRects.back();
-    RectF res;
     if (GreatNotEqual(backRect.Bottom(), frontRect.Bottom())) {
         res.SetRect(contentRect_.GetX() + GetTextPaintOffset().GetX(),
             frontRect.GetY() + textRect_.GetY() + GetTextPaintOffset().GetY(), contentRect_.Width(),
