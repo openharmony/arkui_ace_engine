@@ -880,7 +880,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue imageSizeStyle[] = { {.i32 = static_cast<int32_t>(ArkUI_ImageSize.ARKUI_IMAGE_SIZE_COVER) } }
+     * ArkUI_NumberValue imageSizeStyle[] = { {.i32 = static_cast<int32_t>(ARKUI_IMAGE_SIZE_COVER) } }
      * ARKUI_AttributeItem item = { .value = imageSizeStyle, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE_WITH_STYLE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE_WITH_STYLE);
@@ -910,7 +910,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue blurStyle[] = { { .i32 = static_cast<int32_t>(ArkUI_BlurStyle.ARKUI_BLUR_STYLE_THICK)}}
+     * ArkUI_NumberValue blurStyle[] = { { .i32 = static_cast<int32_t>(ARKUI_BLUR_STYLE_THICK)}}
      * ARKUI_AttributeItem item = { .value = blurStyle, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_BLUR_STYLE , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_BLUR_STYLE);
@@ -972,7 +972,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue opacityTransition[] = { 20, { .i32 = 3000},
-     * { .i32 = static_cast<int32_t>(ArkUI_AnimationCurve.ARKUI_CURVE_EASE_IN_OUT)}}
+     * { .i32 = static_cast<int32_t>(ARKUI_CURVE_EASE_IN_OUT)}}
      * ARKUI_AttributeItem item = { .value = opacityTransition, .size = 3};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_OPACITY_TRANSITION , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_OPACITY_TRANSITION);
@@ -1013,7 +1013,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue rotateTransition[] = { 0.0f, 0.0f, 1.0f, 180, 0, { .i32 = 3000},
-     * { .i32 = static_cast<int32>(ArkUI_AnimationCurve.ARKUI_CURVE_SHARP)}}
+     * { .i32 = static_cast<int32_t>(ARKUI_CURVE_SHARP)}}
      * ARKUI_AttributeItem item = { .value = rotateTransition, .size = 7};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_ROTATE_TRANSITION , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ROTATE_TRANSITION);
@@ -1050,7 +1050,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue scaleTransition[] = { 0.0f, 0.0f, 0.0f, { .i32 = 3000},
-     * { .i32 = static_cast<int32>(ArkUI_AnimationCurve.ARKUI_CURVE_SHARP)}}
+     * { .i32 = static_cast<int32_t>(ARKUI_CURVE_SHARP)}}
      * ARKUI_AttributeItem item = { .value = scaleTransition, .size = 5};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCALE_TRANSITION , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SCALE_TRANSITION);
@@ -1087,7 +1087,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue translateTransition[] = { 0.0f, 0.0f, 0.0f,
-     * { .i32 = 3000}, { .i32 = static_cast<int32>(ArkUI_AnimationCurve.ARKUI_CURVE_SHARP)}}
+     * { .i32 = 3000}, { .i32 = static_cast<int32_t>(ARKUI_CURVE_SHARP)}}
      * ARKUI_AttributeItem item = { .value = translateTransition, .size = 5};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION);
@@ -1576,7 +1576,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue alignRulesArray[] = { { .i32 = 2000}, { .i32 =
-     * static_cast<int32>(ArkUI_HorizontalAlign.ARKUI_HORIZONTAL_ALIGNMENT_START)}}
+     * static_cast<int32_t>(ARKUI_HORIZONTAL_ALIGNMENT_START)}}
      * ARKUI_AttributeItem item = { .value = alignRulesArray, .size = 2};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_ALIGN_RULES , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ALIGNMENT_RULES);
@@ -1914,7 +1914,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue textCase[] = { {.i32 = static_cast<int32>(ArkUI_TextCase.ArkUI_Text_Case_LowerCase) } }
+     * ArkUI_NumberValue textCase[] = { {.i32 = static_cast<int32>(ARKUI_TEXT_CASE_LOWER) } }
      * ARKUI_AttributeItem item = { .value = textCase, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_CASE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_CASE);
@@ -1976,7 +1976,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue alignMent[] = {{.i32 = static_cast<int_32>(ArkUI_TextAlignment.ARKUI_TEXT_ALIGNMENT_CENTER)}};
+     * ArkUI_NumberValue alignMent[] = {{.i32 = static_cast<int32_t>(ARKUI_TEXT_ALIGNMENT_CENTER)}};
      * ARKUI_AttributeItem item = { .value = alignMent, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_ALIGN , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_ALIGN);
@@ -1996,7 +1996,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue textOverFlow[] = { { .i32 = static_cast<int_32>(ArkUI_TextOverflow.ARKUI_TEXT_OVERFLOW_CLIP) }
+     * ArkUI_NumberValue textOverFlow[] = { { .i32 = static_cast<int32_t>(ARKUI_TEXT_OVERFLOW_CLIP) }
      * };
      * ARKUI_AttributeItem item = { .value = textOverFlow, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle,NODE_TEXT_OVERFLOW , &item);
@@ -2266,7 +2266,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ARKUI_NumberValue alignValue[] = { .i32 = {
-     * static_cast<int>(ArkUI_ImageSpanAlignment.ARKUI_IMAGE_SPAN_ALIGNMENT_TOP) } };
+     * static_cast<int32_t>(ARKUI_IMAGE_SPAN_ALIGNMENT_TOP) } };
      * ARKUI_AttributeItem item = {.value = alignValue, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_SPAN_VERTICAL_ALIGN , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_SPAN_VERTICAL_ALIGN);
@@ -2305,7 +2305,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_NumberValue objectFitValue[] = { .i32 = { static_cast<int>(ArkUI_ObjectFit.ARKUI_OBJECT_FIT_FILL) } };
+     * ARKUI_NumberValue objectFitValue[] = { .i32 = { static_cast<int32_t>(ARKUI_OBJECT_FIT_FILL) } };
      * ARKUI_AttributeItem item = { .value = objectFitValue, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_OBJECT_FIT , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_OBJECT_FIT);
@@ -2326,7 +2326,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ARKUI_NumberValue interpolationValue[] = { .i32 = {
-     * static_cast<int>(ArkUI_ImageInterpolation.ARKUI_INTERPOLATION_LOW) } };
+     * static_cast<int32_t>(ARKUI_INTERPOLATION_LOW) } };
      * ARKUI_AttributeItem item = { .value = interpolationValue, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_INTERPOLATION , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_INTERPOLATION);
@@ -2346,7 +2346,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_NumberValue repeatValue[] = { .i32 = { static_cast<int>(ArkUI_ImageRepeat.ARKUI_IMAGE_REPEAT_X) } };
+     * ARKUI_NumberValue repeatValue[] = { .i32 = { static_cast<int32_t>(ARKUI_IMAGE_REPEAT_X) } };
      * ARKUI_AttributeItem item = { .value = repeatValue, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_OBJECT_REPEAT , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_OBJECT_REPEAT);
