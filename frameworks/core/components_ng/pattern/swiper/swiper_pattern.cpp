@@ -3788,7 +3788,7 @@ void SwiperPattern::NotifyParentScrollEnd()
 inline bool SwiperPattern::AnimationRunning() const
 {
     return (controller_ && controller_->IsRunning()) || (springAnimation_ && springAnimationIsRunning_) ||
-           fadeAnimationIsRunning_ || targetIndex_ || usePropertyAnimation_;
+           (fadeAnimation_ && fadeAnimationIsRunning_) || targetIndex_ || usePropertyAnimation_;
 }
 
 bool SwiperPattern::HandleScrollVelocity(float velocity)
