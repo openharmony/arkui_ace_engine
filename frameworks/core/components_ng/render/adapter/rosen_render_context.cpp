@@ -61,6 +61,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/particle/particle_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -876,6 +877,11 @@ void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOpt
         return;
     }
     if (NeedPreloadImage(optionList, rect)) {
+        return;
+    }
+    auto pattern = GetHost()->GetPattern();
+    auto particlePattern = AceType::DynamicCast<ParticlePattern>(pattern);
+    if (particlePattern->HaveUnVisibleParent()) {
         return;
     }
     particleAnimationPlaying_ = true;
