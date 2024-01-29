@@ -121,8 +121,9 @@ const std::vector<std::string> SCROLL_DISPLAY_MODE = { "off", "auto", "on" };
 const std::vector<std::string> SCROLL_AXIS = { "vertical", "horizontal", "free", "none" };
 const std::vector<std::string> SCROLL_EDGE_EFFECT = { "spring", "fade", "none" };
 const std::vector<std::string> LIST_STICKY_STYLE = { "none", "header", "footer", "both" };
-const std::vector<std::string> CURVE_ARRAY = { "linear", "ease", "easein", "easeout", "easeinout", "fastoutslowin",
-    "linearoutslowin", "fastoutlinearin", "extremedeceleration", "sharp", "rhythm", "smooth", "friction" };
+const std::vector<std::string> CURVE_ARRAY = { "linear", "ease", "ease-in", "ease-out", "ease-in-out",
+    "fast-out-slow-in", "linear-out-slow-in", "fast-out-linear-in", "extreme-deceleration", "sharp", "rhythm", "smooth",
+    "friction" };
 const std::vector<std::string> PLAY_MODE_ARRAY = { "normal", "alternate", "reverse", "alternate_reverse" };
 const std::vector<std::string> FONT_STYLES = { "normal", "italic" };
 const std::string DEFAULT_CURVE = "linear";
