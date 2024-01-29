@@ -28,7 +28,7 @@ RefPtr<ImageSource> ImageSource::Create(int32_t fd)
     Media::SourceOptions options;
     auto src = Media::ImageSource::CreateImageSource(fd, options, errorCode);
     if (errorCode != Media::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, " create image source failed, errorCode = %{public}u", errorCode);
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "create image source failed, errorCode = %{public}u", errorCode);
         return nullptr;
     }
     return MakeRefPtr<ImageSourceOhos>(std::move(src));

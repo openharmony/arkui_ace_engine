@@ -138,6 +138,7 @@ template("ace_osal_ohos_source_set") {
     }
     sources += [
       "file_uri_helper_ohos.cpp",
+      "image_packer_ohos.cpp",
       "image_source_ohos.cpp",
       "input_manager.cpp",
       "mouse_style_ohos.cpp",
