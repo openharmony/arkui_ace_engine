@@ -81,9 +81,11 @@ void SelectOverlayLayoutAlgorithm::CalculateCustomMenuLayoutConstraint(
     const auto firstHandleRect = info_->firstHandle.paintRect - offset;
     const auto secondHandleRect = info_->secondHandle.paintRect - offset;
 
-    auto topSpace = firstHandleRect.Top() - menuSpacingBetweenText - menuSpacingBetweenHandle;
+    auto top = info_->isNewAvoid ? info_->selectArea.Top() : firstHandleRect.Top();
+    auto bottom = info_->isNewAvoid ? info_->selectArea.Bottom() : secondHandleRect.Bottom();
+    auto topSpace = top - menuSpacingBetweenText - menuSpacingBetweenHandle;
     auto bottomSpace = layoutConstraint.maxSize.Height() -
-                       (secondHandleRect.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle);
+                       (bottom + menuSpacingBetweenText + menuSpacingBetweenHandle);
     if (info_->isUsingMouse) {
         layoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, layoutConstraint.maxSize.Height());
     } else {

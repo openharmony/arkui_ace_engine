@@ -206,7 +206,7 @@ bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
 bool SelectOverlayManager::IsInSelectedOrSelectOverlayArea(const PointF& point)
 {
     auto host = host_.Upgrade();
-    if (host && host->IsTouchTestPointInArea(Offset { point.GetX(), point.GetY() }, IsTouchInCallerArea())) {
+    if (host && host->IsTouchTestPointInArea(Offset { point.GetX(), point.GetY() }, IsTouchInCallerArea(point))) {
         return true;
     }
     auto current = selectOverlayItem_.Upgrade();
@@ -261,7 +261,7 @@ void SelectOverlayManager::HandleGlobalEvent(
     NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
     // handle global touch event.
     if (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::TOUCH) {
-        if (touchDownPoints_.empty() && !IsTouchInCallerArea() && !IsInSelectedOrSelectOverlayArea(point)) {
+        if (touchDownPoints_.empty() && !IsTouchInCallerArea(point) && !IsInSelectedOrSelectOverlayArea(point)) {
             touchDownPoints_.emplace_back(touchPoint);
         }
         return;
@@ -316,8 +316,12 @@ void SelectOverlayManager::ResetSection(const TouchEvent& touchPoint, bool isMou
     }
 }
 
-bool SelectOverlayManager::IsTouchInCallerArea() const
+bool SelectOverlayManager::IsTouchInCallerArea(const std::optional<NG::PointF>& point) const
 {
+    if (point.has_value() && selectOverlayInfo_.checkIsTouchInHostArea &&
+        selectOverlayInfo_.checkIsTouchInHostArea(point.value())) {
+        return true;
+    }
     if (touchTestResults_.empty()) {
         return false;
     }
