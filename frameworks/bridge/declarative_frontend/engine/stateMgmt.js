@@ -3504,7 +3504,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
         // install when current value is ObservedObject and the value type is not using compatibility mode
         // note value may change for union type variables when switching an object from one class to another.
-        this.shouldInstallTrackedObjectReadCb = true;
+        this.shouldInstallTrackedObjectReadCb = false;
         this.dependentElmtIdsByProperty_ = new PropertyDependencies();
         Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false });
         Object.defineProperty(this, 'subscriberRefs_', { writable: true, enumerable: false, value: new Set() });
@@ -3996,6 +3996,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
         else {
             
             this.wrappedValue_ = ObservedObject.createNew(newValue, this);
+            this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.wrappedValue_);
         }
         
         return true;
@@ -4500,6 +4501,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         if (this.source_) {
             // register to the parent property
             this.source_.addSubscriber(this);
+            this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_.getUnmonitored());
         }
         else {
             throw new SyntaxError(`${this.debugInfo()}: constructor: source variable in parent/ancestor @Component must be defined. Application error!`);
@@ -4537,6 +4539,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         if (this.checkIsSupportedValue(newValue)) {
             // the source_ ObservedProperty will call: this.syncPeerHasChanged(newValue);
             this.source_.set(newValue);
+            this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(newValue);
         }
     }
     /**
