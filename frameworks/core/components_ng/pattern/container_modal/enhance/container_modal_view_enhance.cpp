@@ -450,8 +450,10 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItem(
 void ContainerModalViewEnhance::BondingMenuItemEvent(RefPtr<FrameNode> item)
 {
     auto inputHub = item->GetOrCreateInputEventHub();
-    auto hoverFunc = [item](bool isHover) {
-        auto theme = PipelineContext::GetCurrentContext()->GetTheme<ListItemTheme>();
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(theme);
+    auto hoverFunc = [item, weak = AceType::WeakClaim(AceType::RawPtr(theme))](bool isHover) {
+        auto theme = weak.Upgrade();
         auto renderContext = item->GetRenderContext();
         if (isHover && theme) {
             renderContext->UpdateBackgroundColor(theme->GetItemHoverColor());
@@ -462,8 +464,8 @@ void ContainerModalViewEnhance::BondingMenuItemEvent(RefPtr<FrameNode> item)
     auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverFunc));
     inputHub->AddOnHoverEvent(hoverEvent);
 
-    auto clickFunc = [item](MouseInfo& info) -> void {
-        auto theme = PipelineContext::GetCurrentContext()->GetTheme<ListItemTheme>();
+    auto clickFunc = [item, weak = AceType::WeakClaim(AceType::RawPtr(theme))](MouseInfo& info) -> void {
+        auto theme = weak.Upgrade();
         if (MouseAction::PRESS == info.GetAction() && theme) {
             auto renderContext = item->GetRenderContext();
             renderContext->UpdateBackgroundColor(theme->GetClickColor());
