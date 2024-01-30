@@ -428,7 +428,7 @@ private:
 
     void CloseDialogInner(const RefPtr<FrameNode>& dialogNode);
 
-    void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
+    void SetShowMenuAnimation(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, AnimationOption& option,
