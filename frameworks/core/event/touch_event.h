@@ -234,8 +234,8 @@ struct TouchEvent final {
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
             .isInterpolated = isInterpolated,
-            .pointerEvent = pointerEvent,
-            .enhanceData = enhanceData };
+            .pointerEvent = pointerEvent
+        };
         event.pointers.emplace_back(std::move(point));
         return event;
     }
