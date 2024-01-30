@@ -23,6 +23,7 @@ namespace SecurityComponent {
 enum SCErrCode : int32_t {
     SC_OK = 0,
 
+    SC_SERVICE_ERROR_SERVICE_NOT_EXIST = -55,
     SC_SERVICE_ERROR_COMPONENT_NOT_EXIST = -58,
 };
 } // namespace SecurityComponent

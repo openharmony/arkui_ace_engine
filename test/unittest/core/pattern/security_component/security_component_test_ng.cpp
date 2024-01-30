@@ -1619,11 +1619,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest001, TestSize
     int32_t scId;
     GestureEvent info;
 
+    int32_t invalidId = -1;
+    int32_t noExistId = 0;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(invalidFrameNode, scId), -1);
-    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(invalidFrameNode, 0), -1);
-    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(-1), -1);
-    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(-1, frameNode, info), -1);
-    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(0, invalidFrameNode, info), -1);
+    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(invalidFrameNode, noExistId), -1);
+    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(invalidId), -1);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(invalidId, frameNode, info), -1);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, invalidFrameNode, info), -1);
 }
 
 /**
@@ -1639,10 +1641,11 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest002, TestSize
     int32_t scId;
     GestureEvent info;
 
+    int32_t noExistId = 0;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
-    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, 0), -1);
-    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(0), 0);
-    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(0, frameNode, info), -1);
+    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
+    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, frameNode, info), -1);
 }
 
 /**
@@ -1658,10 +1661,11 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest003, TestSize
     int32_t scId;
     GestureEvent info;
 
+    int32_t noExistId = 0;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
-    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, 0), -1);
-    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(0), 0);
-    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(0, frameNode, info), -1);
+    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
+    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, frameNode, info), -1);
 }
 
 /**
@@ -1677,10 +1681,11 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest004, TestSize
     int32_t scId;
     GestureEvent info;
 
+    int32_t noExistId = 0;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
-    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, 0), -1);
-    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(0), 0);
-    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(0, frameNode, info), -1);
+    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
+    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, frameNode, info), -1);
 }
 
 /**
