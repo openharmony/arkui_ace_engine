@@ -69,11 +69,25 @@ public:
     {
         measureLayoutParam_ = param;
     }
+    void SetUpdateParamFunc(std::function<void(LayoutWrapper* layoutWrapper)>&& updateParamFunc)
+    {
+        updateParamFunc_ = updateParamFunc;
+    }
+    bool FireOnUpdateParam(NG::LayoutWrapper* layoutWrapper);
+    bool UpdateSize(int32_t index, SizeF size)
+    {
+        CHECK_NULL_RETURN(measureLayoutParam_, false);
+        CHECK_NULL_RETURN(measureLayoutParam_->ChildIndexInRange(index), false);
+        auto childParam = measureLayoutParam_->Get(index);
+        childParam.UpdateSize(size);
+        return true;
+    }
 
 private:
     void BuildChildren(const RefPtr<FrameNode>& child);
     std::function<void(LayoutWrapper* layoutWrapper)> layoutFunc_;
     std::function<void(LayoutWrapper* layoutWrapper)> measureFunc_;
+    std::function<void(LayoutWrapper* layoutWrapper)> updateParamFunc_;
     std::string viewKey_;
     RefPtr<MeasureLayoutParam> measureLayoutParam_;
 };
