@@ -30,6 +30,9 @@ public:
     explicit VelocityTracker(Axis mainAxis) : mainAxis_(mainAxis) {}
     ~VelocityTracker() = default;
 
+    static constexpr int32_t LEAST_SQUARE_PARAM_NUM = 3;
+    static constexpr int32_t POINT_NUMBER = 5;
+
     void Reset()
     {
         lastPosition_.Reset();
@@ -131,8 +134,8 @@ private:
     bool isFirstPoint_ = true;
     TimeStamp lastTimePoint_;
     TimeStamp firstPointTime_;
-    LeastSquareImpl xAxis_ { 3, 5 };
-    LeastSquareImpl yAxis_ { 3, 5 };
+    LeastSquareImpl xAxis_ { LEAST_SQUARE_PARAM_NUM, POINT_NUMBER };
+    LeastSquareImpl yAxis_ { LEAST_SQUARE_PARAM_NUM, POINT_NUMBER };
     bool isVelocityDone_ = false;
 };
 
