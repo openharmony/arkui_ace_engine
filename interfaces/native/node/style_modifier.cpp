@@ -4479,7 +4479,7 @@ int32_t SetTransformCenter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     CalcDimension centerX(HALF, DimensionUnit::PERCENT);
     if (CENTER_X_INDEX < actualSize) {
         centerX.SetValue(item->value[CENTER_X_INDEX].f32);
-        centerX.SetUnit(DimensionUnit::PERCENT);
+        centerX.SetUnit(DimensionUnit::VP);
     }
     CalcDimension centerY(HALF, DimensionUnit::PERCENT);
     if (CENTER_Y_INDEX < actualSize) {
