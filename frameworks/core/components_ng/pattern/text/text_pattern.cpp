@@ -1951,7 +1951,11 @@ void TextPattern::InitTextDetect(int32_t startPos, std::string detectText)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->SetTextDetectResult(result);
-            pattern->FireOnResult(result.entity);
+            pattern->FireOnResult(result);
+            if (result.code != 0) {
+                TAG_LOGD(AceLogTag::ACE_TEXT, "Data detect error, error code: %{public}d", result.code);
+                return;
+            }
             pattern->ParseAIResult(result, startPos);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
