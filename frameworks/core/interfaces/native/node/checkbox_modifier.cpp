@@ -179,7 +179,7 @@ void SetCheckboxResponseRegion(NodeHandle node, const double* values, const int3
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<DimensionRect> region;
-    int32_t AYYAY_LENGTH = 4; // 4: dimension length
+    uint32_t AYYAY_LENGTH = 4; // 4: dimension length
     for (uint32_t i = 0; i < length / 4; i++) {
         CalcDimension xDimen =
             CalcDimension(values[i * AYYAY_LENGTH], static_cast<DimensionUnit>(units[i * AYYAY_LENGTH]));
