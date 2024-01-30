@@ -3269,7 +3269,9 @@ void SetMaskPath(ArkUINodeHandle node, const char* type, double* attribute, cons
 } // namespace
 
 namespace NodeModifier {
-OHOS::Ace::TouchEventInfo globalEventInfo("global");
+namespace {
+    OHOS::Ace::TouchEventInfo globalEventInfo("global");
+}
 
 const ArkUICommonModifier* GetCommonModifier()
 {
@@ -3444,7 +3446,7 @@ void SetOnTouch(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [node, eventId, extraParam](TouchEventInfo& eventInfo) {
-        NodeModifier::globalEventInfo = eventInfo; 
+        globalEventInfo = eventInfo;
         ArkUINodeEvent event;
         event.kind = ON_TOUCH;
         event.eventId = eventId;
@@ -3468,7 +3470,7 @@ void SetOnTouch(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
         event.touchEvent.sourceType = static_cast<ArkUISourceType>(eventInfo.GetSourceDevice());
 
         auto getTouchPoints = [](ArkUITouchPoint** points)-> ArkUI_Int32 {
-            const std::list<TouchLocationInfo>& touchList = NodeModifier::globalEventInfo.GetTouches();
+            const std::list<TouchLocationInfo>& touchList = globalEventInfo.GetTouches();
             int index = 0;
             for (const auto& touchInfo : touchList) {
                 const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
