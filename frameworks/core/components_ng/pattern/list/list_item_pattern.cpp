@@ -931,6 +931,12 @@ bool ListItemPattern::GetLayouted() const
 
 float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const
 {
+    auto layoutProperty = GetLayoutProperty<ListItemLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto visible = layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
+    if (visible == VisibleType::GONE) {
+        return 0.0f;
+    }
     if (!isLayouted_) {
         return estimateHeight;
     }
