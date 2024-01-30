@@ -46,7 +46,7 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
 
     // Create paragraph.
-    if (pattern->IsDragging() && !showPlaceHolder_) {
+    if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
         CreateParagraph(textStyle, pattern->GetDragContents(), textContent_, false);
     } else {
         CreateParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition());
