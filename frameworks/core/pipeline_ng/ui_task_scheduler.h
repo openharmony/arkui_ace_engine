@@ -129,6 +129,13 @@ public:
         return dirtyLayoutNodes_.empty();
     }
 
+    void AddSyncGeometryNodeTask(std::function<void()>&& task)
+    {
+        syncGeometryNodeTasks_.emplace_back(task);
+    }
+
+    void FlushSyncGeometryNodeTasks();
+
 private:
     bool NeedAdditionalLayout();
 
@@ -161,6 +168,7 @@ private:
     std::list<std::function<void()>> afterLayoutTasks_;
     std::list<std::function<void()>> afterRenderTasks_;
     std::list<std::function<void()>> persistAfterLayoutTasks_;
+    std::list<std::function<void()>> syncGeometryNodeTasks_;
 
     uint32_t currentPageId_ = 0;
     bool is64BitSystem_ = false;

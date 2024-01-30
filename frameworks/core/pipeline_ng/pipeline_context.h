@@ -614,6 +614,9 @@ public:
         isWindowAnimation_ = false;
     }
 
+    void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
+    void FlushSyncGeometryNodeTasks() override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);

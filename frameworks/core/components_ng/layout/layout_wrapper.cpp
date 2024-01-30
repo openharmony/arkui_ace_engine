@@ -208,7 +208,6 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
     auto childGeo = child->GetGeometryNode();
     child->SaveGeoState();
     childGeo->SetFrameOffset(childGeo->GetFrameOffset() + offset);
-    child->ForceSyncGeometryNode();
 }
 
 void LayoutWrapper::ExpandIntoKeyboard()
