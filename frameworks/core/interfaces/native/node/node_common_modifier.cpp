@@ -74,6 +74,7 @@ constexpr int32_t X_INDEX = 0;
 constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
 constexpr int32_t ARRAY_SIZE = 3;
+constexpr float HALF = 0.5f;
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -2992,6 +2993,16 @@ void SetTransitionCenter(ArkUINodeHandle node, ArkUI_Float32 centerXValue, ArkUI
     ViewAbstract::SetPivot(frameNode, offset);
 }
 
+void ResetTransformCenter(RefPtr<OneCenterTransitionOptionType>& oneCenterTransition)
+{
+    Dimension centerXDimension(HALF, DimensionUnit::PERCENT);
+    Dimension centerYDimension(HALF, DimensionUnit::PERCENT);
+    Dimension centerZDimension(0, DimensionUnit::VP);
+    oneCenterTransition->SetCenterX(centerXDimension);
+    oneCenterTransition->SetCenterY(centerYDimension);
+    oneCenterTransition->SetCenterZ(centerZDimension);
+}
+
 void SetOpacityTransition(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUIAnimationOptionType* animationOption)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3007,6 +3018,7 @@ void SetOpacityTransition(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI
     }
     if (!oneCenterTransition) {
         oneCenterTransition = AceType::MakeRefPtr<OneCenterTransitionOptionType>();
+        ResetTransformCenter(oneCenterTransition);
     }
     RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
     RefPtr<NG::ChainedOpacityEffect> opacityEffect;
@@ -3048,6 +3060,7 @@ void SetRotateTransition(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_
     }
     if (!oneCenterTransition) {
         oneCenterTransition = AceType::MakeRefPtr<OneCenterTransitionOptionType>();
+        ResetTransformCenter(oneCenterTransition);
     }
     RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
     RefPtr<NG::ChainedRotateEffect> rotateEffect;
@@ -3092,6 +3105,7 @@ void SetScaleTransition(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_I
     }
     if (!oneCenterTransition) {
         oneCenterTransition = AceType::MakeRefPtr<OneCenterTransitionOptionType>();
+        ResetTransformCenter(oneCenterTransition);
     }
     RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
     RefPtr<NG::ChainedScaleEffect> scaleEffect;
@@ -3131,6 +3145,7 @@ void SetTranslateTransition(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_In
     }
     if (!oneCenterTransition) {
         oneCenterTransition = AceType::MakeRefPtr<OneCenterTransitionOptionType>();
+        ResetTransformCenter(oneCenterTransition);
     }
     RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
     RefPtr<NG::ChainedTranslateEffect> translateEffect;
