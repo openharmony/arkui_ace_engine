@@ -253,7 +253,7 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxResponseRegion(ArkUIRuntimeCal
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(2); // 2: array length
-    uint32_t length = lengthArg->Int32Value(vm);
+    uint32_t length = static_cast<uint32_t>(lengthArg->Int32Value(vm));
     double regionArray[length];
     int32_t regionUnits[length];
     if (!ArkTSUtils::ParseResponseRegion(vm, secondArg, regionArray, regionUnits, length)) {
