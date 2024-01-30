@@ -436,6 +436,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     if (!arkRuntime->InitializeFromExistVM(vm)) {
         return;
     }
+    arkRuntime->SetNativeEngine(nativeArkEngine);
     localRuntime_ = arkRuntime;
     LocalScope scope(vm);
 
