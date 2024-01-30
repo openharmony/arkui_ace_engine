@@ -71,6 +71,12 @@ private:
     bool TrySkipping(float mainSize);
 
     /**
+     * @brief Measure all items until targetIndex_ is reached. For performing scrollTo with animation.
+     * 
+     */
+    void MeasureToTarget();
+
+    /**
      * @brief Performs the layout of the children based on the main offset.
      * @param mainOffset The main offset of the layout.
      */

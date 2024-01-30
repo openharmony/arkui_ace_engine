@@ -42,11 +42,11 @@ bool GridIrregularFiller::IsFull(float len, float targetLen)
     return len > targetLen || info_->endIndex_ == info_->childrenCount_ - 1;
 }
 
-float GridIrregularFiller::Fill(const FillParameters& params, int32_t startIdx)
+float GridIrregularFiller::Fill(const FillParameters& params, float targetLen, int32_t startingLine)
 {
-    info_->endIndex_ = InitPos(startIdx);
+    info_->endIndex_ = InitPos(startingLine);
     float len = 0.0f;
-    while (!IsFull(len, params.targetLen)) {
+    while (!IsFull(len, targetLen)) {
         int32_t prevRow = posY_;
         if (!FindNextItem(++info_->endIndex_)) {
             FillOne(info_->endIndex_);
@@ -57,13 +57,27 @@ float GridIrregularFiller::Fill(const FillParameters& params, int32_t startIdx)
             UpdateLength(len, prevRow, posY_, params.mainGap);
         }
 
-        MeasureItem(params, posX_, posY_);
+        MeasureItem(params, info_->endIndex_, posX_, posY_);
     }
     info_->endMainLineIndex_ = posY_;
 
     // add length of the last row
     UpdateLength(len, posY_, info_->lineHeightMap_.rbegin()->first + 1, params.mainGap);
     return len;
+}
+
+void GridIrregularFiller::FillToTarget(const FillParameters& params, int32_t targetIdx, int32_t startingLine)
+{
+    if (targetIdx >= info_->childrenCount_) {
+        targetIdx = info_->childrenCount_ - 1;
+    }
+    int32_t idx = InitPos(startingLine);
+    while (idx < targetIdx) {
+        if (!FindNextItem(++idx)) {
+            FillOne(idx);
+        }
+        MeasureItem(params, idx, posX_, posY_);
+    }
 }
 
 int32_t GridIrregularFiller::FitItem(const decltype(GridLayoutInfo::gridMatrix_)::iterator& it, int32_t itemWidth)
@@ -178,13 +192,13 @@ void GridIrregularFiller::UpdateLength(float& len, int32_t prevRow, int32_t curR
     }
 }
 
-void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t col, int32_t row)
+void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row)
 {
-    auto child = wrapper_->GetOrCreateChildByIndex(info_->endIndex_);
+    auto child = wrapper_->GetOrCreateChildByIndex(itemIdx);
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
 
-    auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, info_->endIndex_);
+    auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
     // should cache child constraint result
     float crossLen = 0.0f;
     for (int32_t i = 0; i < itemSize.columns; ++i) {
@@ -237,39 +251,58 @@ int32_t GridIrregularFiller::FillMatrixByLine(int32_t startingLine, int32_t targ
     return idx;
 }
 
-float GridIrregularFiller::MeasureBackward(const FillParameters& params, int32_t jumpLineIdx)
+float GridIrregularFiller::MeasureBackward(const FillParameters& params, float targetLen, int32_t startingLine)
 {
     float len = 0.0f;
-    posY_ = jumpLineIdx;
+    posY_ = startingLine;
     // only need to record irregular items
     std::unordered_set<int32_t> measured;
 
-    for (; posY_ >= 0 && len < params.targetLen; --posY_) {
-        const auto& row = info_->gridMatrix_.find(posY_)->second;
-        for (int c = 0; c < info_->crossCount_; ++c) {
-            if (row.find(c) == row.end()) {
-                continue;
-            }
-
-            if (measured.find(row.at(c)) != measured.end()) {
-                // skip all columns of a measured irregular item
-                c += GridLayoutUtils::GetItemSize(info_, wrapper_, row.at(c)).columns - 1;
-                continue;
-            }
-
-            int32_t topRow = FindItemTopRow(posY_, c);
-            info_->endIndex_ = info_->gridMatrix_.at(topRow).at(c);
-            MeasureItem(params, c, topRow);
-            if (topRow < posY_) {
-                // measure irregular items only once from the bottom-left tile
-                measured.insert(info_->endIndex_);
-            }
-            // skip all columns of this item
-            c += GridLayoutUtils::GetItemSize(info_, wrapper_, info_->endIndex_).columns - 1;
-        }
+    for (; posY_ >= 0 && len < targetLen; --posY_) {
+        BackwardImpl(measured, params);
         len += params.mainGap + info_->lineHeightMap_.at(posY_);
     }
     return len;
+}
+
+void GridIrregularFiller::MeasureBackwardToTarget(
+    const FillParameters& params, int32_t targetLine, int32_t startingLine)
+{
+    if (targetLine < 0) {
+        return;
+    }
+    posY_ = startingLine;
+
+    std::unordered_set<int32_t> measured;
+    for (; posY_ >= targetLine; --posY_) {
+        BackwardImpl(measured, params);
+    }
+}
+
+void GridIrregularFiller::BackwardImpl(std::unordered_set<int32_t>& measured, const FillParameters& params)
+{
+    const auto& row = info_->gridMatrix_.find(posY_)->second;
+    for (int c = 0; c < info_->crossCount_; ++c) {
+        if (row.find(c) == row.end()) {
+            continue;
+        }
+
+        if (measured.find(row.at(c)) != measured.end()) {
+            // skip all columns of a measured irregular item
+            c += GridLayoutUtils::GetItemSize(info_, wrapper_, row.at(c)).columns - 1;
+            continue;
+        }
+
+        int32_t topRow = FindItemTopRow(posY_, c);
+        int32_t itemIdx = info_->gridMatrix_.at(topRow).at(c);
+        MeasureItem(params, itemIdx, c, topRow);
+        if (topRow < posY_) {
+            // measure irregular items only once from the bottom-left tile
+            measured.insert(itemIdx);
+        }
+        // skip all columns of this item
+        c += GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx).columns - 1;
+    }
 }
 
 int32_t GridIrregularFiller::FindItemTopRow(int32_t row, int32_t col) const

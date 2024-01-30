@@ -41,7 +41,6 @@ public:
 
     struct FillParameters {
         std::vector<float> crossLens; /**< The column widths of items. */
-        float targetLen = 0.0f;       /**< The target length of the main axis (total row height to fill). */
         float crossGap = 0.0f;        /**< The cross-axis gap between items. */
         float mainGap = 0.0f;         /**< The main-axis gap between items. */
     };
@@ -52,10 +51,20 @@ public:
      * EFFECT: updates GridLayoutInfo::endIndex_ and GridLayoutInfo::endMainLineIndex_ to the last filled item.
      *
      * @param params The FillParameters object containing the fill parameters.
-     * @param startIdx The line index to start filling from.
+     * @param targetLen The target length of the main axis (total row height to fill).
+     * @param startingLine The line index to start filling from.
      * @return The total length filled on the main axis.
      */
-    float Fill(const FillParameters& params, int32_t startIdx);
+    float Fill(const FillParameters& params, float targetLen, int32_t startingLine);
+
+    /**
+     * @brief Fills the grid with items in the forward direction until targetIdx is measured.
+     *
+     * @param params The FillParameters object containing the fill parameters.
+     * @param targetIdx The target index to fill up to.
+     * @param startingLine The line index to start filling from.
+     */
+    void FillToTarget(const FillParameters& params, int32_t targetIdx, int32_t startingLine);
 
     /**
      * @brief Fills the gridMatrix in forward direction until the target GridItem is included. Measure isn't performed,
@@ -82,13 +91,25 @@ public:
     /**
      * @brief Measures the GridItems in the backward direction until the target length is filled.
      *
-     * REQUIRES: GridMatrix prior to jumpIndex_ is already filled.
+     * REQUIRES: GridMatrix prior to startingLine is already filled.
      *
      * @param params The fill parameters for measuring GridItems.
-     * @param jumpLineIdx The line index to start measuring backward.
+     * @param targetLen The target length of the main axis (total row height to fill).
+     * @param startingLine The line index to start measuring backward.
      * @return The total length filled on the main axis.
      */
-    float MeasureBackward(const FillParameters& params, int32_t jumpLineIdx);
+    float MeasureBackward(const FillParameters& params, float targetLen, int32_t startingLine);
+
+    /**
+     * @brief Measures the GridItems in the backward direction until the target line is measured.
+     *
+     * REQUIRES: GridMatrix prior to startingLine is already filled.
+     *
+     * @param params The fill parameters for measuring GridItems.
+     * @param targetLine The target line index to fill backward to.
+     * @param startingLine The line index to start measuring backward.
+     */
+    void MeasureBackwardToTarget(const FillParameters& params, int32_t targetLine, int32_t startingLine);
 
 private:
     /**
@@ -112,10 +133,11 @@ private:
      * @brief Measures a GridItem at endIndex_ and updates the grid layout information.
      *
      * @param params The FillParameters object containing the fill parameters.
+     * @param itemIdx The index of the GridItem.
      * @param col The column index where the item is being added.
      * @param row The row index where the item is being added.
      */
-    void MeasureItem(const FillParameters& params, int32_t col, int32_t row);
+    void MeasureItem(const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row);
 
     /**
      * @brief Initializes the position of the filler in the grid to GridLayoutInfo::startIndex_.
@@ -158,6 +180,14 @@ private:
      * @return The cross-axis index where the item can fit. Returns -1 if it can't fit on the current row.
      */
     int32_t FitItem(const decltype(GridLayoutInfo::gridMatrix_)::iterator& it, int32_t itemWidth);
+
+    /**
+     * @brief Implementation of MeasureBackward algorithm on each row.
+     * 
+     * @param measured unordered_set to record irregular items that are already measured.
+     * @param params Fill Parameters needed for measure.
+     */
+    void BackwardImpl(std::unordered_set<int32_t>& measured, const FillParameters& params);
 
     /**
      * @brief Finds the top row index of an item in the grid.
