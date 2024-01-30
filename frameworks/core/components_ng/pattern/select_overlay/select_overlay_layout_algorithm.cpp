@@ -102,10 +102,14 @@ OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWra
     CHECK_NULL_RETURN(menu, menuOffset);
     auto maxWidth = layoutConstraint->selfIdealSize.Width().value_or(0.0f);
     auto menuSize = menu->GetGeometryNode()->GetFrameSize();
-    if (menuOffset.GetX() + menuSize.Width() > maxWidth && menuOffset.GetX() >= menuSize.Width()) {
-        menuOffset.SetX(menuOffset.GetX() - menuSize.Width());
-    } else if (menuOffset.GetX() + menuSize.Width() > maxWidth && menuOffset.GetX() < menuSize.Width()) {
-        menuOffset.SetX(menuOffset.GetX() - menuSize.Width() / 2.0);
+    if (GreatNotEqual(menuOffset.GetX() + menuSize.Width(), maxWidth)) {
+        if (GreatOrEqual(menuOffset.GetX(), menuSize.Width())) {
+            menuOffset.SetX(menuOffset.GetX() - menuSize.Width());
+        } else if (LessOrEqual(menuSize.Width(), maxWidth)) {
+            menuOffset.SetX(maxWidth - menuSize.Width());
+        } else if (GreatNotEqual(menuSize.Width(), maxWidth)) {
+            menuOffset.SetX(menuOffset.GetX() - menuSize.Width() / 2.0f);
+        }
     }
     return menuOffset;
 }
