@@ -18,6 +18,7 @@
 
 #include <list>
 
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/gestures/gesture_info.h"
@@ -157,6 +158,9 @@ public:
 
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     virtual GestureMode GetGestureMode() const = 0;
+
+    void SetRecognizerInfoRecursively(const Offset& coordinateOffset, const RefPtr<NG::FrameNode>& node,
+        const RefPtr<NG::TargetComponent>& targetComponent, const SizeF& size);
     
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
