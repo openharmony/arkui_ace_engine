@@ -70,7 +70,7 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
         }
         clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
-        clickRecognizer_->AssignNodeId(frameNode->GetId());
+        clickRecognizer_->SetNodeId(frameNode->GetId());
         clickRecognizer_->AttachFrameNode(frameNode);
         clickRecognizer_->SetTargetComponent(targetComponent);
         clickRecognizer_->SetIsSystemGesture(true);

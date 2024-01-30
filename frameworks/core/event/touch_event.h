@@ -609,7 +609,7 @@ public:
         return nodeName_;
     }
 
-    virtual void AssignNodeId(int id)
+    void SetNodeId(int id)
     {
         if (nodeId_ != -1) {
             return;

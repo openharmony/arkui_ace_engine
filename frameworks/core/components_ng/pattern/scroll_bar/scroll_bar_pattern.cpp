@@ -396,7 +396,7 @@ void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
     if (panRecognizer_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
-        panRecognizer_->AssignNodeId(frameNode->GetId());
+        panRecognizer_->SetNodeId(frameNode->GetId());
         panRecognizer_->AttachFrameNode(frameNode);
         panRecognizer_->SetTargetComponent(targetComponent);
         panRecognizer_->SetIsSystemGesture(true);
