@@ -153,10 +153,13 @@ void ResetMark(NodeHandle node)
     CheckBoxModelNG::SetCheckMarkWidth(frameNode, checkBoxTheme->GetCheckStroke());
 }
 
-void SetCheckboxPadding(NodeHandle node, const double* values, const int* units)
+void SetCheckboxPadding(NodeHandle node, const double* values, const int* units, uint32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (length != 4) { // 4 : data length
+        return;
+    }
     CalcLength topDimen;
     CalcLength rightDimen;
     CalcLength bottomDimen;
@@ -179,16 +182,16 @@ void SetCheckboxResponseRegion(NodeHandle node, const double* values, const int3
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<DimensionRect> region;
-    uint32_t AYYAY_LENGTH = 4; // 4: dimension length
+    uint32_t ARRAY_LENGTH = 4; // 4: dimension length
     for (uint32_t i = 0; i < length / 4; i++) {
         CalcDimension xDimen =
-            CalcDimension(values[i * AYYAY_LENGTH], static_cast<DimensionUnit>(units[i * AYYAY_LENGTH]));
+            CalcDimension(values[i * ARRAY_LENGTH], static_cast<DimensionUnit>(units[i * ARRAY_LENGTH]));
         CalcDimension yDimen =
-            CalcDimension(values[i * AYYAY_LENGTH + 1], static_cast<DimensionUnit>(units[i * AYYAY_LENGTH + 1]));
+            CalcDimension(values[i * ARRAY_LENGTH + 1], static_cast<DimensionUnit>(units[i * ARRAY_LENGTH + 1]));
         CalcDimension widthDimen = CalcDimension(
-            values[i * AYYAY_LENGTH + 2], static_cast<DimensionUnit>(units[i * AYYAY_LENGTH + 2])); // 2: width value
+            values[i * ARRAY_LENGTH + 2], static_cast<DimensionUnit>(units[i * ARRAY_LENGTH + 2])); // 2: width value
         CalcDimension heightDimen = CalcDimension(
-            values[i * AYYAY_LENGTH + 3], static_cast<DimensionUnit>(units[i * AYYAY_LENGTH + 3])); // 3: height value
+            values[i * ARRAY_LENGTH + 3], static_cast<DimensionUnit>(units[i * ARRAY_LENGTH + 3])); // 3: height value
         DimensionOffset offsetDimen(xDimen, yDimen);
         DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
         region.emplace_back(dimenRect);
