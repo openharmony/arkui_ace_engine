@@ -227,18 +227,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         }
         auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(recognizer);
         if (recognizerGroup) {
-            auto groupRecognizers = recognizerGroup->GetGroupRecognizer();
-            for (const auto& groupRecognizer : groupRecognizers) {
-                if (groupRecognizer) {
-                    groupRecognizer->SetCoordinateOffset(offset);
-                    groupRecognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
-                    groupRecognizer->SetTargetComponent(targetComponent);
-                    groupRecognizer->SetSize(size.Height(), size.Width());
-                    groupRecognizer->SetNodeId(host->GetId());
-                }
-            }
-        } else {
-            recognizer->SetNodeId(host->GetId());
+            recognizerGroup->SetRecognizerInfoRecursively(offset, host, targetComponent, size);
         }
         
         recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
