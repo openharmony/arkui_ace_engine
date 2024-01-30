@@ -39,7 +39,6 @@ public:
     void SetBorderRadius(const Dimension& radius) override;
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
-    void SetHoverEffect(const int32_t& hoverEffectNum) override;
     void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) override;
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
