@@ -1386,8 +1386,16 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
     auto dragStatusUpdateAction = [weakPtr = WeakClaim(this), isDragging](const ResultObject& resultObj) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->spans_.empty()) {
+            return;
+        }
         auto it = pattern->spans_.begin();
-        std::advance(it, resultObj.spanPosition.spanIndex);
+        if (resultObj.spanPosition.spanIndex >= static_cast<int32_t>(pattern->spans_.size())) {
+            std::advance(it, pattern->spans_.size() - 1);
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "resultObj.spanPosition.spanIndex is larger than spans size.");
+        } else {
+            std::advance(it, resultObj.spanPosition.spanIndex);
+        }
         auto spanItem = *it;
         CHECK_NULL_VOID(spanItem);
         if (resultObj.type == SelectSpanType::TYPESPAN) {
