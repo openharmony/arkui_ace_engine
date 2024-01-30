@@ -105,6 +105,17 @@ struct GridLayoutInfo {
     }
 
     /**
+     * @brief Perform a binary search to find item with [index] in the gridMatrix_.
+     *
+     * Designed for old ScrollLayoutAlgorithm only, where tiles of large items are all filled with index. Correct answer
+     * not guaranteed for new GridIrregularLayout, where all except the top-left tile are filled with -1.
+     *
+     * @param index target item index
+     * @return iterator to that item, or ::end() if not found.
+     */
+    std::map<int32_t, std::map<int32_t, int32_t>>::const_iterator FindInMatrix(int32_t index) const;
+
+    /**
      * @brief Finds the index of the last item in the grid matrix, and update startIndex_ and startMainLineIndex_ to
      * that last item.
      *

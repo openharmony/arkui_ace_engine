@@ -481,12 +481,12 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     AceEngine::Get().RemoveContainer(instanceId);
 }
 
-bool AceContainer::RunPage(int32_t instanceId, const std::string& url, const std::string& params)
+UIContentErrorCode AceContainer::RunPage(int32_t instanceId, const std::string& url, const std::string& params)
 {
     ACE_FUNCTION_TRACE();
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        return false;
+        return UIContentErrorCode::NULL_POINTER;
     }
 
     ContainerScope scope(instanceId);
@@ -495,11 +495,10 @@ bool AceContainer::RunPage(int32_t instanceId, const std::string& url, const std
         auto type = front->GetType();
         if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD) ||
             (type == FrontendType::ETS_CARD)) {
-            front->RunPage(url, params);
-            return true;
+            return front->RunPage(url, params);
         }
     }
-    return false;
+    return UIContentErrorCode::NULL_POINTER;
 }
 
 void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)

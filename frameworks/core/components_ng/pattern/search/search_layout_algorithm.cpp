@@ -19,6 +19,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/search/search_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -240,6 +241,11 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     // searchButton Measure
     auto buttonLayoutConstraint = layoutProperty->CreateChildConstraint();
     buttonWrapper->Measure(buttonLayoutConstraint);
+
+    // deal with pixel round
+    auto pixelRound = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                        static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    buttonLayoutProperty->UpdatePixelRound(pixelRound);
 
     // compute searchButton width
     auto searchWidthMax = CalcSearchWidth(constraint.value(), layoutWrapper);

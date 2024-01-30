@@ -257,7 +257,7 @@ public:
     void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
         const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
         TouchBottomTypeLoop touchBottomTypeLoop);
-    void StopAnimation();
+    void StopAnimation(bool ifImmediately = false);
     void SetLongPointHeadCurve(RefPtr<Curve> curve, float motionVelocity)
     {
         headCurve_ = curve;

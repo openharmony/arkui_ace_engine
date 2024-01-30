@@ -930,10 +930,10 @@ struct ArkUICommonModifier {
         const ArkUIAnimationOptionType* opacityOption);
     void (*setTranslateTransition)(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue,
         ArkUI_Int32 yUnit, ArkUI_Float32 zValue, ArkUI_Int32 zUnit, const ArkUIAnimationOptionType* opacityOption);
-    void (*setMaskShape)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 strock,
-        ArkUI_Float32 strockWidth, ArkUI_Float64* attribute, ArkUI_Int32 length);
-    void (*setMaskPath)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 strock,
-        ArkUI_Float32 strockWidth, ArkUI_Float64* attribute, ArkUI_CharPtr commands);
+    void (*setMaskShape)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
+        ArkUI_Float32 strokeWidth, ArkUI_Float64* attribute, ArkUI_Int32 length);
+    void (*setMaskPath)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
+        ArkUI_Float32 strokeWidth, ArkUI_Float64* attribute, ArkUI_CharPtr commands);
     void (*setBlendMode)(ArkUINodeHandle node, ArkUI_Int32 blendMode);
     void (*resetBlendMode)(ArkUINodeHandle node);
     void (*setConstraintSize)(ArkUINodeHandle node, const ArkUI_Float64* values, const ArkUI_Int32* units);

@@ -44,6 +44,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
+constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 
 void ExitToDesktop()
@@ -152,7 +153,7 @@ void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std:
     LoadPage(GenerateNextPageId(), info);
 }
 
-void PageRouterManager::RunCard(
+UIContentErrorCode PageRouterManager::RunCard(
     const std::string& url, const std::string& params, int64_t cardId, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
@@ -165,7 +166,7 @@ void PageRouterManager::RunCard(
         info.url = manifestParser_->GetRouter()->GetEntry("");
     }
 #endif
-    LoadCard(0, info, params, cardId, false, true, entryPoint);
+    return LoadCard(0, info, params, cardId, false, true, entryPoint);
 }
 
 void PageRouterManager::Push(const RouterPageInfo& target)
@@ -411,11 +412,24 @@ bool PageRouterManager::StartPop()
     }
 
     // pop top page in page stack
-    auto topNode = pageRouterStack_.back();
-    pageRouterStack_.pop_back();
+    auto preWeakNode = pageRouterStack_.back();
+    auto prePageNode = preWeakNode.Upgrade();
+    if (prePageNode) {
+        auto prePageNodePattern = prePageNode->GetPattern<PagePattern>();
+        // stack's top page should be removed after AboutToDisappear
+        // If in the future, back gesture can BE INTERRUPTED, this delay operation
+        // may lead to error in animation, because the animation will pick a wrong
+        // top element of stack (old top hasn't be removed yet due to interruption).
+        prePageNodePattern->SetDisappearCallback([weak = WeakClaim(this), preWeakNode]() {
+            auto manager = weak.Upgrade();
+            if (manager) {
+                manager->pageRouterStack_.remove(preWeakNode);
+            }
+        });
+    }
 
-    //clean prev top page params
-    currentPage = pageRouterStack_.empty() ? nullptr : pageRouterStack_.back().Upgrade();
+    // clean prev top page params
+    currentPage = (++pageRouterStack_.rbegin())->Upgrade();
     CHECK_NULL_RETURN(currentPage, false);
     pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
@@ -424,9 +438,8 @@ bool PageRouterManager::StartPop()
     std::string params = pageInfo->GetPageParams();
     pageInfo->ReplacePageParams("");
 
-    //do pop page
+    // do pop page
     if (!OnPopPage(true, true)) {
-        pageRouterStack_.emplace_back(topNode);
         pageInfo->ReplacePageParams(params);
         return false;
     }
@@ -511,6 +524,24 @@ std::string PageRouterManager::GetParams() const
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_RETURN(pageInfo, "");
     return pageInfo->GetPageParams();
+}
+
+int32_t PageRouterManager::GetIndexByUrl(const std::string& url) const
+{
+    int32_t index = 0;
+    for (auto iter : pageRouterStack_) {
+        auto pageNode = iter.Upgrade();
+        if (!pageNode) {
+            continue;
+        }
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        auto localUrl = pagePattern->GetPageInfo()->GetPageUrl();
+        if (localUrl == url) {
+            return index;
+        }
+        ++index;
+    }
+    return INVALID_PAGE_INDEX;
 }
 
 std::string PageRouterManager::GetCurrentPageUrl()
@@ -600,23 +631,23 @@ std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo()
     return jsonRouterStack;
 }
 
-std::string PageRouterManager::RestoreRouterStack(std::unique_ptr<JsonValue> stackInfo)
+std::pair<std::string, UIContentErrorCode> PageRouterManager::RestoreRouterStack(std::unique_ptr<JsonValue> stackInfo)
 {
     if (!stackInfo->IsValid() || !stackInfo->IsArray()) {
-        return "";
+        return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
     }
     int32_t stackSize = stackInfo->GetArraySize();
     if (stackSize < 1) {
-        return "";
+        return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
     }
 
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, "");
+    CHECK_NULL_RETURN(container, std::make_pair("", UIContentErrorCode::NULL_POINTER));
     auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipeline, "");
+    CHECK_NULL_RETURN(pipeline, std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER));
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
-    CHECK_NULL_RETURN(stageManager, "");
+    CHECK_NULL_RETURN(stageManager, std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER));
 
     for (int32_t index = 0; index < stackSize - 1; ++index) {
         std::string url = stackInfo->GetArrayItem(index)->GetValue("url")->ToString();
@@ -626,7 +657,7 @@ std::string PageRouterManager::RestoreRouterStack(std::unique_ptr<JsonValue> sta
     }
     std::string startUrl = stackInfo->GetArrayItem(stackSize - 1)->GetValue("url")->ToString();
     // remove 2 useless character, as "XXX" to XXX
-    return startUrl.substr(1, startUrl.size() - 2);
+    return std::make_pair(startUrl.substr(1, startUrl.size() - 2), UIContentErrorCode::NO_ERRORS);
 }
 
 int32_t PageRouterManager::GenerateNextPageId()
@@ -974,7 +1005,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     LOGI("LoadPage Success");
 }
 
-void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
+UIContentErrorCode PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
     int64_t cardId, bool /* isRestore */, bool needHideLast, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
@@ -986,20 +1017,21 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
     pageRouterStack_.emplace_back(pageNode);
 
     if (!loadCard_) {
-        return;
+        return UIContentErrorCode::NULL_CARD_CALLBACK;
     }
     auto result = loadCard_(target.url, cardId, entryPoint);
     if (!result) {
         pageRouterStack_.pop_back();
-        return;
+        return UIContentErrorCode::NULL_CARD_RES;
     }
 
     if (!OnPageReady(pageNode, needHideLast, false, isCardRouter_, cardId)) {
         LOGE("LoadCard OnPageReady Failed");
         pageRouterStack_.pop_back();
-        return;
+        return UIContentErrorCode::CARD_PAGE_NOT_READY;
     }
     LOGI("LoadCard Success");
+    return UIContentErrorCode::NO_ERRORS;
 }
 
 void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const RouterPageInfo& target,

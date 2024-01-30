@@ -162,7 +162,9 @@ RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(
     cacheBitmap_.Build(width, height, format);
     bitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    canvas_ = std::make_unique<RSCanvas>();
     canvas_->Bind(bitmap_);
+    cacheCanvas_ = std::make_unique<RSCanvas>();
     cacheCanvas_->Bind(cacheBitmap_);
 #endif
     InitFilterFunc();

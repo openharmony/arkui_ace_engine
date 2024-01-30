@@ -32,10 +32,12 @@ public:
     MockUIContent() = default;
     ~MockUIContent() override = default;
 
-    MOCK_METHOD3(Initialize, void(OHOS::Rosen::Window* window, const std::string& url, napi_value storage));
-    MOCK_METHOD3(Initialize,
-        void(OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage));
-    MOCK_METHOD3(InitializeByName, void(OHOS::Rosen::Window* window, const std::string& name, napi_value storage));
+    MOCK_METHOD3(Initialize, UIContentErrorCode(OHOS::Rosen::Window* window, const std::string& url,
+        napi_value storage));
+    MOCK_METHOD3(Initialize, UIContentErrorCode(OHOS::Rosen::Window* window,
+        const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage));
+    MOCK_METHOD3(InitializeByName, UIContentErrorCode(OHOS::Rosen::Window *window,
+        const std::string &name, napi_value storage));
     MOCK_METHOD4(Initialize,
         void(OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowID));
     MOCK_METHOD0(Foreground, void());
@@ -44,7 +46,8 @@ public:
     MOCK_METHOD0(UnFocus, void());
     MOCK_METHOD0(Destroy, void());
     MOCK_METHOD1(OnNewWant, void(const OHOS::AAFwk::Want& want));
-    MOCK_METHOD3(Restore, void(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage));
+    MOCK_METHOD3(Restore, UIContentErrorCode(OHOS::Rosen::Window* window, const std::string& contentInfo,
+        napi_value storage));
     MOCK_CONST_METHOD0(GetContentInfo, std::string());
     MOCK_METHOD0(DestroyUIDirector, void());
     MOCK_METHOD0(ProcessBackPressed, bool());

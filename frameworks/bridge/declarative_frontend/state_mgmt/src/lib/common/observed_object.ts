@@ -229,8 +229,15 @@ class SubscribableHandler {
         return true;
         break;
       default:
-        if (Reflect.get(target, property) == newValue) {
-          return true;
+        // this is added for stability test: Reflect.get target is not object
+        try {
+          if (Reflect.get(target, property) == newValue) {
+            return true;
+          }
+        } catch (error) {
+          ArkTools.print("SubscribableHandler: set", target);
+          stateMgmtConsole.error(`An error occurred in SubscribableHandler set, target type is: ${typeof target}, ${error.message}`);
+          throw error;
         }
         Reflect.set(target, property, newValue);
         const propString = String(property);

@@ -407,6 +407,7 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     CHECK_NULL_VOID(frameNode);
     preTargetFrameNode_ = frameNode;
     draggedFrameNode_ = preTargetFrameNode_;
+    parentHitNodes_.emplace(frameNode->GetId());
 }
 
 void DragDropManager::OnDragStart(const Point& point)
