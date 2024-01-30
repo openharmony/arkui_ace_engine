@@ -959,7 +959,6 @@ void ScrollablePattern::ScrollTo(float position)
 
 void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
     float currVelocity = 0.0f;
     if (!IsScrollableStopped()) {
         CHECK_NULL_VOID(scrollableEvent_);
@@ -978,6 +977,10 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
         scrollAbort_ = true;
         animator_->Stop();
     }
+    if (NearEqual(position, GetTotalOffset(), SPRING_ACCURACY)) {
+        return;
+    }
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
     finalPosition_ = position;
     if (smooth) {
         PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS, DEFAULT_SCROLL_TO_STIFFNESS,
