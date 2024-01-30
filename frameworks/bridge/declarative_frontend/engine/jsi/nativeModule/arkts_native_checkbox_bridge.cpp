@@ -231,7 +231,7 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxPadding(ArkUIRuntimeCallInfo* 
     units[2] = static_cast<int>(bottomDimen.Unit());                   // 2: bottom Unit
     values[3] = leftDimen.IsNonNegative() ? leftDimen.Value() : 0;     // 3: left data
     units[3] = static_cast<int>(leftDimen.Unit());                     // 3: left Unit
-    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetCheckboxPadding(nativeNode, values, units);
+    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetCheckboxPadding(nativeNode, values, units, arraySize);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -253,7 +253,7 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxResponseRegion(ArkUIRuntimeCal
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(2); // 2: array length
-    uint32_t length = static_cast<uint32_t>(lengthArg->Int32Value(vm));
+    uint32_t length = lengthArg->Uint32Value(vm);
     double regionArray[length];
     int32_t regionUnits[length];
     if (!ArkTSUtils::ParseResponseRegion(vm, secondArg, regionArray, regionUnits, length)) {
