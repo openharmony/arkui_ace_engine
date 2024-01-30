@@ -330,7 +330,12 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         JsiTimerModule::GetInstance()->InitTimerModule(runtime_, global);
     }
 #endif
+    return true;
+}
 
+void JsiDeclarativeEngineInstance::InitJsObject()
+{
+    CHECK_RUN_ON(JS);
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
     if (!isModulePreloaded_ || !usingSharedRuntime_) {
         InitGlobalObjectTemplate();
@@ -383,7 +388,6 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     currentConfigResourceData_ = JsonUtil::CreateArray(true);
     frontendDelegate_->LoadResourceConfiguration(mediaResourceFileMap_, currentConfigResourceData_);
     isEngineInstanceInitialized_ = true;
-    return true;
 }
 
 bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
@@ -620,7 +624,7 @@ void JsiDeclarativeEngineInstance::InitJsContextModuleObject()
 void JsiDeclarativeEngineInstance::InitGlobalObjectTemplate()
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
-    JsRegisterViews(JSNApi::GetGlobalObject(runtime->GetEcmaVm()));
+    JsRegisterViews(JSNApi::GetGlobalObject(runtime->GetEcmaVm()), reinterpret_cast<void*>(nativeEngine_));
 }
 
 void JsiDeclarativeEngineInstance::InitGroupJsBridge()
@@ -1004,6 +1008,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
     }
     engineInstance_->SetNativeEngine(nativeEngine_);
+    engineInstance_->InitJsObject();
     if (!sharedRuntime) {
         SetPostTask(nativeEngine_);
 #if !defined(PREVIEW)
