@@ -143,6 +143,8 @@ void JSInteractableView::JsMonopolizeEvents(const JSCallbackInfo& info)
 {
     if (info[0]->IsBoolean()) {
         ViewAbstractModel::GetInstance()->SetMonopolizeEvents(info[0]->ToBoolean());
+    } else {
+        ViewAbstractModel::GetInstance()->SetMonopolizeEvents(false);
     }
 }
 
