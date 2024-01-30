@@ -292,11 +292,6 @@ void ButtonModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Di
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius, frameNode);
 }
 
-void ButtonModelNG::SetHoverEffect(const int32_t& hoverEffectNum)
-{
-    NG::ViewAbstract::SetHoverEffect(static_cast<HoverEffectType>(hoverEffectNum));
-}
-
 void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type, const std::optional<bool>& stateEffect)
 {
     if (type.has_value()) {
