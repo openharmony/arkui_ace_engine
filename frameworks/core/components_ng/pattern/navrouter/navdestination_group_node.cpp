@@ -118,10 +118,8 @@ void NavDestinationGroupNode::UpdateTitleFontSize(bool showBackButton)
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     if (showBackButton) {
-        titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
         titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
     } else {
-        titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
         titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
     }
     titleNode->MarkModifyDone();
