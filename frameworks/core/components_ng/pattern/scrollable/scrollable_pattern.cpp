@@ -977,7 +977,7 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
         scrollAbort_ = true;
         animator_->Stop();
     }
-    if (NearEqual(position, GetTotalOffset(), SPRING_ACCURACY)) {
+    if (NearEqual(position, GetTotalOffset())) {
         return;
     }
     ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
