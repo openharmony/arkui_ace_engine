@@ -354,7 +354,7 @@ void ResetImageDraggable(ArkUINodeHandle node)
  * @param values radius values
  * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
  * value[2] : radius value for BottomLeft，value[3] : radius value for BottomRight
- * @param units adius units
+ * @param units radius units
  * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
  * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
  */

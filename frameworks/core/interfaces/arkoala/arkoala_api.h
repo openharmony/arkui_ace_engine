@@ -935,9 +935,9 @@ struct ArkUICommonModifier {
     void (*setTranslateTransition)(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue,
         ArkUI_Int32 yUnit, ArkUI_Float32 zValue, ArkUI_Int32 zUnit, const ArkUIAnimationOptionType* opacityOption);
     void (*setMaskShape)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-        ArkUI_Float32 strokeWidth, ArkUI_Float32* attribute, ArkUI_Int32 length);
+        ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_Int32 length);
     void (*setMaskPath)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-        ArkUI_Float32 strokeWidth, ArkUI_Float32* attribute, ArkUI_CharPtr commands);
+        ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_CharPtr commands);
     void (*setProgressMask)(ArkUINodeHandle node, ArkUI_Float32* attribute, ArkUI_Uint32 color);
     void (*setBlendMode)(ArkUINodeHandle node, ArkUI_Int32 blendMode);
     void (*resetBlendMode)(ArkUINodeHandle node);
