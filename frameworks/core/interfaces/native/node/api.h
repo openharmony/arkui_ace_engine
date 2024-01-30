@@ -977,6 +977,8 @@ struct ArkUIImageModifierAPI {
     void (*ResetImageBorder)(NodeHandle node);
     void (*SetImageOpacity)(NodeHandle node, double opacity);
     void (*ResetImageOpacity)(NodeHandle node);
+    void (*SetEdgeAntialiasing)(NodeHandle node, float edgeAntialiasing);
+    void (*ResetEdgeAntialiasing)(NodeHandle node);
 };
 
 struct ArkUIVideoModifierAPI {
