@@ -21,7 +21,6 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_pattern.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
-#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/canvas_renderer_model_impl.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/pattern/canvas_renderer/canvas_renderer_model_ng.h"
@@ -170,6 +169,46 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
     }
     return result;
 }
+
+#if !defined(PREVIEW)
+RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
+{
+    if (!obj->IsObject()) {
+        return nullptr;
+    }
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!runtime) {
+        return nullptr;
+    }
+    auto* nativeEngine = runtime->GetNativeEngine();
+    if (nativeEngine == nullptr) {
+        return nullptr;
+    }
+#ifdef USE_ARK_ENGINE
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+#endif
+    JSValueWrapper valueWrapper = value;
+
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+    PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
+    if (!pixelMapNapiEntry) {
+        napi_close_handle_scope(env, scope);
+        return nullptr;
+    }
+
+    void* pixmapPtrAddr = pixelMapNapiEntry(env, napiValue);
+    if (pixmapPtrAddr == nullptr) {
+        napi_close_handle_scope(env, scope);
+        return nullptr;
+    }
+    napi_close_handle_scope(env, scope);
+    return PixelMap::CreatePixelMap(pixmapPtrAddr);
+}
+#endif
 } // namespace
 
 JSCanvasRenderer::JSCanvasRenderer()
@@ -1176,11 +1215,10 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pixelmap);
 
     // 3 pixelmap to NapiValue
-    auto engine = EngineHelper::GetCurrentEngine();
-    if (!engine) {
-        return;
-    }
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    CHECK_NULL_VOID(runtime);
+    NativeEngine* nativeEngine = runtime->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     auto pixelmapSharedPtr = pixelmap->GetPixelMapSharedPtr();
     napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelmapSharedPtr);
