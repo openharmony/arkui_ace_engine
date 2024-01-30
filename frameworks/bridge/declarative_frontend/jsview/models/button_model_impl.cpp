@@ -324,14 +324,6 @@ void ButtonModelImpl::SetBorderRadius(const Dimension& radius)
     }
 }
 
-void ButtonModelImpl::SetHoverEffect(const int32_t& hoverEffectNum)
-{
-    auto buttonComponent =
-        AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    CHECK_NULL_VOID(buttonComponent);
-    buttonComponent->SetMouseAnimationType(static_cast<HoverAnimationType>(hoverEffectNum));
-}
-
 RefPtr<TextComponent> ButtonModelImpl::GetTextComponent()
 {
     auto stack = ViewStackProcessor::GetInstance();
