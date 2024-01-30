@@ -987,8 +987,8 @@ void UINode::DoSetActiveChildRange(int32_t start, int32_t end)
     for (const auto& child : children_) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
         child->DoSetActiveChildRange(start, end);
-        start -= count;
-        end -= count;
+        start -= static_cast<int32_t>(count);
+        end -= static_cast<int32_t>(count);
     }
 }
 
