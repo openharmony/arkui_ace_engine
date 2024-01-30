@@ -56,6 +56,7 @@ constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t SUBSTR_LENGTH = 3;
 const char DIMENSION_UNIT_VP[] = "vp";
+const char FORM_COMPONENT_TAG[] = "FormComponent";
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -995,6 +996,12 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
             ProcessAllVisibleCallback(visibleAreaInnerCallbacks_, VISIBLE_RATIO_MIN);
             lastVisibleRatio_ = VISIBLE_RATIO_MIN;
         }
+        return;
+    }
+
+    if (GetTag() == FORM_COMPONENT_TAG && visibleAreaUserCallbacks_.empty() && !visibleAreaInnerCallbacks_.empty()) {
+        ProcessAllVisibleCallback(visibleAreaInnerCallbacks_, VISIBLE_RATIO_MAX);
+        lastVisibleRatio_ = VISIBLE_RATIO_MAX;
         return;
     }
 
