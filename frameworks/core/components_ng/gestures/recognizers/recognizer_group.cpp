@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/gesture_group.h"
 
@@ -188,6 +189,21 @@ void RecognizerGroup::GroupAdjudicate(const RefPtr<NGGestureRecognizer>& recogni
 {
     disposal_ = disposal;
     NGGestureRecognizer::BatchAdjudicate(recognizer, disposal);
+}
+
+void RecognizerGroup::SetRecognizerInfoRecursively(const Offset& coordinateOffset, const RefPtr<NG::FrameNode>& node,
+    const RefPtr<NG::TargetComponent>& targetComponent, const SizeF& size)
+{
+    for (const auto& item : recognizers_) {
+        item->SetCoordinateOffset(coordinateOffset);
+        item->AttachFrameNode(WeakPtr<FrameNode>(node));
+        item->SetTargetComponent(targetComponent);
+        item->SetSize(size.Height(), size.Width());
+        auto group = AceType::DynamicCast<RecognizerGroup>(item);
+        if (group) {
+            group->SetRecognizerInfoRecursively(coordinateOffset, node, targetComponent, size);
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG
