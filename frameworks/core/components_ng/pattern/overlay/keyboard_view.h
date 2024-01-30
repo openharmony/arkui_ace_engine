@@ -43,6 +43,7 @@ public:
             nodeId, AceType::MakeRefPtr<KeyboardPattern>(targetId));
         auto wrapperLayoutProperty = wrapperNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_RETURN(wrapperLayoutProperty, nullptr);
+        wrapperLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
 
         // build keyboard node
         NG::ScopedViewStackProcessor builderViewStackProcessor;
@@ -50,10 +51,6 @@ public:
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         auto keyboardNode = AceType::DynamicCast<UINode>(customNode);
         CHECK_NULL_RETURN(keyboardNode, nullptr);
-
-        // put builder node to the bottom, and set the wrapper size match parent page
-        wrapperLayoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
-        wrapperLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
         wrapperNode->AddChild(keyboardNode);
         wrapperNode->MarkModifyDone();

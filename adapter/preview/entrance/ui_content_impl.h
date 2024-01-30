@@ -40,10 +40,15 @@ public:
     }
 
     // UI content lifeCycles
-    void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
-    void Initialize(OHOS::Rosen::Window* window,
-        const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override {}
-    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override {}
+    UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    UIContentErrorCode Initialize(OHOS::Rosen::Window* window,
+        const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override {
+        return UIContentErrorCode::NO_ERRORS;
+    }
+    UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
+        napi_value storage) override {
+        return UIContentErrorCode::NO_ERRORS;
+    }
     void InitializeDynamic(
         const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint) override {}
     void Initialize(
@@ -56,7 +61,11 @@ public:
     void OnNewWant(const OHOS::AAFwk::Want& want) override {}
 
     // distribute
-    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override {}
+    
+    UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo,
+        napi_value storage) override {
+        return UIContentErrorCode::NO_ERRORS;
+    }
     std::string GetContentInfo() const override;
     void DestroyUIDirector() override;
 
@@ -136,7 +145,8 @@ public:
     void UpdateTransform(const OHOS::Rosen::Transform& transform) override {};
 
 private:
-    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
+    UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,
+        napi_value storage);
     void DestroyCallback() const;
 
 private:

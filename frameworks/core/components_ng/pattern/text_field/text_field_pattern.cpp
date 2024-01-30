@@ -1684,7 +1684,10 @@ void TextFieldPattern::InitDragDropCallBack()
             CHECK_NULL_VOID(host);
 
             // Except for DRAG_SUCCESS, all of rest need to show
-            if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
+            auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+            CHECK_NULL_VOID(paintProperty);
+            if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS &&
+                paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE) {
                 pattern->ShowSelectAfterDragEvent();
             }
             auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -4220,9 +4223,6 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
             CloseSelectOverlay();
         }
     }
-    if (HasFocus() && IsSingleHandle()) {
-        StartTwinkling();
-    }
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -6492,6 +6492,9 @@ void TextFieldPattern::HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& n
 
 void TextFieldPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent)
 {
+    if (IsNormalInlineState()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = GetFocusHub();

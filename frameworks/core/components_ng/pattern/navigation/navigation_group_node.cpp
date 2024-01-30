@@ -153,8 +153,6 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
                 pattern->DeleteOnStateChangeItem(iter->first);
             }
         }
-        hasChanged =
-            UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size());
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
         if (childIndex < 0) {
             navigationContentNode->AddChild(navDestination, slot);
@@ -164,6 +162,13 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             hasChanged = true;
         }
         slot++;
+    }
+
+    for (int32_t i = static_cast<int32_t>(navDestinationNodes.size()) - 1; i >= 0; --i) {
+        const auto& childNode = navDestinationNodes[i];
+        const auto& uiNode = childNode.second;
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
+        hasChanged = UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size());
     }
 
     while (static_cast<size_t>(slot) < navigationContentNode->GetChildren().size()) {
@@ -417,11 +422,10 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto parent = preNavDesNode->GetParent();
             CHECK_NULL_VOID(parent);
             parent->RemoveChild(preNavDesNode);
-            parent->RebuildRenderContextTree();
+            parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
-            context->RequestFrame();
         };
 
     /* set initial status of animation */
@@ -801,8 +805,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     }
     if (index < lastStandardIndex_) {
         auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
-        if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild &&
-            !navDestination->IsOnAnimation()) {
+        if (!navDestination->IsOnAnimation()) {
             if (pattern && pattern->GetIsOnShow()) {
                 // fire hidden event
                 eventHub->FireOnHiddenEvent(pattern->GetName());

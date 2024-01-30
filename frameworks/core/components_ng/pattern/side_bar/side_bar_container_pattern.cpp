@@ -71,8 +71,8 @@ constexpr static int32_t DEFAULT_SIDE_BAR_ZINDEX_EMBED = 0;
 constexpr static int32_t DEFAULT_DIVIDER_ZINDEX_EMBED = 1;
 constexpr static int32_t DEFAULT_CONTENT_ZINDEX_EMBED = 2;
 constexpr static int32_t DEFAULT_SIDE_BAR_ZINDEX_OVERLAY = 2;
-constexpr static int32_t DEFAULT_DIVIDER_ZINDEX_OVERLAY = 0;
-constexpr static int32_t DEFAULT_CONTENT_ZINDEX_OVERLAY = 1;
+constexpr static int32_t DEFAULT_DIVIDER_ZINDEX_OVERLAY = 1;
+constexpr static int32_t DEFAULT_CONTENT_ZINDEX_OVERLAY = 0;
 } // namespace
 
 void SideBarContainerPattern::OnAttachToFrameNode()

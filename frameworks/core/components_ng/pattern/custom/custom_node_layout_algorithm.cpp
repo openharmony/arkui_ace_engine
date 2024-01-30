@@ -66,8 +66,13 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         // use normal measure step.
         auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+        int32_t index = 0;
+        host->FireOnUpdateParam(layoutWrapper);
         for (auto&& child : children) {
             child->Measure(layoutConstraint);
+            auto size = child->GetGeometryNode()->GetFrameSize();
+            host->UpdateSize(index, size);
+            index++;
         }
         BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
     }

@@ -153,7 +153,7 @@ int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()
     return manifestParser_->GetMinPlatformVersion();
 }
 
-void FrontendDelegateDeclarative::RunPage(
+UIContentErrorCode FrontendDelegateDeclarative::RunPage(
     const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter)
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarative::RunPage");
@@ -172,7 +172,7 @@ void FrontendDelegateDeclarative::RunPage(
     } else {
         LOGE("RunPage parse manifest.json failed");
         EventReport::SendPageRouterException(PageRouterExcepType::RUN_PAGE_ERR, url);
-        return;
+        return UIContentErrorCode::PARSE_MANIFEST_FAILED;
     }
 
     taskExecutor_->PostTask(
@@ -185,7 +185,7 @@ void FrontendDelegateDeclarative::RunPage(
         TaskExecutor::TaskType::JS);
 
     if (Container::IsCurrentUseNewPipeline()) {
-        CHECK_NULL_VOID(pageRouterManager_);
+        CHECK_NULL_RETURN(pageRouterManager_, UIContentErrorCode::NULL_PAGE_ROUTER);
         pageRouterManager_->SetManifestParser(manifestParser_);
         taskExecutor_->PostTask(
             [weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params, isNamedRouter]() {
@@ -198,7 +198,7 @@ void FrontendDelegateDeclarative::RunPage(
                 }
             },
             TaskExecutor::TaskType::JS);
-        return;
+        return UIContentErrorCode::NO_ERRORS;
     }
     if (!url.empty()) {
         mainPagePath_ = manifestParser_->GetRouter()->GetPagePath(url);
@@ -206,7 +206,7 @@ void FrontendDelegateDeclarative::RunPage(
         mainPagePath_ = manifestParser_->GetRouter()->GetEntry();
     }
     AddRouterTask(RouterTask { RouterAction::PUSH, PageTarget(mainPagePath_), params });
-    LoadPage(GenerateNextPageId(), PageTarget(mainPagePath_), true, params);
+    return LoadPage(GenerateNextPageId(), PageTarget(mainPagePath_), true, params);
 }
 
 void FrontendDelegateDeclarative::RunPage(
@@ -992,6 +992,21 @@ std::string FrontendDelegateDeclarative::GetParams()
         return pageParamMap_.find(pageId_)->second;
     }
     return "";
+}
+
+int32_t FrontendDelegateDeclarative::GetIndexByUrl(const std::string& url)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_RETURN(pageRouterManager_, INVALID_PAGE_ID);
+        return pageRouterManager_->GetIndexByUrl(url);
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (int32_t i = 0; i < pageRouteStack_.size(); ++ i) {
+        if (pageRouteStack_[i].url == url) {
+            return i;
+        }
+    }
+    return INVALID_PAGE_ID;
 }
 
 void FrontendDelegateDeclarative::AddRouterTask(const RouterTask& task)
@@ -1872,7 +1887,7 @@ std::string FrontendDelegateDeclarative::GetAssetPath(const std::string& url)
     return GetAssetPathImpl(assetManager_, url);
 }
 
-void FrontendDelegateDeclarative::LoadPage(
+UIContentErrorCode FrontendDelegateDeclarative::LoadPage(
     int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params, bool isRestore)
 {
     LOGI("LoadPage[%{public}d]: %{public}s.", pageId, target.url.c_str());
@@ -1880,7 +1895,7 @@ void FrontendDelegateDeclarative::LoadPage(
         LOGE("FrontendDelegateDeclarative, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, target.url);
         ProcessRouterTask();
-        return;
+        return UIContentErrorCode::INVALID_PAGE_ID;
     }
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -1891,7 +1906,7 @@ void FrontendDelegateDeclarative::LoadPage(
         LOGE("FrontendDelegateDeclarative, load page failed, waiting for current page loading finish.");
         RecyclePageId(pageId);
         ProcessRouterTask();
-        return;
+        return UIContentErrorCode::STAGING_PAGE_EXIST;
     }
     isStagingPageExist_ = true;
 
@@ -1945,6 +1960,8 @@ void FrontendDelegateDeclarative::LoadPage(
                 TaskExecutor::TaskType::UI);
         },
         TaskExecutor::TaskType::JS);
+
+    return UIContentErrorCode::NO_ERRORS;
 }
 
 void FrontendDelegateDeclarative::OnSurfaceChanged()
@@ -2884,34 +2901,35 @@ RefPtr<PipelineBase> FrontendDelegateDeclarative::GetPipelineContext()
     return pipelineContextHolder_.Get();
 }
 
-std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& contentInfo)
+std::pair<std::string, UIContentErrorCode> FrontendDelegateDeclarative::RestoreRouterStack(
+    const std::string& contentInfo)
 {
     LOGI("FrontendDelegateDeclarative::RestoreRouterStack: contentInfo = %{public}s", contentInfo.c_str());
     auto jsonContentInfo = JsonUtil::ParseJsonString(contentInfo);
     if (!jsonContentInfo->IsValid() || !jsonContentInfo->IsObject()) {
         LOGW("restore contentInfo is invalid");
-        return "";
+        return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
     }
     // restore node info
     auto jsonNodeInfo = jsonContentInfo->GetValue("nodeInfo");
     auto pipelineContext = pipelineContextHolder_.Get();
-    CHECK_NULL_RETURN(pipelineContext, "");
+    CHECK_NULL_RETURN(pipelineContext, std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER));
     pipelineContext->RestoreNodeInfo(std::move(jsonNodeInfo));
     // restore stack info
     auto routerStack = jsonContentInfo->GetValue("stackInfo");
     if (Container::IsCurrentUseNewPipeline()) {
-        CHECK_NULL_RETURN(pageRouterManager_, "");
+        CHECK_NULL_RETURN(pageRouterManager_, std::make_pair("", UIContentErrorCode::NULL_PAGE_ROUTER));
         return pageRouterManager_->RestoreRouterStack(std::move(routerStack));
     } else {
         std::lock_guard<std::mutex> lock(mutex_);
         if (!routerStack->IsValid() || !routerStack->IsArray()) {
             LOGW("restore router stack is invalid");
-            return "";
+            return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
         }
         int32_t stackSize = routerStack->GetArraySize();
         if (stackSize < 1) {
             LOGW("restore stack size is invalid");
-            return "";
+            return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
         }
         for (int32_t index = 0; index < stackSize - 1; ++index) {
             std::string url = routerStack->GetArrayItem(index)->ToString();
@@ -2920,7 +2938,7 @@ std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& c
         }
         std::string startUrl = routerStack->GetArrayItem(stackSize - 1)->ToString();
         // remove 5 useless character, as "XXX.js" to XXX
-        return startUrl.substr(1, startUrl.size() - 5);
+        return std::make_pair(startUrl.substr(1, startUrl.size() - 5), UIContentErrorCode::NO_ERRORS);
     }
 }
 

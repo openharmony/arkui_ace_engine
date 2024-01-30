@@ -18,19 +18,12 @@
 #include "core/components_ng/pattern/search/search_event_hub.h"
 
 namespace OHOS::Ace::NG {
-bool SearchTextFieldPattern::IsSearchParentNode() const
-{
-    auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
-    return parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG;
-}
-
 RefPtr<FocusHub> SearchTextFieldPattern::GetFocusHub() const
 {
-    if (!IsSearchParentNode()) {
-        return TextFieldPattern::GetFocusHub();
-    }
-
-    auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, TextFieldPattern::GetFocusHub());
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(parentFrameNode, TextFieldPattern::GetFocusHub());
     return parentFrameNode->GetOrCreateFocusHub();
 }
 

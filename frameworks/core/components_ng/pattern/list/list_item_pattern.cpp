@@ -914,14 +914,14 @@ void ListItemPattern::InitDisableEvent()
             selectable_ = false;
         }
         enableOpacity_ = renderContext->GetOpacityValue(1.0);
-        lastOpacity_ = enableOpacity_.value() * theme->GetItemDisabledAlpha();
-    } else if (enableOpacity_.has_value() && userDefineOpacity == lastOpacity_) {
-        lastOpacity_ = enableOpacity_.value();
-        enableOpacity_.reset();
+        renderContext->UpdateOpacity(theme->GetItemDisabledAlpha());
     } else {
-        lastOpacity_ = userDefineOpacity;
+        if (enableOpacity_.has_value()) {
+            renderContext->UpdateOpacity(enableOpacity_.value());
+        } else {
+            renderContext->UpdateOpacity(userDefineOpacity);
+        }
     }
-    renderContext->UpdateOpacity(lastOpacity_);
 }
 
 bool ListItemPattern::GetLayouted() const
@@ -931,6 +931,12 @@ bool ListItemPattern::GetLayouted() const
 
 float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const
 {
+    auto layoutProperty = GetLayoutProperty<ListItemLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto visible = layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
+    if (visible == VisibleType::GONE) {
+        return 0.0f;
+    }
     if (!isLayouted_) {
         return estimateHeight;
     }

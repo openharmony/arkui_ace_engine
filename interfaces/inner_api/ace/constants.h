@@ -12,21 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ACE_MOCK_FRAMEWORKS_COMMON_SECURITY_COMPONENT_ERR_H
-#define ACE_MOCK_FRAMEWORKS_COMMON_SECURITY_COMPONENT_ERR_H
 
-#include <inttypes.h>
+#ifndef INTERFACES_INNER_API_ACE_CONSTANTS_H
+#define INTERFACES_INNER_API_ACE_CONSTANTS_H
 
-namespace OHOS {
-namespace Security {
-namespace SecurityComponent {
-enum SCErrCode : int32_t {
-    SC_OK = 0,
-
-    SC_SERVICE_ERROR_SERVICE_NOT_EXIST = -55,
-    SC_SERVICE_ERROR_COMPONENT_NOT_EXIST = -58,
+namespace OHOS::Ace {
+enum UIContentErrorCode : uint16_t {
+    NO_ERRORS = 0,
+    NULL_WINDOW,
+    NULL_POINTER,
+    PARSE_MANIFEST_FAILED,
+    NULL_PAGE_ROUTER,
+    STAGING_PAGE_EXIST,
+    NULL_CARD_CALLBACK,
+    NULL_CARD_RES,
+    CARD_PAGE_NOT_READY,
+    INVALID_PAGE_ID,
+    NULL_URL,
+    WRONG_PAGE_ROUTER,
+    NO_STAGE,
 };
-} // namespace SecurityComponent
-} // namespace Security
-} // namespace OHOS
-#endif // ACE_MOCK_FRAMEWORKS_COMMON_SECURITY_COMPONENT_ERR_H
+} // namespace OHOS::Ace
+
+#endif // INTERFACES_INNER_API_ACE_CONSTANTS_H

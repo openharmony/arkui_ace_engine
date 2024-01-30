@@ -53,6 +53,7 @@ public:
     void ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper);
     void ExecuteLayout(NG::LayoutWrapper* layoutWrapper);
     void ExecutePlaceChildren(NG::LayoutWrapper* layoutWrapper);
+    void InitJsParam(NG::LayoutWrapper* layoutWrapper);
     void ExecuteAboutToBeDeleted();
     void ExecuteAboutToRender();
     void ExecuteOnRenderDone();

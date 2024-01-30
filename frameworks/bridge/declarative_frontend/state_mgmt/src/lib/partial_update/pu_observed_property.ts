@@ -121,6 +121,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     } else {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: setValueInternal: new value is an Object, needs to be wrapped in an ObservedObject.`);
       this.wrappedValue_ = ObservedObject.createNew(newValue, this);
+      this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.wrappedValue_);
     }
     stateMgmtProfiler.end();
     return true;

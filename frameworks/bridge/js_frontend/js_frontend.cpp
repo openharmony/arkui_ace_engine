@@ -481,12 +481,14 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     }
 }
 
-void JsFrontend::RunPage(const std::string& url, const std::string& params)
+UIContentErrorCode JsFrontend::RunPage(const std::string& url, const std::string& params)
 {
     // Not use this pageId from backend, manage it in FrontendDelegateImpl.
     if (delegate_) {
-        delegate_->RunPage(url, params);
+        return delegate_->RunPage(url, params);
     }
+
+    return UIContentErrorCode::NULL_POINTER;
 }
 
 void JsFrontend::PushPage(const std::string& url, const std::string& params)
