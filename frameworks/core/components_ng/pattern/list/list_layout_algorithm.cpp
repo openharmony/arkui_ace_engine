@@ -1415,12 +1415,12 @@ int32_t ListLayoutAlgorithm::GetMidIndex(LayoutWrapper* layoutWrapper, bool useP
     float contentSize = usePreContentMainSize ? prevContentMainSize_ : contentMainSize_;
     float midPos = contentSize / 2.0f;
     if (GetStartIndex() == 0 && !IsScrollSnapAlignCenter(layoutWrapper) &&
-        GreatNotEqual(GetStartPosition(), startMainPos_)) {
-        midPos = GetStartPosition() + contentSize / 2.0f;
+        GreatNotEqual(GetStartPosition(), contentStartOffset_)) {
+        midPos = GetStartPosition() + contentSize / 2.0f - contentStartOffset_;
     } else if (GetEndIndex() == totalItemCount_ - 1 && !IsScrollSnapAlignCenter(layoutWrapper) &&
-        LessNotEqual(GetEndPosition(), endMainPos_) &&
+        LessNotEqual(GetEndPosition(), contentMainSize_ - contentEndOffset_) &&
         (GetStartIndex() != 0 || !NearEqual(GetStartPosition(), startMainPos_))) {
-        midPos = GetEndPosition() - contentSize / 2.0f;
+        midPos = GetEndPosition() - contentSize / 2.0f + contentEndOffset_;
     }
     for (auto & pos : itemPosition_) {
         if (midPos <= pos.second.endPos + spaceWidth_ / 2) { /* 2:half */
