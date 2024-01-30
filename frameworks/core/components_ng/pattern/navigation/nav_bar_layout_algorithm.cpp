@@ -79,9 +79,7 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
 
     // FREE 和 FULL 模式，有subtitle
     if (hostNode->GetSubtitle()) {
-        if (NearZero(titleBarHeight)) {
-            titleBarHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
-        }
+        titleBarHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
         constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
         titleBarWrapper->Measure(constraint);
         return titleBarHeight;
