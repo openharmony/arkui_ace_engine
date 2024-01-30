@@ -763,6 +763,7 @@ void DotIndicatorModifier::PlayIndicatorAnimation(const LinearVector<float>& vec
     const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
     TouchBottomTypeLoop touchBottomTypeLoop)
 {
+    StopAnimation();
     isTouchBottomLoop_ = false;
     animationState_ = TouchBottomAnimationStage::STAGE_NONE;
     PlayBlackPointsAnimation(vectorBlackPointCenterX);
