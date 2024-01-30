@@ -54,6 +54,7 @@ void JSCanvas::Create(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
         if (jsContext) {
+            jsContext->SetInstanceId(Container::CurrentId());
             jsContext->SetCanvasPattern(canvasPattern);
             jsContext->SetAntiAlias();
         }

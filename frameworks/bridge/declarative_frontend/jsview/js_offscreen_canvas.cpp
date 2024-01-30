@@ -124,6 +124,7 @@ void JSOffscreenCanvas::JSBind(BindingTarget globalObj, void* nativeEngine)
 
 napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     size_t argc = 2;
     napi_value thisVar = nullptr;
     napi_value argv[2] = { nullptr };
@@ -180,17 +181,20 @@ napi_value JSOffscreenCanvas::JsGetHeight(napi_env env, napi_callback_info info)
 
 napi_value JSOffscreenCanvas::JsSetWidth(napi_env env, napi_callback_info info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     return (me != nullptr && !me->isDetached_) ? me->OnSetWidth(env, info) : nullptr;
 }
 
 napi_value JSOffscreenCanvas::JsSetHeight(napi_env env, napi_callback_info info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     return (me != nullptr && !me->isDetached_) ? me->OnSetHeight(env, info) : nullptr;
 }
 napi_value JSOffscreenCanvas::JsTransferToImageBitmap(napi_env env, napi_callback_info info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     if (me->isDetached_) {
         JSException::Throw("%s", "Failed to execute 'transferToImageBitmap' on 'OffscreenCanvas': Cannot transfer an "
@@ -204,6 +208,7 @@ napi_value JSOffscreenCanvas::JsTransferToImageBitmap(napi_env env, napi_callbac
 
 napi_value JSOffscreenCanvas::JsGetContext(napi_env env, napi_callback_info info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     if (me->isDetached_) {
         JSException::Throw(
@@ -411,6 +416,7 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     panda::Local<panda::ObjectRef> localValue = NapiValueToLocalValue(thisVal);
     JSObject jsObject(localValue);
     offscreenCanvasContext_ = Referenced::Claim(jsObject.Unwrap<JSOffscreenRenderingContext>());
+    offscreenCanvasContext_->SetInstanceId(Container::CurrentId());
     offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->AddOffscreenCanvasPattern(offscreenCanvasPattern_);
     return thisVal;
