@@ -259,8 +259,8 @@ void PixelMapImage::DrawToRSCanvas(
         1.0, 0, 0, 0 };
     recordingCanvas.AttachBrush(brush);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, width=%{public}d * height=%{public}d", pixmap->GetWidth(),
-            pixmap->GetHeight());
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, sourceInfo:%{public}s ,width=%{public}d * height=%{public}d",
+            config.sourceInfo_.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight());
         pixmap->SavePixelMapToFile("_ToRS_");
     }
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
