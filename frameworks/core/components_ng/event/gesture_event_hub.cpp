@@ -650,15 +650,23 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         TAG_LOGI(AceLogTag::ACE_DRAG, "FrameNode is not set onDragStart event.");
         return;
     }
+
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
     if (!IsAllowedDrag(eventHub)) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "FrameNode is not allow drag.");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "FrameNode is not allow drag, tag is %{public}s, id is %{public}s,"
+            "draggable is %{public}d, drag start event is %{public}d,"
+            "default support drag is %{public}d, user set is %{public}d.",
+            frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str(),
+            frameNode->IsDraggable(), eventHub->HasOnDragStart(),
+            pattern->DefaultSupportDrag(), frameNode->IsUserSet());
         HandleNotallowDrag(info);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && eventManager->IsLastMoveBeforeUp()) {
@@ -780,7 +788,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     auto ret = SetDragData(unifiedData, udKey);
     if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, error is %{public}d", ret);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);
     }
 
     std::map<std::string, int64_t> summary;
@@ -829,6 +837,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (!overlayManager->GetIsOnAnimation()) {
         dragEventActuator_->SetIsNotInPreviewState(true);
     }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, animation is %{public}d, pixelMap scale is %{public}f",
+        overlayManager->GetIsOnAnimation(), scale);
     pixelMap->Scale(scale, scale, AceAntiAliasingOption::HIGH);
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
