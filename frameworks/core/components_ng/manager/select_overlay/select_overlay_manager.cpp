@@ -29,6 +29,13 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
 {
     host_ = host;
     auto current = selectOverlayItem_.Upgrade();
+    if (selectedByMouseInfo_.selectedNode.Upgrade() && info.callerFrameNode.Upgrade() &&
+        selectedByMouseInfo_.selectedNode.Upgrade() != info.callerFrameNode.Upgrade()) {
+        if (selectedByMouseInfo_.onResetSelection) {
+            selectedByMouseInfo_.onResetSelection();
+        }
+        selectedByMouseInfo_.clear();
+    }
     if (current) {
         if (info.isUsingMouse && IsSameSelectOverlayInfo(info)) {
             auto proxy = MakeRefPtr<SelectOverlayProxy>(current->GetId());
@@ -256,7 +263,7 @@ bool SelectOverlayManager::IsSameSelectOverlayInfo(const SelectOverlayInfo& info
 void SelectOverlayManager::HandleGlobalEvent(
     const TouchEvent& touchPoint, const NG::OffsetF& rootOffset, bool isMousePressAtSelectedNode)
 {
-    ResetSection(touchPoint, isMousePressAtSelectedNode);
+    ResetSelection(touchPoint, isMousePressAtSelectedNode);
     CHECK_NULL_VOID(!selectOverlayItem_.Invalid());
     NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
     // handle global touch event.
@@ -304,10 +311,9 @@ void SelectOverlayManager::HandleGlobalEvent(
     }
 }
 
-void SelectOverlayManager::ResetSection(const TouchEvent& touchPoint, bool isMousePressAtSelectedNode)
+void SelectOverlayManager::ResetSelection(const TouchEvent& touchPoint, bool isMousePressAtSelectedNode)
 {
-    if (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::MOUSE &&
-        !isMousePressAtSelectedNode && !selectOverlayItem_.Upgrade()) {
+    if (touchPoint.type == TouchType::DOWN && !isMousePressAtSelectedNode && !selectOverlayItem_.Upgrade()) {
         CHECK_NULL_VOID(selectedByMouseInfo_.selectedNode.Upgrade());
         if (selectedByMouseInfo_.onResetSelection) {
             selectedByMouseInfo_.onResetSelection();

@@ -107,7 +107,7 @@ public:
         return true;
     }
 
-    void ResetSection(const TouchEvent& touchPoint, bool isMousePressAtSelectedNode);
+    void ResetSelection(const TouchEvent& touchPoint, bool isMousePressAtSelectedNode);
 
 private:
     void DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation = false);
