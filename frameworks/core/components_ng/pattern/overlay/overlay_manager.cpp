@@ -462,7 +462,7 @@ void OverlayManager::SetContainerButtonEnable(bool isEnabled)
     pipeline->SetCloseButtonStatus(isEnabled);
 }
 
-void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow)
+void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu)
 {
     BlurLowerNode(menu);
     auto menuWrapper = menu->GetPattern<MenuWrapperPattern>();
@@ -473,16 +473,12 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
     option.SetDuration(MENU_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent(
-        [weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(), isInSubWindow] {
+        [weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId()] {
             auto menu = menuWK.Upgrade();
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(menu && overlayManager);
             ContainerScope scope(id);
-            if (isInSubWindow) {
-                SubwindowManager::GetInstance()->RequestFocusSubwindow(id);
-            } else {
-                overlayManager->FocusOverlayNode(menu);
-            }
+            overlayManager->FocusOverlayNode(menu);
             auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
             menuWrapperPattern->CallMenuAppearCallback();
         });
@@ -1141,7 +1137,7 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     CHECK_NULL_VOID(rootNode);
     rootNode->Clean();
     menu->MountToParent(rootNode);
-    SetShowMenuAnimation(menu, true);
+    SetShowMenuAnimation(menu);
     menu->MarkModifyDone();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto pattern = menu->GetPattern<MenuWrapperPattern>();
