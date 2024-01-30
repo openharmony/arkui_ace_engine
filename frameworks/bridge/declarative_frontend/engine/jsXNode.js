@@ -138,11 +138,13 @@ class JSBuilderNode extends BaseNode {
     }
     update(param) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.updateStart();
         this.purgeDeletedElmtIds();
         this.params_ = param;
         Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
             return (a < b) ? -1 : (a > b) ? 1 : 0;
         }).forEach(elmtId => this.UpdateElement(elmtId));
+        this.updateEnd();
         __JSScopeUtil__.restoreInstanceId();
     }
     UpdateElement(elmtId) {
