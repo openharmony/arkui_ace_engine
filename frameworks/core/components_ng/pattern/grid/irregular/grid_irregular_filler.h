@@ -61,13 +61,12 @@ public:
      * @brief Fills the gridMatrix in forward direction until the target GridItem is included. Measure isn't performed,
      * and lineHeightMap_ isn't updated.
      *
-     * EFFECT: updates GridLayoutInfo::endIndex_ to targetIdx and GridLayoutInfo::endMainLineIndex_ to the
-     * corresponding line index.
-     *
      * @param startingLine The starting line index.
      * @param targetIdx The target GridItem index to fill.
+     *
+     * @return Line index in which Item [targetIdx] resides.
      */
-    void FillMatrixOnly(int32_t startingLine, int32_t targetIdx);
+    int32_t FillMatrixOnly(int32_t startingLine, int32_t targetIdx);
 
     /**
      * @brief Fills the gridMatrix in forward direction until the target line is reached. Measure isn't performed,

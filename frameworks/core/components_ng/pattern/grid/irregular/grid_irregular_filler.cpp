@@ -135,6 +135,17 @@ bool GridIrregularFiller::FindNextItem(int32_t target)
             return true;
         }
     }
+    // to handle empty tiles in the middle of matrix, check next row
+    auto nextRow = mat.find(posY_ + 1);
+    if (nextRow != mat.end()) {
+        for (const auto [col, item] : nextRow->second) {
+            if (item == target) {
+                ++posY_;
+                posX_ = col;
+                return true;
+            }
+        }
+    }
     return false;
 }
 
@@ -200,19 +211,19 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t col,
     }
 }
 
-void GridIrregularFiller::FillMatrixOnly(int32_t startingLine, int32_t targetIdx)
+int32_t GridIrregularFiller::FillMatrixOnly(int32_t startingLine, int32_t targetIdx)
 {
-    if (targetIdx >= info_->childrenCount_ || targetIdx < info_->startIndex_) {
-        return;
+    if (targetIdx >= info_->childrenCount_) {
+        targetIdx = info_->childrenCount_ - 1;
     }
 
-    info_->endIndex_ = InitPos(startingLine);
-    while (info_->endIndex_ < targetIdx) {
-        if (!FindNextItem(++info_->endIndex_)) {
-            FillOne(info_->endIndex_);
+    int32_t idx = InitPos(startingLine);
+    while (idx < targetIdx) {
+        if (!FindNextItem(++idx)) {
+            FillOne(idx);
         }
     }
-    info_->endMainLineIndex_ = posY_;
+    return posY_;
 }
 
 int32_t GridIrregularFiller::FillMatrixByLine(int32_t startingLine, int32_t targetLine)

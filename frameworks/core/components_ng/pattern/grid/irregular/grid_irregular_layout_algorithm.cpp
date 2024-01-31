@@ -21,10 +21,10 @@
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
+#include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/templates_parser.h"
-#include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 
 namespace OHOS::Ace::NG {
 void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -160,9 +160,6 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     }
 
     int32_t jumpLineIdx = FindJumpLineIdx(info.jumpIndex_);
-
-    info.startMainLineIndex_ = jumpLineIdx;
-    info.startIndex_ = info.jumpIndex_;
     info.jumpIndex_ = EMPTY_JUMP_INDEX;
 
     PrepareLineHeight(mainSize, jumpLineIdx);
@@ -172,7 +169,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 
     info.currentOffset_ = res.pos;
     info.startMainLineIndex_ = res.startRow;
-    info.startIndex_ = info.gridMatrix_[res.startRow][0];
+    info.startIndex_ = info.gridMatrix_.at(res.startRow).at(0);
     info.endMainLineIndex_ = res.endRow;
     info.endIndex_ = res.endIdx;
 }
@@ -285,17 +282,24 @@ ScrollAlign GridIrregularLayoutAlgorithm::TransformAutoScrollAlign(float mainSiz
 int32_t GridIrregularLayoutAlgorithm::FindJumpLineIdx(int32_t jumpIdx)
 {
     auto& info = gridLayoutInfo_;
-    if (jumpIdx >= info.startIndex_ && jumpIdx <= info.endIndex_) {
-        return info.FindItemInRange(jumpIdx).first;
-    }
+    int32_t jumpLine = -1;
     auto it = info.FindInMatrix(jumpIdx);
     if (it == info.gridMatrix_.end()) {
         // fill matrix up to jumpIndex_
         GridIrregularFiller filler(&info, wrapper_);
-        filler.FillMatrixOnly(jumpIdx, info.startMainLineIndex_);
-        return info.endMainLineIndex_;
+        jumpLine = filler.FillMatrixOnly(info.startMainLineIndex_, jumpIdx);
+    } else {
+        jumpLine = it->first;
     }
-    return it->first;
+
+    if (info.scrollAlign_ == ScrollAlign::END) {
+        // jump to the last line the item occupies
+        auto lastLine = jumpLine + GridLayoutUtils::GetItemSize(&info, wrapper_, jumpIdx).rows - 1;
+        GridIrregularFiller filler(&info, wrapper_);
+        filler.FillMatrixByLine(jumpLine, lastLine + 1);
+        jumpLine = lastLine;
+    }
+    return jumpLine;
 }
 
 void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& jumpLineIdx)

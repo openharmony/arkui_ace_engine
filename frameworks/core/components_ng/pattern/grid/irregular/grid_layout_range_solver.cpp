@@ -66,10 +66,7 @@ GridLayoutRangeSolver::RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t 
             int32_t endIdx = 0;
             const auto& lastRow = info_->gridMatrix_.at(jumpLineIdx);
             for (auto it = lastRow.rbegin(); it != lastRow.rend(); ++it) {
-                if (it->second != -1) {
-                    endIdx = it->second;
-                    break;
-                }
+                endIdx = std::max(endIdx, std::abs(it->second));
             }
             return { res.row, res.pos, jumpLineIdx, endIdx };
         }
