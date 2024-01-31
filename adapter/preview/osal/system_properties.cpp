@@ -40,6 +40,7 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 
 bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::svgTraceEnable_ = false;
+bool SystemProperties::layoutTraceEnable_ = false;
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
@@ -270,10 +271,5 @@ bool SystemProperties::GetGridCacheEnabled()
 bool SystemProperties::GetSideBarContainerBlurEnable()
 {
     return sideBarContainerBlurEnable_;
-}
-
-bool SystemProperties::GetLayoutTraceEnabled()
-{
-    return false;
 }
 } // namespace OHOS::Ace
