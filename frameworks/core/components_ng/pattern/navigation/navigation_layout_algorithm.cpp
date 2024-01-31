@@ -271,7 +271,11 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
 
     auto navigationWidth = 0.0f;
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
-        navigationWidth = static_cast<float>(minNavBarWidthValue_.ConvertToPx() + minContentWidthValue_.ConvertToPx());
+        const auto& constraint = navigationLayoutProperty->GetLayoutConstraint();
+        CHECK_NULL_VOID(constraint);
+        auto parentSize = CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
+        auto minNavBarWidth = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
+        navigationWidth = static_cast<float>(minNavBarWidth + minContentWidthValue_.ConvertToPx());
     } else {
         navigationWidth = static_cast<float>(WINDOW_WIDTH.ConvertToPx());
     }
