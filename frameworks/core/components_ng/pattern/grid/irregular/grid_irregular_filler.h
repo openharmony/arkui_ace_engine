@@ -70,6 +70,17 @@ public:
     void FillMatrixOnly(int32_t startingLine, int32_t targetIdx);
 
     /**
+     * @brief Fills the gridMatrix in forward direction until the target line is reached. Measure isn't performed,
+     * and lineHeightMap_ isn't updated.
+     *
+     * @param startingLine The starting line index.
+     * @param targetLine The target GridItem index to fill.
+     *
+     * @return Last item index filled.
+     */
+    int32_t FillMatrixByLine(int32_t startingLine, int32_t targetLine);
+
+    /**
      * @brief Measures the GridItems in the backward direction until the target length is filled.
      *
      * REQUIRES: GridMatrix prior to jumpIndex_ is already filled.
@@ -109,8 +120,9 @@ private:
      * @brief Initializes the position of the filler in the grid to GridLayoutInfo::startIndex_.
      *
      * @param lineIdx The line index of the starting position.
+     * @return startIndex_ - 1, for initializing endIndex_ in Fill
      */
-    void InitPos(int32_t lineIdx);
+    int32_t InitPos(int32_t lineIdx);
 
     /**
      * @brief Try to find the GridItem with target index in the grid matrix.
