@@ -4704,11 +4704,7 @@ float RichEditorPattern::GetLineHeight() const
 {
     auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     CHECK_NULL_RETURN(selectedRects.size(), 0.0f);
-    RectF finalRect = selectedRects.front();
-    for (auto& selectRect : selectedRects) {
-        finalRect = finalRect.CombineRectT(selectRect);
-    }
-    return finalRect.Height();
+    return selectedRects.front().Height();
 }
 
 void RichEditorPattern::UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
