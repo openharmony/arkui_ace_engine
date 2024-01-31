@@ -178,6 +178,7 @@ private:
     void HandlePanCancel();
 
     void CheckHandleReverse();
+    bool IsHandlesInSameLine();
     void StopHiddenHandleTask();
     void HiddenHandle();
     void AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion);
