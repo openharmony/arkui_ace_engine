@@ -25,7 +25,7 @@ public:
     void SetFormat(const std::string& format) override;
     void SetIsCountDown(bool isCountDown) override;
     void SetInputCount(double count) override;
-    void SetOnTimer(std::function<void(const std::string, const std::string)>&& onChange) override;
+    void SetOnTimer(std::function<void(const int64_t, const int64_t)>&& onChange) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
