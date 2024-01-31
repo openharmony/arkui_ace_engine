@@ -3261,6 +3261,28 @@ RefPtr<FrameNode> FrameNode::GetDispatchFrameNode(const TouchResult& touchRes)
     return nullptr;
 }
 
+OffsetF FrameNode::CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto offset = context->GetPaintRectWithTransform().GetOffset();
+
+    auto parent = GetAncestorNodeOfFrame(true);
+    if (parent) {
+        auto parentTimestampOffset = parent->GetCachedTransformRelativeOffset();
+        if (parentTimestampOffset.first == nanoTimestamp) {
+            auto result = offset + parentTimestampOffset.second;
+            SetCachedTransformRelativeOffset({ nanoTimestamp, result });
+            return result;
+        }
+        auto result = offset + parent->CalculateCachedTransformRelativeOffset(nanoTimestamp);
+        SetCachedTransformRelativeOffset({ nanoTimestamp, result });
+        return result;
+    }
+    SetCachedTransformRelativeOffset({ nanoTimestamp, offset });
+    return offset;
+}
+
 OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp)
 {
     auto currOffset = geometryNode_->GetFrameOffset();
@@ -3331,5 +3353,14 @@ const std::pair<uint64_t, OffsetF>& FrameNode::GetCachedGlobalOffset() const
 void FrameNode::SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
 {
     cachedGlobalOffset_ = timestampOffset;
+}
+const std::pair<uint64_t, OffsetF>& FrameNode::GetCachedTransformRelativeOffset() const
+{
+    return cachedTransformRelativeOffset_;
+}
+
+void FrameNode::SetCachedTransformRelativeOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
+{
+    cachedTransformRelativeOffset_ = timestampOffset;
 }
 } // namespace OHOS::Ace::NG
