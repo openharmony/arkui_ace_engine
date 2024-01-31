@@ -37,32 +37,40 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/container.h"
 
-
-// NodeHandle GetFrameNodeById(int nodeId)
-// {
-//     auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId);
-//     return OHOS::Ace::AceType::RawPtr(node);
-// }
-
-// int64_t GetUIState(NodeHandle node)
-// {
-//     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-//     CHECK_NULL_RETURN(frameNode, 0);
-//     auto eventHub = frameNode->GetEventHub<EventHub>();
-//     CHECK_NULL_RETURN(eventHub, 0);
-//     return eventHub->GetCurrentUIState();
-// }
-
-// void SetSupportedUIState(NodeHandle node, uint64_t state)
-// {
-//     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-//     CHECK_NULL_VOID(frameNode);
-//     auto eventHub = frameNode->GetEventHub<EventHub>();
-//     CHECK_NULL_VOID(eventHub);
-//     eventHub->AddSupportedState(static_cast<uint64_t>(state));
-// }
-
 namespace OHOS::Ace::NG {
+
+ArkUINodeHandle GetFrameNodeById(ArkUI_Int32 nodeId)
+{
+    auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
+}
+
+ArkUI_Int64 GetUIState(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, 0);
+    return eventHub->GetCurrentUIState();
+}
+
+void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->AddSupportedState(static_cast<uint64_t>(state));
+}
+
+namespace NodeModifier
+{
+const ArkUIStateModifier* GetUIStateModifier()
+{
+    static const ArkUIStateModifier modifier = { GetFrameNodeById, GetUIState, SetSupportedUIState };
+    return &modifier;
+}
+}
 
 namespace NodeEvent {
 std::deque<ArkUINodeEvent> g_eventQueue;

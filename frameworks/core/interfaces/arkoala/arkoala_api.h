@@ -28,7 +28,7 @@ extern "C" {
 #define ARKUI_BASIC_API_VERSION 5
 #define ARKUI_EXTENDED_API_VERSION 4
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
-#define ARKUI_NODE_MODIFIERS_API_VERSION 5
+#define ARKUI_NODE_MODIFIERS_API_VERSION 6
 #define ARKUI_AUTO_GENERATE_NODE_ID -2
 
 enum ArkUIAPIVariantKind {
@@ -1978,6 +1978,11 @@ struct ArkUICalendarPickerModifier {
     void (*setEdgeAlign)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 size,
         ArkUI_Int32 alignType);
     void (*resetEdgeAlign)(ArkUINodeHandle node);
+    void (*setCalendarPickerPadding)(ArkUINodeHandle node, const struct ArkUISizeType* top,
+        const struct ArkUISizeType* right, const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
+    void (*resetCalendarPickerPadding)(ArkUINodeHandle node);
+    void (*setCalendarPickerBorder)(ArkUINodeHandle node, const ArkUI_Uint32 color);
+    void (*resetCalendarPickerBorder)(ArkUINodeHandle node);
 };
 
 struct ArkUIRatingModifier {
@@ -2377,6 +2382,7 @@ struct ArkUIXComponentModifier {
 };
 
 struct ArkUIStateModifier {
+    ArkUINodeHandle (*getFrameNodeById)(ArkUI_Int32 nodeId);
     ArkUI_Int64 (*getUIState)(ArkUINodeHandle node);
     void (*setSupportedUIState)(ArkUINodeHandle node, ArkUI_Int64 state);
 };
@@ -2543,6 +2549,7 @@ struct ArkUINodeModifiers {
     const ArkUIRenderNodeModifier* (*getRenderNodeModifier)();
     const ArkUIPluginModifier* (*getPluginModifier)();
     const ArkUIXComponentModifier* (*getXComponentModifier)();
+    const ArkUIStateModifier* (*getUIStateModifier)();
     const ArkUIFormComponentModifier* (*getFormComponentModifier)();
     const ArkUIFlexModifier* (*getFlexModifier)();
     const ArkUIScrollBarModifier* (*getScrollBarModifier)();

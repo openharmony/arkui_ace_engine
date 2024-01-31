@@ -130,7 +130,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeById(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     int nodeId = firstArg->ToNumber(vm)->Value();
-    auto nodePtr = GetArkUIInternalNodeAPI()->GetFrameNodeById(nodeId);
+    auto nodePtr = GetArkUINodeModifiers()->getUIStateModifier()->getFrameNodeById(nodeId);
     return panda::NativePointerRef::New(vm, nodePtr);
 }
 
@@ -139,8 +139,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetUIState(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int64_t state = GetArkUIInternalNodeAPI()->GetUIState(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    int64_t state = GetArkUINodeModifiers()->getUIStateModifier()->getUIState(nativeNode);
     return panda::NumberRef::New(vm, state);
 }
 
@@ -150,9 +150,9 @@ ArkUINativeModuleValue ArkUINativeModule::SetSupportedUIState(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto state = secondArg->ToNumber(vm)->Value();
-    GetArkUIInternalNodeAPI()->SetSupportedUIState(nativeNode, state);
+    GetArkUINodeModifiers()->getUIStateModifier()->setSupportedUIState(nativeNode, state);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1274,7 +1274,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterRectAttributes(object, vm);
     RegisterListAttributes(object, vm);
     RegisterGridAttributes(object, vm);
-    RegisterLisitItemGroupAttributes(object, vm);
+    RegisterListItemGroupAttributes(object, vm);
     RegisterQRCodeAttributes(object, vm);
     RegisterLoadingProgressAttributes(object, vm);
     RegisterTextClockAttributes(object, vm);
@@ -2979,13 +2979,13 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "list"), list);
 }
 
-void ArkUINativeModule::RegisterLisitItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+void ArkUINativeModule::RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto listItemGroup = panda::ObjectRef::New(vm);
     listItemGroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListeItemGroupBridege::SetDivider));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemGroupBridge::SetDivider));
     listItemGroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListeItemGroupBridege::ResetDivider));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemGroupBridge::ResetDivider));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItemGroup"), listItemGroup);
 }
 

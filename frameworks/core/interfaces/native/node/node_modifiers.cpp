@@ -33,12 +33,16 @@
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
 
+#include "core/interfaces/native/node/alphabet_indexer_modifier.h"
+#include "core/interfaces/native/node/checkboxgroup_modifier.h"
+#include "core/interfaces/native/node/calendar_picker_modifier.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 const ArkUINodeModifiers impl = {
     ARKUI_NODE_MODIFIERS_API_VERSION,
     NodeModifier::GetCommonModifier,
-    nullptr,
+    NodeModifier::GetCheckboxGroupModifier,
     nullptr,
     nullptr,
     nullptr,
@@ -81,7 +85,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::GetCalendarPickerModifier,
     NodeModifier::GetTextInputModifier,
     nullptr,
     nullptr,
@@ -91,7 +95,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     NodeModifier::GetDatePickerModifier,
     nullptr,
-    nullptr,
+    NodeModifier::GetAlphabetIndexerModifier,
     nullptr,
     nullptr,
     NodeModifier::GetScrollModifier,
@@ -119,6 +123,7 @@ const ArkUINodeModifiers impl = {
 #else
     nullptr,
 #endif
+    NodeModifier::GetUIStateModifier,
 #ifdef FORM_SUPPORTED
     nullptr,
 #else

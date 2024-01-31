@@ -28,7 +28,7 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 } // namespace
 
-void SetTextStyle(NodeHandle node, uint32_t color, const char* fontSize, const char* fontweight)
+void SetTextStyle(ArkUINodeHandle node, uint32_t color, const char* fontSize, const char* fontweight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -45,7 +45,7 @@ void SetTextStyle(NodeHandle node, uint32_t color, const char* fontSize, const c
     CalendarPickerModelNG::SetTextStyle(frameNode, textStyle);
 }
 
-void ResetTextStyle(NodeHandle node)
+void ResetTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -60,7 +60,7 @@ void ResetTextStyle(NodeHandle node)
     CalendarPickerModelNG::SetTextStyle(frameNode, textStyle);
 }
 
-void SetEdgeAlign(NodeHandle node, const double* values, const int* units, int32_t size, int32_t alignType)
+void SetEdgeAlign(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, int32_t size, int32_t alignType)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -75,7 +75,7 @@ void SetEdgeAlign(NodeHandle node, const double* values, const int* units, int32
     CalendarPickerModelNG::SetEdgeAlign(frameNode, align, offset);
 }
 
-void ResetEdgeAlign(NodeHandle node)
+void ResetEdgeAlign(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -84,56 +84,56 @@ void ResetEdgeAlign(NodeHandle node)
     CalendarPickerModelNG::SetEdgeAlign(frameNode, alignType, offset);
 }
 
-void SetCalendarPickerPadding(NodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
+void SetCalendarPickerPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcLength topDimen;
-    CalcLength rightDimen;
-    CalcLength bottomDimen;
-    CalcLength leftDimen;
+    CalcLength topDim;
+    CalcLength rightDim;
+    CalcLength bottomDim;
+    CalcLength leftDim;
     if (top->string != nullptr) {
-        topDimen = CalcLength(top->string);
+        topDim = CalcLength(top->string);
     } else {
-        topDimen = CalcLength(top->value, static_cast<DimensionUnit>(top->unit));
+        topDim = CalcLength(top->value, static_cast<DimensionUnit>(top->unit));
     }
     if (right->string != nullptr) {
-        rightDimen = CalcLength(right->string);
+        rightDim = CalcLength(right->string);
     } else {
-        rightDimen = CalcLength(right->value, static_cast<DimensionUnit>(right->unit));
+        rightDim = CalcLength(right->value, static_cast<DimensionUnit>(right->unit));
     }
     if (bottom->string != nullptr) {
-        bottomDimen = CalcLength(bottom->string);
+        bottomDim = CalcLength(bottom->string);
     } else {
-        bottomDimen = CalcLength(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+        bottomDim = CalcLength(bottom->value, static_cast<DimensionUnit>(bottom->unit));
     }
     if (left->string != nullptr) {
-        leftDimen = CalcLength(left->string);
+        leftDim = CalcLength(left->string);
     } else {
-        leftDimen = CalcLength(left->value, static_cast<DimensionUnit>(left->unit));
+        leftDim = CalcLength(left->value, static_cast<DimensionUnit>(left->unit));
     }
     NG::PaddingProperty paddings;
     paddings.top = std::optional<CalcLength>();
     paddings.bottom = std::optional<CalcLength>();
     paddings.left = std::optional<CalcLength>();
     paddings.right = std::optional<CalcLength>();
-    if (topDimen.IsValid()) {
-        paddings.top = std::optional<CalcLength>(topDimen);
+    if (topDim.IsValid()) {
+        paddings.top = std::optional<CalcLength>(topDim);
     }
-    if (bottomDimen.IsValid()) {
-        paddings.bottom = std::optional<CalcLength>(bottomDimen);
+    if (bottomDim.IsValid()) {
+        paddings.bottom = std::optional<CalcLength>(bottomDim);
     }
-    if (leftDimen.IsValid()) {
-        paddings.left = std::optional<CalcLength>(leftDimen);
+    if (leftDim.IsValid()) {
+        paddings.left = std::optional<CalcLength>(leftDim);
     }
-    if (rightDimen.IsValid()) {
-        paddings.right = std::optional<CalcLength>(rightDimen);
+    if (rightDim.IsValid()) {
+        paddings.right = std::optional<CalcLength>(rightDim);
     }
     CalendarPickerModelNG::SetPadding(frameNode, paddings);
 }
 
-void ResetCalendarPickerPadding(NodeHandle node)
+void ResetCalendarPickerPadding(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -145,7 +145,7 @@ void ResetCalendarPickerPadding(NodeHandle node)
     CalendarPickerModelNG::SetPadding(frameNode, paddings);
 }
 
-void SetCalendarPickerBorder(NodeHandle node, uint32_t color)
+void SetCalendarPickerBorder(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -153,7 +153,7 @@ void SetCalendarPickerBorder(NodeHandle node, uint32_t color)
     ViewAbstract::SetBorderColor(frameNode, Color(color));
 }
 
-void ResetCalendarPickerBorder(NodeHandle node)
+void ResetCalendarPickerBorder(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -168,11 +168,13 @@ void ResetCalendarPickerBorder(NodeHandle node)
     ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
 }
 
-ArkUICalendarPickerModifierAPI GetCalendarPickerModifier()
+namespace NodeModifier {
+const ArkUICalendarPickerModifier* GetCalendarPickerModifier()
 {
-    static const ArkUICalendarPickerModifierAPI modifier = { SetTextStyle, ResetTextStyle, SetEdgeAlign, ResetEdgeAlign,
+    static const ArkUICalendarPickerModifier modifier = { SetTextStyle, ResetTextStyle, SetEdgeAlign, ResetEdgeAlign,
         SetCalendarPickerPadding, ResetCalendarPickerPadding, SetCalendarPickerBorder, ResetCalendarPickerBorder };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

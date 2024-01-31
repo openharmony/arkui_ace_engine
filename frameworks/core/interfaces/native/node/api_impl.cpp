@@ -77,7 +77,6 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
-#include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/data_panel_modifier.h"
 #include "core/interfaces/native/node/gauge_modifier.h"
 #include "core/interfaces/native/node/scroll_modifier.h"
@@ -101,34 +100,10 @@
 
 using namespace OHOS::Ace::NG;
 
-NodeHandle GetFrameNodeById(int nodeId)
-{
-    auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId);
-    return OHOS::Ace::AceType::RawPtr(node);
-}
-
-int64_t GetUIState(NodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(eventHub, 0);
-    return eventHub->GetCurrentUIState();
-}
-
-void SetSupportedUIState(NodeHandle node, uint64_t state)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->AddSupportedState(static_cast<uint64_t>(state));
-}
-
 static struct ArkUINodeAPI impl = {
-    GetFrameNodeById,
-    GetUIState,
-    SetSupportedUIState,
+    nullptr, // GetFrameNodeById,
+    nullptr, // GetUIState,
+    nullptr, // SetSupportedUIState,
     GetCommonModifier,
     GetCheckboxGroupModifier,
     GetCounterModifier,
@@ -182,7 +157,7 @@ static struct ArkUINodeAPI impl = {
     GetMenuModifier,
     GetDatePickerModifier,
     GetWaterFlowModifier,
-    GetAlphabetIndexerModifier,
+    nullptr, // GetAlphabetIndexerModifier,
     GetDataPanelModifier,
     GetGaugeModifier,
     GetScrollModifier,

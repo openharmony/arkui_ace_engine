@@ -19,7 +19,7 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
-#include "core/interfaces/native/node/api.h"
+#include "core/interfaces/native/node/node_api.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
@@ -81,7 +81,7 @@ private:
     static void RegisterSwiperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm); 
     static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterLisitItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterQRCodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextClockAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

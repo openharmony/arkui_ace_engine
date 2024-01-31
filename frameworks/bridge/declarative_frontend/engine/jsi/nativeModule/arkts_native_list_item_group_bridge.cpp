@@ -26,7 +26,7 @@ constexpr int32_t END_MARGIN_INDEX = 4;
 
 constexpr int32_t ARG_GROUP_LENGTH = 3;
 
-ArkUINativeModuleValue ListeItemGroupBridege::SetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue ListItemGroupBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -86,7 +86,7 @@ ArkUINativeModuleValue ListeItemGroupBridege::SetDivider(ArkUIRuntimeCallInfo* r
 
     return panda::JSValueRef::Undefined(vm);
 }
-ArkUINativeModuleValue ListeItemGroupBridege::ResetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue ListItemGroupBridge::ResetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));

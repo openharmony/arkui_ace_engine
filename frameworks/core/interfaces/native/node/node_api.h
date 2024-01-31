@@ -32,4 +32,13 @@ void SendArkUIAsyncEvent(ArkUINodeEvent* event);
 };
 #endif
 
+inline ArkUINodeHandle nodePtr(void* ptr) {
+    return reinterpret_cast<ArkUINodeHandle>(ptr);
+}
+
+namespace OHOS::Ace::NG::NodeModifier 
+{
+    const ArkUIStateModifier* GetUIStateModifier();
+}
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NODE_API_H
