@@ -159,6 +159,9 @@ constexpr uint32_t DEFAULT_FIll_COLOR = 0x00000000;
 constexpr int32_t DEFAULT_X = 0;
 constexpr int32_t DEFAULT_Y = 0;
 
+constexpr int32_t DEFAULT_TRUE = 1;
+constexpr int32_t DEFAULT_FALSE = 0;
+
 void ResetAttributeItem()
 {
     for (int i = 0; i < MAX_ATTRIBUTE_ITEM_LEN; ++i) {
@@ -282,6 +285,72 @@ int32_t CheckAttributeItemArray(const ArkUI_AttributeItem* item, int32_t require
         return -1;
     }
     return item->size;
+}
+
+bool CheckAttributeIsBool(const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0 || item->value[0].i32 != DEFAULT_FALSE ||
+        item->value[0].i32 != DEFAULT_TRUE) {
+        return false;
+    }
+    return true;
+}
+
+bool CheckAttributeIsAlignment(int32_t value)
+{
+    int32_t minEnumValue = static_cast<int32_t>(ArkUI_Alignment::ARKUI_ALIGNMENT_TOP_START);
+    int32_t maxEnumValue = static_cast<int32_t>(ArkUI_Alignment::ARKUI_ALIGNMENT_BOTTOM_END);
+    return value >= minEnumValue && value <= maxEnumValue;
+}
+
+bool CheckAttributeIsFontWeight(int32_t value)
+{
+    int32_t minEnumValue = static_cast<int32_t>(ArkUI_FontWeight::ARKUI_FONT_WEIGHT_W100);
+    int32_t maxEnumValue = static_cast<int32_t>(ArkUI_FontWeight::ARKUI_FONT_WEIGHT_REGULAR);
+    return value >= minEnumValue && value <= maxEnumValue;
+}
+
+bool CheckAttributeIsFontStyle(int32_t value)
+{
+    int32_t minEnumValue = static_cast<int32_t>(ArkUI_FontStyle::ARKUI_FONT_STYLE_NORMAL);
+    int32_t maxEnumValue = static_cast<int32_t>(ArkUI_FontStyle::ARKUI_FONT_STYLE_ITALIC);
+    return value >= minEnumValue && value <= maxEnumValue;
+}
+
+bool CheckAttributeIsTextHeightAdaptivePolicy(int32_t value)
+{
+    int32_t minEnumValue = static_cast<int32_t>(
+        ArkUI_TextHeightAdaptivePolicy::ARKUI_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST);
+    int32_t maxEnumValue = static_cast<int32_t>(
+        ArkUI_TextHeightAdaptivePolicy::ARKUI_TEXT_HEIGHT_ADAPTIVE_POLICY_LAYOUT_CONSTRAINT_FIRST);
+    return value >= minEnumValue && value <= maxEnumValue;
+}
+
+bool CheckAttributeIsCopyOptions(int32_t value)
+{
+    int32_t minEnumValue = static_cast<int32_t>(
+        ArkUI_CopyOptions::ARKUI_COPY_OPTIONS_NONE);
+    int32_t maxEnumValue = static_cast<int32_t>(
+        ArkUI_CopyOptions::ARKUI_COPY_OPTIONS_CROSS_DEVICE);
+    return value >= minEnumValue && value <= maxEnumValue;
+}
+
+bool CheckAttributeIsAnimationCurve(int32_t value)
+{
+    int32_t minEnumValue = static_cast<int32_t>(
+        ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR);
+    int32_t maxEnumValue = static_cast<int32_t>(
+        ArkUI_AnimationCurve::ARKUI_CURVE_FRICTION);
+    return value >= minEnumValue && value <= maxEnumValue;
+}
+
+bool CheckAttributeIsScrollNestedMode(int32_t value)
+{
+    int32_t minEnumValue = static_cast<int32_t>(
+        ArkUI_ScrollNestedMode::ARKUI_SCROLL_NESTED_MODE_SELF_ONLY);
+    int32_t maxEnumValue = static_cast<int32_t>(
+        ArkUI_ScrollNestedMode::ARKUI_SCROLL_NESTED_MODE_PARALLEL);
+    return value >= minEnumValue && value <= maxEnumValue;
 }
 
 bool CheckAttributeString(const ArkUI_AttributeItem* item)
@@ -1173,7 +1242,7 @@ void ResetCustomShadow(ArkUI_NodeHandle node)
 
 int32_t SetFocusable(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    if (!CheckAttributeIsBool(item)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1189,7 +1258,7 @@ void ResetFocusable(ArkUI_NodeHandle node)
 
 int32_t SetAccessibilityGroup(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    if (!CheckAttributeIsBool(item)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1253,7 +1322,7 @@ void ResetAccessibilityDescription(ArkUI_NodeHandle node)
 
 int32_t SetDefaultFocus(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    if (!CheckAttributeIsBool(item)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1305,6 +1374,9 @@ int32_t SetOverlay(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 
     if (item->size > 0) {
         values[0] = 1;
+        if (!CheckAttributeIsAlignment(item->value[0].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         values[1] = item->value[0].i32;
     }
 
@@ -2306,15 +2378,14 @@ void ResetScrollEnableScrollInteraction(ArkUI_NodeHandle node)
 
 int32_t SetScrollNestedScroll(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    //The size must be greater than 2 and check value is Nested Mode
+    if (item->size < 2 || !CheckAttributeIsScrollNestedMode(item->value[0].i32) ||
+        !CheckAttributeIsScrollNestedMode(item->value[1].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
     int first = item->value[NUM_0].i32;
-    int second = 0;
-    if (item->size > ALLOW_SIZE_1) {
-        second = item->value[NUM_1].i32;
-    }
+    int second = item->value[NUM_1].i32;
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollNestedScroll(node->uiNodeHandle, first, second);
     return ERROR_CODE_NO_ERROR;
 }
@@ -2339,7 +2410,8 @@ int32_t SetScrollTo(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size > 2) {
         values[4] = item->value[2].i32;
     }
-    if (item->size > 3) {
+    //check size
+    if (item->size > 3 || !CheckAttributeIsAnimationCurve(item->value[3].i32)) {
         values[5] = item->value[3].i32;
     }
     if (item->size > 4) {
@@ -2746,11 +2818,18 @@ int32_t SetTextFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     // weight
     int weight = 10; // default
     if (item->size > 1) {
+        if (!CheckAttributeIsFontWeight(item->value[1].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         weight = item->value[1].i32;
     }
     // style
     int style = 0;
     if (item->size > 2) {
+        //get value 2 is font style
+        if (!CheckAttributeIsFontStyle(item->value[2].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         weight = item->value[2].i32;
     }
     // family
@@ -2785,7 +2864,7 @@ void ResetTextFont(ArkUI_NodeHandle node)
 
 int32_t SetTextHeightAdaptivePolicy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    if (item->size == 0 || !CheckAttributeIsTextHeightAdaptivePolicy(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -3226,7 +3305,7 @@ void ResetTextCopyOption(ArkUI_NodeHandle node)
 
 int32_t SetTextCopyOption(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == NUM_0) {
+    if (item->size == NUM_0 || !CheckAttributeIsCopyOptions(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     // already check in entry point.
