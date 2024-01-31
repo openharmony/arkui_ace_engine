@@ -479,6 +479,20 @@ std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndex(int32_t index)
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         turnPageRate_ = 0;
     }
+    // item may be invalid in auto linear scene
+    if (nextValidIndex_ >= 0) {
+        int32_t startCurrentIndex = index;
+        int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || LessOrEqualCustomPrecision(turnPageRate_, -1.0f) ||
+                                          GreatOrEqualCustomPrecision(turnPageRate_, 1.0f)
+                                      ? index
+                                      : nextValidIndex_;
+        // reach edge scene
+        if (startCurrentIndex > endCurrentIndex) {
+            startCurrentIndex = currentIndexActual_;
+            endCurrentIndex = currentIndexActual_;
+        }
+        return { startCurrentIndex, endCurrentIndex };
+    }
 
     int32_t startCurrentIndex = index;
     int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || LessOrEqualCustomPrecision(turnPageRate_, -1.0f) ||
