@@ -161,11 +161,31 @@ HWTEST_F(RefreshTestNg, Drag002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Drag003
+ * @tc.desc: Test drag low version, test HandleDragCancel func
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, Drag003, TestSize.Level1)
+{
+    /**
+     * @tc.cases: HandleDrag delta less than TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: Would not trigger refresh
+     */
+    Create([](RefreshModelNG model) {});
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    pattern_->HandleDragCancel();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
  * @tc.name: CustomDrag001
  * @tc.desc: Test drag with customBuilder_ low version
  * @tc.type: FUNC
  */
-HWTEST_F(RefreshTestNg, DISABLED_CustomDrag001, TestSize.Level1)
+HWTEST_F(RefreshTestNg, CustomDrag001, TestSize.Level1)
 {
     bool isRefreshTrigger = false;
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
