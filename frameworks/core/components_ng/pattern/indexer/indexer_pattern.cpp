@@ -786,12 +786,7 @@ void IndexerPattern::UpdateBubbleView()
     CHECK_NULL_VOID(columnRenderContext);
     auto radius = Dimension(BUBBLE_BOX_RADIUS, DimensionUnit::VP);
     columnRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
-    columnRenderContext->UpdateBackShadow(
-        Shadow(
-            INDEXER_POPUP_SHADOW_RADIUS,
-            Offset(0.0, INDEXER_POPUP_SHADOW_OFFSET_Y),
-            Color(INDEXER_POPUP_SHADOW_BG_COLOR),
-            ShadowStyle::OuterDefaultLG));
+    columnRenderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD));
     columnRenderContext->SetClipToBounds(true);
     popupNode_->MarkModifyDone();
     popupNode_->MarkDirtyNode();
