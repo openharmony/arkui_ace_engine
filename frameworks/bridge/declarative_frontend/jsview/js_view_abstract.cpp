@@ -758,6 +758,26 @@ void SetPlacementOnTopVal(const JSRef<JSObject>& popupObj, const RefPtr<PopupPar
     }
 }
 
+bool IsPopupCreated()
+{
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(targetNode, false);
+    auto targetId = targetNode->GetId();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_RETURN(context, false);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto popupInfo = overlayManager->GetPopupInfo(targetId);
+    if (popupInfo.popupId == -1 || !popupInfo.popupNode) {
+        return false;
+    }
+    return true;
+}
+
 void ParsePopupCommonParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
@@ -5135,7 +5155,7 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     } else if (!popupObj->GetProperty("builder").IsEmpty()) {
         ParseCustomPopupParam(info, popupObj, popupParam); // Parse CustomPopupOptions param
         auto builderValue = popupObj->GetProperty("builder");
-        if (!builderValue->IsObject()) {
+        if (!builderValue->IsObject() || (!IsPopupCreated() && !popupParam->IsShow())) {
             return;
         }
 
