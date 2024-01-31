@@ -263,7 +263,9 @@ void TimePickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto stack = host->GetParent();
+    auto blendNode = host->GetParent();
+    CHECK_NULL_VOID(blendNode);
+    auto stack = blendNode->GetParent();
     CHECK_NULL_VOID(stack);
     auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
     auto renderContext = buttonNode->GetRenderContext();
@@ -324,7 +326,9 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto stackNode = DynamicCast<FrameNode>(host->GetParent());
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
     CHECK_NULL_VOID(stackNode);
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(parentNode);

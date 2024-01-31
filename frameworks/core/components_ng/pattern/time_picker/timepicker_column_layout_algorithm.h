@@ -61,7 +61,7 @@ private:
     float pickerItemHeight_ = 0.0f;
     std::vector<int32_t> currentOffset_;
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
-    void InitGradient(const float& gradientPercent, const RefPtr<FrameNode> stackNode,
+    void InitGradient(const float& gradientPercent, const RefPtr<FrameNode> blendNode,
         const RefPtr<FrameNode> columnNode);
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnLayoutAlgorithm);
