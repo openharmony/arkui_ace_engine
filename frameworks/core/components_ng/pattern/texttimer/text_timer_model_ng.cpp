@@ -91,7 +91,7 @@ void TextTimerModelNG::SetFontFamily(const std::vector<std::string>& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontFamily, value);
 }
 
-void TextTimerModelNG::SetOnTimer(std::function<void(const int64_t, const int64_t)>&& onChange)
+void TextTimerModelNG::SetOnTimer(std::function<void(const int64_t, const int64_t)> && onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
