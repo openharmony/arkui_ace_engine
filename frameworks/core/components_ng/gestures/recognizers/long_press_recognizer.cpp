@@ -314,9 +314,6 @@ void LongPressRecognizer::SendCallbackMsg(
         info.SetScreenLocation(trackPoint.GetScreenOffset());
         info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        if (recognizerTarget_.has_value()) {
-            info.SetTarget(recognizerTarget_.value());
-        }
         info.SetForce(trackPoint.force);
         if (trackPoint.tiltX.has_value()) {
             info.SetTiltX(trackPoint.tiltX.value());
@@ -414,9 +411,6 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     }
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
-    if (recognizerTarget_.has_value()) {
-        info->SetTarget(recognizerTarget_.value());
-    }
     info->SetForce(trackPoint.force);
     if (trackPoint.tiltX.has_value()) {
         info->SetTiltX(trackPoint.tiltX.value());

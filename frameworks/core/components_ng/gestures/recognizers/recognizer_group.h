@@ -161,7 +161,7 @@ public:
     virtual GestureMode GetGestureMode() const = 0;
 
     void SetRecognizerInfoRecursively(const Offset& coordinateOffset, const RefPtr<NG::FrameNode>& node,
-        const RefPtr<NG::TargetComponent>& targetComponent, const SizeF& size);
+        const RefPtr<NG::TargetComponent>& targetComponent, const GetEventTargetImpl& getEventTargetImpl);
 
     void AddHittedRecognizerType(std::map<std::string, std::list<TouchTestResultInfo>>& hittedRecognizerInfo);
 
