@@ -407,6 +407,34 @@ void ImagePattern::LoadImageDataIfNeed()
     }
 }
 
+void ImagePattern::UpdateGestureAndDragWhenModify()
+{
+    // remove long press and mouse events
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    if (longPressEvent_) {
+        gestureHub->SetLongPressEvent(nullptr);
+        longPressEvent_ = nullptr;
+    }
+
+    if (clickEvent_) {
+        gestureHub->RemoveClickEvent(clickEvent_);
+        clickEvent_ = nullptr;
+    }
+
+    if (mouseEvent_) {
+        auto inputHub = host->GetOrCreateInputEventHub();
+        inputHub->RemoveOnMouseEvent(mouseEvent_);
+        mouseEvent_ = nullptr;
+    }
+
+    if (host->IsDraggable()) {
+        EnableDrag();
+    }
+}
+
 void ImagePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -428,26 +456,11 @@ void ImagePattern::OnModifyDone()
     }
 
     CloseSelectOverlay();
-    // remove long press and mouse events
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    if (longPressEvent_) {
-        gestureHub->SetLongPressEvent(nullptr);
-        longPressEvent_ = nullptr;
-    }
-
-    if (clickEvent_) {
-        gestureHub->RemoveClickEvent(clickEvent_);
-        clickEvent_ = nullptr;
-    }
-
-    if (mouseEvent_) {
-        auto inputHub = host->GetOrCreateInputEventHub();
-        inputHub->RemoveOnMouseEvent(mouseEvent_);
-        mouseEvent_ = nullptr;
-    }
+    UpdateGestureAndDragWhenModify();
 
     if (isAnalyzerOverlayBuild_) {
         if (!IsSupportImageAnalyzerFeature()) {
