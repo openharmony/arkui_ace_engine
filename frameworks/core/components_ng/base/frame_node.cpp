@@ -786,7 +786,6 @@ void FrameNode::OnVisibleChange(bool isVisible)
 {
     pattern_->OnVisibleChange(isVisible);
     UpdateChildrenVisible(isVisible);
-    TriggerVisibleAreaChangeCallback(true);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive)
@@ -965,7 +964,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
-    bool isFrameDisappear = forceDisappear || !context->GetOnShow() || !IsOnMainTree();
+    bool isFrameDisappear = forceDisappear || !context->GetOnShow() || !IsOnMainTree() || !IsVisible();
     if (!isFrameDisappear) {
         bool curFrameIsActive = isActive_;
         bool curIsVisible = IsVisible();
@@ -1052,22 +1051,12 @@ void FrameNode::ProcessAllVisibleCallback(
         }
 
         if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MIN)) {
-            if (callbackIsVisible) {
-                nodeCallbackInfo.second.isCurrentVisible = false;
-                isVisible = (!isHandled) ? false : isVisible;
-            } else {
-                nodeCallbackInfo.second.isCurrentVisible = true;
-                isVisible = (!isHandled) ? true : isVisible;
-            }
+            nodeCallbackInfo.second.isCurrentVisible = false;
+            isVisible = (!isHandled) ? false : isVisible;
             isHandled = true;
         } else if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MAX)) {
-            if (!callbackIsVisible) {
-                nodeCallbackInfo.second.isCurrentVisible = true;
-                isVisible = (!isHandled) ? true : isVisible;
-            } else {
-                nodeCallbackInfo.second.isCurrentVisible = false;
-                isVisible = (!isHandled) ? false : isVisible;
-            }
+            nodeCallbackInfo.second.isCurrentVisible = true;
+            isVisible = (!isHandled) ? true : isVisible;
             isHandled = true;
         }
     }
