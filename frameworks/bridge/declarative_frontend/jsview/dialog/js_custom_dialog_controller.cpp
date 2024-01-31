@@ -177,14 +177,6 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.backgroundColor = backgroundColor;
         }
 
-        // Parse cornerRadius.
-        auto cornerRadiusValue = constructorArg->GetProperty("cornerRadius");
-        NG::BorderRadiusProperty radius;
-        if (!cornerRadiusValue->IsUndefined()) {
-            ParseBorderRadius(cornerRadiusValue, radius);
-            instance->dialogProperties_.borderRadius = radius;
-        }
-
         auto execContext = info.GetExecutionContext();
         // Parse openAnimation.
         auto openAnimationValue = constructorArg->GetProperty("openAnimation");
@@ -216,6 +208,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         if (isModalValue->IsBoolean()) {
             instance->dialogProperties_.isModal = isModalValue->ToBoolean();
         }
+        JSViewAbstract::SetDialogProperties(constructorArg, instance->dialogProperties_);
         instance->IncRefCount();
         info.SetReturnValue(AceType::RawPtr(instance));
     }
@@ -226,46 +219,6 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
     if (controller != nullptr) {
         controller->ownerView_ = nullptr;
         controller->DecRefCount();
-    }
-}
-
-void JSCustomDialogController::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
-{
-    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        return;
-    }
-
-    std::optional<CalcDimension> radiusTopLeft;
-    std::optional<CalcDimension> radiusTopRight;
-    std::optional<CalcDimension> radiusBottomLeft;
-    std::optional<CalcDimension> radiusBottomRight;
-    CalcDimension borderRadius;
-    if (JSViewAbstract::ParseJsDimensionVp(args, borderRadius)) {
-        radius = NG::BorderRadiusProperty(borderRadius);
-        radius.multiValued = false;
-    } else if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
-            radiusTopLeft = topLeft;
-        }
-        CalcDimension topRight;
-        if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
-            radiusTopRight = topRight;
-        }
-        CalcDimension bottomLeft;
-        if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
-            radiusBottomLeft = bottomLeft;
-        }
-        CalcDimension bottomRight;
-        if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
-            radiusBottomRight = bottomRight;
-        }
-        radius.radiusTopLeft = radiusTopLeft;
-        radius.radiusTopRight = radiusTopRight;
-        radius.radiusBottomLeft = radiusBottomLeft;
-        radius.radiusBottomRight = radiusBottomRight;
-        radius.multiValued = true;
     }
 }
 

@@ -249,7 +249,7 @@ private:
     // build actionMenu
     RefPtr<FrameNode> BuildMenu(const std::vector<ButtonInfo>& buttons, bool hasTitle);
     void RecordEvent(int32_t btnIndex) const;
-
+    void ParseBorderRadius(BorderRadiusProperty& raidus);
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;

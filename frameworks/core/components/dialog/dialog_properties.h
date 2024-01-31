@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/event/ace_event_handler.h"
@@ -183,6 +184,12 @@ struct DialogProperties {
     bool isSysBlurStyle = true;           // init use sysBlurStyle
     std::function<void()> customBuilder;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<NG::BorderWidthProperty> borderWidth;
+    std::optional<NG::BorderColorProperty> borderColor;
+    std::optional<NG::BorderStyleProperty> borderStyle;
+    std::optional<Shadow> shadow;
+    std::optional<CalcDimension> width;
+    std::optional<CalcDimension> height;
 
 #ifndef NG_BUILD
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
@@ -214,6 +221,14 @@ struct PromptDialogAttr {
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
+    std::optional<Color> backgroundColor;
+    std::optional<NG::BorderWidthProperty> borderWidth;
+    std::optional<NG::BorderColorProperty> borderColor;
+    std::optional<NG::BorderStyleProperty> borderStyle;
+    std::optional<NG::BorderRadiusProperty> borderRadius;
+    std::optional<Shadow> shadow;
+    std::optional<CalcDimension> width;
+    std::optional<CalcDimension> height;
 };
 
 } // namespace OHOS::Ace

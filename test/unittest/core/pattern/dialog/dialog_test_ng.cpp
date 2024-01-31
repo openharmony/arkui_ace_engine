@@ -50,6 +50,7 @@ const double_t WIDTH_C = 64.0;
 const double_t WIDTH_D = 80.0;
 const double_t WIDTH_E = 112.0;
 const double_t DIVISOR = 2.0;
+const Dimension DIMENSION_RADIUS(10.0, DimensionUnit::PX);
 } // namespace
 
 class MockDialogTheme : public DialogTheme, public ButtonTheme {
@@ -1220,5 +1221,57 @@ HWTEST_F(DialogPatternTestNg, PopDialog02, TestSize.Level1)
      */
     pattern->PopDialog(0);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 0);
+}
+
+/**
+ * @tc.name: DialogPatternTest013
+ * @tc.desc: Test dialog UpdateContentRenderContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create dialogTheme.
+     * @tc.expected: the dialogTheme created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    /**
+     * @tc.steps: step2. create dialogNode.
+     * @tc.expected: the dialogNode created successfully.
+     */
+    RefPtr<FrameNode> dialogNode = FrameNode::CreateFrameNode(V2::ALERT_DIALOG_ETS_TAG, 1,
+        AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps: step3. create pattern.
+     * @tc.expected: the pattern created successfully.
+     */
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step4. execute UpdateContentRenderContext.
+     * @tc.expected: UpdateContentRenderContext successfully.
+     */
+    DialogProperties props;
+    NG::BorderColorProperty borderColor;
+    borderColor.SetColor(Color::BLUE);
+    props.borderColor = borderColor;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(DIMENSION_RADIUS);
+    props.borderRadius = borderRadius;
+    auto borderStyle = NG::BorderStyleProperty({BorderStyle::SOLID,
+        BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID});
+    props.borderStyle = borderStyle;
+    pattern->UpdateContentRenderContext(dialogNode, props);
+    /**
+     * @tc.steps: step5. test dialogNode's RenderContext's border values.
+     * @tc.expected: equal borderRadius or borderColor or borderStyle.
+     */
+    auto dialogRender = dialogNode->GetRenderContext();
+    ASSERT_NE(dialogRender, nullptr);
+    EXPECT_EQ(dialogRender->GetBorderRadius().value(), borderRadius);
+    EXPECT_EQ(dialogRender->GetBorderColor().value(), borderColor);
+    EXPECT_EQ(dialogRender->GetBorderStyle().value(), borderStyle);
 }
 } // namespace OHOS::Ace::NG
