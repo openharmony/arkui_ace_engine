@@ -4731,18 +4731,9 @@ bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRe
 
 void WebDelegate::OnResourceLoad(const std::string& url)
 {
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), url]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            auto onResourceLoadV2 = delegate->onResourceLoadV2_;
-            if (onResourceLoadV2) {
-                onResourceLoadV2(std::make_shared<ResourceLoadEvent>(url));
-            }
-        },
-        TaskExecutor::TaskType::JS);
+    if (onResourceLoadV2_) {
+        onResourceLoadV2_(std::make_shared<ResourceLoadEvent>(url));
+    }
 }
 
 void WebDelegate::OnScaleChange(float oldScaleFactor, float newScaleFactor)
