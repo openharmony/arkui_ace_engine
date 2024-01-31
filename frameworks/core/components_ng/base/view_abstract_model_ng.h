@@ -744,6 +744,11 @@ public:
         ViewAbstract::SetUseShadowBatching(useShadowBatching);
     }
 
+    void SetFreeze(bool freeze) override
+    {
+        ViewAbstract::SetFreeze(freeze);
+    }
+
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
     {
         ViewAbstract::SetClickEffectLevel(level, scaleValue);
