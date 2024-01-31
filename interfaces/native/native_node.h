@@ -330,7 +330,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { 100, 20, 0 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TRANSLATE);
      * auto nodeTranslate = item->value[0].f32;
@@ -351,7 +351,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { 1.0, 0.5 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCALE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SCALE);
      * auto nodeScale = item->value[0].f32;
@@ -378,7 +378,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { 0, 0, 1, 300, 0 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_ROTATE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ROTATE);
      * auto nodeRotate = item->value[0].f32;
@@ -397,7 +397,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { 1.2 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BRIGHTNESS, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BRIGHTNESS);
      * auto nodeBrightness = item->value[0].f32;
@@ -416,7 +416,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { 1.0 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SATURATION, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SATURATION);
      * auto nodeSaturate = item->value[0].f32;
@@ -436,7 +436,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { 1.0 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BLUR, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BLUR);
      * auto nodeBlur = item->value[0].f32;
@@ -464,7 +464,7 @@ typedef enum {
      *      入参3： 线性渐变的方向，设置angle后不生效；\n
      *      入参4： 为渐变的颜色重复着色。\n
      * @code {.cpp}
-     * ARKUI_AttributeItem item = { .string = "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;;left;true" };
+     * ArkUI_AttributeItem item = { .string = "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;;left;true" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_LINEAR_GRADIENT, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_LINEAR_GRADIENT);
      * auto nodeLinearGradient = item->string;
@@ -483,7 +483,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = ARKUI_ALIGNMENT_CENTER } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_ALIGNMENT, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ALIGNMENT);
      * auto nodeAlign = item->value[0].i32;
@@ -863,7 +863,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue sizeArray[] = { 20, 0 }
-     * ARKUI_AttributeItem item = { .value = sizeArray, .size = 2};
+     * ArkUI_AttributeItem item = { .value = sizeArray, .size = 2};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE);
      * auto width = item->value[0].f32;
@@ -884,7 +884,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue imageSizeStyle[] = { {.i32 = static_cast<int32_t>(ARKUI_IMAGE_SIZE_COVER) } }
-     * ARKUI_AttributeItem item = { .value = imageSizeStyle, .size = 1};
+     * ArkUI_AttributeItem item = { .value = imageSizeStyle, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE_WITH_STYLE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE_WITH_STYLE);
      * auto blurStyle = item->value[0].i32
@@ -914,7 +914,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue blurStyle[] = { { .i32 = static_cast<int32_t>(ARKUI_BLUR_STYLE_THICK)}}
-     * ARKUI_AttributeItem item = { .value = blurStyle, .size = 1};
+     * ArkUI_AttributeItem item = { .value = blurStyle, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_BLUR_STYLE , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_BLUR_STYLE);
      * auto blurStyle = item->value[0].i32
@@ -943,7 +943,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue centerPointArray[] = { 20 };
-     * ARKUI_AttributeItem item = { .value = centerPointArray, .size = 1};
+     * ArkUI_AttributeItem item = { .value = centerPointArray, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TRANSFORM_CENTER , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TRANSFORM_CENTER);
      * auto centerX = item->value[0].f32;
@@ -976,7 +976,7 @@ typedef enum {
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue opacityTransition[] = { 20, { .i32 = 3000},
      * { .i32 = static_cast<int32_t>(ARKUI_CURVE_EASE_IN_OUT)}};
-     * ARKUI_AttributeItem item = { .value = opacityTransition, .size = 3};
+     * ArkUI_AttributeItem item = { .value = opacityTransition, .size = 3};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_OPACITY_TRANSITION , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_OPACITY_TRANSITION);
      * auto opacity = item->value[0].f32;
@@ -1017,7 +1017,7 @@ typedef enum {
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue rotateTransition[] = { 0.0f, 0.0f, 1.0f, 180, 0, { .i32 = 3000},
      * { .i32 = static_cast<int32_t>(ARKUI_CURVE_SHARP)}};
-     * ARKUI_AttributeItem item = { .value = rotateTransition, .size = 7};
+     * ArkUI_AttributeItem item = { .value = rotateTransition, .size = 7};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_ROTATE_TRANSITION , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ROTATE_TRANSITION);
      * auto rotateX = item->value[0].f32;
@@ -1054,7 +1054,7 @@ typedef enum {
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue scaleTransition[] = { 0.0f, 0.0f, 0.0f, { .i32 = 3000},
      * { .i32 = static_cast<int32_t>(ARKUI_CURVE_SHARP)}};
-     * ARKUI_AttributeItem item = { .value = scaleTransition, .size = 5};
+     * ArkUI_AttributeItem item = { .value = scaleTransition, .size = 5};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCALE_TRANSITION , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SCALE_TRANSITION);
      * auto scaleX = item->value[0].f32;
@@ -1091,7 +1091,7 @@ typedef enum {
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue translateTransition[] = { 0.0f, 0.0f, 0.0f,
      * { .i32 = 3000}, { .i32 = static_cast<int32_t>(ARKUI_CURVE_SHARP)}};
-     * ARKUI_AttributeItem item = { .value = translateTransition, .size = 5};
+     * ArkUI_AttributeItem item = { .value = translateTransition, .size = 5};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION);
      * auto translateX = item->value[0].f32;
@@ -1376,6 +1376,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { 0, 5, 0, 5 };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_CONSTRAINT_SIZE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CONSTRAINT_SIZE);
      * auto nodeMinWidth = item->value[0].f32;
      * auto nodeMaxWidth = item->value[1].f32;
@@ -1496,7 +1497,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue offsetArray[] = { 20, 0 };
-     * ARKUI_AttributeItem item = { .value = offsetArray, .size = 2};
+     * ArkUI_AttributeItem item = { .value = offsetArray, .size = 2};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_OFFSET , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_OFFSET);
      * auto offsetX = item->value[0].f32;
@@ -1519,7 +1520,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue pointArray[] = { 20, 0 };
-     * ARKUI_AttributeItem item = { .value = pointArray, .size = 2};
+     * ArkUI_AttributeItem item = { .value = pointArray, .size = 2};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_MARK_ANCHOR , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_MARK_ANCHOR);
      * auto pointX = item->value[0].f32;
@@ -1541,7 +1542,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue possitionArray[] = { 20, 0 };
-     * ARKUI_AttributeItem item = { .value = possitionArray, .size = 2};
+     * ArkUI_AttributeItem item = { .value = possitionArray, .size = 2};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_POSITION , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_POSITION);
      * auto offsetX = item->value[0].f32;
@@ -1588,7 +1589,7 @@ typedef enum {
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue alignRulesArray[] = { { .i32 = 2000}, { .i32 =
      * static_cast<int32_t>(ARKUI_HORIZONTAL_ALIGNMENT_START)}};
-     * ARKUI_AttributeItem item = { .value = alignRulesArray, .size = 2};
+     * ArkUI_AttributeItem item = { .value = alignRulesArray, .size = 2};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_ALIGN_RULES , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ALIGNMENT_RULES);
      * auto id = item->value[0].i32;
@@ -1783,7 +1784,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_AttributeItem item = { .string = "https://www.example.com/xxx.png" };
+     * ArkUI_AttributeItem item = { .string = "https://www.example.com/xxx.png" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_CONTENT , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_CONTENT);
      * auto content = item->string
@@ -1883,7 +1884,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue lineHeight[] = { 20 };
-     * ARKUI_AttributeItem item = { .value = lineHeight, .size = 1};
+     * ArkUI_AttributeItem item = { .value = lineHeight, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_LINE_HEIGHT , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_LINE_HEIGHT);
      * auto pointX = item->value[0].f32;
@@ -1926,7 +1927,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue textCase[] = { {.i32 = static_cast<int32>(ARKUI_TEXT_CASE_LOWER) } };
-     * ARKUI_AttributeItem item = { .value = textCase, .size = 1};
+     * ArkUI_AttributeItem item = { .value = textCase, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_CASE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_CASE);
      * auto textCase = item->value[0].i32;
@@ -1947,7 +1948,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue letterSpacing[] = { 20 };
-     * ARKUI_AttributeItem item = { .value = letterSpacing, .size = 1};
+     * ArkUI_AttributeItem item = { .value = letterSpacing, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_LETTER_SPACING , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_LETTER_SPACING);
      * auto letterSpacing = item->value[0].f32;
@@ -1968,7 +1969,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue maxLine[] = { { .i32 = 2 } };
-     * ARKUI_AttributeItem item = { .value = maxLine, .size = 1};
+     * ArkUI_AttributeItem item = { .value = maxLine, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_MAX_LINES , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_MAX_LINES);
      * auto maxLines = item->value[0].i32;
@@ -1988,7 +1989,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue alignMent[] = {{.i32 = static_cast<int32_t>(ARKUI_TEXT_ALIGNMENT_CENTER)}};
-     * ARKUI_AttributeItem item = { .value = alignMent, .size = 1};
+     * ArkUI_AttributeItem item = { .value = alignMent, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_ALIGN , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_ALIGN);
      * auto alignMent = item->value[0].i32;
@@ -2008,7 +2009,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue textOverFlow[] = { { .i32 = static_cast<int32_t>(ARKUI_TEXT_OVERFLOW_CLIP) } };
-     * ARKUI_AttributeItem item = { .value = textOverFlow, .size = 1};
+     * ArkUI_AttributeItem item = { .value = textOverFlow, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle,NODE_TEXT_OVERFLOW , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_OVERFLOW);
      * auto textOverFlow = item->value[0].i32;
@@ -2218,7 +2219,7 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue textIndent[] = { 20 };
-     * ARKUI_AttributeItem item = { .value = textIndent, .size = 1};
+     * ArkUI_AttributeItem item = { .value = textIndent, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INDENT , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_INDENT);
      * auto indentValue = item->value[0].f32;
@@ -2237,7 +2238,7 @@ typedef enum {
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_AttributeItem item = { .string = "https://www.example.com/xxx.png" };
+     * ArkUI_AttributeItem item = { .string = "https://www.example.com/xxx.png" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SPAN_CONTENT , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SPAN_CONTENT);
      * auto spanContent = item->string;
@@ -2256,7 +2257,7 @@ typedef enum {
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_AttributeItem item = { .string = "https://www.example.com/xxx.png" };
+     * ArkUI_AttributeItem item = { .string = "https://www.example.com/xxx.png" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_SPAN_SRC , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_SPAN_SRC);
      * auto spanScr = item->string;
@@ -2275,8 +2276,8 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_NumberValue alignValue[] = { .i32 = { static_cast<int32_t>(ARKUI_IMAGE_SPAN_ALIGNMENT_TOP) } };
-     * ARKUI_AttributeItem item = {.value = alignValue, .size = 1};
+     * ArkUI_NumberValue alignValue[] = { {.i32 = static_cast<int32_t>(ARKUI_IMAGE_SPAN_ALIGNMENT_TOP) } };
+     * ArkUI_AttributeItem item = {.value = alignValue, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_SPAN_VERTICAL_ALIGN , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_SPAN_VERTICAL_ALIGN);
      * auto verticalAlign = item->value[0].i32;
@@ -2295,7 +2296,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_AttributeItem item = { .string = "https://www.example.com/xxx.png" };
+     * ArkUI_AttributeItem item = { .string = "https://www.example.com/xxx.png" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_SRC , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_SRC);
      * auto imageSrc = item->string;
@@ -2314,8 +2315,8 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_NumberValue objectFitValue[] = { .i32 = { static_cast<int32_t>(ARKUI_OBJECT_FIT_FILL) } };
-     * ARKUI_AttributeItem item = { .value = objectFitValue, .size = 1};
+     * ArkUI_NumberValue objectFitValue[] = { { .i32 = static_cast<int32_t>(ARKUI_OBJECT_FIT_FILL) } };
+     * ArkUI_AttributeItem item = { .value = objectFitValue, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_OBJECT_FIT , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_OBJECT_FIT);
      * auto objectFit = item->value[0].i32;
@@ -2334,8 +2335,8 @@ typedef enum {
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_NumberValue interpolationValue[] = { .i32 = ARKUI_IMAGE_INTERPOLATION_LOW } };
-     * ARKUI_AttributeItem item = { .value = interpolationValue, .size = 1};
+     * ArkUI_NumberValue interpolationValue[] = { { .i32 = ARKUI_INTERPOLATION_LOW } };
+     * ArkUI_AttributeItem item = { .value = interpolationValue, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_INTERPOLATION , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_INTERPOLATION);
      * auto interpolation = item->value[0].i32;
@@ -2354,8 +2355,8 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_NumberValue repeatValue[] = { .i32 = { static_cast<int32_t>(ARKUI_IMAGE_REPEAT_X) } };
-     * ARKUI_AttributeItem item = { .value = repeatValue, .size = 1};
+     * ArkUI_NumberValue repeatValue[] = { { .i32 = static_cast<int32_t>(ARKUI_IMAGE_REPEAT_X) } };
+     * ArkUI_AttributeItem item = { .value = repeatValue, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_OBJECT_REPEAT , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_OBJECT_REPEAT);
      * auto repeat = item->value[0].i32;
@@ -2376,10 +2377,10 @@ typedef enum {
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_NumberValue filterValue[] = { .i32 = {1}, .i32 = {0}, .i32 = {0}, .i32 = {0}, .i32 = {0}, .i32 = {0}, .i32
-     * = {1}, .i32 = {0}, .i32 = {0}, .i32 = {0}, .i32 = {0}, .i32 = {0}, .i32 = {1}, .i32 = {0}, .i32 = {0}, .i32 =
-     * {0}, .i32 = {0}, .i32 = {0}, .i32 = {1}, .i32 = {0} };
-     * ARKUI_AttributeItem item = { .value = filterValue, .size = sizeof(filterValue)/ sizeof(ARKUI_NumberValue)};
+     * ArkUI_NumberValue filterValue[] = { {.i32 = 1}, {.i32 = 0}, {.i32 = 0}, {.i32 = 0}, {.i32 = 0}, {.i32 = 0}, {.i32
+     * = 1}, {.i32 = 0}, {.i32 = 0}, {.i32 = 0}, {.i32 = 0}, {.i32 = 0}, {.i32 = 1}, {.i32 = 0}, {.i32 = 0}, {.i32 =
+     * 0}, {.i32 = 0}, {.i32 = 0}, {.i32 = 1}, {.i32 = 0} };
+     * ArkUI_AttributeItem item = { .value = filterValue, .size = sizeof(filterValue)/ sizeof(ArkUI_NumberValue)};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_COLOR_FILTER , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_COLOR_FILTER);
      * auto colorFilter = item->value
@@ -2398,8 +2399,8 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_NumberValue resizeValue[] = { .i32 = true };
-     * ARKUI_AttributeItem item = { .value = resizeValue, .size = 1}};
+     * ArkUI_NumberValue resizeValue[] = { {.i32 = true} };
+     * ArkUI_AttributeItem item = { .value = resizeValue, .size = 1}};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_AUTO_RESIZE , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_AUTO_RESIZE);
      * auto autoResize = item->value[0].i32;
@@ -2418,7 +2419,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ARKUI_AttributeItem item = { .string = "/pages/loading.png" };
+     * ArkUI_AttributeItem item = { .string = "/pages/loading.png" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_ALT , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_ALT);
      * auto altStr = item->string;
@@ -2478,7 +2479,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { { .u32 = 0x99666666 } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_LOADING_PROGRESS_COLOR, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_LOADING_PROGRESS_COLOR);
      * auto nodeLoadingProgressColor = item->value[0].u32;
@@ -2498,7 +2499,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { { .i32 = true } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_LOADING_PROGRESS_ENABLE_LOADING, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_LOADING_PROGRESS_ENABLE_LOADING);
      * auto nodeLoadingProgressEnableLoading = item->value[0].i32;
@@ -2548,10 +2549,10 @@ typedef enum {
      * @brief 光标颜色属性，支持属性设置，属性重置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].u32：背景色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * .value[0].u32：光标颜色数值，0xargb格式，形如 0xFFFF0000 表示红色；\n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].u32：背景色数值，0xargb格式。\n
+     * .value[0].u32：光标颜色数值，0xargb格式。\n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
@@ -3224,21 +3225,21 @@ typedef enum {
      * @brief 设置XComponent的宽高，支持属性设置和获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32：宽数值，单位为vp；\n
-     * .value[1].f32：高数值，单位为vp。\n
+     * .value[0].u32：宽数值，单位为vp；\n
+     * .value[1].u32：高数值，单位为vp；\n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32：宽数值，单位为vp；\n
-     * .value[1].f32：高数值，单位为vp。\n
+     * .value[0].u32：宽数值，单位为vp；\n
+     * .value[1].u32：高数值，单位为vp；\n
      *
      * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { 300, 50 };
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] = { {.u32=300}, {.u32=50} };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE);
-     * auto nodeXcomponentSurfaceWidth = item->value[0].f32;
-     * auto nodeXcomponentSurfaceHeight = item->value[1].f32;
+     * auto nodeXcomponentSurfaceWidth = item->value[0].u32;
+     * auto nodeXcomponentSurfaceHeight = item->value[1].u32;
      * @endcode
      *
      */
@@ -3255,7 +3256,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = true } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_LUNAR, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_DATE_PICKER_LUNAR);
      * auto nodeDatePickerLunar = item->value[0].i32;
@@ -3272,7 +3273,7 @@ typedef enum {
      * .string： 日期。\n
      *
      * @code {.cpp}
-     * ARKUI_AttributeItem item = { .string = "1970-1-1" };
+     * ArkUI_AttributeItem item = { .string = "1970-1-1" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_START, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_DATE_PICKER_START);
      * auto nodeDatePickerStart = item->string;
@@ -3289,7 +3290,7 @@ typedef enum {
      * .string： 日期。\n
      *
      * @code {.cpp}
-     * ARKUI_AttributeItem item = { .string = "2100-12-31" };
+     * ArkUI_AttributeItem item = { .string = "2100-12-31" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_END, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_DATE_PICKER_END);
      * auto nodeDatePickerEnd = item->string;
@@ -3306,7 +3307,7 @@ typedef enum {
      * .string： 日期。
      *
      * @code {.cpp}
-     * ARKUI_AttributeItem item = { .string = "2024-01-22" };
+     * ArkUI_AttributeItem item = { .string = "2024-01-22" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_SELECTED, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_DATE_PICKER_SELECTED);
      * auto nodeDatePickerSelected = item->string;
@@ -3334,7 +3335,7 @@ typedef enum {
      *       参数5： 文本样式，字符串枚举("normal", "italic")\n
      *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。\n
      * @code {.cpp}
-     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * ArkUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE);
      * auto nodeDatePickerDisappearTextStyle = item->string;
@@ -3362,7 +3363,7 @@ typedef enum {
      *       参数5： 文本样式，字符串枚举("normal", "italic")\n
      *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。\n
      * @code {.cpp}
-     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * ArkUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_TEXT_STYLE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_DATE_PICKER_TEXT_STYLE);
      * auto nodeDatePickerTextStyle = item->string;
@@ -3390,7 +3391,7 @@ typedef enum {
      *       参数5： 文本样式，字符串枚举("normal", "italic")\n
      *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。\n
      * @code {.cpp}
-     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * ArkUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_SELECTED_TEXT_STYLE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_DATE_PICKER_SELECTED_TEXT_STYLE);
      * auto nodeDatePickerSelectedTextStyle = item->string;
@@ -3407,7 +3408,7 @@ typedef enum {
      * .string： 时间。
      *
      * @code {.cpp}
-     * ARKUI_AttributeItem item = { .string = "17-11" };
+     * ArkUI_AttributeItem item = { .string = "17-11" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TIME_PICKER_SELECTED, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TIME_PICKER_SELECTED);
      * auto nodeTimePickerSelected = item->string;
@@ -3426,7 +3427,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = true } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TIME_PICKER_USE_MILITARY_TIME, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TIME_PICKER_USE_MILITARY_TIME);
      * auto nodeTimePickerUseMilitaryTime = item->value[0].i32;
@@ -3454,7 +3455,7 @@ typedef enum {
      *       参数5： 文本样式，字符串枚举("normal", "italic")\n
      *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。\n
      * @code {.cpp}
-     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * ArkUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE);
      * auto nodeDatePickerDisappearTextStyle = item->string;
@@ -3482,7 +3483,7 @@ typedef enum {
      *       参数5： 文本样式，字符串枚举("normal", "italic")\n
      *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。\n
      * @code {.cpp}
-     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * ArkUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TIME_PICKER_TEXT_STYLE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TIME_PICKER_TEXT_STYLE);
      * auto nodeTimePickerTextStyle = item->string;
@@ -3510,7 +3511,7 @@ typedef enum {
      *       参数5： 文本样式，字符串枚举("normal", "italic")\n
      *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。\n
      * @code {.c}
-     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * ArkUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TIME_PICKER_SELECTED_TEXT_STYLE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TIME_PICKER_SELECTED_TEXT_STYLE);
      * auto nodeDatePickerSelectedTextStyle = item->string;
@@ -3611,7 +3612,7 @@ typedef enum {
      *       参数5： 文本样式，字符串枚举("normal", "italic")\n
      *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。\n
      * @code {.c}
-     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * ArkUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_DISAPPEAR_TEXT_STYLE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_PICKER_DISAPPEAR_TEXT_STYLE);
      * auto nodeDatePickerDisappearTextStyle = item->string;
@@ -3639,7 +3640,7 @@ typedef enum {
      *       参数5： 文本样式，字符串枚举("normal", "italic")\n
      *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。\n
      * @code {.c}
-     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * ArkUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_TEXT_STYLE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_PICKER_TEXT_STYLE);
      * auto nodeDatePickerTextStyle = item->string;
@@ -3667,7 +3668,7 @@ typedef enum {
      *       参数5： 文本样式，字符串枚举("normal", "italic")；\n
      *       如 "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" 。\n
      * @code {.c}
-     * ARKUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
+     * ArkUI_AttributeItem item = { .string = "#ff182431;14;normal;Arial,HarmonyOS Sans;normal" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_SELECTED_TEXT_STYLE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_PICKER_SELECTED_TEXT_STYLE);
      * auto nodeTextPickerSelectedTextStyle = item->string;
@@ -3682,7 +3683,7 @@ typedef enum {
      *
      * @code {.c}
      * ArkUI_NumberValue value[] = { { .i32 = 0 }, { .i32 = 1 } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_PICKER_SELECTED_INDEX, &item);
      * @endcode
      */
@@ -4017,7 +4018,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = ARKUI_ALIGNMENT_CENTER } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT);
      * auto nodeStackAlignContent = item->value[0].i32;
@@ -4036,7 +4037,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = ARKUI_SCROLL_BAR_DISPLAY_MODE_AUTO } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_BAR_DISPLAY_MODE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_BAR_DISPLAY_MODE);
      * auto nodeScrollBarDisplayMode = item->value[0].i32;
@@ -4055,7 +4056,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { 20 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_BAR_WIDTH, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_BAR_WIDTH);
      * auto nodeScrollBarWidth = item->value[0].f32;
@@ -4074,7 +4075,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .u32 = 0xFFFFFFFF } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_BAR_COLOR, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_BAR_COLOR);
      * auto nodeScrollBarColor = item->value[0].u32;
@@ -4093,7 +4094,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = ARKUI_AXIS_VERTICAL } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_DIRECTION, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_SCROLL_DIRECTION);
      * auto nodeScrollBarDirection = item->value[0].i32;
@@ -4114,7 +4115,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = ARKUI_EDGE_EFFECT_NONE }, { .i32 = 1 } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_EDGE_EFFECT, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_EDGE_EFFECT);
      * auto nodeScrollEdgeEffect = item->value[0].i32;
@@ -4133,7 +4134,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = true } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_ENABLE_SCROLL_INTERACTION, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_ENABLE_SCROLL_INTERACTION);
      * auto nodeScrollEnableScroll = item->value[0].i32;
@@ -4152,7 +4153,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { 0.6 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_FRICTION, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_FRICTION);
      * auto nodeScrollFriction = item->value[0].f32;
@@ -4180,7 +4181,7 @@ typedef enum {
      *     { .i32=ARKUI_SCROLL_SNAP_ALIGN_NONE }, { .i32=true }, { .i32=true },
      *     { .f32=0 }, { .f32=500 }, { .f32=1000 }, { .f32=1500 }
      * };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SNAP, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_SNAP);
      * auto nodeScrollSnap = item->value[0].i32;
@@ -4277,7 +4278,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = true } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_ENABLE_PAGING, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_SCROLL_ENABLE_PAGING);
      * auto nodeScrollEnablePaging = item->value[0].i32;
@@ -4297,7 +4298,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = ARKUI_AXIS_VERTICAL } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_LIST_DIRECTION, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_LIST_DIRECTION);
      * auto nodeListDirection = item->value[0].i32;
@@ -4316,7 +4317,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = ARKUI_STICKY_STYLE_NONE } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_LIST_STICKY, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_LIST_STICKY);
      * auto nodeListSticky = item->value[0].i32;
@@ -4335,7 +4336,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { 10 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_LIST_SPACE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_LIST_SPACE);
      * auto nodeListSpace = item->value[0].f32;
@@ -4615,7 +4616,7 @@ typedef enum {
      *
      * @code {.cpp}
      * auto header = nodeAPI->createNode(ARKUI_NODE_TEXT);
-     * ARKUI_AttributeItem item = { .object = header };
+     * ArkUI_AttributeItem item = { .object = header };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_HEADER, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_HEADER);
      * auto nodeListItemGroupSetHeader = item->object;
@@ -4633,7 +4634,7 @@ typedef enum {
      *
      * @code {.cpp}
      * auto footer = nodeAPI->createNode(ARKUI_NODE_TEXT);
-     * ARKUI_AttributeItem item = { .object = footer };
+     * ArkUI_AttributeItem item = { .object = footer };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_FOOTER, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_LIST_ITEM_GROUP_SET_FOOTER);
      * auto nodeListItemGroupSetFooter = item->value[0].object;
@@ -4657,7 +4658,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .u32 = 0xFFFFFFFF }, 1, 0, 0 };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE, &item);
      * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE);
      * auto nodeListItemDividerColor = item->value[0].u32;
@@ -4677,9 +4678,9 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { 16.0f };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_HINT_RADIUS, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_HINT_RADIUS);
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_HINT_RADIUS, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_HINT_RADIUS);
      * auto borderRadius = item->value[0].f32;
      * @endcode
      */
@@ -4699,9 +4700,9 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .u32 = 2028 }, { .u32 = 1 }, { .u32 = 1 } };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED);
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED);
      * auto selectYear = item->value[0].u32;
      * @endcode
      */
@@ -4721,9 +4722,9 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .i32 = static_cast<int32_t>(ARKUI_CALENDAR_ALIGN_END) }, 10.0f, 0.0f };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGN, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGN);
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGN, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGN);
      * auto alignType = item->value[0].i32;
      * @endcode
      */
@@ -4744,9 +4745,9 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .u32 = 0xff00ffff }, 16.0f, { .i32 =
      * static_cast<int32_t>(ARKUI_FONT_WEIGHT_NORMAL)} };
-     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * basicNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_TEXT_STYLE, &item);
-     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_TEXT_STYLE);
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_TEXT_STYLE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_TEXT_STYLE);
      * auto textColor = item->value[0].u32;
      * @endcode
      */
