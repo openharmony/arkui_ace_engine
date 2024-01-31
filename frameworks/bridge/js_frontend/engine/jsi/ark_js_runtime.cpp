@@ -148,22 +148,27 @@ bool ArkJSRuntime::StartDebugger()
     bool ret = false;
 #if !defined(PREVIEW)
     if (!libPath_.empty()) {
-        auto callback = [instanceId = instanceId_, weak = weak_from_this()](int socketFd, std::string option) {
+        bool isDebugApp = AceApplicationInfo::GetInstance().IsDebugVersion();
+        auto callback = [instanceId = instanceId_,
+                            weak = weak_from_this(), isDebugApp](int socketFd, std::string option) {
             LOGI("HdcRegister callback socket %{public}d, option %{public}s.", socketFd, option.c_str());
             if (option.find(DEBUGGER) == std::string::npos) {
-                ConnectServerManager::Get().StopConnectServer();
+                if (isDebugApp) {
+                    ConnectServerManager::Get().StopConnectServer();
+                }
                 ConnectServerManager::Get().StartConnectServerWithSocketPair(socketFd);
             } else {
                 auto runtime = weak.lock();
                 CHECK_NULL_VOID(runtime);
-                JSNApi::StopDebugger(ParseHdcRegisterOption(option));
+                if (isDebugApp) {
+                    JSNApi::StopDebugger(ParseHdcRegisterOption(option));
+                }
                 runtime->StartDebuggerForSocketPair(option, socketFd);
             }
         };
 
         HdcRegister::Get().StartHdcRegister(instanceId_, callback);
         ConnectServerManager::Get().SetDebugMode();
-        bool isDebugApp = AceApplicationInfo::GetInstance().IsDebugVersion();
         JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugApp ? isDebugMode_ : false };
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         ConnectServerManager::Get().AddInstance(gettid(), language_);
