@@ -41,7 +41,7 @@ public:
         const DestroyApplicationCallback& destroyApplicationCallback,
         const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
         const MediaQueryCallback& mediaQueryCallback, const LayoutInspectorCallback& layoutInspectorCallback,
-		const DrawInspectorCallback& drawInspectorCallback,
+        const DrawInspectorCallback& drawInspectorCallback,
 		const RequestAnimationCallback& requestAnimationCallback,
         const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
         const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
@@ -53,9 +53,9 @@ public:
         const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack, const OnSaveDataCallBack& onSaveDataCallBack,
         const OnRestoreDataCallBack& onRestoreDataCallBack, const ExternalEventCallback& externalEventCallback) :
             FrontendDelegateDeclarative(taskExecutor, loadCallback, transferCallback, asyncEventCallback,
-                syncEventCallback, updatePageCallback,
+              syncEventCallback, updatePageCallback,
                 resetLoadingPageCallback, destroyPageCallback,
-                destroyApplicationCallback,
+              destroyApplicationCallback,
                 updateApplicationStateCallback, timerCallback,
                 mediaQueryCallback, layoutInspectorCallback,
 				drawInspectorCallback,
@@ -63,18 +63,18 @@ public:
                 jsCallback, onWindowDisplayModeChangedCallBack,
                 onConfigurationUpdatedCallBack,
                 onSaveAbilityStateCallBack,
-                onRestoreAbilityStateCallBack, onNewWantCallBack,
+              onRestoreAbilityStateCallBack, onNewWantCallBack,
                 onMemoryLevelCallBack,
                 onStartContinuationCallBack,
-                onCompleteContinuationCallBack,
+              onCompleteContinuationCallBack,
                 onRemoteTerminatedCallBack, onSaveDataCallBack,
                 onRestoreDataCallBack, externalEventCallback)
     {}
 
     ~FormFrontendDelegateDeclarative() override;
 
-    void RunCard(const std::string& url, const std::string& params, const std::string& profile, int64_t cardId,
-        const std::string& entryPoint = "");
+    UIContentErrorCode RunCard(const std::string& url, const std::string& params, const std::string& profile,
+        int64_t cardId, const std::string& entryPoint = "");
 
     void FireCardEvent(const EventMarker& eventMarker, const std::string& params = "");
 
@@ -87,7 +87,7 @@ public:
         pageRouterManager->SetLoadCardCallback(loadCallback);
     }
     void LoadResourceConfiguration(std::map<std::string, std::string>& mediaResourceFileMap,
-                                    std::unique_ptr<JsonValue>& currentResourceData) override
+        std::unique_ptr<JsonValue>& currentResourceData) override
     {}
     void UpdatePageData(const std::string& dataList)
     {

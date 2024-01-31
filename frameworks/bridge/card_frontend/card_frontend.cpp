@@ -83,7 +83,7 @@ void CardFrontend::ParseManifest() const
     });
 }
 
-void CardFrontend::RunPage(const std::string& url, const std::string& params)
+UIContentErrorCode CardFrontend::RunPage(const std::string& url, const std::string& params)
 {
     std::string urlPath;
     if (GetFormSrc().empty()) {
@@ -99,7 +99,7 @@ void CardFrontend::RunPage(const std::string& url, const std::string& params)
     }
     if (urlPath.empty()) {
         TAG_LOGW(AceLogTag::ACE_FORM, "fail to run page due to path url is empty");
-        return;
+        return UIContentErrorCode::NULL_URL;
     }
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), urlPath, params] {
@@ -109,6 +109,8 @@ void CardFrontend::RunPage(const std::string& url, const std::string& params)
             }
         },
         TaskExecutor::TaskType::JS);
+    
+    return UIContentErrorCode::NO_ERRORS;
 }
 
 std::string CardFrontend::GetFormSrcPath(const std::string& uri, const std::string& suffix) const

@@ -30,6 +30,7 @@
 #include "serialized_gesture.h"
 #include "serializeable_object.h"
 #include "viewport_config.h"
+#include "constants.h"
 
 namespace OHOS {
 
@@ -98,10 +99,11 @@ public:
     virtual ~UIContent() = default;
 
     // UI content life-cycles
-    virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
-    virtual void Initialize(
+    virtual UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
+    virtual UIContentErrorCode Initialize(
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) = 0;
-    virtual void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) = 0;
+    virtual UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
+                                                napi_value storage) = 0;
     virtual void InitializeDynamic(
         const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint) {};
 
@@ -116,7 +118,8 @@ public:
     virtual void OnNewWant(const OHOS::AAFwk::Want& want) = 0;
 
     // distribute
-    virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) = 0;
+    virtual UIContentErrorCode Restore(OHOS::Rosen::Window *window, const std::string &contentInfo,
+                                       napi_value storage) = 0;
     virtual std::string GetContentInfo() const = 0;
     virtual void DestroyUIDirector() = 0;
 

@@ -81,7 +81,7 @@ public:
     void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
 
     // JSFrontend delegate functions.
-    void RunPage(
+    UIContentErrorCode RunPage(
         const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter = false);
     void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::string& params, const std::string& profile);
@@ -120,7 +120,7 @@ public:
         const WeakPtr<Framework::JsEngine>& jsEngineWeak, const std::string& key, const std::string& value);
 
     // distribute
-    std::string RestoreRouterStack(const std::string& contentInfo) override;
+    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo) override;
     std::string GetContentInfo() override;
 
     // Accessibility delegate functions.
@@ -348,7 +348,7 @@ private:
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);
 
-    void LoadPage(
+    UIContentErrorCode LoadPage(
         int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params, bool isRestore = false);
     void OnPageReady(const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage, bool isRestore);
     void FlushPageCommand(

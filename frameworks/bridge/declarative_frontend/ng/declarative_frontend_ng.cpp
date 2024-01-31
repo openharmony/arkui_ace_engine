@@ -359,14 +359,14 @@ bool DeclarativeFrontendNG::OnRestoreData(const std::string& data)
     return delegate_->OnRestoreData(data);
 }
 
-void DeclarativeFrontendNG::RunPage(const std::string& url, const std::string& params)
+UIContentErrorCode DeclarativeFrontendNG::RunPage(const std::string& url, const std::string& params)
 {
     auto container = Container::Current();
     auto isStageModel = container ? container->IsUseStageModel() : false;
     if (!isStageModel) {
         // In NG structure and fa mode, first load app.js
         auto taskExecutor = container ? container->GetTaskExecutor() : nullptr;
-        CHECK_NULL_VOID(taskExecutor);
+        CHECK_NULL_RETURN(taskExecutor, UIContentErrorCode::NULL_POINTER);
         taskExecutor->PostTask(
             [weak = AceType::WeakClaim(this)]() {
                 auto frontend = weak.Upgrade();
@@ -379,21 +379,28 @@ void DeclarativeFrontendNG::RunPage(const std::string& url, const std::string& p
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarativeNg.
     if (delegate_) {
         delegate_->RunPage(url, params, pageProfile_);
+        return UIContentErrorCode::NO_ERRORS;
     }
+
+    return UIContentErrorCode::NULL_POINTER;
 }
 
-void DeclarativeFrontendNG::RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+UIContentErrorCode DeclarativeFrontendNG::RunPage(
+    const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
 {
     auto container = Container::Current();
     auto isStageModel = container ? container->IsUseStageModel() : false;
     if (!isStageModel) {
         LOGE("RunPage by buffer must be run under stage model.");
-        return;
+        return UIContentErrorCode::NO_STAGE;
     }
 
     if (delegate_) {
         delegate_->RunPage(content, params, pageProfile_);
+        return UIContentErrorCode::NO_ERRORS;
     }
+
+    return UIContentErrorCode::NULL_POINTER;
 }
 
 void DeclarativeFrontendNG::ReplacePage(const std::string& url, const std::string& params)
@@ -542,12 +549,12 @@ void DeclarativeFrontendNG::DumpHeapSnapshot(bool isPrivate)
     }
 }
 
-std::string DeclarativeFrontendNG::RestoreRouterStack(const std::string& contentInfo)
+std::pair<std::string, UIContentErrorCode> DeclarativeFrontendNG::RestoreRouterStack(const std::string& contentInfo)
 {
     if (delegate_) {
         return delegate_->RestoreRouterStack(contentInfo);
     }
-    return "";
+    return std::make_pair("", UIContentErrorCode::NULL_POINTER);
 }
 
 std::string DeclarativeFrontendNG::GetContentInfo() const

@@ -30,6 +30,7 @@
 #include "frameworks/bridge/common/utils/componentInfo.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
+#include "interfaces/inner_api/ace/constants.h"
 
 namespace OHOS::Ace::Framework {
 enum class AlertState { USER_CANCEL = 0, USER_CONFIRM, RECOVERY };
@@ -97,9 +98,9 @@ public:
     virtual void GetRectangleById(const std::string& key, NG::Rectangle& rectangle);
 
     // distribute
-    virtual std::string RestoreRouterStack(const std::string& contentInfo)
+    virtual std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo)
     {
-        return "";
+        return std::make_pair("", UIContentErrorCode::NO_ERRORS);
     }
     virtual std::string GetContentInfo()
     {
