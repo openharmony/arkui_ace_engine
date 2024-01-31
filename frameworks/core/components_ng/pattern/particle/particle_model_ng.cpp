@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/particle/particle_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/particle/particle_pattern.h"
 namespace OHOS::Ace::NG {
 void ParticleModelNG::Create(std::list<ParticleOption>& arrayValue)
 {
@@ -24,7 +24,7 @@ void ParticleModelNG::Create(std::list<ParticleOption>& arrayValue)
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PARTICLE_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::PARTICLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+        V2::PARTICLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ParticlePattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_RENDER_CONTEXT(ParticleOptionArray, arrayValue);
 }

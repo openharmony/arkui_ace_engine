@@ -111,6 +111,11 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
 #ifdef SECURITY_COMPONENT_ENABLE
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    if (!IsParentMenu(host)) {
+        return;
+    }
+
     auto pointerEvent = info.GetPointerEvent();
     CHECK_NULL_VOID(pointerEvent);
 
@@ -124,8 +129,7 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
     GestureEvent gestureInfo;
     gestureInfo.SetDisplayX(item.GetDisplayX());
     gestureInfo.SetDisplayY(item.GetDisplayY());
-    gestureInfo.SetTimeStamp(TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime())));
-    gestureInfo.SetEnhanceData(pointerEvent->GetEnhanceData());
+    gestureInfo.SetPointerEvent(info.GetPointerEvent());
     int res = SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
         host, gestureInfo);
     if (res != 0) {
@@ -405,17 +409,8 @@ void SecurityComponentPattern::OnModifyDone()
     InitOnKeyEvent(frameNode);
     InitAppearCallback(frameNode);
     InitOnTouch(frameNode);
-    RegisterOrUpdateSecurityComponent(frameNode, scId_);
-}
-
-void SecurityComponentPattern::RegisterOrUpdateSecurityComponent(RefPtr<FrameNode>& frameNode, int32_t& scId)
-{
 #ifdef SECURITY_COMPONENT_ENABLE
-    if (scId == -1) {
-        SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId);
-    } else {
-        SecurityComponentHandler::UpdateSecurityComponent(frameNode, scId);
-    }
+    SecurityComponentHandler::TryLoadSecurityComponentIfNotExist();
 #endif
 }
 
@@ -432,8 +427,7 @@ void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
         auto securityComponentPattern = weak.Upgrade();
         CHECK_NULL_VOID(securityComponentPattern);
         auto frameNode = securityComponentPattern->GetHost();
-        securityComponentPattern->RegisterOrUpdateSecurityComponent(frameNode,
-            securityComponentPattern->scId_);
+        SecurityComponentHandler::TryLoadSecurityComponentIfNotExist();
 #endif
     };
 

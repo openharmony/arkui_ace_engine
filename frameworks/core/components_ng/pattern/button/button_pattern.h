@@ -318,6 +318,7 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> hoverListener_;
     bool isHover_ = false;
+    bool isPress_ = false;
 
     bool isInHover_ = false;
     Offset localLocation_;

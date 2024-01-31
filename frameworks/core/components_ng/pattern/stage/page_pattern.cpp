@@ -168,6 +168,9 @@ void PagePattern::OnDetachFromMainTree()
 {
     state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    if (disappearCallback_) {
+        disappearCallback_();
+    }
 }
 
 void PagePattern::OnShow()
@@ -177,8 +180,6 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID(!isOnShow_);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    state_ = RouterPageState::ON_PAGE_SHOW;
-    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
     }
@@ -191,6 +192,8 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(true);
     isOnShow_ = true;
+    state_ = RouterPageState::ON_PAGE_SHOW;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     JankFrameReport::GetInstance().StartRecord(pageInfo_->GetPageUrl());
     PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
     auto pageUrlChecker = container->GetPageUrlChecker();
@@ -217,8 +220,6 @@ void PagePattern::OnHide()
     JankFrameReport::GetInstance().FlushRecord();
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    state_ = RouterPageState::ON_PAGE_HIDE;
-    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), false);
     }
@@ -226,6 +227,8 @@ void PagePattern::OnHide()
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(false);
     isOnShow_ = false;
+    state_ = RouterPageState::ON_PAGE_HIDE;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     auto container = Container::Current();
     if (container) {
         auto pageUrlChecker = container->GetPageUrlChecker();
@@ -255,8 +258,8 @@ bool PagePattern::OnBackPressed()
     // if in page transition, do not set to ON_BACK_PRESS
     state_ = RouterPageState::ON_BACK_PRESS;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
-    if (OnBackPressed_) {
-        return OnBackPressed_();
+    if (onBackPressed_) {
+        return onBackPressed_();
     }
     return false;
 }

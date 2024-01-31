@@ -314,11 +314,6 @@ void TextFieldPattern::BeforeCreateLayoutWrapper()
         auto operation = inputOperations_.front();
         inputOperations_.pop();
         switch (operation) {
-            case InputOperation::INIT: {
-                InitValueOperation(initValueOperations_.front());
-                initValueOperations_.pop();
-                break;
-            }
             case InputOperation::INSERT: {
                 InsertValueOperation(insertValueOperations_.front());
                 insertValueOperations_.pop();
@@ -408,7 +403,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         processOverlayDelayTask_();
         processOverlayDelayTask_ = nullptr;
     }
-    if (needToRefreshSelectOverlay_) {
+    if (needToRefreshSelectOverlay_ && SelectOverlayIsOn()) {
         StopTwinkling();
         ProcessOverlay();
         needToRefreshSelectOverlay_ = false;
@@ -1689,7 +1684,10 @@ void TextFieldPattern::InitDragDropCallBack()
             CHECK_NULL_VOID(host);
 
             // Except for DRAG_SUCCESS, all of rest need to show
-            if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
+            auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+            CHECK_NULL_VOID(paintProperty);
+            if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS &&
+                paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE) {
                 pattern->ShowSelectAfterDragEvent();
             }
             auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2759,12 +2757,9 @@ void TextFieldPattern::InitEditingValueText(std::string content)
 
 void TextFieldPattern::InitValueText(std::string content)
 {
-    inputOperations_.emplace(InputOperation::INIT);
-    initValueOperations_.emplace(content);
-}
-
-void TextFieldPattern::InitValueOperation(std::string content)
-{
+    if (HasInputOperation() && content != "") {
+        return;
+    }
     contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetWideText().length());
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -4227,9 +4222,6 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
         } else {
             CloseSelectOverlay();
         }
-    }
-    if (HasFocus() && IsSingleHandle()) {
-        StartTwinkling();
     }
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -6500,6 +6492,9 @@ void TextFieldPattern::HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& n
 
 void TextFieldPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent)
 {
+    if (IsNormalInlineState()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = GetFocusHub();
@@ -6611,12 +6606,13 @@ void TextFieldPattern::FireSelectEvent()
 RectF TextFieldPattern::GetSelectArea()
 {
     auto selectRects = selectController_->GetSelectedRects();
+    RectF res(selectController_->GetCaretRect());
     if (selectRects.empty()) {
-        return { 0, 0, 0, 0 };
+        res.SetOffset(res.GetOffset() + GetTextPaintOffset());
+        return res;
     }
     auto frontRect = selectRects.front();
     auto backRect = selectRects.back();
-    RectF res;
     if (GreatNotEqual(backRect.Bottom(), frontRect.Bottom())) {
         res.SetRect(contentRect_.GetX() + GetTextPaintOffset().GetX(),
             frontRect.GetY() + textRect_.GetY() + GetTextPaintOffset().GetY(), contentRect_.Width(),

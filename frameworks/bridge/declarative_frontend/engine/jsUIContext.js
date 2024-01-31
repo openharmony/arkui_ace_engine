@@ -264,7 +264,7 @@ class UIContext {
     }
 
     getUIObserver() {
-        this.observer_ = new UIObserver();
+        this.observer_ = new UIObserver(this.instanceId_);
         return this.observer_;
     }
 
@@ -526,4 +526,20 @@ class AtomicServiceBar {
  */
 function __getUIContext__(instanceId) {
     return new UIContext(instanceId);
+}
+
+/**
+ * check regex valid
+ * @param pattern regex string
+ * @returns valid result
+ */
+function __checkRegexValid__(pattern) {
+    let result = true;
+    try {
+        new RegExp(pattern);
+    } catch (error) {
+        result = false;
+    } finally {
+        return result;
+    }
 }

@@ -188,6 +188,11 @@ public:
         return anti_;
     }
 
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
+
     void SetTransform(unsigned int id, const TransformParam&);
     
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasRenderer);
@@ -207,6 +212,7 @@ protected:
 
 private:
     void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     PaintState paintState_;
     TextStyle style_;
     static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;

@@ -98,7 +98,6 @@ struct MouseEvent final {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
-    std::vector<uint8_t> enhanceData;
 
     Offset GetOffset() const
     {
@@ -141,8 +140,7 @@ struct MouseEvent final {
                 .deviceId = deviceId,
                 .targetDisplayId = targetDisplayId,
                 .sourceType = sourceType,
-                .pointerEvent = pointerEvent,
-                .enhanceData = enhanceData };
+                .pointerEvent = pointerEvent };
         }
 
         return { .x = x / scale,
@@ -164,8 +162,7 @@ struct MouseEvent final {
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
-            .pointerEvent = pointerEvent,
-            .enhanceData = enhanceData };
+            .pointerEvent = pointerEvent };
     }
 
     TouchEvent CreateTouchPoint() const
@@ -203,8 +200,7 @@ struct MouseEvent final {
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
-            .pointerEvent = pointerEvent,
-            .enhanceData = enhanceData };
+            .pointerEvent = pointerEvent };
         event.pointers.emplace_back(std::move(point));
         return event;
     }
@@ -229,8 +225,7 @@ struct MouseEvent final {
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
-            .pointerEvent = pointerEvent,
-            .enhanceData = enhanceData };
+            .pointerEvent = pointerEvent };
     }
 };
 

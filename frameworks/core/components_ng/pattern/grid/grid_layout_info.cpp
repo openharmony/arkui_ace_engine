@@ -233,7 +233,7 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
         return 0.0f;
     }
     float averageHeight = heightSum / itemCount;
-    
+
     if (itemCount == childrenCount_) {
         return heightSum - mainGap;
     }
@@ -353,20 +353,42 @@ void GridLayoutInfo::UpdateStartIdxToLastItem()
     startMainLineIndex_ = 0;
 }
 
-int32_t GridLayoutInfo::FindItemInRange(int32_t target) const
+std::pair<int32_t, int32_t> GridLayoutInfo::FindItemInRange(int32_t target) const
 {
     if (gridMatrix_.empty()) {
-        return -1;
+        return { -1, -1 };
     }
     for (int r = startMainLineIndex_; r <= endMainLineIndex_; ++r) {
         const auto& row = gridMatrix_.at(r);
         for (auto it : row) {
             if (it.second == target) {
-                return r;
+                return { r, it.first };
             }
         }
     }
-    return -1;
+    return { -1, -1 };
+}
+
+bool GridLayoutInfo::ItemAboveViewport(int32_t idx, float mainGap) const
+{
+    auto [line, _] = FindItemInRange(idx);
+    float len = currentOffset_;
+    for (int i = startMainLineIndex_; i < line; ++i) {
+        len += lineHeightMap_.at(i) + mainGap;
+    }
+    return len < 0.0f;
+}
+
+bool GridLayoutInfo::ItemBelowViewport(int32_t idx, int32_t itemHeight, float mainSize, float mainGap) const
+{
+    auto [line, col] = FindItemInRange(idx);
+
+    float len = currentOffset_;
+    for (int i = startMainLineIndex_; i < line + itemHeight; ++i) {
+        len += lineHeightMap_.at(i) + mainGap;
+    }
+    len -= mainGap;
+    return len > mainSize;
 }
 
 // Use the index to get the line number where the item is located
@@ -464,6 +486,37 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
         }
     }
     return true;
+}
+
+decltype(GridLayoutInfo::gridMatrix_)::const_iterator GridLayoutInfo::FindInMatrix(int32_t index) const
+{
+    size_t count = gridMatrix_.size();
+    size_t step = 0;
+    auto left = gridMatrix_.begin();
+    auto it = left;
+    while (count > 0) {
+        it = left;
+        step = count / 2;
+        std::advance(it, step);
+
+        // with irregular items, only the max index on each row is guaranteed to be in order.
+        int32_t maxV = 0;
+        for (auto [_, item] : it->second) {
+            maxV = std::max(maxV, item);
+            if (item == index) {
+                return it;
+            }
+        }
+
+        if (index < maxV) {
+            count = step;
+        } else {
+            // index on the right side of current row
+            left = ++it;
+            count -= step + 1;
+        }
+    }
+    return gridMatrix_.end();
 }
 
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)

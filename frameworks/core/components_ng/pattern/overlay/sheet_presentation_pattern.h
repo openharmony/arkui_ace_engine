@@ -125,6 +125,7 @@ public:
 
     void InitialLayoutProps();
 
+    bool IsScrollable() const;
     void AvoidAiBar();
     void AvoidSafeArea();
     float GetSheetHeightChange();

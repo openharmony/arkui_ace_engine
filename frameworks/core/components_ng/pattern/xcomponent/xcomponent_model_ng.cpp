@@ -163,6 +163,13 @@ bool XComponentModelNG::IsTexture(FrameNode *frameNode)
     return layoutProperty->GetXComponentTypeValue() == XComponentType::TEXTURE;
 }
 
+XComponentType XComponentModelNG::GetType(FrameNode* frameNode)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, XComponentType::SURFACE);
+    return layoutProperty->GetXComponentTypeValue(XComponentType::SURFACE);
+}
+
 RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::string& id, XComponentType type,
     const std::string& libraryname)
 {

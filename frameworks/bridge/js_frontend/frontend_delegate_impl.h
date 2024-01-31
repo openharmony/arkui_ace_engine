@@ -174,7 +174,7 @@ public:
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
 
     // JsFrontend delegate functions.
-    void RunPage(const std::string& url, const std::string& params);
+    UIContentErrorCode RunPage(const std::string& url, const std::string& params);
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const;
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data);
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const;
@@ -362,7 +362,7 @@ private:
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);
 
-    void LoadPage(int32_t pageId, const std::string& url, bool isMainPage, const std::string& params);
+    UIContentErrorCode LoadPage(int32_t pageId, const std::string& url, bool isMainPage, const std::string& params);
     void OnPageReady(const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage);
     void FlushPageCommand(const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage);
     void AddPageLocked(const RefPtr<JsAcePage>& page);

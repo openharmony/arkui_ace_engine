@@ -116,6 +116,10 @@ JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
     ACE_FUNCTION_TRACE();
     JSRef<JSVal> jsObject = jsThis_.Lock();
     auto jsFunction = jsWeakFunction_.Lock();
+    if (jsFunction.IsEmpty()) {
+        LOGW("js function is null.");
+        return {};
+    }
     JSRef<JSVal> result = jsFunction->Call(jsObject, argc, argv);
     return result;
 }

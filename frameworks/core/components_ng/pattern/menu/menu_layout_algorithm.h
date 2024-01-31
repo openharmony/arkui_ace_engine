@@ -106,6 +106,7 @@ private:
     bool GetIfNeedArrow(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
     void UpdateArrowOffsetWithMenuLimit(const SizeF& menuSize);
     void UpdatePropArrowOffset();
+    void LimitContainerModalMenuRect(double& rectWidth, double& rectHeight);
 
     // get option LayoutWrapper for measure get max width
     std::list<RefPtr<LayoutWrapper>> GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper);

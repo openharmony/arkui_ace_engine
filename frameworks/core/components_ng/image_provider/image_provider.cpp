@@ -306,6 +306,7 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
     }
     auto context = ctxWp.Upgrade();
     if (context && context->Downloadable() && !obj->GetData() && context->GetStateManger()) {
+        EndTask(key);
         auto stateManager = context->GetStateManger();
         if (stateManager) {
             stateManager->SetState(ImageLoadingState::UNLOADED);

@@ -167,6 +167,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     void OnModifyDone() override;
+    void UpdateGestureAndDragWhenModify();
 
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -178,9 +179,8 @@ private:
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
-    void SetImagePaintConfig(
-        const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
-        const RectF& dstRect, bool isSvg, int32_t frameCount = 1);
+    void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
+        const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
     void PrepareAnimation(const RefPtr<CanvasImage>& image);

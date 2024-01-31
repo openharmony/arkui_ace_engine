@@ -53,7 +53,7 @@ public:
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
-    void RunPage(const std::string& url, const std::string& params) override;
+    UIContentErrorCode RunPage(const std::string& url, const std::string& params) override;
 
     void ReplacePage(const std::string& url, const std::string& params) override;
 

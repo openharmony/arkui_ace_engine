@@ -19,6 +19,7 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/ace_scoring_log.h"
+#include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -30,6 +31,8 @@ using namespace OHOS::Security;
 using namespace OHOS::Security::SecurityComponent;
 namespace {
 constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
+constexpr int32_t MAX_RETRY_TIMES = 3;
+constexpr int64_t RETRY_INTERVAL = 30;
 }
 
 static std::vector<uintptr_t> g_callList = {
@@ -40,6 +43,7 @@ static std::vector<uintptr_t> g_callList = {
 
 SecurityComponentProbe SecurityComponentHandler::probe;
 SecurityComponent::SecCompUiRegister uiRegister(g_callList, &SecurityComponentHandler::probe);
+bool SecurityComponentHandler::isPreRegister_ = false;
 
 bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY)
 {
@@ -467,9 +471,36 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
     return true;
 }
 
-int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId)
+void SecurityComponentHandler::TryLoadSecurityComponentIfNotExist()
 {
     SecurityComponentHandler::probe.InitProbeTask();
+    if (isPreRegister_) {
+        return;
+    }
+    auto scTaskExecutor =
+        SingleTaskExecutor::Make(PipelineContext::GetCurrentContext()->GetTaskExecutor(),
+        TaskExecutor::TaskType::BACKGROUND);
+    scTaskExecutor.PostTask([] {
+        int32_t res = SecCompKit::PreRegisterSecCompProcess();
+        if (res != SCErrCode::SC_SERVICE_ERROR_SERVICE_NOT_EXIST) {
+            return;
+        }
+        // service is shutdowning, try to load it.
+        int32_t retryCount = MAX_RETRY_TIMES;
+        while (retryCount > 0) {
+            res = SecCompKit::PreRegisterSecCompProcess();
+            if (res != SCErrCode::SC_SERVICE_ERROR_SERVICE_NOT_EXIST) {
+                return;
+            }
+            retryCount--;
+            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_INTERVAL));
+        }
+    });
+    isPreRegister_ = true;
+}
+
+int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId)
+{
     std::string componentInfo;
     SecCompType type;
     if (!InitButtonInfo(componentInfo, node, type)) {
@@ -480,7 +511,7 @@ int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& n
     return ret;
 }
 
-int32_t SecurityComponentHandler::UpdateSecurityComponent(RefPtr<FrameNode>& node, int32_t scId)
+int32_t SecurityComponentHandler::UpdateSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId)
 {
     std::string componentInfo;
     SecCompType type;
@@ -491,7 +522,7 @@ int32_t SecurityComponentHandler::UpdateSecurityComponent(RefPtr<FrameNode>& nod
     return ret;
 }
 
-int32_t SecurityComponentHandler::UnregisterSecurityComponent(int32_t scId)
+int32_t SecurityComponentHandler::UnregisterSecurityComponent(int32_t& scId)
 {
     if (scId == -1) {
         return -1;
@@ -500,11 +531,13 @@ int32_t SecurityComponentHandler::UnregisterSecurityComponent(int32_t scId)
     return ret;
 }
 
-int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t scId,
+int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t& scId,
     RefPtr<FrameNode>& node, SecCompClickEvent& event)
 {
     if (scId == -1) {
-        return -1;
+        if (RegisterSecurityComponent(node, scId) != 0) {
+            return -1;
+        }
     }
     std::string componentInfo;
     SecCompType type;
@@ -516,7 +549,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t
     return SecCompKit::ReportSecurityComponentClickEvent(scId, componentInfo, event, container->GetToken());
 }
 
-int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId,
+int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scId,
     RefPtr<FrameNode>& node, GestureEvent& event)
 {
     SecCompClickEvent secEvent;
@@ -524,19 +557,21 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId
 #ifdef SECURITY_COMPONENT_ENABLE
     secEvent.point.touchX = event.GetDisplayX();
     secEvent.point.touchY = event.GetDisplayY();
-    auto data = event.GetEnhanceData();
+    auto data = event.GetPointerEvent()->GetEnhanceData();
     if (data.size() > 0) {
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
     }
 #endif
+    std::chrono::microseconds microseconds(event.GetPointerEvent()->GetActionTime());
+    TimeStamp time(microseconds);
     secEvent.point.timestamp =
-        static_cast<uint64_t>(event.GetTimeStamp().time_since_epoch().count()) / SECOND_TO_MILLISECOND;
+        static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
 
     return ReportSecurityComponentClickEventInner(scId, node, secEvent);
 }
 
-int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId,
+int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scId,
     RefPtr<FrameNode>& node, const KeyEvent& event)
 {
     SecCompClickEvent secEvent;

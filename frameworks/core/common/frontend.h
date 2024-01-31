@@ -28,6 +28,7 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
+#include "interfaces/inner_api/ace/constants.h"
 
 using FrontendDialogCallback = std::function<void(const std::string& event, const std::string& param)>;
 
@@ -121,12 +122,24 @@ public:
     // Get the stage mode sourceMap.
     virtual void GetStageSourceMap(std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const {}
 
-    virtual void RunPage(const std::string& content, const std::string& params) = 0;
-    virtual void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params) {};
-    virtual void RunDynamicPage(
-        const std::string& content, const std::string& params, const std::string& entryPoint) {};
+    virtual UIContentErrorCode RunPage(const std::string& content, const std::string& params)
+    {
+        return UIContentErrorCode::NO_ERRORS;
+    }
+    virtual UIContentErrorCode RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+    {
+        return UIContentErrorCode::NO_ERRORS;
+    }
+    virtual UIContentErrorCode RunDynamicPage(
+        const std::string& content, const std::string& params, const std::string& entryPoint)
+    {
+        return UIContentErrorCode::NO_ERRORS;
+    }
 
-    virtual void RunPageByNamedRouter(const std::string& name) {}
+    virtual UIContentErrorCode RunPageByNamedRouter(const std::string& name)
+    {
+        return UIContentErrorCode::NO_ERRORS;
+    }
 
     virtual void ReplacePage(const std::string& url, const std::string& params) = 0;
 
@@ -260,9 +273,9 @@ public:
     virtual void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) {}
 
     // distribute
-    virtual std::string RestoreRouterStack(const std::string& contentInfo)
+    virtual std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo)
     {
-        return "";
+        return std::make_pair("", UIContentErrorCode::NO_ERRORS);
     }
 
     virtual std::string GetContentInfo() const

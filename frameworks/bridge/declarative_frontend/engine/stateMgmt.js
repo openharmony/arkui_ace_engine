@@ -2077,8 +2077,16 @@ class SubscribableHandler {
                 return true;
                 break;
             default:
-                if (Reflect.get(target, property) == newValue) {
-                    return true;
+                // this is added for stability test: Reflect.get target is not object
+                try {
+                    if (Reflect.get(target, property) == newValue) {
+                        return true;
+                    }
+                }
+                catch (error) {
+                    ArkTools.print("SubscribableHandler: set", target);
+                    stateMgmtConsole.error(`An error occurred in SubscribableHandler set, target type is: ${typeof target}, ${error.message}`);
+                    throw error;
                 }
                 Reflect.set(target, property, newValue);
                 const propString = String(property);
@@ -3504,7 +3512,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
         // install when current value is ObservedObject and the value type is not using compatibility mode
         // note value may change for union type variables when switching an object from one class to another.
-        this.shouldInstallTrackedObjectReadCb = true;
+        this.shouldInstallTrackedObjectReadCb = false;
         this.dependentElmtIdsByProperty_ = new PropertyDependencies();
         Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false });
         Object.defineProperty(this, 'subscriberRefs_', { writable: true, enumerable: false, value: new Set() });
@@ -3996,6 +4004,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
         else {
             
             this.wrappedValue_ = ObservedObject.createNew(newValue, this);
+            this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.wrappedValue_);
         }
         
         return true;
@@ -4291,18 +4300,31 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
     resetLocalValue(newObservedObjectValue, needCopyObject) {
         // note: We can not test for newObservedObjectValue == this.localCopyObservedObject_
         // here because the object might still be the same, but some property of it has changed
-        if (!this.checkIsSupportedValue(newObservedObjectValue)) {
-            return;
+        // this is added for stability test: Target of target is not Object/is not callable/
+        // InstanceOf error when target is not Callable/Can not get Prototype on non ECMA Object
+        try {
+            if (!this.checkIsSupportedValue(newObservedObjectValue)) {
+                return;
+            }
+            // unsubscribe from old local copy
+            if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
+                this.localCopyObservedObject_.removeOwningProperty(this);
+            }
+            else {
+                ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
+                // make sure the ObservedObject no longer has a read callback function
+                // assigned to it
+                ObservedObject.unregisterPropertyReadCb(this.localCopyObservedObject_);
+            }
         }
-        // unsubscribe from old local copy 
-        if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
-            this.localCopyObservedObject_.removeOwningProperty(this);
-        }
-        else {
-            ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
-            // make sure the ObservedObject no longer has a read callback function
-            // assigned to it
-            ObservedObject.unregisterPropertyReadCb(this.localCopyObservedObject_);
+        catch (error) {
+            stateMgmtConsole.error(`${this.debugInfo()}, an error occurred in resetLocalValue: ${error.message}`);
+            ArkTools.print("resetLocalValue SubscribableAbstract", SubscribableAbstract);
+            ArkTools.print("resetLocalValue ObservedObject", ObservedObject);
+            ArkTools.print("resetLocalValue this", this);
+            let a = Reflect.getPrototypeOf(this);
+            ArkTools.print("resetLocalVale getPrototypeOf", a);
+            throw error;
         }
         // shallow/deep copy value 
         // needed whenever newObservedObjectValue comes from source
@@ -4500,6 +4522,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         if (this.source_) {
             // register to the parent property
             this.source_.addSubscriber(this);
+            this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_.getUnmonitored());
         }
         else {
             throw new SyntaxError(`${this.debugInfo()}: constructor: source variable in parent/ancestor @Component must be defined. Application error!`);
@@ -4537,6 +4560,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         if (this.checkIsSupportedValue(newValue)) {
             // the source_ ObservedProperty will call: this.syncPeerHasChanged(newValue);
             this.source_.set(newValue);
+            this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(newValue);
         }
     }
     /**

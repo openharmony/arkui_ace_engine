@@ -199,7 +199,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         if (static_cast<int32_t>(columnNode->GetChildren().size()) != 0) {
             columnNode->Clean();
         }
-        builderNode->MountToParent(columnNode);
+        if (builderNode) {
+            builderNode->MountToParent(columnNode);
+        }
         auto oldColumnNode = tabsNode->GetBuilderByContentId(tabContentId, columnNode);
         if (!oldColumnNode) {
             columnNode->MountToParent(tabBarNode, myIndex);

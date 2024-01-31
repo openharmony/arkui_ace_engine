@@ -75,6 +75,11 @@ void ViewFunctions::ExecutePlaceChildren(NG::LayoutWrapper* layoutWrapper)
     jsPlaceChildrenFunc_.Lock()->Call(jsObject_.Lock(), 3, params); /* 3:params number */
 }
 
+void ViewFunctions::InitJsParam(NG::LayoutWrapper* layoutWrapper)
+{
+    JSMeasureLayoutParamNG::GetInstance(layoutWrapper);
+}
+
 void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)

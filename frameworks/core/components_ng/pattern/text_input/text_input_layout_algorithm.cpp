@@ -40,7 +40,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     // Create paragraph.
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
-    if (pattern->IsDragging() && !showPlaceHolder_) {
+    if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
         CreateParagraph(textStyle, pattern->GetDragContents(), textContent_,
             isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, disableTextAlign);
     } else {

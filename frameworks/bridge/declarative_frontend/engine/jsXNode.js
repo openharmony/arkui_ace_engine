@@ -108,6 +108,22 @@ class JSBuilderNode extends BaseNode {
         }
         child.updateStateVars(params);
     }
+    createOrGetNode(elmtId, builder) {
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        if (entry === undefined) {
+            throw new Error(`fail to create node, elmtId is illegal`);
+        }
+        let updateFuncRecord = (typeof entry === 'object') ? entry : undefined;
+        if (updateFuncRecord === undefined) {
+            throw new Error(`fail to create node, the api level of app does not supported`);
+        }
+        let nodeInfo = updateFuncRecord.node;
+        if (nodeInfo === undefined) {
+            nodeInfo = builder();
+            updateFuncRecord.node = nodeInfo;
+        }
+        return nodeInfo;
+    }
     build(builder, params) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.params_ = params;
@@ -122,11 +138,13 @@ class JSBuilderNode extends BaseNode {
     }
     update(param) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.updateStart();
         this.purgeDeletedElmtIds();
         this.params_ = param;
         Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
             return (a < b) ? -1 : (a > b) ? 1 : 0;
         }).forEach(elmtId => this.UpdateElement(elmtId));
+        this.updateEnd();
         __JSScopeUtil__.restoreInstanceId();
     }
     UpdateElement(elmtId) {

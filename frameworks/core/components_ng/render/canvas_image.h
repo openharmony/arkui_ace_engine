@@ -24,6 +24,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing_forward.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 using BorderRadiusArray = std::array<PointF, 4>;
@@ -44,6 +45,7 @@ struct ImagePaintConfig {
     int32_t frameCount_ = 1;
     std::vector<ObscuredReasons> obscuredReasons_;
     ImageResizableSlice resizableSlice_;
+    ImageSourceInfo sourceInfo_;
 };
 
 // CanvasImage is interface for drawing image.

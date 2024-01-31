@@ -327,7 +327,6 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSButton>::StaticMethod("size", &JSButton::JsSize);
     JSClass<JSButton>::StaticMethod("padding", &JSButton::JsPadding);
-    JSClass<JSButton>::StaticMethod("hoverEffect", &JSButton::JsHoverEffect);
     JSClass<JSButton>::StaticMethod("buttonStyle", &JSButton::SetButtonStyle);
     JSClass<JSButton>::StaticMethod("controlSize", &JSButton::SetControlSize);
     JSClass<JSButton>::StaticMethod("createWithLabel", &JSButton::CreateWithLabel, MethodOptions::NONE);
@@ -601,16 +600,6 @@ CalcDimension JSButton::GetSizeValue(const JSCallbackInfo& info)
         return { -1.0 };
     }
     return value;
-}
-
-void JSButton::JsHoverEffect(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsNumber()) {
-        return;
-    }
-
-    auto hoverEffectNum = info[0]->ToNumber<int32_t>();
-    ButtonModel::GetInstance()->SetHoverEffect(hoverEffectNum);
 }
 
 CreateWithPara JSButton::ParseCreatePara(const JSCallbackInfo& info, bool hasLabel)
