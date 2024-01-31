@@ -50,7 +50,7 @@ void TextTimerModelImpl::SetFormat(const std::string& format)
     component->SetFormat(format);
 }
 
-void TextTimerModelImpl::SetOnTimer(std::function<void(const int64_t, const int64_t)>&& onChange)
+void TextTimerModelImpl::SetOnTimer(std::function<void(int64_t, int64_t)>&& onChange)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
