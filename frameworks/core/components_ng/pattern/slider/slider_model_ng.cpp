@@ -457,7 +457,8 @@ void SliderModelNG::SetStep(FrameNode* frameNode, float value)
 Color SliderModelNG::GetBlockColor(FrameNode* frameNode)
 {
     Color value;
-    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SliderPaintProperty, BlockColor, value, BLOCK_COLOR);                                       
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, BlockColor, value, frameNode, Color(BLOCK_COLOR));
     return value;
 }
 
@@ -465,7 +466,7 @@ Color SliderModelNG::GetTrackBackgroundColor(FrameNode* frameNode)
 {
     Color value;
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
-        SliderPaintProperty, TrackBackgroundColor, value, frameNode, TRACK_COLOR);
+        SliderPaintProperty, TrackBackgroundColor, value, frameNode, Color(TRACK_COLOR));
     return value;
 }
 
@@ -473,15 +474,15 @@ Color SliderModelNG::GetSelectColor(FrameNode* frameNode)
 {
     Color value;
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
-        SliderPaintProperty, SelectColor, value, frameNode, SELECTED_COLOR);
+        SliderPaintProperty, SelectColor, value, frameNode, Color(SELECTED_COLOR));
     return value;
 }
 
 bool SliderModelNG::GetShowSteps(FrameNode* frameNode)
 {
     bool value = false;
-    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE
-    SliderPaintProperty, ShowSteps, value, frameNode, false);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, ShowSteps, value, frameNode, false);
     return value;
 }
 

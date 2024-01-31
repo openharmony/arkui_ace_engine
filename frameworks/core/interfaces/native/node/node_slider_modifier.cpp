@@ -25,22 +25,26 @@ namespace OHOS::Ace::NG {
 const bool DEFAULT_SHOW_STEPS = false;
 const bool DEFAULT_SHOW_TIPS = false;
 const std::vector<SliderModel::SliderMode> SLIDER_MODE = { SliderModel::SliderMode::OUTSET,
- SliderModel::SliderMode::INSET, SliderModel::SliderMode::CAPSULE,};
+    SliderModel::SliderMode::INSET, SliderModel::SliderMode::CAPSULE, };
 const std::vector<SliderModel::BlockStyleType> SLIDER_STYLE_TYPE = { SliderModel::BlockStyleType::DEFAULT,
- SliderModel::BlockStyleType::IMAGE, SliderModel::BlockStyleType::SHAPE};
-const std::map<SliderModel::SliderMode, int> SLIDER_MODE_MAP = {
+    SliderModel::BlockStyleType::IMAGE, SliderModel::BlockStyleType::SHAPE };
+std::map<SliderModel::SliderMode, int> SLIDER_MODE_MAP = {
     { SliderModel::SliderMode::OUTSET, 0 },
     { SliderModel::SliderMode::INSET, 1 },
-    { SliderModel::SliderMode::CAPSULE, 2 }};
-const std::map<SliderModel::BlockStyleType, int> SLIDER_STYLE_TYPE_MAP = {
+    { SliderModel::SliderMode::CAPSULE, 2 } };
+std::map<SliderModel::BlockStyleType, int> SLIDER_STYLE_TYPE_MAP = {
     { SliderModel::BlockStyleType::DEFAULT, 0 },
     { SliderModel::BlockStyleType::IMAGE, 1 },
-    { SliderModel::BlockStyleType::SHAPE, 2 }};
+    { SliderModel::BlockStyleType::SHAPE, 2 } };
 
 const float DEFAULT_VALUE = 0.0;
 const float DEFAULT_MAX_VALUE = 100.0;
 const float DEFAULT_MIN_VALUE = 0.0;
 const float DEFAULT_STEP_VALUE = 1.0;
+
+const uint32_t ERROR_UINT_CODE = -1;
+const float ERROR_FLOAT_CODE = -1.0f;
+const int32_t ERROR_INT_CODE = -1;
 
 void SetShowTips(ArkUINodeHandle node, ArkUI_Bool isShow, const char *value)
 {
@@ -86,8 +90,8 @@ void ResetSliderStepSize(ArkUINodeHandle node)
     SliderModelNG::SetStepSize(frameNode, stepSize);
 }
 
-void SetBlockSize(ArkUINodeHandle node, ArkUI_Float32 widthVal, 
-int widthUnit, ArkUI_Float32 heightVal, int heightUnit)
+void SetBlockSize(ArkUINodeHandle node, ArkUI_Float32 widthVal,
+    int widthUnit, ArkUI_Float32 heightVal, int heightUnit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -323,7 +327,7 @@ void ResetMaxLabel(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::SetMaxLabel(frameNode, DEFAULT_MIN_VALUE);
+    SliderModelNG::SetMaxLabel(frameNode, DEFAULT_MAX_VALUE);
 }
 
 void ResetDirection(ArkUINodeHandle node)
@@ -351,9 +355,6 @@ void ResetSliderStyle(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (value >= SLIDER_MODE.size()) {
-        return;
-    }
     SliderModelNG::SetSliderMode(frameNode, SliderModel::SliderMode::OUTSET);
 }
 
@@ -375,7 +376,7 @@ void ResetSliderBlockImage(ArkUINodeHandle node)
     SliderModelNG::ResetBlockImage(frameNode);
 }
 
-void setSliderBlockPath(ArkUINodeHandle node, const char* type, const ArkUI_Float32* attribute, const char* commands)
+void SetSliderBlockPath(ArkUINodeHandle node, const char* type, const ArkUI_Float32* attribute, const char* commands)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -389,16 +390,17 @@ void setSliderBlockPath(ArkUINodeHandle node, const char* type, const ArkUI_Floa
     SliderModelNG::SetBlockShape(frameNode, path);
 }
 
-void setSliderBlockShape(ArkUINodeHandle node, const char* type, const ArkUI_Float32* attribute, int length)
+void SetSliderBlockShape(ArkUINodeHandle node, const char* type, const ArkUI_Float32* attribute, int length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (std::strcmp(type, "rect") == 0) {
         auto shape = AceType::MakeRefPtr<ShapeRect>();
-        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto radiusWidth = Dimension(attribute[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto radiusHeight = Dimension(attribute[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(1));
+        // 0 width 1 height 2 radiusWith 3 radius Height
+        auto width = Dimension(attribute[0], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto height = Dimension(attribute[1], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto radiusWidth = Dimension(attribute[2], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto radiusHeight = Dimension(attribute[3], static_cast<OHOS::Ace::DimensionUnit>(1));
         shape->SetWidth(width);
         shape->SetHeight(height);
         shape->SetRadiusWidth(radiusWidth);
@@ -407,16 +409,18 @@ void setSliderBlockShape(ArkUINodeHandle node, const char* type, const ArkUI_Flo
     }
     if (std::strcmp(type, "circle") == 0) {
         auto shape = AceType::MakeRefPtr<Circle>();
-        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
+        // 0 width 1 height
+        auto width = Dimension(attribute[0], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto height = Dimension(attribute[1], static_cast<OHOS::Ace::DimensionUnit>(1));
         shape->SetWidth(width);
         shape->SetHeight(height);
         SliderModelNG::SetBlockShape(frameNode, shape);
     }
     if (std::strcmp(type, "ellipse") == 0) {
         auto shape = AceType::MakeRefPtr<Ellipse>();
-        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
-        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
+        // 0 width 1 height
+        auto width = Dimension(attribute[0], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto height = Dimension(attribute[1], static_cast<OHOS::Ace::DimensionUnit>(1));
         shape->SetWidth(width);
         shape->SetHeight(height);
         SliderModelNG::SetBlockShape(frameNode, shape);
@@ -447,150 +451,103 @@ void ResetSliderBlockType(ArkUINodeHandle node)
 ArkUI_Uint32 GetBlockColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return SliderModelNG::GetBlockColor(frameNode).GetValue();
 }
 
 ArkUI_Uint32 GetTrackBackgroundColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return SliderModelNG::GetTrackBackgroundColor(frameNode).GetValue();
 }
 
 ArkUI_Uint32 GetSelectColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return SliderModelNG::GetSelectColor(frameNode).GetValue();
 }
 
 ArkUI_Bool GetShowSteps(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Bool>(SliderModelNG::GetShowSteps(frameNode));
 }
 
 ArkUI_Int32 GetBlockType(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return SLIDER_STYLE_TYPE_MAP[SliderModelNG::GetBlockType(frameNode)];
 }
 
 ArkUI_Float32 GetSliderValue(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return SliderModelNG::GetSliderValue(frameNode);
 }
 
 ArkUI_Float32 GetMinLabel(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return SliderModelNG::GetMinLabel(frameNode);
 }
 
 ArkUI_Float32 GetMaxLabel(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return SliderModelNG::GetMaxLabel(frameNode);
 }
 
 ArkUI_Int32 GetDirection(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(SliderModelNG::GetDirection(frameNode));
 }
 
 ArkUI_Float32 GetStep(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return SliderModelNG::GetStep(frameNode);
 }
 
 ArkUI_Bool GetReverse(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Bool>(SliderModelNG::GetReverse(frameNode));
 }
 
 ArkUI_Int32 GetSliderStyle(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return SLIDER_MODE_MAP[SliderModelNG::GetSliderMode(frameNode)];
 }
 
-namespace NodeModifier{
+namespace NodeModifier {
 const ArkUISliderModifier *GetSliderModifier()
 {
-  static const ArkUISliderModifier modifier = { SetShowTips,
-                                               ResetShowTips,
-                                               SetSliderStepSize,
-                                               ResetSliderStepSize,
-                                               SetBlockSize,
-                                               ResetBlockSize,
-                                               SetTrackBorderRadius,
-                                               ResetTrackBorderRadius,
-                                               SetStepColor,
-                                               ResetStepColor,
-                                               SetBlockBorderColor,
-                                               ResetBlockBorderColor,
-                                               SetBlockBorderWidth,
-                                               ResetBlockBorderWidth,
-                                               SetBlockColor,
-                                               ResetBlockColor,
-                                               SetTrackBackgroundColor,
-                                               ResetTrackBackgroundColor,
-                                               SetSelectColor,
-                                               ResetSelectColor,
-                                               SetShowSteps,
-                                               ResetShowSteps,
-                                               SetThickness,
-                                               ResetThickness,
-                                               SetSliderValue,
-                                               SetMinLabel,
-                                               SetMaxLabel,
-                                               SetDirection,
-                                               SetStep,
-                                               SetReverse,
-                                               SetSliderMode,
-                                               ResetSliderValue,
-                                               ResetMinLabel,
-                                               ResetMaxLabel,
-                                               ResetDirection,
-                                               ResetStep,
-                                               ResetReverse,
-                                               ResetSliderMode,
-                                               SetSliderBlockImage,
-                                               ResetSliderBlockImage,
-                                               setSliderBlockPath,
-                                               setSliderBlockShape,
-                                               ResetSliderBlockShape,
-                                               SetSliderBlockType,
-                                               ResetSliderBlockType,
-                                               GetBlockColor,
-                                               GetTrackBackgroundColor,
-                                               GetSelectColor,
-                                               GetShowSteps,
-                                               GetBlockType,
-                                               GetSliderValue,
-                                               GetMinLabel,
-                                               GetMaxLabel,
-                                               GetDirection,
-                                               GetStep,
-                                               GetReverse,
-                                               GetSliderStyle,
-                                               };
-
-  return &modifier;
+    static const ArkUISliderModifier modifier = { SetShowTips, ResetShowTips, SetSliderStepSize,
+        ResetSliderStepSize, SetBlockSize, ResetBlockSize, SetTrackBorderRadius, ResetTrackBorderRadius,
+        SetStepColor, ResetStepColor, SetBlockBorderColor, ResetBlockBorderColor,
+        SetBlockBorderWidth, ResetBlockBorderWidth, SetBlockColor, ResetBlockColor, SetTrackBackgroundColor,
+        ResetTrackBackgroundColor, SetSelectColor, ResetSelectColor, SetShowSteps, ResetShowSteps,
+        SetThickness, ResetThickness, SetSliderValue, SetMinLabel, SetMaxLabel, SetDirection,
+        SetStep, SetReverse, SetSliderStyle, ResetSliderValue, ResetMinLabel, ResetMaxLabel, ResetDirection,
+        ResetStep, ResetReverse, ResetSliderStyle, SetSliderBlockImage, ResetSliderBlockImage, SetSliderBlockPath,
+        SetSliderBlockShape,  ResetSliderBlockShape, SetSliderBlockType, ResetSliderBlockType, GetBlockColor,
+        GetTrackBackgroundColor, GetSelectColor, GetShowSteps, GetBlockType, GetSliderValue, GetMinLabel,
+        GetMaxLabel, GetDirection, GetStep, GetReverse, GetSliderStyle };
+                                    
+    return &modifier;
 }
 
 void SetSliderChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)

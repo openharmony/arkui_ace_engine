@@ -25,6 +25,9 @@
 namespace OHOS::Ace::NG {
 const DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
+const uint32_t ERROR_UINT_CODE = -1;
+const float ERROR_FLOAT_CODE = -1.0f;
+const int32_t ERROR_INT_CODE = -1;
 
 void SetSelect(ArkUINodeHandle node, ArkUI_Bool isSelected)
 {
@@ -146,8 +149,7 @@ void ResetMark(ArkUINodeHandle node)
     CheckBoxModelNG::SetCheckMarkColor(frameNode, checkBoxTheme->GetPointColor());
     CheckBoxModelNG::SetCheckMarkSize(
         frameNode, Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
-    CheckBoxModelNG::SetCheckMarkWidth(frameNode,
-                                     checkBoxTheme->GetCheckStroke());
+    CheckBoxModelNG::SetCheckMarkWidth(frameNode, checkBoxTheme->GetCheckStroke());
 }
 
 void SetCheckboxShape(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -167,79 +169,61 @@ void ResetCheckboxShape(ArkUINodeHandle node)
 ArkUI_Bool GetSelect(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Bool>(CheckBoxModelNG::GetSelect(frameNode));
 }
 
 ArkUI_Uint32 GetSelectedColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return CheckBoxModelNG::GetSelectedColor(frameNode).GetValue();
 }
 
 ArkUI_Uint32 GetUnSelectedColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return CheckBoxModelNG::GetUnSelectedColor(frameNode).GetValue();
 }
 
 ArkUI_Uint32 GetCheckMarkColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return CheckBoxModelNG::GetCheckMarkColor(frameNode).GetValue();
 }
 
 ArkUI_Float64 GetCheckMarkSize(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return CheckBoxModelNG::GetCheckMarkSize(frameNode).Value();
 }
 
 ArkUI_Float64 GetCheckMarkWidth(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return CheckBoxModelNG::GetCheckMarkWidth(frameNode).Value();
 }
 
 ArkUI_Int32 GetCheckboxShape(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(CheckBoxModelNG::GetCheckboxStyle(frameNode));
 }
 
-namespace NodeModifier{
-const ArkUICheckboxModifier *GetCheckboxModifier() 
+namespace NodeModifier {
+const ArkUICheckboxModifier *GetCheckboxModifier()
 {
-  static const ArkUICheckboxModifier modifier = {SetSelect,
-                                                 SetSelectedColor,
-                                                 SetUnSelectedColor,
-                                                 SetCheckboxWidth,
-                                                 SetCheckboxHeight,
-                                                 SetMark,
-                                                 ResetSelect,
-                                                 ResetSelectedColor,
-                                                 ResetUnSelectedColor,
-                                                 ResetCheckboxWidth,
-                                                 ResetCheckboxHeight,
-                                                 ResetMark,
-                                                 SetCheckboxShape,
-                                                 ResetCheckboxShape,
-                                                 GetSelect,
-                                                 GetSelectedColor,
-                                                 GetUnSelectedColor,
-                                                 GetCheckMarkColor,
-                                                 GetCheckMarkSize,
-                                                 GetCheckMarkWidth,
-                                                 GetCheckboxShape,
-                                                 };
-
-  return &modifier;
+    static const ArkUICheckboxModifier modifier = { SetSelect, SetSelectedColor,
+        SetUnSelectedColor, SetCheckboxWidth, SetCheckboxHeight, SetMark, ResetSelect, ResetSelectedColor,
+        ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape, ResetCheckboxShape,
+        GetSelect, GetSelectedColor, GetUnSelectedColor, GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth,
+        GetCheckboxShape, };
+    return &modifier;
 }
 
 void SetCheckboxChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
