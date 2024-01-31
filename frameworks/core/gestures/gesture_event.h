@@ -17,6 +17,10 @@
 
 #include "core/gestures/gesture_info.h"
 
+namespace OHOS::MMI {
+class PointerEvent;
+} // namespace OHOS::MMI
+
 namespace OHOS::Ace {
 
 class GestureEvent : public BaseEventInfo {
@@ -231,6 +235,15 @@ public:
     {
         return pointerId_;
     }
+
+    void SetPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+    {
+        pointerEvent_ = pointerEvent;
+    }
+    const std::shared_ptr<MMI::PointerEvent>& GetPointerEvent() const
+    {
+        return pointerEvent_;
+    }
 #ifdef SECURITY_COMPONENT_ENABLE
     void SetDisplayX(double displayX)
     {
@@ -261,16 +274,6 @@ public:
     {
         return secCompHandleEvent_;
     }
-
-    void SetEnhanceData(std::vector<uint8_t> enhanceData)
-    {
-        enhanceData_ = enhanceData;
-    }
-
-    std::vector<uint8_t> GetEnhanceData() const
-    {
-        return enhanceData_;
-    }
 #endif
 private:
     bool repeat_ = false;
@@ -288,9 +291,9 @@ private:
 #ifdef SECURITY_COMPONENT_ENABLE
     double displayX_ = 0.0;
     double displayY_ = 0.0;
-    std::vector<uint8_t> enhanceData_;
     std::shared_ptr<JsonValue> secCompHandleEvent_;
 #endif
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     Point globalPoint_;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;

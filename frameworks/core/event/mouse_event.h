@@ -98,7 +98,6 @@ struct MouseEvent final {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
-    std::vector<uint8_t> enhanceData;
 
     Offset GetOffset() const
     {

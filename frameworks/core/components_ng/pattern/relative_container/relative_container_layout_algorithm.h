@@ -69,9 +69,9 @@ private:
     void GetDependencyRelationship();
     void GetDependencyRelationshipInChain(const std::string& anchor, const std::string& nodeName);
     void GetDependencyRelationshipInBarrier();
-    void CalcHorizontalGuideline(std::optional<CalcSize>& selfIdealSize, const float& containerHeight,
+    void CalcHorizontalGuideline(std::optional<CalcSize>& selfIdealSize, float containerHeight,
         const GuidelineInfo& guidelineInfo);
-    void CalcVerticalGuideline(std::optional<CalcSize>& selfIdealSize, const float& containerWidth,
+    void CalcVerticalGuideline(std::optional<CalcSize>& selfIdealSize, float containerWidth,
         const GuidelineInfo& guidelineInfo);
     void CalcGuideline(LayoutWrapper* layoutWrapper);
     void CalcBarrier(LayoutWrapper* layoutWrapper);
@@ -122,6 +122,7 @@ private:
         const std::unique_ptr<FlexItemProperty>& flexItemProperty, const ChildIdealSize& childIdealSize);
     void UpdateTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule, LineDirection direction);
     void UpdateSizeWhenChildrenEmpty(LayoutWrapper* layoutWrapper);
+    bool IsAnchorLegal(const std::string& anchorName);
 
     bool isHorizontalRelyOnContainer_ = false;
     bool isVerticalRelyOnContainer_ = false;
