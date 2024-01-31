@@ -77,6 +77,8 @@ constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
 constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
+constexpr int32_t ORIGINAL_IMAGE_SIZE_AUTO = 0;
+constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -1556,6 +1558,19 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
 }
 
+int32_t GetBackgroundImageSizeType(int nativeImageSizeType)
+{
+    switch (nativeImageSizeType) {
+        case ORIGINAL_IMAGE_SIZE_AUTO:
+            return static_cast<int32_t>(OHOS::Ace::BackgroundImageSizeType::AUTO);
+        case ORIGINAL_IMAGE_SIZE_CONTAIN:
+            return static_cast<int32_t>(OHOS::Ace::BackgroundImageSizeType::CONTAIN);
+        default:
+            break;
+    }
+    return nativeImageSizeType;
+}
+
 void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
     ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight)
 {
@@ -1563,14 +1578,16 @@ void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkU
     CHECK_NULL_VOID(frameNode);
     BackgroundImageSize bgImgSize;
     if (LessNotEqual(valueWidth, 0.0f)) {
-        bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeWidth));
+        bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(GetBackgroundImageSizeType(typeWidth)));
     } else {
-        bgImgSize.SetSizeValueX(valueWidth);
+        bgImgSize.SetSizeValueX(Dimension(valueWidth, DimensionUnit::VP).ConvertToPx());
+        bgImgSize.SetSizeTypeX(BackgroundImageSizeType::LENGTH);
     }
     if (LessNotEqual(valueHeight, 0.0f)) {
-        bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeHeight));
+        bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(GetBackgroundImageSizeType(typeHeight)));
     } else {
-        bgImgSize.SetSizeValueY(valueWidth);
+        bgImgSize.SetSizeValueY(Dimension(valueHeight, DimensionUnit::VP).ConvertToPx());
+        bgImgSize.SetSizeTypeY(BackgroundImageSizeType::LENGTH);
     }
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
