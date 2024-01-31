@@ -110,26 +110,29 @@ void JSGauge::Create(const JSCallbackInfo& info)
 
 void JSGauge::SetValue(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsNumber()) {
-        return;
+    float value = NG::DEFAULT_MIN_VALUE;
+    if (info[0]->IsNumber()) {
+        value = info[0]->ToNumber<float>();
     }
-    GaugeModel::GetInstance()->SetValue(info[0]->ToNumber<float>());
+    GaugeModel::GetInstance()->SetValue(value);
 }
 
 void JSGauge::SetStartAngle(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsNumber()) {
-        return;
+    float startAngle = NG::DEFAULT_START_DEGREE;
+    if (info[0]->IsNumber()) {
+        startAngle = info[0]->ToNumber<float>();
     }
-    GaugeModel::GetInstance()->SetStartAngle(info[0]->ToNumber<float>());
+    GaugeModel::GetInstance()->SetStartAngle(startAngle);
 }
 
 void JSGauge::SetEndAngle(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsNumber()) {
-        return;
+    float endAngle = NG::DEFAULT_END_DEGREE;
+    if (info[0]->IsNumber()) {
+        endAngle = info[0]->ToNumber<float>();
     }
-    GaugeModel::GetInstance()->SetEndAngle(info[0]->ToNumber<float>());
+    GaugeModel::GetInstance()->SetEndAngle(endAngle);
 }
 
 void JSGauge::SetColors(const JSCallbackInfo& info)
