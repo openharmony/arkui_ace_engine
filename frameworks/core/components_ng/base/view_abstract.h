@@ -315,6 +315,8 @@ public:
     // useEffect
     static void SetUseEffect(bool useEffect);
 
+    static void SetFreeze(bool freeze);
+
     // useShadowBatching
     static void SetUseShadowBatching(bool useShadowBatching);
 

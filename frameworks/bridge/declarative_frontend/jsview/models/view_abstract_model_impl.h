@@ -155,6 +155,7 @@ public:
     void SetHueRotate(float value) override;
     void SetUseEffect(bool) override {}
     void SetUseShadowBatching(bool) override {}
+    void SetFreeze(bool) override {}
 
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
