@@ -167,6 +167,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     void OnModifyDone() override;
+    void UpdateGestureAndDragWhenModify();
 
     bool IsNeedInitClickEventRecorder() const override
     {
