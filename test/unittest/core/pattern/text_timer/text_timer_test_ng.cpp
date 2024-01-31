@@ -43,10 +43,10 @@ constexpr double INPUT_COUNT = 60000.0;
 constexpr bool IS_COUNT_DOWN = false;
 const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SS";
 const std::string FORMAT_DATA = "08:00:00";
-const std::string UTC_1 = "1000000000000";
-const std::string UTC_2 = "2000000000000";
-const std::string ELAPSED_TIME_1 = "100";
-const std::string ELAPSED_TIME_2 = "200";
+const int64_t UTC_1 = 1000000000000;
+const int64_t UTC_2 = 2000000000000;
+const int64_t ELAPSED_TIME_1 = 100;
+const int64_t ELAPSED_TIME_2 = 200;
 const std::string EMPTY_TEXT = "";
 const std::string TEXTTIMER_CONTENT = "08:00:00";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
@@ -285,9 +285,9 @@ HWTEST_F(TextTimerTestNg, TextTimerTest003, TestSize.Level1)
      */
     TextTimerModelNG textTimerModel;
     textTimerModel.Create();
-    std::string utc = UTC_1;
-    std::string elapsedTime = ELAPSED_TIME_1;
-    auto onChange = [&utc, &elapsedTime](const std::string& isUtc, const std::string& isElapsedTime) {
+    int64_t utc = UTC_1;
+    int64_t elapsedTime = ELAPSED_TIME_1;
+    auto onChange = [&utc, &elapsedTime](const int64_t& isUtc, const int64_t& isElapsedTime) {
         utc = isUtc;
         elapsedTime = isElapsedTime;
     };
