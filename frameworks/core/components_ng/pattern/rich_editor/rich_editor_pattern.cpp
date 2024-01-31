@@ -1485,6 +1485,11 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "in handleSingleClickEvent");
     hasClicked_ = true;
     lastClickTimeStamp_ = info.GetTimeStamp();
+    if (info.GetSourceDevice() != SourceType::MOUSE && SelectOverlayIsOn() &&
+        BetweenSelectedPosition(info.GetGlobalLocation())) {
+        selectOverlayProxy_->ShowOrHiddenMenu(false);
+        return;
+    }
 
     HandleClickAISpanEvent(info);
     if (isClickOnAISpan_ && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
@@ -3699,29 +3704,12 @@ void RichEditorPattern::InitTouchEvent()
 
 void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    auto touchPoint = info.GetTouches().front();
-    auto touchType = touchPoint.GetTouchType();
-    if (touchType == TouchType::DOWN) {
-        touchDownOffset_ = touchPoint.GetScreenLocation();
-    }
     if (SelectOverlayIsOn()) {
-        if (touchType == TouchType::MOVE) {
-            auto touchOffset = touchPoint.GetScreenLocation();
-            if (touchOffset == touchDownOffset_) {
-                return;
-            }
-            selectMenuInfo_.menuIsShow = false;
-            selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
-        } else if (touchType == TouchType::UP) {
-            touchDownOffset_.Reset();
-            selectMenuInfo_.menuIsShow = true;
-            selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
-        }
         return;
     }
+    auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
     } else if (touchType == TouchType::UP) {
-        touchDownOffset_.Reset();
         isMousePressed_ = false;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (isLongPress_) {
@@ -4091,6 +4079,13 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             };
         }
         selectInfo.callerFrameNode = host;
+        selectInfo.isNewAvoid = true;
+        selectInfo.selectArea = pattern->GetSelectArea();
+        selectInfo.checkIsTouchInHostArea = [weak](const PointF& touchPoint) -> bool {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, false);
+            return pattern->IsTouchInFrameArea(touchPoint);
+        };
         pattern->CopySelectionMenuParams(selectInfo, responseType);
         pattern->UpdateSelectMenuInfo(hasData, selectInfo, isCopyAll);
         pattern->CheckEditorTypeChange();
@@ -4392,6 +4387,7 @@ void RichEditorPattern::OnAreaChangedInner()
         textSelector_.selectionDestinationOffset.SetX(
             CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
         CreateHandles();
+        selectOverlayProxy_->ShowOrHiddenMenu(true);
     }
 }
 
@@ -4855,6 +4851,9 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
         if (scrollBar) {
             scrollBar->PlayScrollBarAppearAnimation();
         }
+        if (SelectOverlayIsOn()) {
+            selectOverlayProxy_->ShowOrHiddenMenu(true);
+        }
         return true;
     }
     if (IsReachedBoundary(offset)) {
@@ -4971,6 +4970,7 @@ void RichEditorPattern::OnScrollEndCallback()
     if (scrollBar) {
         scrollBar->ScheduleDisappearDelayTask();
     }
+    UpdateOverlaySelectArea();
 }
 
 bool RichEditorPattern::IsReachedBoundary(float offset)
@@ -5520,5 +5520,51 @@ void RichEditorPattern::ResetDragOption()
         CloseSelectOverlay();
         ResetSelection();
     }
+}
+
+RectF RichEditorPattern::GetSelectArea()
+{
+    auto selectRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    if (selectRects.empty()) {
+        float caretHeight = 0.0f;
+        auto caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
+        auto caretWidth = Dimension(1.5f, DimensionUnit::VP).ConvertToPx();
+        return RectF(caretOffset + parentGlobalOffset_, SizeF(caretWidth, caretHeight));
+    }
+    auto frontRect = selectRects.front();
+    auto backRect = selectRects.back();
+    RectF res;
+    if (GreatNotEqual(backRect.Bottom(), frontRect.Bottom())) {
+        res.SetRect(contentRect_.GetX() + parentGlobalOffset_.GetX(),
+            frontRect.GetY() + richTextRect_.GetY() + parentGlobalOffset_.GetY(), contentRect_.Width(),
+            backRect.Bottom() - frontRect.Top());
+    } else {
+        res.SetRect(frontRect.GetX() + richTextRect_.GetX() + parentGlobalOffset_.GetX(),
+            frontRect.GetY() + richTextRect_.GetY() + parentGlobalOffset_.GetY(), backRect.Right() - frontRect.Left(),
+            backRect.Bottom() - frontRect.Top());
+    }
+    auto contentRect = contentRect_;
+    contentRect.SetOffset(contentRect.GetOffset() + parentGlobalOffset_);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RectF(0, 0, 0, 0));
+    auto parent = host->GetAncestorNodeOfFrame();
+    contentRect = GetVisibleContentRect(parent, contentRect);
+    return res.IntersectRectT(contentRect);
+}
+
+void RichEditorPattern::UpdateOverlaySelectArea()
+{
+    CHECK_NULL_VOID(selectOverlayProxy_);
+    selectOverlayProxy_->UpdateSelectArea(GetSelectArea());
+}
+
+bool RichEditorPattern::IsTouchInFrameArea(const PointF& touchPoint)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto viewPort = RectF(parentGlobalOffset_, frameRect_.GetSize());
+    auto parent = host->GetAncestorNodeOfFrame();
+    viewPort = GetVisibleContentRect(parent, viewPort);
+    return viewPort.IsInRegion(touchPoint);
 }
 } // namespace OHOS::Ace::NG
