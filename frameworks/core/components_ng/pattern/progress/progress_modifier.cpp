@@ -211,16 +211,10 @@ void ProgressModifier::StartCapsuleSweepingAnimationImpl(float value, float spee
             float currentDate = modifier->sweepingDate_->Get();
             if (modifier->dateUpdated_) {
                 modifier->dateUpdated_ = false;
-                modifier->PostTask([id = Container::CurrentId(), weak = AceType::WeakClaim(AceType::RawPtr(modifier)),
-                    currentDate, speed]() {
-                    ContainerScope scope(id);
-                    auto modifier = weak.Upgrade();
-                    CHECK_NULL_VOID(modifier);
-                    modifier->StopSweepingAnimation(currentDate);
-                    modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
-                    auto context = PipelineBase::GetCurrentContext();
-                    context->RequestFrame();
-                });
+                modifier->StopSweepingAnimation(currentDate);
+                modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
+                auto context = PipelineBase::GetCurrentContext();
+                context->RequestFrame();
             }
         });
 }
@@ -295,25 +289,14 @@ void ProgressModifier::StartRingLoadingHeadAnimation()
     optionHead.SetCurve(curveHead);
     optionHead.SetIteration(isFormRender ? 1 : -1);
     AnimationUtils::Animate(
-        optionHead,
-        [&]() { trailingHeadDate_->Set(ANGLE_360); },
-        nullptr,
+        optionHead, [&]() { trailingHeadDate_->Set(ANGLE_360); }, nullptr,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto taskExecutor = pipeline->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostTask(
-                [weak, id]() {
-                    ContainerScope scope(id);
-                    auto modifier = weak.Upgrade();
-                    CHECK_NULL_VOID(modifier);
-                    if (static_cast<ProgressStatus>(modifier->progressStatus_->Get()) == ProgressStatus::PROGRESSING) {
-                        modifier->StopRingLoadingHeadAnimation();
-                    }
-                },
-                TaskExecutor::TaskType::UI);
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            if (static_cast<ProgressStatus>(modifier->progressStatus_->Get()) == ProgressStatus::PROGRESSING) {
+                modifier->StopRingLoadingHeadAnimation();
+            }
         });
 }
 
@@ -333,23 +316,14 @@ void ProgressModifier::StartRingLoadingTailAnimation()
         nullptr,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto taskExecutor = pipeline->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostTask(
-                [weak, id]() {
-                    ContainerScope scope(id);
-                    auto modifier = weak.Upgrade();
-                    CHECK_NULL_VOID(modifier);
-                    if (static_cast<ProgressStatus>(modifier->progressStatus_->Get()) == ProgressStatus::PROGRESSING) {
-                        modifier->StopRingLoadingTailAnimation();
-                        if (GreatOrEqual(modifier->valueBackup_, 0.0f)) {
-                            modifier->SetValue(modifier->valueBackup_);
-                        }
-                    }
-                },
-                TaskExecutor::TaskType::UI);
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            if (static_cast<ProgressStatus>(modifier->progressStatus_->Get()) == ProgressStatus::PROGRESSING) {
+                modifier->StopRingLoadingTailAnimation();
+                if (GreatOrEqual(modifier->valueBackup_, 0.0f)) {
+                    modifier->SetValue(modifier->valueBackup_);
+                }
+            }
         });
 }
 
@@ -437,16 +411,10 @@ void ProgressModifier::StartRingSweepingAnimationImpl(float date, float speed)
             if (modifier->dateUpdated_) {
                 modifier->dateUpdated_ = false;
                 float currentDate = modifier->sweepingDate_->Get();
-                modifier->PostTask([id = Container::CurrentId(), weak = AceType::WeakClaim(AceType::RawPtr(modifier)),
-                    currentDate, speed]() {
-                    ContainerScope scope(id);
-                    auto modifier = weak.Upgrade();
-                    CHECK_NULL_VOID(modifier);
-                    modifier->StopSweepingAnimation(currentDate);
-                    modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
-                    auto context = PipelineBase::GetCurrentContext();
-                    context->RequestFrame();
-                });
+                modifier->StopSweepingAnimation(currentDate);
+                modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
+                auto context = PipelineBase::GetCurrentContext();
+                context->RequestFrame();
             }
         });
 }
@@ -478,40 +446,28 @@ void ProgressModifier::StartContinuousSweepingAnimation(float currentDate, float
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
             if (!modifier->dateUpdated_) {
-                modifier->PostTask([id = Container::CurrentId(), weak = AceType::WeakClaim(AceType::RawPtr(modifier)),
-                    speed]() {
-                    ContainerScope scope(id);
-                    auto modifier = weak.Upgrade();
-                    CHECK_NULL_VOID(modifier);
-                    modifier->sweepingDate_->Set(0.0f);
-                    switch (ProgressType(modifier->progressType_->Get())) {
-                        case ProgressType::LINEAR:
-                            modifier->StartLinearSweepingAnimationImpl(modifier->sweepingDateBackup_, speed);
-                            break;
-                        case ProgressType::CAPSULE:
-                            modifier->StartCapsuleSweepingAnimationImpl(modifier->sweepingDateBackup_, speed);
-                            break;
-                        case ProgressType::RING:
-                            modifier->StartRingSweepingAnimationImpl(modifier->sweepingDateBackup_, speed);
-                            break;
-                        default:
-                            return;
-                    }
-                    auto context = PipelineBase::GetCurrentContext();
-                    context->RequestFrame();
-                });
+                modifier->sweepingDate_->Set(0.0f);
+                switch (ProgressType(modifier->progressType_->Get())) {
+                    case ProgressType::LINEAR:
+                        modifier->StartLinearSweepingAnimationImpl(modifier->sweepingDateBackup_, speed);
+                        break;
+                    case ProgressType::CAPSULE:
+                        modifier->StartCapsuleSweepingAnimationImpl(modifier->sweepingDateBackup_, speed);
+                        break;
+                    case ProgressType::RING:
+                        modifier->StartRingSweepingAnimationImpl(modifier->sweepingDateBackup_, speed);
+                        break;
+                    default:
+                        return;
+                }
+                auto context = PipelineBase::GetCurrentContext();
+                context->RequestFrame();
             } else {
                 modifier->dateUpdated_ = false;
                 float currentDate = modifier->sweepingDate_->Get();
-                modifier->PostTask([id = Container::CurrentId(), weak = AceType::WeakClaim(AceType::RawPtr(modifier)),
-                    currentDate, speed]() {
-                    ContainerScope scope(id);
-                    auto modifier = weak.Upgrade();
-                    CHECK_NULL_VOID(modifier);
-                    modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
-                    auto context = PipelineBase::GetCurrentContext();
-                    context->RequestFrame();
-                });
+                modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
+                auto context = PipelineBase::GetCurrentContext();
+                context->RequestFrame();
             }
         });
 }
@@ -624,16 +580,10 @@ void ProgressModifier::StartLinearSweepingAnimationImpl(float date, float speed)
             if (modifier->dateUpdated_) {
                 modifier->dateUpdated_ = false;
                 float currentDate = modifier->sweepingDate_->Get();
-                modifier->PostTask([id = Container::CurrentId(), weak = AceType::WeakClaim(AceType::RawPtr(modifier)),
-                    currentDate, speed]() {
-                    ContainerScope scope(id);
-                    auto modifier = weak.Upgrade();
-                    CHECK_NULL_VOID(modifier);
-                    modifier->StopSweepingAnimation(currentDate);
-                    modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
-                    auto context = PipelineBase::GetCurrentContext();
-                    context->RequestFrame();
-                });
+                modifier->StopSweepingAnimation(currentDate);
+                modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
+                auto context = PipelineBase::GetCurrentContext();
+                context->RequestFrame();
             }
         });
 }

@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -118,6 +119,8 @@ std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const
     overlayInfo.secondHandle = secondHandleInfo.has_value() ? *secondHandleInfo : overlayInfo.secondHandle;
     overlayInfo.isSingleHandle = !firstHandleInfo && secondHandleInfo;
     overlayInfo.isSelectRegionVisible = CheckSelectionRectVisible();
+    overlayInfo.selectArea = clientInfo.selectArea;
+    overlayInfo.isNewAvoid = clientInfo.isNewAvoid;
     if (!clientInfo.isUpdateMenu) {
         return overlayInfo;
     }
@@ -147,6 +150,9 @@ void SelectOverlayClient::UpdateShowingSelectOverlay(ClientOverlayInfo& clientIn
     CHECK_NULL_VOID(selectOverlayInfo);
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
+    if (clientInfo.isNewAvoid) {
+        proxy->UpdateSelectArea(selectOverlayInfo->selectArea);
+    }
     if (hasRequestSingleHandle) {
         if (clientInfo.isUpdateMenu) {
             proxy->UpdateSelectMenuInfo([newMenuInfo = selectOverlayInfo->menuInfo](SelectMenuInfo& menuInfo) {
@@ -280,7 +286,10 @@ void SelectOverlayClient::OnParentScrollStartOrEnd(bool isEnd, bool noAnimation)
     if (proxy->IsSingleHandle() && !proxy->IsSingleHandleMenuShow()) {
         UpdateSelectMenuInfo([](SelectMenuInfo& menuInfo) { menuInfo.menuIsShow = false; });
     } else {
-        proxy->ShowOrHiddenMenu(!originIsMenuShow_);
+        auto info = proxy->GetSelectOverlayMangerInfo();
+        if (!info.isNewAvoid) {
+            proxy->ShowOrHiddenMenu(!originIsMenuShow_);
+        }
     }
 }
 
@@ -292,7 +301,7 @@ RectF SelectOverlayClient::GetVisibleContentRect(WeakPtr<FrameNode> parent, Rect
         return visibleRect;
     }
     auto intersectRect = visibleRect;
-    auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(parentNode->GetPattern());
+    auto scrollablePattern = AceType::DynamicCast<NestableScrollContainer>(parentNode->GetPattern());
     auto geometryNode = parentNode->GetGeometryNode();
     if (scrollablePattern && geometryNode) {
         auto parentViewPort = RectF(parentNode->GetTransformRelativeOffset(), geometryNode->GetFrameSize());

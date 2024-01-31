@@ -438,6 +438,41 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrDisplayCount004
+ * @tc.desc: Test property about DisplayCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrDisplayCount004, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Do not set displayCount
+     * @tc.expected: DisplayCount is 1
+     */
+    SwiperModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    CreateItem();
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetDisplayCount(), 1);
+
+    /**
+     * @tc.cases: Set displayCount to invalid -1
+     * @tc.expected: DisplayCount is default 1
+     */
+    model.SetDisplayCount(AceType::RawPtr(frameNode_), -1);
+    EXPECT_EQ(pattern_->GetDisplayCount(), 1);
+
+    /**
+     * @tc.cases: Set displayCount to 2
+     * @tc.expected: DisplayCount is 2
+     */
+    model.SetDisplayCount(AceType::RawPtr(frameNode_), 2);
+    EXPECT_EQ(pattern_->GetDisplayCount(), 2);
+}
+
+/**
  * @tc.name: AttrEdgeEffect001
  * @tc.desc: Test property about EdgeEffect
  * @tc.type: FUNC
@@ -560,4 +595,94 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin004, TestSize.Level1)
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
 }
+
+/**
+ * @tc.name: AttrNestedScroll001
+ * @tc.desc: Test property about NestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrNestedScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: NestedScroll is default
+     * @tc.expected: enableNestedScroll_ is false
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetLoop(false); });
+    EXPECT_FALSE(pattern_->IsLoop());
+    EXPECT_FALSE(pattern_->enableNestedScroll_);
+}
+
+/**
+ * @tc.name: AttrNestedScroll002
+ * @tc.desc: Test property about NestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrNestedScroll002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: NestedScroll is SELF_FIRST
+     * @tc.expected: enableNestedScroll_ is true
+     */
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    CreateWithItem([nestedOpt](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetNestedScroll(nestedOpt);
+    });
+    EXPECT_FALSE(pattern_->IsLoop());
+    EXPECT_TRUE(pattern_->enableNestedScroll_);
+}
+
+/**
+ * @tc.name: AttrDisplayArrow001
+ * @tc.desc: Test property about DisplayArrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrDisplayArrow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper.
+     */
+    SwiperModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    CreateItem();
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. set invalid SwiperArrowParameters.
+     * @tc.expected: check whether the properties is correct.
+     */
+    SwiperArrowParameters swiperArrowParameters;
+    model.SetArrowStyle(AceType::RawPtr(frameNode_), swiperArrowParameters);
+    EXPECT_FALSE(layoutProperty_->HasIsShowBackground());
+    EXPECT_FALSE(layoutProperty_->HasBackgroundSize());
+    EXPECT_FALSE(layoutProperty_->HasBackgroundColor());
+    EXPECT_FALSE(layoutProperty_->HasArrowSize());
+    EXPECT_FALSE(layoutProperty_->HasArrowColor());
+    EXPECT_FALSE(layoutProperty_->HasIsSidebarMiddle());
+
+    /**
+     * @tc.steps: step3. set valid SwiperArrowParameters.
+     * @tc.expected: check whether the properties is correct.
+     */
+    swiperArrowParameters.isShowBackground = false;
+    swiperArrowParameters.isSidebarMiddle = false;
+    swiperArrowParameters.backgroundSize = Dimension(24.0);
+    swiperArrowParameters.backgroundColor = Color::BLUE;
+    swiperArrowParameters.arrowSize = Dimension(24.0);
+    swiperArrowParameters.arrowColor = Color::BLUE;
+    model.SetArrowStyle(AceType::RawPtr(frameNode_), swiperArrowParameters);
+    EXPECT_TRUE(layoutProperty_->GetIsShowBackground());
+    EXPECT_TRUE(layoutProperty_->GetIsSidebarMiddle());
+    EXPECT_EQ(layoutProperty_->GetBackgroundSize(), Dimension(24.0));
+    EXPECT_EQ(layoutProperty_->GetBackgroundColor(), Color::BLUE);
+    EXPECT_EQ(layoutProperty_->GetArrowSize(), Dimension(24.0));
+    EXPECT_EQ(layoutProperty_->GetArrowColor(), Color::BLUE);
+}
+
 } // namespace OHOS::Ace::NG

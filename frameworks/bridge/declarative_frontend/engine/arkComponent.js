@@ -4659,6 +4659,19 @@ class ImageOpacityModifier extends ModifierWithKey {
   }
 }
 ImageOpacityModifier.identity = Symbol('imageOpacity');
+class ImageeEdgeAntialiasingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetEdgeAntialiasing(node);
+    } else {
+      getUINativeModule().image.setEdgeAntialiasing(node, this.value);
+    }
+  }
+}
+ImageeEdgeAntialiasingModifier.identity = Symbol('edgeAntialiasing');
 class ImageTransitionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4681,6 +4694,10 @@ class ArkImageComponent extends ArkComponent {
   }
   draggable(value) {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
+    return this;
+  }
+  edgeAntialiasing(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageeEdgeAntialiasingModifier.identity, ImageeEdgeAntialiasingModifier, value);
     return this;
   }
   alt(value) {

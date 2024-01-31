@@ -170,6 +170,11 @@ public:
         nativeEngine_ = nativeEngine;
     }
 
+    NativeEngine* GetNativeEngine() const
+    {
+        return nativeEngine_;
+    }
+
 #if defined(PREVIEW)
     void SetPreviewFlag(bool flag)
     {

@@ -31,6 +31,7 @@
 #include "adapter/preview/entrance/event_dispatcher.h"
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "adapter/preview/inspector/inspector_client.h"
+#include "core/common/resource/resource_configuration.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
@@ -410,7 +411,7 @@ void AceAbility::SurfaceChanged(
         container->NativeOnConfigurationUpdated(ACE_INSTANCE_ID);
     }
     if (orientation != runArgs_.deviceConfig.orientation || resolution != runArgs_.deviceConfig.density) {
-        container->NotifyConfigurationChange(false, AceType::OnConfigurationChange({ false, false, true }));
+        container->NotifyConfigurationChange(false, ConfigurationChange({ false, false, true }));
     }
     runArgs_.deviceConfig.orientation = orientation;
     runArgs_.deviceConfig.density = resolution;

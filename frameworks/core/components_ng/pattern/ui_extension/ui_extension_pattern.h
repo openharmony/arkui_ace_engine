@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,13 +52,17 @@ class AvoidArea;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
+enum EmbeddedType : int32_t {
+    DEFAULT_TYPE = -1,
+    UI_EXTENSION = 0
+};
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
 
 public:
-    explicit UIExtensionPattern(
-        bool isTransferringCaller = false, bool isModal = false, bool isAsyncModalBinding = false);
+    explicit UIExtensionPattern(bool isTransferringCaller = false, bool isModal = false,
+        bool isAsyncModalBinding = false, int32_t embeddedType = EmbeddedType::DEFAULT_TYPE);
     ~UIExtensionPattern() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
@@ -71,6 +75,7 @@ public:
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
     void OnAreaChangedInner() override;
+    void OnMountToParentDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     // for DynamicComponent
@@ -126,6 +131,9 @@ public:
     int32_t GetUiExtensionId() override;
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
+    bool IsEmbeddedComponentType();
+    void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
+    RefPtr<OHOS::Ace::WantWrap> GetWantWrap();
 
     virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
@@ -186,6 +194,7 @@ private:
     void RegisterVisibleAreaChange();
     void UpdateTextFieldManager(const Offset& offset, float height);
     bool IsCurrentFocus() const;
+    bool CheckCascadeStatus();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -203,6 +212,7 @@ private:
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::function<void()> bindModalCallback_;
 
+    RefPtr<OHOS::Ace::WantWrap> curWant_;
     RefPtr<FrameNode> contentNode_;
     RefPtr<SessionWrapper> sessionWrapper_;
     ErrorMsg lastError_;
@@ -215,6 +225,7 @@ private:
     int32_t uiExtensionId_ = 0;
     int32_t callbackId_ = 0;
     RectF displayArea_;
+    int32_t embeddedType_ = EmbeddedType::DEFAULT_TYPE;
 
     // for DynamicComponent
     ComponentType componentType_ = ComponentType::UI_EXTENSION;

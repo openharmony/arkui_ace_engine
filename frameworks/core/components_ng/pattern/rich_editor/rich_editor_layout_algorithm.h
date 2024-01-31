@@ -60,6 +60,18 @@ private:
 
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group);
 
+    std::string SpansToString()
+    {
+        std::stringstream ss;
+        for (auto& list : spans_) {
+            ss << "[";
+            for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
+                ss << "[" << StringUtils::RestoreEscape(item->content) << "], "; });
+            ss << "], ";
+        }
+        return ss.str();
+    }
+
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     ParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;

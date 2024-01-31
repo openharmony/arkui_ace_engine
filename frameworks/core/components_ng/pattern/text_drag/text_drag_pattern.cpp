@@ -45,7 +45,7 @@ const RectF GetFirstBoxRect(const std::vector<RectF>& boxes, const RectF& conten
 const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect, const float textStartY)
 {
     for (const auto& box : boxes) {
-        if (box.Bottom() + textStartY > contentRect.Bottom() + BOX_EPSILON) {
+        if (box.Bottom() + textStartY >= contentRect.Bottom()) {
             return box;
         }
     }

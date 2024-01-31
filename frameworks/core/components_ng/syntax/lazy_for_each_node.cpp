@@ -266,7 +266,7 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
     return children_;
 }
 
-void LazyForEachNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
+void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.colorModeUpdate && builder_) {
         auto map = builder_->GetCachedUINodeMap();

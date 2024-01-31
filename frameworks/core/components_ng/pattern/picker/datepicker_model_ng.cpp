@@ -201,6 +201,14 @@ void DatePickerModelNG::SetOnDateChange(DateChangeEvent&& onChange)
     eventHub->SetOnDateChange(std::move(onChange));
 }
 
+void DatePickerModelNG::SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDateChange(std::move(onChange));
+}
+
 void DatePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
     CHECK_NULL_VOID(theme);
@@ -273,6 +281,33 @@ void DatePickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& co
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
     datePickerPattern->SetBackgroundColor(color);
+}
+
+void DatePickerModelNG::SetStartDate(FrameNode* frameNode, const PickerDate& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetStartDate(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, StartDate, datePickerPattern->GetStartDateLunar());
+}
+
+void DatePickerModelNG::SetEndDate(FrameNode* frameNode, const PickerDate& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetEndDate(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, EndDate, datePickerPattern->GetEndDateLunar());
+}
+
+void DatePickerModelNG::SetSelectedDate(FrameNode* frameNode, const PickerDate& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetSelectDate(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedDate, datePickerPattern->GetSelectDate());
 }
 
 void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)

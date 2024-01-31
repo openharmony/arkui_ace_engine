@@ -523,7 +523,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected abstract rerender(): void;
   protected abstract updateRecycleElmtId(oldElmtId: number, newElmtId: number): void;
   protected updateStateVars(params: {}): void {
-    stateMgmtConsole.error(`${this.debugInfo__()}: updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version. Application error.`)
+    stateMgmtConsole.error(`${this.debugInfo__()}: updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version. Application error.`);
   }
 
   protected initialRenderView(): void {
@@ -702,7 +702,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
             }
           }
 
-          stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate: all elmtIds that need re-render [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
+          stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate: all elmtIds that need re-render [${Array.from(this.dirtDescendantElementIds_).toString()}].`);
 
           const cb = this.watchedProps.get(varName)
           if (cb) {
@@ -892,7 +892,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // avoid the incompatible change that move set function before updateFunc.
       this.updateFuncByElmtId.delete(elmtId);
       UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmtId);
-      stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in update func: ${(error as Error).message}`)
+      stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in update func: ${(error as Error).message}`);
       throw error;
     }
   }
@@ -964,6 +964,16 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
     this.recycleManager_ = new RecycleManager;
   }
+  rebuildUpdateFunc(elmtId, compilerAssignedUpdateFunc) {
+    const updateFunc = (elmtId, isFirstRender) => {
+        this.currentlyRenderedElmtIdStack_.push(elmtId);
+        compilerAssignedUpdateFunc(elmtId, isFirstRender);
+        this.currentlyRenderedElmtIdStack_.pop();
+    };
+    if (this.updateFuncByElmtId.has(elmtId)) {
+        this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc });
+    }
+  }
 
   /**
    * @function observeRecycleComponentCreation
@@ -990,6 +1000,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const oldElmtId: number = node.id__();
     this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
     this.hasBeenRecycled_ = true;
+    this.rebuildUpdateFunc(oldElmtId, compilerAssignedUpdateFunc);
     recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
   }
 
@@ -1454,6 +1465,10 @@ class UpdateFuncsByElmtId {
 
   public get(elmtId: number): UpdateFuncRecord | undefined {
     return this.map_.get(elmtId);
+  }
+
+  public has(elmtId: number): boolean {
+    return this.map_.has(elmtId);
   }
 
   public keys(): IterableIterator<number> {

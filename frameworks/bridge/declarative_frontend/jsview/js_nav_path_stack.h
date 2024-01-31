@@ -29,7 +29,10 @@
 namespace OHOS::Ace::Framework {
 class JSNavPathStack final : public Referenced {
 public:
-    JSNavPathStack() = default;
+    JSNavPathStack()
+    {
+        containerCurrentId_ = Container::CurrentId();
+    };
     ~JSNavPathStack() = default;
 
     static void JSBind(BindingTarget globalObj);
@@ -62,6 +65,8 @@ private:
 
     std::function<void()> onStateChangedCallback_;
     std::function<int32_t(JSRef<JSObject>)> checkNavDestinationExistsFunc_;
+
+    int32_t containerCurrentId_;
 };
 } // namespace OHOS::Ace::Framework
 

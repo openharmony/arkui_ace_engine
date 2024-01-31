@@ -186,10 +186,10 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
 
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        titleBarNode->SetActive(false);
+        titleBarNode->SetJSViewActive(false);
     } else {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        titleBarNode->SetActive(true);
+        titleBarNode->SetJSViewActive(true);
         MountTitleBar(hostNode);
         if (opts && opts->Expansive()) {
             titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
@@ -256,7 +256,7 @@ bool NavDestinationPattern::GetBackButtonState()
     if (targetFontSize == currentFontSize) {
         return showBackButton;
     }
-    textLayoutProperty->UpdateFontSize(targetFontSize);
+    textLayoutProperty->UpdateAdaptMaxFontSize(targetFontSize);
     textLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     return showBackButton;
 }

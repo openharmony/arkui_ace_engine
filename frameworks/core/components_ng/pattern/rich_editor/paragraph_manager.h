@@ -35,7 +35,7 @@ public:
     };
     std::optional<double> minParagraphFontSize = std::nullopt;
 
-    int32_t GetIndex(Offset offset) const;
+    int32_t GetIndex(Offset offset, bool clamp = false) const;
     float GetHeight() const;
 
     const std::list<ParagraphInfo>& GetParagraphs() const

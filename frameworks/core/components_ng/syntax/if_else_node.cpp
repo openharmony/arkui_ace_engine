@@ -30,6 +30,7 @@ RefPtr<IfElseNode> IfElseNode::GetOrCreateIfElseNode(int32_t nodeId)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<IfElseNode>(nodeId);
     if (node) {
+        TAG_LOGI(AceLogTag::ACE_IF, "Not create If node");
         return node;
     }
     node = MakeRefPtr<IfElseNode>(nodeId);

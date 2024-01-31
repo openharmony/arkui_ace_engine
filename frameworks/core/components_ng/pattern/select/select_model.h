@@ -88,6 +88,8 @@ public:
     virtual void SetOptionHeight(const Dimension& value);
     virtual void SetOptionWidthFitTrigger(bool isFitTrigger);
     virtual void SetHasOptionWidth(bool hasOptionWidth);
+    virtual void SetMenuBackgroundColor(const Color& color);
+    virtual void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
 private:
     static std::unique_ptr<SelectModel> instance_;
     static std::mutex mutex_;

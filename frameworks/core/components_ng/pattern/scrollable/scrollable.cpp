@@ -27,12 +27,13 @@
 #include "core/common/container.h"
 #include "core/common/layout_inspector.h"
 #include "core/event/ace_events.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 
 constexpr double CAP_COEFFICIENT = 0.45;
-constexpr int32_t FIRST_THRESHOLD = 5;
+constexpr int32_t FIRST_THRESHOLD = 4;
 constexpr int32_t SECOND_THRESHOLD = 10;
 constexpr double CAP_FIXED_VALUE = 16.0;
 constexpr uint32_t DRAG_INTERVAL_TIME = 900;
@@ -523,6 +524,13 @@ void Scrollable::SetDelayedTask()
     taskExecutor.PostDelayedTask(task_, DRAG_INTERVAL_TIME);
 }
 
+void Scrollable::MarkNeedFlushAnimationStartTime()
+{
+    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->MarkNeedFlushAnimationStartTime();
+}
+
 double Scrollable::ComputeCap(int dragCount)
 {
     if (dragCount < FIRST_THRESHOLD) {
@@ -537,29 +545,34 @@ double Scrollable::GetGain(double delta)
     auto cap = 1.0;
     auto gain = 1.0;
     if (!continuousSlidingCallback_) {
+        preGain_ = gain;
         return gain;
     }
     auto screenHeight = continuousSlidingCallback_();
     if (delta == 0 || screenHeight == 0) {
+        preGain_ = gain;
         return gain;
     }
     if (dragCount_ >= FIRST_THRESHOLD && dragCount_ < SECOND_THRESHOLD) {
         if (Negative(lastPos_ / delta)) {
             ResetContinueDragCount();
+            preGain_ = gain;
             return gain;
         }
-        cap = ComputeCap(dragCount_);
-        gain = (LessNotEqual(cap, std::abs(delta) / screenHeight * (dragCount_ - 1))) ? cap :
-            std::abs(delta) / screenHeight * (dragCount_ - 1);
+        cap = CAP_COEFFICIENT * (dragCount_ - 1);
+        gain = (LessNotEqual(cap, std::abs(delta) / screenHeight * (dragCount_ - 1))) ? preGain_ + cap :
+            preGain_ + std::abs(delta) / screenHeight * (dragCount_ - 1);
     } else if (dragCount_ >= SECOND_THRESHOLD) {
         if (Negative(lastPos_ / delta)) {
             ResetContinueDragCount();
+            preGain_ = gain;
             return gain;
         }
         cap = CAP_FIXED_VALUE;
-        gain = (LessNotEqual(cap, std::abs(delta) / screenHeight * (dragCount_ - 1))) ? cap :
-            std::abs(delta) / screenHeight * (dragCount_ - 1);
+        gain = (LessNotEqual(cap, preGain_ + std::abs(delta) / screenHeight * (dragCount_ - 1))) ? cap :
+            preGain_ + std::abs(delta) / screenHeight * (dragCount_ - 1);
     }
+    preGain_ = gain;
     return gain;
 }
 
@@ -689,6 +702,7 @@ void Scrollable::ProcessScrollSnapMotion(double position)
     if (outBoundaryCallback_ && outBoundaryCallback_()  && !isSnapScrollAnimationStop_) {
         scrollPause_ = true;
         skipRestartSpring_ = true;
+        MarkNeedFlushAnimationStartTime();
         StopSnapAnimation();
     }
 }
@@ -870,7 +884,8 @@ void Scrollable::ProcessScrollMotionStop(bool stopFriction)
 
 void Scrollable::ProcessSpringMotion(double position)
 {
-    position = Round(position);
+    // Do not round when the current position is less than 0.5 px from the final position.
+    position = NearEqual(position, finalPosition_, 0.5) ? position : Round(position);
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
         currentPos_, position);
     auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
@@ -888,6 +903,7 @@ void Scrollable::ProcessSpringMotion(double position)
         if ((currentPos_ - finalPosition_) * (position - finalPosition_) < 0) {
             double currentVelocity = currentVelocity_;
             scrollPause_ = true;
+            MarkNeedFlushAnimationStartTime();
             StopSpringAnimation();
             StartScrollAnimation(position, currentVelocity);
         }
@@ -935,6 +951,7 @@ void Scrollable::ProcessScrollMotion(double position)
         (!Container::IsCurrentUseNewPipeline() && outBoundaryCallback_ && outBoundaryCallback_())) {
         scrollPause_ = true;
         skipRestartSpring_ = true;
+        MarkNeedFlushAnimationStartTime();
         StopFrictionAnimation();
     }
 }
@@ -1173,7 +1190,7 @@ void Scrollable::OnCollectTouchTarget(
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
 {
     if (panRecognizerNG_) {
-        panRecognizerNG_->AssignNodeId(frameNode->GetId());
+        panRecognizerNG_->SetNodeId(frameNode->GetId());
         panRecognizerNG_->AttachFrameNode(frameNode);
         panRecognizerNG_->SetTargetComponent(targetComponent);
         panRecognizerNG_->SetIsSystemGesture(true);

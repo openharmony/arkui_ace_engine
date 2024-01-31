@@ -367,6 +367,7 @@ private:
     void UpdateNavPathList();
     void RefreshNavDestination();
     RefPtr<NavigationPattern> GetParentNavigationPattern();
+    void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBar);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

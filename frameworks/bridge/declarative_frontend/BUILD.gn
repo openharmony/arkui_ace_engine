@@ -300,6 +300,7 @@ template("declarative_js_engine") {
       "jsview/js_tabs_controller.cpp",
       "jsview/js_text.cpp",
       "jsview/js_text_clock.cpp",
+      "jsview/js_text_editable_controller.cpp",
       "jsview/js_textarea.cpp",
       "jsview/js_textfield.cpp",
       "jsview/js_textinput.cpp",
@@ -603,6 +604,7 @@ template("declarative_js_engine") {
 
       if (defined(config.window_scene_support) && config.window_scene_support) {
         sources += [
+          "jsview/js_embedded_component.cpp",
           "jsview/js_ui_extension.cpp",
           "jsview/window_scene/js_root_scene.cpp",
           "jsview/window_scene/js_screen.cpp",
@@ -798,6 +800,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_tabs_controller.cpp",
       "jsview/js_text.cpp",
       "jsview/js_text_clock.cpp",
+      "jsview/js_text_editable_controller.cpp",
       "jsview/js_textarea.cpp",
       "jsview/js_textfield.cpp",
       "jsview/js_textinput.cpp",
@@ -841,6 +844,7 @@ template("declarative_js_engine_ng") {
 
     if (defined(config.window_scene_support) && config.window_scene_support) {
       sources += [
+        "jsview/js_embedded_component.cpp",
         "jsview/js_ui_extension.cpp",
         "jsview/window_scene/js_root_scene.cpp",
         "jsview/window_scene/js_screen.cpp",

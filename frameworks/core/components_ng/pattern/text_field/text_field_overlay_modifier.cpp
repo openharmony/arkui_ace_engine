@@ -228,7 +228,7 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     if (textFieldPattern->GetShowMagnifier()) {
         cursorVisible_->Set(true);
     }
-    if (!cursorVisible_->Get() || textFieldPattern->GetSelectMode() == SelectionMode::SELECT_ALL) {
+    if (!cursorVisible_->Get() || textFieldPattern->IsSelected()) {
         return;
     }
     canvas.Save();
@@ -273,10 +273,12 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
     auto pattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
     magnifierRect_ = pattern->GetMagnifierRect();
-    if (!magnifierRect_.isChildNode) {
+    auto textFieldpattern = DynamicCast<TextFieldPattern>(magnifierRect_.parent.Upgrade());
+    CHECK_NULL_VOID(textFieldpattern);
+    if (!magnifierRect_.isChildNode || !textFieldpattern->GetShowMagnifier()) {
         return;
     }
-    auto pixelMap = magnifierRect_.pixelMap;
+    auto pixelMap = textFieldpattern->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     auto& canvas = context.canvas;
     canvas.Save();

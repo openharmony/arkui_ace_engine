@@ -64,6 +64,8 @@ public:
     void SetOptionHeight(const Dimension& value) override;
     void SetOptionWidthFitTrigger(bool isFitTrigger) override;
     void SetHasOptionWidth(bool haveOptionWidth) override;
+    void SetMenuBackgroundColor(const Color& color) override;
+    void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H

@@ -133,6 +133,23 @@ class ImageDraggableModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class ImageEdgeAntialiasingModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('edgeAntialiasing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetSourceSize(node);
+    } else {
+      getUINativeModule().image.setSourceSize(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
 class ImageInterpolationModifier extends ModifierWithKey<ImageInterpolation> {
   constructor(value: ImageInterpolation) {
     super(value);
@@ -436,6 +453,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
   draggable(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
+    return this;
+  }
+  edgeAntialiasing(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, ImageEdgeAntialiasingModifier.identity, ImageEdgeAntialiasingModifier, value);
     return this;
   }
   alt(value: ResourceStr): this {

@@ -304,11 +304,11 @@ void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestu
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto stopAnimationCb = [weak = WeakClaim(this)]() {
+    auto stopAnimationCb = [weak = WeakClaim(this)](bool ifImmediately) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (pattern->dotIndicatorModifier_) {
-                pattern->dotIndicatorModifier_->StopAnimation();
+                pattern->dotIndicatorModifier_->StopAnimation(ifImmediately);
             }
         }
     };

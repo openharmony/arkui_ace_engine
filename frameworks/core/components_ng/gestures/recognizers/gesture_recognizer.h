@@ -58,7 +58,8 @@ public:
 
     static void ResetGlobalTransCfg();
 
-    static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false);
+    static void Transform(
+        PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false, bool isPostEventResult = false);
 
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
     void BeginReferee(int32_t touchId, bool needUpdateChild = false)
@@ -159,6 +160,11 @@ public:
     bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
 
     void SetEventImportGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
+
+    void ResetEventImportGestureGroup()
+    {
+        eventImportGestureGroup_.Reset();
+    }
 
     const WeakPtr<NGGestureRecognizer>& GetGestureGroup() const
     {

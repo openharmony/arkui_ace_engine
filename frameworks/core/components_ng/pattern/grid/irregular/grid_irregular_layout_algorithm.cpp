@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/templates_parser.h"
+#include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 
 namespace OHOS::Ace::NG {
 void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -88,7 +89,7 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
     }
 
     const float crossSize = contentSize.CrossSize(gridLayoutInfo_.axis_);
-    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap_, wrapper_->GetTotalChildCount());
+    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap_, gridLayoutInfo_.childrenCount_);
 
     crossLens_ = std::vector<float>(res.first.begin(), res.first.end());
     if (crossLens_.empty()) {
@@ -126,11 +127,11 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     auto& info = gridLayoutInfo_;
 
     if (info.jumpIndex_ == LAST_ITEM) {
-        info.jumpIndex_ = wrapper_->GetTotalChildCount() - 1;
+        info.jumpIndex_ = info.childrenCount_ - 1;
     }
 
     if (info.scrollAlign_ == ScrollAlign::AUTO) {
-        TransformAutoScrollAlign();
+        info.scrollAlign_ = TransformAutoScrollAlign(mainSize);
     }
     if (info.scrollAlign_ == ScrollAlign::NONE) {
         info.jumpIndex_ = EMPTY_JUMP_INDEX;
@@ -158,7 +159,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 bool GridIrregularLayoutAlgorithm::ReachedEnd() const
 {
     const auto& info = gridLayoutInfo_;
-    if (info.endIndex_ < wrapper_->GetTotalChildCount() - 1) {
+    if (info.endIndex_ < info.childrenCount_ - 1) {
         return false;
     }
     auto child = wrapper_->GetChildByIndex(info.endIndex_);
@@ -176,7 +177,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 
     info.reachStart_ = info.startIndex_ == 0 && info.currentOffset_ >= 0;
     // GridLayoutInfo::reachEnd_ has a different meaning
-    info.reachEnd_ = info.endIndex_ == wrapper_->GetTotalChildCount() - 1;
+    info.reachEnd_ = info.endIndex_ == info.childrenCount_ - 1;
 
     info.offsetEnd_ = ReachedEnd();
 
@@ -233,23 +234,35 @@ std::vector<float> GridIrregularLayoutAlgorithm::CalculateCrossPositions(const P
     return res;
 }
 
-void GridIrregularLayoutAlgorithm::TransformAutoScrollAlign()
+ScrollAlign GridIrregularLayoutAlgorithm::TransformAutoScrollAlign(float mainSize) const
 {
-    auto& info = gridLayoutInfo_;
+    const auto& info = gridLayoutInfo_;
     if (info.jumpIndex_ >= info.startIndex_ && info.jumpIndex_ <= info.endIndex_) {
-        info.scrollAlign_ = ScrollAlign::NONE;
-    } else if (info.jumpIndex_ > info.endIndex_) {
-        info.scrollAlign_ = ScrollAlign::START;
-    } else {
-        info.scrollAlign_ = ScrollAlign::END;
+        if (info.startMainLineIndex_ == info.endMainLineIndex_ || info.startIndex_ == info.endIndex_) {
+            // item occupies the whole viewport
+            return ScrollAlign::NONE;
+        }
+        // scrollAlign start / end if the item is not fully in viewport
+        if (info.ItemAboveViewport(info.jumpIndex_, mainGap_)) {
+            return ScrollAlign::START;
+        }
+        int32_t rows = GridLayoutUtils::GetItemSize(&info, wrapper_, info.jumpIndex_).rows;
+        if (info.ItemBelowViewport(info.jumpIndex_, rows, mainSize, mainGap_)) {
+            return ScrollAlign::END;
+        }
+        return ScrollAlign::NONE;
     }
+    if (info.jumpIndex_ > info.endIndex_) {
+        return ScrollAlign::END;
+    }
+    return ScrollAlign::START;
 }
 
 int32_t GridIrregularLayoutAlgorithm::FindJumpLineIdx(int32_t jumpIdx)
 {
     auto& info = gridLayoutInfo_;
     if (jumpIdx >= info.startIndex_ && jumpIdx <= info.endIndex_) {
-        return info.FindItemInRange(jumpIdx);
+        return info.FindItemInRange(jumpIdx).first;
     }
     if (jumpIdx > info.endIndex_) {
         // fill matrix up to jumpIndex_

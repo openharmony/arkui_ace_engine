@@ -62,7 +62,6 @@ void PaintWrapper::FlushRender()
 
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
-
     auto contentModifier = nodePaintImpl_->GetContentModifier(this);
     if (contentModifier) {
         nodePaintImpl_->UpdateContentModifier(this);

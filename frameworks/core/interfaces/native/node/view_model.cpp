@@ -45,7 +45,7 @@
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
-#include "core/interfaces/native/node/node_api.h"
+#include "core/pipeline/base/element_register.h"
 
 
 namespace OHOS::Ace::NG::ViewModel {
@@ -254,6 +254,9 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         return nullptr;
     }
     CHECK_NULL_RETURN(createArkUIFrameNodes[tag], nullptr);
+    if (nodeId == ARKUI_AUTO_GENERATE_NODE_ID) {
+        nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    }
     return createArkUIFrameNodes[tag](nodeId);
 }
 

@@ -188,7 +188,8 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
 
     // If the parameter value is string(''), parse result 0.
     // The value of 0 is allowed, but the value of string('') is not allowed, so use theme value.
-    if (info[0]->IsString() && info[0]->ToString().empty()) {
+    if (info[0]->IsString() && (info[0]->ToString().empty() || !StringUtils::StringToDimensionWithUnitNG(
+        info[0]->ToString(), strokeWidthDimension))) {
         strokeWidthDimension = theme->GetThickness();
     }
 

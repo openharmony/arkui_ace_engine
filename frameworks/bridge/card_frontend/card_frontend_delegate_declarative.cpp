@@ -30,21 +30,21 @@ CardFrontendDelegateDeclarative::~CardFrontendDelegateDeclarative()
     LOG_DESTROY();
 }
 
-void CardFrontendDelegateDeclarative::RunCard(const std::string& url,
-    const std::string& params, const std::string& profile, int64_t cardId)
+UIContentErrorCode CardFrontendDelegateDeclarative::RunCard(
+    const std::string& url, const std::string& params, const std::string& profile, int64_t cardId)
 {
     ACE_SCOPED_TRACE("CardFrontendDelegateDeclarative::RunCard");
     auto pageRouterManager = GetPageRouterManager();
-    CHECK_NULL_VOID(pageRouterManager);
+    CHECK_NULL_RETURN(pageRouterManager, UIContentErrorCode::NULL_PAGE_ROUTER);
     pageRouterManager->SetManifestParser(GetManifestParser());
     pageRouterManager->SetIsCard();
     auto cardPipeline = GetPipelineContext();
     auto taskExecutor = GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
+    CHECK_NULL_RETURN(taskExecutor, UIContentErrorCode::NULL_POINTER);
     cardData_ = params;
     taskExecutor->PostTask(
-        [weakPageRouterManager = WeakPtr<NG::PageRouterManager>(pageRouterManager), 
-         weakCardPipeline = WeakPtr<PipelineBase>(cardPipeline), url, params, cardId]() {
+        [weakPageRouterManager = WeakPtr<NG::PageRouterManager>(pageRouterManager),
+            weakCardPipeline = WeakPtr<PipelineBase>(cardPipeline), url, params, cardId]() {
             auto pageRouterManager = weakPageRouterManager.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             auto container = Container::Current();
@@ -53,6 +53,8 @@ void CardFrontendDelegateDeclarative::RunCard(const std::string& url,
             pageRouterManager->RunCard(url, params, cardId);
         },
         TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
+
+    return UIContentErrorCode::NO_ERRORS;
 }
 
 void CardFrontendDelegateDeclarative::FireCardEvent(const EventMarker& eventMarker, const std::string& params) {}

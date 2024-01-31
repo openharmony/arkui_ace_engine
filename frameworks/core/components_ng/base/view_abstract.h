@@ -65,11 +65,17 @@ struct OptionParam {
     ~OptionParam() = default;
 };
 
+enum class ContextMenuRegisterType : char {
+    NORMAL_TYPE = 0,
+    CUSTOM_TYPE = 1,
+};
+
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
     bool setShow = false;
     bool isShow = false;
+    ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
     std::function<void(const std::string&)> onStateChange;
     std::optional<Placement> placement;
     std::function<void()> onAppear;
@@ -183,6 +189,7 @@ public:
     // layout
     static void SetAlign(Alignment alignment);
     static void SetAlignRules(const std::map<AlignDirection, AlignRule> &alignRules);
+    static void SetChainStyle(const ChainInfo& chainInfo);
     static void SetBias(const BiasPair& biasPair);
     static void SetVisibility(VisibleType visible);
     static void SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset,
@@ -444,6 +451,7 @@ public:
     static void SetMinHeight(FrameNode* frameNode, const CalcLength& minHeight);
     static void SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeight);
     static void SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules);
+    static void SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo);
     static void SetGrid(FrameNode* frameNode, std::optional<int32_t> span, std::optional<int32_t> offset,
         GridSizeType type = GridSizeType::UNDEFINED);
     static void ResetAspectRatio(FrameNode* frameNode);
@@ -474,8 +482,13 @@ public:
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
+    static void SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear);
+    static void SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
+        const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
+    static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc);
+    static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
 private:
     static void AddDragFrameNodeToManager();
 };

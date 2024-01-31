@@ -406,6 +406,14 @@ void ViewAbstract::SetAlignRules(const std::map<AlignDirection, AlignRule> &alig
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules);
 }
 
+void ViewAbstract::SetChainStyle(const ChainInfo& chainInfo)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, ChainStyle, chainInfo);
+}
+
 void ViewAbstract::SetBias(const BiasPair& biasPair)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2592,6 +2600,12 @@ void ViewAbstract::SetAlignRules(FrameNode* frameNode, const std::map<AlignDirec
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules, frameNode);
 }
 
+void ViewAbstract::SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, ChainStyle, chainInfo, frameNode);
+}
+
 void ViewAbstract::SetGrid(
     FrameNode* frameNode, std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)
 {
@@ -2800,6 +2814,23 @@ void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& 
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeRef));
 }
 
+void ViewAbstract::SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAppear(std::move(onAppear));
+}
+
+void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
+    const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAreaChanged(std::move(onAreaChanged));
+}
+
 void ViewAbstract::SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2812,6 +2843,20 @@ void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     focusHub->SetOnBlurCallback(std::move(onBlurCallback));
+}
+
+void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+}
+
+void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTouchEvent(std::move(touchEventFunc));
 }
 
 } // namespace OHOS::Ace::NG

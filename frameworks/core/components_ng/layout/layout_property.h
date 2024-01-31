@@ -210,6 +210,8 @@ public:
 
     void UpdateAlignRules(const std::map<AlignDirection, AlignRule>& alignRules);
 
+    void UpdateChainStyle(const ChainInfo& chainInfo);
+
     void UpdateBias(const BiasPair& biasPair);
 
     void UpdateDisplayIndex(int32_t displayIndex);

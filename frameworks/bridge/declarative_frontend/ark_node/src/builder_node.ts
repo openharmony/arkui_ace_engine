@@ -21,9 +21,9 @@ class BuilderNode {
   constructor(uiContext: UIContext, options: RenderOptions) {
     let jsBuilderNode = new JSBuilderNode(uiContext, options);
     this._JSBuilderNode = jsBuilderNode;
-    let id = Symbol("BuilderNode");
+    let id = Symbol('BuilderNode');
     BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
-    BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderNode', idOfNode: id })
+    BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderNode', idOfNode: id });
   }
   public update(params: Object) {
     this._JSBuilderNode.update(params);
@@ -80,6 +80,23 @@ class JSBuilderNode extends BaseNode {
       return;
     }
     child.updateStateVars(params);
+  }
+  public createOrGetNode(elmtId: number, builder: () => object): object {
+    const entry = this.updateFuncByElmtId.get(elmtId);
+    if (entry === undefined) {
+      throw new Error(`fail to create node, elmtId is illegal`);
+    }
+    let updateFuncRecord : UpdateFuncRecord = (typeof entry === 'object') ? entry : undefined;
+    if(updateFuncRecord === undefined)
+    {
+      throw new Error(`fail to create node, the api level of app does not supported`);
+    }
+    let nodeInfo = updateFuncRecord.node;
+    if (nodeInfo === undefined) {
+      nodeInfo = builder();
+      updateFuncRecord.node = nodeInfo;
+    }
+    return nodeInfo;
   }
   public build(builder: WrappedBuilder<Object[]>, params: Object) {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);

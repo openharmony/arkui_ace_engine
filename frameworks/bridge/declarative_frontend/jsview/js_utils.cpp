@@ -20,14 +20,20 @@
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
+#if !defined(WINDOWS_PLATFORM)
+#include <regex.h>
+#endif
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 #endif
+#include "napi/native_node_api.h"
+
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
 #include "base/want/want_wrap.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -35,7 +41,11 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Framework {
-namespace {} // namespace
+namespace {
+#if defined(WINDOWS_PLATFORM)
+constexpr char CHECK_REGEX_VALID[] = "__checkRegexValid__";
+#endif
+} // namespace
 
 #if !defined(PREVIEW)
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
@@ -212,5 +222,45 @@ bool IsDrawable(const JSRef<JSVal>& jsValue)
     // if jsObject has function getPixelMap, it's a DrawableDescriptor object
     JSRef<JSVal> func = jsObj->GetProperty("getPixelMap");
     return (!func->IsNull() && func->IsFunction());
+}
+
+bool CheckRegexValid(const std::string& pattern)
+{
+#if !defined(WINDOWS_PLATFORM)
+    regex_t regex;
+    // compile regex
+    const char* patternPtr = pattern.c_str();
+    int32_t ret = regcomp(&regex, patternPtr, REG_EXTENDED);
+    if (ret != 0) {
+        regfree(&regex);
+        return false;
+    }
+    regfree(&regex);
+    return true;
+#else
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, false);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, false);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value global;
+    napi_status ret = napi_get_global(env, &global);
+    if (ret != napi_ok) {
+        return false;
+    }
+    napi_value checkRegexValid;
+    ret = napi_get_named_property(env, global, CHECK_REGEX_VALID, &checkRegexValid);
+    if (ret != napi_ok) {
+        return false;
+    }
+    // create napi string
+    napi_value argv[1];
+    napi_create_string_utf8(env, pattern.c_str(), pattern.length(), &argv[0]);
+    napi_value result;
+    napi_call_function(env, nullptr, checkRegexValid, 1, argv, &result);
+    bool isValid = false;
+    napi_get_value_bool(env, result, &isValid);
+    return isValid;
+#endif
 }
 } // namespace OHOS::Ace::Framework

@@ -256,7 +256,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioResponseRegion(ArkUIRuntimeCallInfo*
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);  //1 is Jsvalue
     Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(2); //2 is length arguments
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    uint32_t length = lengthArg->Int32Value(vm);
+    uint32_t length = static_cast<uint32_t>(lengthArg->Int32Value(vm));
     double regionArray[length];
     int32_t regionUnits[length];
     if (!ArkTSUtils::ParseResponseRegion(vm, valueArg, regionArray, regionUnits, length)) {

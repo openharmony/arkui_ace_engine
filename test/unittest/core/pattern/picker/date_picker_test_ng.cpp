@@ -1005,7 +1005,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg001, TestSize.Le
     ASSERT_NE(accessibilityProperty, nullptr);
 
     for (auto& Value : DEFAULT_VALUE) {
-        options[columnNode].emplace_back(std::to_string(Value));
+        options[columnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     columnPattern->SetOptions(options);
     EXPECT_EQ(accessibilityProperty->GetCollectionItemCounts(), static_cast<int32_t>(DEFAULT_VALUE.size()));
@@ -1041,7 +1041,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg002, TestSize.Le
     EXPECT_FALSE(accessibilityProperty->IsScrollable());
 
     for (auto& Value : DEFAULT_VALUE) {
-        options[columnNode].emplace_back(std::to_string(Value));
+        options[columnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     columnPattern->SetOptions(options);
     columnPattern->SetCurrentIndex(-3);
@@ -1078,7 +1078,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg003, TestSize.Le
     EXPECT_EQ(accessibilityProperty->GetEndIndex(), DEFAULT_INDEX);
 
     for (auto& Value : DEFAULT_VALUE) {
-        options[columnNode].emplace_back(std::to_string(Value));
+        options[columnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     columnPattern->SetOptions(options);
     columnPattern->SetShowCount(BIG_SHOWCOUNT);
@@ -1126,10 +1126,12 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg004, TestSize.Le
     EXPECT_EQ(accessibilityProperty->GetText(), "");
 
     for (auto& Value : DEFAULT_VALUE) {
-        options[yearColumnNode].emplace_back(std::to_string(Value));
+        options[yearColumnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     columnPattern->SetOptions(options);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(DEFAULT_VALUE.at(YEARINDEX)));
+    DateTime date;
+    date.year = DEFAULT_VALUE.at(YEARINDEX);
+    EXPECT_EQ(accessibilityProperty->GetText(), Localization::GetInstance()->FormatDateTime(date, "y"));
     options[yearColumnNode].clear();
     columnPattern->SetOptions(options);
     EXPECT_EQ(accessibilityProperty->GetText(), "");
@@ -1163,7 +1165,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg005, TestSize.Le
     auto options = columnPattern->GetOptions();
     options[yearColumnNode].clear();
     for (auto& Value : DEFAULT_VALUE) {
-        options[yearColumnNode].emplace_back(std::to_string(Value));
+        options[yearColumnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     columnPattern->SetOptions(options);
 
@@ -2513,7 +2515,7 @@ HWTEST_F(DatePickerTestNg, PerformActionTest001, TestSize.Level1)
      */
     options[columnNode].clear();
     for (auto& Value : DEFAULT_VALUE) {
-        options[columnNode].emplace_back(std::to_string(Value));
+        options[columnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     options = columnPattern->GetOptions();
     columnPattern->SetOptions(options);
@@ -2521,7 +2523,7 @@ HWTEST_F(DatePickerTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
     options[columnNode].clear();
     for (auto& Value : DEFAULT_VALUE) {
-        options[columnNode].emplace_back(std::to_string(Value));
+        options[columnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     options = columnPattern->GetOptions();
     columnPattern->SetOptions(options);
@@ -2580,7 +2582,7 @@ HWTEST_F(DatePickerTestNg, DatePickerEventActionsTest001, TestSize.Level1)
     columnPattern->SetShowCount(0);
     auto options = columnPattern->GetOptions();
     for (auto& Value : DEFAULT_VALUE) {
-        options[columnNode].emplace_back(std::to_string(Value));
+        options[columnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     columnPattern->SetOptions(options);
     EXPECT_FALSE(columnPattern->NotLoopOptions());
@@ -3181,19 +3183,19 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest014, TestSize.Level1)
     CreateDatePickerColumnNode();
     ASSERT_NE(columnPattern_, nullptr);
     auto options = columnPattern_->GetOptions();
-    auto strings = options[columnNode_];
-    strings.clear();
-    strings.emplace_back("option");
-    strings.emplace_back("option");
-    strings.emplace_back("option");
-    options[columnNode_] = strings;
+    auto pickerDates = options[columnNode_];
+    pickerDates.clear();
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    options[columnNode_] = pickerDates;
     columnPattern_->options_ = options;
 
     /**
      * @tc.steps: step2. Call UpdateFinishToss while scroll can move.
      * @tc.expected: ScrollDelta_ is added.
      */
-    columnPattern_->showCount_ = strings.size() * 2;
+    columnPattern_->showCount_ = pickerDates.size() * 2;
     columnPattern_->SetCurrentIndex(5);
     columnPattern_->UpdateFinishToss(OFFSET_Y);
     EXPECT_FALSE(columnPattern_->CanMove(true));
@@ -3291,12 +3293,12 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest017, TestSize.Level1)
     CreateDatePickerColumnNode();
     ASSERT_NE(columnPattern_, nullptr);
     auto options = columnPattern_->GetOptions();
-    auto strings = options[columnNode_];
-    strings.clear();
-    strings.emplace_back("option");
-    strings.emplace_back("option");
-    strings.emplace_back("option");
-    options[columnNode_] = strings;
+    auto pickerDates = options[columnNode_];
+    pickerDates.clear();
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    options[columnNode_] = pickerDates;
     columnPattern_->options_ = options;
 
     /**

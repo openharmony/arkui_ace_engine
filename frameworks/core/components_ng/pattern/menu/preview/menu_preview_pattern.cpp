@@ -72,7 +72,7 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(pipeline, false);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_RETURN(menuTheme, false);
-    context->UpdateBackgroundColor(Color::WHITE);
+    context->UpdateBackgroundColor(Color::TRANSPARENT);
     context->SetClipToBounds(true);
     auto shadow = context->GetBackShadow();
     if (!shadow.has_value()) {

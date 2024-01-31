@@ -808,7 +808,7 @@ protected:
     void FlushPipelineWithoutAnimation() override;
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
-    void FlushReload(const OnConfigurationChange& configurationChange) override;
+    void FlushReload(const ConfigurationChange& configurationChange) override;
     void FlushReloadTransition() override;
     void FlushUITasks() override
     {

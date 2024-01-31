@@ -63,6 +63,8 @@ void JSRelativeContainer::JSBind(BindingTarget globalObj)
     JSClass<JSRelativeContainer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRelativeContainer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRelativeContainer>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSRelativeContainer>::StaticMethod("barrier", &JSRelativeContainer::JsBarrier);
+    JSClass<JSRelativeContainer>::StaticMethod("guideLine", &JSRelativeContainer::JsGuideline);
     JSClass<JSRelativeContainer>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -71,4 +73,111 @@ void JSRelativeContainer::Create(const JSCallbackInfo& info)
     RelativeContainerModel::GetInstance()->Create();
 }
 
+void JSRelativeContainer::ParseBarrierInfo(const JSRef<JSVal>& args, BarrierInfo& barrierInfoItem)
+{
+    JSRef<JSObject> barrierInfoObj = JSRef<JSObject>::Cast(args);
+    JSRef<JSVal> idVal = barrierInfoObj->GetProperty("id");
+    JSRef<JSVal> directionVal = barrierInfoObj->GetProperty("direction");
+    JSRef<JSVal> referencedIdVal = barrierInfoObj->GetProperty("referencedId");
+
+    if (idVal->IsString()) {
+        barrierInfoItem.id = idVal->ToString();
+    }
+
+    if (directionVal->IsNumber()) {
+        auto direction = directionVal->ToNumber<int32_t>();
+        barrierInfoItem.direction = static_cast<BarrierDirection>(direction);
+    }
+
+    if (referencedIdVal->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(referencedIdVal);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> idVal = array->GetValueAt(i);
+            if (idVal->IsString()) {
+                barrierInfoItem.referencedId.emplace_back(idVal->ToString());
+            }
+        }
+    }
+}
+
+void JSRelativeContainer::JsBarrier(const JSCallbackInfo& info)
+{
+    auto tmpInfo = info[0];
+    std::vector<BarrierInfo> barrierInfos;
+    if (tmpInfo->IsUndefined()) {
+        RelativeContainerModel::GetInstance()->SetBarrier(barrierInfos);
+        return;
+    }
+    if (!tmpInfo->IsArray() && !tmpInfo->IsObject()) {
+        RelativeContainerModel::GetInstance()->SetBarrier(barrierInfos);
+        return;
+    }
+
+    if (tmpInfo->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
+        for (size_t i = 0; i < array->Length(); i++) {
+            BarrierInfo barrierInfoItem;
+            ParseBarrierInfo(array->GetValueAt(i), barrierInfoItem);
+            barrierInfos.emplace_back(barrierInfoItem);
+        }
+    }
+
+    RelativeContainerModel::GetInstance()->SetBarrier(barrierInfos);
+}
+
+void JSRelativeContainer::ParseGuideline(const JSRef<JSVal>& args, GuidelineInfo& guidelineInfoItem)
+{
+    JSRef<JSObject> guildLineInfoObj = JSRef<JSObject>::Cast(args);
+    JSRef<JSVal> idVal = guildLineInfoObj->GetProperty("id");
+    JSRef<JSVal> directionVal = guildLineInfoObj->GetProperty("direction");
+    JSRef<JSVal> positionVal = guildLineInfoObj->GetProperty("position");
+
+    if (idVal->IsString()) {
+        guidelineInfoItem.id = idVal->ToString();
+    }
+
+    if (directionVal->IsNumber()) {
+        auto direction = directionVal->ToNumber<int32_t>();
+        guidelineInfoItem.direction = static_cast<LineDirection>(direction);
+    }
+
+    CalcDimension start;
+    CalcDimension end;
+    if (positionVal->IsObject()) {
+        JSRef<JSObject> val = JSRef<JSObject>::Cast(positionVal);
+        JSRef<JSVal> startVal = val->GetProperty("start");
+        JSRef<JSVal> endVal = val->GetProperty("end");
+
+        if (JSViewAbstract::ParseJsDimensionVpNG(startVal, start)) {
+            guidelineInfoItem.start = start;
+        }
+        if (JSViewAbstract::ParseJsDimensionVpNG(endVal, end)) {
+            guidelineInfoItem.end = end;
+        }
+    }
+}
+
+void JSRelativeContainer::JsGuideline(const JSCallbackInfo& info)
+{
+    auto tmpInfo = info[0];
+    std::vector<GuidelineInfo> guidelineInfos;
+    if (tmpInfo->IsUndefined()) {
+        RelativeContainerModel::GetInstance()->SetGuideline(guidelineInfos);
+        return;
+    }
+    if (!tmpInfo->IsArray() && !tmpInfo->IsObject()) {
+        RelativeContainerModel::GetInstance()->SetGuideline(guidelineInfos);
+        return;
+    }
+
+    if (tmpInfo->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
+        for (size_t i = 0; i < array->Length(); i++) {
+            GuidelineInfo guidelineInfoItem;
+            ParseGuideline(array->GetValueAt(i), guidelineInfoItem);
+            guidelineInfos.emplace_back(guidelineInfoItem);
+        }
+    }
+    RelativeContainerModel::GetInstance()->SetGuideline(guidelineInfos);
+}
 } // namespace OHOS::Ace::Framework

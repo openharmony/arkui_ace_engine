@@ -44,7 +44,6 @@ public:
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) override {};
-    void SetHoverEffect(const int32_t& hoverEffectNum) override;
     void SetRemoteMessage(RemoteCallback&& remoteCallback) override;
 
 private:

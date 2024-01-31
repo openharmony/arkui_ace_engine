@@ -468,7 +468,7 @@ void FrameNode::DumpCommonInfo()
     }
     if (geometryNode_->GetParentLayoutConstraint().has_value())
         DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
-                                           .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
+            .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
     if (!(NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX()))) {
         DumpLog::GetInstance().AddDesc(std::string("top: ")
                                            .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
@@ -745,7 +745,7 @@ void FrameNode::OnAttachToBuilderNode(NodeStatus nodeStatus)
     pattern_->OnAttachToBuilderNode(nodeStatus);
 }
 
-void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
+void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.languageUpdate) {
         pattern_->OnLanguageConfigurationUpdate();
@@ -767,7 +767,16 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (configurationChange.defaultFontUpdate) {
+    if (configurationChange.fontUpdate) {
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    if (configurationChange.iconUpdate) {
+        pattern_->OnIconConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    if (configurationChange.skinUpdate) {
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -777,7 +786,7 @@ void FrameNode::OnVisibleChange(bool isVisible)
 {
     pattern_->OnVisibleChange(isVisible);
     UpdateChildrenVisible(isVisible);
-    TriggerVisibleAreaChangeCallback(!isVisible);
+    TriggerVisibleAreaChangeCallback(true);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive)

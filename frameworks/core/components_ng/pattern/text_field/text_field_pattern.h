@@ -518,6 +518,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
+    void InitValueText(std::string content);
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
@@ -1103,8 +1104,15 @@ public:
         return magnifierController_;
     }
 
+    void NeedRequestKeyboard()
+    {
+        needToRequestKeyboardInner_ = true;
+    }
+
     void CleanNodeResponseKeyEvent();
     void FireSelectEvent();
+
+    void OnVirtualKeyboardAreaChanged() override;
 
 protected:
     virtual void InitDragEvent();

@@ -140,7 +140,7 @@ float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     auto toolBarNode = hostNode->GetToolBarNode();
     CHECK_NULL_RETURN(toolBarNode, 0.0f);
     auto index = hostNode->GetChildIndexById(toolBarNode->GetId());
-    auto toolBarWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
+    auto toolBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(toolBarWrapper, 0.0f);
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
 

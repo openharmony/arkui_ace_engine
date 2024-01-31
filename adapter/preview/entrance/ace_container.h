@@ -71,7 +71,7 @@ public:
         int32_t height, UIEnvCallback callback);
 #endif
 
-    static bool RunPage(int32_t instanceId, const std::string& url, const std::string& params);
+    static UIContentErrorCode RunPage(int32_t instanceId, const std::string& url, const std::string& params);
     static RefPtr<AceContainer> GetContainerInstance(int32_t instanceId);
     static void AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback);
     static void NativeOnConfigurationUpdated(int32_t instanceId);
@@ -284,7 +284,7 @@ public:
         containerSdkPath_ = containerSdkPath;
     }
 
-    void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange) override;
+    void NotifyConfigurationChange(bool, const ConfigurationChange& configurationChange) override;
 
     // Support to execute the ets code mocked by developer
     void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo)

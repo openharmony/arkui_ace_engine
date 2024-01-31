@@ -55,6 +55,58 @@ struct AlignRule {
     }
 };
 
+enum class ChainStyle {
+    SPREAD,
+    SPREAD_INSIDE,
+    PACKED,
+};
+
+enum class LineDirection {
+    VERTICAL,
+    HORIZONTAL,
+};
+
+enum class BarrierDirection {
+    LEFT,
+    RIGHT,
+    TOP,
+    BOTTOM,
+};
+
+struct GuidelineInfo {
+    std::string id;
+    LineDirection direction = LineDirection::VERTICAL;
+    std::optional<Dimension> start;
+    std::optional<Dimension> end;
+
+    bool operator==(const GuidelineInfo& right) const
+    {
+        return ((this->id == right.id) && (this->direction == right.direction) &&
+                (this->start == right.start) && (this->end == right.end));
+    }
+};
+
+struct ChainInfo {
+    LineDirection direction = LineDirection::VERTICAL;
+    ChainStyle style = ChainStyle::SPREAD;
+
+    bool operator==(const ChainInfo& right) const
+    {
+        return ((this->direction == right.direction) && (this->style == right.style));
+    }
+};
+
+struct BarrierInfo {
+    std::string id;
+    BarrierDirection direction = BarrierDirection::LEFT;
+    std::vector<std::string> referencedId;
+
+    bool operator==(const BarrierInfo& right) const
+    {
+        return ((this->id == right.id) && (this->direction == right.direction) &&
+                (this->referencedId == right.referencedId));
+    }
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_POSITION_PARAM_H

@@ -29,20 +29,23 @@ float ParagraphManager::GetHeight() const
     return res;
 }
 
-int32_t ParagraphManager::GetIndex(Offset offset) const
+int32_t ParagraphManager::GetIndex(Offset offset, bool clamp) const
 {
     CHECK_NULL_RETURN(!paragraphs_.empty(), 0);
+    if (clamp && LessNotEqual(offset.GetY(), 0.0)) {
+        return 0;
+    }
     int idx = 0;
     for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
         auto&& info = *it;
         if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight()) ||
-            (idx == static_cast<int>(paragraphs_.size()) - 1)) {
+            (!clamp && idx == static_cast<int>(paragraphs_.size()) - 1)) {
             return info.paragraph->GetGlyphIndexByCoordinate(offset) + info.start;
         }
         // get offset relative to each paragraph
         offset.SetY(offset.GetY() - info.paragraph->GetHeight());
     }
-    return paragraphs_.back().paragraph->GetGlyphIndexByCoordinate(offset) + paragraphs_.back().start;
+    return paragraphs_.back().end;
 }
 
 std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const

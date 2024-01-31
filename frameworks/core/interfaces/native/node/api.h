@@ -627,7 +627,7 @@ struct ArkUICheckboxModifierAPI {
     void (*SetCheckboxWidth)(NodeHandle node, double widthVal, int widthUnit);
     void (*SetCheckboxHeight)(NodeHandle node, double heightVal, int heightUnit);
     void (*SetMark)(NodeHandle node, uint32_t color, double sizeValue, double widthValue);
-    void (*SetCheckboxPadding)(NodeHandle node, const double* values, const int* units);
+    void (*SetCheckboxPadding)(NodeHandle node, const double* values, const int* units, uint32_t length);
     void (*SetCheckboxResponseRegion)(NodeHandle node, const double* values, const int32_t* units, uint32_t length);
 
     void (*ResetSelect)(NodeHandle node);
@@ -977,6 +977,8 @@ struct ArkUIImageModifierAPI {
     void (*ResetImageBorder)(NodeHandle node);
     void (*SetImageOpacity)(NodeHandle node, double opacity);
     void (*ResetImageOpacity)(NodeHandle node);
+    void (*SetEdgeAntialiasing)(NodeHandle node, float edgeAntialiasing);
+    void (*ResetEdgeAntialiasing)(NodeHandle node);
 };
 
 struct ArkUIVideoModifierAPI {

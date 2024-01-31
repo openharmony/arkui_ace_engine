@@ -638,4 +638,18 @@ void SelectModelNG::SetHasOptionWidth(FrameNode* frameNode, bool hasOptionWidth)
     CHECK_NULL_VOID(pattern);
     pattern->SetHasOptionWidth(hasOptionWidth);
 }
+
+void SelectModelNG::SetMenuBackgroundColor(const Color& color)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuBackgroundColor(color);
+}
+
+void SelectModelNG::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuBackgroundBlurStyle(blurStyle);
+}
 } // namespace OHOS::Ace::NG

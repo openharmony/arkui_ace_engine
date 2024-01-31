@@ -451,11 +451,22 @@ bool WebClientImpl::OnFileSelectorShow(
 void WebClientImpl::OnResource(const std::string& url)
 {
     ContainerScope scope(instanceId_);
-    auto delegate = webDelegate_.Upgrade();
-    if (!delegate) {
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
         return;
     }
-    delegate->OnResourceLoad(url);
+    std::weak_ptr<WebClientImpl> webClientWeak = shared_from_this();
+    task->PostTask([webClient = webClientWeak, url] {
+        auto webClientUpgrade = webClient.lock();
+        if (webClientUpgrade == nullptr) {
+            return;
+        }
+        auto delegate = webClientUpgrade->GetWebDelegate();
+        if (delegate) {
+            delegate->OnResourceLoad(url);
+        }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS);
 }
 
 void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)

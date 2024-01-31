@@ -22,6 +22,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT RelativeContainerModelNG : public OHOS::Ace::RelativeContainerModel {
 public:
     void Create() override;
+    void SetBarrier(const std::vector<BarrierInfo>& barrierInfo) override;
+    void SetGuideline(const std::vector<GuidelineInfo>& guidelineInfo) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RELATIVE_CONTAINER_RELATIVE_CONTAINER_MODEL_NG_H

@@ -64,6 +64,7 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
     CHECK_NULL_VOID(frameNode);
     auto textBase = DynamicCast<TextBase>(node);
     CHECK_NULL_VOID(textBase);
+    textBase->OnVirtualKeyboardAreaChanged();
 
     auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
     CHECK_NULL_VOID(scrollableNode);
@@ -82,11 +83,11 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
     auto diffTop = caretRect.Top() - scrollableRect.Top();
     // caret height larger scroll's content region
     if (isShowKeyboard) {
-        if (diffTop <= 0 && LessNotEqual(bottomInset.start, caretRect.Bottom())) {
+        if (diffTop <= 0 &&
+            LessNotEqual(bottomInset.start, (caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()))) {
             return;
         }
     }
-    
 
     // caret above scroll's content region
     if (diffTop < 0) {
@@ -96,18 +97,17 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
 
     // caret inner scroll's content region
     if (isShowKeyboard) {
-        if (LessNotEqual(caretRect.Bottom(), bottomInset.start)) {
+        if (LessNotEqual((caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()), bottomInset.start)) {
             return;
         }
     }
-    
 
     // caret below safeArea
     float diffBot = 0.0f;
     if (isShowKeyboard) {
-        diffBot = bottomInset.start - caretRect.Bottom();
+        diffBot = bottomInset.start - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     } else {
-        diffBot = scrollableRect.Bottom() - caretRect.Bottom();
+        diffBot = scrollableRect.Bottom() - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     }
     CHECK_NULL_VOID(diffBot < 0);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);

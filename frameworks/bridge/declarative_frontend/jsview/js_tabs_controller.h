@@ -51,7 +51,13 @@ public:
         return swiperController_;
     }
 
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
+
 private:
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     RefPtr<TabController> controller_;
     RefPtr<SwiperController> swiperController_; // used by ng structure
 

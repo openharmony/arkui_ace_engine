@@ -437,6 +437,7 @@ public:
     virtual void OnColorConfigurationUpdate() {}
     virtual void OnDirectionConfigurationUpdate() {}
     virtual void OnDpiConfigurationUpdate() {}
+    virtual void OnIconConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {

@@ -176,7 +176,8 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
     referee->Adjudicate(recognizer, disposal);
 }
 
-void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime)
+void NGGestureRecognizer::Transform(
+    PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime, bool isPostEventResult)
 {
     if (node.Invalid()) {
         return;
@@ -207,7 +208,7 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:%{public}d", host->GetId());
             break;
         }
-        if (host->GetTag() == "NodeContainer") {
+        if (host->GetTag() == "NodeContainer" && isPostEventResult) {
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when used in NodeContainer, id:%{public}d", host->GetId());
             break;
         }

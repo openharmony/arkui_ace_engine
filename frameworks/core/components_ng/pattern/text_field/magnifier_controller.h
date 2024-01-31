@@ -55,8 +55,8 @@ private:
     void CreateMagnifierChildNode();
     void SetMagnifierRect(const RefPtr<Pattern>& childPattern);
 
-    bool haveChildNode_ = false;
     WeakPtr<Pattern> pattern_;
+    RefPtr<FrameNode> magnifierFrameNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

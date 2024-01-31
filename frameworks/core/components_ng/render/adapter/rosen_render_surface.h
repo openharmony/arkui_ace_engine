@@ -33,16 +33,7 @@
 namespace OHOS::Ace::NG {
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 #ifdef OHOS_PLATFORM
-struct SurfaceBufferNode {
-    SurfaceBufferNode(sptr<SurfaceBuffer> buf, int32_t fence, OffsetF orgin)
-        : buffer_(std::move(buf)), fence_(fence), orgin_(orgin)
-    {}
-    ~SurfaceBufferNode() noexcept = default;
-
-    sptr<SurfaceBuffer> buffer_;
-    int32_t fence_;
-    OffsetF orgin_ { 0, 0 };
-};
+struct SurfaceBufferNode;
 #endif
 
 class RosenRenderSurface : public RenderSurface {

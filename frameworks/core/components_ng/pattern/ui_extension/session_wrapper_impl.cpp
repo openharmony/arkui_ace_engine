@@ -489,9 +489,9 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
         CHECK_NULL_RETURN(pipeline, false);
         auto curWindow = pipeline->GetCurrentWindowRect();
         int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), .0);
-        keyboardHeight = std::max(keyboardHeight - spaceWindow, 0);
+        keyboardHeight = static_cast<int32_t>(std::max(keyboardHeight - spaceWindow, 0));
     }
-    info->rect_.height_ = keyboardHeight;
+    info->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
     session_->NotifyOccupiedAreaChangeInfo(info);
     return true;
 }

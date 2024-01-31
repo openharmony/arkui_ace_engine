@@ -24,6 +24,10 @@ class JSRelativeContainer : public JSContainerBase {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
+    static void ParseBarrierInfo(const JSRef<JSVal>& args, BarrierInfo& barrierInfoItem);
+    static void JsBarrier(const JSCallbackInfo& info);
+    static void ParseGuideline(const JSRef<JSVal>& args, GuidelineInfo& guidelineInfoItem);
+    static void JsGuideline(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

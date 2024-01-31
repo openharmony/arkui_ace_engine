@@ -26,10 +26,15 @@ class ImageAnalyzerInterface {
 public:
     virtual bool IsImageAnalyzerSupported() = 0;
     virtual void BuildNodeFunc(
-        napi_value pixelMap, ImageAnalyzerConfig* config, ImageAnalyzerInnerConfig* uiConfig, void** overlayData) = 0;
+        napi_value pixelMap, napi_value config, ImageAnalyzerInnerConfig* uiConfig, void** overlayData) {};
     virtual void UpdateImage(
-        void** overlayData, napi_value pixelMap, ImageAnalyzerConfig* config, ImageAnalyzerInnerConfig* uiConfig) = 0;
-    virtual void UpdateConfig(void** overlayData, ImageAnalyzerConfig* config) = 0;
+        void** overlayData, napi_value pixelMap, napi_value config, ImageAnalyzerInnerConfig* uiConfig) {};
+    virtual void UpdateConfig(void** overlayData, napi_value config) {};
+    virtual void BuildNodeFunc(
+        napi_value pixelMap, ImageAnalyzerConfig* config, ImageAnalyzerInnerConfig* uiConfig, void** overlayData) {};
+    virtual void UpdateImage(
+        void** overlayData, napi_value pixelMap, ImageAnalyzerConfig* config, ImageAnalyzerInnerConfig* uiConfig) {};
+    virtual void UpdateConfig(void** overlayData, ImageAnalyzerConfig* config) {};
     virtual void UpdateInnerConfig(void** overlayData, ImageAnalyzerInnerConfig* config) = 0;
     virtual void Release(void** overlayData) = 0;
 protected:

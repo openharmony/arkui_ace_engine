@@ -133,7 +133,10 @@ RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_
         { CalcLength(buttonWidth), std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
     buttonPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     if (callback) {
-        pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& /* info */) {
+        pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& info) {
+            if (!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info)) {
+                return;
+            }
             if (callback) {
                 callback();
             }
@@ -657,22 +660,13 @@ void SelectOverlayNode::MoreAnimation()
     FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty,
                                   id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [selectMenuInnerProperty, extensionProperty, backButtonProperty, id, weak]() {
-                ContainerScope scope(id);
-                selectMenuInnerProperty->UpdateVisibility(VisibleType::GONE);
-                extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
-                backButtonProperty->UpdateVisibility(VisibleType::VISIBLE);
-                auto selectOverlay = weak.Upgrade();
-                CHECK_NULL_VOID(selectOverlay);
-                selectOverlay->SetAnimationStatus(false);
-                selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-            },
-            TaskExecutor::TaskType::UI);
+        selectMenuInnerProperty->UpdateVisibility(VisibleType::GONE);
+        extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
+        backButtonProperty->UpdateVisibility(VisibleType::VISIBLE);
+        auto selectOverlay = weak.Upgrade();
+        CHECK_NULL_VOID(selectOverlay);
+        selectOverlay->SetAnimationStatus(false);
+        selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     };
     AnimationOption selectOption;
     selectOption.SetDuration(ANIMATION_DURATION1);
@@ -742,22 +736,13 @@ void SelectOverlayNode::BackAnimation()
     FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty,
                                   id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [selectMenuInnerProperty, extensionProperty, backButtonProperty, id, weak]() {
-                ContainerScope scope(id);
-                selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
-                extensionProperty->UpdateVisibility(VisibleType::GONE);
-                backButtonProperty->UpdateVisibility(VisibleType::GONE);
-                auto selectOverlay = weak.Upgrade();
-                CHECK_NULL_VOID(selectOverlay);
-                selectOverlay->SetAnimationStatus(false);
-                selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-            },
-            TaskExecutor::TaskType::UI);
+        selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
+        extensionProperty->UpdateVisibility(VisibleType::GONE);
+        backButtonProperty->UpdateVisibility(VisibleType::GONE);
+        auto selectOverlay = weak.Upgrade();
+        CHECK_NULL_VOID(selectOverlay);
+        selectOverlay->SetAnimationStatus(false);
+        selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     };
 
     AnimationOption selectOption;
@@ -1097,7 +1082,7 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
     }
     if (info->menuInfo.menuDisable || !info->menuInfo.menuIsShow) {
         (noAnimation) ? HideFrameNodeImmediately(FrameNodeType::SELECTMENU)
-            : ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
+                      : ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
     } else {
         ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::SHOW);
     }
@@ -1176,7 +1161,8 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
 {
     RefPtr<FrameNode> menuWrapper;
     std::vector<OptionParam> params = GetOptionsParams(info);
-    menuWrapper = MenuView::Create(std::move(params), -1);
+    menuWrapper = MenuView::Create(
+        std::move(params), -1, "SelectOverlayMenuByRightClick", MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU);
     CHECK_NULL_RETURN(menuWrapper, nullptr);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     // set click position to menu

@@ -31,4 +31,19 @@ void RelativeContainerModelNG::Create()
     ViewStackProcessor::GetInstance()->Push(frameNode);
 }
 
+void RelativeContainerModelNG::SetBarrier(const std::vector<BarrierInfo>& barrierInfo)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Barrier, barrierInfo);
+}
+
+void RelativeContainerModelNG::SetGuideline(const std::vector<GuidelineInfo>& guidelineInfo)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Guideline, guidelineInfo);
+}
 } // namespace OHOS::Ace::NG

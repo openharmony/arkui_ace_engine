@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -64,7 +65,7 @@ void ButtonLayoutAlgorithm::HandleChildLayoutConstraint(
     if (selfLayoutConstraint && !selfLayoutConstraint->selfIdealSize.Height().has_value()) {
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
-        auto defaultHeight = GetDefaultHeight(buttonLayoutProperty);
+        auto defaultHeight = GetDefaultHeight(layoutWrapper);
         auto maxHeight = selfLayoutConstraint->maxSize.Height();
         layoutConstraint.maxSize.SetHeight(maxHeight > defaultHeight ? defaultHeight : maxHeight);
     }
@@ -80,7 +81,7 @@ std::optional<SizeF> ButtonLayoutAlgorithm::HandleLabelCircleButtonConstraint(La
     auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, constraintSize);
     const auto& padding = buttonLayoutProperty->CreatePaddingAndBorder();
-    auto defaultHeight = GetDefaultHeight(buttonLayoutProperty);
+    auto defaultHeight = GetDefaultHeight(layoutWrapper);
     float minLength = 0.0f;
     if (selfLayoutConstraint->selfIdealSize.IsNull()) {
         // Width and height are not set.
@@ -180,7 +181,7 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         auto bottomPadding = padding.bottom.value_or(0.0);
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
-        auto defaultHeight = GetDefaultHeight(buttonLayoutProperty);
+        auto defaultHeight = GetDefaultHeight(layoutWrapper);
         if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
             HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize, defaultHeight);
         } else {
@@ -257,10 +258,19 @@ Dimension ButtonLayoutAlgorithm::GetFirstValidRadius(const BorderRadiusProperty&
     return 0.0_vp;
 }
 
-float ButtonLayoutAlgorithm::GetDefaultHeight(RefPtr<ButtonLayoutProperty> layoutProperty)
+float ButtonLayoutAlgorithm::GetDefaultHeight(LayoutWrapper* layoutWrapper)
 {
+    auto layoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, 0.0);
     auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, 0.0);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, 0.0);
+    if (frameNode->GetTag() == V2::TOGGLE_ETS_TAG) {
+        auto toggleTheme = PipelineBase::GetCurrentContext()->GetTheme<ToggleTheme>();
+        CHECK_NULL_RETURN(toggleTheme, 0.0);
+        return static_cast<float>(toggleTheme->GetButtonHeight().ConvertToPx());
+    }
     ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
     return static_cast<float>(buttonTheme->GetHeight(controlSize).ConvertToPx());
 }

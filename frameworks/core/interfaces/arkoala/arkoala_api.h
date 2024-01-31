@@ -29,6 +29,7 @@ extern "C" {
 #define ARKUI_EXTENDED_API_VERSION 2
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 5
+#define ARKUI_AUTO_GENERATE_NODE_ID -2
 
 enum ArkUIAPIVariantKind {
     BASIC = 1,
@@ -459,6 +460,9 @@ enum ArkUINodeType {
     ARKUI_CUSTOM,
     ARKUI_CUSTOM_CONTAINER,
     ARKUI_LIST_ITEM_GROUP,
+    ARKUI_DATE_PICKER,
+    ARKUI_TIME_PICKER,
+    ARKUI_TEXT_PICKER,
 };
 
 enum ArkUIEventCategory {
@@ -475,7 +479,7 @@ enum ArkUIEventCategory {
 #define ARKUI_MAX_EVENT_NUM 1000
 
 enum ArkUIAsyncEventKind {
-// common events
+    // common events
     ON_APPEAR = 0,
     ON_DISAPPEAR = 1,
     ON_TOUCH = 2,
@@ -535,7 +539,9 @@ enum ArkUIAsyncEventKind {
     ON_XCOMPONENT_DESTROY,
 
     ON_REFRESH_STATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_REFRESH,
-    ON_REFRESH_REFRESHING
+    ON_REFRESH_REFRESHING,
+    ON_DATE_PICKER_DATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_DATE_PICKER,
+    ON_TIME_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TIME_PICKER
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -560,13 +566,7 @@ enum ArkUIAPIValueKind {
     VALUE_KIND_FLOAT64 = 3,
 };
 
-enum ArkUIAPIEventCallbackType {
-    VOID = 0,
-    INT_32 = 1,
-    FLOAT_32 = 2,
-    INT_32_ARRAY = 3,
-    FLOAT_32_ARRAY = 4
-};
+enum ArkUIAPIEventCallbackType { VOID = 0, INT_32 = 1, FLOAT_32 = 2, INT_32_ARRAY = 3, FLOAT_32_ARRAY = 4 };
 
 enum ArkUIAPINodeFlags {
     NONE = 0,
@@ -575,11 +575,7 @@ enum ArkUIAPINodeFlags {
     CUSTOM_DRAW = 1 << 2,
 };
 
-enum ArkUIAPICustomOp {
-    MEASURE = 1,
-    LAYOUT = 2,
-    DRAW = 3
-};
+enum ArkUIAPICustomOp { MEASURE = 1, LAYOUT = 2, DRAW = 3 };
 
 enum ArkUIVMKind {
     VM_JS = 1,
@@ -667,6 +663,7 @@ struct ArkUINodeEvent {
         ArkUIAPIEventTextInput textInputEvent;
         ArkUIAPIEventGestureAsyncEvent gestureAsyncEvent;
         ArkUIStringAsyncEvent stringAsyncEvent;
+        ArkUITouchEvent touchEvent;
     };
 };
 
@@ -692,7 +689,6 @@ struct ArkUIBorderOptions {
     ArkUI_Int32* styles;
 };
 
-
 struct ArkUIAnimationOptionType {
     ArkUI_Int32 duration;
     ArkUI_CharPtr curve;
@@ -709,19 +705,19 @@ struct ArkUICommonModifier {
     void (*resetWidth)(ArkUINodeHandle node);
     void (*setHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetHeight)(ArkUINodeHandle node);
-    void (*setBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units,
-        ArkUI_Int32 length);
+    void (*setBorderRadius)(
+        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetBorderRadius)(ArkUINodeHandle node);
-    void (*setBorderWidth)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units,
-        ArkUI_Int32 length);
+    void (*setBorderWidth)(
+        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetBorderWidth)(ArkUINodeHandle node);
     void (*setTransform)(ArkUINodeHandle node, const ArkUI_Float32* matrix, ArkUI_Int32 length);
     void (*resetTransform)(ArkUINodeHandle node);
     void (*setBorderColor)(ArkUINodeHandle node, ArkUI_Uint32 leftColorInt, ArkUI_Uint32 rightColorInt,
         ArkUI_Uint32 topColorInt, ArkUI_Uint32 bottomColorInt);
     void (*resetBorderColor)(ArkUINodeHandle node);
-    void (*setPosition)(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue,
-        ArkUI_Int32 yUnit);
+    void (*setPosition)(
+        ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue, ArkUI_Int32 yUnit);
     void (*resetPosition)(ArkUINodeHandle node);
     void (*setBorderStyle)(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length);
     void (*resetBorderStyle)(ArkUINodeHandle node);
@@ -784,9 +780,8 @@ struct ArkUICommonModifier {
     void (*setBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
         const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
     void (*resetBorder)(ArkUINodeHandle node);
-    void (*setBackgroundImagePosition)(
-        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types, ArkUI_Bool isAlign,
-        ArkUI_Int32 size);
+    void (*setBackgroundImagePosition)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
+        ArkUI_Bool isAlign, ArkUI_Int32 size);
     void (*resetBackgroundImagePosition)(ArkUINodeHandle node);
     void (*setBackgroundImageSize)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
         ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight);
@@ -794,15 +789,16 @@ struct ArkUICommonModifier {
     void (*setBackgroundImage)(
         ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle, ArkUI_CharPtr module, ArkUI_Int32 repeatIndex);
     void (*resetBackgroundImage)(ArkUINodeHandle node);
-    void (*setTranslate)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units,
-    ArkUI_Int32 length);
-        void (*resetTranslate)(ArkUINodeHandle node);
-    void (*setScale)(
-        ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength, const ArkUI_Int32* units,
+    void (*setTranslate)(
+        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetTranslate)(ArkUINodeHandle node);
+    void (*setScale)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength, const ArkUI_Int32* units,
         ArkUI_Int32 unitLength);
+    void (*setScaleWithoutTransformCenter)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength);
     void (*resetScale)(ArkUINodeHandle node);
     void (*setRotate)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength,
         const ArkUI_Int32* units, ArkUI_Int32 unitLength);
+    void (*setRotateWithoutTransformCenter)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength);
     void (*resetRotate)(ArkUINodeHandle node);
     void (*setGeometryTransition)(ArkUINodeHandle node, ArkUI_CharPtr id);
     void (*resetGeometryTransition)(ArkUINodeHandle node);
@@ -922,8 +918,9 @@ struct ArkUICommonModifier {
 
     void (*setClip)(ArkUINodeHandle node, ArkUI_Int32 isClip);
     void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_Int32 length);
-    void (*setClipPath)(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute,
-        ArkUI_CharPtr commands);
+    void (*setClipPath)(
+        ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_CharPtr commands);
+    void (*resetClip)(ArkUINodeHandle node);
     void (*setTransitionCenter)(ArkUINodeHandle node, ArkUI_Float32 centerX, ArkUI_Int32 centerXUnit,
         ArkUI_Float32 centerY, ArkUI_Int32 centerYUnit, ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit);
     void (*setOpacityTransition)(
@@ -934,6 +931,14 @@ struct ArkUICommonModifier {
         const ArkUIAnimationOptionType* opacityOption);
     void (*setTranslateTransition)(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue,
         ArkUI_Int32 yUnit, ArkUI_Float32 zValue, ArkUI_Int32 zUnit, const ArkUIAnimationOptionType* opacityOption);
+    void (*setMaskShape)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
+        ArkUI_Float32 strokeWidth, ArkUI_Float64* attribute, ArkUI_Int32 length);
+    void (*setMaskPath)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
+        ArkUI_Float32 strokeWidth, ArkUI_Float64* attribute, ArkUI_CharPtr commands);
+    void (*setBlendMode)(ArkUINodeHandle node, ArkUI_Int32 blendMode);
+    void (*resetBlendMode)(ArkUINodeHandle node);
+    void (*setConstraintSize)(ArkUINodeHandle node, const ArkUI_Float64* values, const ArkUI_Int32* units);
+    void (*resetConstraintSize)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -1008,7 +1013,7 @@ struct ArkUIShapeModifier {
 
 struct ArkUITextModifier {
     void (*setContent)(ArkUINodeHandle node, ArkUI_CharPtr value);
-    void (*setFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr weight);
+    void (*setFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
     void (*resetFontWeight)(ArkUINodeHandle node);
     void (*setFontStyle)(ArkUINodeHandle node, ArkUI_Uint32 fontStyle);
     void (*resetFontStyle)(ArkUINodeHandle node);
@@ -1022,8 +1027,7 @@ struct ArkUITextModifier {
     void (*resetTextLineHeight)(ArkUINodeHandle node);
     void (*setTextOverflow)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextOverflow)(ArkUINodeHandle node);
-    void (*setTextDecoration)(
-        ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style);
+    void (*setTextDecoration)(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style);
     void (*resetTextDecoration)(ArkUINodeHandle node);
     void (*setTextCase)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextCase)(ArkUINodeHandle node);
@@ -1051,6 +1055,7 @@ struct ArkUITextModifier {
     void (*resetTextLetterSpacing)(ArkUINodeHandle node);
     void (*setTextFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
     void (*resetTextFont)(ArkUINodeHandle node);
+    void (*setFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr weight);
 };
 
 struct ArkUIButtonModifier {
@@ -1177,7 +1182,9 @@ struct ArkUIListModifier {
     void (*setListScrollBar)(ArkUINodeHandle node, ArkUI_Int32 barState);
     void (*resetListScrollBar)(ArkUINodeHandle node);
     void (*setListScrollBarWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetListScrollBarWidth)(ArkUINodeHandle node);
     void (*setListScrollBarColor)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetListScrollBarColor)(ArkUINodeHandle node);
     void (*setAlignListItem)(ArkUINodeHandle node, ArkUI_Int32 listItemAlign);
     void (*resetAlignListItem)(ArkUINodeHandle node);
     void (*setScrollSnapAlign)(ArkUINodeHandle node, ArkUI_Int32 scrollSnapAlign);
@@ -1189,11 +1196,11 @@ struct ArkUIListModifier {
         ArkUINodeHandle node, const struct ArkUIChainAnimationOptionsType* chainAnimationOptions);
     void (*resetChainAnimationOptions)(ArkUINodeHandle node);
     void (*setListSpace)(ArkUINodeHandle node, ArkUI_Float32 space);
+    void (*resetListSpace)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {
-    void (*listItemGroupSetDivider)(
-        ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+    void (*listItemGroupSetDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*listItemGroupResetDivider)(ArkUINodeHandle node);
     void (*listItemGroupSetHeader)(ArkUINodeHandle node, ArkUINodeHandle header);
@@ -1233,7 +1240,7 @@ struct ArkUISwiperModifier {
     void (*resetSwiperIndex)(ArkUINodeHandle node);
     void (*setSwiperIndicator)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
     void (*resetSwiperIndicator)(ArkUINodeHandle node);
-    void (*setSwiperDuration)(ArkUINodeHandle node, ArkUI_Int32 duration);
+    void (*setSwiperDuration)(ArkUINodeHandle node, ArkUI_Float32 duration);
     void (*resetSwiperDuration)(ArkUINodeHandle node);
 };
 
@@ -1264,6 +1271,8 @@ struct ArkUINodeContainerModifier {
 };
 
 struct ArkUITimepickerModifier {
+    void (*setTimepickerSelected)(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute);
+    void (*resetTimepickerSelected)(ArkUINodeHandle node);
     void (*setTimepickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setTimepickerDisappearTextStyle)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
@@ -1275,6 +1284,8 @@ struct ArkUITimepickerModifier {
     void (*resetTimepickerTextStyle)(ArkUINodeHandle node);
     void (*resetTimepickerSelectedTextStyle)(ArkUINodeHandle node);
     void (*resetTimepickerBackgroundColor)(ArkUINodeHandle node);
+    void (*SetTimepickerUseMilitaryTime)(ArkUINodeHandle node, ArkUI_Bool isUseMilitaryTime);
+    void (*ResetTimepickerUseMilitaryTime)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoModifier {
@@ -1378,6 +1389,10 @@ struct ArkUIScrollModifier {
     void (*resetEnableScrollInteraction)(ArkUINodeHandle node);
     void (*setScrollTo)(ArkUINodeHandle node, const ArkUI_Float32* values);
     void (*setScrollEdge)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetScrollTo)(ArkUINodeHandle node);
+    void (*resetScrollEdge)(ArkUINodeHandle node);
+    void (*setScrollEnablePaging)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetScrollEnablePaging)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemModifier {
@@ -1452,14 +1467,14 @@ struct ArkUITabsControllerModifier {
 };
 
 struct ArkUIGestureModifier {
-    void (*tapGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority,
-        ArkUI_Int32 count, ArkUI_Int32 fingers);
+    void (*tapGestureAsyncEvent)(
+        ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority, ArkUI_Int32 count, ArkUI_Int32 fingers);
     void (*longPressGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority,
         ArkUI_Int32 fingers, ArkUI_Int32 repeat, ArkUI_Int32 duration, ArkUI_Int32* event);
-    void (*panGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority,
-        ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Int32 distance, ArkUI_Int32* event);
-    void (*pinchGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority,
-        ArkUI_Int32 fingers, ArkUI_Int32 distance, ArkUI_Int32* event);
+    void (*panGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority, ArkUI_Int32 fingers,
+        ArkUI_Int32 direction, ArkUI_Int32 distance, ArkUI_Int32* event);
+    void (*pinchGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority, ArkUI_Int32 fingers,
+        ArkUI_Int32 distance, ArkUI_Int32* event);
     void (*groupGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mode, ArkUI_Int32* event);
     void (*notifyResetGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 subKind);
 };
@@ -1469,9 +1484,8 @@ struct ArkUISliderModifier {
     void (*resetShowTips)(ArkUINodeHandle node);
     void (*setSliderStepSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetSliderStepSize)(ArkUINodeHandle node);
-    void (*setBlockSize)(
-        ArkUINodeHandle node, ArkUI_Float32 widthVal, ArkUI_Int32 widthUnit,
-        ArkUI_Float32 heightVal, ArkUI_Int32 heightUnit);
+    void (*setBlockSize)(ArkUINodeHandle node, ArkUI_Float32 widthVal, ArkUI_Int32 widthUnit, ArkUI_Float32 heightVal,
+        ArkUI_Int32 heightUnit);
     void (*resetBlockSize)(ArkUINodeHandle node);
     void (*setTrackBorderRadius)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTrackBorderRadius)(ArkUINodeHandle node);
@@ -1553,7 +1567,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaFontColor)(ArkUINodeHandle node);
     void (*setTextAreaFontStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextAreaFontStyle)(ArkUINodeHandle node);
-    void (*setTextAreaFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
+    void (*setTextAreaFontWeight)(ArkUINodeHandle node, ArkUI_Int32 fontWeight);
     void (*resetTextAreaFontWeight)(ArkUINodeHandle node);
     void (*setTextAreaFontSize)(ArkUINodeHandle node, const struct ArkUIResourceLength* size);
     void (*resetTextAreaFontSize)(ArkUINodeHandle node);
@@ -1561,6 +1575,7 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaPlaceholderString)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setTextAreaTextString)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*stopTextAreaTextEditing)(ArkUINodeHandle node);
+    void (*setTextAreaFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
 };
 
 struct ArkUITextInputModifier {
@@ -1596,7 +1611,7 @@ struct ArkUITextInputModifier {
     void (*resetTextInputBarState)(ArkUINodeHandle node);
     void (*setTextInputEnterKeyType)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextInputEnterKeyType)(ArkUINodeHandle node);
-    void (*setTextInputFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
+    void (*setTextInputFontWeight)(ArkUINodeHandle node, ArkUI_Int32 fontWeight);
     void (*resetTextInputFontWeight)(ArkUINodeHandle node);
     void (*setTextInputFontSize)(ArkUINodeHandle node, const struct ArkUILengthType* value);
     void (*resetTextInputFontSize)(ArkUINodeHandle node);
@@ -1616,6 +1631,7 @@ struct ArkUITextInputModifier {
     void (*resetTextInputFontFamily)(ArkUINodeHandle node);
     void (*setTextInputPlaceholderString)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setTextInputTextString)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setTextInputFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
 };
 
 struct ArkUIWebModifier {
@@ -1780,8 +1796,7 @@ struct ArkUIGaugeModifier {
     void (*resetGaugeEndAngle)(ArkUINodeHandle node);
     void (*setGaugeStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetGaugeStrokeWidth)(ArkUINodeHandle node);
-    void (*setShadowOptions)(
-        ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY,
+    void (*setShadowOptions)(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY,
         ArkUI_Bool isShadowVisible);
     void (*resetShadowOptions)(ArkUINodeHandle node);
     void (*setIsShowIndicator)(ArkUINodeHandle node, ArkUI_Bool isShowIndicator);
@@ -1798,7 +1813,6 @@ struct ArkUIGaugeModifier {
         ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Uint32 weightLength);
     void (*resetGradientColors)(ArkUINodeHandle node);
 };
-
 
 struct ArkUIBadgeModifier {
     void (*setBadgeParameters)(ArkUINodeHandle node, ArkUI_Int32* intValue, ArkUI_Float32* floatValue);
@@ -1852,14 +1866,16 @@ struct ArkUIAlphabetIndexerModifier {
     void (*resetPopupSelectedColor)(ArkUINodeHandle node);
     void (*setItemSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetItemSize)(ArkUINodeHandle node);
-    void (*setPopupPosition)(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit,
-        ArkUI_Float32 yValue, ArkUI_Int32 yUnit);
+    void (*setPopupPosition)(
+        ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue, ArkUI_Int32 yUnit);
     void (*resetPopupPosition)(ArkUINodeHandle node);
 };
 
 struct ArkUILoadingProgressModifier {
+    ArkUI_Uint32 (*getColor)(ArkUINodeHandle node);
     void (*setColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetColor)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableLoading)(ArkUINodeHandle node);
     void (*setEnableLoading)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableLoading)(ArkUINodeHandle node);
 };
@@ -1908,8 +1924,7 @@ struct ArkUISideBarContainerModifier {
 struct ArkUICalendarPickerModifier {
     void (*setTextStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontSize, ArkUI_CharPtr fontWeight);
     void (*resetTextStyle)(ArkUINodeHandle node);
-    void (*setEdgeAlign)(
-        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 size,
+    void (*setEdgeAlign)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 size,
         ArkUI_Int32 alignType);
     void (*resetEdgeAlign)(ArkUINodeHandle node);
 };
@@ -2049,13 +2064,21 @@ struct ArkUIDatePickerModifier {
     void (*resetDisappearTextStyle)(ArkUINodeHandle node);
     void (*setLunar)(ArkUINodeHandle node, ArkUI_Bool isLunar);
     void (*resetLunar)(ArkUINodeHandle node);
+    void (*setStartDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetStartDate)(ArkUINodeHandle node);
+    void (*setEndDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetEndDate)(ArkUINodeHandle node);
+    void (*setSelectedDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetSelectedDate)(ArkUINodeHandle node);
+    void (*setDatePickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetDatePickerBackgroundColor)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {
     void (*setContent)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setSpanTextCase)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSpanTextCase)(ArkUINodeHandle node);
-    void (*setSpanFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setSpanFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSpanFontWeight)(ArkUINodeHandle node);
     void (*setSpanLineHeight)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit);
     void (*resetSpanLineHeight)(ArkUINodeHandle node);
@@ -2074,6 +2097,7 @@ struct ArkUISpanModifier {
     void (*resetSpanLetterSpacing)(ArkUINodeHandle node);
     void (*setSpanFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
     void (*resetSpanFont)(ArkUINodeHandle node);
+    void (*setSpanFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr value);
 };
 
 struct ArkUISelectModifier {
@@ -2254,8 +2278,8 @@ struct ArkUICanvasRenderingContext2DModifier {
     void (*setCanvasGlobalAlpha)(ArkUINodeHandle node, ArkUI_Float32 value);
     ArkUI_Float32 (*getCanvasGlobalAlpha)(ArkUINodeHandle node);
     void (*setCanvasFillRect)(ArkUINodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y, ArkUI_Float32 w, ArkUI_Float32 h);
-    void (*setCanvasFillText)(ArkUINodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y,
-        ArkUI_Float32 w, ArkUI_Float32 maxWidth);
+    void (*setCanvasFillText)(
+        ArkUINodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y, ArkUI_Float32 w, ArkUI_Float32 maxWidth);
 };
 
 struct ArkUIUtilsModifier {
@@ -2267,8 +2291,8 @@ struct ArkUIUtilsModifier {
 struct ArkUISideBarModifier {
     void (*setShowSideBar)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*setControlButton)(ArkUINodeHandle node, ArkUI_Float32* position, ArkUI_Int32 positionArrayLength,
-        ArkUI_CharPtr* showIcon, ArkUI_Int32 showArrayLength, ArkUI_CharPtr* hiddenIcon,
-        ArkUI_Int32 hiddenArrayLength, ArkUI_CharPtr* switchingIcon, ArkUI_Int32 switchingArrayLength);
+        ArkUI_CharPtr* showIcon, ArkUI_Int32 showArrayLength, ArkUI_CharPtr* hiddenIcon, ArkUI_Int32 hiddenArrayLength,
+        ArkUI_CharPtr* switchingIcon, ArkUI_Int32 switchingArrayLength);
     void (*setShowControlButton)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*setSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setMinSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
@@ -2287,7 +2311,7 @@ struct ArkUIXComponentModifier {
     // matching VM we're embedding into. errorCallbackId is invoked if operation
     // cannot be completed.
     ArkUIVMObject (*loadXComponent)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUIVMKind vmKind,
-                                    ArkUI_CharPtr libraryName, ArkUI_Int32 errorCallbackId);
+        ArkUI_CharPtr libraryName, ArkUI_Int32 errorCallbackId);
     void (*setXComponentOptions)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_CharPtr type, ArkUI_CharPtr libraryName);
     ArkUI_CharPtr (*getXComponentSurfaceId)(ArkUIXComponentControllerHandle controller);
     ArkUIXComponentControllerHandle (*getXComponentController)(ArkUINodeHandle node);
@@ -2338,10 +2362,10 @@ struct ArkUIGraphicsCanvas {
     void (*finalize)(ArkUICanvasHandle canvas);
 
     void (*drawPoint)(ArkUICanvasHandle canvas, ArkUI_Float32 x, ArkUI_Float32 y, ArkUIPaintHandle paint);
-    void (*drawPoints)(ArkUICanvasHandle canvas, ArkUI_Int32 mode, ArkUI_Float32* coords, ArkUI_Int32 count,
+    void (*drawPoints)(
+        ArkUICanvasHandle canvas, ArkUI_Int32 mode, ArkUI_Float32* coords, ArkUI_Int32 count, ArkUIPaintHandle paint);
+    void (*drawLine)(ArkUICanvasHandle canvas, ArkUI_Float32 x0, ArkUI_Float32 y0, ArkUI_Float32 x1, ArkUI_Float32 y1,
         ArkUIPaintHandle paint);
-    void (*drawLine)(ArkUICanvasHandle canvas, ArkUI_Float32 x0, ArkUI_Float32 y0, ArkUI_Float32 x1,
-        ArkUI_Float32 y1, ArkUIPaintHandle paint);
     void (*drawArc)(ArkUICanvasHandle canvas, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right,
         ArkUI_Float32 bottom, ArkUI_Float32 startAngle, ArkUI_Float32 sweepAngle, ArkUI_Bool includeCenter,
         ArkUIPaintHandle paint);
@@ -2349,14 +2373,13 @@ struct ArkUIGraphicsCanvas {
         ArkUI_Float32 bottom, ArkUIPaintHandle paint);
     void (*drawOval)(ArkUICanvasHandle canvas, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right,
         ArkUI_Float32 bottom, ArkUIPaintHandle paint);
-    void (*drawCircle)(ArkUICanvasHandle canvas, ArkUI_Float32 x, ArkUI_Float32 y, ArkUI_Float32 radius,
-        ArkUIPaintHandle paintPtr);
+    void (*drawCircle)(
+        ArkUICanvasHandle canvas, ArkUI_Float32 x, ArkUI_Float32 y, ArkUI_Float32 radius, ArkUIPaintHandle paintPtr);
     void (*drawRRect)(ArkUICanvasHandle canvas, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right,
         ArkUI_Float32 bottom, ArkUI_Float32* jradii, ArkUI_Int32 jradiiSize, ArkUIPaintHandle paintPtr);
     void (*drawDRRect)(ArkUICanvasHandle canvas, ArkUI_Float32 ol, ArkUI_Float32 ot, ArkUI_Float32 oright,
         ArkUI_Float32 ob, ArkUI_Float32* ojradii, ArkUI_Int32 ojradiiSize, ArkUI_Float32 il, ArkUI_Float32 it,
-        ArkUI_Float32 ir, ArkUI_Float32 ib, ArkUI_Float32* ijradii, ArkUI_Int32 ijradiiSize,
-        ArkUIPaintHandle paint);
+        ArkUI_Float32 ir, ArkUI_Float32 ib, ArkUI_Float32* ijradii, ArkUI_Int32 ijradiiSize, ArkUIPaintHandle paint);
     void (*drawString)(ArkUICanvasHandle canvas, ArkUI_CharPtr string, ArkUI_Float32 x, ArkUI_Float32 y,
         ArkUIFontHandle font, ArkUIPaintHandle paint);
 };
@@ -2522,8 +2545,8 @@ struct ArkUIBasicAPI {
     /**
      * notify the node to send node event back
      */
-    void (*registerNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId,
-                                   void* extraParam);
+    void (*registerNodeAsyncEvent)(
+        ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId, void* extraParam);
     void (*unRegisterNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind);
     /* registerNodeAsyncEventReceiver() must be redesigned */
     void (*registerNodeAsyncEventReceiver)(void (*eventReceiver)(ArkUINodeEvent* event));
@@ -2550,14 +2573,10 @@ struct ArkUIExtendedNodeAPI {
 
     void (*setCallbackMethod)(ArkUIAPICallbackMethod* method);
     void (*setCustomCallback)(ArkUINodeHandle node, ArkUI_Int32 callbackId);
-    ArkUI_Int32 (*measureLayoutAndDraw)(ArkUIVMContext vmContext,
-                                        ArkUINodeHandle node);
-    ArkUI_Int32 (*measureNode)(ArkUIVMContext vmContext, ArkUINodeHandle node,
-                               ArkUI_Float32 *data);
-    ArkUI_Int32 (*layoutNode)(ArkUIVMContext vmContext, ArkUINodeHandle node,
-                              ArkUI_Float32 *data);
-    ArkUI_Int32 (*drawNode)(ArkUIVMContext vmContext, ArkUINodeHandle node,
-                            ArkUI_Float32 *data);
+    ArkUI_Int32 (*measureLayoutAndDraw)(ArkUIVMContext vmContext, ArkUINodeHandle node);
+    ArkUI_Int32 (*measureNode)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data);
+    ArkUI_Int32 (*layoutNode)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data);
+    ArkUI_Int32 (*drawNode)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data);
     void (*setMeasureWidth)(ArkUINodeHandle node, ArkUI_Float32 value);
     ArkUI_Float32 (*getMeasureWidth)(ArkUINodeHandle node);
     void (*setMeasureHeight)(ArkUINodeHandle node, ArkUI_Float32 value);
@@ -2566,30 +2585,26 @@ struct ArkUIExtendedNodeAPI {
     void (*setY)(ArkUINodeHandle node, ArkUI_Float32 value);
     ArkUI_Int32 (*indexerChecker)(ArkUIVMContext context, ArkUINodeHandle node);
     void (*setRangeUpdater)(ArkUINodeHandle node, ArkUI_Int32 updaterId);
-    void (*setLazyItemIndexer)(ArkUIVMContext vmContext, ArkUINodeHandle node,
-                             ArkUI_Int32 indexerId);
+    void (*setLazyItemIndexer)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 indexerId);
     /// Vsync support.
-    ArkUI_Int32 (*setVsyncCallback)(ArkUIVMContext vmContext,
-                                    ArkUI_Int32 device,
-                                    ArkUI_Int32 callbackId);
+    ArkUI_Int32 (*setVsyncCallback)(ArkUIVMContext vmContext, ArkUI_Int32 device, ArkUI_Int32 callbackId);
     void (*unblockVsyncWait)(ArkUIVMContext vmContext, ArkUI_Int32 device);
     /// Events.
     /**
-    * Returns != 0 if an event was received,
-    * fills in supplied buffer in such a case.
-    * Must not block, blocking is performed by
-    * ArkoalaHostApi.waitForVsync().
-    */
-    ArkUI_Int32 (*checkEvent)(ArkUINodeEvent *event);
+     * Returns != 0 if an event was received,
+     * fills in supplied buffer in such a case.
+     * Must not block, blocking is performed by
+     * ArkoalaHostApi.waitForVsync().
+     */
+    ArkUI_Int32 (*checkEvent)(ArkUINodeEvent* event);
     /**
-    * Add an event to the event queue, so that
-    * it will be picked up later by checkEvent().
-    */
-    void (*sendEvent)(ArkUINodeEvent *event);
+     * Add an event to the event queue, so that
+     * it will be picked up later by checkEvent().
+     */
+    void (*sendEvent)(ArkUINodeEvent* event);
 
     /// Continuations on native side.
-    void (*callContinuation)(ArkUI_Int32 continuationId, ArkUI_Int32 argCount,
-                             ArkUIEventCallbackArg *args);
+    void (*callContinuation)(ArkUI_Int32 continuationId, ArkUI_Int32 argCount, ArkUIEventCallbackArg* args);
     void (*setChildTotalCuunt)(ArkUINodeHandle node, ArkUI_Int32 totalCount);
 };
 

@@ -125,18 +125,6 @@ public:
         return TypeInfoHelper::InstanceOf<T>(RawPtr(ptr));
     }
 
-    struct OnConfigurationChange {
-        bool colorModeUpdate = false;
-        bool languageUpdate = false;
-        bool directionUpdate = false;
-        bool dpiUpdate = false;
-        bool defaultFontUpdate = false;
-        bool IsNeedUpdate() const
-        {
-            return colorModeUpdate || languageUpdate || directionUpdate || dpiUpdate || defaultFontUpdate;
-        }
-    };
-
 protected:
     AceType() = default;
 };

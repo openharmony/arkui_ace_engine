@@ -62,7 +62,7 @@ void LongPressRecognizer::OnAccepted()
     if (onLongPress_ && !touchPoints_.empty()) {
         TouchEvent trackPoint = touchPoints_.begin()->second;
         PointF localPoint(trackPoint.GetOffset().GetX(), trackPoint.GetOffset().GetY());
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
         LongPressInfo info(trackPoint.id);
         info.SetTimeStamp(time_);
         info.SetScreenLocation(trackPoint.GetScreenOffset());

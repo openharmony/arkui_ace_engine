@@ -255,6 +255,11 @@ public:
 
     void AddAfterRenderTask(std::function<void()>&& task);
 
+    void AddDragWindowVisibleTask(std::function<void()>&& task)
+    {
+        dragWindowVisibleCallback_ = std::move(task);
+    }
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
@@ -411,7 +416,7 @@ public:
         return geometryNode->GetFrameRect();
     }
 
-    void FlushReload(const OnConfigurationChange& configurationChange) override;
+    void FlushReload(const ConfigurationChange& configurationChange) override;
 
     int32_t RegisterSurfaceChangedCallback(
         std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
@@ -486,6 +491,11 @@ public:
     void MarkNeedFlushMouseEvent()
     {
         isNeedFlushMouseEvent_ = true;
+    }
+
+    void MarkNeedFlushAnimationStartTime()
+    {
+        isNeedFlushAnimationStartTime_ = true;
     }
 
     // font
@@ -593,6 +603,16 @@ public:
     bool PrintVsyncInfoIfNeed() const override;
 
     void CheckVirtualKeyboardHeight() override;
+
+    void StartWindowAnimation() override
+    {
+        isWindowAnimation_ = true;
+    }
+
+    void StopWindowAnimation() override
+    {
+        isWindowAnimation_ = false;
+    }
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -744,14 +764,17 @@ private:
     bool isTabJustTriggerOnKeyEvent_ = false;
     bool onShow_ = false;
     bool isNeedFlushMouseEvent_ = false;
+    bool isNeedFlushAnimationStartTime_ = false;
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
+    bool isWindowAnimation_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
+    std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;
     std::optional<bool> windowFocus_;

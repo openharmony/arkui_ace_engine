@@ -242,8 +242,12 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
 ModalSheetCoordinationMode ScrollablePattern::CoordinateWithSheet(double& offset, int32_t source, bool isAtTop)
 {
     auto coordinationMode = ModalSheetCoordinationMode::UNKNOWN;
-    if ((!sheetPattern_) && (source == SCROLL_FROM_START)) {
-        GetParentModalSheet();
+    if (source == SCROLL_FROM_START) {
+        isSheetInReactive_ = false;
+
+        if (!sheetPattern_) {
+            GetParentModalSheet();
+        }
     }
     auto overOffsets = GetOverScrollOffset(offset);
     if (IsAtTop() && (source == SCROLL_FROM_UPDATE) && !isSheetInReactive_ && (axis_ == Axis::VERTICAL)) {
@@ -955,7 +959,6 @@ void ScrollablePattern::ScrollTo(float position)
 
 void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
     float currVelocity = 0.0f;
     if (!IsScrollableStopped()) {
         CHECK_NULL_VOID(scrollableEvent_);
@@ -974,6 +977,10 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
         scrollAbort_ = true;
         animator_->Stop();
     }
+    if (NearEqual(position, GetTotalOffset())) {
+        return;
+    }
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
     finalPosition_ = position;
     if (smooth) {
         PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS, DEFAULT_SCROLL_TO_STIFFNESS,

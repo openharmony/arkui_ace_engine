@@ -642,6 +642,9 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     }
 
     if (event.action != KeyAction::DOWN) {
+        if (event.code == KeyCode::KEY_TAB && focusChoice_ == FocusChoice::SEARCH) {
+            textFieldPattern->OnKeyEvent(event);
+        }
         return false;
     }
 
@@ -767,9 +770,10 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
 
-    if (focusChoice_ == SearchPattern::FocusChoice::SEARCH) {
+    if (focusChoice_ == FocusChoice::SEARCH) {
         if (!recoverFlag) {
             if (!textFieldPattern->GetTextValue().empty()) {
+                textFieldPattern->NeedRequestKeyboard();
                 textFieldPattern->HandleOnSelectAll(true); // Select all text
                 textFieldPattern->StopTwinkling();         // Hide caret
             } else {

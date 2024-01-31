@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -273,6 +273,21 @@ var Alignment;
   Alignment[Alignment["Bottom"] = 7] = "Bottom";
   Alignment[Alignment["BottomEnd"] = 8] = "BottomEnd";
 })(Alignment || (Alignment = {}));
+
+var ChainStyle;
+(function (ChainStyle) {
+  ChainStyle[ChainStyle["SPREAD"] = 0] = "SPREAD";
+  ChainStyle[ChainStyle["SPREAD_INSIDE"] = 1] = "SPREAD_INSIDE";
+  ChainStyle[ChainStyle["PACKED"] = 2] = "PACKED";
+})(ChainStyle || (ChainStyle = {}));
+
+var BarrierDirection;
+(function (BarrierDirection) {
+  BarrierDirection[BarrierDirection["LEFT"] = 0] = "LEFT";
+  BarrierDirection[BarrierDirection["RIGHT"] = 1] = "RIGHT";
+  BarrierDirection[BarrierDirection["TOP"] = 2] = "TOP";
+  BarrierDirection[BarrierDirection["BOTTOM"] = 3] = "BOTTOM";
+})(BarrierDirection || (BarrierDirection = {}));
 
 var BlendMode;
 (function (BlendMode) {
@@ -1683,7 +1698,7 @@ class NavPathInfo {
     this.param = param;
     this.onPop = onPop;
     // index that if check navdestination exists first
-    this.flag = false;
+    this.checkNavDestinationFlag = false;
   }
 }
 
@@ -1751,7 +1766,7 @@ class NavPathStack {
     } else {
       info = new NavPathInfo(name, param, onPop);
     }
-    info.flag = true;
+    info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
@@ -1767,7 +1782,7 @@ class NavPathStack {
     if (!promise) {
       this.pathArray.pop();
       return new Promise((resolve, reject)=>{
-        reject({ message: "Internal error.", code: 100001 });
+        reject({ message: 'Internal error.', code: 100001 });
       })
     }
     this.nativeStack?.onStateChanged();
@@ -1785,7 +1800,7 @@ class NavPathStack {
     this.nativeStack?.onStateChanged();
   }
   pushDestination(info, animated) {
-    info.flag = true;
+    info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
@@ -1798,7 +1813,7 @@ class NavPathStack {
     if (!promise) {
       this.pathArray.pop();
       promise = new Promise((resolve, reject)=>{
-        reject({ message: "Internal error.", code: 100001 });
+        reject({ message: 'Internal error.', code: 100001 });
       })
     }
     this.nativeStack?.onStateChanged();
@@ -1846,7 +1861,7 @@ class NavPathStack {
     let pathInfo = this.pathArray.pop();
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop != undefined) {
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
       let popInfo = {
         info: currentPathInfo,
         result: result,
@@ -1875,7 +1890,7 @@ class NavPathStack {
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop != undefined) {
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
       let popInfo = {
         info: currentPathInfo,
         result: result,
@@ -1900,7 +1915,7 @@ class NavPathStack {
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop != undefined) {
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
       let popInfo = {
         info: currentPathInfo,
         result: result,
@@ -1999,7 +2014,8 @@ class NavPathStack {
   }
   removeInvalidPage(name, param) {
     for (let i = 0; i < this.pathArray.length; i++) {
-      if (this.pathArray[i].flag && this.pathArray[i].name === name && this.pathArray[i].param === param) {
+      if (this.pathArray[i].checkNavDestinationFlag && this.pathArray[i].name === name &&
+        this.pathArray[i].param === param) {
         this.pathArray.splice(i, 1);
         return;
       }
@@ -2040,6 +2056,13 @@ class NavPathStack {
       return undefined;
     }
     return item.name;
+  }
+  getCheckNavDestinationFlagByIndex(index) {
+    let item = this.pathArray[index];
+    if (item === undefined) {
+      return undefined;
+    }
+    return item.checkNavDestinationFlag;
   }
   getOnPopByIndex(index) {
     let item = this.pathArray[index];
@@ -2396,6 +2419,11 @@ var FoldStatus;
   FoldStatus[FoldStatus["FOLD_STATUS_FOLDED"] = 2] = "FOLD_STATUS_FOLDED";
   FoldStatus[FoldStatus["FOLD_STATUS_HALF_FOLDED"] = 3] = "FOLD_STATUS_HALF_FOLDED";
 })(FoldStatus || (FoldStatus = {}));
+
+var EmbeddedType;
+(function (EmbeddedType) {
+  EmbeddedType[EmbeddedType["UIEXTENSION"] = 0] = "UIEXTENSION";
+})(EmbeddedType || (EmbeddedType = {}));
 
 var OutlineStyle;
 (function (OutlineStyle) {

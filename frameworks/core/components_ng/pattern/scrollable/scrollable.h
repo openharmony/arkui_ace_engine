@@ -432,6 +432,7 @@ private:
     double ComputeCap(int dragCount);
     double GetGain(double delta);
     void SetDelayedTask();
+    void MarkNeedFlushAnimationStartTime();
     float GetFrictionVelocityByFinalPosition(float final, float position, float signum, float friction,
         float threshold = DEFAULT_MULTIPLIER);
 
@@ -486,6 +487,7 @@ private:
     double lastVelocity_ = 0.0;
     double friction_ = -1.0;
     double velocityScale_ = 0.0;
+    double preGain_ = 1.0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif

@@ -49,7 +49,7 @@ void TextFieldModelNG::CreateNode(
             value.value_or("NA").c_str(), textValue.c_str());
     }
     if (value.has_value() && value.value() != textValue) {
-        pattern->InitEditingValueText(value.value());
+        pattern->InitValueText(value.value());
     }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
     if (!isTextArea) {

@@ -97,9 +97,11 @@ void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width,
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto rect = pipeline->GetDisplayWindowRectInfo();
+    auto windowScale = GetWindowScale();
+    int32_t windowX = static_cast<int32_t>(info.GetGlobalPoint().GetX() * windowScale);
+    int32_t windowY = static_cast<int32_t>(info.GetGlobalPoint().GetY() * windowScale);
     dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
-        static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
-        static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(), width, height);
+        windowX + rect.Left(), windowY + rect.Top(), width, height);
     if (dragWindow_) {
         dragWindow_->SetOffset(rect.Left(), rect.Top());
     }
@@ -407,6 +409,7 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     CHECK_NULL_VOID(frameNode);
     preTargetFrameNode_ = frameNode;
     draggedFrameNode_ = preTargetFrameNode_;
+    parentHitNodes_.emplace(frameNode->GetId());
 }
 
 void DragDropManager::OnDragStart(const Point& point)

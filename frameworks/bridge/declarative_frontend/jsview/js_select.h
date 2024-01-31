@@ -50,6 +50,8 @@ public:
     static void SetOptionWidth(const JSCallbackInfo& info);
     static void SetOptionHeight(const JSCallbackInfo& info);
     static void SetOptionWidthFitTrigger(const JSCallbackInfo& info);
+    static void SetMenuBackgroundColor(const JSCallbackInfo& info);
+    static void SetMenuBackgroundBlurStyle(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif

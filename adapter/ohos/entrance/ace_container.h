@@ -39,8 +39,10 @@
 #include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_context.h"
+#include "interfaces/inner_api/ace/constants.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -381,9 +383,9 @@ public:
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
 
     static void DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback = nullptr);
-    static bool RunPage(
+    static UIContentErrorCode RunPage(
         int32_t instanceId, const std::string& content, const std::string& params, bool isNamedRouter = false);
-    static bool RunPage(
+    static UIContentErrorCode RunPage(
         int32_t instanceId, const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params);
     static bool PushPage(int32_t instanceId, const std::string& content, const std::string& params);
     static bool RunDynamicPage(
@@ -406,14 +408,15 @@ public:
     static void AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath);
     static void SetView(AceView* view, double density, int32_t width, int32_t height,
         sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback = nullptr);
-    static void SetViewNew(
-        AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow);
+    static UIContentErrorCode SetViewNew(
+        AceView* view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
-    static std::string RestoreRouterStack(int32_t instanceId, const std::string& contentInfo);
+    static std::pair<std::string, UIContentErrorCode> RestoreRouterStack(
+        int32_t instanceId, const std::string& contentInfo);
     static std::string GetContentInfo(int32_t instanceId);
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
@@ -471,7 +474,7 @@ public:
     void UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(
-        bool needReloadTransition, const OnConfigurationChange& configurationChange = { false, false }) override;
+        bool needReloadTransition, const ConfigurationChange& configurationChange = { false, false }) override;
     void HotReload() override;
 
     bool IsUseStageModel() const override
@@ -553,7 +556,7 @@ private:
     std::string GetFontFamilyName(std::string path);
     bool endsWith(std::string str, std::string suffix);
 
-    void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
+    void AttachView(std::shared_ptr<Window> window, AceView* view, double density, float width, float height,
         uint32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,6 +173,13 @@ void SetListSpace(ArkUINodeHandle node, ArkUI_Float32 space)
     ListModelNG::SetListSpace(frameNode, Dimension(space, DimensionUnit::VP));
 }
 
+void ResetListSpace(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListSpace(frameNode, Dimension(0, DimensionUnit::VP));
+}
+
 void SetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -260,12 +267,26 @@ void SetListScrollBarWidth(ArkUINodeHandle node, ArkUI_CharPtr value)
     ListModelNG::SetListScrollBarWidth(frameNode, value);
 }
 
+void ResetListScrollBarWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListScrollBarWidth(frameNode, "0vp");
+}
+
 void SetListScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     CHECK_NULL_VOID(value);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetListScrollBarColor(frameNode, value);
+}
+
+void ResetListScrollBarColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListScrollBarColor(frameNode, "#FF000000");
 }
 
 void SetAlignListItem(ArkUINodeHandle node, ArkUI_Int32 listItemAlign)
@@ -368,14 +389,19 @@ void ResetChainAnimationOptions(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIListModifier* GetListModifier()
 {
-    static const ArkUIListModifier modifier = { SetListLanes, ResetListLanes, SetEditMode, ResetEditMode,
-        SetMultiSelectable, ResetMultiSelectable, SetChainAnimation, ResetChainAnimation, SetCachedCount,
-        ResetCachedCount, SetEnableScrollInteraction, ResetEnableScrollInteraction, SetSticky, ResetSticky,
-        SetListEdgeEffect, ResetListEdgeEffect, SetListDirection, ResetListDirection, SetListFriction,
-        ResetListFriction, SetListNestedScroll, ResetListNestedScroll, SetListScrollBar, ResetListScrollBar,
-        SetListScrollBarWidth, SetListScrollBarColor, SetAlignListItem, ResetAlignListItem, SetScrollSnapAlign,
+    static const ArkUIListModifier modifier = {
+        SetListLanes, ResetListLanes, SetEditMode,
+        ResetEditMode, SetMultiSelectable, ResetMultiSelectable,
+        SetChainAnimation, ResetChainAnimation, SetCachedCount,
+        ResetCachedCount, SetEnableScrollInteraction, ResetEnableScrollInteraction,
+        SetSticky, ResetSticky, SetListEdgeEffect,
+        ResetListEdgeEffect, SetListDirection, ResetListDirection,
+        SetListFriction, ResetListFriction, SetListNestedScroll,
+        ResetListNestedScroll, SetListScrollBar, ResetListScrollBar,
+        SetListScrollBarWidth, ResetListScrollBarWidth, SetListScrollBarColor,
+        ResetListScrollBarColor, SetAlignListItem, ResetAlignListItem, SetScrollSnapAlign,
         ResetScrollSnapAlign, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
-        SetListSpace
+        SetListSpace, ResetListSpace
     };
     return &modifier;
 }

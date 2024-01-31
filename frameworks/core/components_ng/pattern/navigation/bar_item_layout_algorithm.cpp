@@ -36,7 +36,7 @@ void BarItemLayoutAlgorithm::MeasureIcon(LayoutWrapper* layoutWrapper, const Ref
     auto iconNode = hostNode->GetIconNode();
     CHECK_NULL_VOID(iconNode);
     auto index = hostNode->GetChildIndexById(iconNode->GetId());
-    auto iconWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
+    auto iconWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(iconWrapper);
     auto constraint = barItemLayoutProperty->CreateChildConstraint();
 
@@ -53,7 +53,7 @@ void BarItemLayoutAlgorithm::MeasureToolbarItemText(LayoutWrapper* layoutWrapper
     auto textNode = hostNode->GetTextNode();
     CHECK_NULL_VOID(textNode);
     auto index = hostNode->GetChildIndexById(textNode->GetId());
-    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
+    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(textWrapper);
     auto constraint = barItemLayoutProperty->CreateChildConstraint();
 
@@ -91,7 +91,7 @@ void BarItemLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const Ref
     auto textNode = hostNode->GetTextNode();
     CHECK_NULL_VOID(textNode);
     auto index = hostNode->GetChildIndexById(textNode->GetId());
-    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
+    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(textWrapper);
     auto constraint = barItemLayoutProperty->CreateChildConstraint();
     textWrapper->Measure(constraint);

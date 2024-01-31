@@ -49,7 +49,6 @@ public:
     static void JsSize(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
-    static void JsHoverEffect(const JSCallbackInfo& info);
 
     static void JSBind(BindingTarget globalObj);
     static void CreateWithChild(const JSCallbackInfo& info);

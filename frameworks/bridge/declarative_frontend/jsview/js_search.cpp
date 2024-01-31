@@ -20,6 +20,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -120,7 +121,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
     std::optional<std::string> key;
     std::optional<std::string> tip;
     std::optional<std::string> src;
-    JSSearchController* jsController = nullptr;
+    JSTextEditableController* jsController = nullptr;
     JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
@@ -155,7 +156,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
         }
         auto controllerObj = param->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
+            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
     auto controller = SearchModel::GetInstance()->Create(key, tip, src);
@@ -623,7 +624,7 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
         JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
 
     auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc)](
-        const std::string& val, NG::TextCommonEvent& info) {
+                       const std::string& val, NG::TextCommonEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
@@ -695,89 +696,10 @@ void JSSearch::SetType(const JSCallbackInfo& info)
 
 void JSSearchController::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSSearchController>::Declare("SearchController");
-    JSClass<JSSearchController>::Method("caretPosition", &JSSearchController::CaretPosition);
-    JSClass<JSSearchController>::CustomMethod("getCaretOffset", &JSSearchController::GetCaretOffset);
-    JSClass<JSSearchController>::CustomMethod("getTextContentRect", &JSSearchController::GetTextContentRect);
-    JSClass<JSSearchController>::CustomMethod("getTextContentLineCount", &JSSearchController::GetTextContentLinesNum);
-    JSClass<JSSearchController>::Method("stopEditing", &JSSearchController::StopEditing);
-    JSClass<JSSearchController>::Bind(globalObj, JSSearchController::Constructor, JSSearchController::Destructor);
+    JSClass<JSTextEditableController>::Declare("SearchController");
+    JSTextEditableController::JSBind(globalObj);
 }
 
-void JSSearchController::Constructor(const JSCallbackInfo& args)
-{
-    auto scroller = Referenced::MakeRefPtr<JSSearchController>();
-    scroller->IncRefCount();
-    args.SetReturnValue(Referenced::RawPtr(scroller));
-}
-
-void JSSearchController::Destructor(JSSearchController* scroller)
-{
-    if (scroller != nullptr) {
-        scroller->DecRefCount();
-    }
-}
-
-void JSSearchController::CaretPosition(int32_t caretPosition)
-{
-    auto controller = controller_.Upgrade();
-    if (controller) {
-        controller->CaretPosition(caretPosition);
-    }
-}
-
-void JSSearchController::GetCaretOffset(const JSCallbackInfo& info)
-{
-    auto controller = controller_.Upgrade();
-    if (controller) {
-        JSRef<JSObject> caretObj = JSRef<JSObject>::New();
-        NG::OffsetF caretOffset = controller->GetCaretPosition();
-        caretObj->SetProperty<int32_t>("index", controller->GetCaretIndex());
-        caretObj->SetProperty<float>("x", caretOffset.GetX());
-        caretObj->SetProperty<float>("y", caretOffset.GetY());
-        JSRef<JSVal> ret = JSRef<JSObject>::Cast(caretObj);
-        info.SetReturnValue(ret);
-    }
-}
-
-JSRef<JSObject> JSSearchController::CreateRectangle(const Rect& info)
-{
-    JSRef<JSObject> rectObj = JSRef<JSObject>::New();
-    rectObj->SetProperty<double>("x", info.Left());
-    rectObj->SetProperty<double>("y", info.Top());
-    rectObj->SetProperty<double>("width", info.Width());
-    rectObj->SetProperty<double>("height", info.Height());
-    return rectObj;
-}
-
-void JSSearchController::GetTextContentRect(const JSCallbackInfo& info)
-{
-    auto controller = controller_.Upgrade();
-    if (controller) {
-        auto rectObj = CreateRectangle(controller->GetTextContentRect());
-        JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
-        info.SetReturnValue(rect);
-    }
-}
-
-void JSSearchController::GetTextContentLinesNum(const JSCallbackInfo& info)
-{
-    auto controller = controller_.Upgrade();
-    if (controller) {
-        auto lines = controller->GetTextContentLinesNum();
-        auto linesNum = JSVal(ToJSValue(lines));
-        auto textLines = JSRef<JSVal>::Make(linesNum);
-        info.SetReturnValue(textLines);
-    }
-}
-
-void JSSearchController::StopEditing()
-{
-    auto controller = controller_.Upgrade();
-    if (controller) {
-        controller->StopEditing();
-    }
-}
 void JSSearch::SetMaxLength(const JSCallbackInfo& info)
 {
     int32_t maxLength = 0;

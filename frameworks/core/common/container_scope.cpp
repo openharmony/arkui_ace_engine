@@ -66,7 +66,7 @@ int32_t ContainerScope::RecentForegroundId()
 std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
 {
     int32_t currentId = CurrentId();
-    if (currentId > 0) {
+    if (currentId >= 0) {
         return { currentId, InstanceIdGenReason::SCOPE };
     }
     uint32_t containerCount = ContainerCount();
@@ -77,11 +77,11 @@ std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
         return { SingletonId(), InstanceIdGenReason::SINGLETON };
     }
     currentId = ContainerScope::RecentActiveId();
-    if (currentId > 0) {
+    if (currentId >= 0) {
         return { currentId, InstanceIdGenReason::ACTIVE };
     }
     currentId = ContainerScope::RecentForegroundId();
-    if (currentId > 0) {
+    if (currentId >= 0) {
         return { currentId, InstanceIdGenReason::FOREGROUND };
     }
     return { ContainerScope::DefaultId(), InstanceIdGenReason::DEFAULT };

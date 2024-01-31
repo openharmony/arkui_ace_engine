@@ -81,9 +81,11 @@ void SelectOverlayLayoutAlgorithm::CalculateCustomMenuLayoutConstraint(
     const auto firstHandleRect = info_->firstHandle.paintRect - offset;
     const auto secondHandleRect = info_->secondHandle.paintRect - offset;
 
-    auto topSpace = firstHandleRect.Top() - menuSpacingBetweenText - menuSpacingBetweenHandle;
+    auto top = info_->isNewAvoid ? info_->selectArea.Top() : firstHandleRect.Top();
+    auto bottom = info_->isNewAvoid ? info_->selectArea.Bottom() : secondHandleRect.Bottom();
+    auto topSpace = top - menuSpacingBetweenText - menuSpacingBetweenHandle;
     auto bottomSpace = layoutConstraint.maxSize.Height() -
-                       (secondHandleRect.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle);
+                       (bottom + menuSpacingBetweenText + menuSpacingBetweenHandle);
     if (info_->isUsingMouse) {
         layoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, layoutConstraint.maxSize.Height());
     } else {
@@ -102,10 +104,14 @@ OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWra
     CHECK_NULL_RETURN(menu, menuOffset);
     auto maxWidth = layoutConstraint->selfIdealSize.Width().value_or(0.0f);
     auto menuSize = menu->GetGeometryNode()->GetFrameSize();
-    if (menuOffset.GetX() + menuSize.Width() > maxWidth && menuOffset.GetX() >= menuSize.Width()) {
-        menuOffset.SetX(menuOffset.GetX() - menuSize.Width());
-    } else if (menuOffset.GetX() + menuSize.Width() > maxWidth && menuOffset.GetX() < menuSize.Width()) {
-        menuOffset.SetX(menuOffset.GetX() - menuSize.Width() / 2.0);
+    if (GreatNotEqual(menuOffset.GetX() + menuSize.Width(), maxWidth)) {
+        if (GreatOrEqual(menuOffset.GetX(), menuSize.Width())) {
+            menuOffset.SetX(menuOffset.GetX() - menuSize.Width());
+        } else if (LessOrEqual(menuSize.Width(), maxWidth)) {
+            menuOffset.SetX(maxWidth - menuSize.Width());
+        } else if (GreatNotEqual(menuSize.Width(), maxWidth)) {
+            menuOffset.SetX(menuOffset.GetX() - menuSize.Width() / 2.0f);
+        }
     }
     return menuOffset;
 }
@@ -114,9 +120,10 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if ((!CheckInShowArea(*info_) ||
-            (!info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible)) &&
-        !info_->isUsingMouse) {
+    auto isNewAvoid = info_->isNewAvoid && !info_->isSingleHandle;
+    auto shouldInActiveByHandle =
+        !info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible;
+    if ((!CheckInShowArea(*info_) || (!isNewAvoid && shouldInActiveByHandle)) && !info_->isUsingMouse) {
         menu->SetActive(false);
         return;
     } else {
@@ -273,16 +280,17 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
                 static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
         }
     }
-    if (LessNotEqual(menuPosition.GetY(), viewPort.GetY() - menuSpacingBetweenText - menuHeight) ||
+    auto spaceBetweenViewPort = menuSpacingBetweenText + menuSpacingBetweenHandle;
+    if (LessNotEqual(menuPosition.GetY(), viewPort.GetY() - spaceBetweenViewPort - menuHeight) ||
         LessNotEqual(menuPosition.GetY(), menuSpacingBetweenText)) {
-        auto menuOffsetY = viewPort.GetY() - menuSpacingBetweenText - menuHeight;
+        auto menuOffsetY = viewPort.GetY() - spaceBetweenViewPort - menuHeight;
         if (menuOffsetY > menuSpacingBetweenText) {
             menuPosition.SetY(menuOffsetY);
         } else {
             menuPosition.SetY(menuSpacingBetweenText);
         }
-    } else if (GreatOrEqual(menuPosition.GetY(), viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText)) {
-        menuPosition.SetY(viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText);
+    } else if (GreatOrEqual(menuPosition.GetY(), viewPort.GetY() + viewPort.Height() + spaceBetweenViewPort)) {
+        menuPosition.SetY(viewPort.GetY() + viewPort.Height() + spaceBetweenViewPort);
     }
 
     auto safeAreaManager = pipeline->GetSafeAreaManager();
@@ -430,16 +438,16 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(float menuWidth, floa
     auto menuSpacing =
         static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
     menuPosition =
-        OffsetF(positionX, selectArea.Bottom() - menuSpacing - menuHeight);
+        OffsetF(positionX, selectArea.Top() - menuSpacing - menuHeight);
     if (LessNotEqual(menuPosition.GetY(), topArea)) { // 顶部避让失败，实行底部避让
         menuPosition = OffsetF(positionX, selectArea.Bottom() + menuSpacing);
     }
+    menuPosition = OffsetF(positionX, std::max((float)topArea, menuPosition.GetY()));
     auto viewPort = pipeline->GetRootRect();
-    if ((hasKeyboard || (menuPosition.GetY() + menuHeight) > keyboardInsert.start) ||
+    if ((hasKeyboard && (menuPosition.GetY() + menuHeight) > keyboardInsert.start) ||
         (menuPosition.GetY() + menuHeight) > viewPort.Bottom()) { // 底部避让失败，实行选中区避让
         selectArea = selectArea.IntersectRectT(viewPort);
-        menuPosition =
-            OffsetF(positionX, (selectArea.Top() + selectArea.Bottom()) / 2.0f - menuHeight / 2.0f);
+        menuPosition = OffsetF(positionX, (selectArea.Top() + selectArea.Bottom() - menuHeight) / 2.0f);
     }
     return menuPosition;
 }

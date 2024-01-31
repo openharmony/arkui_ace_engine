@@ -176,6 +176,7 @@ public:
 
     void SetShowLunar(bool value)
     {
+        isForceUpdate_ = true;
         lunar_ = value;
     }
 
@@ -261,7 +262,7 @@ public:
         return options_[frmeNode].size();
     }
 
-    std::string GetOptionValue(RefPtr<FrameNode>& frmeNode, uint32_t index)
+    PickerDateF GetOptionValue(RefPtr<FrameNode>& frmeNode, uint32_t index)
     {
         if (index >= GetOptionCount(frmeNode)) {
             LOGE("index out of range.");
@@ -270,12 +271,12 @@ public:
         return options_[frmeNode][index];
     }
 
-    const std::vector<std::string>& GetAllOptions(RefPtr<FrameNode>& frmeNode)
+    const std::vector<PickerDateF>& GetAllOptions(RefPtr<FrameNode>& frmeNode)
     {
         return options_[frmeNode];
     }
 
-    const std::map<WeakPtr<FrameNode>, std::vector<std::string>>& GetOptions() const
+    const std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>>& GetOptions() const
     {
         return options_;
     }
@@ -564,6 +565,7 @@ public:
 
     void SetFocusDisable();
     void SetFocusEnable();
+    static const std::string GetFormatString(PickerDateF data);
 
 private:
     void OnModifyDone() override;
@@ -585,7 +587,7 @@ private:
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
-    std::map<WeakPtr<FrameNode>, std::vector<std::string>> options_;
+    std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>> options_;
     uint32_t showCount_ = 0;
     std::vector<WeakPtr<FrameNode>> datePickerColumns_;
     bool lunar_ = false;
@@ -620,16 +622,19 @@ private:
     const PickerDate limitEndDate_ = PickerDate(2100, 12, 31);
     static bool inited_;
     static const std::string empty_;
-    static std::vector<std::string> years_;       // year from 1900 to 2100,count is 201
-    static std::vector<std::string> solarMonths_; // solar month from 1 to 12,count is 12
-    static std::vector<std::string> solarDays_;   // solar day from 1 to 31, count is 31
-    static std::vector<std::string> lunarMonths_; // lunar month from 1 to 24, count is 24
-    static std::vector<std::string> lunarDays_;   // lunar day from 1 to 30, count is 30
+    static const PickerDateF emptyPickerDate_;
+    static std::unordered_map<uint32_t, std::string> years_;       // year from 1900 to 2100,count is 201
+    static std::unordered_map<uint32_t, std::string> solarMonths_; // solar month from 1 to 12,count is 12
+    static std::unordered_map<uint32_t, std::string> solarDays_;   // solar day from 1 to 31, count is 31
+    static std::unordered_map<uint32_t, std::string> lunarMonths_; // lunar month from 1 to 24, count is 24
+    static std::unordered_map<uint32_t, std::string> lunarDays_;   // lunar day from 1 to 30, count is 30
     static std::vector<std::string> tagOrder_;    // year month day tag order
+    static std::vector<std::string> localizedMonths_;
     WeakPtr<FrameNode> contentRowNode_;
     WeakPtr<FrameNode> buttonTitleNode_;
     bool isPicker_ = false;
     bool isFiredDateChange_ = false;
+    bool isForceUpdate_ = false;
     std::optional<std::string> firedDateStr_;
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };

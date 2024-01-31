@@ -634,7 +634,7 @@ void ResetSwiperIndicator(ArkUINodeHandle node)
     SwiperModelNG::SetShowIndicator(frameNode, true);
 }
 
-void SetSwiperDuration(ArkUINodeHandle node, int32_t duration)
+void SetSwiperDuration(ArkUINodeHandle node, ArkUI_Float32 duration)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

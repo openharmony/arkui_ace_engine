@@ -29,7 +29,6 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
@@ -37,7 +36,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
@@ -297,6 +295,16 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
+void JSBaseNode::UpdateStart(const JSCallbackInfo& info)
+{
+    scopedViewStackProcessor_ = std::make_unique<NG::ScopedViewStackProcessor>();
+}
+
+void JSBaseNode::UpdateEnd(const JSCallbackInfo& info)
+{
+    scopedViewStackProcessor_ = nullptr;
+}
+
 void JSBaseNode::JSBind(BindingTarget globalObj)
 {
     JSClass<JSBaseNode>::Declare("__JSBaseNode__");
@@ -306,6 +314,8 @@ void JSBaseNode::JSBind(BindingTarget globalObj)
     JSClass<JSBaseNode>::CustomMethod("finishUpdateFunc", &JSBaseNode::FinishUpdateFunc);
     JSClass<JSBaseNode>::CustomMethod("postTouchEvent", &JSBaseNode::PostTouchEvent);
     JSClass<JSBaseNode>::CustomMethod("dispose", &JSBaseNode::Dispose);
+    JSClass<JSBaseNode>::CustomMethod("updateStart", &JSBaseNode::UpdateStart);
+    JSClass<JSBaseNode>::CustomMethod("updateEnd", &JSBaseNode::UpdateEnd);
 
     JSClass<JSBaseNode>::Bind(globalObj, JSBaseNode::ConstructorCallback, JSBaseNode::DestructorCallback);
 }

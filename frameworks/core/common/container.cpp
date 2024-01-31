@@ -32,7 +32,7 @@ int32_t Container::CurrentId()
 int32_t Container::CurrentIdSafely()
 {
     int32_t currentId = ContainerScope::CurrentId();
-    if (currentId > 0) {
+    if (currentId >= 0) {
         return currentId;
     }
     uint32_t containerCount = ContainerScope::ContainerCount();
@@ -43,11 +43,11 @@ int32_t Container::CurrentIdSafely()
         return ContainerScope::SingletonId();
     }
     currentId = ContainerScope::RecentActiveId();
-    if (currentId > 0) {
+    if (currentId >= 0) {
         return currentId;
     }
     currentId = ContainerScope::RecentForegroundId();
-    if (currentId > 0) {
+    if (currentId >= 0) {
         return currentId;
     }
     return ContainerScope::DefaultId();

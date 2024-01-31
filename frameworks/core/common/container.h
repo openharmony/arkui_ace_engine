@@ -36,6 +36,7 @@
 #include "core/common/frontend.h"
 #include "core/common/page_url_checker.h"
 #include "core/common/platform_res_register.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/common/settings.h"
 #include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
@@ -367,7 +368,7 @@ public:
         return 1.0f;
     }
 
-    virtual void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange = { false, false }) {}
+    virtual void NotifyConfigurationChange(bool, const ConfigurationChange& configurationChange = { false, false }) {}
     virtual void HotReload() {}
 
     void SetIsModule(bool isModule)

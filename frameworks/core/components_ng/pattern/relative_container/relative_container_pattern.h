@@ -36,7 +36,7 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
-        return MakeRefPtr<LayoutProperty>();
+        return MakeRefPtr<RelativeContainerLayoutProperty>();
     }
 
     bool IsAtomicNode() const override

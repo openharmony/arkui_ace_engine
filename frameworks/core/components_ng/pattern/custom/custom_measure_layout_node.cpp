@@ -57,4 +57,13 @@ bool CustomMeasureLayoutNode::FireOnLayout(NG::LayoutWrapper* layoutWrapper)
     return false;
 }
 
+bool CustomMeasureLayoutNode::FireOnUpdateParam(NG::LayoutWrapper* layoutWrapper)
+{
+    if (updateParamFunc_) {
+        updateParamFunc_(layoutWrapper);
+        return true;
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

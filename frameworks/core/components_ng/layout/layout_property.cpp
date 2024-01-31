@@ -399,7 +399,7 @@ void LayoutProperty::CheckSelfIdealSize(const LayoutConstraintF& parentConstrain
         layoutConstraint_->selfIdealSize.UpdateWidthWhenSmaller(maxSize);
         if (GreatNotEqual(maxSize.Width(), 0.0f) && GreatOrEqual(maxSize.Width(), minSize.Width())) {
             layoutConstraint_->UpdateMaxWidthWithCheck(maxSize);
-        } else if (LessNotEqual(maxSize.Width(), minSize.Width())) {
+        } else if (GreatNotEqual(maxSize.Width(), 0.0f) && LessNotEqual(maxSize.Width(), minSize.Width())) {
             layoutConstraint_->maxSize.SetWidth(minSize.Width());
         } else {
             layoutConstraint_->maxSize.SetWidth(originMax.Width());
@@ -407,7 +407,7 @@ void LayoutProperty::CheckSelfIdealSize(const LayoutConstraintF& parentConstrain
         layoutConstraint_->selfIdealSize.UpdateHeightWhenSmaller(maxSize);
         if (GreatNotEqual(maxSize.Height(), 0.0f) && GreatOrEqual(maxSize.Height(), minSize.Height())) {
             layoutConstraint_->UpdateMaxHeightWithCheck(maxSize);
-        } else if (LessNotEqual(maxSize.Height(), minSize.Height())) {
+        } else if (GreatNotEqual(maxSize.Height(), 0.0f) && LessNotEqual(maxSize.Height(), minSize.Height())) {
             layoutConstraint_->maxSize.SetHeight(minSize.Height());
         } else {
             layoutConstraint_->maxSize.SetHeight(originMax.Height());
@@ -937,6 +937,22 @@ void LayoutProperty::UpdateAlignRules(const std::map<AlignDirection, AlignRule>&
     }
     if (flexItemProperty_->UpdateAlignRules(alignRules)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateChainStyle(const ChainInfo& chainInfo)
+{
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
+    if (chainInfo.direction == LineDirection::HORIZONTAL) {
+        if (flexItemProperty_->UpdateHorizontalChainStyle(chainInfo)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    } else {
+        if (flexItemProperty_->UpdateVerticalChainStyle(chainInfo)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
     }
 }
 

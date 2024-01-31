@@ -134,6 +134,10 @@ public:
     void SetSelectedOptionFontFamily(const std::vector<std::string>& value);
     void SetSelectedOptionFontColor(const Color& color);
 
+    // set props of menu background
+    void SetMenuBackgroundColor(const Color& color);
+    void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
+
     // Get functions for unit tests
     const std::vector<RefPtr<FrameNode>>& GetOptions();
 
