@@ -56,6 +56,7 @@ TimeEventProxyOhos::TimeEventProxyOhos()
     subscribeInfo.SetThreadMode(CommonEventSubscribeInfo::ThreadMode::HANDLER);
 
     eventFwkSubscriber_ = std::make_shared<TimeEventSubscriber>(subscribeInfo);
+    CommonEventManager::SubscribeCommonEvent(eventFwkSubscriber_);
 }
 
 TimeEventProxyOhos::~TimeEventProxyOhos()
@@ -102,9 +103,6 @@ void TimeEventProxyOhos::OnTimeChange()
 
 void TimeEventProxyOhos::Register(const WeakPtr<TimeChangeListener>& listener)
 {
-    if (listeners_.empty()) {
-        CommonEventManager::SubscribeCommonEvent(eventFwkSubscriber_);
-    }
     listeners_.insert({ listener, Container::CurrentId() });
 }
 } // namespace OHOS::Ace
