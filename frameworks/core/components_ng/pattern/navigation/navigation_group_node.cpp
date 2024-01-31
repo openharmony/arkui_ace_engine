@@ -168,7 +168,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         const auto& childNode = navDestinationNodes[i];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
-        hasChanged = UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size());
+        hasChanged |= UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size());
     }
 
     while (static_cast<size_t>(slot) < navigationContentNode->GetChildren().size()) {
@@ -813,8 +813,10 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
                 pattern->SetIsOnShow(false);
                 NavigationPattern::FireNavigationStateChange(navDestination, false);
             }
-            navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-            navDestination->SetJSViewActive(false);
+            if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild) {
+                navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                navDestination->SetJSViewActive(false);
+            }
         }
         return false;
     }
