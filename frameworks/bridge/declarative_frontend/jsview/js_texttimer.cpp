@@ -269,7 +269,7 @@ void JSTextTimer::OnTimer(const JSCallbackInfo& info)
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                        const int64_t& utc, const int64_t& elapsedTime) {
+                        int64_t utc, int64_t elapsedTime) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("TextTimer.onTimer");
         PipelineContext::SetCallBackNode(node);
