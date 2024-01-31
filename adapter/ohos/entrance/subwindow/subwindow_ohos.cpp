@@ -536,6 +536,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
     ShowWindow();
     ResizeWindow();
     window_->SetTouchable(true);
+    ContainerScope scope(childContainerId_);
     overlay->ShowMenuInSubWindow(targetId, offset, menuNode);
 }
 
