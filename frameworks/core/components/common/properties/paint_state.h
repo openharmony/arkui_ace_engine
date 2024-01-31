@@ -108,12 +108,19 @@ struct ImageData {
 };
 
 struct TextMetrics {
-    double width;
-    double height;
-    double actualBoundingBoxLeft;
-    double actualBoundingBoxRight;
-    double actualBoundingBoxAscent;
-    double actualBoundingBoxDescent;
+    double width = 0;
+    double height = 0;
+    double actualBoundingBoxLeft = 0;
+    double actualBoundingBoxRight = 0;
+    double actualBoundingBoxAscent = 0;
+    double actualBoundingBoxDescent = 0;
+    double alphabeticBaseline = 0;
+    double emHeightAscent = 0;
+    double emHeightDescent = 0;
+    double fontBoundingBoxAscent = 0;
+    double fontBoundingBoxDescent = 0;
+    double hangingBaseline = 0;
+    double ideographicBaseline = 0;
 };
 
 enum class ContextType {

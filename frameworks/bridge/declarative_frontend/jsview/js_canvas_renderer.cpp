@@ -2261,17 +2261,7 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
     paintState_.SetTextStyle(style_);
     double width = 0.0;
     double height = 0.0;
-    double actualBoundingBoxLeft = 0.0;
-    double actualBoundingBoxRight = 0.0;
-    double actualBoundingBoxAscent = 0.0;
-    double actualBoundingBoxDescent = 0.0;
-    double hangingBaseline = 0.0;
-    double alphabeticBaseline = 0.0;
-    double ideographicBaseline = 0.0;
-    double emHeightAscent = 0.0;
-    double emHeightDescent = 0.0;
-    double fontBoundingBoxAscent = 0.0;
-    double fontBoundingBoxDescent = 0.0;
+    TextMetrics textMetrics;
     if (info[0]->IsString()) {
         JSViewAbstract::ParseJsString(info[0], text);
 
@@ -2283,22 +2273,35 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
 
         width = CanvasRendererModel::GetInstance()->GetMeasureTextWidth(baseInfo, text);
         height = CanvasRendererModel::GetInstance()->GetMeasureTextHeight(baseInfo, text);
+        textMetrics = CanvasRendererModel::GetInstance()->GetMeasureTextMetrics(baseInfo, text);
 
         auto retObj = JSRef<JSObject>::New();
-        retObj->SetProperty("width", PipelineBase::Px2VpWithCurrentDensity(width));
-        retObj->SetProperty("height", PipelineBase::Px2VpWithCurrentDensity(height));
-        retObj->SetProperty("actualBoundingBoxLeft", PipelineBase::Px2VpWithCurrentDensity(actualBoundingBoxLeft));
-        retObj->SetProperty("actualBoundingBoxRight", PipelineBase::Px2VpWithCurrentDensity(actualBoundingBoxRight));
-        retObj->SetProperty("actualBoundingBoxAscent", PipelineBase::Px2VpWithCurrentDensity(actualBoundingBoxAscent));
-        retObj->SetProperty(
-            "actualBoundingBoxDescent", PipelineBase::Px2VpWithCurrentDensity(actualBoundingBoxDescent));
-        retObj->SetProperty("hangingBaseline", PipelineBase::Px2VpWithCurrentDensity(hangingBaseline));
-        retObj->SetProperty("alphabeticBaseline", PipelineBase::Px2VpWithCurrentDensity(alphabeticBaseline));
-        retObj->SetProperty("ideographicBaseline", PipelineBase::Px2VpWithCurrentDensity(ideographicBaseline));
-        retObj->SetProperty("emHeightAscent", PipelineBase::Px2VpWithCurrentDensity(emHeightAscent));
-        retObj->SetProperty("emHeightDescent", PipelineBase::Px2VpWithCurrentDensity(emHeightDescent));
-        retObj->SetProperty("fontBoundingBoxAscent", PipelineBase::Px2VpWithCurrentDensity(fontBoundingBoxAscent));
-        retObj->SetProperty("fontBoundingBoxDescent", PipelineBase::Px2VpWithCurrentDensity(fontBoundingBoxDescent));
+        retObj->SetProperty("width",
+            PipelineBase::Px2VpWithCurrentDensity(width));
+        retObj->SetProperty("height",
+            PipelineBase::Px2VpWithCurrentDensity(height));
+        retObj->SetProperty("actualBoundingBoxLeft",
+            PipelineBase::Px2VpWithCurrentDensity(textMetrics.actualBoundingBoxLeft));
+        retObj->SetProperty("actualBoundingBoxRight",
+            PipelineBase::Px2VpWithCurrentDensity(textMetrics.actualBoundingBoxRight));
+        retObj->SetProperty("actualBoundingBoxAscent",
+            PipelineBase::Px2VpWithCurrentDensity(textMetrics.actualBoundingBoxAscent));
+        retObj->SetProperty("actualBoundingBoxDescent",
+            PipelineBase::Px2VpWithCurrentDensity(textMetrics.actualBoundingBoxDescent));
+        retObj->SetProperty("hangingBaseline",
+            PipelineBase::Px2VpWithCurrentDensity(textMetrics.hangingBaseline));
+        retObj->SetProperty("alphabeticBaseline",
+            PipelineBase::Px2VpWithCurrentDensity(textMetrics.alphabeticBaseline));
+        retObj->SetProperty("ideographicBaseline",
+            PipelineBase::Px2VpWithCurrentDensity(textMetrics.ideographicBaseline));
+        retObj->SetProperty("emHeightAscent",
+            PipelineBase::Px2VpWithCurrentDensity(textMetrics.emHeightAscent));
+        retObj->SetProperty("emHeightDescent",
+            PipelineBase::Px2VpWithCurrentDensity(textMetrics.emHeightDescent));
+        retObj->SetProperty("fontBoundingBoxAscent",
+            PipelineBase::Px2VpWithCurrentDensity(textMetrics.fontBoundingBoxAscent));
+        retObj->SetProperty("fontBoundingBoxDescent",
+            PipelineBase::Px2VpWithCurrentDensity(textMetrics.fontBoundingBoxDescent));
         info.SetReturnValue(retObj);
     }
 }
