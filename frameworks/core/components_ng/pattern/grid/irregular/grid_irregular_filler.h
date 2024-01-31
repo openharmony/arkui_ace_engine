@@ -94,8 +94,10 @@ public:
 private:
     /**
      * @brief Fills one GridItem into the Grid.
+     *
+     * @param idx Item index to fill in the matrix.
      */
-    void FillOne();
+    void FillOne(int32_t idx);
 
     /**
      * @brief Updates the length of the main axis after filling a row or column. Add heights in range [prevRow, curRow).

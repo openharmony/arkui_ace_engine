@@ -49,7 +49,7 @@ float GridIrregularFiller::Fill(const FillParameters& params, int32_t startIdx)
     while (!IsFull(len, params.targetLen)) {
         int32_t prevRow = posY_;
         if (!FindNextItem(++info_->endIndex_)) {
-            FillOne();
+            FillOne(info_->endIndex_);
         }
 
         if (posY_ > prevRow) {
@@ -95,10 +95,8 @@ int32_t GridIrregularFiller::FitItem(const decltype(GridLayoutInfo::gridMatrix_)
     return -1;
 }
 
-void GridIrregularFiller::FillOne()
+void GridIrregularFiller::FillOne(const int32_t idx)
 {
-    /* alias */
-    const int32_t& idx = info_->endIndex_;
     int32_t row = posY_;
 
     auto size = GridLayoutUtils::GetItemSize(info_, wrapper_, idx);
@@ -172,7 +170,6 @@ void GridIrregularFiller::UpdateLength(float& len, int32_t prevRow, int32_t curR
 void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t col, int32_t row)
 {
     auto child = wrapper_->GetOrCreateChildByIndex(info_->endIndex_);
-    std::cout << "measure idx "  << info_->endIndex_ << std::endl;
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
 
@@ -212,7 +209,7 @@ void GridIrregularFiller::FillMatrixOnly(int32_t startingLine, int32_t targetIdx
     info_->endIndex_ = InitPos(startingLine);
     while (info_->endIndex_ < targetIdx) {
         if (!FindNextItem(++info_->endIndex_)) {
-            FillOne();
+            FillOne(info_->endIndex_);
         }
     }
     info_->endMainLineIndex_ = posY_;
@@ -223,7 +220,7 @@ int32_t GridIrregularFiller::FillMatrixByLine(int32_t startingLine, int32_t targ
     int32_t idx = InitPos(startingLine);
     while (posY_ < targetLine && idx < info_->childrenCount_ - 1) {
         if (!FindNextItem(++idx)) {
-            FillOne();
+            FillOne(idx);
         }
     }
     return idx;

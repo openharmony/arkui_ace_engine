@@ -38,13 +38,14 @@ constexpr float HALF = 0.5f;
 // Try not to add more variables in [GridLayoutInfo] because the more state variables, the more problematic and the
 // harder it is to maintain
 struct GridLayoutInfo {
-    float GetTotalHeightOfItemsInView(float mainGap)
+    float GetTotalHeightOfItemsInView(float mainGap) const
     {
         float lengthOfItemsInViewport = 0.0;
         for (auto i = startMainLineIndex_; i <= endMainLineIndex_; i++) {
-            if (GreatOrEqual(lineHeightMap_[i], 0)) {
-                lengthOfItemsInViewport += (lineHeightMap_[i] + mainGap);
+            if (lineHeightMap_.find(i) == lineHeightMap_.end()) {
+                continue;
             }
+            lengthOfItemsInViewport += (lineHeightMap_.at(i) + mainGap);
         }
         return lengthOfItemsInViewport - mainGap;
     }
@@ -132,20 +133,10 @@ struct GridLayoutInfo {
     /**
      * @brief Perform a binary search to find item with [index] in the gridMatrix_.
      *
-     * Designed for old ScrollLayoutAlgorithm only, where tiles of large items are all filled with index. Correct answer
-     * not guaranteed for new GridIrregularLayout, where all except the top-left tile are filled with -1.
-     *
      * @param index target item index
-     * @return iterator to that item, or ::end() if not found.
+     * @return iterator to that item, or map::end if not found.
      */
     std::map<int32_t, std::map<int32_t, int32_t>>::const_iterator FindInMatrix(int32_t index) const;
-
-    /**
-     * @brief Finds the index of the last item in the grid matrix, and update startIndex_ and startMainLineIndex_ to
-     * that last item.
-     *
-     */
-    void UpdateStartIdxToLastItem();
 
     /**
      * @brief Tries to find the item between startMainLine and endMainLine.
@@ -156,18 +147,20 @@ struct GridLayoutInfo {
     std::pair<int32_t, int32_t> FindItemInRange(int32_t target) const;
 
     /**
-     * @brief clears gridMatrix_ and lineHeightMap_ starting from line [idx]
+     * @brief clears lineHeightMap_ starting from line [idx]
      *
      * @param idx starting line index
      */
-    void ClearMapsToEnd(int32_t idx);
+    void ClearHeightsToEnd(int32_t idx);
 
     /**
-     * @brief clears gridMatrix_ and lineHeightMap_ in range [0, idx)
+     * @brief clears lineHeightMap_ in range [0, idx)
      *
      * @param idx ending line index, exclusive.
      */
-    void ClearMapsFromStart(int32_t idx);
+    void ClearHeightsFromStart(int32_t idx);
+
+    void ClearMatrixToEnd(int32_t idx, int32_t lineIdx);
 
     void ResetPositionFlags()
     {
