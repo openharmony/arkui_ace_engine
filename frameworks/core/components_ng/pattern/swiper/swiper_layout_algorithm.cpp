@@ -384,7 +384,7 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             }
 
             LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
-            if (LessNotEqual(GetEndPosition(), endMainPos_)) {
+            if (LessNotEqualCustomPrecision(GetEndPosition(), endMainPos_, -0.01f)) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
             }
         } else {
