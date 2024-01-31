@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-using ChangeEvent = std::function<void(const int64_t, const int64_t)>;
+using ChangeEvent = std::function<void(int64_t, int64_t)>;
 
 class TextTimerEventHub : public EventHub {
     DECLARE_ACE_TYPE(TextTimerEventHub, EventHub)

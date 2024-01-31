@@ -287,7 +287,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest003, TestSize.Level1)
     textTimerModel.Create();
     int64_t utc = UTC_1;
     int64_t elapsedTime = ELAPSED_TIME_1;
-    auto onChange = [&utc, &elapsedTime](const int64_t& isUtc, const int64_t& isElapsedTime) {
+    auto onChange = [&utc, &elapsedTime](int64_t isUtc, int64_t isElapsedTime) {
         utc = isUtc;
         elapsedTime = isElapsedTime;
     };
