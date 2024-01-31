@@ -2623,7 +2623,7 @@ void OverlayManager::PlaySheetTransition(
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
     auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
-
+    CHECK_NULL_VOID(sheetParent);
     if (isTransitionIn) {
         sheetPattern->SetCurrentHeight(sheetHeight_);
         float offset = 0.0f;
