@@ -502,6 +502,8 @@ enum ArkUIAsyncEventKind {
 
     ON_TOGGLE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TOGGLE,
 
+    ON_CHECKBOX_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_CHECKBOX,
+    
     ON_TEXT_INPUT_EDIT_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT_INPUT,
     ON_TEXT_INPUT_SUBMIT,
     ON_TEXT_INPUT_CHANGE,
@@ -1532,6 +1534,29 @@ struct ArkUISliderModifier {
     void (*resetStep)(ArkUINodeHandle node);
     void (*resetReverse)(ArkUINodeHandle node);
     void (*resetSliderStyle)(ArkUINodeHandle node);
+    void (*setSliderBlockImage)(
+        ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle, ArkUI_CharPtr module);
+    void (*resetSliderBlockImage)(ArkUINodeHandle node);
+    void (*setSliderBlockPath)(
+        ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_CharPtr commands);
+    void (*setSliderBlockShape)(ArkUINodeHandle node, ArkUI_CharPtr type,
+        const ArkUI_Float32* attribute, ArkUI_Int32 length);
+    void (*resetSliderBlockShape)(ArkUINodeHandle node);
+    void (*setSliderBlockType)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetSliderBlockType)(ArkUINodeHandle node);
+
+    ArkUI_Uint32 (*getBlockColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTrackBackgroundColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getSelectColor)(ArkUINodeHandle node);
+    ArkUI_Bool (*getShowSteps)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getBlockType)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getSliderValue)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getMinLabel)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getMaxLabel)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getDirection)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getStep)(ArkUINodeHandle node);
+    ArkUI_Bool (*getReverse)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSliderStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIProgressModifier {
@@ -1698,6 +1723,14 @@ struct ArkUICheckboxModifier {
     void (*resetMark)(ArkUINodeHandle node);
     void (*setCheckboxShape)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCheckboxShape)(ArkUINodeHandle node);
+
+    ArkUI_Bool (*getSelect)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getSelectedColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getUnSelectedColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getCheckMarkColor)(ArkUINodeHandle node);
+    ArkUI_Float64 (*getCheckMarkSize)(ArkUINodeHandle node);
+    ArkUI_Float64 (*getCheckMarkWidth)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCheckboxShape)(ArkUINodeHandle node);
 };
 
 struct ArkUICheckboxGroupModifier {

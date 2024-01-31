@@ -20,5 +20,6 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUISliderModifier* GetSliderModifier();
+void SetSliderChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 }
 #endif

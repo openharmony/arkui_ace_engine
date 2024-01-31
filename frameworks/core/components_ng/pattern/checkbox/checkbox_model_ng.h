@@ -50,6 +50,16 @@ public:
     static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle checkboxStyle);
+
+    static bool GetSelect(FrameNode* frameNode);
+    static Color GetSelectedColor(FrameNode* frameNode);
+    static Color GetUnSelectedColor(FrameNode* frameNode);
+    static Color GetCheckMarkColor(FrameNode* frameNode);
+    static Dimension GetCheckMarkSize(FrameNode* frameNode);
+    static Dimension GetCheckMarkWidth(FrameNode* frameNode);
+    static CheckBoxStyle GetCheckboxStyle(FrameNode* frameNode);
+
+    static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H

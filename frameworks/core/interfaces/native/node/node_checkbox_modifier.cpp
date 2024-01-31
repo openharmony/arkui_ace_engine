@@ -18,6 +18,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/checkable/checkable_theme.h"
 
@@ -163,6 +164,55 @@ void ResetCheckboxShape(ArkUINodeHandle node)
     CheckBoxModelNG::SetCheckboxStyle(frameNode, CheckBoxStyle::CIRCULAR_STYLE);
 }
 
+ArkUI_Bool GetSelect(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    return static_cast<ArkUI_Bool>(CheckBoxModelNG::GetSelect(frameNode));
+}
+
+ArkUI_Uint32 GetSelectedColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    return CheckBoxModelNG::GetSelectedColor(frameNode).GetValue();
+}
+
+ArkUI_Uint32 GetUnSelectedColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    return CheckBoxModelNG::GetUnSelectedColor(frameNode).GetValue();
+}
+
+ArkUI_Uint32 GetCheckMarkColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    return CheckBoxModelNG::GetCheckMarkColor(frameNode).GetValue();
+}
+
+ArkUI_Float64 GetCheckMarkSize(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    return CheckBoxModelNG::GetCheckMarkSize(frameNode).Value();
+}
+
+ArkUI_Float64 GetCheckMarkWidth(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    return CheckBoxModelNG::GetCheckMarkWidth(frameNode).Value();
+}
+
+ArkUI_Int32 GetCheckboxShape(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    return static_cast<ArkUI_Int32>(CheckBoxModelNG::GetCheckboxStyle(frameNode));
+}
+
 namespace NodeModifier{
 const ArkUICheckboxModifier *GetCheckboxModifier() 
 {
@@ -179,9 +229,33 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
                                                  ResetCheckboxHeight,
                                                  ResetMark,
                                                  SetCheckboxShape,
-                                                 ResetCheckboxShape,};
+                                                 ResetCheckboxShape,
+                                                 GetSelect,
+                                                 GetSelectedColor,
+                                                 GetUnSelectedColor,
+                                                 GetCheckMarkColor,
+                                                 GetCheckMarkSize,
+                                                 GetCheckMarkWidth,
+                                                 GetCheckboxShape,
+                                                 };
 
   return &modifier;
 }
+
+void SetCheckboxChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, eventId, extraParam](const bool value) {
+        ArkUINodeEvent event;
+        event.kind = ON_CHECKBOX_CHANGE;
+        event.eventId = eventId;
+        event.extraParam = extraParam;
+        event.componentAsyncEvent.data[0].i32 = static_cast<int>(value);
+        SendArkUIAsyncEvent(&event);
+    };
+    CheckBoxModelNG::SetOnChange(frameNode, std::move(onEvent));
+}
+
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

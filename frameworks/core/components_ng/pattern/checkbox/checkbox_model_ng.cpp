@@ -192,4 +192,60 @@ void CheckBoxModelNG::SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle check
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, checkboxStyle, frameNode);
 }
 
+bool CheckBoxModelNG::GetSelect(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, value, frameNode);
+    return value;
+}
+
+Color CheckBoxModelNG::GetSelectedColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, value, frameNode);
+    return value;
+}
+
+Color CheckBoxModelNG::GetUnSelectedColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, value, frameNode);
+    return value;
+}
+
+Color CheckBoxModelNG::GetCheckMarkColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkColor, value, frameNode);
+    return value;
+}
+
+Dimension CheckBoxModelNG::GetCheckMarkSize(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkSize, value, frameNode);
+    return value;
+}
+
+Dimension CheckBoxModelNG::GetCheckMarkWidth(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkWidth, value, frameNode);
+    return value;
+}
+
+CheckBoxStyle CheckBoxModelNG::GetCheckboxStyle(FrameNode* frameNode)
+{
+    CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, checkboxStyle, frameNode);
+    return checkboxStyle;
+}
+
+void CheckBoxModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
+{
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
 } // namespace OHOS::Ace::NG

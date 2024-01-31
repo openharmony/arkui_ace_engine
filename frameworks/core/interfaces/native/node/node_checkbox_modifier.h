@@ -20,5 +20,6 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICheckboxModifier* GetCheckboxModifier();
+void SetCheckboxChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 }
 #endif
