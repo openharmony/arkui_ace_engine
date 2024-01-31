@@ -138,6 +138,11 @@ public:
         currentIndexActual_ = currentIndexActual;
     }
 
+    void SetNextValidIndex(int32_t nextValidIndex)
+    {
+        nextValidIndex_ = nextValidIndex;
+    }
+
 private:
     struct StarAndEndPointCenter {
         float startLongPointLeftCenterX = 0.0f;
@@ -178,6 +183,7 @@ private:
     Axis axis_ = Axis::HORIZONTAL;
     int32_t currentIndex_ = 0;
     int32_t currentIndexActual_ = 0;
+    int32_t nextValidIndex_ = 0;
     int32_t itemCount_ = 0;
     int32_t displayCount_ = 1;
     float turnPageRate_ = 0.0f;
