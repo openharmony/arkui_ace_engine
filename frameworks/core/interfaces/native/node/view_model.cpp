@@ -248,6 +248,10 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr,
         nullptr,
         createListItemGroupNode,
+        nullptr, // DatePicker
+        nullptr, // TimePicker
+        nullptr, // TextPicker
+        nullptr, // GridItem
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);

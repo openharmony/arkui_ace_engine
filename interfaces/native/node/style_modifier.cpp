@@ -1573,7 +1573,7 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         std::vector<std::string> attributeProps;
         StringUtils::StringSplitter(content.c_str(), PARAMS_SEPARATOR_LEVEL2, attributeProps);
         if (shape == "path") {
-            double pathAttributes[NUM_2];
+            ArkUI_Float32 pathAttributes[NUM_2];
             for (int i = 0; i < NUM_2; ++i) {
                 pathAttributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
             }
@@ -1581,7 +1581,7 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             fullImpl->getNodeModifiers()->getCommonModifier()->setMaskPath(
                 node->uiNodeHandle, shape.c_str(), fill, strock, strockWidth, pathAttributes, commands.c_str());
         } else if (shape == "progressMask") {
-            double progressAttributes[NUM_3];
+            ArkUI_Float32 progressAttributes[NUM_3];
             for (int i = 0; i < NUM_2; ++i) {
                 progressAttributes[i] = StringToInt(attributeProps[i].c_str(), 0);
             }
@@ -1589,7 +1589,7 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             fullImpl->getNodeModifiers()->getCommonModifier()->setMaskShape(
                 node->uiNodeHandle, shape.c_str(), fill, strock, strockWidth, progressAttributes, NUM_3);
         } else {
-            double attributes[attributeProps.size()];
+            ArkUI_Float32 attributes[attributeProps.size()];
             for (int i = 0; i < attributeProps.size(); ++i) {
                 attributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
             }
@@ -1727,7 +1727,7 @@ int32_t SetConstraintSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     }
 
     auto* fullImpl = GetFullImpl();
-    ArkUI_Float64 constraintSize[ALLOW_SIZE_4] = { 0.0f, DBL_MAX, 0.0f, DBL_MAX };
+    ArkUI_Float32 constraintSize[ALLOW_SIZE_4] = { 0.0f, FLT_MAX, 0.0f, FLT_MAX };
     ArkUI_Int32 units[ALLOW_SIZE_4] = { 1, 1, 1, 1 };
 
     if (item->size == 1) {
@@ -2750,7 +2750,7 @@ void ResetTextBaselineOffset(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTextModifier()->resetTextBaselineOffset(node->uiNodeHandle);
 }
 
-int32_t SetTextTextShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+int32_t SetTextShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size < NUM_5) {
         return ERROR_CODE_PARAM_INVALID;
@@ -2763,14 +2763,14 @@ int32_t SetTextTextShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
         item->value[3].f32, item->value[4].f32 };
     shadows.emplace_back(shadow);
 
-    fullImpl->getNodeModifiers()->getTextModifier()->setTextTextShadow(node->uiNodeHandle, &shadows[0], shadows.size());
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextShadow(node->uiNodeHandle, &shadows[0], shadows.size());
     return ERROR_CODE_NO_ERROR;
 }
 
-void ResetTextTextShadow(ArkUI_NodeHandle node)
+void ResetTextShadow(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextModifier()->resetTextTextShadow(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextShadow(node->uiNodeHandle);
 }
 
 int32_t SetTextMinFontSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -4752,7 +4752,7 @@ int32_t SetTextIndent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_PARAM_INVALID;
     }
     struct ArkUIStringAndFloat offset = { item->value[0].f32, nullptr };
-    fullImpl->getNodeModifiers()->getTextModifier()->setTextTextIndent(node->uiNodeHandle, &offset);
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextIndent(node->uiNodeHandle, &offset);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4760,7 +4760,7 @@ void ResetTextIndent(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     struct ArkUIStringAndFloat offset = { 0.0, nullptr };
-    fullImpl->getNodeModifiers()->getTextModifier()->setTextTextIndent(node->uiNodeHandle, &offset);
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextIndent(node->uiNodeHandle, &offset);
 }
 
 int32_t SetSpanContent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5188,7 +5188,7 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
     using Setter = int32_t(ArkUI_NodeHandle node, const ArkUI_AttributeItem* value);
     static Setter* setters[] = { SetTextContent, SetFontColor, SetFontSize, SetFontStyle, SetFontWeight, SetLineHeight,
         SetDecoration, SetTextCase, SetLetterSpacing, SetMaxLines, SetTextAlign, SetTextOverflow, SetTextFontFamily,
-        SetTextCopyOption, SetTextBaselineOffset, SetTextTextShadow, SetTextMinFontSize, SetTextMaxFontSize,
+        SetTextCopyOption, SetTextBaselineOffset, SetTextShadow, SetTextMinFontSize, SetTextMaxFontSize,
         SetTextFont, SetTextHeightAdaptivePolicy, SetTextIndent };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -5201,7 +5201,7 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetTextContent, ResetFontColor, ResetFontSize, ResetFontStyle, ResetFontWeight,
         ResetLineHeight, ResetDecoration, ResetTextCase, ResetLetterSpacing, ResetMaxLines, ResetTextAlign,
-        ResetTextOverflow, ResetTextFontFamily, ResetTextCopyOption, ResetTextBaselineOffset, ResetTextTextShadow,
+        ResetTextOverflow, ResetTextFontFamily, ResetTextCopyOption, ResetTextBaselineOffset, ResetTextShadow,
         ResetTextMinFontSize, ResetTextMaxFontSize, ResetTextFont, ResetTextHeightAdaptivePolicy, ResetTextIndent };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
