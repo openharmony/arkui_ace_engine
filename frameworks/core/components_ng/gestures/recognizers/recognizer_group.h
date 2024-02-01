@@ -146,6 +146,8 @@ public:
         disposal_ = GestureDisposal::NONE;
     }
 
+    void CleanRecognizerState() override;
+
     void SetIsPostEventResultRecursively(bool isPostEventResult)
     {
         for (const auto& item : recognizers_) {

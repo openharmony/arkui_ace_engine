@@ -64,6 +64,10 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives touch down event, begin to detect rotation event");
+    if (!IsInAttachedNode(event)) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     if (fingers_ > MAX_ROTATION_FINGERS) {
         fingers_ = DEFAULT_ROTATION_FINGERS;
     }
