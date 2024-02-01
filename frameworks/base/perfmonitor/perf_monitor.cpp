@@ -226,7 +226,7 @@ bool SceneRecord::IsFirstFrame()
 
 bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
 {
-    if (sceneId == PerfConstants::APP_LIST_FLING) {
+    if (sceneId == PerfConstants::APP_LIST_FLING || sceneId == PerfConstants::APP_SWIPER_SCROLL) {
         return true;
     }
     return false;
