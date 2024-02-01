@@ -79,6 +79,7 @@ constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
 constexpr int32_t ORIGINAL_IMAGE_SIZE_AUTO = 0;
 constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
+constexpr int32_t BLUR_STYLE_NONE_INDEX = 7;
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -1410,16 +1411,27 @@ void ResetLinearGradientBlur(ArkUINodeHandle node)
     ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
 }
 
+int32_t GetBlurStyle(int32_t originBlurStyle)
+{
+    if (originBlurStyle < BLUR_STYLE_NONE_INDEX) {
+        return originBlurStyle + 1;
+    } else if (originBlurStyle == BLUR_STYLE_NONE_INDEX) {
+        return static_cast<int32_t>(BlurStyle::NO_MATERIAL);
+    }
+    return originBlurStyle;
+}
+
 void SetBackgroundBlurStyle(
     ArkUINodeHandle node, ArkUI_Int32 blurStyle, ArkUI_Int32 colorMode, ArkUI_Int32 adaptiveColor, ArkUI_Float32 scale)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption bgBlurStyle;
-    if (blurStyle >= 0) {
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
-            bgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
+    int32_t inputBlurStyle = GetBlurStyle(blurStyle);
+    if (inputBlurStyle >= 0) {
+        if (inputBlurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            inputBlurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            bgBlurStyle.blurStyle = static_cast<BlurStyle>(inputBlurStyle);
         }
     }
     bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0));
