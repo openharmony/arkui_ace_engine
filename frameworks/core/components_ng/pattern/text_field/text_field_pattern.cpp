@@ -112,6 +112,7 @@ constexpr int32_t ILLEGAL_VALUE = 0;
 constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr float DOUBLECLICK_MIN_INTERVAL_MS = 0.0f;
+constexpr Dimension DOUBLECLICK_DISTANCE = 15.0_vp;
 constexpr double VELOCITY = -1000;
 constexpr double MASS = 1.0;
 constexpr double STIFFNESS = 428.0;
@@ -1787,17 +1788,12 @@ bool TextFieldPattern::CheckClickLocation(GestureEvent& info)
     lastClickTimeStamp_ = info.GetTimeStamp();
 
     Offset location = info.GetLocalLocation();
-    auto range = selectController_->GetSelectRangeByOffset(location);
-    int32_t start = range.first;
-    int32_t end = range.second;
-
-    auto last_range = selectController_->GetSelectRangeByOffset(clickLocation_);
-    int32_t last_start = last_range.first;
-    int32_t last_end = last_range.second;
+    auto deltaOffset = location - clickLocation_;
+    auto deltaDistance = deltaOffset.GetDistance();
     clickLocation_ = location;
 
     return timeout.count() >= DOUBLECLICK_MIN_INTERVAL_MS && timeout.count() < DOUBLECLICK_INTERVAL_MS &&
-           start == last_start && end == last_end;
+           deltaDistance < DOUBLECLICK_DISTANCE.ConvertToPx();
 }
 
 void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
