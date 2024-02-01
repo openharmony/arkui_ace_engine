@@ -284,6 +284,7 @@ private:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json) const;
     // XTS inspector helper functions
     std::string InspectorGetOptions() const;
     std::string InspectorGetSelectedFont() const;
