@@ -3305,8 +3305,13 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
         }
     }
     UpdateEditingValueToRecord();
-    cursorVisible_ = true;
-    StartTwinkling();
+    if (HasFocus()) {
+        cursorVisible_ = true;
+        StartTwinkling();
+    } else {
+        cursorVisible_ = false;
+        StopTwinkling();
+    }
 }
 
 void TextFieldPattern::InsertValue(const std::string& insertValue)
