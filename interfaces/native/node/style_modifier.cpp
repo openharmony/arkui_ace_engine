@@ -4869,7 +4869,7 @@ int32_t SetColorFilter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     std::vector<float> colorFloatArray;
     for (size_t i = 0; i < actualSize && i < REQUIRED_TWENTY_PARAM; i++) {
-        colorFloatArray.emplace_back(item->value[i].f32);
+        colorFloatArray.emplace_back(static_cast<float>(item->value[i].i32));
     }
     fullImpl->getNodeModifiers()->getImageModifier()->setColorFilter(
         node->uiNodeHandle, &colorFloatArray[0], colorFloatArray.size());
