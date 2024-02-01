@@ -1727,7 +1727,7 @@ int32_t SetConstraintSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     }
 
     auto* fullImpl = GetFullImpl();
-    ArkUI_Float64 constraintSize[ALLOW_SIZE_4] = { 0.0f, DBL_MAX, 0.0f, DBL_MAX };
+    ArkUI_Float32 constraintSize[ALLOW_SIZE_4] = { 0.0f, FLT_MAX, 0.0f, FLT_MAX };
     ArkUI_Int32 units[ALLOW_SIZE_4] = { 1, 1, 1, 1 };
 
     if (item->size == 1) {
