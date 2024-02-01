@@ -248,7 +248,6 @@ public:
             if (frameNode) {
                 frameNode->SetActive(false);
             }
-            node.second->SetJSViewActive(false);
             expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
         }
     }
