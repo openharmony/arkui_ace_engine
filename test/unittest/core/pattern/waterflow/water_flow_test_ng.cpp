@@ -1396,7 +1396,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest004, TestSize.Level1)
      * @tc.expected: step2. Check whether the endIndex_ is correct.
      */
     int32_t resetFrom = pattern_->layoutInfo_.endIndex_;
-    pattern_->layoutInfo_.Reset(resetFrom);
+    pattern_->layoutInfo_.Reset(resetFrom + 1);
     EXPECT_EQ(pattern_->layoutInfo_.endIndex_, resetFrom);
 
     pattern_->layoutInfo_.Reset(resetFrom - 1);
