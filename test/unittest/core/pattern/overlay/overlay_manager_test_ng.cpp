@@ -1087,7 +1087,7 @@ HWTEST_F(OverlayManagerTestNg, MenuTest001, TestSize.Level1)
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
     EXPECT_FALSE(overlayManager->menuMap_.empty());
-    overlayManager->SetShowMenuAnimation(menuNode);
+    overlayManager->ShowMenuAnimation(menuNode);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
@@ -1280,7 +1280,7 @@ HWTEST_F(OverlayManagerTestNg, MenuTest004, TestSize.Level1)
 
 /**
  * @tc.name: MenuTest005
- * @tc.desc: Test OverlayManager::SetShowMenuAnimation.
+ * @tc.desc: Test OverlayManager::ShowMenuAnimation.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestNg, MenuTest005, TestSize.Level1)
@@ -1311,10 +1311,10 @@ HWTEST_F(OverlayManagerTestNg, MenuTest005, TestSize.Level1)
     focusHub->parentFocusable_ = false;
     menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
     /**
-     * @tc.steps: step2. call SetShowMenuAnimation and call StartShowAnimation of menu pattern
+     * @tc.steps: step2. call ShowMenuAnimation and call StartShowAnimation of menu pattern
      * @tc.expected: the isFirstShow_ of preview pattern true and parentFocusable_ of menuWrapper's focus hub is true
      */
-    overlayManager->SetShowMenuAnimation(menuWrapperNode);
+    overlayManager->ShowMenuAnimation(menuWrapperNode);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     menuWrapperPattern->StartShowAnimation();
     pipeline->taskExecutor_ = nullptr;
