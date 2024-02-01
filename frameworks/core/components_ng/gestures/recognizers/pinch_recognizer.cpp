@@ -62,7 +62,6 @@ void PinchRecognizer::OnRejected()
     if (refereeState_ == RefereeState::SUCCEED) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 
