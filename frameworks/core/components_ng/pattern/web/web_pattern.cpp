@@ -1864,8 +1864,11 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
     delegate_->HandleTouchMove(touchPointInfoList, fromOverlay);
 }
 
-void WebPattern::HandleTouchCancel(const TouchEventInfo& /*info*/)
+void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
 {
+    if (IsRootNeedExportTexture()) {
+        HandleTouchUp(info, false);
+    }
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleTouchCancel();
 }
