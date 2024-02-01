@@ -5768,21 +5768,37 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
 
 void TextFieldPattern::DumpInfo()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    DumpLog::GetInstance().AddDesc(std::string("Content:").append(GetTextValue()));
+    DumpLog::GetInstance().AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
+    DumpLog::GetInstance().AddDesc(std::string("InputFilter:").append(GetInputFilter()));
+    DumpLog::GetInstance().AddDesc(std::string("CopyOption:").append(GetCopyOptionString()));
+    DumpLog::GetInstance().AddDesc(std::string("TextAlign:").append(std::to_string((int32_t)GetTextAlign())));
+    DumpLog::GetInstance().AddDesc(std::string("CaretPosition:").append(std::to_string(GetCaretIndex())));
+    DumpLog::GetInstance().AddDesc(std::string("enableKeyboardOnFocus:")
+                            .append(std::to_string(needToRequestKeyboardOnFocus_)));
+    DumpLog::GetInstance().AddDesc(std::string("enableAutoFill:")
+                            .append(std::to_string(layoutProperty->GetEnableAutoFillValue(true))));
     DumpLog::GetInstance().AddDesc(std::string("HasFocus:").append(std::to_string(HasFocus())));
 #if defined(ENABLE_STANDARD_INPUT)
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
     MiscServices::TextConfig textConfig = miscTextConfig.value();
     DumpLog::GetInstance().AddDesc(std::string("RequestKeyboard calling window :")
-                                       .append(std::to_string(textConfig.windowId))
-                                       .append(std::string("inputType:"))
-                                       .append(std::to_string(textConfig.inputAttribute.inputPattern)));
+                                        .append(std::to_string(textConfig.windowId))
+                                        .append(std::string("inputType:"))
+                                        .append(std::to_string(textConfig.inputAttribute.inputPattern))
+                                        .append(std::string("enterKeyType:"))
+                                        .append(std::to_string(textConfig.inputAttribute.enterKeyType)));
 #endif
     DumpLog::GetInstance().AddDesc(textSelector_.ToString());
     if (customKeyboardBuilder_) {
         DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
-                                           .append(", Attached: ")
-                                           .append(std::to_string(isCustomKeyboardAttached_)));
+                                            .append(", Attached: ")
+                                            .append(std::to_string(isCustomKeyboardAttached_)));
     }
 }
 
