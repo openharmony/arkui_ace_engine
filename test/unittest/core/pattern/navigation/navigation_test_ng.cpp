@@ -203,7 +203,6 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest003, TestSize.Level1)
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
         frameNode->GetLayoutProperty<NavigationLayoutProperty>();
     ASSERT_NE(navigationLayoutProperty, nullptr);
-
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(hostNode, nullptr);
     RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
@@ -221,12 +220,6 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest003, TestSize.Level1)
     config.skipMeasure = true;
     config.skipLayout = true;
     std::vector<DirtySwapConfig> configValue;
-    configValue.push_back(config);
-    config.skipLayout = false;
-    configValue.push_back(config);
-    config.skipMeasure = false;
-    configValue.push_back(config);
-    config.skipLayout = true;
     configValue.push_back(config);
 
     for (auto& iter : configValue) {
@@ -794,9 +787,9 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_012, TestSize.Level1)
     ASSERT_NE(layoutAlgorithmWrapper, nullptr);
     auto navigationLayoutAlgorithm =
         AceType::DynamicCast<NavigationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    navigationPattern->AddDividerHotZoneRect(navigationLayoutAlgorithm);
+    navigationPattern->AddDividerHotZoneRect();
     navigationPattern->realDividerWidth_ = 2.0f;
-    navigationPattern->AddDividerHotZoneRect(navigationLayoutAlgorithm);
+    navigationPattern->AddDividerHotZoneRect();
     /**
      * @tc.steps: step4. check navigationLayoutAlgorithm
      * @tc.expected: navigationLayoutAlgorithm is not nullptr.
@@ -850,6 +843,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_014, TestSize.Level1)
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
+    navigationModel.SetNavigationStack();
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
@@ -1201,7 +1195,6 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
     auto navigationLayoutAlgorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
     layoutAlgorithmWrapper->layoutAlgorithm_ = navigationLayoutAlgorithm;
-    navigationLayoutAlgorithm->navigationMode_ = NavigationMode::SPLIT;
 
     DirtySwapConfig config;
     config.skipMeasure = false;
@@ -1213,7 +1206,6 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     ASSERT_FALSE(navigation->isModeChange_);
 
     layout->propVisibility_ = VisibleType::VISIBLE;
-    navigationLayoutAlgorithm->navigationMode_ = NavigationMode::SPLIT;
     layout->propHideNavBar_ = true;
     navigation->contentNode_ = contentNode;
     auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
@@ -1234,8 +1226,10 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
      * @tc.steps: step1. create navigation contentNode and navBarNode.
      * @tc.expected: check whether the properties is correct.
      */
-    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
-        "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto navBarNode =
@@ -1257,8 +1251,6 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     navigationLayoutProperty->propHideNavBar_ = true;
     navigationLayoutProperty->propNavigationMode_ = NavigationMode::SPLIT;
     algorithm->Layout(AceType::RawPtr(layoutWrapper));
-    navigation->children_.push_back(navBarNode);
-    ASSERT_EQ(navigation->children_.size(), 1);
     auto navBarGeometryNode = navBarNode->geometryNode_;
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     auto navBarWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
@@ -1280,9 +1272,6 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
      *                   test LayoutDivider.
      * @tc.expected: check whether the properties is correct.
      */
-    navigation->dividerNode_ = dividerNode;
-    navigation->children_.push_back(dividerNode);
-    ASSERT_EQ(navigation->children_.size(), 2);
     auto dividerGeometryNode = dividerNode->geometryNode_;
     auto dividerLayoutProperty = dividerNode->GetLayoutProperty<NavBarLayoutProperty>();
     auto dividerWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
@@ -1297,9 +1286,6 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
      *                   test LayoutContent.
      * @tc.expected: check whether the properties is correct.
      */
-    navigation->contentNode_ = contentNode;
-    navigation->children_.push_back(contentNode);
-    ASSERT_EQ(navigation->children_.size(), 3);
     auto contentGeometryNode = contentNode->geometryNode_;
     auto contentLayoutProperty = contentNode->GetLayoutProperty<NavBarLayoutProperty>();
     auto contentWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
@@ -1335,7 +1321,6 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
     ASSERT_TRUE(navigationLayoutProperty->propHideNavBar_.value());
 
-    algorithm->navigationMode_ = NavigationMode::SPLIT;
     auto tempAlgorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tempAlgorithm);
     layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
@@ -2877,15 +2862,15 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0023, TestSize.Level1)
 
     navigationPattern->navigationStack_->Add("11", contentNode);
     algorithm->SetNavigationHeight(AceType::RawPtr(layoutWrapper), size);
-    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::AUTO);
+    ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::AUTO);
 
-    algorithm->navigationMode_ = NavigationMode::STACK;
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
     algorithm->SetNavigationHeight(AceType::RawPtr(layoutWrapper), size);
-    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::STACK);
+    ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::STACK);
 
-    algorithm->navigationMode_ = NavigationMode::SPLIT;
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
     algorithm->SetNavigationHeight(AceType::RawPtr(layoutWrapper), size);
-    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::SPLIT);
+    ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
 }
 
 /**

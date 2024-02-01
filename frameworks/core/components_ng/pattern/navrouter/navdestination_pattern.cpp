@@ -234,11 +234,7 @@ bool NavDestinationPattern::GetBackButtonState()
     auto index = stack->FindIndex(name_, navDestinationNode_.Upgrade(), true);
     bool showBackButton = true;
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    auto layoutWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(navigationNode->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutWrapper, showBackButton);
-    auto layout = AceType::DynamicCast<NavigationLayoutAlgorithm>(layoutWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layout, false);
-    if (index == 0 && (layout->GetNavigationMode() == NavigationMode::SPLIT ||
+    if (index == 0 && (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
         navigationLayoutProperty->GetHideNavBarValue(false))) {
         showBackButton = false;
     }
