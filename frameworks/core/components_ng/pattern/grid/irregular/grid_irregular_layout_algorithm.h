@@ -72,7 +72,7 @@ private:
 
     /**
      * @brief Measure all items until targetIndex_ is reached. For performing scrollTo with animation.
-     * 
+     *
      */
     void MeasureToTarget();
 

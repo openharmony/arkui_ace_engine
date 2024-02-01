@@ -37,33 +37,36 @@ int32_t GridIrregularFiller::InitPos(int32_t lineIdx)
     return row->second.at(0) - 1;
 }
 
-bool GridIrregularFiller::IsFull(float len, float targetLen)
+using Result = GridIrregularFiller::FillResult;
+Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, int32_t startingLine)
 {
-    return len > targetLen || info_->endIndex_ == info_->childrenCount_ - 1;
-}
-
-float GridIrregularFiller::Fill(const FillParameters& params, float targetLen, int32_t startingLine)
-{
-    info_->endIndex_ = InitPos(startingLine);
-    float len = 0.0f;
-    while (!IsFull(len, targetLen)) {
+    int32_t idx = InitPos(startingLine);
+    // no gap on first row
+    float len = -params.mainGap;
+    while (idx < info_->childrenCount_ - 1) {
         int32_t prevRow = posY_;
-        if (!FindNextItem(++info_->endIndex_)) {
-            FillOne(info_->endIndex_);
+        if (!FindNextItem(++idx)) {
+            FillOne(idx);
+        }
+        // (posY_ > prevRow) implies that the previous row has been filled
+
+        int32_t row = prevRow;
+        if (UpdateLength(len, targetLen, row, posY_, params.mainGap)) {
+            return { len, row, idx - 1 };
         }
 
-        if (posY_ > prevRow) {
-            // previous row has been filled
-            UpdateLength(len, prevRow, posY_, params.mainGap);
-        }
-
-        MeasureItem(params, info_->endIndex_, posX_, posY_);
+        MeasureItem(params, idx, posX_, posY_);
     }
-    info_->endMainLineIndex_ = posY_;
 
-    // add length of the last row
-    UpdateLength(len, posY_, info_->lineHeightMap_.rbegin()->first + 1, params.mainGap);
-    return len;
+    if (info_->lineHeightMap_.empty()) {
+        return {};
+    }
+    // last child reached
+    int32_t lastRow = info_->lineHeightMap_.rbegin()->first;
+    if (UpdateLength(len, targetLen, posY_, lastRow + 1, params.mainGap)) {
+        return { len, posY_, idx };
+    }
+    return { len, lastRow, idx };
 }
 
 void GridIrregularFiller::FillToTarget(const FillParameters& params, int32_t targetIdx, int32_t startingLine)
@@ -181,15 +184,15 @@ bool GridIrregularFiller::AdvancePos()
     return row.find(posX_) != row.end();
 }
 
-void GridIrregularFiller::UpdateLength(float& len, int32_t prevRow, int32_t curRow, float mainGap)
+bool GridIrregularFiller::UpdateLength(float& len, float targetLen, int32_t& row, int32_t rowBound, float mainGap) const
 {
-    for (int32_t row = prevRow; row < curRow; ++row) {
-        len += info_->lineHeightMap_[row] + mainGap;
+    for (; row < rowBound; ++row) {
+        len += info_->lineHeightMap_.at(row) + mainGap;
+        if (GreatOrEqual(len, targetLen)) {
+            return true;
+        }
     }
-    if (prevRow == info_->startMainLineIndex_) {
-        // no gap on first row
-        len -= mainGap;
-    }
+    return false;
 }
 
 void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row)

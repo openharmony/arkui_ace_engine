@@ -126,7 +126,9 @@ void GridIrregularLayoutAlgorithm::MeasureOnOffset(float mainSize)
     }
 
     GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
-    filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize - res.pos, info.startMainLineIndex_);
+    auto fillRes = filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize - res.pos, info.startMainLineIndex_);
+    info.endMainLineIndex_ = fillRes.endMainLineIndex;
+    info.endIndex_ = fillRes.endIndex;
 }
 
 bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
@@ -315,7 +317,7 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
     GridIrregularFiller filler(&info, wrapper_);
     switch (info.scrollAlign_) {
         case ScrollAlign::START: {
-            float len = filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx);
+            float len = filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx).length;
             // condition [jumpLineIdx > 0] guarantees a finite call stack
             if (len < mainSize && jumpLineIdx > 0) {
                 jumpLineIdx = info.lineHeightMap_.rbegin()->first;
@@ -336,7 +338,7 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
                 PrepareLineHeight(mainSize, jumpLineIdx);
                 return;
             }
-            float forwardLen = filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx);
+            float forwardLen = filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx).length;
             forwardLen -= info.lineHeightMap_[jumpLineIdx] / 2.0f;
             if (forwardLen < targetLen) {
                 jumpLineIdx = info.lineHeightMap_.rbegin()->first;
