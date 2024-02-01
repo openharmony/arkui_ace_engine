@@ -23,6 +23,8 @@
 
 /**
  * @brief GridIrregularLayout class supports irregular grid items that take multiple rows and multiple columns.
+ *
+ * INVARIANT: The gridMatrix_ is always filled from the first row up to endIndex_ at the beginning of each layout.
  */
 namespace OHOS::Ace::NG {
 class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
@@ -37,6 +39,11 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
+
+    void SetEnableSkip(bool value)
+    {
+        enableSkip_ = value;
+    }
 
 private:
     /**
@@ -54,7 +61,14 @@ private:
 
     void MeasureOnOffset(float mainSize);
 
-    void MeasureOnJump(float mainSize);
+    /**
+     * @brief Check if offset is larger than the entire viewport. If so, skip measuring intermediate items and jump
+     * directly to the estimated destination.
+     *
+     * @param mainSize main-axis length of the viewport.
+     * @return true if a skip is performed.
+     */
+    bool TrySkipping(float mainSize);
 
     /**
      * @brief Performs the layout of the children based on the main offset.
@@ -80,6 +94,9 @@ private:
      */
     inline bool ReachedEnd() const;
 
+    // ========================================== MeasureOnJump functions =====================================
+
+    void MeasureOnJump(float mainSize);
     /**
      * @brief Transforms GridLayoutInfo::scrollAlign_ into other ScrollAlign values, based on current position of
      * jumpIdx_ item.
@@ -108,12 +125,29 @@ private:
      * @param jumpLineIdx The line index to jump to, can be adjusted during the function call.
      */
     void PrepareLineHeight(float mainSize, int32_t& jumpLineIdx);
+    // ========================================== MeasureOnJump ends ===========================================
+
+    /**
+     * @brief Skip forward by currentOffset_ and fill the matrix along the way.
+     *
+     * @return item index to jump to after skipping.
+     */
+    int32_t SkipLinesForward();
+
+    /**
+     * @brief Skip backward by currentOffset_. Can assume that the matrix is already filled up to startIdx_
+     *
+     * @return item index to jump to after skipping.
+     */
+    int32_t SkipLinesBackward() const;
 
     LayoutWrapper* wrapper_ = nullptr;
 
     std::vector<float> crossLens_; /**< The column widths of the GridItems. */
     float crossGap_ = 0.0f;        /**< The cross-axis gap between GridItems. */
     float mainGap_ = 0.0f;         /**< The main-axis gap between GridItems. */
+
+    bool enableSkip_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayoutAlgorithm);
 };
