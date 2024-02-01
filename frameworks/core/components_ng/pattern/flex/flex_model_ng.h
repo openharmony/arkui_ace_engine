@@ -49,6 +49,13 @@ public:
     void SetAlignContent(int32_t value) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetFlexRow(FrameNode* frameNode);
+    static void SetFlexWrap(FrameNode* frameNode);
+    static void SetFlexDirection(FrameNode* frameNode, FlexDirection value);
+    static void SetFlexWrapDirection(FrameNode* frameNode, WrapDirection value);
+    static void SetFlexJustifyContent(FrameNode* frameNode, int32_t value);
+    static void SetFlexAlignItems(FrameNode* frameNode, int32_t value);
+    static void SetFlexAlignContent(FrameNode* frameNode, int32_t value);
 };
 
 } // namespace OHOS::Ace::NG

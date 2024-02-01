@@ -32,6 +32,9 @@
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/interfaces/native/node/node_row_modifier.h"
+#include "core/interfaces/native/node/node_column_modifier.h"
+#include "core/interfaces/native/node/node_flex_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -40,7 +43,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetCommonModifier,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::GetRowModifier,
     nullptr,
     NodeModifier::GetTextModifier,
     nullptr,
@@ -64,7 +67,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     NodeModifier::GetTextAreaModifier,
     nullptr,
-    nullptr,
+    NodeModifier::GetColumnModifier,
     nullptr,
     NodeModifier::GetImageModifier,
     nullptr,
@@ -124,7 +127,7 @@ const ArkUINodeModifiers impl = {
 #else
     nullptr,
 #endif
-    nullptr, // FlexModifier
+    NodeModifier::GetFlexModifier, // FlexModifier
     nullptr, // ScrollBarModifier
     nullptr, // ScrollerModifier
     nullptr, // TabContentModifier

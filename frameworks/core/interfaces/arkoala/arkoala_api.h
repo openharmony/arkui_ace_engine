@@ -939,6 +939,11 @@ struct ArkUICommonModifier {
     void (*resetBlendMode)(ArkUINodeHandle node);
     void (*setConstraintSize)(ArkUINodeHandle node, const ArkUI_Float64* values, const ArkUI_Int32* units);
     void (*resetConstraintSize)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getOpacity)(ArkUINodeHandle node);
+    const ArkUI_Float32* (*getBorderWidth)(ArkUINodeHandle node);
+    const ArkUI_Float32* (*getBorderRadius)(ArkUINodeHandle node);  
+    const ArkUI_Uint32* (*getBorderColor)(ArkUINodeHandle node); 
+    const ArkUI_Int32* (*getBorderStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -1153,6 +1158,7 @@ struct ArkUIDividerModifier {
 
 struct ArkUIFlexModifier {
     void (*setFlexOptions)(ArkUINodeHandle node, ArkUI_Int32* options, ArkUI_Int32 length);
+    void (*resetFlexOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUIListModifier {
