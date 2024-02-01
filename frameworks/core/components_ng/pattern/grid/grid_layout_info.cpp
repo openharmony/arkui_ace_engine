@@ -483,10 +483,10 @@ bool CheckRow(int32_t& maxV, const std::map<int, int>& row, int32_t target)
     return false;
 }
 
-using iter = decltype(GridLayoutInfo::gridMatrix_)::const_iterator;
+using MatIter = decltype(GridLayoutInfo::gridMatrix_)::const_iterator;
 } // namespace
 
-iter GridLayoutInfo::FindInMatrix(int32_t index) const
+MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
 {
     if (index == 0) {
         return gridMatrix_.begin();
