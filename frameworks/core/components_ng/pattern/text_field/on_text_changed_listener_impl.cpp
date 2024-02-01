@@ -16,11 +16,13 @@
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 
 #include "base/input_manager/input_manager.h"
+#include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/ime/text_input_client.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/event/key_event.h"
 #include "core/pipeline/pipeline_base.h"
-
 namespace OHOS::Ace::NG {
 
 void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
@@ -325,11 +327,14 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         keyboardInfo.keyBoardType = KeyBoardType::STATUS_BAR;
     }
     keyboardInfo.visible = info.visible;
-    auto task = [textField = pattern_, keyboardInfo] {
-        auto client = textField.Upgrade();
-        CHECK_NULL_VOID(client);
-        ContainerScope scope(client->GetInstanceId());
-        client->NotifyKeyboardInfo(keyboardInfo);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto task = [weak = WeakPtr(pipeline), keyboardInfo, id = Container::CurrentId()] {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        ContainerScope scope(id);
+        auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        CHECK_NULL_VOID(textFieldManager);
+        textFieldManager->SetImeShow(keyboardInfo.visible);
     };
     PostTaskToUI(task);
 }

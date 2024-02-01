@@ -2043,4 +2043,15 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
     return nextNode;
 }
 
+void FocusHub::CloseKeyboard()
+{
+#if defined(ENABLE_STANDARD_INPUT)
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyBoard");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyBoard SoftKeyboard Closes Successfully.");
+    }
+#endif
+}
 } // namespace OHOS::Ace::NG

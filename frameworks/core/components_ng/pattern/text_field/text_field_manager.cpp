@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -146,5 +147,12 @@ void TextFieldManagerNG::UpdateScrollableParentViewPort(const RefPtr<FrameNode>&
     }
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
     scrollableNode->SetViewPort(scrollableRect);
+}
+void TextFieldManagerNG::ProcessNavKeyboard()
+{
+    if (imeShow_ || uiExtensionImeShow_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav notNeedSoftKeyboard.");
+        FocusHub::NavCloseKeyboard();
+    }
 }
 } // namespace OHOS::Ace::NG

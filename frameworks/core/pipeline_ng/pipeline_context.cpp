@@ -51,6 +51,7 @@
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
@@ -2630,6 +2631,9 @@ void PipelineContext::Destroy()
     needRenderNode_.clear();
     dirtyDefaultFocusNode_.Reset();
     dirtyRequestFocusNode_.Reset();
+    if (textFieldManager_->GetImeShow()) {
+        FocusHub::CloseKeyboard();
+    }
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_.Reset();
 #endif
@@ -3273,5 +3277,10 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
         return true;
     }
     return false;
+}
+
+void PipelineContext::SetUIExtensionImeShow(bool imeShow)
+{
+    textFieldManager_->SetUIExtensionImeShow(imeShow);
 }
 } // namespace OHOS::Ace::NG
