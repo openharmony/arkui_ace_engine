@@ -1926,7 +1926,7 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue textCase[] = { {.i32 = static_cast<int32>(ARKUI_TEXT_CASE_LOWER) } };
+     * ArkUI_NumberValue textCase[] = { {.i32 = static_cast<int32_t>(ARKUI_TEXT_CASE_LOWER) } };
      * ArkUI_AttributeItem item = { .value = textCase, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_CASE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_CASE);
