@@ -148,6 +148,11 @@ public:
         return WeakClaim(AceType::RawPtr(altLoadingCtx_));
     }
 
+protected:
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback();
+    bool isShow_ = true;
+
 private:
     class ObscuredImage : public CanvasImage {
         void DrawToRSCanvas(
@@ -248,7 +253,6 @@ private:
     void* overlayData_ = nullptr;
 
     bool syncLoad_ = false;
-    bool isShow_ = true;
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerOverlayBuild_ = false;
  
