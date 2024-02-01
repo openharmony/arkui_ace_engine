@@ -420,6 +420,10 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
                 preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
             }
 
+            if (!preNavDesNode->IsCacheNode() && preNavDesNode->GetContentNode()) {
+                preNavDesNode->GetContentNode()->Clean();
+            }
+
             auto parent = preNavDesNode->GetParent();
             CHECK_NULL_VOID(parent);
             parent->RemoveChild(preNavDesNode);
