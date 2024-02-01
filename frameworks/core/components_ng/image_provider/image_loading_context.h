@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_LOADING_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_LOADING_CONTEXT_H
 
+#include <cstdint>
 #include "base/geometry/ng/size_t.h"
+#include "base/thread/task_executor.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/image_provider/image_provider.h"
@@ -88,6 +90,12 @@ public:
     bool Downloadable();
     void OnDataReady();
 
+    // Needed to restore the relevant containerId from the originating thread
+    int32_t GetContainerId()
+    {
+        return containerId_;
+    }
+
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
     void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResult##NotifyTask) \
@@ -126,6 +134,9 @@ private:
 
     // [LoadNotifier] contains 3 tasks to notify whom uses [ImageLoadingContext] of loading results
     LoadNotifier notifiers_;
+
+    // the container of the creator thread of this image loading context
+    const int32_t containerId_ {0};
 
     bool autoResize_ = true;
     bool syncLoad_ = false;
