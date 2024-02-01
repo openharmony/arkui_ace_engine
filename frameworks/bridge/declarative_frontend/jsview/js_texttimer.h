@@ -60,7 +60,13 @@ public:
         return controller_;
     }
 
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
+
 private:
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     RefPtr<TextTimerController> controller_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JSTextTimerController);

@@ -213,6 +213,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 
 JSCanvasRenderer::JSCanvasRenderer()
 {
+    SetInstanceId(Container::CurrentIdSafely());
 }
 
 void JSCanvasRenderer::JsCreateLinearGradient(const JSCallbackInfo& info)

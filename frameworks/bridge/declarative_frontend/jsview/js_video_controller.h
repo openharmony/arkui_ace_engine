@@ -48,7 +48,13 @@ public:
         videoController_ = videoController;
     }
 
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
+
 private:
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     RefPtr<VideoControllerV2> videoController_;
     ACE_DISALLOW_COPY_AND_MOVE(JSVideoController);
 };

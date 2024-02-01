@@ -871,6 +871,7 @@ panda::Local<panda::JSValueRef> Vp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo
 
 panda::Local<panda::JSValueRef> Px2Vp(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
@@ -893,6 +894,7 @@ panda::Local<panda::JSValueRef> Px2Vp(panda::JsiRuntimeCallInfo* runtimeCallInfo
 
 panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
@@ -906,7 +908,7 @@ panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo
     double density = PipelineBase::GetCurrentDensity();
     double fpValue = firstArg->ToNumber(vm)->Value();
 
-    auto container = Container::CurrentSafely();
+    auto container = Container::Current();
     if (!container) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -921,6 +923,7 @@ panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo
 
 panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
@@ -936,7 +939,7 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo* runtimeCallInfo
     }
 
     double pxValue = firstArg->ToNumber(vm)->Value();
-    auto container = Container::CurrentSafely();
+    auto container = Container::Current();
     if (!container) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -952,6 +955,7 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo* runtimeCallInfo
 
 panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
@@ -961,7 +965,7 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
     if (!firstArg->IsNumber()) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto container = Container::CurrentSafely();
+    auto container = Container::Current();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     auto window = container->GetWindow();
     CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
@@ -979,6 +983,7 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
 
 panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
@@ -988,7 +993,7 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
     if (!firstArg->IsNumber()) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto container = Container::CurrentSafely();
+    auto container = Container::Current();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     auto window = container->GetWindow();
     CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
@@ -1006,6 +1011,7 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
 
 panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
@@ -1029,6 +1035,7 @@ panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo*
 
 panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
@@ -1041,7 +1048,7 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     std::string inspectorKey = firstArg->ToString(vm)->ToString();
 
     bool result = false;
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, panda::BooleanRef::New(vm, result));
     if (!pipelineContext->GetTaskExecutor()) {
         return panda::BooleanRef::New(vm, result);
@@ -1054,6 +1061,7 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
 
 panda::Local<panda::JSValueRef> SetCursor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
     if (vm == nullptr) {
@@ -1065,7 +1073,7 @@ panda::Local<panda::JSValueRef> SetCursor(panda::JsiRuntimeCallInfo* runtimeCall
     }
     int32_t intValue = firstArg->Int32Value(vm);
 
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
     if (!pipelineContext->GetTaskExecutor()) {
         return panda::JSValueRef::Undefined(vm);
@@ -1078,12 +1086,13 @@ panda::Local<panda::JSValueRef> SetCursor(panda::JsiRuntimeCallInfo* runtimeCall
 
 panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
     if (vm == nullptr) {
         return panda::JSValueRef::Undefined(vm);
     }
 
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
     if (!pipelineContext->GetTaskExecutor()) {
         return panda::JSValueRef::Undefined(vm);

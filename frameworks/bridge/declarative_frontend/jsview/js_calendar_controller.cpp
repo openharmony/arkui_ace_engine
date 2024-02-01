@@ -71,11 +71,13 @@ void JSCalendarController::Destructor(JSCalendarController* controller)
 
 void JSCalendarController::BackToToday(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     CalendarControllerModel::GetInstance()->BackToToday(controller_);
 }
 
 void JSCalendarController::GoTo(const JSCallbackInfo& info)
 {
+    ContainerScope scope(instanceId_);
     if (info.Length() != 1 || !info[0]->IsObject()) {
         return;
     }

@@ -93,7 +93,7 @@ protected:
 private:
     using ObjectClassMap  = std::map<std::string, JSRef<JSObject>>;
     ObjectClassMap objectorMap_;
-    int32_t instanceId_ = -1;
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     std::unordered_map<std::string, std::vector<std::string>> methods_;
     RefPtr<WebController> webController_;
     ACE_DISALLOW_COPY_AND_MOVE(JSWebController);

@@ -68,6 +68,7 @@ void JSVideo::Create(const JSCallbackInfo& info)
     if (controllerObj->IsObject()) {
         auto* jsVideoController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSVideoController>();
         if (jsVideoController) {
+            jsVideoController->SetInstanceId(Container::CurrentId());
             videoController = jsVideoController->GetController();
         }
     }

@@ -26,6 +26,7 @@ constexpr int32_t DEFAULT_ID = 0;
 constexpr int32_t DEFAULT_ID = INSTANCE_ID_UNDEFINED;
 #endif
 
+std::shared_mutex mutex_;
 std::set<int32_t> containerSet_;
 thread_local int32_t currentId_(DEFAULT_ID);
 std::atomic<int32_t> recentActiveId_(DEFAULT_ID);
@@ -40,6 +41,7 @@ int32_t ContainerScope::CurrentId()
 int32_t ContainerScope::DefaultId()
 {
     if (ContainerCount() > 0) {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
         return *containerSet_.end();
     }
     return INSTANCE_ID_UNDEFINED;
@@ -50,6 +52,7 @@ int32_t ContainerScope::SingletonId()
     if (ContainerCount() != 1) {
         return INSTANCE_ID_UNDEFINED;
     }
+    std::shared_lock<std::shared_mutex> lock(mutex_);
     return *containerSet_.begin();
 }
 
@@ -104,16 +107,19 @@ void ContainerScope::UpdateRecentForeground(int32_t id)
 
 uint32_t ContainerScope::ContainerCount()
 {
+    std::shared_lock<std::shared_mutex> lock(mutex_);
     return static_cast<uint32_t>(containerSet_.size());
 }
 
 void ContainerScope::Add(int32_t id)
 {
+    std::unique_lock<std::shared_mutex> lock(mutex_);
     containerSet_.emplace(id);
 }
 
 void ContainerScope::Remove(int32_t id)
 {
+    std::unique_lock<std::shared_mutex> lock(mutex_);
     containerSet_.erase(id);
 }
 
