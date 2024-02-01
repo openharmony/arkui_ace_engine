@@ -823,7 +823,7 @@ void SwiperPattern::FireAnimationStartEvent(
 
 void SwiperPattern::FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
 {
-    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, false);
     if (currentIndex == -1) {
         return;
     }
@@ -1753,7 +1753,7 @@ void SwiperPattern::HandleTouchUp()
 
 void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "Swiper");
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_SCROLL, PerfActionType::FIRST_MOVE, "");
     UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
 
     StopAnimationOnScrollStart(
@@ -1828,6 +1828,8 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
+    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_SCROLL, false);
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
     isTouchDown_ = false;
     UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
