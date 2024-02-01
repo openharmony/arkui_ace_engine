@@ -81,7 +81,7 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(JSScroller);
 
-    int32_t instanceId_ = -1;
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 };
 
 } // namespace OHOS::Ace::Framework

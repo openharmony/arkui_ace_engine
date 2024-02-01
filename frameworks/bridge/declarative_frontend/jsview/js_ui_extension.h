@@ -64,7 +64,7 @@ private:
     RegisterType GetRegisterType(const std::string& strType);
 
     RefPtr<NG::UIExtensionProxy> proxy_;
-    int32_t instanceId_ = -1;
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     CallbackFuncPairList onSyncOnCallbackList_;
     CallbackFuncPairList onAsyncOnCallbackList_;
     std::mutex callbackLisLock_;
