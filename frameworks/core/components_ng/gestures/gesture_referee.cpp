@@ -220,6 +220,16 @@ void GestureScope::ForceCleanGestureScope()
     }
 }
 
+void GestureScope::CleanGestureScopeState()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer) {
+            recognizer->CleanRecognizerState();
+        }
+    }
+}
+
 void GestureReferee::AddGestureToScope(size_t touchId, const TouchTestResult& result)
 {
     RefPtr<GestureScope> scope;
@@ -321,6 +331,13 @@ void GestureReferee::ForceCleanGestureReferee()
         iter->second->ForceCleanGestureScope();
     }
     gestureScopes_.clear();
+}
+
+void GestureReferee::CleanGestureRefereeState()
+{
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
+        iter->second->CleanGestureScopeState();
+    }
 }
 
 void GestureReferee::Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)

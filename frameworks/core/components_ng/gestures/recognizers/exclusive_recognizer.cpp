@@ -326,4 +326,18 @@ bool ExclusiveRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
     return true;
 }
 
+void ExclusiveRecognizer::CleanRecognizerState()
+{
+    for (const auto& child : recognizers_) {
+        if (child) {
+            child->CleanRecognizerState();
+        }
+    }
+    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+        currentFingers_ == 0) {
+        refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
+    }
+    activeRecognizer_ = nullptr;
+}
 } // namespace OHOS::Ace::NG
