@@ -154,6 +154,22 @@ void PagePattern::ProcessShowState()
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto manager = context->GetSafeAreaManager();
+    if (manager) {
+        auto safeArea = manager->GetSafeArea();
+        auto parentGlobalOffset = host->GetParentGlobalOffsetDuringLayout();
+        auto geometryNode = host->GetGeometryNode();
+        auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
+        // if page's frameRect not fit current safeArea, need layout page again
+        if (!NearEqual(frame.GetY(), safeArea.top_.end)) {
+            host->MarkDirtyNode(manager->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE);
+        }
+        if (!NearEqual(frame.GetY() + frame.Height(), safeArea.bottom_.start)) {
+            host->MarkDirtyNode(manager->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE);
+        }
+    }
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
 }
