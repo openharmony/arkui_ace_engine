@@ -562,11 +562,11 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
     }
-#endif
     std::chrono::microseconds microseconds(event.GetPointerEvent()->GetActionTime());
     TimeStamp time(microseconds);
     secEvent.point.timestamp =
         static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
+#endif
 
     return ReportSecurityComponentClickEventInner(scId, node, secEvent);
 }
