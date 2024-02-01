@@ -201,6 +201,8 @@ void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 
 void PipelineContext::FlushMessages() {}
 
+void PipelineContext::FlushUITasks() {}
+
 void PipelineContext::Finish(bool autoFinish) const {}
 
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
