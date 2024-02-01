@@ -422,9 +422,17 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
     panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
-    C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
-    T* instance = static_cast<T*>(ptr);
     EcmaVM* vm = runtimeCallInfo->GetVM();
+    C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    if (thisObj->IsProxy()) {
+        panda::Local<panda::ProxyRef> thisProxiedObj = static_cast<panda::Local<panda::ProxyRef>>(thisObj);
+        ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisProxiedObj->GetTarget(vm))->GetNativePointerField(0));
+    } else {
+        ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    }
+
+    T* instance = static_cast<T*>(ptr);
+
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
     if (binding == nullptr) {
