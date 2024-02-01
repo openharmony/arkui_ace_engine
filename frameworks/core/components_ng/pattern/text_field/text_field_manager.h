@@ -60,6 +60,7 @@ public:
 
     bool UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight);
     void SetHeight(float height);
+    void ProcessNavKeyboard();
 
     float GetHeight() const
     {
@@ -70,7 +71,7 @@ public:
 
     void UpdateScrollableParentViewPort(const RefPtr<FrameNode>& node);
 
-    bool GetImeShow() const
+    bool GetImeShow() const override
     {
         return imeShow_;
     }
@@ -80,12 +81,18 @@ public:
         imeShow_ = imeShow;
     }
 
+    void SetUIExtensionImeShow(bool imeShow) override
+    {
+        uiExtensionImeShow_ = imeShow;
+    }
+
 private:
     void ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
 
     bool hasMove_ = false;
     bool imeShow_ = false;
+    bool uiExtensionImeShow_ = false;
     Offset position_;
     float height_ = 0.0f;
     WeakPtr<Pattern> onFocusTextField_;

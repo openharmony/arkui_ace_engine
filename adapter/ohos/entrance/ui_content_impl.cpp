@@ -240,14 +240,31 @@ public:
             CHECK_NULL_VOID(context);
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
             if (pipeline) {
+                ContainerScope scope(instanceId_);
                 auto uiExtMgr = pipeline->GetUIExtensionManager();
+                if (uiExtMgr) {
+                    if (GreatNotEqual(keyboardRect.Height(), 0.0f)) {
+                        taskExecutor->PostTask(
+                            [pipeline] {
+                                CHECK_NULL_VOID(pipeline);
+                                pipeline->SetUIExtensionImeShow(true);
+                        },
+                        TaskExecutor::TaskType::UI);
+                    } else {
+                        taskExecutor->PostTask(
+                            [pipeline] {
+                                CHECK_NULL_VOID(pipeline);
+                                pipeline->SetUIExtensionImeShow(false);
+                        },
+                        TaskExecutor::TaskType::UI);
+                    }
+                }
                 if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
                     return;
                 }
             }
             auto curWindow = context->GetCurrentWindowRect();
             positionY -= curWindow.Top();
-            ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
                 [context, keyboardRect, rsTransaction, positionY, height] {
                     CHECK_NULL_VOID(context);
