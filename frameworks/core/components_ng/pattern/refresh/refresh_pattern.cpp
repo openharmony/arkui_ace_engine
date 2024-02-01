@@ -83,6 +83,9 @@ void RefreshPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    refreshOffset_ = layoutProperty->GetRefreshOffset().value_or(TRIGGER_REFRESH_DISTANCE).Value() > 0 ?
+        layoutProperty->GetRefreshOffset().value_or(TRIGGER_REFRESH_DISTANCE) : TRIGGER_REFRESH_DISTANCE;
+    pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     InitChildNode();
@@ -447,13 +450,15 @@ void RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
         if (!isSourceFromAnimation_) {
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
+                UpdateFirstChildPlacement();
+                return;
+            }
+            UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
+            if (LessNotEqual(scrollOffset_, static_cast<float>(refreshOffset_.ConvertToPx())) ||
+                    !pullToRefresh_) {
+                UpdateRefreshStatus(RefreshStatus::DRAG);
             } else {
-                UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
-                if (LessNotEqual(scrollOffset_, static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
-                    UpdateRefreshStatus(RefreshStatus::DRAG);
-                } else {
-                    UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
-                }
+                UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
             }
         }
         UpdateFirstChildPlacement();
@@ -491,9 +496,9 @@ float RefreshPattern::GetFollowRatio()
 {
     auto loadingVisibleHeight = GetLoadingVisibleHeight();
     auto ratio = 0.0f;
-    if (!NearEqual(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()), loadingVisibleHeight)) {
+    if (!NearEqual(static_cast<float>(refreshOffset_.ConvertToPx()), loadingVisibleHeight)) {
         ratio = static_cast<float>(
-            (scrollOffset_ - loadingVisibleHeight) / (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - loadingVisibleHeight));
+            (scrollOffset_ - loadingVisibleHeight) / (refreshOffset_.ConvertToPx() - loadingVisibleHeight));
     }
     return std::clamp(ratio, 0.0f, 1.0f);
 }
@@ -754,9 +759,10 @@ float RefreshPattern::GetLoadingVisibleHeight()
 
 void RefreshPattern::SpeedTriggerAnimation(float speed)
 {
-    auto targetOffset = (isSourceFromAnimation_ || LessNotEqual(scrollOffset_, TRIGGER_REFRESH_DISTANCE.ConvertToPx()))
+    auto targetOffset = (isSourceFromAnimation_ ||
+                            LessNotEqual(scrollOffset_, refreshOffset_.ConvertToPx()) || !pullToRefresh_)
                             ? 0.0f
-                            : TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+                            : refreshOffset_.ConvertToPx();
     auto dealSpeed = 0.0f;
     if (!NearEqual(scrollOffset_, targetOffset)) {
         dealSpeed = speed / (targetOffset - scrollOffset_);
@@ -794,7 +800,7 @@ float RefreshPattern::GetTargetOffset()
     switch (refreshStatus_) {
         case RefreshStatus::OVER_DRAG:
         case RefreshStatus::REFRESH:
-            targetOffset = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+            targetOffset = refreshOffset_.ConvertToPx();
             break;
         default:
             targetOffset = 0.0f;
@@ -814,13 +820,14 @@ void RefreshPattern::SpeedAnimationFinish()
 
 void RefreshPattern::QuickFirstChildAppear()
 {
+    isSourceFromAnimation_ = false;
     UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
     ResetAnimation();
     AnimationOption option;
     option.SetCurve(DEFAULT_CURVE);
     option.SetDuration(LOADING_ANIMATION_DURATION);
     animation_ = AnimationUtils::StartAnimation(
-        option, [&]() { offsetProperty_->Set(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx())); });
+        option, [&]() { offsetProperty_->Set(static_cast<float>(refreshOffset_.ConvertToPx())); });
 }
 
 void RefreshPattern::QuickFirstChildDisappear()
