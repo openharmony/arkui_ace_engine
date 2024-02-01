@@ -77,6 +77,7 @@ public:
 
     void SwipeTo(const JSCallbackInfo& args)
     {
+        ContainerScope scope(instanceId_);
         if (args.Length() < 1 || !args[0]->IsNumber()) {
             LOGE("Param is not valid");
             return;
@@ -88,6 +89,7 @@ public:
 
     void ShowNext(const JSCallbackInfo& args)
     {
+        ContainerScope scope(instanceId_);
         if (controller_) {
             controller_->ShowNext();
         }
@@ -95,6 +97,7 @@ public:
 
     void ShowPrevious(const JSCallbackInfo& args)
     {
+        ContainerScope scope(instanceId_);
         if (controller_) {
             controller_->ShowPrevious();
         }
@@ -107,7 +110,13 @@ public:
         controller_ = controller;
     }
 
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
+
 private:
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     RefPtr<SwiperController> controller_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JSSwiperController);

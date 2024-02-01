@@ -165,6 +165,7 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
 
 napi_value JSOffscreenCanvas::JsGetWidth(napi_env env, napi_callback_info info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     napi_value defaultWidth = nullptr;
     napi_create_double(env, 0.0, &defaultWidth);
@@ -173,6 +174,7 @@ napi_value JSOffscreenCanvas::JsGetWidth(napi_env env, napi_callback_info info)
 
 napi_value JSOffscreenCanvas::JsGetHeight(napi_env env, napi_callback_info info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     napi_value defaultHeight = nullptr;
     napi_create_double(env, 0.0, &defaultHeight);

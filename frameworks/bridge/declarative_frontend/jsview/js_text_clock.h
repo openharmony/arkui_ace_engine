@@ -54,7 +54,13 @@ public:
         controller_.emplace_back(controller);
     }
 
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
+
 private:
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     std::vector<RefPtr<TextClockController>> controller_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextClockController);
 };
