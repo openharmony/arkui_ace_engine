@@ -140,7 +140,8 @@ struct MouseEvent final {
                 .deviceId = deviceId,
                 .targetDisplayId = targetDisplayId,
                 .sourceType = sourceType,
-                .pointerEvent = pointerEvent };
+                .pointerEvent = pointerEvent
+            };
         }
 
         return { .x = x / scale,
@@ -162,7 +163,8 @@ struct MouseEvent final {
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
-            .pointerEvent = pointerEvent };
+            .pointerEvent = pointerEvent,
+        };
     }
 
     TouchEvent CreateTouchPoint() const
@@ -200,7 +202,8 @@ struct MouseEvent final {
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
-            .pointerEvent = pointerEvent };
+            .pointerEvent = pointerEvent,
+        };
         event.pointers.emplace_back(std::move(point));
         return event;
     }
@@ -225,7 +228,8 @@ struct MouseEvent final {
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
-            .pointerEvent = pointerEvent };
+            .pointerEvent = pointerEvent
+        };
     }
 };
 
