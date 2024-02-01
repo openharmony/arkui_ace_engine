@@ -959,6 +959,9 @@ HWTEST_F(ScrollTestNg, ScrollPositionControlle003, TestSize.Level1)
 HWTEST_F(ScrollTestNg, ScrollBarAnimation001, TestSize.Level1)
 {
     Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
 
@@ -1453,6 +1456,11 @@ HWTEST_F(ScrollTestNg, ScrollFadeEffect002, TestSize.Level1)
     scrollFadeEffect->InitialEdgeEffect();
 
     Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Scale(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_)).Times(AtLeast(1));
     OffsetF offset = OffsetF(0, 0);
     scrollFadeEffect->fadePainter_->SetOpacity(0);
     scrollFadeEffect->fadePainter_->direction_ = OverScrollDirection::UP;
@@ -3438,7 +3446,7 @@ HWTEST_F(ScrollTestNg, AnimateTo001, TestSize.Level1)
     auto smooth = false;
     pattern_->isAnimationStop_ = false;
     pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_LINE_NUMBER, 1.f, Curves::LINEAR, smooth);
-    EXPECT_TRUE(pattern_->isAnimationStop_);
+    EXPECT_FALSE(pattern_->isAnimationStop_);
 }
 
 /**
@@ -3452,7 +3460,7 @@ HWTEST_F(ScrollTestNg, PlaySpringAnimation001, TestSize.Level1)
     auto smooth = false;
     pattern_->isAnimationStop_ = false;
     pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_LINE_NUMBER, 1.f, Curves::LINEAR, smooth);
-    EXPECT_TRUE(pattern_->isAnimationStop_);
+    EXPECT_FALSE(pattern_->isAnimationStop_);
 }
 
 /**

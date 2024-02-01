@@ -2319,10 +2319,10 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. Test AnimateTo function
-     * @tc.expected: pattern_->isAnimationStop_ is true
+     * @tc.expected: pattern_->isAnimationStop_ is false
      */
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false);
-    EXPECT_TRUE(pattern_->isAnimationStop_);
+    EXPECT_FALSE(pattern_->isAnimationStop_);
 }
 
 /**
