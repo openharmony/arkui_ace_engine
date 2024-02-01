@@ -114,7 +114,7 @@ private:
 
     void Destroy(const RefPtr<FrameNode>& overlay);
 
-    bool IsTouchInCallerArea() const;
+    bool IsTouchInCallerArea(const std::optional<NG::PointF>& point = std::nullopt) const;
 
     void NotifyOverlayClosed(bool closedByGlobalEvent = false);
 

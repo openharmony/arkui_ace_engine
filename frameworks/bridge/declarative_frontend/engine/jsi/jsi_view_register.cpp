@@ -640,7 +640,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* r
     if (argc < 1 || !firstArg->IsString()) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto container = Container::CurrentSafely();
+    auto container = Container::Current();
     if (!container) {
         return panda::JSValueRef::Undefined(vm);
     }

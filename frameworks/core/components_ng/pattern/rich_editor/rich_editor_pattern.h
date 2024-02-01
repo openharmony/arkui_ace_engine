@@ -174,7 +174,6 @@ public:
     std::wstring DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
-    void HandleClickAISpanEvent(GestureEvent& info);
     void NotifyKeyboardClosedByUser() override
     {
         FocusHub::LostFocusToViewRoot();
@@ -560,6 +559,10 @@ private:
     void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
 
+    RectF GetSelectArea();
+    void UpdateOverlaySelectArea();
+    bool IsTouchInFrameArea(const PointF& touchPoint);
+
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
@@ -630,7 +633,6 @@ private:
     TimeStamp lastClickTimeStamp_;
     TimeStamp lastAiPosTimeStamp_;
     bool adjusted_ = false;
-    Offset touchDownOffset_;
     bool isShowMenu_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };

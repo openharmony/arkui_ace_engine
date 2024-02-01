@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 
 namespace OHOS::Ace::NG {
 void ImageUtils::PostTask(
@@ -33,14 +34,18 @@ void ImageUtils::PostTask(
         taskType);
 }
 
-void ImageUtils::PostToUI(std::function<void()>&& task)
+void ImageUtils::PostToUI(std::function<void()>&& task, const int32_t containerId)
 {
+    ContainerScope scope(containerId);
+
     CHECK_NULL_VOID(task);
     ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::UI, "UI");
 }
 
-void ImageUtils::PostToBg(std::function<void()>&& task)
+void ImageUtils::PostToBg(std::function<void()>&& task, const int32_t containerId)
 {
+    ContainerScope scope(containerId);
+
     CHECK_NULL_VOID(task);
     ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::BACKGROUND, "BACKGROUND");
 }

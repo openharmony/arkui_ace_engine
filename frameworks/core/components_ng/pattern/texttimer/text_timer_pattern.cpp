@@ -48,7 +48,7 @@ void TextTimerPattern::FireChangeEvent()
     auto utcTime = GetFormatDuration(GetMilliseconds());
     auto elapsedTime = GetFormatDuration(elapsedTime_);
     if (elapsedTime - lastElapsedTime_ >= 1) {
-        textTimerEventHub->FireChangeEvent(std::to_string(utcTime), std::to_string(elapsedTime));
+        textTimerEventHub->FireChangeEvent(utcTime, elapsedTime);
         lastElapsedTime_ = elapsedTime;
     }
 }

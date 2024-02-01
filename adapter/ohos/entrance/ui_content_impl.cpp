@@ -551,6 +551,7 @@ void UIContentImpl::PreInitializeForm(OHOS::Rosen::Window* window, const std::st
     if (isFormRender_ && !window) {
         LOGI("CommonInitializeForm url = %{public}s", url.c_str());
         CommonInitializeForm(window, url, storage);
+        SystemProperties::AddWatchSystemParameter(this);
     }
 }
 
@@ -566,6 +567,7 @@ void UIContentImpl::RunFormPage()
 
 UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
+    SystemProperties::AddWatchSystemParameter(this);
     return InitializeInner(window, url, storage, false);
 }
 
@@ -575,6 +577,7 @@ UIContentErrorCode UIContentImpl::Initialize(
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, "", storage);
     CHECK_ERROR_CODE_RETURN(errorCode);
+    SystemProperties::AddWatchSystemParameter(this);
     if (content) {
         LOGI("Initialize by buffer, size:%{public}zu", content->size());
         // run page.
@@ -592,6 +595,7 @@ UIContentErrorCode UIContentImpl::Initialize(
 UIContentErrorCode UIContentImpl::InitializeByName(
     OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
+    SystemProperties::AddWatchSystemParameter(this);
     return InitializeInner(window, name, storage, true);
 }
 
@@ -605,6 +609,7 @@ void UIContentImpl::InitializeDynamic(
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
 
     CommonInitializeForm(nullptr, abcPath, nullptr);
+    SystemProperties::AddWatchSystemParameter(this);
 
     LOGI("Initialize DynamicComponent startUrl = %{public}s, entryPoint = %{public}s", startUrl_.c_str(),
         entryPoint.c_str());
@@ -619,6 +624,7 @@ void UIContentImpl::Initialize(
 {
     if (window) {
         CommonInitialize(window, url, storage);
+        SystemProperties::AddWatchSystemParameter(this);
     }
     if (focusWindowId != 0) {
         LOGI("UIExtension host window id:%{public}u", focusWindowId);
@@ -1602,6 +1608,7 @@ void UIContentImpl::UnFocus()
 void UIContentImpl::Destroy()
 {
     LOGI("%{public}s window destroy", bundleName_.c_str());
+    SystemProperties::RemoveWatchSystemParameter(this);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file

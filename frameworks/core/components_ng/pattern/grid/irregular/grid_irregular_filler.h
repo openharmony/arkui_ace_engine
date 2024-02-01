@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,14 +145,6 @@ private:
      * @return The cross-axis index where the item can fit. Returns -1 if it can't fit on the current row.
      */
     int32_t FitItem(const decltype(GridLayoutInfo::gridMatrix_)::iterator& it, int32_t itemWidth);
-
-    /**
-     * @brief Gets the size of an item at the specified index.
-     *
-     * @param idx The index of the item.
-     * @return The size of the item.
-     */
-    GridItemSize GetItemSize(int32_t idx);
 
     /**
      * @brief Finds the top row index of an item in the grid.

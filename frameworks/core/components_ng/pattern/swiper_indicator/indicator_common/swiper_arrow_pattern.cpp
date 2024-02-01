@@ -164,7 +164,7 @@ int32_t SwiperArrowPattern::TotalCount() const
     CHECK_NULL_RETURN(swiperNode, 0);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, 0);
-    return swiperPattern->TotalCount() - 1;
+    return swiperPattern->RealTotalCount() - 1;
 }
 
 void SwiperArrowPattern::ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchType touchType)

@@ -1035,6 +1035,20 @@ typedef enum {
     ARKUI_VISIBILITY_NONE,
 } ArkUI_Visibility;
 
+/**
+ * @brief 日历选择器与入口组件对齐方式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 选择器和入口组件左对齐方式。 */
+    ARKUI_CALENDAR_ALIGNMENT_START = 0,
+    /** 选择器和入口组件居中对齐方式。 */
+    ARKUI_CALENDAR_ALIGNMENT_CENTER,
+    /** 选择器和入口组件右对齐方式。 */
+    ARKUI_CALENDAR_ALIGNMENT_END,
+} ArkUI_CalendarAlignment;
+
 #ifdef __cplusplus
 };
 #endif

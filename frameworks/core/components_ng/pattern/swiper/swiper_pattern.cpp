@@ -329,7 +329,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             }
         }
     }
-    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount()) {
+    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= RealTotalCount()) {
         currentIndex_ = 0;
         layoutProperty->UpdateIndexWithoutMeasure(GetLoopIndex(currentIndex_));
     } else {
@@ -940,7 +940,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     MarkDirtyNodeSelf();
 }
 
-int32_t SwiperPattern::CheckTargetIndex(int32_t targetIndex)
+int32_t SwiperPattern::CheckTargetIndex(int32_t targetIndex, bool isForceBackward)
 {
     if (!IsAutoLinear()) {
         return targetIndex;
@@ -953,7 +953,7 @@ int32_t SwiperPattern::CheckTargetIndex(int32_t targetIndex)
         if (swiperLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::GONE) {
             return targetIndex;
         }
-        if (currentIndex_ < targetIndex) {
+        if (isForceBackward || currentIndex_ < targetIndex) {
             ++targetIndex;
         } else {
             --targetIndex;
@@ -1609,17 +1609,26 @@ void SwiperPattern::CalculateGestureState(float additionalOffset, float currentT
     return;
 }
 
+void SwiperPattern::UpdateNextValidIndex()
+{
+    // item may be invalid in auto linear scene, mark next valid item
+    if (IsAutoLinear()) {
+        currentFirstIndex_ = CheckTargetIndex(currentFirstIndex_, true);
+        nextValidIndex_ = GetLoopIndex(CheckTargetIndex(currentFirstIndex_ + 1, true));
+    } else {
+        nextValidIndex_ = -1;
+    }
+}
+
 void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (!indicatorId_.has_value()) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto child = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
-    CHECK_NULL_VOID(child);
-
-    if (child->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
+    if (!child || child->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
         return;
     }
 
@@ -1644,6 +1653,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
         }
     }
 
+    UpdateNextValidIndex();
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
     CalculateGestureState(additionalOffset, currentTurnPageRate, preFirstIndex);
     turnPageRate_ = (currentTurnPageRate == FLT_MAX ? turnPageRate_ : currentTurnPageRate);

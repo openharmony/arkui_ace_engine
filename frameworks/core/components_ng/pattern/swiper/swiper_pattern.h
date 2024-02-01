@@ -592,6 +592,12 @@ public:
     int32_t GetDisplayCount() const;
     int32_t GetCachedCount() const;
 
+    int32_t GetNextValidIndex() const
+    {
+        return nextValidIndex_;
+    }
+    void UpdateNextValidIndex();
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -800,7 +806,7 @@ private:
     void AdjustCurrentFocusIndex();
     bool IsContentFocused();
 
-    int32_t CheckTargetIndex(int32_t targetIndex);
+    int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
 
     WeakPtr<NestableScrollContainer> parent_;
     /**
@@ -851,6 +857,7 @@ private:
     float currentIndexOffset_ = 0.0f;
     int32_t gestureSwipeIndex_ = 0;
     int32_t currentFirstIndex_ = 0;
+    int32_t nextValidIndex_ = 0;
     int32_t currentFocusIndex_ = 0;
 
     bool moveDirection_ = false;

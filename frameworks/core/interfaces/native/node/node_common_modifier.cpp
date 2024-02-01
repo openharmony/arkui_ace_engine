@@ -77,6 +77,8 @@ constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
 constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
+constexpr int32_t ORIGINAL_IMAGE_SIZE_AUTO = 0;
+constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -1556,6 +1558,19 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
 }
 
+int32_t GetBackgroundImageSizeType(int nativeImageSizeType)
+{
+    switch (nativeImageSizeType) {
+        case ORIGINAL_IMAGE_SIZE_AUTO:
+            return static_cast<int32_t>(OHOS::Ace::BackgroundImageSizeType::AUTO);
+        case ORIGINAL_IMAGE_SIZE_CONTAIN:
+            return static_cast<int32_t>(OHOS::Ace::BackgroundImageSizeType::CONTAIN);
+        default:
+            break;
+    }
+    return nativeImageSizeType;
+}
+
 void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
     ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight)
 {
@@ -1563,14 +1578,16 @@ void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkU
     CHECK_NULL_VOID(frameNode);
     BackgroundImageSize bgImgSize;
     if (LessNotEqual(valueWidth, 0.0f)) {
-        bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeWidth));
+        bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(GetBackgroundImageSizeType(typeWidth)));
     } else {
-        bgImgSize.SetSizeValueX(valueWidth);
+        bgImgSize.SetSizeValueX(Dimension(valueWidth, DimensionUnit::VP).ConvertToPx());
+        bgImgSize.SetSizeTypeX(BackgroundImageSizeType::LENGTH);
     }
     if (LessNotEqual(valueHeight, 0.0f)) {
-        bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeHeight));
+        bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(GetBackgroundImageSizeType(typeHeight)));
     } else {
-        bgImgSize.SetSizeValueY(valueWidth);
+        bgImgSize.SetSizeValueY(Dimension(valueHeight, DimensionUnit::VP).ConvertToPx());
+        bgImgSize.SetSizeTypeY(BackgroundImageSizeType::LENGTH);
     }
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
@@ -3282,6 +3299,10 @@ void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, Ar
 } // namespace
 
 namespace NodeModifier {
+namespace {
+    OHOS::Ace::TouchEventInfo globalEventInfo("global");
+}
+
 const ArkUICommonModifier* GetCommonModifier()
 {
     static const ArkUICommonModifier modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
@@ -3404,6 +3425,103 @@ void SetOnAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
             Offset(origin.GetX(), origin.GetY()));
     };
     ViewAbstract::SetOnAreaChanged(frameNode, std::move(areaChangeCallback));
+}
+
+void SetOnClick(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, eventId, extraParam](GestureEvent& info) {
+        ArkUINodeEvent event;
+        event.kind = ON_CLICK;
+        event.eventId = eventId;
+        event.extraParam = extraParam;
+
+        Offset globalOffset = info.GetGlobalLocation();
+        Offset localOffset = info.GetLocalLocation();
+        Offset screenOffset = info.GetScreenLocation();
+        //x
+        event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+        //y
+        event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
+        //timestamp
+        event.componentAsyncEvent.data[2].f32 = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        //target width
+        event.componentAsyncEvent.data[3].f32 = info.GetTarget().area.GetWidth().ConvertToVp();
+        //target height
+        event.componentAsyncEvent.data[4].f32 = info.GetTarget().area.GetHeight().ConvertToVp();
+        const auto& areaLocalOffset = info.GetTarget().area.GetOffset();
+        const auto& areaOrigin = info.GetTarget().origin;
+        //target position x
+        event.componentAsyncEvent.data[5].f32 = areaLocalOffset.GetX().ConvertToVp();
+        //target position y
+        event.componentAsyncEvent.data[6].f32 = areaLocalOffset.GetY().ConvertToVp();
+        //target globalPosition x
+        event.componentAsyncEvent.data[7].f32 = areaOrigin.GetX().ConvertToVp() + areaLocalOffset.GetX().ConvertToVp();
+        //target globalPosition y
+        event.componentAsyncEvent.data[8].f32 = areaOrigin.GetY().ConvertToVp() + areaLocalOffset.GetY().ConvertToVp();
+        //source
+        event.componentAsyncEvent.data[9].i32 = static_cast<int32_t>(info.GetSourceDevice());
+        //windowX
+        event.componentAsyncEvent.data[10].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX());
+        //windowY
+        event.componentAsyncEvent.data[11].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY());
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+}
+
+void SetOnTouch(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, eventId, extraParam](TouchEventInfo& eventInfo) {
+        globalEventInfo = eventInfo;
+        ArkUINodeEvent event;
+        event.kind = ON_TOUCH;
+        event.eventId = eventId;
+        event.extraParam = extraParam;
+        const std::list<TouchLocationInfo>& changeTouch = eventInfo.GetChangedTouches();
+        if (changeTouch.size() > 0) {
+            TouchLocationInfo front = changeTouch.front();
+            event.touchEvent.action = static_cast<ArkUITouchEventAction>(front.GetTouchType());
+            const OHOS::Ace::Offset& globalLocation = front.GetGlobalLocation();
+            const OHOS::Ace::Offset& localLocation = front.GetLocalLocation();
+            const OHOS::Ace::Offset& screenLocation = front.GetScreenLocation();
+            event.touchEvent.actionTouch.id = front.GetFingerId();
+            event.touchEvent.actionTouch.nodeX = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+            event.touchEvent.actionTouch.nodeY = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+            event.touchEvent.actionTouch.windowX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
+            event.touchEvent.actionTouch.windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
+            event.touchEvent.actionTouch.screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
+            event.touchEvent.actionTouch.screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
+        }
+        event.touchEvent.timeStamp = static_cast<double>(eventInfo.GetTimeStamp().time_since_epoch().count());
+        event.touchEvent.sourceType = static_cast<ArkUISourceType>(eventInfo.GetSourceDevice());
+
+        auto getTouchPoints = [](ArkUITouchPoint** points)-> ArkUI_Int32 {
+            const std::list<TouchLocationInfo>& touchList = globalEventInfo.GetTouches();
+            int index = 0;
+            for (const auto& touchInfo : touchList) {
+                const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
+                const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
+                const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
+                ArkUITouchPoint touchPoint;
+                touchPoint.id = touchInfo.GetFingerId();
+                touchPoint.nodeX = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+                touchPoint.nodeY = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+                touchPoint.windowX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
+                touchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
+                touchPoint.screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
+                touchPoint.screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
+                points[index++] = &touchPoint;
+            }
+            return index;
+        };
+        event.touchEvent.getTouches = std::move(getTouchPoints);
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
 
 } // namespace NodeModifier

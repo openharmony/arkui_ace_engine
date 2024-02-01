@@ -87,6 +87,7 @@ private:
     void HandleDragStart(bool isDrag = true, float mainSpeed = 0.0f);
     void HandleDragUpdate(float delta, float mainSpeed = 0.0f);
     void HandleDragEnd(float speed);
+    void HandleDragCancel();
     float CalculateFriction();
     void TriggerStatusChange(RefreshStatus newStatus);
     void OnAttachToFrameNode() override;

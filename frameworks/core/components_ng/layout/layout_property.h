@@ -305,6 +305,8 @@ private:
     void CheckAspectRatio();
     void CheckBorderAndPadding();
 
+    const std::string PixelRoundToJsonValue() const;
+
     // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;
     std::optional<LayoutConstraintF> contentConstraint_;
