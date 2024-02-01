@@ -4701,12 +4701,12 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .u32 = 2028 }, { .u32 = 1 }, { .u32 = 1 } };
      * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED, &item);
-     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED_DATE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED_DATE);
      * auto selectYear = item->value[0].u32;
      * @endcode
      */
-    NODE_CALENDAR_PICKER_SELECTED,
+    NODE_CALENDAR_PICKER_SELECTED_DATE,
     /**
      * @brief 设置日历选择器与入口组件的对齐方式，支持属性设置，属性重置和属性获取接口。
      *
@@ -4721,14 +4721,14 @@ typedef enum {
      * .value[2]?.f32： 按照对齐方式对齐后，选择器相对入口组件的y轴方向相对偏移。\n
      *
      * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = static_cast<int32_t>(ARKUI_CALENDAR_ALIGN_END) }, 10.0f, 0.0f };
+     * ArkUI_NumberValue value[] = { { .i32 = static_cast<int32_t>(ARKUI_CALENDAR_ALIGNMENT_END) }, 10.0f, 0.0f };
      * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGN, &item);
-     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGN);
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGNMENT, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGNMENT);
      * auto alignType = item->value[0].i32;
      * @endcode
      */
-    NODE_CALENDAR_PICKER_EDGE_ALIGN,
+    NODE_CALENDAR_PICKER_EDGE_ALIGNMENT,
     /**
      * @brief 设置日历选择器入口区的文本颜色、字号、字体粗细。
      *
