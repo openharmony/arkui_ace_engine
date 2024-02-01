@@ -3209,7 +3209,7 @@ void ResetBlendMode(ArkUINodeHandle node)
     ViewAbstract::SetBlendMode(frameNode, BlendMode::NONE);
 }
 
-void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float64* values, const ArkUI_Int32* units)
+void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3230,7 +3230,7 @@ void ResetConstraintSize(ArkUINodeHandle node)
 }
 
 void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-    ArkUI_Float32 strokeWidth, ArkUI_Float64* attribute, ArkUI_Int32 length)
+    ArkUI_Float32 strokeWidth, ArkUI_Float32* attribute, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3279,7 +3279,7 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
 }
 
 void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-    ArkUI_Float32 strokeWidth, ArkUI_Float64* attribute, ArkUI_CharPtr commands)
+    ArkUI_Float32 strokeWidth, ArkUI_Float32* attribute, ArkUI_CharPtr commands)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     auto strokeWidth_ = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(1));

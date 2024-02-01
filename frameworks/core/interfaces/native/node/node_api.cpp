@@ -313,34 +313,38 @@ const ArkUIBasicAPI* GetBasicAPI()
     return &basicImpl;
 }
 
+void ShowCrash(ArkUI_CharPtr message) {
+    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Arkoala crash: %{public}s", message);
+}
 /* clang-format off */
 ArkUIExtendedNodeAPI impl_extended = {
     ARKUI_EXTENDED_API_VERSION,
 
-    nullptr,
-    nullptr,
+    nullptr, // getUtilsModifier
+    nullptr, // getCanvasRenderingContext2DModifier
 
     SetCallbackMethod,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    nullptr, // setCustomCallback
+    nullptr, // measureLayoutAndDraw
+    nullptr, // measureNode
+    nullptr, // layoutNode
+    nullptr, // drawNode
+    nullptr, // setMeasureWidth
+    nullptr, // getMeasureWidth
+    nullptr, // setMeasureHeight
+    nullptr, // getMeasureHeight
+    nullptr, // setX
+    nullptr, // setY
+    nullptr, // indexerChecker
+    nullptr, // setRangeUpdater
+    nullptr, // setLazyItemIndexer
+    nullptr, // setVsyncCallback
+    nullptr, // unblockVsyncWait
+    nullptr, // checkEvent
+    nullptr, // sendEvent
+    nullptr, // callContinuation
+    nullptr, // setChildTotalCount
+    ShowCrash,
 };
 /* clang-format on */
 

@@ -20,13 +20,13 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 66
+#define ARKUI_FULL_API_VERSION 67
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 66
+#define ARKUI_NODE_API_VERSION 67
 
 #define ARKUI_BASIC_API_VERSION 5
-#define ARKUI_EXTENDED_API_VERSION 2
+#define ARKUI_EXTENDED_API_VERSION 4
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 5
 #define ARKUI_AUTO_GENERATE_NODE_ID -2
@@ -463,6 +463,7 @@ enum ArkUINodeType {
     ARKUI_DATE_PICKER,
     ARKUI_TIME_PICKER,
     ARKUI_TEXT_PICKER,
+    ARKUI_GRID_ITEM,
 };
 
 enum ArkUIEventCategory {
@@ -932,12 +933,12 @@ struct ArkUICommonModifier {
     void (*setTranslateTransition)(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue,
         ArkUI_Int32 yUnit, ArkUI_Float32 zValue, ArkUI_Int32 zUnit, const ArkUIAnimationOptionType* opacityOption);
     void (*setMaskShape)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-        ArkUI_Float32 strokeWidth, ArkUI_Float64* attribute, ArkUI_Int32 length);
+        ArkUI_Float32 strokeWidth, ArkUI_Float32* attribute, ArkUI_Int32 length);
     void (*setMaskPath)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-        ArkUI_Float32 strokeWidth, ArkUI_Float64* attribute, ArkUI_CharPtr commands);
+        ArkUI_Float32 strokeWidth, ArkUI_Float32* attribute, ArkUI_CharPtr commands);
     void (*setBlendMode)(ArkUINodeHandle node, ArkUI_Int32 blendMode);
     void (*resetBlendMode)(ArkUINodeHandle node);
-    void (*setConstraintSize)(ArkUINodeHandle node, const ArkUI_Float64* values, const ArkUI_Int32* units);
+    void (*setConstraintSize)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units);
     void (*resetConstraintSize)(ArkUINodeHandle node);
 };
 
@@ -1043,12 +1044,12 @@ struct ArkUITextModifier {
     void (*resetTextFontFamily)(ArkUINodeHandle node);
     void (*setTextCopyOption)(ArkUINodeHandle node, ArkUI_Int32 copyOption);
     void (*resetTextCopyOption)(ArkUINodeHandle node);
-    void (*setTextTextShadow)(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length);
-    void (*resetTextTextShadow)(ArkUINodeHandle node);
+    void (*setTextShadow)(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length);
+    void (*resetTextShadow)(ArkUINodeHandle node);
     void (*setTextHeightAdaptivePolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextHeightAdaptivePolicy)(ArkUINodeHandle node);
-    void (*setTextTextIndent)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* value);
-    void (*resetTextTextIndent)(ArkUINodeHandle node);
+    void (*setTextIndent)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* value);
+    void (*resetTextIndent)(ArkUINodeHandle node);
     void (*setTextBaselineOffset)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* offset);
     void (*resetTextBaselineOffset)(ArkUINodeHandle node);
     void (*setTextLetterSpacing)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingStruct);
@@ -2279,7 +2280,7 @@ struct ArkUICanvasRenderingContext2DModifier {
     ArkUI_Float32 (*getCanvasGlobalAlpha)(ArkUINodeHandle node);
     void (*setCanvasFillRect)(ArkUINodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y, ArkUI_Float32 w, ArkUI_Float32 h);
     void (*setCanvasFillText)(
-        ArkUINodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y, ArkUI_Float32 w, ArkUI_Float32 maxWidth);
+        ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_Float32 x, ArkUI_Float32 y, ArkUI_Float32 maxWidth);
 };
 
 struct ArkUIUtilsModifier {
@@ -2498,6 +2499,7 @@ struct ArkUINodeModifiers {
     const ArkUIScrollerModifier* (*getScrollerModifier)();
     const ArkUITabContentModifier* (*getTabContentModifier)();
     const ArkUITabsControllerModifier* (*getTabsControllerModifier)();
+    const ArkUISwiperControllerModifier* (*getSwiperControllerModifier)();
     const ArkUIGestureModifier* (*getGestureModifier)();
     const ArkUIBadgeModifier* (*getBadgeModifier)();
     const ArkUIWebModifier* (*getWebModifier)();
@@ -2605,7 +2607,10 @@ struct ArkUIExtendedNodeAPI {
 
     /// Continuations on native side.
     void (*callContinuation)(ArkUI_Int32 continuationId, ArkUI_Int32 argCount, ArkUIEventCallbackArg* args);
-    void (*setChildTotalCuunt)(ArkUINodeHandle node, ArkUI_Int32 totalCount);
+    void (*setChildTotalCount)(ArkUINodeHandle node, ArkUI_Int32 totalCount);
+
+    /// Error reporting.
+    void (*showCrash)(ArkUI_CharPtr message);
 };
 
 /**
