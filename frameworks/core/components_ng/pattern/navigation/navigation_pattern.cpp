@@ -185,7 +185,6 @@ void NavigationPattern::OnModifyDone()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
-
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
         auto dividerNode = GetDividerNode();
         CHECK_NULL_VOID(dividerNode);
@@ -196,7 +195,6 @@ void NavigationPattern::OnModifyDone()
         CHECK_NULL_VOID(inputHub);
         InitDividerMouseEvent(inputHub);
     }
-
     auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
     if (opts && opts->Expansive()) {
         navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
@@ -773,10 +771,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(navigationLayoutAlgorithm, false);
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, false);
-    auto oldMode = navigationMode_;
-    navigationMode_ = navigationLayoutAlgorithm->GetNavigationMode();
-    OnNavBarStateChange(oldMode != navigationMode_);
-    OnNavigationModeChange(oldMode != navigationMode_);
     auto context = PipelineContext::GetCurrentContext();
     if (context) {
         context->GetTaskExecutor()->PostTask(
@@ -840,9 +834,8 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
-
     UpdateTitleModeChangeEventHub(hostNode);
-    AddDividerHotZoneRect(navigationLayoutAlgorithm);
+    AddDividerHotZoneRect();
     ifNeedInit_ = false;
     return false;
 }
@@ -1072,19 +1065,25 @@ RefPtr<FrameNode> NavigationPattern::GetDividerNode() const
     return dividerFrameNode;
 }
 
-void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm)
+void NavigationPattern::AddDividerHotZoneRect()
 {
-    CHECK_NULL_VOID(layoutAlgorithm);
     if (realDividerWidth_ <= 0.0f) {
         return;
     }
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto geometryNode = navBarNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
     OffsetF hotZoneOffset;
     hotZoneOffset.SetX(-DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneOffset.SetY(DEFAULT_DIVIDER_START_MARGIN.ConvertToPx());
     SizeF hotZoneSize;
     hotZoneSize.SetWidth(realDividerWidth_ + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM *
                                                  DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
-    hotZoneSize.SetHeight(layoutAlgorithm->GetRealNavBarHeight());
+    hotZoneSize.SetHeight(geometryNode->GetFrameSize().Height());
     DimensionRect hotZoneRegion;
     if (navigationMode_ == NavigationMode::STACK) {
         hotZoneRegion.SetSize(DimensionSize(Dimension(0.0f), Dimension(0.0f)));
@@ -1102,14 +1101,14 @@ void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgor
     CHECK_NULL_VOID(dividerGestureHub);
     dividerGestureHub->SetMouseResponseRegion(mouseRegion);
 
-    auto dragRectOffset = layoutAlgorithm->GetNavBarOffset();
+    auto dragRectOffset = geometryNode->GetMarginFrameOffset();
     dragRectOffset.SetX(-DEFAULT_DRAG_REGION.ConvertToPx());
     dragRect_.SetOffset(dragRectOffset);
     if (navigationMode_ == NavigationMode::STACK) {
         dragRect_.SetSize(SizeF(0.0f, 0.0f));
     } else {
         dragRect_.SetSize(SizeF(DEFAULT_DRAG_REGION.ConvertToPx() * DEFAULT_HALF + realDividerWidth_,
-            layoutAlgorithm->GetRealNavBarHeight()));
+            geometryNode->GetFrameSize().Height()));
     }
 
     std::vector<DimensionRect> responseRegion;
