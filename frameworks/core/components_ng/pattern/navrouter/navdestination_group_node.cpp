@@ -87,6 +87,10 @@ void NavDestinationGroupNode::OnOffscreenProcess(bool recursive)
 
 void NavDestinationGroupNode::ProcessShallowBuilder()
 {
+    if (isCacheNode_) {
+        return;
+    }
+
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "render navDestination content");
     auto navDestinationPattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);

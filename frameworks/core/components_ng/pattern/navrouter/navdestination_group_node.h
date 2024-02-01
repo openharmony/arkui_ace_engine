@@ -153,6 +153,16 @@ public:
         return index_;
     }
 
+    void SetIsCacheNode(bool cache)
+    {
+        isCacheNode_ = cache;
+    }
+
+    bool IsCacheNode() const
+    {
+        return isCacheNode_;
+    }
+
 private:
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
@@ -163,6 +173,7 @@ private:
     int32_t index_ = -1;
     PageTransitionType transitionType_ = PageTransitionType::NONE;
     NavDestinationMode mode_ = NavDestinationMode::STANDARD;
+    bool isCacheNode_ = false;
 };
 
 } // namespace OHOS::Ace::NG
