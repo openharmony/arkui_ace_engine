@@ -1544,6 +1544,7 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 void UIContentImpl::Foreground()
 {
     LOGI("[%{public}s][%{public}s]: window foreground", bundleName_.c_str(), moduleName_.c_str());
+    PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     ContainerScope::UpdateRecentForeground(instanceId_);
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
