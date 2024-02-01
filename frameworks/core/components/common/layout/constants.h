@@ -658,6 +658,7 @@ enum class GestureTypeName {
     DRAG = 6,
     CLICK = 7,
     BOXSELECT = 8,
+    WEBSCROLL = 9,
 };
 
 enum class ModifierKey {
