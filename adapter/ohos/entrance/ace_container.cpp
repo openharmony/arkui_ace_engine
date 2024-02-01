@@ -148,6 +148,19 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
         }
     }
 }
+
+std::string EncodeBundleAndModule(const std::string& bundleName, const std::string& moduleName)
+{
+    return bundleName + " " + moduleName;
+}
+
+void DecodeBundleAndModule(const std::string& encode, std::string& bundleName, std::string& moduleName)
+{
+    std::vector<std::string> tokens;
+    StringUtils::StringSplitter(encode, ' ', tokens);
+    bundleName = tokens[0];
+    moduleName = tokens[1];
+}
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -265,6 +278,15 @@ void AceContainer::Destroy()
 {
     LOGI("AceContainer Destroy begin");
     ContainerScope scope(instanceId_);
+
+    for (auto& encode : resAdapterRecord_) {
+        std::string bundleName;
+        std::string moduleName;
+        DecodeBundleAndModule(encode, bundleName, moduleName);
+        ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName);
+    }
+    resAdapterRecord_.clear();
+
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
         RefPtr<PipelineBase> context;
@@ -1799,6 +1821,10 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
 {
     auto context = runtimeContext_.lock();
     CHECK_NULL_RETURN(context, nullptr);
+    if (!isFormRender_) {
+        std::string encode = EncodeBundleAndModule(bundle, module);
+        resAdapterRecord_.emplace(encode);
+    }
     return isFormRender_ ? nullptr : context->CreateModuleContext(bundle, module);
 }
 
