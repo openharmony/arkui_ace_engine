@@ -513,6 +513,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     }
 
     if (point.type == TouchType::DOWN) {
+        refereeNG_->CleanGestureRefereeState();
         int64_t currentEventTime = static_cast<int64_t>(point.time.time_since_epoch().count());
         int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
         int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
