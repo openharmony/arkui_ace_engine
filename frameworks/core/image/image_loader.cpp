@@ -58,6 +58,17 @@
 
 namespace OHOS::Ace {
 namespace {
+#ifdef USE_ROSEN_DRAWING
+struct SkDataWrapper {
+    sk_sp<SkData> data;
+};
+
+inline void SkDataWrapperReleaseProc(const void* /* pixels */, void* context)
+{
+    SkDataWrapper* wrapper = reinterpret_cast<SkDataWrapper*>(context);
+    delete wrapper;
+}
+#endif
 
 constexpr size_t FILE_HEAD_LENGTH = 7;           // 7 is the size of "file://"
 constexpr size_t MEMORY_HEAD_LENGTH = 9;         // 9 is the size of "memory://"
@@ -184,7 +195,8 @@ std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& u
         auto skData = SkData::MakeFromFILE(file.get());
         CHECK_NULL_RETURN(skData, nullptr);
         auto rsData = std::make_shared<RSData>();
-        rsData->GetImpl<Rosen::Drawing::SkiaData>()->SetSkData(skData);
+        SkDataWrapper* wrapper = new SkDataWrapper { std::move(skData) };
+        rsData->BuildWithProc(wrapper->data->data(), wrapper->data->size(), SkDataWrapperReleaseProc, wrapper);
         return rsData;
 #endif
     }
@@ -337,8 +349,9 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
     // return a copy to release the file handle
     return rsData->BuildWithCopy(result->data(), result->size()) ? rsData : nullptr;
 #else
-    rsData->GetImpl<Rosen::Drawing::SkiaData>()->SetSkData(result);
-    return rsData;
+    SkDataWrapper* wrapper = new SkDataWrapper { std::move(result) };
+    return rsData->BuildWithProc(wrapper->data->data(), wrapper->data->size(),
+        SkDataWrapperReleaseProc, wrapper) ? rsData : nullptr;
 #endif
 #endif
 }
@@ -369,7 +382,8 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
     auto skData = SkData::MakeFromMalloc(res->GetData().release(), res->GetSize());
     CHECK_NULL_RETURN(skData, nullptr);
     auto data = std::make_shared<RSData>();
-    data->GetImpl<Rosen::Drawing::SkiaData>()->SetSkData(skData);
+    SkDataWrapper* wrapper = new SkDataWrapper { std::move(skData) };
+    data->BuildWithProc(wrapper->data->data(), wrapper->data->size(), SkDataWrapperReleaseProc, wrapper);
 #endif
     return data;
 }

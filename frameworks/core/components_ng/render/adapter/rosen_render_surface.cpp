@@ -368,9 +368,9 @@ void RosenRenderSurface::DrawBufferForXComponent(RSCanvas& canvas, float width, 
         return;
     }
     ACE_SCOPED_TRACE("XComponent DrawBuffer");
+#ifndef USE_ROSEN_DRAWING
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     CHECK_NULL_VOID(rsCanvas);
-#ifndef USE_ROSEN_DRAWING
     auto* skCanvas = rsCanvas->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
     auto* recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
