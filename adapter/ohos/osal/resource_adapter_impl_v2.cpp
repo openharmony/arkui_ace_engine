@@ -99,6 +99,7 @@ const char* PATTERN_MAP[] = {
     THEME_BLUR_STYLE_COMMON,
     THEME_PATTERN_SHADOW
 };
+const std::string RESOURCE_TOKEN_PATTERN = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
 
 bool IsDirExist(const std::string& path)
 {
@@ -622,7 +623,13 @@ std::string ResourceAdapterImplV2::GetRawfile(const std::string& fileName)
         }
         return "file:///" + outPath + params;
     }
-    return "resource://RAWFILE/" + fileName;
+    std::regex regex(RESOURCE_TOKEN_PATTERN);
+    std::smatch results;
+    std::string newFIleName = fileName;
+    if (std::regex_match(fileName, results, regex)) {
+        newFIleName = results[1];
+    }
+    return "resource://RAWFILE/" + newFIleName;
 }
 
 bool ResourceAdapterImplV2::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
