@@ -1435,6 +1435,27 @@ void CanvasRendererModelNG::GetImageDataModel(const BaseInfo& baseInfo, const Im
 #endif
 }
 
+TextMetrics CanvasRendererModelNG::GetMeasureTextMetrics(const BaseInfo& baseInfo, const std::string& text)
+{
+    TextMetrics textMetrics;
+    if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
+        auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
+        CHECK_NULL_RETURN(offscreenPattern, textMetrics);
+        if (!offscreenPattern->IsSucceed()) {
+            return textMetrics;
+        }
+        textMetrics = offscreenPattern->MeasureTextMetrics(text, baseInfo.paintState);
+        return textMetrics;
+    }
+
+    if (!baseInfo.isOffscreen && baseInfo.canvasPattern) {
+        auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(baseInfo.canvasPattern);
+        CHECK_NULL_RETURN(canvasPattern, textMetrics);
+        textMetrics = canvasPattern->MeasureTextMetrics(text, baseInfo.paintState);
+    }
+    return textMetrics;
+}
+
 void CanvasRendererModelNG::GetImageData(const BaseInfo& baseInfo, const std::shared_ptr<Ace::ImageData>& imageData)
 {
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
