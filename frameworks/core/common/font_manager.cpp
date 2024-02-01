@@ -15,6 +15,7 @@
 
 #include "core/common/font_manager.h"
 
+#include "base/i18n/localization.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/text/render_text.h"
@@ -78,7 +79,8 @@ void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
     Rosen::TextEngine::FontParser fontParser;
     std::vector<Rosen::TextEngine::FontParser::FontDescriptor> systemFontList;
-    systemFontList = fontParser.GetVisibilityFonts();
+    auto locale = Localization::GetInstance()->GetFontLocale();
+    systemFontList = fontParser.GetVisibilityFonts(locale);
     for (size_t i = 0; i < systemFontList.size(); ++i) {
         std::string fontName = systemFontList[i].fullName;
         fontList.emplace_back(fontName);
@@ -137,7 +139,8 @@ bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
     Rosen::TextEngine::FontParser fontParser;
     std::vector<Rosen::TextEngine::FontParser::FontDescriptor> systemFontList;
-    systemFontList = fontParser.GetVisibilityFonts();
+    auto locale = Localization::GetInstance()->GetFontLocale();
+    systemFontList = fontParser.GetVisibilityFonts(locale);
     for (size_t i = 0; i < systemFontList.size(); ++i) {
         if (fontName == systemFontList[i].fullName) {
             fontInfo.path = systemFontList[i].path;
