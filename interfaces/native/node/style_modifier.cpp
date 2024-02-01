@@ -1573,7 +1573,7 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         std::vector<std::string> attributeProps;
         StringUtils::StringSplitter(content.c_str(), PARAMS_SEPARATOR_LEVEL2, attributeProps);
         if (shape == "path") {
-            double pathAttributes[NUM_2];
+            ArkUI_Float32 pathAttributes[NUM_2];
             for (int i = 0; i < NUM_2; ++i) {
                 pathAttributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
             }
@@ -1581,7 +1581,7 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             fullImpl->getNodeModifiers()->getCommonModifier()->setMaskPath(
                 node->uiNodeHandle, shape.c_str(), fill, strock, strockWidth, pathAttributes, commands.c_str());
         } else if (shape == "progressMask") {
-            double progressAttributes[NUM_3];
+            ArkUI_Float32 progressAttributes[NUM_3];
             for (int i = 0; i < NUM_2; ++i) {
                 progressAttributes[i] = StringToInt(attributeProps[i].c_str(), 0);
             }
@@ -1589,7 +1589,7 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             fullImpl->getNodeModifiers()->getCommonModifier()->setMaskShape(
                 node->uiNodeHandle, shape.c_str(), fill, strock, strockWidth, progressAttributes, NUM_3);
         } else {
-            double attributes[attributeProps.size()];
+            ArkUI_Float32 attributes[attributeProps.size()];
             for (int i = 0; i < attributeProps.size(); ++i) {
                 attributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
             }
