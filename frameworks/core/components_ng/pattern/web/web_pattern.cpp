@@ -2747,13 +2747,13 @@ void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, boo
 {
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
     if (!isFling) {
-        if (scrollState_ && ((velocity < 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST) ||
-                                (velocity > 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST))) {
+        if (scrollState_ && ((velocity < 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST) ||
+                                (velocity > 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST))) {
             HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         }
     } else {
-        if (((velocity > 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST) ||
-                (velocity < 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST))) {
+        if (((velocity > 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST) ||
+                (velocity < 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST))) {
             if (isFirstFlingScrollVelocity_) {
                 HandleScrollVelocity(velocity);
                 isFirstFlingScrollVelocity_ = false;
@@ -2822,8 +2822,8 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
 {
     float offset = GetAxis() == Axis::HORIZONTAL ? x : y;
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
-    if (((offset > 0 || velocity > 0) && nestedScrollForwardMode_ == NestedScrollMode::PARENT_FIRST) ||
-        ((offset < 0 || velocity < 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARENT_FIRST)) {
+    if (((offset > 0 || velocity > 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARENT_FIRST) ||
+        ((offset < 0 || velocity < 0) && nestedScrollForwardMode_ == NestedScrollMode::PARENT_FIRST)) {
         if (offset != 0) {
             auto result = HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
             CHECK_NULL_RETURN(delegate_, false);
@@ -2833,8 +2833,8 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
         } else {
             return HandleScrollVelocity(velocity);
         }
-    } else if (((offset > 0 || velocity > 0) && nestedScrollForwardMode_ == NestedScrollMode::PARALLEL) ||
-               ((offset < 0 || velocity < 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARALLEL)) {
+    } else if (((offset > 0 || velocity > 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARALLEL) ||
+               ((offset < 0 || velocity < 0) && nestedScrollForwardMode_ == NestedScrollMode::PARALLEL)) {
         if (offset != 0) {
             HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         } else {
