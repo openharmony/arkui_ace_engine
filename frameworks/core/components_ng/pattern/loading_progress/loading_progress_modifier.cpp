@@ -69,6 +69,7 @@ constexpr float TRANS_OPACITY_SPAN = 0.3f;
 constexpr float FULL_OPACITY = 255.0f;
 constexpr float FAKE_DELTA = 0.01f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
+constexpr float REFRESH_DARK_MODE_RING_BLUR_RADIUS = 0.4f;
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
     : enableLoading_(AceType::MakeRefPtr<PropertyBool>(true)),
@@ -128,9 +129,15 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     auto& canvas = context.canvas;
     canvas.Save();
     RSPen pen;
+    RSFilter filter;
     auto ringColor = color_->Get();
     ringColor.BlendOpacity(RING_ALPHA);
     pen.SetColor(ToRSColor(ringColor));
+    if (loadingProgressOwner_ == LoadingProgressOwner::REFRESH && SystemProperties::GetColorMode() == ColorMode::DARK) {
+        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+            RSBlurType::NORMAL, PipelineBase::GetCurrentDensity() * REFRESH_DARK_MODE_RING_BLUR_RADIUS));
+        pen.SetFilter(filter);
+    }
     pen.SetWidth(ringParam.strokeWidth);
     pen.SetAntiAlias(true);
     canvas.AttachPen(pen);
