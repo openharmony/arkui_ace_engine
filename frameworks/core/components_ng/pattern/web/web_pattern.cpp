@@ -292,6 +292,29 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetPanEventType(GestureTypeName::WEBSCROLL);
+    gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
+                                                const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+            if (!gestureInfo) {
+                // info is null, default case to continue
+                return GestureJudgeResult::CONTINUE;
+            }
+            if (gestureInfo->GetType() != GestureTypeName::WEBSCROLL) {
+                // not web pan event type, continue
+                return GestureJudgeResult::CONTINUE;
+            }
+
+            auto inputEventType = gestureInfo->GetInputEventType();
+            if (inputEventType == InputEventType::AXIS) {
+                // axis event type of web pan, dispatch to panEvent to process
+                return GestureJudgeResult::CONTINUE;
+            } else if (inputEventType == InputEventType::MOUSE_BUTTON) {
+                // mouse button event type of web pan, dispatch to DragEvent to process
+                return GestureJudgeResult::REJECT;
+            }
+            // In other cases, the panEvent is used by default
+            return GestureJudgeResult::CONTINUE;
+        });
 }
 
 void WebPattern::HandleDragMove(const GestureEvent& event)
