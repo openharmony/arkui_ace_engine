@@ -561,7 +561,7 @@ RefPtr<FrontendDelegate> JsGetFrontendDelegate()
 
 panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    ContainerScope scope{Container::CurrentSafely()};
+    ContainerScope scope{Container::CurrentIdSafely()};
     EcmaVM* vm = runtimeCallInfo->GetVM();
     if (vm == nullptr) {
         return panda::JSValueRef::Undefined(vm);
@@ -577,7 +577,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::JsiRuntimeCallInfo* r
 
 panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    ContainerScope scope{Container::CurrentSafely()};
+    ContainerScope scope{Container::CurrentIdSafely()};
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
@@ -602,7 +602,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo
 
 panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    ContainerScope scope{Container::CurrentSafely()};
+    ContainerScope scope{Container::CurrentIdSafely()};
     EcmaVM* vm = runtimeCallInfo->GetVM();
     if (vm == nullptr) {
         return panda::JSValueRef::Undefined(vm);
@@ -630,7 +630,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
 
 panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    ContainerScope scope{Container::CurrentSafely()};
+    ContainerScope scope{Container::CurrentIdSafely()};
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
@@ -663,7 +663,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* r
 
 panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    ContainerScope scope{Container::CurrentSafely()};
+    ContainerScope scope{Container::CurrentIdSafely()};
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
@@ -720,7 +720,7 @@ static TouchEvent GetTouchPointFromJS(const JsiObject& value)
 
 panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    ContainerScope scope{Container::CurrentSafely()};
+    ContainerScope scope{Container::CurrentIdSafely()};
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
@@ -774,7 +774,7 @@ static KeyEvent GetKeyEventFromJS(const JsiObject& value)
 
 panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    ContainerScope scope{Container::CurrentSafely()};
+    ContainerScope scope{Container::CurrentIdSafely()};
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
@@ -825,7 +825,7 @@ static MouseEvent GetMouseEventFromJS(const JsiObject& value)
 
 panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    ContainerScope scope{Container::CurrentSafely()};
+    ContainerScope scope{Container::CurrentIdSafely()};
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
