@@ -24,7 +24,7 @@
 namespace OHOS::Ace::Framework {
 class SelectModelImpl : public SelectModel {
 public:
-    void Create(const std::vector<SelectParam>& params) override;
+    void Create(const std::vector<SelectParam>& params, const ControlSize& controlSize) override;
     void SetSelected(int32_t idx) override;
     void SetValue(const std::string& value) override;
     void SetFontSize(const Dimension& value) override;
@@ -66,6 +66,7 @@ public:
     void SetHasOptionWidth(bool haveOptionWidth) override;
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
+    void SetControlSize(const std::optional<ControlSize>& controlSize) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H

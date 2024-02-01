@@ -63,6 +63,7 @@ void JSSelect::Create(const JSCallbackInfo& info)
     if (info.Length() < 0) {
         return;
     }
+    auto controlSize = ControlSize::NORMAL;
     if (info[0]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
         size_t size = paramArray->Length();
@@ -81,7 +82,10 @@ void JSSelect::Create(const JSCallbackInfo& info)
             ParseJsMedia(selectIcon, icon);
             params[i] = { value, icon };
         }
-        SelectModel::GetInstance()->Create(params);
+        if (info.Length() > 1 && info[1]->IsNumber()) {
+            controlSize = static_cast<ControlSize>(info[1]->ToNumber<int32_t>());
+        }
+        SelectModel::GetInstance()->Create(params, controlSize);
     }
 }
 
@@ -119,6 +123,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("optionWidthFitTrigger", &JSSelect::SetOptionWidthFitTrigger, opt);
     JSClass<JSSelect>::StaticMethod("menuBackgroundColor", &JSSelect::SetMenuBackgroundColor, opt);
     JSClass<JSSelect>::StaticMethod("menuBackgroundBlurStyle", &JSSelect::SetMenuBackgroundBlurStyle, opt);
+    JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -834,6 +839,14 @@ void JSSelect::SetMenuBackgroundBlurStyle(const JSCallbackInfo& info)
             styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
             SelectModel::GetInstance()->SetMenuBackgroundBlurStyle(styleOption);
         }
+    }
+}
+
+void JSSelect::SetControlSize(const JSCallbackInfo& info)
+{
+    if (info[0]->IsNumber()) {
+        auto controlSize = static_cast<ControlSize>(info[0]->ToNumber<int32_t>());
+        SelectModel::GetInstance()->SetControlSize(controlSize);
     }
 }
 } // namespace OHOS::Ace::Framework

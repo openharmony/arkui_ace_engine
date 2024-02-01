@@ -187,11 +187,13 @@ public:
     void ShowSelectMenu();
     
     Dimension GetFontSize();
-    void SetSelectDefaultTheme();
+    void SetSelectDefaultTheme(const ControlSize& controlSize);
     void SetOptionWidth(const Dimension& value);
     void SetOptionHeight(const Dimension& value);
     void SetOptionWidthFitTrigger(bool isFitTrigger);
     void SetHasOptionWidth(bool hasOptionWidth);
+    void SetControlSize(const ControlSize& controlSize);
+    ControlSize GetControlSize();
 
 private:
     void OnAttachToFrameNode() override;
@@ -259,6 +261,7 @@ private:
     void InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme);
     void InitSpinner(
         const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme);
+    void ReSetpara();
 
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;
@@ -300,6 +303,7 @@ private:
     std::string selectValue_;
     bool isFitTrigger_ = false;
     Color selectDefaultBgColor_ = Color::TRANSPARENT;
+    ControlSize controlSize_ = ControlSize::NORMAL;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };
 

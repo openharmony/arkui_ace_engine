@@ -80,6 +80,10 @@ public:
             const double bgColorSelectedAlpha = 0.2;
 
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, theme->fontSize_);
+            theme->selectFontSizeMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL,
+                theme->fontSize_));
+            theme->selectFontSizeMap_.insert(std::pair<ControlSize, Dimension>(
+                ControlSize::SMALL, pattern->GetAttr<Dimension>("small_text_font_size", 0.0_vp)));
             theme->menuFontSize_ = pattern->GetAttr<Dimension>("menu_text_font_size", theme->menuFontSize_);
             theme->menuTitleFontSize_ =
                 pattern->GetAttr<Dimension>("menu_title_text_font_size", theme->menuTitleFontSize_);
@@ -132,11 +136,27 @@ public:
             theme->menuAnimationOffset_ =
                 pattern->GetAttr<Dimension>("menu_animation_offset", theme->menuAnimationOffset_);
             theme->spinnerWidth_ = pattern->GetAttr<Dimension>("spinner_width", theme->spinnerWidth_);
+            theme->selectSpinnerWidthMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL,
+                theme->spinnerWidth_));
+            theme->selectSpinnerWidthMap_.insert(std::pair<ControlSize, Dimension>(
+                ControlSize::SMALL, pattern->GetAttr<Dimension>("small_spinner_width", 0.0_vp)));
             theme->spinnerHeight_ = pattern->GetAttr<Dimension>("spinner_height", theme->spinnerHeight_);
+            theme->selectSpinnerHeightMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL,
+                theme->spinnerHeight_));
+            theme->selectSpinnerHeightMap_.insert(std::pair<ControlSize, Dimension>(
+                ControlSize::SMALL, pattern->GetAttr<Dimension>("small_spinner_height", 0.0_vp)));
             theme->defaultDividerWidth_ =
                 pattern->GetAttr<Dimension>("default_divider_width", theme->defaultDividerWidth_);
             theme->selectMinWidth_ = pattern->GetAttr<Dimension>("select_min_width", theme->selectMinWidth_);
+            theme->selectMinWidthMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL,
+                theme->selectMinWidth_));
+            theme->selectMinWidthMap_.insert(std::pair<ControlSize, Dimension>(
+                ControlSize::SMALL, pattern->GetAttr<Dimension>("small_select_min_width", 0.0_vp)));
             theme->selectDefaultHeight_ = pattern->GetAttr<Dimension>("select_min_height", theme->selectDefaultHeight_);
+            theme->selectMinHeightMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL,
+                theme->selectDefaultHeight_));
+            theme->selectMinHeightMap_.insert(std::pair<ControlSize, Dimension>(
+                ControlSize::SMALL, pattern->GetAttr<Dimension>("small_select_min_height", 0.0_vp)));
             theme->iconSideLength_ = pattern->GetAttr<Dimension>("icon_side_length", theme->iconSideLength_);
             theme->endIconWidth_ = MENU_END_ICON_WIDTH;
             theme->endIconHeight_ = MENU_END_ICON_HEIGHT;
@@ -145,6 +165,10 @@ public:
                 pattern->GetAttr<Color>("select_default_bg_color", theme->selectDefaultBgColor_);
             theme->selectDefaultBorderRadius_ =
                 pattern->GetAttr<Dimension>("select_default_border_radius", theme->selectDefaultBorderRadius_);
+            theme->selectBorderRadiusMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL,
+                theme->selectDefaultBorderRadius_));
+            theme->selectBorderRadiusMap_.insert(std::pair<ControlSize, Dimension>(
+                ControlSize::SMALL, pattern->GetAttr<Dimension>("small_select_border_radius", 0.0_vp)));
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 theme->expandDisplay_ = false;
             } else {
@@ -374,6 +398,16 @@ public:
     {
         return fontSize_;
     }
+
+    const Dimension& GetFontSize(ControlSize controlSize) const
+    {
+        auto result = selectFontSizeMap_.find(controlSize);
+        if (result != selectFontSizeMap_.end()) {
+            return result->second;
+        }
+        return fontSize_;
+    }
+
     void SetFontSize(const Dimension& value)
     {
         fontSize_ = value;
@@ -811,8 +845,26 @@ public:
         return spinnerWidth_;
     }
 
+    const Dimension& GetSpinnerWidth(ControlSize controlSize) const
+    {
+        auto result = selectSpinnerWidthMap_.find(controlSize);
+        if (result != selectSpinnerWidthMap_.end()) {
+            return result->second;
+        }
+        return spinnerWidth_;
+    }
+
     const Dimension& GetSpinnerHeight() const
     {
+        return spinnerHeight_;
+    }
+
+    const Dimension& GetSpinnerHeight(ControlSize controlSize) const
+    {
+        auto result = selectSpinnerHeightMap_.find(controlSize);
+        if (result != selectSpinnerHeightMap_.end()) {
+            return result->second;
+        }
         return spinnerHeight_;
     }
 
@@ -826,8 +878,26 @@ public:
         return selectMinWidth_;
     }
 
+    const Dimension& GetSelectMinWidth(ControlSize controlSize) const
+    {
+        auto result = selectMinWidthMap_.find(controlSize);
+        if (result != selectMinWidthMap_.end()) {
+            return result->second;
+        }
+        return selectMinWidth_;
+    }
+
     const Dimension& GetSelectDefaultHeight() const
     {
+        return selectDefaultHeight_;
+    }
+
+    const Dimension& GetSelectDefaultHeight(ControlSize controlSize) const
+    {
+        auto result = selectMinHeightMap_.find(controlSize);
+        if (result != selectMinHeightMap_.end()) {
+            return result->second;
+        }
         return selectDefaultHeight_;
     }
 
@@ -858,6 +928,15 @@ public:
 
     const Dimension& GetSelectDefaultBorderRadius() const
     {
+        return selectDefaultBorderRadius_;
+    }
+
+    const Dimension& GetSelectDefaultBorderRadius(ControlSize controlSize) const
+    {
+        auto result = selectBorderRadiusMap_.find(controlSize);
+        if (result != selectBorderRadiusMap_.end()) {
+            return result->second;
+        }
         return selectDefaultBorderRadius_;
     }
 
@@ -978,6 +1057,12 @@ private:
     bool expandDisplay_ = false;
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
+    std::unordered_map<ControlSize, Dimension> selectMinWidthMap_;
+    std::unordered_map<ControlSize, Dimension> selectMinHeightMap_;
+    std::unordered_map<ControlSize, Dimension> selectBorderRadiusMap_;
+    std::unordered_map<ControlSize, Dimension> selectSpinnerWidthMap_;
+    std::unordered_map<ControlSize, Dimension> selectSpinnerHeightMap_;
+    std::unordered_map<ControlSize, Dimension> selectFontSizeMap_;
 };
 
 } // namespace OHOS::Ace

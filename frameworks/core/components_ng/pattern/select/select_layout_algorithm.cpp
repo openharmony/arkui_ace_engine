@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline/pipeline_base.h"
+#include "select_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -83,7 +84,8 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto defaultHeight = static_cast<float>(theme->GetSelectDefaultHeight().ConvertToPx());
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    auto defaultHeight = static_cast<float>(theme->GetSelectDefaultHeight(pattern->GetControlSize()).ConvertToPx());
     layoutWrapper->GetGeometryNode()->SetContentSize(
         SizeF(rowWidth, rowHeight > defaultHeight ? rowHeight : defaultHeight));
 

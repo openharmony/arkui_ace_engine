@@ -789,7 +789,7 @@ void SelectPattern::UpdateText(int32_t index)
 
 void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme)
 {
-    textProps->UpdateFontSize(theme->GetFontSize());
+    textProps->UpdateFontSize(theme->GetFontSize(controlSize_));
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateTextColor(theme->GetFontColor());
     textProps->UpdateTextDecoration(theme->GetTextDecoration());
@@ -811,7 +811,8 @@ void SelectPattern::InitSpinner(
     auto spinnerLayoutProperty = spinner->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
     spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    CalcSize idealSize = { CalcLength(selectTheme->GetSpinnerWidth()), CalcLength(selectTheme->GetSpinnerHeight()) };
+    CalcSize idealSize = { CalcLength(selectTheme->GetSpinnerWidth(controlSize_)),
+        CalcLength(selectTheme->GetSpinnerHeight(controlSize_)) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
@@ -1119,7 +1120,7 @@ Dimension SelectPattern::GetFontSize()
     return props->GetFontSize().value_or(selectTheme->GetFontSize());
 }
 
-void SelectPattern::SetSelectDefaultTheme()
+void SelectPattern::SetSelectDefaultTheme(const ControlSize& controlSize)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1137,7 +1138,8 @@ void SelectPattern::SetSelectDefaultTheme()
         renderContext->UpdateBackgroundColor(selectDefaultBgColor_);
     }
     BorderRadiusProperty border;
-    border.SetRadius(selectTheme->GetSelectDefaultBorderRadius());
+    controlSize_ = controlSize;
+    border.SetRadius(selectTheme->GetSelectDefaultBorderRadius(controlSize_));
     renderContext->UpdateBorderRadius(border);
 }
 
@@ -1226,5 +1228,48 @@ void SelectPattern::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
     auto renderContext = menu->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackBlurStyle(blurStyle);
+}
+
+void SelectPattern::ReSetpara()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto select = GetHost();
+    auto layoutProperty = select->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(selectTheme->GetSelectMinWidth(controlSize_)),
+        std::nullopt));
+    ViewAbstract::SetHeight(NG::CalcLength(selectTheme->GetSelectDefaultHeight(controlSize_)));
+    auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProps);
+    textProps->UpdateFontSize(selectTheme->GetFontSize(controlSize_));
+
+    auto spinnerLayoutProperty = spinner_->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(spinnerLayoutProperty);
+    CalcSize idealSize = { CalcLength(selectTheme->GetSpinnerWidth(controlSize_)),
+        CalcLength(selectTheme->GetSpinnerHeight(controlSize_)) };
+
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
+    auto renderContext = select->GetRenderContext();
+    BorderRadiusProperty border;
+    border.SetRadius(selectTheme->GetSelectDefaultBorderRadius(controlSize_));
+    renderContext->UpdateBorderRadius(border);
+}
+
+void SelectPattern::SetControlSize(const ControlSize& controlSize)
+{
+    if (controlSize == controlSize_) {
+        return;
+    }
+    controlSize_ = controlSize;
+    ReSetpara();
+}
+
+ControlSize SelectPattern::GetControlSize()
+{
+    return controlSize_;
 }
 } // namespace OHOS::Ace::NG
