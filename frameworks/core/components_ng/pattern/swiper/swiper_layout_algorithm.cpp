@@ -1208,6 +1208,13 @@ void SwiperLayoutAlgorithm::ResetOffscreenItemPosition(
     CHECK_NULL_VOID(swiperGeometryNode);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(childWrapper);
+
+    if (childWrapper->GetHostTag() == V2::SWIPER_INDICATOR_ETS_TAG ||
+        childWrapper->GetHostTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG ||
+        childWrapper->GetHostTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+        return;
+    }
+
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
     auto swiperFrameRect = swiperGeometryNode->GetFrameRect();

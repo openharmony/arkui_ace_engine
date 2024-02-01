@@ -329,7 +329,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             }
         }
     }
-    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount()) {
+    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= RealTotalCount()) {
         currentIndex_ = 0;
         layoutProperty->UpdateIndexWithoutMeasure(GetLoopIndex(currentIndex_));
     } else {
