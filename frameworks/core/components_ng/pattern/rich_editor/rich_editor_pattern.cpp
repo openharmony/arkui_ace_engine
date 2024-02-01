@@ -2061,7 +2061,9 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
         showSelect_ = true;
         isShowMenu_ = false;
         CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        if (!IsUsingMouse()) {
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -4099,7 +4101,7 @@ void RichEditorPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInf
     }
     TextPattern::UpdateSelectOverlayOrCreate(selectInfo, animation);
     CHECK_NULL_VOID(selectOverlayProxy_);
-    selectOverlayProxy_->ShowOrHiddenMenu(!isOriginMenuShow);
+    selectOverlayProxy_->ShowOrHiddenMenu(!isOriginMenuShow || !isShowMenu_);
 }
 
 void RichEditorPattern::CheckEditorTypeChange()
