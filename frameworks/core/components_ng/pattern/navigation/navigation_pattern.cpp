@@ -35,7 +35,7 @@ constexpr int32_t OPACITY_ANIMATION_DURATION_DISAPPEAR = 250;
 constexpr int32_t EMPTY_DESTINATION_CHILD_SIZE = 1;
 constexpr Dimension DEFAULT_DRAG_REGION = 12.0_vp;
 constexpr float DEFAULT_HALF = 2.0f;
-
+const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 namespace {
 
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
@@ -857,7 +857,7 @@ void NavigationPattern::UpdateContextRect(
     CHECK_NULL_VOID(navigationPattern);
 
     if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
-        curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+        curDestination->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
         return;
     }
     auto navigationLayoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
@@ -867,7 +867,7 @@ void NavigationPattern::UpdateContextRect(
     navBarNode->SetJSViewActive(true);
     if (!curDestination->IsOnAnimation()) {
         curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
-        curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+        curDestination->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
         CHECK_NULL_VOID(titleNode);
