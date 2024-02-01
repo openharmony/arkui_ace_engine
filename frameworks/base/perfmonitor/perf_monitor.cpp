@@ -505,7 +505,7 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 // for jank frame app
 bool PerfMonitor::IsExclusionFrame()
 {
-    return isResponseExclusion || isStartAppFrame || isBackgroundApp;
+    return isResponseExclusion || isStartAppFrame || isBackgroundApp || isExclusionWindow;
 }
 
 void PerfMonitor::SetAppStartStatus()
