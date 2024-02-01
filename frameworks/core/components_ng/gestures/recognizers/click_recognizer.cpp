@@ -141,7 +141,6 @@ void ClickRecognizer::OnAccepted()
 
 void ClickRecognizer::OnRejected()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 

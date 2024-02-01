@@ -81,7 +81,6 @@ void LongPressRecognizer::OnAccepted()
 
 void LongPressRecognizer::OnRejected()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 
