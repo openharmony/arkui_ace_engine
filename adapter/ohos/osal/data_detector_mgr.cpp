@@ -15,18 +15,9 @@
 
 #include "core/common/ai/data_detector_mgr.h"
 
-#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
-#include "want.h"
-
-#include "base/log/log_wrapper.h"
 #include "core/common/ai/data_detector_default.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
-constexpr int32_t UNSUPPORTED_CODE = 801;
 
 DataDetectorMgr& DataDetectorMgr::GetInstance()
 {
@@ -64,88 +55,6 @@ void DataDetectorMgr::DataDetect(const TextDataDetectInfo& info, const TextDetec
     if (engine_) {
         engine_->DataDetect(info, resultFunc);
     }
-}
-
-bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::string>& paramaters, NG::RectF aiRect,
-    std::function<void(const std::string&)> onClickMenu, const RefPtr<NG::FrameNode>& targetNode)
-{
-    ModalUIExtensionCallbacks callbacks;
-    callbacks.onResult = [onClickMenu](int32_t code, const AAFwk::Want& want) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability onResult, code: %{public}d", code);
-        auto action = want.GetStringParam("action");
-        if (!action.empty() && onClickMenu) {
-            onClickMenu(action);
-        }
-    };
-    callbacks.onDestroy = []() { TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability Destroy"); };
-    callbacks.onError = [](int32_t code, const std::string& name, const std::string& message) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "UIExtension Ability Error, code: %{public}d, name: %{public}s, message: %{public}s", code, name.c_str(),
-            message.c_str());
-    };
-    callbacks.onRelease  = [](int32_t code) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability Release, code: %{public}d", code);
-    };
-    AAFwk::Want want;
-    want.SetElementName(bundleName_, abilityName_);
-    for (const auto& param : paramaters) {
-        want.SetParam(param.first, param.second);
-    }
-
-    auto uiExtNode = NG::UIExtensionModelNG::Create(want, callbacks);
-    CHECK_NULL_RETURN(uiExtNode, false);
-    auto onReceive = GetOnReceive(uiExtNode, aiRect, onClickMenu, targetNode);
-    auto pattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    pattern->SetOnReceiveCallback(std::move(onReceive));
-    uiExtNode->MarkModifyDone();
-    return true;
-}
-
-std::function<void(const AAFwk::WantParams&)> DataDetectorMgr::GetOnReceive(const RefPtr<NG::FrameNode>& uiExtNode,
-    NG::RectF aiRect, std::function<void(const std::string&)> onClickMenu, const RefPtr<NG::FrameNode>& targetNode)
-{
-    return [uiExtNode, aiRect, onClickMenu, weak = AceType::WeakClaim(AceType::RawPtr(targetNode))](
-               const AAFwk::WantParams& wantParams) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability onReceive");
-        auto targetNode = weak.Upgrade();
-        CHECK_NULL_VOID(uiExtNode);
-        CHECK_NULL_VOID(targetNode);
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        std::string action = wantParams.GetStringParam("action");
-        if (!action.empty() && onClickMenu) {
-            onClickMenu(action);
-        }
-        std::string closeMenu = wantParams.GetStringParam("closeMenu");
-        if (closeMenu == "true") {
-            int32_t targetId = targetNode->GetId();
-            auto menuNode = overlayManager->GetMenuNode(targetId);
-            CHECK_NULL_VOID(menuNode);
-            overlayManager->HideMenu(menuNode, targetId);
-            return;
-        }
-        std::string longestContent = wantParams.GetStringParam("longestContent");
-        std::string menuSizeString = wantParams.GetStringParam("menuSize");
-        if (longestContent.empty() || menuSizeString.empty()) {
-            return;
-        }
-        int32_t menuSize = static_cast<int32_t>(atoi(menuSizeString.c_str()));
-        overlayManager->ShowUIExtensionMenu(uiExtNode, aiRect, longestContent, menuSize, targetNode);
-    };
-}
-
-void DataDetectorMgr::ResponseBestMatchItem(const std::map<std::string, std::string>& paramaters, const AISpan& aiSpan)
-{
-    ModalUIExtensionCallbacks callbacks;
-    AAFwk::Want want;
-    want.SetElementName(bundleName_, abilityName_);
-    for (const auto& param : paramaters) {
-        want.SetParam(param.first, param.second);
-    }
-    NG::UIExtensionModelNG::Create(want, callbacks);
 }
 
 void DataDetectorMgr::AdjustCursorPosition(
