@@ -56,7 +56,8 @@ public:
 
     bool InitJsEnv(bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject,
         const shared_ptr<JsRuntime>& runtime = nullptr);
-
+    void InitJsObject();
+    
     bool FireJsEvent(const std::string& eventStr);
 
     // add Console object to worker
