@@ -3129,7 +3129,7 @@ void SwiperPattern::RegisterVisibleAreaChange()
         }
     };
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
-    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
     hasVisibleChangeRegistered_ = true;
 }
 
