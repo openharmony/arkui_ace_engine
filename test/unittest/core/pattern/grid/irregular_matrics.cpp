@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
- #include "irregular_matrices.h"
+#include "irregular_matrices.h"
 
- namespace OHOS::Ace::NG {
-    GridLayoutOptions GetOptionDemo1()
+namespace OHOS::Ace::NG {
+GridLayoutOptions GetOptionDemo1()
 {
     GridLayoutOptions option;
     option.irregularIndexes = {
@@ -170,4 +170,4 @@ GridLayoutOptions GetOptionDemo11()
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
     return option;
 }
- }
+} // namespace OHOS::Ace::NG

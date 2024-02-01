@@ -105,7 +105,6 @@ struct GridLayoutInfo {
         return (removeLastGap) ? totalHeight - mainGap : totalHeight;
     }
 
-
     /**
      * Checks if the item at the specified index is partially or fully above the viewport.
      *
@@ -147,20 +146,18 @@ struct GridLayoutInfo {
     std::pair<int32_t, int32_t> FindItemInRange(int32_t target) const;
 
     /**
-     * @brief clears lineHeightMap_ starting from line [idx]
+     * @brief clears gridMatrix_ and lineHeightMap_ starting from line [idx]
      *
      * @param idx starting line index
      */
-    void ClearHeightsToEnd(int32_t idx);
+    void ClearMapsToEnd(int32_t idx);
 
     /**
-     * @brief clears lineHeightMap_ in range [0, idx)
+     * @brief clears gridMatrix_ and lineHeightMap_ in range [0, idx)
      *
      * @param idx ending line index, exclusive.
      */
-    void ClearHeightsFromStart(int32_t idx);
-
-    void ClearMatrixToEnd(int32_t idx, int32_t lineIdx);
+    void ClearMapsFromStart(int32_t idx);
 
     void ResetPositionFlags()
     {

@@ -949,6 +949,34 @@ HWTEST_F(GridIrregularLayoutTest, FindRangeOnJump001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridIrregularLayout::FindRangeOnJump002
+ * @tc.desc: Test GridLayoutRangeFinder::FindRangeOnJump special endIndex (endIndex not on the last line).
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, FindRangeOnJump002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 100.0f }, { 2, 50.0f }, { 3, 50.0f }, { 4, 80.0f }, { 5, 75.0f } };
+    info.gridMatrix_ = MATRIX_DEMO_8;
+
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo8());
+    });
+    frameNode_->GetGeometryNode()->SetContentSize({ 500.0f, 250.0f });
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+
+    info.scrollAlign_ = ScrollAlign::END;
+    auto res = solver.FindRangeOnJump(5, 5.0f);
+    EXPECT_EQ(res.startRow, 1);
+    EXPECT_EQ(res.pos, -125.0f);
+    EXPECT_EQ(res.endIdx, 6);
+    EXPECT_EQ(res.endRow, 5);
+}
+
+/**
  * @tc.name: GridIrregularLayout::SolveForwardForEndIdx001
  * @tc.desc: Test GridLayoutRangeFinder::SolveForwardForEndIdx
  * @tc.type: FUNC
