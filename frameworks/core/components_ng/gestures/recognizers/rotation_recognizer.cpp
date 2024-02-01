@@ -53,7 +53,6 @@ void RotationRecognizer::OnAccepted()
 
 void RotationRecognizer::OnRejected()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation gesture has been rejected");
     if (refereeState_ != RefereeState::SUCCEED) {
         refereeState_ = RefereeState::FAIL;
     }

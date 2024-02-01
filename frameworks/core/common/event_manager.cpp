@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/event/ace_events.h"
@@ -48,14 +49,6 @@ enum class CtrlKeysBit {
     CTRL = 1,
     SHIFT = 2,
     ALT = 4,
-};
-
-struct TouchTestResultInfo {
-    int32_t nodeId = 0;
-    std::string tag;
-    std::string inspectorId;
-    std::string frameRect;
-    int32_t depth = 0;
 };
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
@@ -89,11 +82,6 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
     const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-        "TouchEvent do TouchTest in EventManager: "
-        "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
-        "touchPoint referee state:%{public}d, needAppend:%{public}d",
-        touchPoint.id, touchPoint.x, touchPoint.y, (int)(refereeNG_->QueryAllDone(touchPoint.id)), (int)needAppend);
     ContainerScope scope(instanceId_);
 
     ACE_FUNCTION_TRACE();
@@ -145,7 +133,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    std::map<int32_t, TouchTestResultInfo> touchTestResultInfo;
+    std::map<int32_t, NG::TouchTestResultInfo> touchTestResultInfo;
     for (const auto& item : touchTestResults_[touchPoint.id]) {
         auto node = item->GetAttachedNode().Upgrade();
         if (!node) {
@@ -184,11 +172,51 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             if (dumpCount > DUMP_LIMIT_SIZE) {
                 TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
                     "EventTreeDumpInfo size is over limit, the following info is dropped!");
-                return;
+                break;
             }
             TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
         }
     }
+    LogTouchTestResultRecognizers(touchTestResults_[touchPoint.id]);
+}
+
+void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result)
+{
+    std::map<std::string, std::list<NG::TouchTestResultInfo>> hittedRecognizerInfo;
+    for (const auto& item : result) {
+        if (AceType::InstanceOf<NG::MultiFingersRecognizer>(item) && !AceType::InstanceOf<NG::RecognizerGroup>(item)) {
+            auto node = item->GetAttachedNode().Upgrade();
+            if (!node) {
+                hittedRecognizerInfo.emplace(AceType::TypeName(item), std::list<NG::TouchTestResultInfo>());
+                continue;
+            }
+            auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+            if (!frameNode) {
+                hittedRecognizerInfo.emplace(AceType::TypeName(item), std::list<NG::TouchTestResultInfo>());
+                continue;
+            }
+            hittedRecognizerInfo[AceType::TypeName(item)].emplace_back(NG::TouchTestResultInfo {
+                frameNode->GetId(), frameNode->GetTag(), frameNode->GetInspectorIdValue("") });
+        }
+        auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
+        if (group) {
+            group->AddHittedRecognizerType(hittedRecognizerInfo);
+        }
+    }
+    std::string hittedRecognizerTypeInfo = std::string("Touch test hitted recognizer type info: ");
+    for (const auto& item : hittedRecognizerInfo) {
+        hittedRecognizerTypeInfo.append("recognizer type ").append(item.first).append(" node info:");
+        for (const auto& nodeInfo : item.second) {
+            hittedRecognizerTypeInfo.append(" { id: ")
+                .append(std::to_string(nodeInfo.nodeId))
+                .append(", tag: ")
+                .append(nodeInfo.tag)
+                .append(", inspectorId: ")
+                .append(nodeInfo.inspectorId)
+                .append(" };");
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "%{public}s", hittedRecognizerTypeInfo.c_str());
 }
 
 bool EventManager::PostEventTouchTest(
@@ -466,13 +494,6 @@ void EventManager::CheckTouchEvent(TouchEvent touchEvent)
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 {
-    if (event.type != TouchType::MOVE) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "TouchEvent Dispatch in EventManager: "
-            "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
-            "type=%{public}d",
-            event.id, event.x, event.y, (int)event.type);
-    }
     CheckTouchEvent(event);
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
