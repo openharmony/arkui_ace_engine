@@ -54,6 +54,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double HANGING_PERCENT = 0.8;
 constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr double CONIC_START_ANGLE = 0.0;
@@ -2001,6 +2002,48 @@ double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<O
             break;
     }
     return x;
+}
+
+double CustomPaintPaintMethod::GetFontBaseline(
+    const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const
+{
+    switch (baseline) {
+        case TextBaseline::TOP:
+            return fontMetrics.fAscent;
+        case TextBaseline::HANGING:
+            return fontMetrics.fAscent * HANGING_PERCENT;
+        case TextBaseline::MIDDLE:
+            return fontMetrics.fAscent + fontMetrics.fDescent;
+        case TextBaseline::BOTTOM:
+        case TextBaseline::IDEOGRAPHIC:
+            return fontMetrics.fDescent;
+        case TextBaseline::ALPHABETIC:
+            return 0;
+        default:
+            break;
+    }
+    return 0;
+}
+
+double CustomPaintPaintMethod::GetFontAlign(
+    TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph) const
+{
+    TextDirection textDirection = fillState_.GetOffTextDirection();
+    switch (align) {
+        case TextAlign::LEFT:
+            return 0;
+        case TextAlign::START:
+            return (textDirection == TextDirection::LTR) ? 0.0 : paragraph->GetMaxIntrinsicWidth();
+        case TextAlign::RIGHT:
+            return paragraph->GetMaxIntrinsicWidth();
+        case TextAlign::END:
+            return (textDirection == TextDirection::LTR) ? paragraph->GetMaxIntrinsicWidth() : 0.0;
+        case TextAlign::CENTER:
+            return paragraph->GetMaxIntrinsicWidth() / 2.0;
+        default:
+            break;
+    }
+    return 0;
 }
 
 #ifndef USE_GRAPHIC_TEXT_GINE

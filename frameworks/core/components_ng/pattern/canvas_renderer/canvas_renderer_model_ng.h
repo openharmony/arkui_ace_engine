@@ -96,6 +96,7 @@ public:
     TransformParam GetTransform(const BaseInfo& baseInfo) override;
     RefPtr<Ace::PixelMap> GetPixelMap(const BaseInfo& baseInfo, const ImageSize& imageSize) override;
     void GetImageDataModel(const BaseInfo& baseInfo, const ImageSize& imageSize, uint8_t* buffer) override;
+    TextMetrics GetMeasureTextMetrics(const BaseInfo& baseInfo, const std::string& text) override;
 
 private:
     static void GetImageData(const BaseInfo& baseInfo, const std::shared_ptr<Ace::ImageData>& imageData);

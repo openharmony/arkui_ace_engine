@@ -443,6 +443,8 @@ protected:
     double GetAlignOffset(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
     OHOS::Rosen::TextAlign GetEffectiveAlign(OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const;
 #endif
+    double GetFontBaseline(const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const;
+    double GetFontAlign(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph) const;
 
     PaintState fillState_;
     StrokePaintState strokeState_;
