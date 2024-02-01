@@ -281,18 +281,23 @@ export struct SubHeader {
         .onAreaChange((oldValue: Area, newValue: Area) => {
           this.arrowWidth = Number(parseInt(newValue.width.toString(), 0))
         })
-
-        if (this.textArrowFocus) {
-          Row()
-            .height(BUTTON_SIZE)
-            .width(this.arrowWidth)
-            .hitTestBehavior(HitTestMode.None)
+        .stateStyles({
+          focused: {
             .border({
+              radius: MARGIN_NUM,
               width: BORDER_WIDTH,
-              color: $r('sys.color.ohos_id_color_focused_outline')
+              color: $r('sys.color.ohos_id_color_focused_outline'),
+              style: BorderStyle.Solid
             })
-            .borderRadius(MARGIN_NUM)
-        }
+          },
+          normal: {
+            .border({
+              radius: MARGIN_NUM,
+              width: BORDER_WIDTH,
+              color: $r('sys.color.ohos_id_color_focused_outline_transparent')
+            })
+          }
+        })
       }
     }
     .onAreaChange((oldValue: Area, newValue: Area) => {
