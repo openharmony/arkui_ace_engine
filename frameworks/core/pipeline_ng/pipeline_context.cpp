@@ -562,6 +562,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    window_->Lock();
     auto recvTime = GetSysTimestamp();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
@@ -641,6 +642,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     taskScheduler_->FlushAfterRenderTask();
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
+    window_->Unlock();
 }
 
 void PipelineContext::InspectDrew()
@@ -714,6 +716,13 @@ void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE();
     window_->FlushTasks();
+}
+
+void PipelineContext::FlushUITasks()
+{
+    window_->Lock();
+    taskScheduler_->FlushTask();
+    window_->Unlock();
 }
 
 void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node)
@@ -805,12 +814,14 @@ void PipelineContext::FlushPipelineImmediately()
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
     ACE_FUNCTION_TRACE();
+    window_->Lock();
     FlushBuild();
     FlushTouchEvents();
     taskScheduler_->FlushTask();
     FlushAnimationClosure();
     FlushMessages();
     FlushFocus();
+    window_->Unlock();
 }
 
 void PipelineContext::FlushFrameRate()
@@ -842,6 +853,7 @@ void PipelineContext::FlushAnimationClosure()
     if (animationClosuresList_.empty()) {
         return;
     }
+    window_->Lock();
     taskScheduler_->FlushTask();
 
     decltype(animationClosuresList_) temp(std::move(animationClosuresList_));
@@ -852,6 +864,7 @@ void PipelineContext::FlushAnimationClosure()
         taskScheduler_->CleanUp();
     }
     taskScheduler_ = std::move(scheduler);
+    window_->Unlock();
 }
 
 void PipelineContext::FlushBuildFinishCallbacks()

@@ -397,10 +397,7 @@ public:
     void NotifyMemoryLevel(int32_t level) override;
     void FlushMessages() override;
 
-    void FlushUITasks() override
-    {
-        taskScheduler_->FlushTask();
-    }
+    void FlushUITasks() override;
 
     bool IsLayouting() const override
     {
