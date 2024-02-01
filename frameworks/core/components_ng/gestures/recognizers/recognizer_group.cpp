@@ -206,4 +206,29 @@ void RecognizerGroup::SetRecognizerInfoRecursively(const Offset& coordinateOffse
     }
 }
 
+void RecognizerGroup::AddHittedRecognizerType(
+    std::map<std::string, std::list<TouchTestResultInfo>>& hittedRecognizerInfo)
+{
+    for (const auto& item : recognizers_) {
+        if (AceType::InstanceOf<NG::MultiFingersRecognizer>(item) && !AceType::InstanceOf<NG::RecognizerGroup>(item)) {
+            auto node = item->GetAttachedNode().Upgrade();
+            if (!node) {
+                hittedRecognizerInfo.emplace(AceType::TypeName(item), std::list<NG::TouchTestResultInfo>());
+                continue;
+            }
+            auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+            if (!frameNode) {
+                hittedRecognizerInfo.emplace(AceType::TypeName(item), std::list<NG::TouchTestResultInfo>());
+                continue;
+            }
+            hittedRecognizerInfo[AceType::TypeName(item)].emplace_back(NG::TouchTestResultInfo {
+                frameNode->GetId(), frameNode->GetTag(), frameNode->GetInspectorIdValue("") });
+        }
+        auto group = AceType::DynamicCast<RecognizerGroup>(item);
+        if (group) {
+            group->AddHittedRecognizerType(hittedRecognizerInfo);
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

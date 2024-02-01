@@ -71,7 +71,6 @@ void SwipeRecognizer::OnAccepted()
 
 void SwipeRecognizer::OnRejected()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 
