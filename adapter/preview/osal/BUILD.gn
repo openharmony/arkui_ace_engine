@@ -62,6 +62,7 @@ ohos_source_set("preview_osal_source") {
       "ace_checker.cpp",
       "ace_engine_ext.cpp",
       "ace_trace.cpp",
+      "advance/data_detector_adapter.cpp",
       "advance/data_detector_mgr.cpp",
       "advance/image_analyzer_mgr.cpp",
       "app_bar_helper_impl.cpp",

@@ -174,7 +174,6 @@ public:
     std::wstring DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
-    void HandleClickAISpanEvent(GestureEvent& info);
     void NotifyKeyboardClosedByUser() override
     {
         FocusHub::LostFocusToViewRoot();

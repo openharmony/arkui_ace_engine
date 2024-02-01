@@ -31,28 +31,6 @@ bool DataDetectorMgr::IsDataDetectorSupported()
 
 void DataDetectorMgr::DataDetect(const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc) {}
 
-RefPtr<NG::FrameNode> DataDetectorMgr::CreateUIExtensionMenu(
-    const std::map<std::string, std::string>& paramaters, std::function<void(const std::string&)> onClickMenu)
-{
-    return nullptr;
-}
-
-bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::string>& paramaters, NG::RectF aiRect,
-    std::function<void(const std::string&)> onClickMenu, const RefPtr<NG::FrameNode>& targetNode)
-{
-    return false;
-}
-
-void DataDetectorMgr::ResponseBestMatchItem(const std::map<std::string, std::string>& paramaters, const AISpan& aiSpan)
-{}
-
-std::function<void(const AAFwk::WantParams&)> DataDetectorMgr::GetOnReceive(
-    const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect,
-    std::function<void(const std::string&)> onClickMenu, const RefPtr<NG::FrameNode>& targetNode)
-{
-    return [](const AAFwk::WantParams& wantParams) {};
-}
-
 void DataDetectorMgr::AdjustCursorPosition(
     int32_t& caretPos, const std::string& content, TimeStamp& lastAiPosTimeStamp, const TimeStamp& lastClickTimeStamp)
 {
