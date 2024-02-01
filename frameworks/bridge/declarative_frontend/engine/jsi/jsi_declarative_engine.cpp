@@ -2066,10 +2066,9 @@ void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* 
     if (jsValue->IsObject()) {
         auto storage = JSRef<JSObject>::Cast(jsValue);
         JSLocalStorage::AddStorage(instanceId, storage);
-    } else {
-        delete nativeValue;
-        nativeValue = nullptr;
     }
+    delete nativeValue;
+    nativeValue = nullptr;
 #endif
 }
 
