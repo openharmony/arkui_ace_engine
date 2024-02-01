@@ -313,7 +313,8 @@ const ArkUIBasicAPI* GetBasicAPI()
     return &basicImpl;
 }
 
-void ShowCrash(ArkUI_CharPtr message) {
+void ShowCrash(ArkUI_CharPtr message)
+{
     TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Arkoala crash: %{public}s", message);
 }
 /* clang-format off */
