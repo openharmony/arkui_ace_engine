@@ -182,6 +182,7 @@ void WaterFlowLayoutInfo::Reset()
     itemEnd_ = false;
     itemStart_ = false;
     offsetEnd_ = false;
+    maxHeight_ = 0.0f;
 
     jumpIndex_ = EMPTY_JUMP_INDEX;
 
@@ -193,7 +194,7 @@ void WaterFlowLayoutInfo::Reset()
 
 void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
 {
-    if (resetFrom >= endIndex_) {
+    if (resetFrom > endIndex_) {
         return;
     }
     Reset();
