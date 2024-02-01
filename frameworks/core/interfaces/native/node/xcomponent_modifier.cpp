@@ -35,10 +35,11 @@ void ResetXComponentBackgroundColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (XComponentModelNG::GetType(frameNode) == XComponentType::COMPONENT) {
+    auto type = XComponentModelNG::GetType(frameNode);
+    if (type == XComponentType::COMPONENT) {
         return;
     }
-    ViewAbstract::SetBackgroundColor(frameNode, Color(Color::TRANSPARENT));
+    ViewAbstract::SetBackgroundColor(frameNode, (type == XComponentType::SURFACE) ? Color::BLACK : Color::TRANSPARENT);
 }
 
 void SetXComponentOpacity(NodeHandle node, double opacity)
