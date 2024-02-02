@@ -2504,11 +2504,6 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     childScrolling_ = false;
     auto leading = currentOffset_ + mainSize - itemPosition_.rbegin()->second.endPos;
     auto trailing = currentOffset_ - itemPosition_.begin()->second.startPos;
-    if (IsSwipeByGroup()) {
-        auto startPageOffset = itemPosition_.find(currentIndex_)->second.startPos;
-        leading = currentOffset_ + std::abs(startPageOffset);
-    }
-
     ExtentPair extentPair = ExtentPair(leading, trailing);
 
     host->CreateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, 0, [weak = AceType::WeakClaim(this)](float position) {
