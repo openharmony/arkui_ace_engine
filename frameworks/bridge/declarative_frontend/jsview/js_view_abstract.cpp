@@ -2795,6 +2795,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
             func->Execute();
         };
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
+        ParseContentPreviewAnimationOptionsParam(menuContentOptions, menuParam);
     }
 }
 

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 
 #include "core/animation/animation_pub.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
@@ -23,13 +24,32 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
 
-void ShowScaleAnimation(const RefPtr<RenderContext>& context, const RefPtr<MenuTheme>& menuTheme)
+RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuWrapper)
+{
+    CHECK_NULL_RETURN(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+    auto menuNode = menuWrapperPattern->GetMenu();
+    CHECK_NULL_RETURN(menuNode, nullptr);
+    return menuNode->GetPattern<MenuPattern>();
+}
+
+void ShowScaleAnimation(
+    const RefPtr<RenderContext>& context, const RefPtr<MenuTheme>& menuTheme, const RefPtr<MenuPattern>& menuPattern)
 {
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(menuTheme);
+    auto scaleBefore { -1.0f };
+    auto scaleAfter { -1.0f };
+    if (menuPattern != nullptr) {
+        scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
+        scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
+    }
+    auto previewBeforeAnimationScale =
+        LessOrEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
+    auto previewAfterAnimationScale =
+        LessOrEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
 
-    auto previewBeforeAnimationScale = menuTheme->GetPreviewBeforeAnimationScale();
-    auto previewAfterAnimationScale = menuTheme->GetPreviewAfterAnimationScale();
     auto springMotionResponse = menuTheme->GetSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
     AnimationOption scaleOption;
@@ -98,7 +118,9 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
             }
         },
         option.GetOnFinishEvent());
-    ShowScaleAnimation(context, menuTheme);
+    auto menuWrapper = GetMenuWrapper();
+    auto menuPattern = GetMenuPattern(menuWrapper);
+    ShowScaleAnimation(context, menuTheme, menuPattern);
     isFirstShow_ = false;
     return false;
 }
