@@ -264,7 +264,7 @@ class UIContext {
     }
 
     getUIObserver() {
-        this.observer_ = new UIObserver();
+        this.observer_ = new UIObserver(this.instanceId_);
         return this.observer_;
     }
 

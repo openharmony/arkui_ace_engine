@@ -418,13 +418,14 @@ HWTEST_F(ImageTestNg, SetImagePaintConfig002, TestSize.Level1)
     /**
      * @tc.steps: step3. start set ImagePaintConfig and Verify it will be set correctly.
      */
-    imagePattern->SetImagePaintConfig(canvasImage, RectF(), RectF(), true);
+    imagePattern->SetImagePaintConfig(
+        canvasImage, RectF(), RectF(), ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
     ASSERT_NE(canvasImage->paintConfig_, nullptr);
     auto paintConfig = canvasImage->GetPaintConfig();
     EXPECT_EQ(paintConfig.srcRect_, RectF());
     EXPECT_EQ(paintConfig.dstRect_, RectF());
     EXPECT_EQ(paintConfig.imageFit_, ImageFit::COVER);
-    EXPECT_TRUE(paintConfig.isSvg_);
+    EXPECT_TRUE(paintConfig.sourceInfo_.IsSvg());
 }
 
 /**

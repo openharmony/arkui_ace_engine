@@ -557,14 +557,16 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
 #ifdef SECURITY_COMPONENT_ENABLE
     secEvent.point.touchX = event.GetDisplayX();
     secEvent.point.touchY = event.GetDisplayY();
-    auto data = event.GetEnhanceData();
+    auto data = event.GetPointerEvent()->GetEnhanceData();
     if (data.size() > 0) {
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
     }
 #endif
+    std::chrono::microseconds microseconds(event.GetPointerEvent()->GetActionTime());
+    TimeStamp time(microseconds);
     secEvent.point.timestamp =
-        static_cast<uint64_t>(event.GetTimeStamp().time_since_epoch().count()) / SECOND_TO_MILLISECOND;
+        static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
 
     return ReportSecurityComponentClickEventInner(scId, node, secEvent);
 }

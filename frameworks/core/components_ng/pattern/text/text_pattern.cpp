@@ -1386,8 +1386,16 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
     auto dragStatusUpdateAction = [weakPtr = WeakClaim(this), isDragging](const ResultObject& resultObj) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->spans_.empty()) {
+            return;
+        }
         auto it = pattern->spans_.begin();
-        std::advance(it, resultObj.spanPosition.spanIndex);
+        if (resultObj.spanPosition.spanIndex >= static_cast<int32_t>(pattern->spans_.size())) {
+            std::advance(it, pattern->spans_.size() - 1);
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "resultObj.spanPosition.spanIndex is larger than spans size.");
+        } else {
+            std::advance(it, resultObj.spanPosition.spanIndex);
+        }
         auto spanItem = *it;
         CHECK_NULL_VOID(spanItem);
         if (resultObj.type == SelectSpanType::TYPESPAN) {
@@ -1951,7 +1959,11 @@ void TextPattern::InitTextDetect(int32_t startPos, std::string detectText)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->SetTextDetectResult(result);
-            pattern->FireOnResult(result.entity);
+            pattern->FireOnResult(result);
+            if (result.code != 0) {
+                TAG_LOGD(AceLogTag::ACE_TEXT, "Data detect error, error code: %{public}d", result.code);
+                return;
+            }
             pattern->ParseAIResult(result, startPos);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
@@ -2144,6 +2156,9 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, boo
         auto start = textSelector_.GetTextStart();
         auto end = textSelector_.GetTextEnd();
         selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
+        if (selectInfo.isNewAvoid) {
+            selectOverlayProxy_->UpdateSelectArea(selectInfo.selectArea);
+        }
         selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
         selectOverlayProxy_->ShowOrHiddenMenu(!firstHandleInfo.isShow && !secondHandleInfo.isShow);
     } else {

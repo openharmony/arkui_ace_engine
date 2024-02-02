@@ -148,6 +148,17 @@ void SheetPresentationPattern::AvoidAiBar()
     layoutProperty->UpdateScrollContentEndOffset(inset.bottom_.Length());
 }
 
+bool SheetPresentationPattern::IsScrollable() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_RETURN(scrollNode, false);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(scrollPattern, false);
+    return Positive(scrollPattern->GetScrollableDistance());
+}
+
 void SheetPresentationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -349,7 +360,7 @@ void SheetPresentationPattern::OnCoordScrollStart()
 
 bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
 {
-    if (!GetShowState()) {
+    if (!GetShowState() || !IsScrollable()) {
         return false;
     }
 

@@ -107,14 +107,14 @@ public:
         return true;
     }
 
-    void ResetSection(const TouchEvent& touchPoint, bool isMousePressAtSelectedNode);
+    void ResetSelection(const TouchEvent& touchPoint, bool isMousePressAtSelectedNode);
 
 private:
     void DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation = false);
 
     void Destroy(const RefPtr<FrameNode>& overlay);
 
-    bool IsTouchInCallerArea() const;
+    bool IsTouchInCallerArea(const std::optional<NG::PointF>& point = std::nullopt) const;
 
     void NotifyOverlayClosed(bool closedByGlobalEvent = false);
 

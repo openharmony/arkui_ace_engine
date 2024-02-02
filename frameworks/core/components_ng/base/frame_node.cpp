@@ -786,7 +786,7 @@ void FrameNode::OnVisibleChange(bool isVisible)
 {
     pattern_->OnVisibleChange(isVisible);
     UpdateChildrenVisible(isVisible);
-    TriggerVisibleAreaChangeCallback(!isVisible);
+    TriggerVisibleAreaChangeCallback(true);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive)

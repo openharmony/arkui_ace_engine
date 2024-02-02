@@ -857,7 +857,7 @@ typedef enum {
  */
 typedef enum {
     /** 将上层图像直接覆盖到下层图像上，不进行任何混合操作。 */
-    ARKUI_BLEND_MODE_NONE,
+    ARKUI_BLEND_MODE_NONE = 0,
     /** 将源像素覆盖的目标像素清除为完全透明。 */
     ARKUI_BLEND_MODE_CLEAR,
     /** r = s，只显示源像素。 */
@@ -1034,6 +1034,20 @@ typedef enum {
     /** 隐藏，但不参与布局，不进行占位。 */
     ARKUI_VISIBILITY_NONE,
 } ArkUI_Visibility;
+
+/**
+ * @brief 日历选择器与入口组件对齐方式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 选择器和入口组件左对齐方式。 */
+    ARKUI_CALENDAR_ALIGNMENT_START = 0,
+    /** 选择器和入口组件居中对齐方式。 */
+    ARKUI_CALENDAR_ALIGNMENT_CENTER,
+    /** 选择器和入口组件右对齐方式。 */
+    ARKUI_CALENDAR_ALIGNMENT_END,
+} ArkUI_CalendarAlignment;
 
 #ifdef __cplusplus
 };

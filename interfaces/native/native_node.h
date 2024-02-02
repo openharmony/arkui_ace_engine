@@ -104,6 +104,8 @@ typedef enum {
     ARKUI_NODE_FLEX,
     /** 刷新组件。 */
     ARKUI_NODE_REFRESH,
+    /** 日历选择器组件。 */
+    ARKUI_NODE_CALENDAR_PICKER,
 } ArkUI_NodeType;
 
 /**
@@ -301,7 +303,7 @@ typedef enum {
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi - reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value1[] = { 1, 2, 3, 4};
+     * ArkUI_NumberValue value1[] = { 1, 2, 3, 4 };
      * ArkUI_AttributeItem item1 = { value1, sizeof(value1)/sizeof(ArkUI_NumberValue) };
      * ArkUI_NumberValue value2[] = { 10 };
      * ArkUI_AttributeItem item2 = { value2, sizeof(value2)/sizeof(ArkUI_NumberValue) };
@@ -813,7 +815,7 @@ typedef enum {
      *
      */
     NODE_SHADOW,
-    /** 
+    /**
      * @brief 自定义阴影效果，支持属性设置，属性重置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
@@ -876,7 +878,7 @@ typedef enum {
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
      * .value[0].i32 表示背景图片的宽高样式，取{@link ArkUI_ImageSize}枚举值。\n
-     * 
+     *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
@@ -906,7 +908,7 @@ typedef enum {
      * .value[3]?.f32 表示模糊效果程度，取[0.0,1.0]范围内的值。\n
      * .value[4]?.f32 表示灰阶模糊起始边界。\n
      * .value[5]?.f32 表示灰阶模糊终点边界。\n
-     *     
+     *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
@@ -1045,7 +1047,7 @@ typedef enum {
      * .value[6]?.i32 表示动画播放次数。\n
      * .value[7]?.i32 表示动画播放模式，取{@link ArkUI_AnimationPlayMode}枚举值。\n
      * .value[8]?.f32 表示动画播放速度。\n
-     *     
+     *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
@@ -1126,7 +1128,7 @@ typedef enum {
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
      * value[0].i32：参数类型为1或者0。
-     * 
+     *
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
@@ -1142,7 +1144,7 @@ typedef enum {
 
     /**
      * @brief 触摸热区属性，支持属性设置，属性重置和属性获取。
-     * 
+     *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
      * .data[0].f32：触摸点相对于组件左上角的x轴坐标,单位为vp。 \n
      * .data[1].f32：触摸点相对于组件左上角的y轴坐标,单位为vp。 \n
@@ -1156,7 +1158,7 @@ typedef enum {
      * .data[2].f32：触摸热区的宽度 ，单位为%。 \n
      * .data[3].f32：触摸热区的高度，单位为%。 \n
      * .data[4...].f32:可以设置多个手势响应区域，顺序和上述一致。
-     * 
+     *
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
@@ -1179,7 +1181,7 @@ typedef enum {
 
     /**
      * @brief 遮罩文本属性，支持属性设置，属性重置和属性获取。
-     * 
+     *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
      * .string 遮罩文本；\n
      * .value[0]?.i32：可选值，浮层相对于组件的位置，参数类型{@link ArkUI_Alignment}，
@@ -1193,7 +1195,7 @@ typedef enum {
      *  默认值为ARKUI_ALIGNMENT_TOP_START。 \n
      * .value[1]?.f32：可选值，浮层基于自身左上角的偏移量X，单位为vp。 \n
      * .value[2]?.f32：可选值，浮层基于自身左上角的偏移量Y，单位为vp。
-     * 
+     *
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
@@ -1210,30 +1212,32 @@ typedef enum {
      * @brief 角度渐变效果，支持属性设置，属性重置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .string: 字符串组合参数，入参6个，以分号分割： \n
-     * 入参1：为角度渐变的中心点，即相对于当前组件左上角的坐标,以逗号分隔。 \n
-     * 入参2：角度渐变的起点，默认值0。 \n
-     * 入参3：角度渐变的终点，默认值0。 \n
-     * 入参4：角度渐变的旋转角度，默认值0。 \n
-     * 入参5：指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
-     * 入参6：为渐变的颜色重复着色，默认值 false。 \n
+     * .string: 字符串组合参数，入参7个，以分号分割： \n
+     * 入参1：指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
+     * 入参2：为角度渐变的中心点，即相对于当前组件左上角的坐标,X轴坐标。 \n
+     * 入参3：为角度渐变的中心点，即相对于当前组件左上角的坐标,Y轴坐标。 \n
+     * 入参4：角度渐变的起点，默认值0。 \n
+     * 入参5：角度渐变的终点，默认值0。 \n
+     * 入参6：角度渐变的旋转角度，默认值0。 \n
+     * 入参7：为渐变的颜色重复着色，默认值 false。 \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .string: 字符串组合参数，入参6个，以分号分割： \n
-     * 入参1：为角度渐变的中心点，即相对于当前组件左上角的坐标,以逗号分隔。 \n
-     * 入参2：角度渐变的起点，默认值0。 \n
-     * 入参3：角度渐变的终点，默认值0。 \n
-     * 入参4：角度渐变的旋转角度，默认值0。 \n
-     * 入参5：指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
-     * 入参6：为渐变的颜色重复着色，默认值 false。 \n
+     * .string: 字符串组合参数： \n
+     * 入参1：指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
+     * 入参2：为角度渐变的中心点，即相对于当前组件左上角的坐标,X轴坐标。 \n
+     * 入参3：为角度渐变的中心点，即相对于当前组件左上角的坐标,Y轴坐标。 \n
+     * 入参4：角度渐变的起点，默认值0。 \n
+     * 入参5：角度渐变的终点，默认值0。 \n
+     * 入参6：角度渐变的旋转角度，默认值0。 \n
+     * 入参7：为渐变的颜色重复着色，默认值 false。 \n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_AttributeItem item = { .string = "5,10;60;180;60;#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;true" };
+     * ArkUI_AttributeItem item = { .string = "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;5;10;60;180;60;true" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SWEEP_GRADIENT, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWEEP_GRADIENT);
-     * auto nodeCustomShadow = item->string;
+     * auto nodeSweepGradient = item->string;
      * @endcode
      *
      */
@@ -1242,26 +1246,28 @@ typedef enum {
      * @brief 径向渐变渐变效果，支持属性设置，属性重置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .string: 字符串组合参数，入参4个，以分号分割： \n
-     * 入参1：为径向渐变的中心点，即相对于当前组件左上角的坐标,以逗号分隔。 \n
-     * 入参2：径向渐变的半径，默认值0。 \n
-     * 入参3：指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
-     * 入参4：为渐变的颜色重复着色。 \n
+     * .string: 字符串组合参数，入5个，以分号分割： \n
+     * 入参1：指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
+     * 入参2：为径向渐变的中心点，即相对于当前组件左上角的坐标,X轴坐标。 \n
+     * 入参3：为径向渐变的中心点，即相对于当前组件左上角的坐标,Y轴坐标。 \n
+     * 入参4：径向渐变的半径，默认值0。 \n
+     * 入参5：为渐变的颜色重复着色。 \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .string: 字符串组合参数，入参4个，以分号分割： \n
-     * 入参1：为径向渐变的中心点，即相对于当前组件左上角的坐标,以逗号分隔。 \n
-     * 入参2：径向渐变的半径，默认值0。 \n
-     * 入参3：指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
-     * 入参4：为渐变的颜色重复着色。 \n
+     * .string: 字符串组合参数： \n
+     * 入参1：指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
+     * 入参2：为径向渐变的中心点，即相对于当前组件左上角的坐标,X轴坐标。 \n
+     * 入参3：为径向渐变的中心点，即相对于当前组件左上角的坐标,Y轴坐标。 \n
+     * 入参4：径向渐变的半径，默认值0。 \n
+     * 入参5：为渐变的颜色重复着色。 \n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_AttributeItem item = { .string = "5,10;50;#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;true" };
+     * ArkUI_AttributeItem item = { .string = "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;5;10;50;true" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_RADIAL_GRADIENT, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_RADIAL_GRADIENT);
-     * auto nodeCustomShadow = item->string;
+     * auto nodeRadialGradient = item->string;
      * @endcode
      *
      */
@@ -1294,10 +1300,14 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_AttributeItem item = { .string = "rect(10,10,10,10)" };
+     * ArkUI_NumberValue value[] = { { .u32 = 0xFFFF0000 }, { .u32 = 0xFFFF0000 }, 2 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue), "rect(10,10,10,10)" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_MASK, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_MASK);
-     * auto nodeClipShape = item->string;
+     * auto nodeMaskFill = item->value[0].u32;
+     * auto nodeMaskStrokeColor = item->value[1].u32;
+     * auto nodeMaskStrokeWidth = item->value[1].f32;
+     * auto nodeMaskShape = item->string;
      * @endcode
      *
      */
@@ -1318,7 +1328,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BLEND_MODE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BLEND_MODE);
-     * auto nodeHitTestBehavior = item->value[0].i32;
+     * auto nodeBlendMode = item->value[0].i32;
      * @endcode
      *
      */
@@ -1341,7 +1351,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_DIRECTION, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_DIRECTION);
-     * auto nodeHitTestBehavior = item->value[0].i32;
+     * auto nodeDirection = item->value[0].i32;
      * @endcode
      *
      */
@@ -1624,7 +1634,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_FLEX_GROW, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_FLEX_GROW);
-     * auto nodeZIndex = item->value[0].f32;
+     * auto nodeFlexGrow = item->value[0].f32;
      * @endcode
      *
      */
@@ -1645,7 +1655,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_FLEX_SHRINK, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_FLEX_SHRINK);
-     * auto nodeZIndex = item->value[0].f32;
+     * auto nodeFlexShrink = item->value[0].f32;
      * @endcode
      *
      */
@@ -1666,7 +1676,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_FLEX_BASIS, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_FLEX_BASIS);
-     * auto nodeZIndex = item->value[0].f32;
+     * auto nodeFlexBasis = item->value[0].f32;
      * @endcode
      *
      */
@@ -1918,7 +1928,7 @@ typedef enum {
      * ARKUI_AttributeItem item = { .value = textCase, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_CASE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_CASE);
-     * auto textCase = item->value[0].i32     
+     * auto textCase = item->value[0].i32
      * @endcode
      *
      */
@@ -2007,13 +2017,13 @@ typedef enum {
     NODE_TEXT_OVERFLOW,
     /**
      * @brief Text字体列表属性，支持属性设置，属性重置和属性获取。
-     * 
+     *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
      * .string：字体字符串，多个用,分隔。
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
      * .string：字体字符串，多个用,分隔。
-     * 
+     *
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
@@ -2099,13 +2109,13 @@ typedef enum {
     NODE_TEXT_TEXT_SHADOW,
     /**
      * @brief Text最小显示字号，支持属性设置，属性重置和属性获取。
-     * 
+     *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
      * .value[0].f32：文本最小显示字号，单位FP。
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
      * .value[0].f32：文本最小显示字号，单位FP。
-     * 
+     *
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
@@ -2121,13 +2131,13 @@ typedef enum {
 
     /**
      * @brief Text最大显示字号，支持属性设置，属性重置和属性获取。
-     * 
+     *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
      * .value[0].f32：文本最大显示字号 单位FP。
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
      * .value[0].f32：文本最大显示字号 单位FP。
-     * 
+     *
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
@@ -2143,7 +2153,7 @@ typedef enum {
 
     /**
      * @brief Text样式，支持属性设置，属性重置和属性获取。
-     * 
+     *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
      * .string?：可选值 字体列表，使用多个字体，使用','进行分割。 \n
      * .value[0].f32：文本尺寸 单位FP。 \n
@@ -2159,7 +2169,7 @@ typedef enum {
      * 默认值为ARKUI_FONT_WEIGHT_NORMAL。 \n
      * .value[2]?.i32：可选值，字体样式，参数类型{@link ArkUI_FontStyle}。
      *  默认值为ARKUI_FONT_STYLE_NORMAL。
-     * 
+     *
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
@@ -2176,13 +2186,13 @@ typedef enum {
 
     /**
      * @brief Text自适应高度的方式，支持属性设置，属性重置和属性获取。
-     * 
+     *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
      * .value[0].i32：参数类型{@link ArkUI_TextHeightAdaptivePolicy}。
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
      * .value[0].i32：参数类型{@link ArkUI_TextHeightAdaptivePolicy}。
-     * 
+     *
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
@@ -2195,7 +2205,7 @@ typedef enum {
      *
      */
     NODE_TEXT_HEIGHT_ADAPTIVE_POLICY,
-    /**     
+    /**
      * @brief 文本首行缩进属性，支持属性设置，属性重置，属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
@@ -2222,7 +2232,7 @@ typedef enum {
      * .string 表示span的文本内容。\n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .string 表示span的文本内容。\n     
+     * .string 表示span的文本内容。\n
      *
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
@@ -2394,7 +2404,7 @@ typedef enum {
      * ARKUI_AttributeItem item = { .value = resizeValue, .size = 1}}
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_AUTO_RESIZE , &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_AUTO_RESIZE);
-     * auto autoResize = item->value[0].i32     
+     * auto autoResize = item->value[0].i32
      * @endcode
      */
     NODE_IMAGE_AUTO_RESIZE,
@@ -4369,7 +4379,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_AUTO_PLAY, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_AUTO_PLAY);
-     * auto nodeSwiperLoop = item->value[0].i32;
+     * auto nodeSwiperAutoPlay = item->value[0].i32;
      * @endcode
      *
      */
@@ -4454,7 +4464,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DURATION, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_DURATION);
-     * auto nodeSwiperVertical = item->value[0].f32;
+     * auto nodeSwiperDuration = item->value[0].f32;
      * @endcode
      *
      */
@@ -4476,7 +4486,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_CURVE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_CURVE);
-     * auto nodeSwiperVertical = item->value[0].i32;
+     * auto nodeSwiperCurve = item->value[0].i32;
      * @endcode
      *
      */
@@ -4498,7 +4508,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE);
-     * auto nodeSwiperVertical = item->value[0].f32;
+     * auto nodeSwiperItemSpace = item->value[0].f32;
      * @endcode
      *
      */
@@ -4564,7 +4574,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISABLE_SWIPE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_DISABLE_SWIPE);
-     * auto nodeSwiperDisplayCount = item->value[0].i32;
+     * auto nodeSwiperDisableSwipe = item->value[0].i32;
      * @endcode
      *
      */
@@ -4588,7 +4598,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_SHOW_DISPLAY_ARROW, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_SHOW_DISPLAY_ARROW);
-     * auto nodeSwiperDisplayCount = item->value[0].i32;
+     * auto nodeSwiperShowDisplayArrow = item->value[0].i32;
      * @endcode
      *
      */
@@ -4654,6 +4664,93 @@ typedef enum {
      * @endcode
      */
     NODE_LIST_ITEM_GROUP_SET_DIVIDER,
+    /**
+     * @brief 设置日历选中态底板圆角半径的参数，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32： 日历选中态底板圆角半径，取值范围[0,+∞)，其中取值为0表示底板样式为直角矩形；
+     * 取值范围为(0, 16)时，底板样式为圆角矩形；取值范围为[16,+∞)时，底板样式为圆形。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32： 日历选中态底板圆角半径，取值范围[0,+∞)，其中取值为0表示底板样式为直角矩形；
+     * 取值范围为(0, 16)时，底板样式为圆角矩形；取值范围为[16,+∞)时，底板样式为圆形。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { 16.0f };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_HINT_RADIUS, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_HINT_RADIUS);
+     * auto borderRadius = item->value[0].f32;
+     * @endcode
+     */
+    NODE_CALENDAR_PICKER_HINT_RADIUS = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CALENDAR_PICKER,
+    /**
+     * @brief 设置日历选择选中日期的参数，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[1].u32： 选中的年。\n
+     * .value[2].u32： 选中的月。\n
+     * .value[3].u32： 选中的日。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[1].u32： 选中的年。\n
+     * .value[2].u32： 选中的月。\n
+     * .value[3].u32： 选中的日。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .u32 = 2028 }, { .u32 = 1 }, { .u32 = 1 } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED);
+     * auto selectYear = item->value[0].u32;
+     * @endcode
+     */
+    NODE_CALENDAR_PICKER_SELECTED,
+    /**
+     * @brief 设置日历选择器与入口组件的对齐方式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 对齐方式类型，参数类型{@link ArkUI_CalendarAlignment}。\n
+     * .value[1]?.f32： 按照对齐方式对齐后，选择器相对入口组件的x轴方向相对偏移。\n
+     * .value[2]?.f32： 按照对齐方式对齐后，选择器相对入口组件的y轴方向相对偏移。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 对齐方式类型，参数类型{@link ArkUI_CalendarAlignment}。\n
+     * .value[1]?.f32： 按照对齐方式对齐后，选择器相对入口组件的x轴方向相对偏移。\n
+     * .value[2]?.f32： 按照对齐方式对齐后，选择器相对入口组件的y轴方向相对偏移。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = static_cast<int32_t>(ARKUI_CALENDAR_ALIGN_END) }, 10.0f, 0.0f };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGN, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGN);
+     * auto alignType = item->value[0].i32;
+     * @endcode
+     */
+    NODE_CALENDAR_PICKER_EDGE_ALIGN,
+    /**
+     * @brief 设置日历选择器入口区的文本颜色、字号、字体粗细。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0]?.u32： 入口区的文本颜色。\n
+     * .value[1]?.f32： 入口区的文本字号，单位为fp。\n
+     * .value[2]?.i32： 入口区的文本字体粗细，参数类型{@link ArkUI_FontWeight}。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0]?.u32： 入口区的文本颜色。\n
+     * .value[1]?.f32： 入口区的文本字号，单位为fp。\n
+     * .value[2]?.i32： 入口区的文本字体粗细，参数类型{@link ArkUI_FontWeight}。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .u32 = 0xff00ffff }, 16.0f, { .i32 =
+     * static_cast<int32_t>(ARKUI_FONT_WEIGHT_NORMAL)} };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_TEXT_STYLE, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_TEXT_STYLE);
+     * auto textColor = item->value[0].u32;
+     * @endcode
+     */
+    NODE_CALENDAR_PICKER_TEXT_STYLE,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -4854,6 +4951,15 @@ typedef enum {
      * <b>ArkUI_NodeComponent.data[0].i32</b>表示当前碰到的是上下左右哪个边。\n
      */
     NODE_SCROLL_EVENT_ON_SCROLL_EDGE,
+    /**
+     * @brief 定义NODE_CALENDAR_PICKER选中日期时触发的事件。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>ArkUI_NodeComponent.data[0].u32</b>选中的年。\n
+     * <b>ArkUI_NodeComponent.data[1].u32</b>选中的月。\n
+     * <b>ArkUI_NodeComponent.data[2].u32</b>选中的日。\n
+     */
+    NODE_CALENDAR_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CALENDAR_PICKER,
 } ArkUI_NodeEventType;
 
 /**

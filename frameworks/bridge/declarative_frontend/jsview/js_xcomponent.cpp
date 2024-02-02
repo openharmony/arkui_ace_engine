@@ -358,7 +358,7 @@ void JSXComponent::JsOnBlur(const JSCallbackInfo& args)
 void JSXComponent::JsBackgroundColor(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type == XComponentType::SURFACE || type == XComponentType::COMPONENT) {
+    if (type == XComponentType::COMPONENT) {
         return;
     }
     JSViewAbstract::JsBackgroundColor(args);

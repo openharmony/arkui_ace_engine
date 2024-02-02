@@ -1190,7 +1190,7 @@ void Scrollable::OnCollectTouchTarget(
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
 {
     if (panRecognizerNG_) {
-        panRecognizerNG_->AssignNodeId(frameNode->GetId());
+        panRecognizerNG_->SetNodeId(frameNode->GetId());
         panRecognizerNG_->AttachFrameNode(frameNode);
         panRecognizerNG_->SetTargetComponent(targetComponent);
         panRecognizerNG_->SetIsSystemGesture(true);

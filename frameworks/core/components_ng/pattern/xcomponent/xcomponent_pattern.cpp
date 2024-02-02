@@ -179,13 +179,24 @@ void XComponentPattern::Initialize(int32_t instanceId)
             InitNativeNodeCallbacks();
         }
     }
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 }
 
 void XComponentPattern::OnAttachToFrameNode()
 {
     instanceId_ = Container::CurrentId();
     Initialize(instanceId_);
+}
+
+void XComponentPattern::OnModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto bkColor = renderContext->GetBackgroundColor();
+    if (bkColor.has_value() && handlingSurfaceRenderContext_) {
+        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
 }
 
 void XComponentPattern::OnAreaChangedInner()

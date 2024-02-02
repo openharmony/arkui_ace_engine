@@ -76,9 +76,14 @@ bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
     FormatIndex(startIndex, endIndex);
     auto tmp = PreprocessString(startIndex, endIndex, value);
     auto wideText = GetWideText();
+    auto str = content_;
     content_ = StringUtils::ToString(wideText.substr(0, startIndex)) + tmp +
                StringUtils::ToString(wideText.substr(endIndex, static_cast<int32_t>(wideText.length()) - endIndex));
+    auto len = content_.length();
     FilterValue();
+    if (value.length() == 1 && content_.length() < len) {
+        content_ = str;
+    }
     return !tmp.empty();
 }
 

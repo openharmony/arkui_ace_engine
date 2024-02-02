@@ -147,7 +147,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         if (recognizer) {
             auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(recognizer);
             if (!recognizerGroup && newIdx >= idx) {
-                recognizer->AssignNodeId(host->GetId());
+                recognizer->SetNodeId(host->GetId());
                 recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
                 recognizer->SetTargetComponent(targetComponent);
                 recognizer->SetIsSystemGesture(true);
@@ -155,7 +155,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
             recognizer->BeginReferee(touchId);
             innerRecognizers.push_back(std::move(recognizer));
         } else {
-            eventTarget->AssignNodeId(host->GetId());
+            eventTarget->SetNodeId(host->GetId());
             eventTarget->AttachFrameNode(WeakPtr<FrameNode>(host));
             eventTarget->SetTargetComponent(targetComponent);
             finalResult.push_back(eventTarget);
@@ -227,17 +227,9 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         }
         auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(recognizer);
         if (recognizerGroup) {
-            auto groupRecognizers = recognizerGroup->GetGroupRecognizer();
-            for (const auto& groupRecognizer : groupRecognizers) {
-                if (groupRecognizer) {
-                    groupRecognizer->SetCoordinateOffset(offset);
-                    groupRecognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
-                    groupRecognizer->SetTargetComponent(targetComponent);
-                    groupRecognizer->SetSize(size.Height(), size.Width());
-                }
-            }
+            recognizerGroup->SetRecognizerInfoRecursively(offset, host, targetComponent, size);
         }
-        recognizer->AssignNodeId(host->GetId());
+        
         recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
         recognizer->SetTargetComponent(targetComponent);
         recognizer->SetSize(size.Height(), size.Width());
@@ -264,7 +256,6 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 }
                 externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
                 externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
-                externalParallelRecognizer_[parallelIndex]->AssignNodeId(host->GetId());
                 externalParallelRecognizer_[parallelIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
                 externalParallelRecognizer_[parallelIndex]->SetTargetComponent(targetComponent);
                 current = externalParallelRecognizer_[parallelIndex];
@@ -290,7 +281,6 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 }
                 externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
                 externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(touchId);
-                externalExclusiveRecognizer_[exclusiveIndex]->AssignNodeId(host->GetId());
                 externalExclusiveRecognizer_[exclusiveIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
                 externalExclusiveRecognizer_[exclusiveIndex]->SetTargetComponent(targetComponent);
                 current = externalExclusiveRecognizer_[exclusiveIndex];
@@ -660,15 +650,23 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         TAG_LOGI(AceLogTag::ACE_DRAG, "FrameNode is not set onDragStart event.");
         return;
     }
+
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
     if (!IsAllowedDrag(eventHub)) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "FrameNode is not allow drag.");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "FrameNode is not allow drag, tag is %{public}s, id is %{public}s,"
+            "draggable is %{public}d, drag start event is %{public}d,"
+            "default support drag is %{public}d, user set is %{public}d.",
+            frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str(),
+            frameNode->IsDraggable(), eventHub->HasOnDragStart(),
+            pattern->DefaultSupportDrag(), frameNode->IsUserSet());
         HandleNotallowDrag(info);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && eventManager->IsLastMoveBeforeUp()) {
@@ -790,7 +788,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     auto ret = SetDragData(unifiedData, udKey);
     if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, error is %{public}d", ret);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);
     }
 
     std::map<std::string, int64_t> summary;
@@ -839,6 +837,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (!overlayManager->GetIsOnAnimation()) {
         dragEventActuator_->SetIsNotInPreviewState(true);
     }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, animation is %{public}d, pixelMap scale is %{public}f",
+        overlayManager->GetIsOnAnimation(), scale);
     pixelMap->Scale(scale, scale, AceAntiAliasingOption::HIGH);
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();

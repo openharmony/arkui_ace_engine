@@ -24,11 +24,13 @@
 #include "core/animation/animation_pub.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -75,6 +77,8 @@ constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
 constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
+constexpr int32_t ORIGINAL_IMAGE_SIZE_AUTO = 0;
+constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -1554,6 +1558,19 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
 }
 
+int32_t GetBackgroundImageSizeType(int nativeImageSizeType)
+{
+    switch (nativeImageSizeType) {
+        case ORIGINAL_IMAGE_SIZE_AUTO:
+            return static_cast<int32_t>(OHOS::Ace::BackgroundImageSizeType::AUTO);
+        case ORIGINAL_IMAGE_SIZE_CONTAIN:
+            return static_cast<int32_t>(OHOS::Ace::BackgroundImageSizeType::CONTAIN);
+        default:
+            break;
+    }
+    return nativeImageSizeType;
+}
+
 void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
     ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight)
 {
@@ -1561,14 +1578,16 @@ void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkU
     CHECK_NULL_VOID(frameNode);
     BackgroundImageSize bgImgSize;
     if (LessNotEqual(valueWidth, 0.0f)) {
-        bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeWidth));
+        bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(GetBackgroundImageSizeType(typeWidth)));
     } else {
-        bgImgSize.SetSizeValueX(valueWidth);
+        bgImgSize.SetSizeValueX(Dimension(valueWidth, DimensionUnit::VP).ConvertToPx());
+        bgImgSize.SetSizeTypeX(BackgroundImageSizeType::LENGTH);
     }
     if (LessNotEqual(valueHeight, 0.0f)) {
-        bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeHeight));
+        bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(GetBackgroundImageSizeType(typeHeight)));
     } else {
-        bgImgSize.SetSizeValueY(valueWidth);
+        bgImgSize.SetSizeValueY(Dimension(valueHeight, DimensionUnit::VP).ConvertToPx());
+        bgImgSize.SetSizeTypeY(BackgroundImageSizeType::LENGTH);
     }
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
@@ -3210,11 +3229,13 @@ void ResetConstraintSize(ArkUINodeHandle node)
     ViewAbstract::ResetMinSize(frameNode, false);
 }
 
-void SetMaskShape(ArkUINodeHandle node, const char* type, double* attribute, int length)
+void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
+    ArkUI_Float32 strokeWidth, ArkUI_Float64* attribute, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string shapeType(type);
+    auto strokeWidth_ = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(1));
     if (shapeType == "rect") {
         auto shape = AceType::MakeRefPtr<ShapeRect>();
         auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
@@ -3250,12 +3271,18 @@ void SetMaskShape(ArkUINodeHandle node, const char* type, double* attribute, int
         ViewAbstract::SetProgressMask(frameNode, progressMask);
     } else {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "type are invalid");
+        return;
     }
+    ShapeModelNG::SetFill(frameNode, Color(fill));
+    ShapeModelNG::SetStroke(frameNode, Color(stroke));
+    ShapeModelNG::SetStrokeWidth(frameNode, strokeWidth_);
 }
 
-void SetMaskPath(ArkUINodeHandle node, const char* type, double* attribute, const char* commands)
+void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
+    ArkUI_Float32 strokeWidth, ArkUI_Float64* attribute, ArkUI_CharPtr commands)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto strokeWidth_ = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(1));
     CHECK_NULL_VOID(frameNode);
     auto path = AceType::MakeRefPtr<Path>();
     auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
@@ -3265,6 +3292,9 @@ void SetMaskPath(ArkUINodeHandle node, const char* type, double* attribute, cons
     path->SetHeight(height);
     path->SetValue(StringUtils::TrimStr(pathCommands));
     ViewAbstract::SetMask(frameNode, path);
+    ShapeModelNG::SetFill(frameNode, Color(fill));
+    ShapeModelNG::SetFill(frameNode, Color(stroke));
+    ShapeModelNG::SetStrokeWidth(frameNode, strokeWidth_);
 }
 } // namespace
 
@@ -3389,7 +3419,7 @@ void SetOnAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
         SendArkUIAsyncEvent(&event);
     };
     auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
-                                    const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
+                                  const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
         areaChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
             Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
             Offset(origin.GetX(), origin.GetY()));
