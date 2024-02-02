@@ -88,6 +88,11 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
 
+    if (!IsInAttachedNode(event)) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+
     touchPoints_[event.id] = event;
     downEvents_[event.id] = event;
     time_ = event.time;

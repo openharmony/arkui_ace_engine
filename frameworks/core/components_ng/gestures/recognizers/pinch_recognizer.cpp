@@ -77,6 +77,10 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
         return;
     }
+    if (!IsInAttachedNode(event)) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
 
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch down event, begin to detect pinch event");
     activeFingers_.emplace_back(event.id);

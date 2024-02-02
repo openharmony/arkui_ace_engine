@@ -51,6 +51,8 @@ public:
         return GestureMode::Exclusive;
     }
 
+    void CleanRecognizerState() override;
+
 private:
     bool CheckNeedBlocked(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandleTouchDownEvent(const TouchEvent& event) override {};
