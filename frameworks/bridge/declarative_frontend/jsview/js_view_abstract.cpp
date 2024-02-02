@@ -92,7 +92,7 @@
 
 namespace OHOS::Ace {
 namespace {
-const std::string RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.([a-z]+?)\\.(\\S+)";
+const std::string RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.(\\S+?)\\.(\\S+)";
 const std::string RESOURCE_NAME_PATTERN = "\\[(.+?)\\]";
 }
 
