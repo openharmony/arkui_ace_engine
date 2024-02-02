@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -159,6 +160,7 @@ void* createColumnNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ColumnModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
+    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createColumnNode: frameNode %{public}p", AceType::RawPtr(frameNode));
     return AceType::RawPtr(frameNode);
 }
 
@@ -187,6 +189,30 @@ void* createRefreshode(ArkUI_Int32 nodeId)
 {
     auto frameNode = RefreshModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createRootNode(ArkUI_Int32 nodeId)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    RefPtr<PipelineBase> pipeline;
+    pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(context, nullptr);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, nullptr);
+    auto stageNode = stageManager->GetStageNode();
+    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createRootNode: stageNode %{public}p", AceType::RawPtr(stageNode));
+    return AceType::RawPtr(stageNode);
+}
+
+void* createComponentRootNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CommonViewModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createComponentRootNode: frameNode %{public}p", AceType::RawPtr(frameNode));
     return AceType::RawPtr(frameNode);
 }
 
@@ -251,8 +277,8 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 #endif
         nullptr,
         createRefreshode,
-        nullptr,
-        nullptr,
+        createRootNode,
+        createComponentRootNode,
         nullptr,
         nullptr,
         createListItemGroupNode,

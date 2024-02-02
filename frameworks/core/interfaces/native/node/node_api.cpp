@@ -34,6 +34,7 @@
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::NG {
@@ -182,7 +183,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
                 return;
             }
             eventHandle = imageNodeAsyncEventHandlers[subKind];
-            break;            
+            break;
         }
         case ARKUI_SCROLL: {
             // scroll event type.
@@ -310,6 +311,35 @@ static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
     callbacks = method;
 }
 
+ArkUIAPICallbackMethod* GetArkUIAPICallbackMethod()
+{
+    return callbacks;
+}
+
+int SetVsyncCallback(ArkUIVMContext vmContext, ArkUI_Int32 device, ArkUI_Int32 callbackId)
+{
+    static int vsyncCount = 1;
+    auto vsync = [vmContext, callbackId]() {
+        ArkUIEventCallbackArg args[] = { { vsyncCount++ } };
+        ArkUIAPICallbackMethod* cbs = GetArkUIAPICallbackMethod();
+        CHECK_NULL_VOID(vmContext);
+        CHECK_NULL_VOID(cbs);
+        cbs->CallInt(vmContext, callbackId, 1, &args[0]);
+    };
+    PipelineContext::GetCurrentContext()->SetVsyncListener(vsync);
+    return 0;
+}
+
+void UnblockVsyncWait(ArkUIVMContext vmContext, ArkUI_Int32 device)
+{
+    PipelineContext::GetCurrentContext()->RequestFrame();
+}
+
+ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootPtr)
+{
+    return 0;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     /* clang-format off */
@@ -354,7 +384,7 @@ ArkUIExtendedNodeAPI impl_extended = {
 
     SetCallbackMethod,
     nullptr, // setCustomCallback
-    nullptr, // measureLayoutAndDraw
+    MeasureLayoutAndDraw,
     nullptr, // measureNode
     nullptr, // layoutNode
     nullptr, // drawNode
@@ -367,9 +397,9 @@ ArkUIExtendedNodeAPI impl_extended = {
     nullptr, // indexerChecker
     nullptr, // setRangeUpdater
     nullptr, // setLazyItemIndexer
-    nullptr, // setVsyncCallback
-    nullptr, // unblockVsyncWait
-    nullptr, // checkEvent
+    OHOS::Ace::NG::SetVsyncCallback,
+    OHOS::Ace::NG::UnblockVsyncWait,
+    OHOS::Ace::NG::NodeEvent::CheckEvent,
     nullptr, // sendEvent
     nullptr, // callContinuation
     nullptr, // setChildTotalCount
