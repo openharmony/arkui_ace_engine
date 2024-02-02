@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_split_bridge.h"
-#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue RowSplitBridge::SetResizable(ArkUIRuntimeCallInfo *runtimeCallInfo)
@@ -22,12 +21,12 @@ ArkUINativeModuleValue RowSplitBridge::SetResizable(ArkUIRuntimeCallInfo *runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> resizableArg = runtimeCallInfo->GetCallArgRef(1);
-    void *nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     bool resizable = false;
     if (resizableArg->IsBoolean()) {
         resizable = resizableArg->ToBoolean(vm)->BooleaValue();
     }
-    GetArkUIInternalNodeAPI()->GetRowSplitModifier().SetRowSplitResizable(nativeNode, resizable);
+    GetArkUINodeModifiers()->getRowSplitModifier()->setRowSplitResizable(nativeNode, resizable);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -36,8 +35,8 @@ ArkUINativeModuleValue RowSplitBridge::ResetResizable(ArkUIRuntimeCallInfo *runt
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRowSplitModifier().ResetRowSplitResizable(nativeNode);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRowSplitModifier()->resetRowSplitResizable(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

@@ -80,7 +80,7 @@ void ViewAbstract::SetWidth(const CalcLength &width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
-    }ViewAbstract::ClearWidthOrHeight
+    }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();

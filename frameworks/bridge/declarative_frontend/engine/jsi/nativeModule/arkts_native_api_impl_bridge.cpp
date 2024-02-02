@@ -677,9 +677,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 
     auto rowSplit = panda::ObjectRef::New(vm);
     rowSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResizeable"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowSplitBridge::SetResizeable));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowSplitBridge::SetResizable));
     rowSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResizeable"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowSplitBridge::ResetResizeable));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowSplitBridge::ResetResizable));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "rowSplit"), rowSplit);
 
     auto text = panda::ObjectRef::New(vm);
@@ -1083,9 +1083,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::ResetDivider));
     columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResizeable"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::SetResizeable));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::SetResizable));
     columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResizeable"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::ResetResizeable));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::ResetResizable));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "columnSplit"), columnSplit);
 
     auto imageAnimator = panda::ObjectRef::New(vm);

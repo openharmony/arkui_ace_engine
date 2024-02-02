@@ -43,6 +43,7 @@
 #include "core/interfaces/native/node/grid_col_modifier.h"
 #include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/interfaces/native/node/button_modifier.h"
+#include "core/interfaces/native/node/row_split_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -52,7 +53,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetCheckboxGroupModifier,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::GetRowSplitModifier,
     NodeModifier::GetTextModifier,
     NodeModifier::GetButtonModifier,
     NodeModifier::GetToggleModifier,

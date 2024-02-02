@@ -84,7 +84,7 @@ void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
     auto yOffset = static_cast<float>(info.GetOffsetY());
     auto gestureOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto gestureOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-    if (!resizeable_) {
+    if (!resizable_) {
         return;
     }
     isDraged_ = true;
@@ -118,7 +118,7 @@ void LinearSplitPattern::HandlePanStartBeforeAPI10(const GestureEvent& info)
     auto yOffset = static_cast<float>(info.GetOffsetY());
     auto gestureOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto gestureOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-    if (!resizeable_) {
+    if (!resizable_) {
         return;
     }
     isDraged_ = true;
@@ -243,7 +243,7 @@ void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
         HandlePanUpdateBeforeAPI10(info);
         return;
     }
-    if (!resizeable_) {
+    if (!resizable_) {
         return;
     }
     auto xOffset = static_cast<float>(info.GetOffsetX());
@@ -292,7 +292,7 @@ void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
 
 void LinearSplitPattern::HandlePanUpdateBeforeAPI10(const GestureEvent& info)
 {
-    if (!resizeable_) {
+    if (!resizable_) {
         return;
     }
     auto xOffset = info.GetOffsetX();
@@ -400,7 +400,7 @@ void LinearSplitPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 
 void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
 {
-    if (!resizeable_) {
+    if (!resizable_) {
         return;
     }
 
@@ -565,7 +565,7 @@ void LinearSplitPattern::OnModifyDone()
 
     auto layoutProperty = GetLayoutProperty<LinearSplitLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    resizeable_ = layoutProperty->GetResizeable().value_or(false);
+    resizable_ = layoutProperty->GetResizable().value_or(false);
     auto layoutFlag = layoutProperty->GetPropertyChangeFlag();
     if (!CheckNoChanged(layoutFlag)) {
         childrenDragPos_.clear();
