@@ -544,7 +544,6 @@ void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
     if (!isShowed_) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "hide menu ng failed.");
         return;
     }
     isShowed_ = false;
@@ -565,7 +564,6 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
     if (!isShowed_) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "hide menu ng failed.");
         return;
     }
     isShowed_ = false;
