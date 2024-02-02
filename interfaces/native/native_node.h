@@ -1786,8 +1786,8 @@ typedef enum {
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_AttributeItem item = { .string = "https://www.example.com/xxx.png" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_CONTENT , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_CONTENT);
-     * auto content = item->string
+     * auto textContentItem = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_CONTENT);
+     * auto content = textContentItem->string;
      * @endcode
      */
     NODE_TEXT_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
@@ -1886,8 +1886,8 @@ typedef enum {
      * ArkUI_NumberValue lineHeight[] = { 20 };
      * ArkUI_AttributeItem item = { .value = lineHeight, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_LINE_HEIGHT , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_LINE_HEIGHT);
-     * auto pointX = item->value[0].f32;
+     * auto lineHeightItem = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_LINE_HEIGHT);
+     * auto pointX = lineHeightItem->value[0].f32;
      * @endcode
      */
     NODE_TEXT_LINE_HEIGHT,
@@ -1907,9 +1907,9 @@ typedef enum {
      * ArkUI_NumberValue value[] = { {.i32 = ARKUI_TEXT_DECORATION_TYPE_NONE}, {.u32=0xFFFF0000} };
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_DECORATION, &item);
-     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_DECORATION);
-     * auto nodeDecorationStyle = item->value[0].i32;
-     * auto nodeDecorationColor = item->value[1].u32;
+     * auto decorationItem = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_DECORATION);
+     * auto nodeDecorationStyle = decorationItem->value[0].i32;
+     * auto nodeDecorationColor = decorationItem->value[1].u32;
      * @endcode
      *
      */
@@ -1929,8 +1929,8 @@ typedef enum {
      * ArkUI_NumberValue textCase[] = { {.i32 = static_cast<int32_t>(ARKUI_TEXT_CASE_LOWER) } };
      * ArkUI_AttributeItem item = { .value = textCase, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_CASE, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_CASE);
-     * auto textCase = item->value[0].i32;
+     * auto textCaseItem = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_CASE);
+     * auto textCase = textCaseItem->value[0].i32;
      * @endcode
      *
      */
@@ -1950,8 +1950,8 @@ typedef enum {
      * ArkUI_NumberValue letterSpacing[] = { 20 };
      * ArkUI_AttributeItem item = { .value = letterSpacing, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_LETTER_SPACING , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_LETTER_SPACING);
-     * auto letterSpacing = item->value[0].f32;
+     * auto letterSpacingItem = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_LETTER_SPACING);
+     * auto letterSpacing = letterSpacingItem->value[0].f32;
      * @endcode
      *
      */
@@ -1971,8 +1971,8 @@ typedef enum {
      * ArkUI_NumberValue maxLine[] = { { .i32 = 2 } };
      * ArkUI_AttributeItem item = { .value = maxLine, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_MAX_LINES , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_MAX_LINES);
-     * auto maxLines = item->value[0].i32;
+     * auto maxLinesItem = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_MAX_LINES);
+     * auto maxLines = maxLinesItem->value[0].i32;
      * @endcode
      */
     NODE_TEXT_MAX_LINES,
@@ -1991,8 +1991,8 @@ typedef enum {
      * ArkUI_NumberValue alignMent[] = {{.i32 = static_cast<int32_t>(ARKUI_TEXT_ALIGNMENT_CENTER)}};
      * ArkUI_AttributeItem item = { .value = alignMent, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_ALIGN , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_ALIGN);
-     * auto alignMent = item->value[0].i32;
+     * auto alignmentItem = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_ALIGN);
+     * auto alignMent = alignmentItem->value[0].i32;
      * @endcode
      */
     NODE_TEXT_ALIGN,
@@ -2011,8 +2011,8 @@ typedef enum {
      * ArkUI_NumberValue textOverFlow[] = { { .i32 = static_cast<int32_t>(ARKUI_TEXT_OVERFLOW_CLIP) } };
      * ArkUI_AttributeItem item = { .value = textOverFlow, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle,NODE_TEXT_OVERFLOW , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_OVERFLOW);
-     * auto textOverFlow = item->value[0].i32;
+     * auto textOverFlowItem = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_OVERFLOW);
+     * auto textOverFlow = textOverFlowItem->value[0].i32;
      * @endcode
      */
     NODE_TEXT_OVERFLOW,
@@ -2221,8 +2221,8 @@ typedef enum {
      * ArkUI_NumberValue textIndent[] = { 20 };
      * ArkUI_AttributeItem item = { .value = textIndent, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_INDENT , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_INDENT);
-     * auto indentValue = item->value[0].f32;
+     * auto indentItem = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_INDENT);
+     * auto indentValue = indentItem->value[0].f32;
      * @endcode
      */
     NODE_TEXT_INDENT,
@@ -2240,8 +2240,8 @@ typedef enum {
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_AttributeItem item = { .string = "https://www.example.com/xxx.png" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SPAN_CONTENT , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SPAN_CONTENT);
-     * auto spanContent = item->string;
+     * auto spanContentItem = nativeNodeApi->getAttribute(nodeHandle, NODE_SPAN_CONTENT);
+     * auto spanContent = spanContentItem->string;
      * @endcode
      */
     NODE_SPAN_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SPAN,
@@ -2259,8 +2259,8 @@ typedef enum {
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_AttributeItem item = { .string = "https://www.example.com/xxx.png" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_SPAN_SRC , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_SPAN_SRC);
-     * auto spanScr = item->string;
+     * auto srcItem = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_SPAN_SRC);
+     * auto spanScr = srcItem->string;
      * @endcode
      */
     NODE_IMAGE_SPAN_SRC = MAX_NODE_SCOPE_NUM * ARKUI_NODE_IMAGE_SPAN,
@@ -2279,8 +2279,8 @@ typedef enum {
      * ArkUI_NumberValue alignValue[] = { {.i32 = static_cast<int32_t>(ARKUI_IMAGE_SPAN_ALIGNMENT_TOP) } };
      * ArkUI_AttributeItem item = {.value = alignValue, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_SPAN_VERTICAL_ALIGN , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_SPAN_VERTICAL_ALIGN);
-     * auto verticalAlign = item->value[0].i32;
+     * auto verticalAlignItem = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_SPAN_VERTICAL_ALIGN);
+     * auto verticalAlign = verticalAlignItem->value[0].i32;
      * @endcode
      */
     NODE_IMAGE_SPAN_VERTICAL_ALIGN,
@@ -2298,8 +2298,8 @@ typedef enum {
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_AttributeItem item = { .string = "https://www.example.com/xxx.png" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_SRC , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_SRC);
-     * auto imageSrc = item->string;
+     * auto imageSrcItem = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_SRC);
+     * auto imageSrc = imageSrcItem->string;
      * @endcode
      */
     NODE_IMAGE_SRC = MAX_NODE_SCOPE_NUM * ARKUI_NODE_IMAGE,
@@ -2318,8 +2318,8 @@ typedef enum {
      * ArkUI_NumberValue objectFitValue[] = { { .i32 = static_cast<int32_t>(ARKUI_OBJECT_FIT_FILL) } };
      * ArkUI_AttributeItem item = { .value = objectFitValue, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_OBJECT_FIT , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_OBJECT_FIT);
-     * auto objectFit = item->value[0].i32;
+     * auto objectFitItem = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_OBJECT_FIT);
+     * auto objectFit = objectFitItem->value[0].i32;
      * @endcode
      */
     NODE_IMAGE_OBJECT_FIT,
@@ -2335,11 +2335,11 @@ typedef enum {
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue interpolationValue[] = { { .i32 = ARKUI_INTERPOLATION_LOW } };
+     * ArkUI_NumberValue interpolationValue[] = { { .i32 = ARKUI_IMAGE_INTERPOLATION_LOW } };
      * ArkUI_AttributeItem item = { .value = interpolationValue, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_INTERPOLATION , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_INTERPOLATION);
-     * auto interpolation = item->value[0].i32;
+     * auto interpolationItem = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_INTERPOLATION);
+     * auto interpolation = interpolationItem->value[0].i32;
      * @endcode
      */
     NODE_IMAGE_INTERPOLATION,
@@ -2358,8 +2358,8 @@ typedef enum {
      * ArkUI_NumberValue repeatValue[] = { { .i32 = static_cast<int32_t>(ARKUI_IMAGE_REPEAT_X) } };
      * ArkUI_AttributeItem item = { .value = repeatValue, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_OBJECT_REPEAT , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_OBJECT_REPEAT);
-     * auto repeat = item->value[0].i32;
+     * auto objectRepeatItem = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_OBJECT_REPEAT);
+     * auto repeat = objectRepeatItem->value[0].i32;
      * @endcode
      */
     NODE_IMAGE_OBJECT_REPEAT,
@@ -2382,8 +2382,8 @@ typedef enum {
      * 0}, {.i32 = 0}, {.i32 = 0}, {.i32 = 1}, {.i32 = 0} };
      * ArkUI_AttributeItem item = { .value = filterValue, .size = sizeof(filterValue)/ sizeof(ArkUI_NumberValue)};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_COLOR_FILTER , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_COLOR_FILTER);
-     * auto colorFilter = item->value
+     * auto colorFilterItem = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_COLOR_FILTER);
+     * auto colorFilter = colorFilterItem->value;
      * @endcode
      */
     NODE_IMAGE_COLOR_FILTER,
@@ -2400,10 +2400,10 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue resizeValue[] = { {.i32 = true} };
-     * ArkUI_AttributeItem item = { .value = resizeValue, .size = 1}};
+     * ArkUI_AttributeItem item = { .value = resizeValue, .size = 1 };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_AUTO_RESIZE , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_AUTO_RESIZE);
-     * auto autoResize = item->value[0].i32;
+     * auto autoResizeItem = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_AUTO_RESIZE);
+     * auto autoResize = autoResizeItem->value[0].i32;
      * @endcode
      */
     NODE_IMAGE_AUTO_RESIZE,
@@ -2421,8 +2421,8 @@ typedef enum {
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_AttributeItem item = { .string = "/pages/loading.png" };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_IMAGE_ALT , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_ALT);
-     * auto altStr = item->string;
+     * auto altStrItem = nativeNodeApi->getAttribute(nodeHandle, NODE_IMAGE_ALT);
+     * auto altStr = altStrItem->string;
      * @endcode
      */
     NODE_IMAGE_ALT,
@@ -4020,8 +4020,8 @@ typedef enum {
      * ArkUI_NumberValue value[] = { { .i32 = ARKUI_ALIGNMENT_CENTER } };
      * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT, &item);
-     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT);
-     * auto nodeStackAlignContent = item->value[0].i32;
+     * auto alignContentItem = nativeNodeApi->getAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT);
+     * auto alignContent = alignContentItem->value[0].i32;
      * @endcode
      */
     NODE_STACK_ALIGN_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_STACK,
