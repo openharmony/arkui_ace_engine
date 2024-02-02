@@ -151,6 +151,7 @@ void NavigationPattern::OnAttachToFrameNode()
         pipelineContext->RemoveWindowStateChangedCallback(navigationNode->GetId());
         auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
         CHECK_NULL_VOID(navigationPattern);
+        navigationPattern->SyncWithJsStackIfNeeded();
         CHECK_NULL_VOID(navigationPattern->navigationStack_);
         navigationPattern->NotifyDialogChange(false, false);
     };
