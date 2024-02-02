@@ -129,12 +129,24 @@ HWTEST_F(GridIrregularLayoutTest, UpdateLength001, TestSize.Level1)
     info.lineHeightMap_[1] = 30.0f;
 
     GridIrregularFiller filler(&info, nullptr);
-    float len = 0.0f;
-    filler.UpdateLength(len, 0, 2, 5.0f);
+    float len = -5.0f;
+    int32_t row = 0;
+    EXPECT_TRUE(filler.UpdateLength(len, 50.0f, row, 2, 5.0f));
+    EXPECT_EQ(len, 50.0f);
+
+    len = -5.0f;
+    row = 0;
+    EXPECT_FALSE(filler.UpdateLength(len, 100.0f, row, 2, 5.0f));
     EXPECT_EQ(len, 85.0f);
 
     info.lineHeightMap_[2] = 50.0f;
-    filler.UpdateLength(len, 2, 3, 10.0f);
+    row = 2;
+    EXPECT_TRUE(filler.UpdateLength(len, 100.0f, row, 3, 10.0f));
+    EXPECT_EQ(len, 85.0f + 50.0f + 10.0f);
+
+    len = 85.0f;
+    row = 2;
+    EXPECT_FALSE(filler.UpdateLength(len, 200.0f, row, 3, 10.0f));
     EXPECT_EQ(len, 85.0f + 50.0f + 10.0f);
 }
 
@@ -242,7 +254,7 @@ HWTEST_F(GridIrregularLayoutTest, MeasureItem001, TestSize.Level1)
     GridIrregularFiller::FillParameters params {
         .crossLens = { 50.0f, 50.0f, 100.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f
     };
-    filler.MeasureItem(params, 0, 0);
+    filler.MeasureItem(params, 0, 0, 0);
 
     EXPECT_TRUE(info.lineHeightMap_.find(0) != info.lineHeightMap_.end());
     EXPECT_TRUE(info.lineHeightMap_.find(1) != info.lineHeightMap_.end());
@@ -281,7 +293,7 @@ HWTEST_F(GridIrregularLayoutTest, MeasureItem002, TestSize.Level1)
     GridIrregularFiller::FillParameters params {
         .crossLens = { 50.0f, 50.0f, 100.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f
     };
-    filler.MeasureItem(params, 0, 0);
+    filler.MeasureItem(params, 0, 0, 0);
 
     EXPECT_TRUE(info.lineHeightMap_.find(0) != info.lineHeightMap_.end());
     EXPECT_TRUE(info.lineHeightMap_.find(1) == info.lineHeightMap_.end());
@@ -311,13 +323,13 @@ HWTEST_F(GridIrregularLayoutTest, Fill001, TestSize.Level1)
     info.childrenCount_ = 10;
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
 
-    float len = filler.Fill(
-        { .crossLens = { 50.0f, 50.0f, 100.0f }, .targetLen = 1000.0f, .crossGap = 5.0f, .mainGap = 1.0f }, 0);
+    auto res = filler.Fill(
+        { .crossLens = { 50.0f, 50.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 0);
 
-    EXPECT_EQ(len, 6.0f);
+    EXPECT_EQ(res.length, 6.0f);
 
-    EXPECT_EQ(info.endIndex_, 9);
-    EXPECT_EQ(info.endMainLineIndex_, 6);
+    EXPECT_EQ(res.endIndex, 9);
+    EXPECT_EQ(res.endMainLineIndex, 6);
 
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_9);
 }
@@ -340,26 +352,108 @@ HWTEST_F(GridIrregularLayoutTest, Fill002, TestSize.Level1)
     info.childrenCount_ = 10;
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
 
-    float len = filler.Fill(
-        { .crossLens = { 50.0f, 50.0f, 100.0f }, .targetLen = 1000.0f, .crossGap = 5.0f, .mainGap = 1.0f }, 0);
+    auto res = filler.Fill(
+        { .crossLens = { 50.0f, 50.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f,  0);
 
-    EXPECT_EQ(len, 6.0f);
+    EXPECT_EQ(res.length, 6.0f);
 
-    EXPECT_EQ(info.endIndex_, 9);
-    EXPECT_EQ(info.endMainLineIndex_, 6);
+    EXPECT_EQ(res.endIndex, 9);
+    EXPECT_EQ(res.endMainLineIndex, 6);
 
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_11);
 
     // call Fill on an already filled matrix
-    len = filler.Fill(
-        { .crossLens = { 50.0f, 50.0f, 100.0f }, .targetLen = 1000.0f, .crossGap = 5.0f, .mainGap = 1.0f }, 0);
+    res = filler.Fill(
+        { .crossLens = { 50.0f, 50.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 0);
 
-    EXPECT_EQ(len, 6.0f);
+    EXPECT_EQ(res.length, 6.0f);
 
-    EXPECT_EQ(info.endIndex_, 9);
-    EXPECT_EQ(info.endMainLineIndex_, 6);
+    EXPECT_EQ(res.endIndex, 9);
+    EXPECT_EQ(res.endMainLineIndex, 6);
 
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_11);
+}
+
+/**
+ * @tc.name: IrregularFiller::Fill003
+ * @tc.desc: Test IrregularFiller::Fill
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Fill003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo5());
+        CreateFixedItem(11);
+    });
+
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 11;
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+
+    auto res = filler.Fill(
+        { .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 600.0f, 0);
+
+    EXPECT_EQ(res.length, 602.0f);
+
+    EXPECT_EQ(res.endIndex, 3);
+    EXPECT_EQ(res.endMainLineIndex, 5);
+
+    res = filler.Fill(
+        { .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 2);
+
+    EXPECT_EQ(res.length, 1004.0f);
+
+    EXPECT_EQ(res.endIndex, 8);
+    EXPECT_EQ(res.endMainLineIndex, 10);
+
+    res = filler.Fill(
+        { .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 7);
+
+    EXPECT_EQ(res.length, 803.0f);
+
+    EXPECT_EQ(res.endIndex, 10);
+    EXPECT_EQ(res.endMainLineIndex, 11);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_5);
+}
+
+/**
+ * @tc.name: IrregularFiller::Fill004
+ * @tc.desc: Test IrregularFiller::Fill
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Fill004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetLayoutOptions(GetOptionDemo2());
+        CreateFixedItem(8);
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+    });
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.childrenCount_ = 8;
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+
+    auto res = filler.Fill(
+        { .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 300.0f, 0);
+
+    EXPECT_EQ(res.length, 401.0f);
+
+    EXPECT_EQ(res.endIndex, 3);
+    EXPECT_EQ(res.endMainLineIndex, 2);
+
+    // call Fill on an already filled matrix
+    res = filler.Fill(
+        { .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 500.0f, 2);
+
+    EXPECT_EQ(res.length, 602.0f);
+
+    EXPECT_EQ(res.endIndex, 7);
+    EXPECT_EQ(res.endMainLineIndex, 4);
+
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_2);
 }
 
 /**
@@ -778,6 +872,54 @@ HWTEST_F(GridIrregularLayoutTest, MeasureJump001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridIrregularLayout::MeasureTarget001
+ * @tc.desc: Test GridIrregularLayout::Measure with target index
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, MeasureTarget001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo5());
+        model.SetColumnsGap(Dimension { 5.0f });
+        model.SetRowsGap(Dimension { 1.0f });
+        CreateFixedItem(11);
+    });
+    LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
+    layoutProperty_->layoutConstraint_ = constraint;
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    auto& info = algorithm->gridLayoutInfo_;
+    info.childrenCount_ = 11;
+
+    info.targetIndex_ = 10;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+
+    EXPECT_EQ(info.crossCount_, 2);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.endMainLineIndex_, 5);
+    EXPECT_EQ(info.endIndex_, 3);
+    EXPECT_EQ(info.lineHeightMap_.size(), 12);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_5);
+
+    info.lineHeightMap_.erase(info.lineHeightMap_.begin(), info.lineHeightMap_.find(7));
+    info.startIndex_ = 5;
+    info.startMainLineIndex_ = 7;
+    info.endIndex_ = 10;
+    info.endMainLineIndex_ = 11;
+
+    info.targetIndex_ = 2;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_5);
+    EXPECT_EQ(info.lineHeightMap_.size(), 11);
+    EXPECT_EQ(info.endMainLineIndex_, 10);
+    EXPECT_EQ(info.endIndex_, 8);
+    EXPECT_EQ(info.startIndex_, 5);
+    EXPECT_EQ(info.startMainLineIndex_, 7);
+}
+
+/**
  * @tc.name: GridIrregularLayout::Layout001
  * @tc.desc: Test GridIrregularLayout::Layout
  * @tc.type: FUNC
@@ -859,7 +1001,7 @@ HWTEST_F(GridIrregularLayoutTest, MeasureBackward001, TestSize.Level1)
     });
 
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
-    float len = filler.MeasureBackward({ { 50.0f, 50.0f, 50.0f }, 1000.0f, 5.0f, 5.0f }, 5);
+    float len = filler.MeasureBackward({ { 50.0f, 50.0f, 50.0f }, 5.0f, 5.0f }, 1000.0f, 5);
 
     EXPECT_EQ(len, 30.0f);
     EXPECT_EQ(info.lineHeightMap_.size(), 6);
