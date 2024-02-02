@@ -4244,13 +4244,13 @@ typedef enum {
     NODE_SCROLL_OFFSET,
 
     /**
-     * @brief Scroll滚动到容器边缘，支持属性设置，属性重置和属性获取。
+     * @brief Scroll滚动到容器边缘，支持属性设置，属性获取。
      *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
      * .value[0].i32：容器边缘，参数类型{@link ArkUI_ScrollEdge}。 \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：容器边缘，参数类型{@link ArkUI_ScrollEdge}。
+     * .value[0].i32：容器是否位于边缘，-1：表示未处于边缘，如果处于边缘状态参数类型{@link ArkUI_ScrollEdge}。
      * 
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
