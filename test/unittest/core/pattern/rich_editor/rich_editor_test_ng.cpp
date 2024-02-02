@@ -467,6 +467,10 @@ HWTEST_F(RichEditorTestNg, RichEditorModel009, TestSize.Level1)
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    ClearSpan();
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
 
     // insert value 1
     richEditorPattern->InsertValue(INIT_VALUE_1);
@@ -522,22 +526,27 @@ HWTEST_F(RichEditorTestNg, RichEditorModel010, TestSize.Level1)
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    ClearSpan();
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
 
     // insert value
     richEditorPattern->InsertValue(INIT_VALUE_1);
 
     // add image
-    AddImageSpan();
+    ImageSpanOptions imageSpanOptions;
+    richEditorPattern->AddImageSpan(imageSpanOptions);
     richEditorPattern->HandleOnSelectAll();
     EXPECT_EQ(testSelectionRange.start_, 0);
     EXPECT_EQ(testSelectionRange.end_, 7);
 
     // add symbol
-    SymbolSpanOptions options;
-    options.symbolId = SYMBOL_ID;
+    SymbolSpanOptions symbolSpanOptions;
+    symbolSpanOptions.symbolId = SYMBOL_ID;
     auto richEditorController =  richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
-    richEditorController->AddSymbolSpan(options);
+    richEditorController->AddSymbolSpan(symbolSpanOptions);
     richEditorPattern->HandleOnSelectAll();
     EXPECT_EQ(testSelectionRange.start_, 0);
     EXPECT_EQ(testSelectionRange.end_, 9);
