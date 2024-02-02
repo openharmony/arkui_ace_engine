@@ -63,7 +63,7 @@ GridLayoutRangeSolver::RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t 
         }
         case ScrollAlign::END: {
             auto res = SolveBackward(mainGap, mainSize - info_->lineHeightMap_.at(jumpLineIdx), jumpLineIdx);
-            return { res.row, res.pos, jumpLineIdx, FindEndIdx(jumpLineIdx) };
+            return { res.row, res.pos, jumpLineIdx, info_->FindEndIdx(jumpLineIdx).itemIdx };
         }
         default:
             return {};
@@ -128,20 +128,7 @@ std::pair<int32_t, int32_t> GridLayoutRangeSolver::SolveForwardForEndIdx(float m
         len += info_->lineHeightMap_.at(line++) + mainGap;
     }
     --line;
-    return { line, FindEndIdx(line) };
-}
-
-int32_t GridLayoutRangeSolver::FindEndIdx(int32_t endLine)
-{
-    for (int r = endLine; r >= 0; --r) {
-        const auto& row = info_->gridMatrix_.at(r);
-        for (auto it = row.rbegin(); it != row.rend(); ++it) {
-            if (it->second > 0) {
-                return it->second;
-            }
-        }
-    }
-    return 0;
+    return { line, info_->FindEndIdx(line).itemIdx };
 }
 
 Result GridLayoutRangeSolver::SolveBackward(float mainGap, float targetLen, int32_t idx)

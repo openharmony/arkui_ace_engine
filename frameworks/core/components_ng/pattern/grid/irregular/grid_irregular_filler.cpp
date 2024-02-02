@@ -228,13 +228,20 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t item
     }
 }
 
-int32_t GridIrregularFiller::FillMatrixOnly(int32_t startingLine, int32_t targetIdx)
+int32_t GridIrregularFiller::InitPosToLastItem(int32_t lineIdx)
+{
+    auto res = info_->FindEndIdx(lineIdx);
+    posX_ = res.x;
+    posY_ = std::max(0, res.y);
+    return res.itemIdx;
+}
+
+int32_t GridIrregularFiller::FillMatrixOnly(int32_t targetIdx)
 {
     if (targetIdx >= info_->childrenCount_) {
         targetIdx = info_->childrenCount_ - 1;
     }
-
-    int32_t idx = InitPos(startingLine);
+    int32_t idx = InitPosToLastItem(info_->gridMatrix_.size() - 1);
     while (idx < targetIdx) {
         if (!FindNextItem(++idx)) {
             FillOne(idx);
@@ -245,7 +252,7 @@ int32_t GridIrregularFiller::FillMatrixOnly(int32_t startingLine, int32_t target
 
 int32_t GridIrregularFiller::FillMatrixByLine(int32_t startingLine, int32_t targetLine)
 {
-    int32_t idx = InitPos(startingLine);
+    int32_t idx = InitPosToLastItem(startingLine);
     while (posY_ < targetLine && idx < info_->childrenCount_ - 1) {
         if (!FindNextItem(++idx)) {
             FillOne(idx);

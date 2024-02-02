@@ -105,6 +105,19 @@ struct GridLayoutInfo {
         return (removeLastGap) ? totalHeight - mainGap : totalHeight;
     }
 
+    struct EndIndexInfo {
+        int32_t itemIdx = -1; /**< Index of the last item. */
+        int32_t y = -1;       /**< Main-axis position (line index) of the item. */
+        int32_t x = -1;       /**< Cross-axis position (column index) of the item. */
+    };
+    /**
+     * @brief Traverse the matrix backward to find the last item index, starting from Line [endLine].
+     * 
+     * @param endLine index of the line to start traversing.
+     * @return last item index above endLine (inclusive) and the position it resides in.
+     */
+    EndIndexInfo FindEndIdx(int32_t endLine) const;
+
     /**
      * Checks if the item at the specified index is partially or fully above the viewport.
      *

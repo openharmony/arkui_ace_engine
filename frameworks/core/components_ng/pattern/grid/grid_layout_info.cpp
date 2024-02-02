@@ -517,6 +517,22 @@ MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
     return gridMatrix_.end();
 }
 
+GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
+{
+    if (gridMatrix_.find(endLine) == gridMatrix_.end()) {
+        return {};
+    }
+    for (int r = endLine; r >= 0; --r) {
+        const auto& row = gridMatrix_.at(r);
+        for (auto it = row.rbegin(); it != row.rend(); ++it) {
+            if (it->second > 0) {
+                return { .itemIdx = it->second, .y = r, .x = it->first };
+            }
+        }
+    }
+    return {};
+}
+
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
 {
     auto gridIt = gridMatrix_.lower_bound(idx);

@@ -122,7 +122,7 @@ inline void ResetMaps(GridLayoutInfo& info)
 {
     info.gridMatrix_.clear();
     info.lineHeightMap_.clear();
-} 
+}
 inline void ResetLayoutRange(GridLayoutInfo& info)
 {
     info.startIndex_ = 0;
@@ -177,9 +177,8 @@ void GridIrregularLayoutAlgorithm::MeasureOnOffset(float mainSize)
     info.startMainLineIndex_ = res.row;
     info.currentOffset_ = res.pos;
     // on init, gridMatrix_ is empty
-    if (info.gridMatrix_.find(res.row) != info.gridMatrix_.end()) {
-        info.startIndex_ = info.gridMatrix_[res.row][0];
-    }
+    const auto row = info.gridMatrix_.find(res.row);
+    info.startIndex_ = (row != info.gridMatrix_.end()) ? row->second.at(0) : 0;
 
     GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
     auto fillRes = filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize - res.pos, info.startMainLineIndex_);
@@ -354,7 +353,7 @@ int32_t GridIrregularLayoutAlgorithm::FindJumpLineIdx(int32_t jumpIdx)
     if (it == info.gridMatrix_.end()) {
         // fill matrix up to jumpIndex_
         GridIrregularFiller filler(&info, wrapper_);
-        jumpLine = filler.FillMatrixOnly(info.startMainLineIndex_, jumpIdx);
+        jumpLine = filler.FillMatrixOnly(jumpIdx);
     } else {
         jumpLine = it->first;
     }
@@ -458,7 +457,7 @@ int32_t GridIrregularLayoutAlgorithm::SkipLinesBackward() const
     while (LessNotEqual(height, target) && idx > 0) {
         AddLineHeight(height, --idx, info.endMainLineIndex_, info.lineHeightMap_);
     }
-    while (info.gridMatrix_.at(idx).begin()->second == -1) {
+    while (info.gridMatrix_.at(idx).begin()->second < 0) {
         --idx;
     }
     return info.gridMatrix_.at(idx).begin()->second;

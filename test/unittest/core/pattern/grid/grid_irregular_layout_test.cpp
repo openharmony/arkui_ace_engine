@@ -1112,7 +1112,7 @@ HWTEST_F(GridIrregularLayoutTest, FillMatrixOnly001, TestSize.Level1)
     info.childrenCount_ = 7;
 
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
-    EXPECT_EQ(filler.FillMatrixOnly(0, 6), 4);
+    EXPECT_EQ(filler.FillMatrixOnly(6), 4);
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_8);
 }
 
@@ -1440,6 +1440,42 @@ HWTEST_F(GridIrregularLayoutTest, SkipLines001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridIrregularLayout::SkipLines002
+ * @tc.desc: Test GridIrregularLayout::SkipLines backward
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, SkipLines002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo11());
+    });
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    algorithm->wrapper_ = AceType::RawPtr(frameNode_);
+
+    auto& info = algorithm->gridLayoutInfo_;
+    info.crossCount_ = 3;
+    info.gridMatrix_ = MATRIX_DEMO_11;
+    info.childrenCount_ = 10;
+
+    info.lineHeightMap_ = { { 4, 300.0f }, { 5, 300.0f }, { 6, 300.0f } };
+    info.startIndex_ = 7;
+    info.startMainLineIndex_ = 6;
+    info.endMainLineIndex_ = 6;
+    info.endIndex_ = 9;
+
+    info.currentOffset_ = 700.0f;
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 3);
+
+    info.currentOffset_ = 1300.0f;
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 0);
+
+    info.currentOffset_ = 1600.0f;
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 0);
+}
+
+/**
  * @tc.name: GridIrregularLayout::TrySkipping001
  * @tc.desc: Test GridIrregularLayout::TrySkipping001
  * @tc.type: FUNC
@@ -1514,16 +1550,12 @@ HWTEST_F(GridIrregularLayoutTest, FillMatrixByLine001, TestSize.Level1)
     info.crossCount_ = 3;
     info.childrenCount_ = 8;
     info.gridMatrix_ = MATRIX_DEMO_2;
-    info.startMainLineIndex_ = 0;
-    info.endMainLineIndex_ = 1;
-    info.startIndex_ = 0;
-    info.endIndex_ = 1;
 
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
     int32_t idx = filler.FillMatrixByLine(0, 3);
     EXPECT_EQ(idx, 4);
 
-    idx = filler.FillMatrixByLine(0, 10);
+    idx = filler.FillMatrixByLine(3, 10);
     EXPECT_EQ(idx, 7);
 
     info.gridMatrix_.clear();
@@ -1531,11 +1563,49 @@ HWTEST_F(GridIrregularLayoutTest, FillMatrixByLine001, TestSize.Level1)
     EXPECT_EQ(idx, 4);
     idx = filler.FillMatrixByLine(2, 5);
     EXPECT_EQ(idx, 7);
+    idx = filler.FillMatrixByLine(5, 5);
+    EXPECT_EQ(idx, 7);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_2);
 
     info.gridMatrix_.clear();
     idx = filler.FillMatrixByLine(0, 10);
     EXPECT_EQ(idx, 7);
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_2);
+}
+
+/**
+ * @tc.name: GridIrregularFiller::FillMatrixByLine002
+ * @tc.desc: Test GridIrregularFiller::FillMatrixByLine
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, FillMatrixByLine002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo5());
+        CreateFixedItem(11);
+    });
+
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 11;
+    info.gridMatrix_ = MATRIX_DEMO_5;
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+    int32_t idx = filler.FillMatrixByLine(2, 4);
+    EXPECT_EQ(idx, 4);
+
+    idx = filler.FillMatrixByLine(3, 10);
+    EXPECT_EQ(idx, 9);
+
+    idx = filler.FillMatrixByLine(4, 8);
+    EXPECT_EQ(idx, 7);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_5);
+
+    info.gridMatrix_.clear();
+    idx = filler.FillMatrixByLine(5, 13);
+    EXPECT_EQ(idx, 10);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_5);
 }
 
 /**
