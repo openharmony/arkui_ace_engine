@@ -169,7 +169,8 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         const auto& childNode = navDestinationNodes[i];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
-        hasChanged |= UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size());
+        hasChanged = (UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size())
+         || hasChanged);
     }
 
     while (static_cast<size_t>(slot) < navigationContentNode->GetChildren().size()) {
