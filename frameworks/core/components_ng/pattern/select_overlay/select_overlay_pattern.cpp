@@ -341,9 +341,7 @@ void SelectOverlayPattern::HandlePanCancel()
 void SelectOverlayPattern::CheckHandleReverse()
 {
     bool handleReverseChanged = false;
-    double epsilon = std::max(info_->firstHandle.paintRect.Height(), info_->secondHandle.paintRect.Height());
-    epsilon = std::max(static_cast<double>(info_->singleLineHeight), epsilon) - 0.5f;
-    if (NearEqual(info_->firstHandle.paintRect.Top(), info_->secondHandle.paintRect.Top(), epsilon)) {
+    if (IsHandlesInSameLine()) {
         if (info_->firstHandle.paintRect.Left() > info_->secondHandle.paintRect.Left()) {
             if (!info_->handleReverse) {
                 info_->handleReverse = true;
@@ -369,6 +367,21 @@ void SelectOverlayPattern::CheckHandleReverse()
     if (handleReverseChanged && info_->onHandleReverse) {
         info_->onHandleReverse(info_->handleReverse);
     }
+}
+
+bool SelectOverlayPattern::IsHandlesInSameLine()
+{
+    float lowerHandleTop = 0.0f;
+    RectF heigherHandleRect;
+    if (GreatNotEqual(info_->firstHandle.paintRect.Top(), info_->secondHandle.paintRect.Top())) {
+        lowerHandleTop = info_->firstHandle.paintRect.Top() + 0.5f;
+        heigherHandleRect = info_->secondHandle.paintRect;
+    } else {
+        lowerHandleTop = info_->secondHandle.paintRect.Top() + 0.5f;
+        heigherHandleRect = info_->firstHandle.paintRect;
+    }
+    return GreatNotEqual(lowerHandleTop, heigherHandleRect.Top())
+        && LessNotEqual(lowerHandleTop, heigherHandleRect.Bottom());
 }
 
 void SelectOverlayPattern::SetHandleReverse(bool reverse)
