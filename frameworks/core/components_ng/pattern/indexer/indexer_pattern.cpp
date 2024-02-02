@@ -74,7 +74,6 @@ void IndexerPattern::OnModifyDone()
         }
         fullArrayValue_ = newArray;
     }
-    isNewHeightCalculated_ = false;
 
     if (fullArrayValue_.size() > 0) {
         if (autoCollapse_) {
@@ -115,13 +114,15 @@ void IndexerPattern::OnModifyDone()
         selected_ = propSelect;
         selectChanged_ = true;
         ResetStatus();
+    } else if (!isNewHeightCalculated_) {
+        selectChanged_ = false;
     }
+    isNewHeightCalculated_ = false;
     auto itemSize =
         layoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
     auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
     lastItemSize_ = itemSize;
     auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
-    layoutProperty->UpdateIsPopup(false);
     ApplyIndexChanged(needMarkDirty, initialized_ && selectChanged_, false, indexerSizeChanged);
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
@@ -177,8 +178,12 @@ void IndexerPattern::BuildArrayValueItems()
     CHECK_NULL_VOID(layoutProperty);
     auto children = host->GetChildren();
     auto lastChildCount = static_cast<int32_t>(children.size());
+    if (layoutProperty->GetIsPopupValue(false)) {
+        lastChildCount -= 1;
+    }
     if (indexerSize != lastChildCount) {
         host->Clean();
+        layoutProperty->UpdateIsPopup(false);
         for (int32_t index = 0; index < indexerSize; index++) {
             auto indexerChildNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -615,7 +620,6 @@ void IndexerPattern::ApplyIndexChanged(
     bool isTextNodeInTree, bool selectChanged, bool fromTouchUp, bool indexerSizeChanged)
 {
     initialized_ = true;
-    selectChanged_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
@@ -709,7 +713,7 @@ void IndexerPattern::ApplyIndexChanged(
         childNode->MarkModifyDone();
         if (isTextNodeInTree) childNode->MarkDirtyNode();
     }
-    if (selectChanged || NeedShowPopupView()) {
+    if (selectChanged) {
         ShowBubble();
     }
 }
