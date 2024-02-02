@@ -2215,12 +2215,12 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     EXPECT_TRUE(NearEqual(topSheetPattern->currentOffset_, -10));
 
     /**
-     * @tc.steps: step5. Do OnCoordScrollUpdate when scrollOffset < 0 .
-     * @tc.expected: return true
+     * @tc.steps: step5. Do OnCoordScrollUpdate when scrollOffset < 0 and showstate = true.
+     * @tc.expected: return false
      */
     topSheetPattern->OnCoordScrollEnd(*topSheetPattern->sheetDetentHeight_.end());
     auto ret = topSheetPattern->OnCoordScrollUpdate(*topSheetPattern->sheetDetentHeight_.end());
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 /**
  * @tc.name: TestOnBindSheet
