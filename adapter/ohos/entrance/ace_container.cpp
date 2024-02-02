@@ -2245,6 +2245,12 @@ bool AceContainer::IsScenceBoardWindow()
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
 }
 
+bool AceContainer::IsUIExtensionWindow()
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
+}
+
 bool AceContainer::IsSceneBoardEnabled()
 {
     return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();

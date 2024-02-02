@@ -516,6 +516,7 @@ public:
 
     bool IsLauncherContainer() override;
     bool IsScenceBoardWindow() override;
+    bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
