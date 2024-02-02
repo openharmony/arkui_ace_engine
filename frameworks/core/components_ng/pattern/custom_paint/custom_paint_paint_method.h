@@ -422,6 +422,8 @@ protected:
 #else
     std::shared_ptr<RSImage> GetImage(const std::string& src);
 #endif
+    void GetSvgRect(const sk_sp<SkSVGDOM>& skiaDom, const Ace::CanvasImage& canvasImage,
+        RSRect* srcRect, RSRect* dstRect);
     void DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage);
 #ifndef USE_ROSEN_DRAWING
     virtual SkCanvas* GetRawPtrOfSkCanvas() = 0;
@@ -502,6 +504,11 @@ protected:
 
     SizeF lastLayoutSize_;
     RefPtr<ImageCache> imageCache_;
+    enum DrawImageType {
+        THREE_PARAMS,
+        FIVE_PARAMS,
+        NINE_PARAMS,
+    };
 };
 } // namespace OHOS::Ace::NG
 
