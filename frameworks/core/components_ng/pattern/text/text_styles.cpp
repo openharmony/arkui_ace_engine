@@ -108,11 +108,11 @@ std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& valu
 {
     std::string text;
     if (value == RENDERINGSTRATEGY_MULTIPLE_COLOR) {
-        text = "RenderingStrategy.MULTIPLE_COLOR";
+        text = "SymbolRenderingStrategy.MULTIPLE_COLOR";
     } else if (value == RENDERINGSTRATEGY_MULTIPLE_OPACITY) {
-        text = "RenderingStrategy.MULTIPLE_OPACITY";
+        text = "SymbolRenderingStrategy.MULTIPLE_OPACITY";
     } else {
-        text = "RenderingStrategy.SINGLE";
+        text = "SymbolRenderingStrategy.SINGLE";
     }
     return text;
 }
@@ -120,11 +120,11 @@ std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;
     if (value == EFFECTSTRATEGY_SCALE) {
-        text = "EffectStrategy.SCALE";
+        text = "SymbolEffectStrategy.SCALE";
     } else if (value == EFFECTSTRATEGY_HIERARCHICAL) {
-        text = "EffectStrategy.HIERARCHICAL";
+        text = "SymbolEffectStrategy.HIERARCHICAL";
     } else {
-        text = "EffectStrategy.NONE";
+        text = "SymbolEffectStrategy.NONE";
     }
     return text;
 }
