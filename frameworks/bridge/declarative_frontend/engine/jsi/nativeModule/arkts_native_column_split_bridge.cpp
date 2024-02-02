@@ -28,7 +28,7 @@ ArkUINativeModuleValue ColumnSplitBridge::SetResizable(ArkUIRuntimeCallInfo *run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> resizableArg = runtimeCallInfo->GetCallArgRef(1);
-    void *nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     bool resizable = false;
     if (resizableArg->IsBoolean()) {
         resizable = resizableArg->ToBoolean(vm)->BooleaValue();
@@ -42,7 +42,7 @@ ArkUINativeModuleValue ColumnSplitBridge::ResetResizable(ArkUIRuntimeCallInfo *r
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getColumnSplitModifier()->resetColumnSplitResizable(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -54,7 +54,7 @@ ArkUINativeModuleValue ColumnSplitBridge::SetDivider(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> startMarginArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> endMarginArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     CalcDimension startMargin(0.0, DimensionUnit::VP);
     CalcDimension endMargin(0.0, DimensionUnit::VP);
     ArkTSUtils::ParseJsDimensionVp(vm, startMarginArg, startMargin);
@@ -69,7 +69,7 @@ ArkUINativeModuleValue ColumnSplitBridge::ResetDivider(ArkUIRuntimeCallInfo *run
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getColumnSplitModifier()->resetColumnSplitDivider(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

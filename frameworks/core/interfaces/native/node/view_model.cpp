@@ -185,7 +185,7 @@ void* createListItemNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
-void* createRefreshode(ArkUI_Int32 nodeId)
+void* createRefreshNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = RefreshModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
@@ -276,7 +276,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr,
 #endif
         nullptr,
-        createRefreshode,
+        createRefreshNode,
         createRootNode,
         createComponentRootNode,
         nullptr,

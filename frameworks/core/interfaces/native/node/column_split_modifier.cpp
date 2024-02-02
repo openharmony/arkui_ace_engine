@@ -40,7 +40,8 @@ void ResetColumnSplitResizable(ArkUINodeHandle node)
     LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, DEFAULT_COLUMN_SPLIT_RESIZABLE);
 }
 
-void SetColumnSplitDivider(ArkUINodeHandle node, ArkUI_Float32 stVal, int32_t stUnit, ArkUI_Float32 endVal, int32_t endUnit)
+void SetColumnSplitDivider(ArkUINodeHandle node, ArkUI_Float32 stVal, int32_t stUnit,
+    ArkUI_Float32 endVal, int32_t endUnit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -57,8 +58,7 @@ void ResetColumnSplitDivider(ArkUINodeHandle node)
     LinearSplitModelNG::SetDivider(frameNode, SplitType::COLUMN_SPLIT, { DEFAULT_DIVIDER_START, DEFAULT_DIVIDER_END });
 }
 
-namespace NodeModifier
-{
+namespace NodeModifier {
 const ArkUIColumnSplitModifier* GetColumnSplitModifier()
 {
     static const ArkUIColumnSplitModifier modifier = { SetColumnSplitDivider, ResetColumnSplitDivider,

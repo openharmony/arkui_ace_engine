@@ -63,8 +63,7 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
     eventHub->AddSupportedState(static_cast<uint64_t>(state));
 }
 
-namespace NodeModifier
-{
+namespace NodeModifier {
 const ArkUIStateModifier* GetUIStateModifier()
 {
     static const ArkUIStateModifier modifier = { GetFrameNodeById, GetUIState, SetSupportedUIState };

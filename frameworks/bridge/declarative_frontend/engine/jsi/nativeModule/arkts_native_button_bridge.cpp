@@ -17,7 +17,6 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
-#include "core/interfaces/native/node/api.h"
 #include "core/components/common/properties/text_style.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
@@ -310,12 +309,12 @@ void ButtonBridge::PutButtonValuesParameters(
     PushValuesVector(fontStyleOptional, valuesVector);
 }
 
-void ButtonBridge::PushDimensionVector(const std::optional<Dimension>& valueDim, std::vector<double>& dimensions)
+void ButtonBridge::PushDimensionVector(const std::optional<Dimension>& valueDim, std::vector<ArkUI_Float32>& dimensions)
 {
-    dimensions.push_back(static_cast<double>(valueDim.has_value()));
+    dimensions.push_back(static_cast<ArkUI_Float32>(valueDim.has_value()));
     if (valueDim.has_value()) {
-        dimensions.push_back(static_cast<double>(valueDim.value().Value()));
-        dimensions.push_back(static_cast<double>(valueDim.value().Unit()));
+        dimensions.push_back(static_cast<ArkUI_Float32>(valueDim.value().Value()));
+        dimensions.push_back(static_cast<ArkUI_Float32>(valueDim.value().Unit()));
     } else {
         dimensions.push_back(0);
         dimensions.push_back(0);
@@ -323,7 +322,7 @@ void ButtonBridge::PushDimensionVector(const std::optional<Dimension>& valueDim,
 }
 
 void ButtonBridge::PushButtonDimension(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<double>& fontSizesVector, int32_t argIndex)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& fontSizesVector, int32_t argIndex)
 {
     Local<JSValueRef> arg = runtimeCallInfo->GetCallArgRef(argIndex);
     std::optional<CalcDimension> dimensionOptional = std::nullopt;
@@ -335,7 +334,7 @@ void ButtonBridge::PushButtonDimension(
 }
 
 void ButtonBridge::PutButtonDimensionParameters(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<double>& fontSizesVector)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& fontSizesVector)
 {
     std::vector<int32_t> indexVector = { MIN_FONT_SIZE_ARG_3, MAX_FONT_SIZE_ARG_4, FONT_SIZE_ARG_6 };
     for (size_t index = 0; index < indexVector.size(); index++) {
@@ -379,16 +378,15 @@ ArkUINativeModuleValue ButtonBridge::SetLabelStyle(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    std::vector<int32_t> valuesVector;
+    std::vector<ArkUI_Int32> valuesVector;
     PutButtonValuesParameters(runtimeCallInfo, vm, valuesVector);
-    std::vector<double> fontSizesVector;
+    std::vector<ArkUI_Float32> fontSizesVector;
     PutButtonDimensionParameters(runtimeCallInfo, vm, fontSizesVector);
-    std::vector<const char*> stringParameters;
+    std::vector<ArkUI_CharPtr> stringParameters;
     PutButtonStringParameters(runtimeCallInfo, vm, stringParameters);
-    std::vector<size_t> dataCountVector;
+    std::vector<ArkUI_Uint32> dataCountVector;
     dataCountVector.push_back(stringParameters.size());
     dataCountVector.push_back(valuesVector.size());
-    dataCountVector.push_back(fontSizesVector.size());
     GetArkUINodeModifiers()->getButtonModifier()->setButtonLabelStyle(
         nativeNode, stringParameters.data(), valuesVector.data(), fontSizesVector.data(), dataCountVector.data());
     return panda::JSValueRef::Undefined(vm);
@@ -412,12 +410,12 @@ void ParseBorderRadius(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<
     }
 }
 
-void PushBorderRadiusVector(const std::optional<CalcDimension>& valueDim, std::vector<double> &options)
+void PushBorderRadiusVector(const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options)
 {
-    options.push_back(static_cast<double>(valueDim.has_value()));
+    options.push_back(static_cast<ArkUI_Float32>(valueDim.has_value()));
     if (valueDim.has_value()) {
-        options.push_back(static_cast<double>(valueDim.value().Value()));
-        options.push_back(static_cast<double>(valueDim.value().Unit()));
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Value()));
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Unit()));
     } else {
         options.push_back(0);
         options.push_back(0);
@@ -451,7 +449,7 @@ ArkUINativeModuleValue ButtonBridge::SetButtonBorderRadius(ArkUIRuntimeCallInfo*
     ParseBorderRadius(vm, bottomLeftArgs, radiusBottomLeft);
     ParseBorderRadius(vm, bottomRightArgs, radiusBottomRight);
 
-    std::vector<double> options;
+    std::vector<ArkUI_Float32> options;
     PushBorderRadiusVector(radiusTopLeft, options);
     PushBorderRadiusVector(radiusTopRight, options);
     PushBorderRadiusVector(radiusBottomLeft, options);
@@ -499,7 +497,7 @@ ArkUINativeModuleValue ButtonBridge::SetButtonBorder(ArkUIRuntimeCallInfo* runti
     ParseBorderRadius(vm, bottomLeftArgs, radiusBottomLeft);
     ParseBorderRadius(vm, bottomRightArgs, radiusBottomRight);
 
-    std::vector<double> options;
+    std::vector<ArkUI_Float32> options;
     PushBorderRadiusVector(radiusTopLeft, options);
     PushBorderRadiusVector(radiusTopRight, options);
     PushBorderRadiusVector(radiusBottomLeft, options);
@@ -515,7 +513,7 @@ ArkUINativeModuleValue ButtonBridge::ResetButtonBorder(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBorder(nativeNode);
+    GetArkUINodeModifiers()->getCommonModifier()->resetBorder(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

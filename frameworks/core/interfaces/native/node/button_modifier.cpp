@@ -260,7 +260,8 @@ void ButtonCompleteParameters(ButtonParameters& buttonParameters)
 }
 
 bool SetButtonDimension(
-    const ArkUI_Float32* dimensionArray, uint32_t offset, const size_t dataCount, std::optional<CalcDimension>& optDimension)
+    const ArkUI_Float32* dimensionArray, uint32_t offset, const size_t dataCount,
+    std::optional<CalcDimension>& optDimension)
 {
     CHECK_NULL_RETURN(dimensionArray, false);
     auto hasValue = dimensionArray[offset];
@@ -465,8 +466,7 @@ void ResetButtonSize(ArkUINodeHandle node)
     ButtonModelNG::SetSize(frameNode, value, value);
 }
 
-namespace NodeModifier
-{
+namespace NodeModifier {
 const ArkUIButtonModifier* GetButtonModifier()
 {
     static const ArkUIButtonModifier modifier = { nullptr, nullptr,

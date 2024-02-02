@@ -107,8 +107,7 @@ void ResetGridItemColumnEnd(ArkUINodeHandle node)
     GridItemModelNG::SetColumnEnd(frameNode, DEFAULT_GRID_ITEM_VALUE);
 }
 
-namespace NodeModifier 
-{
+namespace NodeModifier {
 const ArkUIGridItemModifier* GetGridItemModifier()
 {
     static const ArkUIGridItemModifier modifier = { SetGridItemSelectable, ResetGridItemSelectable,

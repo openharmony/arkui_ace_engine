@@ -31,9 +31,20 @@
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/render_context.h"
-#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
+constexpr int TOP_LEFT_X_VALUE = 0;
+constexpr int TOP_LEFT_Y_VALUE = 1;
+constexpr int TOP_RIGHT_X_VALUE = 2;
+constexpr int TOP_RIGHT_Y_VALUE = 3;
+constexpr int BOTTOM_LEFT_X_VALUE = 4;
+constexpr int BOTTOM_LEFT_Y_VALUE = 5;
+constexpr int BOTTOM_RIGHT_X_VALUE = 6;
+constexpr int BOTTOM_RIGHT_Y_VALUE = 7;
+constexpr int LEFT_VALUE = 8;
+constexpr int TOP_VALUE = 9;
+constexpr int WIDTH_VALUE = 10;
+constexpr int HEIGHT_VALUE = 11;
 
 RefPtr<RenderContext> GetRenderContext(UINode* UiNode)
 {
@@ -43,7 +54,7 @@ RefPtr<RenderContext> GetRenderContext(UINode* UiNode)
     return context;
 }
 
-void AppendChild(NodeHandle node, NodeHandle child)
+void AppendChild(ArkUINodeHandle node, ArkUINodeHandle child)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto* childNode = reinterpret_cast<UINode*>(child);
@@ -52,7 +63,7 @@ void AppendChild(NodeHandle node, NodeHandle child)
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-void InsertChildAfter(NodeHandle node, NodeHandle child, NodeHandle sibling)
+void InsertChildAfter(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto* childNode = reinterpret_cast<UINode*>(child);
@@ -63,7 +74,7 @@ void InsertChildAfter(NodeHandle node, NodeHandle child, NodeHandle sibling)
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-void RemoveChild(NodeHandle node, NodeHandle child)
+void RemoveChild(ArkUINodeHandle node, ArkUINodeHandle child)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto* childNode = reinterpret_cast<UINode*>(child);
@@ -71,14 +82,14 @@ void RemoveChild(NodeHandle node, NodeHandle child)
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-void ClearChildren(NodeHandle node)
+void ClearChildren(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     currentNode->Clean();
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-void SetClipToFrame(NodeHandle node, bool useClip)
+void SetClipToFrame(ArkUINodeHandle node, ArkUI_Bool useClip)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -86,7 +97,7 @@ void SetClipToFrame(NodeHandle node, bool useClip)
     renderContext->SetClipToFrame(useClip);
 }
 
-void SetRotation(NodeHandle node, double rotationX, double rotationY, double rotationZ)
+void SetRotation(ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 rotationY, ArkUI_Float32 rotationZ)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -97,7 +108,7 @@ void SetRotation(NodeHandle node, double rotationX, double rotationY, double rot
     renderContext->SetRotation(first.ConvertToPx(), second.ConvertToPx(), third.ConvertToPx());
 }
 
-void SetShadowColor(NodeHandle node, uint32_t color)
+void SetShadowColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -105,7 +116,7 @@ void SetShadowColor(NodeHandle node, uint32_t color)
     renderContext->SetShadowColor(color);
 }
 
-void SetShadowOffset(NodeHandle node, double offsetX, double offsetY)
+void SetShadowOffset(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -115,7 +126,7 @@ void SetShadowOffset(NodeHandle node, double offsetX, double offsetY)
     renderContext->SetShadowOffset(first.ConvertToPx(), second.ConvertToPx());
 }
 
-void SetShadowAlpha(NodeHandle node, float alpha)
+void SetShadowAlpha(ArkUINodeHandle node, ArkUI_Float32 alpha)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -123,7 +134,7 @@ void SetShadowAlpha(NodeHandle node, float alpha)
     renderContext->SetShadowAlpha(alpha);
 }
 
-void SetShadowElevation(NodeHandle node, float elevation)
+void SetShadowElevation(ArkUINodeHandle node, ArkUI_Float32 elevation)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -131,7 +142,7 @@ void SetShadowElevation(NodeHandle node, float elevation)
     renderContext->SetShadowElevation(elevation);
 }
 
-void SetShadowRadius(NodeHandle node, float radius)
+void SetShadowRadius(ArkUINodeHandle node, ArkUI_Float32 radius)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -139,7 +150,7 @@ void SetShadowRadius(NodeHandle node, float radius)
     renderContext->SetShadowRadius(radius);
 }
 
-void Invalidate(NodeHandle node)
+void Invalidate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -148,7 +159,7 @@ void Invalidate(NodeHandle node)
     pattern->Invalidate();
 }
 
-void SetScale(NodeHandle node, float scaleX, float scaleY)
+void SetScale(ArkUINodeHandle node, ArkUI_Float32 scaleX, ArkUI_Float32 scaleY)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -156,7 +167,7 @@ void SetScale(NodeHandle node, float scaleX, float scaleY)
     renderContext->SetScale(scaleX, scaleY);
 }
 
-void SetRenderNodeBackgroundColor(NodeHandle node, uint32_t colorValue)
+void SetRenderNodeBackgroundColor(ArkUINodeHandle node, uint32_t colorValue)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -164,7 +175,7 @@ void SetRenderNodeBackgroundColor(NodeHandle node, uint32_t colorValue)
     renderContext->SetBackgroundColor(colorValue);
 }
 
-void SetPivot(NodeHandle node, float pivotX, float pivotY)
+void SetPivot(ArkUINodeHandle node, ArkUI_Float32 pivotX, ArkUI_Float32 pivotY)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -172,7 +183,8 @@ void SetPivot(NodeHandle node, float pivotX, float pivotY)
     renderContext->SetRenderPivot(pivotX, pivotY);
 }
 
-void SetFrame(NodeHandle node, float positionX, float positionY, float width, float height)
+void SetFrame(ArkUINodeHandle node, ArkUI_Float32 positionX, ArkUI_Float32 positionY,
+    ArkUI_Float32 width, ArkUI_Float32 height)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -180,7 +192,7 @@ void SetFrame(NodeHandle node, float positionX, float positionY, float width, fl
     renderContext->SetFrame(positionX, positionY, width, height);
 }
 
-void SetSize(NodeHandle node, float width, float height)
+void SetSize(ArkUINodeHandle node, ArkUI_Float32 width, ArkUI_Float32 height)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
@@ -192,7 +204,7 @@ void SetSize(NodeHandle node, float width, float height)
     frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-void SetOpacity(NodeHandle node, float opacity)
+void SetOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -200,7 +212,7 @@ void SetOpacity(NodeHandle node, float opacity)
     renderContext->SetOpacity(opacity);
 }
 
-void SetTranslate(NodeHandle node, float translateX, float translateY, float translateZ)
+void SetTranslate(ArkUINodeHandle node, ArkUI_Float32 translateX, ArkUI_Float32 translateY, ArkUI_Float32 translateZ)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
@@ -208,22 +220,23 @@ void SetTranslate(NodeHandle node, float translateX, float translateY, float tra
     renderContext->SetTranslate(translateX, translateY, translateZ);
 }
 
-void SetBorderStyle(NodeHandle node, BorderStyle left, BorderStyle top, BorderStyle right, BorderStyle bottom)
+void SetBorderStyle(ArkUINodeHandle node, ArkUI_Int32 left, ArkUI_Int32 top, ArkUI_Int32 right, ArkUI_Int32 bottom)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
     BorderStyleProperty borderStyleProperty {
-        .styleLeft = left,
-        .styleTop = top,
-        .styleRight = right,
-        .styleBottom = bottom,
+        .styleLeft = static_cast<BorderStyle>(left),
+        .styleRight = static_cast<BorderStyle>(right),
+        .styleTop = static_cast<BorderStyle>(top),
+        .styleBottom = static_cast<BorderStyle>(bottom),
         .multiValued = true
     };
     renderContext->UpdateBorderStyle(borderStyleProperty);
 }
 
-void SetBorderWidth(NodeHandle node, float left, float top, float right, float bottom)
+void SetBorderWidth(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right,
+    ArkUI_Float32 bottom)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
@@ -243,7 +256,7 @@ void SetBorderWidth(NodeHandle node, float left, float top, float right, float b
     layoutProperty->UpdateBorderWidth(borderWidthProperty);
 }
 
-void SetBorderColor(NodeHandle node, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
+void SetBorderColor(ArkUINodeHandle node, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
@@ -260,7 +273,8 @@ void SetBorderColor(NodeHandle node, uint32_t left, uint32_t top, uint32_t right
     renderContext->UpdateBorderColor(borderColorProperty);
 }
 
-void SetBorderRadius(NodeHandle node, double topLeft, double topRight, double bottomLeft, double bottomRight)
+void SetBorderRadius(ArkUINodeHandle node,
+    ArkUI_Float32 topLeft, ArkUI_Float32 topRight, ArkUI_Float32 bottomLeft, ArkUI_Float32 bottomRight)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
@@ -273,61 +287,105 @@ void SetBorderRadius(NodeHandle node, double topLeft, double topRight, double bo
     renderContext->UpdateBorderRadius(borderRadiusProperty);
 }
 
-void SetRectMask(NodeHandle node, const RectF& rect, const ShapeMaskProperty& property)
+void SetRectMask(ArkUINodeHandle node,
+    ArkUI_Float32 rectX, ArkUI_Float32 rectY, ArkUI_Float32 rectW, ArkUI_Float32 rectH,
+    ArkUI_Uint32 fillColor, ArkUI_Uint32 strokeColor, ArkUI_Float32 strokeWidth)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
+
+    RectF rect(rectX, rectY, rectW, rectH);
+    ShapeMaskProperty property { fillColor, strokeColor, strokeWidth };
     renderContext->SetRectMask(rect, property);
 }
 
-void SetCircleMask(NodeHandle node, const Circle& circle, const ShapeMaskProperty& property)
+void SetCircleMask(ArkUINodeHandle node,
+    ArkUI_Float32 centerXValue, ArkUI_Float32 centerYValue, ArkUI_Float32 radiusValue,
+    ArkUI_Uint32 fillColor, ArkUI_Uint32 strokeColor, ArkUI_Float32 strokeWidth)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
+
+    Circle circle;
+    Dimension centerX(centerXValue, DimensionUnit::VP);
+    circle.SetAxisX(centerX);
+    Dimension centerY(centerYValue, DimensionUnit::VP);
+    circle.SetAxisY(centerY);
+    Dimension radius(radiusValue, DimensionUnit::VP);
+    circle.SetRadius(radius);
+
+    ShapeMaskProperty property { fillColor, strokeColor, strokeWidth };
+
     renderContext->SetCircleMask(circle, property);
 }
 
-void SetRoundRectMask(
-    NodeHandle node, const RoundRect& roundRect, const ShapeMaskProperty& property)
+void SetRoundRectMask(ArkUINodeHandle node, const ArkUI_Float32* roundRect, const ArkUI_Uint32 roundRectSize,
+    ArkUI_Uint32 fillColor, ArkUI_Uint32 strokeColor, ArkUI_Float32 strokeWidth)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetRoundRectMask(roundRect, property);
+
+    RoundRect roundRectInstance;
+    roundRectInstance.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
+        roundRect[TOP_LEFT_X_VALUE], roundRect[TOP_LEFT_Y_VALUE]);
+    roundRectInstance.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
+        roundRect[TOP_RIGHT_X_VALUE], roundRect[TOP_RIGHT_Y_VALUE]);
+    roundRectInstance.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        roundRect[BOTTOM_LEFT_X_VALUE], roundRect[BOTTOM_LEFT_Y_VALUE]);
+    roundRectInstance.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        roundRect[BOTTOM_RIGHT_X_VALUE], roundRect[BOTTOM_RIGHT_Y_VALUE]);
+
+    RectF rect(roundRect[LEFT_VALUE], roundRect[TOP_VALUE], roundRect[WIDTH_VALUE], roundRect[HEIGHT_VALUE]);
+    roundRectInstance.SetRect(rect);
+
+    ShapeMaskProperty property { fillColor, strokeColor, strokeWidth };
+
+    renderContext->SetRoundRectMask(roundRectInstance, property);
 }
 
-void SetOvalMask(NodeHandle node, const RectF& rect, const ShapeMaskProperty& property)
+void SetOvalMask(ArkUINodeHandle node,
+    ArkUI_Float32 rectX, ArkUI_Float32 rectY, ArkUI_Float32 rectW, ArkUI_Float32 rectH,
+    ArkUI_Uint32 fillColor, ArkUI_Uint32 strokeColor, ArkUI_Float32 strokeWidth)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
+
+    RectF rect(rectX, rectY, rectW, rectH);
+    ShapeMaskProperty property { fillColor, strokeColor, strokeWidth };
     renderContext->SetOvalMask(rect, property);
 }
 
 void SetCommandPathMask(
-    NodeHandle node, const std::string& commands, const ShapeMaskProperty& property)
+    ArkUINodeHandle node, ArkUI_CharPtr commands,
+    ArkUI_Uint32 fillColor, ArkUI_Uint32 strokeColor, ArkUI_Float32 strokeWidth)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetCommandPathMask(commands, property);
+
+    ShapeMaskProperty property { fillColor, strokeColor, strokeWidth };
+    renderContext->SetCommandPathMask(std::string(commands), property);
 }
 
-ArkUIRenderNodeModifierAPI GetRenderNodeModifier()
+namespace NodeModifier {
+const ArkUIRenderNodeModifier* GetRenderNodeModifier()
 {
-    static const ArkUIRenderNodeModifierAPI modifier = { AppendChild, InsertChildAfter, RemoveChild, ClearChildren,
+    static const ArkUIRenderNodeModifier modifier = { AppendChild, InsertChildAfter, RemoveChild, ClearChildren,
         SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetShadowAlpha, SetShadowElevation,
         SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame, SetSize, SetOpacity,
         SetTranslate, SetBorderStyle, SetBorderWidth, SetBorderColor, SetBorderRadius, SetRectMask, SetCircleMask,
         SetRoundRectMask, SetOvalMask, SetCommandPathMask };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

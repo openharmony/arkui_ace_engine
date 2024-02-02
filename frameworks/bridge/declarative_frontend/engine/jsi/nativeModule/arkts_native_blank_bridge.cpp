@@ -51,16 +51,16 @@ ArkUINativeModuleValue BlankBridge::SetBlankHeight(ArkUIRuntimeCallInfo* runtime
     CalcDimension height;
     std::string calcStr;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, valueArg, height)) {
-        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetHeight(nativeNode);
+        GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
             height.SetValue(0.0);
         }
         if (height.Unit() == DimensionUnit::CALC) {
-            GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
+            GetArkUINodeModifiers()->getCommonModifier()->setHeight(
                 nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), height.CalcValue().c_str());
         } else {
-            GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
+            GetArkUINodeModifiers()->getCommonModifier()->setHeight(
                 nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), calcStr.c_str());
         }
     }

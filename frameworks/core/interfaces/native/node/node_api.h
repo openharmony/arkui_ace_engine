@@ -17,28 +17,20 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NODE_API_H
 
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/node_utils.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-const ArkUINodeModifiers* GetArkUINodeModifiers();
+const struct ArkUINodeModifiers* GetArkUINodeModifiers();
 
 // use internal, not for export.
-const ArkUIFullNodeAPI* GetArkUIFullNodeAPI();
-void SendArkUIAsyncEvent(ArkUINodeEvent* event);
+const struct ArkUIFullNodeAPI* GetArkUIFullNodeAPI();
+void SendArkUIAsyncEvent(struct ArkUINodeEvent* event);
 
 #ifdef __cplusplus
 };
 #endif
-
-inline ArkUINodeHandle nodePtr(void* ptr) {
-    return reinterpret_cast<ArkUINodeHandle>(ptr);
-}
-
-namespace OHOS::Ace::NG::NodeModifier 
-{
-    const ArkUIStateModifier* GetUIStateModifier();
-}
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NODE_API_H

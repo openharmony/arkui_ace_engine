@@ -15,7 +15,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_marquee_bridge.h"
 
 #include "base/geometry/dimension.h"
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/properties/text_style.h"
 
@@ -28,9 +27,9 @@ ArkUINativeModuleValue MarqueeBridge::SetAllowScale(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     bool allowScale = secondArg->ToBoolean(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetMarqueeModifier().SetMarqueeAllowScale(nativeNode, allowScale);
+    GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeAllowScale(nativeNode, allowScale);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -39,8 +38,8 @@ ArkUINativeModuleValue MarqueeBridge::ResetAllowScale(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetMarqueeModifier().ResetMarqueeAllowScale(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeAllowScale(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -50,7 +49,7 @@ ArkUINativeModuleValue MarqueeBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> weightArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string weight = DEFAULT_FONT_WEIGHT;
     if (!weightArg->IsNull()) {
         if (weightArg->IsNumber()) {
@@ -59,7 +58,7 @@ ArkUINativeModuleValue MarqueeBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtim
             weight = weightArg->ToString(vm)->ToString();
         }
     }
-    GetArkUIInternalNodeAPI()->GetMarqueeModifier().SetMarqueeFontWeight(nativeNode, weight.c_str());
+    GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeFontWeight(nativeNode, weight.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -68,8 +67,8 @@ ArkUINativeModuleValue MarqueeBridge::ResetFontWeight(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetMarqueeModifier().ResetMarqueeFontWeight(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeFontWeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -79,12 +78,12 @@ ArkUINativeModuleValue MarqueeBridge::SetFontFamily(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!secondArg->IsString()) {
         return panda::JSValueRef::Undefined(vm);
     }
     std::string families = secondArg->ToString(vm)->ToString();
-    GetArkUIInternalNodeAPI()->GetMarqueeModifier().SetMarqueeFontFamily(nativeNode, families.c_str());
+    GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeFontFamily(nativeNode, families.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -93,8 +92,8 @@ ArkUINativeModuleValue MarqueeBridge::ResetFontFamily(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetMarqueeModifier().ResetMarqueeFontFamily(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeFontFamily(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -104,13 +103,13 @@ ArkUINativeModuleValue MarqueeBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
     if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize) || fontSize.IsNegative()
         || fontSize.Unit() == DimensionUnit::PERCENT) {
-        GetArkUIInternalNodeAPI()->GetMarqueeModifier().ResetMarqueeFontSize(nativeNode);
+        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeFontSize(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetMarqueeModifier().SetMarqueeFontSize(
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeFontSize(
             nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -121,8 +120,8 @@ ArkUINativeModuleValue MarqueeBridge::ResetFontSize(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetMarqueeModifier().ResetMarqueeFontSize(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeFontSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -132,12 +131,12 @@ ArkUINativeModuleValue MarqueeBridge::SetFontColor(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetMarqueeModifier().ResetMarqueeFontColor(nativeNode);
+        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeFontColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetMarqueeModifier().SetMarqueeFontColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeFontColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -147,8 +146,8 @@ ArkUINativeModuleValue MarqueeBridge::ResetFontColor(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetMarqueeModifier().ResetMarqueeFontColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeFontColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

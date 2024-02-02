@@ -21,7 +21,8 @@
 #include "base/geometry/shape.h"
 
 namespace OHOS::Ace::NG {
-void SetStartPoint(NodeHandle node, double* pointValues, int32_t* pointUnits, const char* pointStr[])
+void SetStartPoint(ArkUINodeHandle node, const ArkUI_Float32* pointValues, const ArkUI_Int32* pointUnits,
+    const char* pointStr[])
 {
     ShapePoint point;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -31,7 +32,7 @@ void SetStartPoint(NodeHandle node, double* pointValues, int32_t* pointUnits, co
     LineModelNG::StartPoint(frameNode, point);
 }
 
-void ResetStartPoint(NodeHandle node)
+void ResetStartPoint(ArkUINodeHandle node)
 {
     ShapePoint point;
     point.first = 0.0_vp;
@@ -41,7 +42,8 @@ void ResetStartPoint(NodeHandle node)
     LineModelNG::StartPoint(frameNode, point);
 }
 
-void SetEndPoint(NodeHandle node, double* pointValues, int32_t* pointUnits, const char* pointStr[])
+void SetEndPoint(ArkUINodeHandle node, const ArkUI_Float32* pointValues, const ArkUI_Int32* pointUnits,
+    const char* pointStr[])
 {
     ShapePoint point;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -51,7 +53,7 @@ void SetEndPoint(NodeHandle node, double* pointValues, int32_t* pointUnits, cons
     LineModelNG::EndPoint(frameNode, point);
 }
 
-void ResetEndPoint(NodeHandle node)
+void ResetEndPoint(ArkUINodeHandle node)
 {
     ShapePoint point;
     point.first = 0.0_vp;
@@ -61,9 +63,11 @@ void ResetEndPoint(NodeHandle node)
     LineModelNG::EndPoint(frameNode, point);
 }
 
-ArkUILineModifierAPI GetLineModifier()
+namespace NodeModifier {
+const ArkUILineModifier* GetLineModifier()
 {
-    static const ArkUILineModifierAPI modifier = {SetStartPoint, ResetStartPoint, SetEndPoint, ResetEndPoint};
-    return modifier;
+    static const ArkUILineModifier modifier = {SetStartPoint, ResetStartPoint, SetEndPoint, ResetEndPoint};
+    return &modifier;
+}
 }
 }

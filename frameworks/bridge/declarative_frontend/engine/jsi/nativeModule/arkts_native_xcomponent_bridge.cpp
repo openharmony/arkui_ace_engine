@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/jsview/models/indexer_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
@@ -26,12 +24,12 @@ ArkUINativeModuleValue XComponentBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetXComponentModifier().ResetXComponentBackgroundColor(nativeNode);
+        GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentBackgroundColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetXComponentModifier().SetXComponentBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentBackgroundColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -41,8 +39,8 @@ ArkUINativeModuleValue XComponentBridge::ResetBackgroundColor(ArkUIRuntimeCallIn
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetXComponentModifier().ResetXComponentBackgroundColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -52,12 +50,12 @@ ArkUINativeModuleValue XComponentBridge::SetOpacity(ArkUIRuntimeCallInfo *runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double opacity;
     if (!ArkTSUtils::ParseJsDouble(vm, secondArg, opacity)) {
-        GetArkUIInternalNodeAPI()->GetXComponentModifier().ResetXComponentOpacity(nativeNode);
+        GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentOpacity(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetXComponentModifier().SetXComponentOpacity(nativeNode, opacity);
+        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentOpacity(nativeNode, opacity);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -67,8 +65,8 @@ ArkUINativeModuleValue XComponentBridge::ResetOpacity(ArkUIRuntimeCallInfo *runt
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetXComponentModifier().ResetXComponentOpacity(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentOpacity(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

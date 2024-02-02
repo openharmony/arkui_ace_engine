@@ -50,8 +50,7 @@ void ResetBlankHeight(ArkUINodeHandle node)
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
-namespace NodeModifier
-{
+namespace NodeModifier {
 const ArkUIBlankModifier* GetBlankModifier()
 {
     static const ArkUIBlankModifier modifier = { SetColor, ResetColor, SetBlankHeight, ResetBlankHeight };

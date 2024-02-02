@@ -106,8 +106,7 @@ void ResetOrder(ArkUINodeHandle node)
     GridColModelNG::SetOrder(frameNode, Order);
 }
 
-namespace NodeModifier
-{
+namespace NodeModifier {
 const ArkUIGridColModifier* GetGridColModifier()
 {
     static const ArkUIGridColModifier modifier = {

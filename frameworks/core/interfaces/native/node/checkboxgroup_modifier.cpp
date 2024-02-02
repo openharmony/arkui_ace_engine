@@ -154,8 +154,7 @@ void ResetCheckboxGroupMark(ArkUINodeHandle node)
     CheckBoxGroupModelNG::SetCheckMarkWidth(frameNode, checkBoxTheme->GetCheckStroke());
 }
 
-namespace NodeModifier
-{
+namespace NodeModifier {
 const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
 {
     static const ArkUICheckboxGroupModifier modifier = { SetCheckboxGroupSelectedColor,

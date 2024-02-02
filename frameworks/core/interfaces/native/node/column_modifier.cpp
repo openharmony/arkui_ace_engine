@@ -60,8 +60,7 @@ void ResetColumnAlignItems(ArkUINodeHandle node)
     ColumnModelNG::SetAlignItems(frameNode, FlexAlign::CENTER);
 }
 
-namespace NodeModifier
-{
+namespace NodeModifier {
 const ArkUIColumnModifier* GetColumnModifier()
 {
     static const ArkUIColumnModifier modifier = {

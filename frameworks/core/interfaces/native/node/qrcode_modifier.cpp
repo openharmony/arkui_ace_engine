@@ -25,14 +25,14 @@ namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_BG_COLOR = 0xffffffff;
 constexpr double DEFAULT_OPACITY = 1.0;
 
-void SetQRColor(NodeHandle node, uint32_t color)
+void SetQRColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     QRCodeModelNG::SetQRCodeColor(frameNode, Color(color));
 }
 
-void ResetQRColor(NodeHandle node)
+void ResetQRColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -42,21 +42,21 @@ void ResetQRColor(NodeHandle node)
     QRCodeModelNG::SetQRCodeColor(frameNode, qrcodeColor);
 }
 
-void SetQRBackgroundColor(NodeHandle node, uint32_t color)
+void SetQRBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     QRCodeModelNG::SetQRBackgroundColor(frameNode, Color(color));
 }
 
-void ResetQRBackgroundColor(NodeHandle node)
+void ResetQRBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     QRCodeModelNG::SetQRBackgroundColor(frameNode, Color(DEFAULT_BG_COLOR));
 }
 
-void SetContentOpacity(NodeHandle node, double opacity)
+void SetContentOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -68,19 +68,20 @@ void SetContentOpacity(NodeHandle node, double opacity)
     }
 }
 
-void ResetContentOpacity(NodeHandle node)
+void ResetContentOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     QRCodeModelNG::SetContentOpacity(frameNode, DEFAULT_OPACITY);
 }
 
-
-ArkUIQRCodeModifierAPI GetQRCodeModifier()
+namespace NodeModifier {
+const ArkUIQRCodeModifier* GetQRCodeModifier()
 {
-    static const ArkUIQRCodeModifierAPI modifier = { SetQRColor, ResetQRColor, SetQRBackgroundColor,
+    static const ArkUIQRCodeModifier modifier = { SetQRColor, ResetQRColor, SetQRBackgroundColor,
         ResetQRBackgroundColor, SetContentOpacity, ResetContentOpacity };
 
-    return modifier;
+    return &modifier;
+}
 }
 }

@@ -23,49 +23,50 @@ constexpr float MIN_VALUE = 0.0f;
 constexpr float DEFAULT_START_ANGLE = 0.0f;
 constexpr float DEFAULT_END_ANGLE = 360.0f;
 constexpr int32_t DEFAULT_STROKE_WIDTH = 4;
-void SetGaugeVaule(NodeHandle node, float value)
+
+void SetGaugeValue(ArkUINodeHandle node, ArkUI_Float32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::SetValue(frameNode, value);
 }
 
-void ResetGaugeVaule(NodeHandle node)
+void ResetGaugeValue(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::SetValue(frameNode, MIN_VALUE);
 }
 
-void SetGaugeStartAngle(NodeHandle node, float value)
+void SetGaugeStartAngle(ArkUINodeHandle node, ArkUI_Float32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::SetStartAngle(frameNode, value);
 }
 
-void ResetGaugeStartAngle(NodeHandle node)
+void ResetGaugeStartAngle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::SetStartAngle(frameNode, DEFAULT_START_ANGLE);
 }
 
-void SetGaugeEndAngle(NodeHandle node, float value)
+void SetGaugeEndAngle(ArkUINodeHandle node, ArkUI_Float32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::SetEndAngle(frameNode, value);
 }
 
-void ResetGaugeEndAngle(NodeHandle node)
+void ResetGaugeEndAngle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::SetEndAngle(frameNode, DEFAULT_END_ANGLE);
 }
 
-void SetGaugeStrokeWidth(NodeHandle node, double value, int32_t unit)
+void SetGaugeStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -73,14 +74,15 @@ void SetGaugeStrokeWidth(NodeHandle node, double value, int32_t unit)
     GaugeModelNG::SetGaugeStrokeWidth(frameNode, Dimension(value, unitEnum));
 }
 
-void ResetGaugeStrokeWidth(NodeHandle node)
+void ResetGaugeStrokeWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::SetGaugeStrokeWidth(frameNode, Dimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP));
 }
 
-void SetShadowOptions(NodeHandle node, double radius, double offsetX, double offsetY, bool isShadowVisible)
+void SetShadowOptions(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY,
+    ArkUI_Bool isShadowVisible)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -92,21 +94,21 @@ void SetShadowOptions(NodeHandle node, double radius, double offsetX, double off
     GaugeModelNG::SetShadowOptions(frameNode, shadowOptions);
 }
 
-void ResetShadowOptions(NodeHandle node)
+void ResetShadowOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::ResetShadowOptions(frameNode);
 }
 
-void SetIsShowIndicator(NodeHandle node, bool isShowIndicator)
+void SetIsShowIndicator(ArkUINodeHandle node, ArkUI_Bool isShowIndicator)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::SetIsShowIndicator(frameNode, isShowIndicator);
 }
+void SetIndicatorIconPath(ArkUINodeHandle node, const char* iconPath, const char* bundleName, const char* moduleName)
 
-void SetIndicatorIconPath(NodeHandle node, const char* iconPath, const char* bundleName, const char* moduleName)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -125,14 +127,14 @@ void SetIndicatorIconPath(NodeHandle node, const char* iconPath, const char* bun
     GaugeModelNG::SetIndicatorIconPath(frameNode, iconPathStr, bundleNameStr, moduleNameStr);
 }
 
-void ResetIndicatorIconPath(NodeHandle node)
+void ResetIndicatorIconPath(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::ResetIndicatorIconPath(frameNode);
 }
 
-void SetIndicatorSpace(NodeHandle node, const char* spaceStrValue, double spaceValue, int32_t spaceUnit)
+void SetIndicatorSpace(ArkUINodeHandle node, const char* spaceStrValue, ArkUI_Float32 spaceValue, int32_t spaceUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -150,21 +152,21 @@ void SetIndicatorSpace(NodeHandle node, const char* spaceStrValue, double spaceV
     GaugeModelNG::SetIndicatorSpace(frameNode, space);
 }
 
-void ResetIndicatorSpace(NodeHandle node)
+void ResetIndicatorSpace(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::ResetIndicatorSpace(frameNode);
 }
 
-void SetColors(NodeHandle node, const uint32_t* colors, const float* weight, uint32_t length)
+void SetColors(ArkUINodeHandle node, const uint32_t* colors, const ArkUI_Float32* weight, uint32_t length)
 {
     CHECK_NULL_VOID(colors);
     CHECK_NULL_VOID(weight);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<Color> inputColor(length);
-    std::vector<float> weights(length);
+    std::vector<ArkUI_Float32> weights(length);
     for (uint32_t i = 0; i < length; i++) {
         inputColor.at(i) = Color(colors[i]);
         weights.at(i) = weight[i];
@@ -172,25 +174,25 @@ void SetColors(NodeHandle node, const uint32_t* colors, const float* weight, uin
     GaugeModelNG::SetColors(frameNode, inputColor, weights);
 }
 
-void ResetColors(NodeHandle node)
+void ResetColors(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<Color> inputColor;
-    std::vector<float> weights;
+    std::vector<ArkUI_Float32> weights;
     GaugeModelNG::SetColors(frameNode, inputColor, weights);
 }
 
-void SetGradientColors(NodeHandle node, const struct ArkUIGradientType* gradient, uint32_t weightLength)
+void SetGradientColors(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, uint32_t weightLength)
 {
     CHECK_NULL_VOID(gradient->gradientLength);
     CHECK_NULL_VOID(gradient->color);
     CHECK_NULL_VOID(gradient->offset);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::vector<float> weight;
+    std::vector<ArkUI_Float32> weight;
     if (weightLength > 0 && gradient->weight != nullptr) {
-        weight = std::vector<float>(gradient->weight, gradient->weight + weightLength);
+        weight = std::vector<ArkUI_Float32>(gradient->weight, gradient->weight + weightLength);
     }
     std::vector<ColorStopArray> colors(gradient->length);
     uint32_t pos = 0;
@@ -213,22 +215,24 @@ void SetGradientColors(NodeHandle node, const struct ArkUIGradientType* gradient
     GaugeModelNG::SetGradientColors(frameNode, colors, weight, type);
 }
 
-void ResetGradientColors(NodeHandle node)
+void ResetGradientColors(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GaugeModelNG::ResetGradientColors(frameNode);
 }
 
-ArkUIGaugeModifierAPI GetGaugeModifier()
+namespace NodeModifier {
+const ArkUIGaugeModifier* GetGaugeModifier()
 {
-    static const ArkUIGaugeModifierAPI modifier = { SetGaugeVaule, ResetGaugeVaule, SetGaugeStartAngle,
+    static const ArkUIGaugeModifier modifier = { SetGaugeValue, ResetGaugeValue, SetGaugeStartAngle,
         ResetGaugeStartAngle, SetGaugeEndAngle, ResetGaugeEndAngle, SetGaugeStrokeWidth, ResetGaugeStrokeWidth,
         SetShadowOptions, ResetShadowOptions, SetIsShowIndicator,
         SetIndicatorIconPath, ResetIndicatorIconPath, SetIndicatorSpace, ResetIndicatorSpace,
         SetColors, ResetColors, SetGradientColors, ResetGradientColors
     };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

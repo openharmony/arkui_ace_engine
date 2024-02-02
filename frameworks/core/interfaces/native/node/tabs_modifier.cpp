@@ -35,14 +35,15 @@ constexpr int DEFAULT_LENGTH_OF_BAR_GRID_ALIGN = 5;
 constexpr int DEFAULT_LENGTH_OF_BAR_GRID_ALIGN_VALUES = 2;
 constexpr int DEFAULT_ANIMATION_DURATION = 300;
 
-void SetTabBarMode(NodeHandle node, int32_t tabsBarMode)
+void SetTabBarMode(ArkUINodeHandle node, ArkUI_Int32 tabsBarMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto barMode = static_cast<TabBarMode>(tabsBarMode);
     TabsModelNG::SetTabBarMode(frameNode, barMode);
 }
-void SetScrollableBarModeOptions(NodeHandle node, const double value, const int unit, const int layoutStyle)
+void SetScrollableBarModeOptions(ArkUINodeHandle node, const ArkUI_Float32 value,
+    ArkUI_Int32 unit, ArkUI_Int32 layoutStyle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -52,7 +53,8 @@ void SetScrollableBarModeOptions(NodeHandle node, const double value, const int 
     option.nonScrollableLayoutStyle = (static_cast<LayoutStyle>(layoutStyle));
     TabsModelNG::SetScrollableBarModeOptions(frameNode, option);
 }
-void SetBarGridAlign(NodeHandle node, const double* values, int32_t valuesLength, const int* units, int32_t unitsLength)
+void SetBarGridAlign(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
+    const ArkUI_Int32* units, ArkUI_Int32 unitsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -69,7 +71,8 @@ void SetBarGridAlign(NodeHandle node, const double* values, int32_t valuesLength
 
     TabsModelNG::SetBarGridAlign(frameNode, columnOption);
 }
-void SetDivider(NodeHandle node, uint32_t color, const double* values, const int32_t* units, int32_t length)
+void SetDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const ArkUI_Int32* units,
+    ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -85,56 +88,56 @@ void SetDivider(NodeHandle node, uint32_t color, const double* values, const int
 
     TabsModelNG::SetDivider(frameNode, divider);
 }
-void SetFadingEdge(NodeHandle node, bool fadingEdge)
+void SetFadingEdge(ArkUINodeHandle node, ArkUI_Bool fadingEdge)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetFadingEdge(frameNode, fadingEdge);
 }
-void SetBarBackgroundColor(NodeHandle node, uint32_t color)
+void SetBarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color(color));
 }
-void SetBarOverlap(NodeHandle node, bool barOverlap)
+void SetBarOverlap(ArkUINodeHandle node, ArkUI_Bool barOverlap)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarOverlap(frameNode, barOverlap);
 }
-void SetIsVertical(NodeHandle node, bool isVertical)
+void SetIsVertical(ArkUINodeHandle node, ArkUI_Bool isVertical)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetIsVertical(frameNode, isVertical);
 }
-void SetTabBarPosition(NodeHandle node, int32_t barVal)
+void SetTabBarPosition(ArkUINodeHandle node, ArkUI_Int32 barVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetTabBarPosition(frameNode, static_cast<BarPosition>(barVal));
 }
-void SetScrollable(NodeHandle node, bool scrollable)
+void SetScrollable(ArkUINodeHandle node, ArkUI_Bool scrollable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetScrollable(frameNode, scrollable);
 }
-void SetBarAdaptiveHeight(NodeHandle node, bool value)
+void SetBarAdaptiveHeight(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarAdaptiveHeight(frameNode, value);
 }
-void SetTabBarWidth(NodeHandle node, double value, int unit)
+void SetTabBarWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     TabsModelNG::SetTabBarWidth(frameNode, width);
 }
-void SetTabBarHeight(NodeHandle node, double value, int unit)
+void SetTabBarHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -142,7 +145,7 @@ void SetTabBarHeight(NodeHandle node, double value, int unit)
     TabsModelNG::SetTabBarHeight(frameNode, width);
 }
 
-void SetAnimationDuration(NodeHandle node, float duration)
+void SetAnimationDuration(ArkUINodeHandle node, ArkUI_Float32 duration)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -151,18 +154,19 @@ void SetAnimationDuration(NodeHandle node, float duration)
         CHECK_NULL_VOID(pipelineContext);
         auto tabTheme = pipelineContext->GetTheme<TabTheme>();
         CHECK_NULL_VOID(tabTheme);
-        TabsModelNG::SetAnimationDuration(frameNode, static_cast<float>(tabTheme->GetTabContentAnimationDuration()));
+        TabsModelNG::SetAnimationDuration(frameNode,
+            static_cast<ArkUI_Float32>(tabTheme->GetTabContentAnimationDuration()));
     }
     TabsModelNG::SetAnimationDuration(frameNode, duration);
 }
-void ResetTabBarMode(NodeHandle node)
+void ResetTabBarMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabBarMode barMode = TabBarMode::FIXED;
     TabsModelNG::SetTabBarMode(frameNode, barMode);
 }
-void ResetScrollableBarModeOptions(NodeHandle node)
+void ResetScrollableBarModeOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -172,14 +176,14 @@ void ResetScrollableBarModeOptions(NodeHandle node)
     defaultOption.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
     TabsModelNG::SetScrollableBarModeOptions(frameNode, defaultOption);
 }
-void ResetBarGridAlign(NodeHandle node)
+void ResetBarGridAlign(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     BarGridColumnOptions columnOption;
     TabsModelNG::SetBarGridAlign(frameNode, columnOption);
 }
-void ResetDivider(NodeHandle node)
+void ResetDivider(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -190,52 +194,52 @@ void ResetDivider(NodeHandle node)
     TabsModelNG::SetDivider(frameNode, divider);
 }
 
-void ResetFadingEdge(NodeHandle node)
+void ResetFadingEdge(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetFadingEdge(frameNode, true);
 }
-void ResetBarBackgroundColor(NodeHandle node)
+void ResetBarBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color::BLACK.BlendOpacity(0.0f));
 }
-void ResetBarOverlap(NodeHandle node)
+void ResetBarOverlap(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarOverlap(frameNode, false);
 }
-void ResetIsVertical(NodeHandle node)
+void ResetIsVertical(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetIsVertical(frameNode, false);
 }
 
-void ResetTabBarPosition(NodeHandle node)
+void ResetTabBarPosition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetTabBarPosition(frameNode, BarPosition::START);
 }
 
-void ResetScrollable(NodeHandle node)
+void ResetScrollable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetScrollable(frameNode, true);
 }
-void ResetTabBarWidth(NodeHandle node)
+void ResetTabBarWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
     TabsModelNG::SetTabBarWidth(frameNode, width);
 }
-void ResetTabBarHeight(NodeHandle node)
+void ResetTabBarHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -243,37 +247,38 @@ void ResetTabBarHeight(NodeHandle node)
     TabsModelNG::SetTabBarHeight(frameNode, width);
 }
 
-void ResetAnimationDuration(NodeHandle node)
+void ResetAnimationDuration(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetAnimationDuration(frameNode, DEFAULT_ANIMATION_DURATION);
 }
 
-void ResetBarAdaptiveHeight(NodeHandle node)
+void ResetBarAdaptiveHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarAdaptiveHeight(frameNode, false);
 }
 
-void SetTabClip(NodeHandle node, bool clipEdge)
+void SetTabClip(ArkUINodeHandle node, ArkUI_Bool clipEdge)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetClipEdge(frameNode, clipEdge);
 }
 
-void ResetTabClip(NodeHandle node)
+void ResetTabClip(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetClipEdge(frameNode, false);
 }
 
-ArkUITabsModifierAPI GetTabsModifier()
+namespace NodeModifier {
+const ArkUITabsModifier* GetTabsModifier()
 {
-    static const ArkUITabsModifierAPI modifier = {
+    static const ArkUITabsModifier modifier = {
         SetTabBarMode,
         SetScrollableBarModeOptions,
         SetBarGridAlign,
@@ -306,6 +311,7 @@ ArkUITabsModifierAPI GetTabsModifier()
         ResetTabClip,
     };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

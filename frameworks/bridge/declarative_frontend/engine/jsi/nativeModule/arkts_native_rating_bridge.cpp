@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -32,13 +30,13 @@ ArkUINativeModuleValue RatingBridge::SetStars(ArkUIRuntimeCallInfo* runtimeCallI
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto input = secondArg->ToNumber(vm)->Value();
     int32_t stars = static_cast<int32_t>(input);
     if (stars <= 0) {
         stars = STARS_DEFAULT;
     }
-    GetArkUIInternalNodeAPI()->GetRatingModifier().SetStars(nativeNode, stars);
+    GetArkUINodeModifiers()->getRatingModifier()->setStars(nativeNode, stars);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -47,8 +45,8 @@ ArkUINativeModuleValue RatingBridge::ResetStars(ArkUIRuntimeCallInfo* runtimeCal
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRatingModifier().ResetStars(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRatingModifier()->resetStars(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue RatingBridge::SetRatingStepSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -57,17 +55,17 @@ ArkUINativeModuleValue RatingBridge::SetRatingStepSize(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     if (secondArg->IsNull() || !secondArg->IsNumber()) {
-        GetArkUIInternalNodeAPI()->GetRatingModifier().ResetRatingStepSize(nativeNode);
+        GetArkUINodeModifiers()->getRatingModifier()->resetRatingStepSize(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     auto steps  = secondArg->ToNumber(vm)->Value();
     if (LessNotEqual(steps, STEPS_MIN_SIZE)) {
         steps = STEPS_DEFAULT;
     }
-    GetArkUIInternalNodeAPI()->GetRatingModifier().SetRatingStepSize(nativeNode, steps);
+    GetArkUINodeModifiers()->getRatingModifier()->setRatingStepSize(nativeNode, steps);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -76,8 +74,8 @@ ArkUINativeModuleValue RatingBridge::ResetRatingStepSize(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRatingModifier().ResetRatingStepSize(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRatingModifier()->resetRatingStepSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -89,7 +87,7 @@ ArkUINativeModuleValue RatingBridge::SetStarStyle(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> backgroundUriArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> foregroundUriArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> secondaryUriArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     std::string backgroundUri;
     if (backgroundUriArg->IsString()) {
@@ -110,7 +108,7 @@ ArkUINativeModuleValue RatingBridge::SetStarStyle(ArkUIRuntimeCallInfo* runtimeC
         secondaryUri = backgroundUri;
     }
 
-    GetArkUIInternalNodeAPI()->GetRatingModifier().SetStarStyle(
+    GetArkUINodeModifiers()->getRatingModifier()->setStarStyle(
         nativeNode, backgroundUri.c_str(), foregroundUri.c_str(), secondaryUri.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -120,8 +118,8 @@ ArkUINativeModuleValue RatingBridge::ResetStarStyle(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRatingModifier().ResetStarStyle(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRatingModifier()->resetStarStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

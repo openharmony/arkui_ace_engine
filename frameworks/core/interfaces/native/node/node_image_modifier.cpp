@@ -33,6 +33,7 @@ constexpr ImageFit DEFAULT_OBJECT_FIT_VALUE = ImageFit::COVER;
 constexpr bool DEFAULT_FIT_ORIGINAL_SIZE = false;
 constexpr ImageInterpolation DEFAULT_IMAGE_INTERPOLATION = ImageInterpolation::NONE;
 constexpr bool DEFAULT_DRAGGABLE = false;
+constexpr ArkUI_Float32 DEFAULT_IMAGE_EDGE_ANTIALIASING = 0;
 const std::vector<float> DEFAULT_COLOR_FILTER = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
 constexpr int32_t LOAD_ERROR_CODE = 401;
 constexpr int32_t IMAGE_LOAD_STATUS_INDEX = 0;
@@ -50,6 +51,7 @@ constexpr int32_t IMAGE_OBJECT_FIT_AUTO_INDEX = 2;
 constexpr int32_t IMAGE_OBJECT_FIT_FILL_INDEX = 3;
 constexpr int32_t IMAGE_OBJECT_FIT_SCALE_DOWN_INDEX = 4;
 constexpr int32_t IMAGE_OBJECT_FIT_NONE_INDEX = 5;
+
 void SetImageSrc(ArkUINodeHandle node, const char* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -275,7 +277,7 @@ void ResetImageInterpolation(ArkUINodeHandle node)
     ImageModelNG::SetImageInterpolation(frameNode, DEFAULT_IMAGE_INTERPOLATION);
 }
 
-void SetColorFilter(ArkUINodeHandle node, const float* array, int length)
+void SetColorFilter(ArkUINodeHandle node, const ArkUI_Float32* array, int length)
 {
     CHECK_NULL_VOID(array);
     if (length != COLOR_FILTER_MATRIX_SIZE) {
@@ -361,6 +363,51 @@ void ResetImageDraggable(ArkUINodeHandle node)
 void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, ArkUI_Int32 length) {}
 
 void ResetImageBorderRadius(ArkUINodeHandle node) {}
+
+void SetImageBorder(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
+
+void ResetImageBorder(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
+
+void SetImageOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
+        opacity = 1.0f;
+    }
+    ViewAbstract::SetOpacity(frameNode, opacity);
+}
+
+void ResetImageOpacity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOpacity(frameNode, 1.0f);
+}
+
+void SetEdgeAntialiasing(ArkUINodeHandle node, ArkUI_Float32 edgeAntialiasing)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetSmoothEdge(frameNode, edgeAntialiasing);
+}
+
+void ResetEdgeAntialiasing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetSmoothEdge(frameNode, DEFAULT_IMAGE_EDGE_ANTIALIASING);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -372,7 +419,9 @@ const ArkUIImageModifier* GetImageModifier()
         SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
         SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
         ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
-        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius };
+        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius,
+        SetImageBorder, ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing,
+        ResetEdgeAntialiasing };
     return &modifier;
 }
 

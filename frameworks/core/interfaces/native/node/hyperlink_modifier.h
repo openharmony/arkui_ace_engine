@@ -16,10 +16,10 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_HYPERLINK_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_HYPERLINK_MODIFIER_H
 
-#include "core/interfaces/native/node/api.h"
+#include "core/interfaces/native/node/node_api.h"
 
-namespace OHOS::Ace::NG {
-ArkUIHyperlinkModifierAPI GetHyperlinkModifier();
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUIHyperlinkModifier* GetHyperlinkModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_HYPERLINK_MODIFIER_H

@@ -22,14 +22,14 @@
 
 namespace OHOS::Ace::NG {
 
-void SetPathCommands(NodeHandle node, const char* commands)
+void SetPathCommands(ArkUINodeHandle node, ArkUI_CharPtr commands)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     PathModelNG::SetCommands(frameNode, std::string(commands));
 }
 
-void ResetPathCommands(NodeHandle node)
+void ResetPathCommands(ArkUINodeHandle node)
 {
     std::string outCommands = "";
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -37,10 +37,12 @@ void ResetPathCommands(NodeHandle node)
     PathModelNG::SetCommands(frameNode, outCommands);
 }
 
-ArkUIPathModifierAPI GetPathModifier()
+namespace NodeModifier {
+const ArkUIPathModifier* GetPathModifier()
 {
-    static const ArkUIPathModifierAPI modifier = {SetPathCommands, ResetPathCommands};
+    static const ArkUIPathModifier modifier = {SetPathCommands, ResetPathCommands};
 
-    return modifier;
+    return &modifier;
+}
 }
 }

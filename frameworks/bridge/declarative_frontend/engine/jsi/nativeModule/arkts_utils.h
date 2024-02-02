@@ -97,7 +97,7 @@ public:
         const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result);
     static bool ParseResponseRegion(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-        double* regionValues, int32_t* regionUnits, uint32_t length);
+        ArkUI_Float32* regionValues, int32_t* regionUnits, uint32_t length);
     template<typename T>
     static RefPtr<T> GetTheme()
     {

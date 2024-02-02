@@ -14,8 +14,6 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigator_bridge.h"
 
-#include "core/interfaces/native/node/api.h"
-
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue NavigatorBridge::SetTarget(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -23,9 +21,9 @@ ArkUINativeModuleValue NavigatorBridge::SetTarget(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string target = secondArg->ToString(vm)->ToString();
-    GetArkUIInternalNodeAPI()->GetNavigatorModifier().SetTarget(nativeNode, target.c_str());
+    GetArkUINodeModifiers()->getNavigatorModifier()->setTarget(nativeNode, target.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -34,8 +32,8 @@ ArkUINativeModuleValue NavigatorBridge::ResetTarget(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigatorModifier().ResetTarget(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigatorModifier()->resetTarget(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -45,12 +43,12 @@ ArkUINativeModuleValue NavigatorBridge::SetType(ArkUIRuntimeCallInfo* runtimeCal
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetNavigatorModifier().ResetType(nativeNode);
+        GetArkUINodeModifiers()->getNavigatorModifier()->resetType(nativeNode);
     }
     int32_t value = secondArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetNavigatorModifier().SetType(nativeNode, value);
+    GetArkUINodeModifiers()->getNavigatorModifier()->setType(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -59,8 +57,8 @@ ArkUINativeModuleValue NavigatorBridge::ResetType(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigatorModifier().ResetType(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigatorModifier()->resetType(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -70,9 +68,9 @@ ArkUINativeModuleValue NavigatorBridge::SetActive(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     bool active = secondArg->ToBoolean(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigatorModifier().SetActive(nativeNode, active);
+    GetArkUINodeModifiers()->getNavigatorModifier()->setActive(nativeNode, active);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -81,8 +79,8 @@ ArkUINativeModuleValue NavigatorBridge::ResetActive(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigatorModifier().ResetActive(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigatorModifier()->resetActive(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -92,12 +90,12 @@ ArkUINativeModuleValue NavigatorBridge::SetParams(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetNavigatorModifier().ResetParams(nativeNode);
+        GetArkUINodeModifiers()->getNavigatorModifier()->resetParams(nativeNode);
     }
     std::string params = secondArg->ToString(vm)->ToString();
-    GetArkUIInternalNodeAPI()->GetNavigatorModifier().SetParams(nativeNode, params.c_str());
+    GetArkUINodeModifiers()->getNavigatorModifier()->setParams(nativeNode, params.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -106,8 +104,8 @@ ArkUINativeModuleValue NavigatorBridge::ResetParams(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigatorModifier().ResetParams(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigatorModifier()->resetParams(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

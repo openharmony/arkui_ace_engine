@@ -355,8 +355,7 @@ void ResetPopupPosition(ArkUINodeHandle node)
     IndexerModelNG::SetPopupPositionY(frameNode, Dimension(DEFAULT_POPUP_POSITION_Y, DimensionUnit::VP));
 }
 
-namespace NodeModifier 
-{
+namespace NodeModifier {
 const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
     static const ArkUIAlphabetIndexerModifier modifier = { SetPopupItemFont, ResetPopupItemFont, SetSelectedFont,

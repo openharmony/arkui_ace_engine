@@ -14,13 +14,11 @@
  */
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rect_bridge.h"
-
 #include "ecmascript/napi/include/jsnapi.h"
-
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
@@ -35,15 +33,15 @@ ArkUINativeModuleValue RectBridge::SetRadiusWidth(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     CalcDimension radiusWidth;
     bool isSupportPercent = true;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, radiusWidth, isSupportPercent)) {
-        GetArkUIInternalNodeAPI()->GetRectModifier().ResetRectRadiusWidth(nativeNode);
+        GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUIInternalNodeAPI()->GetRectModifier().SetRectRadiusWidth(
+    GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWidth(
         nativeNode, radiusWidth.Value(), static_cast<int32_t>(radiusWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -53,8 +51,8 @@ ArkUINativeModuleValue RectBridge::ResetRadiusWidth(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRectModifier().ResetRectRadiusWidth(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -63,15 +61,15 @@ ArkUINativeModuleValue RectBridge::SetRadiusHeight(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     CalcDimension radiusHeight;
     bool isSupportPercent = true;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, radiusHeight, isSupportPercent)) {
-        GetArkUIInternalNodeAPI()->GetRectModifier().ResetRectRadiusHeight(nativeNode);
+        GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUIInternalNodeAPI()->GetRectModifier().SetRectRadiusHeight(
+    GetArkUINodeModifiers()->getRectModifier()->setRectRadiusHeight(
         nativeNode, radiusHeight.Value(), static_cast<int32_t>(radiusHeight.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -81,8 +79,8 @@ ArkUINativeModuleValue RectBridge::ResetRadiusHeight(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRectModifier().ResetRectRadiusHeight(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -91,14 +89,14 @@ ArkUINativeModuleValue RectBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    std::vector<double> radiusValues;
+    std::vector<ArkUI_Float32> radiusValues;
     std::vector<int32_t> radiusUnits;
     std::vector<uint32_t> radiusValidPairs;
     if (jsValue->IsArray(vm)) {
         RectBridge::SetRadiusWithArray(vm, jsValue, radiusValues, radiusUnits, radiusValidPairs);
-        GetArkUIInternalNodeAPI()->GetRectModifier().SetRectRadiusWithArray(
+        GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWithArray(
             nativeNode, radiusValues.data(), radiusUnits.data(), radiusValidPairs.data(), radiusValidPairs.size());
         return panda::JSValueRef::Undefined(vm);
     }
@@ -108,7 +106,7 @@ ArkUINativeModuleValue RectBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
         if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, parsedValue, isSupportPercent)) {
             parsedValue.Reset();
         }
-        GetArkUIInternalNodeAPI()->GetRectModifier().SetRectRadiusWithValue(
+        GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWithValue(
             nativeNode, parsedValue.Value(), static_cast<int32_t>(parsedValue.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -119,13 +117,15 @@ ArkUINativeModuleValue RectBridge::ResetRadius(ArkUIRuntimeCallInfo* runtimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRectModifier().ResetRectRadius(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRectModifier()->resetRectRadius(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
 void RectBridge::SetRadiusWithArray(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-    std::vector<double>& radiusValues, std::vector<int32_t>& radiusUnits, std::vector<uint32_t>& radiusValidPairs)
+    std::vector<ArkUI_Float32>& radiusValues,
+    std::vector<int32_t>& radiusUnits,
+    std::vector<uint32_t>& radiusValidPairs)
 {
     if (!jsValue->IsArray(vm)) {
         return;
@@ -166,23 +166,23 @@ void RectBridge::SetRadiusWithArray(const EcmaVM* vm, const Local<JSValueRef>& j
             radiusYValue.Reset();
         }
         radiusValidPairs.push_back(VALID_RADIUS_PAIR_FLAG);
-        radiusValues.push_back(radiusXValue.Value());
-        radiusValues.push_back(radiusYValue.Value());
+        radiusValues.push_back(static_cast<ArkUI_Float32>(radiusXValue.Value()));
+        radiusValues.push_back(static_cast<ArkUI_Float32>(radiusYValue.Value()));
         radiusUnits.push_back(static_cast<int32_t>(radiusXValue.Unit()));
         radiusUnits.push_back(static_cast<int32_t>(radiusYValue.Unit()));
     }
 }
 
-void RectBridge::SetRadiusArraysInvalidValue(std::vector<double>& radiusValues, std::vector<int32_t>& radiusUnits,
-    std::vector<uint32_t>& radiusValidPairs, int index)
+void RectBridge::SetRadiusArraysInvalidValue(std::vector<ArkUI_Float32>& radiusValues,
+    std::vector<int32_t>& radiusUnits, std::vector<uint32_t>& radiusValidPairs, int index)
 {
     radiusValidPairs.push_back(INVALID_RADIUS_PAIR_FLAG);
     CalcDimension radiusXValue;
     CalcDimension radiusYValue;
     radiusXValue.Reset();
     radiusYValue.Reset();
-    radiusValues.push_back(radiusXValue.Value());
-    radiusValues.push_back(radiusYValue.Value());
+    radiusValues.push_back(static_cast<ArkUI_Float32>(radiusXValue.Value()));
+    radiusValues.push_back(static_cast<ArkUI_Float32>(radiusYValue.Value()));
     radiusUnits.push_back(static_cast<int32_t>(radiusXValue.Unit()));
     radiusUnits.push_back(static_cast<int32_t>(radiusYValue.Unit()));
 }

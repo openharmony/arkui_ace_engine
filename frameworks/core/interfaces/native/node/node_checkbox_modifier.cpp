@@ -81,6 +81,68 @@ void SetMark(ArkUINodeHandle node, uint32_t color, float sizeValue,
     Dimension width = Dimension(static_cast<double>(widthValue), DEFAULT_UNIT);
     CheckBoxModelNG::SetCheckMarkWidth(frameNode, width);
 }
+
+void SetCheckboxPadding(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, uint32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (length != 4) { // 4 : data length
+        return;
+    }
+    CalcLength topDim;
+    CalcLength rightDim;
+    CalcLength bottomDim;
+    CalcLength leftDim;
+    topDim = CalcLength(values[0], static_cast<DimensionUnit>(units[0])); // 0: top Dimension
+    rightDim = CalcLength(values[1], static_cast<DimensionUnit>(units[1])); // 1: right Dimension
+    bottomDim = CalcLength(values[2], static_cast<DimensionUnit>(units[2])); // 2: bottom Dimension
+    leftDim = CalcLength(values[3], static_cast<DimensionUnit>(units[3])); // 3: left Dimension
+    NG::PaddingProperty padding;
+    padding.top = std::optional<CalcLength>(topDim);
+    padding.bottom = std::optional<CalcLength>(bottomDim);
+    padding.left = std::optional<CalcLength>(leftDim);
+    padding.right = std::optional<CalcLength>(rightDim);
+
+    CheckBoxModelNG::SetPadding(frameNode, padding);
+}
+
+void SetCheckboxResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const int32_t* units, uint32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<DimensionRect> region;
+    uint32_t ARRAY_LENGTH = 4; // 4: dimension length
+    for (uint32_t i = 0; i < length / 4; i++) {
+        CalcDimension xDimen =
+            CalcDimension(values[i * ARRAY_LENGTH], static_cast<DimensionUnit>(units[i * ARRAY_LENGTH]));
+        CalcDimension yDimen =
+            CalcDimension(values[i * ARRAY_LENGTH + 1], static_cast<DimensionUnit>(units[i * ARRAY_LENGTH + 1]));
+        CalcDimension widthDimen = CalcDimension(
+            values[i * ARRAY_LENGTH + 2], static_cast<DimensionUnit>(units[i * ARRAY_LENGTH + 2])); // 2: width value
+        CalcDimension heightDimen = CalcDimension(
+            values[i * ARRAY_LENGTH + 3], static_cast<DimensionUnit>(units[i * ARRAY_LENGTH + 3])); // 3: height value
+        DimensionOffset offsetDimen(xDimen, yDimen);
+        DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+        region.emplace_back(dimenRect);
+    }
+    CheckBoxModelNG::SetResponseRegion(frameNode, region);
+}
+
+void ResetCheckboxPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::PaddingProperty padding;
+    padding.top = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+    padding.bottom = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+    padding.left = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+    padding.right = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+
+    CheckBoxModelNG::SetPadding(frameNode, padding);
+}
+
+void ResetCheckboxResponseRegion(ArkUINodeHandle node) {}
+
 void ResetSelect(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -219,9 +281,10 @@ namespace NodeModifier {
 const ArkUICheckboxModifier *GetCheckboxModifier()
 {
     static const ArkUICheckboxModifier modifier = { SetSelect, SetSelectedColor,
-        SetUnSelectedColor, SetCheckboxWidth, SetCheckboxHeight, SetMark, ResetSelect, ResetSelectedColor,
+        SetUnSelectedColor, SetCheckboxWidth, SetCheckboxHeight, SetMark,  SetCheckboxPadding,
+        SetCheckboxResponseRegion, ResetSelect, ResetSelectedColor,
         ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape, ResetCheckboxShape,
-        nullptr, nullptr,
+        ResetCheckboxPadding, ResetCheckboxResponseRegion,
         GetSelect, GetSelectedColor, GetUnSelectedColor, GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth,
         GetCheckboxShape };
     return &modifier;

@@ -33,11 +33,11 @@ constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const bool DEFAULT_SELECTION_MENU_HIDDEN = false;
-constexpr CancelButtonStyle DEFAULT_CANCELBUTTON_STYLE = CancelButtonStyle::INPUT;
+constexpr CancelButtonStyle DEFAULT_CANCEL_BUTTON_STYLE = CancelButtonStyle::INPUT;
 constexpr Dimension THEME_SEARCH_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 constexpr Color THEME_SEARCH_TEXT_COLOR = Color(0xe5000000);
 
-void SetSearchTextFont(NodeHandle node, const struct ArkUIFontStruct* value)
+void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -50,7 +50,7 @@ void SetSearchTextFont(NodeHandle node, const struct ArkUIFontStruct* value)
     SearchModelNG::SetTextFont(frameNode, font);
 }
 
-void ResetSearchTextFont(NodeHandle node)
+void ResetSearchTextFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -61,35 +61,35 @@ void ResetSearchTextFont(NodeHandle node)
     SearchModelNG::SetTextFont(frameNode, font);
 }
 
-void SetSearchPlaceholderColor(NodeHandle node, uint32_t color)
+void SetSearchPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetPlaceholderColor(frameNode, Color(color));
 }
 
-void ResetSearchPlaceholderColor(NodeHandle node)
+void ResetSearchPlaceholderColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetPlaceholderColor(frameNode, Color(DEFAULT_SEARCH_COLOR));
 }
 
-void SetSearchSelectionMenuHidden(NodeHandle node, uint32_t selectionMenuHidden)
+void SetSearchSelectionMenuHidden(ArkUINodeHandle node, ArkUI_Uint32 selectionMenuHidden)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetSelectionMenuHidden(frameNode, static_cast<bool>(selectionMenuHidden));
 }
 
-void ResetSearchSelectionMenuHidden(NodeHandle node)
+void ResetSearchSelectionMenuHidden(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetSelectionMenuHidden(frameNode, DEFAULT_SELECTION_MENU_HIDDEN);
 }
 
-void SetSearchCaretStyle(NodeHandle node, const double number, const int8_t unit, uint32_t caretColor)
+void SetSearchCaretStyle(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit, ArkUI_Uint32 caretColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -97,7 +97,7 @@ void SetSearchCaretStyle(NodeHandle node, const double number, const int8_t unit
     SearchModelNG::SetCaretColor(frameNode, Color(caretColor));
 }
 
-void ResetSearchCaretStyle(NodeHandle node)
+void ResetSearchCaretStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -109,7 +109,7 @@ void ResetSearchCaretStyle(NodeHandle node)
     SearchModelNG::SetCaretColor(frameNode, Color(caretColor));
 }
 
-void SetSearchTextAlign(NodeHandle node, int32_t value)
+void SetSearchTextAlign(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -117,15 +117,15 @@ void SetSearchTextAlign(NodeHandle node, int32_t value)
     SearchModelNG::SetTextAlign(frameNode, value_textAlign);
 }
 
-void ResetSearchTextAlign(NodeHandle node)
+void ResetSearchTextAlign(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextAlign(frameNode, TextAlign::START);
 }
 
-void SetSearchCancelButton(NodeHandle node,
-    int32_t style, const struct ArkUISizeType* size, uint32_t color, const char* src)
+void SetSearchCancelButton(ArkUINodeHandle node,
+    ArkUI_Int32 style, const struct ArkUISizeType* size, ArkUI_Uint32 color, ArkUI_CharPtr src)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -137,28 +137,28 @@ void SetSearchCancelButton(NodeHandle node,
     SearchModelNG::SetRightIconSrcPath(frameNode, srcStr);
 }
 
-void ResetSearchCancelButton(NodeHandle node)
+void ResetSearchCancelButton(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetCancelButtonStyle(frameNode, DEFAULT_CANCELBUTTON_STYLE);
+    SearchModelNG::SetCancelButtonStyle(frameNode, DEFAULT_CANCEL_BUTTON_STYLE);
 }
 
-void SetSearchEnableKeyboardOnFocus(NodeHandle node, uint32_t value)
+void SetSearchEnableKeyboardOnFocus(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::RequestKeyboardOnFocus(frameNode, static_cast<bool>(value));
 }
 
-void ResetSearchEnableKeyboardOnFocus(NodeHandle node)
+void ResetSearchEnableKeyboardOnFocus(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::RequestKeyboardOnFocus(frameNode, true);
 }
 
-void SetSearchPlaceholderFont(NodeHandle node, const struct ArkUIFontStruct* value)
+void SetSearchPlaceholderFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -171,7 +171,7 @@ void SetSearchPlaceholderFont(NodeHandle node, const struct ArkUIFontStruct* val
     SearchModelNG::SetPlaceholderFont(frameNode, font);
 }
 
-void ResetSearchPlaceholderFont(NodeHandle node)
+void ResetSearchPlaceholderFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -182,7 +182,7 @@ void ResetSearchPlaceholderFont(NodeHandle node)
     SearchModelNG::SetPlaceholderFont(frameNode, font);
 }
 
-void SetSearchSearchIcon(NodeHandle node, const struct ArkUIIconOptionsStruct* value)
+void SetSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -193,14 +193,14 @@ void SetSearchSearchIcon(NodeHandle node, const struct ArkUIIconOptionsStruct* v
     }
 }
 
-void ResetSearchSearchIcon(NodeHandle node)
+void ResetSearchSearchIcon(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetSearchSrcPath(frameNode, "");
 }
 
-void SetSearchSearchButton(NodeHandle node, const struct ArkUISearchButtonOptionsStruct* value)
+void SetSearchSearchButton(ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -210,28 +210,28 @@ void SetSearchSearchButton(NodeHandle node, const struct ArkUISearchButtonOption
     SearchModelNG::SetSearchButtonFontColor(frameNode, Color(value->fontColor));
 }
 
-void ResetSearchSearchButton(NodeHandle node)
+void ResetSearchSearchButton(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetSearchButton(frameNode, "");
 }
 
-void SetSearchFontColor(NodeHandle node, uint32_t value)
+void SetSearchFontColor(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextColor(frameNode, Color(value));
 }
 
-void ResetSearchFontColor(NodeHandle node)
+void ResetSearchFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextColor(frameNode, THEME_SEARCH_TEXT_COLOR);
 }
 
-void SetSearchCopyOption(NodeHandle node, uint32_t value)
+void SetSearchCopyOption(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -240,7 +240,7 @@ void SetSearchCopyOption(NodeHandle node, uint32_t value)
     SearchModelNG::SetCopyOption(frameNode, copyOptions);
 }
 
-void ResetSearchCopyOption(NodeHandle node)
+void ResetSearchCopyOption(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -248,23 +248,24 @@ void ResetSearchCopyOption(NodeHandle node)
     SearchModelNG::SetCopyOption(frameNode, copyOptions);
 }
 
-void SetSearchHeight(NodeHandle node, double heightValue, int32_t heightUnit)
+void SetSearchHeight(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetHeight(frameNode, CalcDimension(heightValue, (DimensionUnit)heightUnit));
 }
 
-void ResetSearchHeight(NodeHandle node)
+void ResetSearchHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
-ArkUISearchModifierAPI GetSearchModifier()
+namespace NodeModifier {
+const ArkUISearchModifier* GetSearchModifier()
 {
-    static const ArkUISearchModifierAPI modifier = { SetSearchPlaceholderColor, ResetSearchPlaceholderColor,
+    static const ArkUISearchModifier modifier = { SetSearchPlaceholderColor, ResetSearchPlaceholderColor,
         SetSearchTextFont, ResetSearchTextFont, SetSearchSelectionMenuHidden, ResetSearchSelectionMenuHidden,
         SetSearchCaretStyle, ResetSearchCaretStyle, SetSearchTextAlign, ResetSearchTextAlign, SetSearchCancelButton,
         ResetSearchCancelButton, SetSearchEnableKeyboardOnFocus, ResetSearchEnableKeyboardOnFocus,
@@ -272,6 +273,7 @@ ArkUISearchModifierAPI GetSearchModifier()
         SetSearchSearchButton, ResetSearchSearchButton, SetSearchFontColor, ResetSearchFontColor, SetSearchCopyOption,
         ResetSearchCopyOption, SetSearchHeight, ResetSearchHeight };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void SetRichEditorCopyOptions(NodeHandle node, int8_t copyOptionsValue)
+void SetRichEditorCopyOptions(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CopyOptions copyOptions = static_cast<CopyOptions>(copyOptionsValue);
@@ -30,7 +30,7 @@ void SetRichEditorCopyOptions(NodeHandle node, int8_t copyOptionsValue)
     RichEditorModelNG::SetCopyOption(frameNode, copyOptions);
 }
 
-void ResetRichEditorCopyOptions(NodeHandle node)
+void ResetRichEditorCopyOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -38,9 +38,11 @@ void ResetRichEditorCopyOptions(NodeHandle node)
     RichEditorModelNG::SetCopyOption(frameNode, defaultCopyOptions);
 }
 
-ArkUIRichEditorModifierAPI GetRichEditorModifier()
+namespace NodeModifier {
+const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
-    static const ArkUIRichEditorModifierAPI modifier = {SetRichEditorCopyOptions, ResetRichEditorCopyOptions};
-    return modifier;
+    static const ArkUIRichEditorModifier modifier = {SetRichEditorCopyOptions, ResetRichEditorCopyOptions};
+    return &modifier;
+}
 }
 }

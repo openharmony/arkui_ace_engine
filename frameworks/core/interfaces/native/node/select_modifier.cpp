@@ -21,6 +21,8 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/components_ng/pattern/select/select_model.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 const char DELIMITER = '|';
@@ -29,7 +31,7 @@ const int32_t SIZE_OF_FONT_INFO = 3;
 const int32_t SIZE_OF_TWO = 2;
 const int32_t DEFAULT_SELECT = 0;
 
-void SetSpace(NodeHandle node, float value, int32_t unit)
+void SetSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -37,14 +39,14 @@ void SetSpace(NodeHandle node, float value, int32_t unit)
     SelectModelNG::SetSpace(frameNode, space);
 }
 
-void SetValue(NodeHandle node, const char* value)
+void SetValue(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetValue(frameNode, value);
 }
 
-void SetSelected(NodeHandle node, int32_t idx)
+void SetSelected(ArkUINodeHandle node, ArkUI_Int32 idx)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -54,42 +56,42 @@ void SetSelected(NodeHandle node, int32_t idx)
     SelectModelNG::SetSelected(frameNode, idx);
 }
 
-void SetSelectFontColor(NodeHandle node, const uint32_t color)
+void SetSelectFontColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetFontColor(frameNode, Color(color));
 }
 
-void SetSelectedOptionBgColor(NodeHandle node, const uint32_t color)
+void SetSelectedOptionBgColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetSelectedOptionBgColor(frameNode, Color(color));
 }
 
-void SetOptionBgColor(NodeHandle node, const uint32_t color)
+void SetOptionBgColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetOptionBgColor(frameNode, Color(color));
 }
 
-void SetOptionFontColor(NodeHandle node, const uint32_t color)
+void SetOptionFontColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetOptionFontColor(frameNode, Color(color));
 }
 
-void SetSelectedOptionFontColor(NodeHandle node, const uint32_t color)
+void SetSelectedOptionFontColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetSelectedOptionFontColor(frameNode, Color(color));
 }
 
-void SetArrowPosition(NodeHandle node, const int32_t arrowPosition)
+void SetArrowPosition(ArkUINodeHandle node, ArkUI_Int32 arrowPosition)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -97,7 +99,8 @@ void SetArrowPosition(NodeHandle node, const int32_t arrowPosition)
 }
 
 void SetMenuAlign(
-    NodeHandle node, const int32_t alignType, const float* values, const int32_t* units, const int32_t size)
+    ArkUINodeHandle node, ArkUI_Int32 alignType, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -112,7 +115,7 @@ void SetMenuAlign(
     SelectModelNG::SetMenuAlign(frameNode, menuAlignObj);
 }
 
-void SetFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
+void SetFont(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -151,7 +154,7 @@ void SetFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     SelectModelNG::SetItalicFontStyle(frameNode, style);
 }
 
-void SetOptionFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
+void SetOptionFont(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -189,7 +192,7 @@ void SetOptionFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     SelectModelNG::SetOptionItalicFontStyle(frameNode, style);
 }
 
-void SetSelectedOptionFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
+void SetSelectedOptionFont(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -227,7 +230,7 @@ void SetSelectedOptionFont(NodeHandle node, const char* fontInfo, int32_t styleV
     SelectModelNG::SetSelectedOptionItalicFontStyle(frameNode, style);
 }
 
-void ResetSpace(NodeHandle node)
+void ResetSpace(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -237,21 +240,21 @@ void ResetSpace(NodeHandle node)
     SelectModelNG::SetSpace(frameNode, space);
 }
 
-void ResetValue(NodeHandle node)
+void ResetValue(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetValue(frameNode, "");
 }
 
-void ResetSelected(NodeHandle node)
+void ResetSelected(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetSelected(frameNode, DEFAULT_SELECT);
 }
 
-void ResetSelectFontColor(NodeHandle node)
+void ResetSelectFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -260,7 +263,7 @@ void ResetSelectFontColor(NodeHandle node)
     SelectModelNG::SetFontColor(frameNode, selectTheme->GetFontColor());
 }
 
-void ResetSelectedOptionBgColor(NodeHandle node)
+void ResetSelectedOptionBgColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -269,7 +272,7 @@ void ResetSelectedOptionBgColor(NodeHandle node)
     SelectModelNG::SetSelectedOptionBgColor(frameNode, selectTheme->GetSelectedColor());
 }
 
-void ResetOptionBgColor(NodeHandle node)
+void ResetOptionBgColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -278,7 +281,7 @@ void ResetOptionBgColor(NodeHandle node)
     SelectModelNG::SetOptionBgColor(frameNode, selectTheme->GetBackgroundColor());
 }
 
-void ResetOptionFontColor(NodeHandle node)
+void ResetOptionFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -287,7 +290,7 @@ void ResetOptionFontColor(NodeHandle node)
     SelectModelNG::SetOptionFontColor(frameNode, selectTheme->GetMenuFontColor());
 }
 
-void ResetSelectedOptionFontColor(NodeHandle node)
+void ResetSelectedOptionFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -296,14 +299,14 @@ void ResetSelectedOptionFontColor(NodeHandle node)
     SelectModelNG::SetSelectedOptionFontColor(frameNode, selectTheme->GetSelectedColorText());
 }
 
-void ResetArrowPosition(NodeHandle node)
+void ResetArrowPosition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetArrowPosition(frameNode, ArrowPosition::END);
 }
 
-void ResetMenuAlign(NodeHandle node)
+void ResetMenuAlign(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -311,7 +314,7 @@ void ResetMenuAlign(NodeHandle node)
     SelectModelNG::SetMenuAlign(frameNode, menuAlignObj);
 }
 
-void ResetFont(NodeHandle node)
+void ResetFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -327,7 +330,7 @@ void ResetFont(NodeHandle node)
     SelectModelNG::SetItalicFontStyle(frameNode, textTheme->GetTextStyle().GetFontStyle());
 }
 
-void ResetOptionFont(NodeHandle node)
+void ResetOptionFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -343,7 +346,7 @@ void ResetOptionFont(NodeHandle node)
     SelectModelNG::SetOptionItalicFontStyle(frameNode, textTheme->GetTextStyle().GetFontStyle());
 }
 
-void ResetSelectedOptionFont(NodeHandle node)
+void ResetSelectedOptionFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -359,14 +362,14 @@ void ResetSelectedOptionFont(NodeHandle node)
     SelectModelNG::SetSelectedOptionItalicFontStyle(frameNode, textTheme->GetTextStyle().GetFontStyle());
 }
 
-void SetSelectOptionWidthFitTrigger(NodeHandle node, bool trigger)
+void SetSelectOptionWidthFitTrigger(ArkUINodeHandle node, ArkUI_Bool trigger)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetOptionWidthFitTrigger(frameNode, trigger);
 }
 
-void SetSelectOptionWidth(NodeHandle node, double value, int32_t unit)
+void SetSelectOptionWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -375,7 +378,7 @@ void SetSelectOptionWidth(NodeHandle node, double value, int32_t unit)
     SelectModelNG::SetOptionWidth(frameNode, optionWidth);
 }
 
-void ResetSelectOptionWidth(NodeHandle node)
+void ResetSelectOptionWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -384,7 +387,7 @@ void ResetSelectOptionWidth(NodeHandle node)
     SelectModelNG::SetOptionWidth(frameNode, optionWidth);
 }
 
-void SetSelectOptionHeight(NodeHandle node, double value, int32_t unit)
+void SetSelectOptionHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -392,49 +395,49 @@ void SetSelectOptionHeight(NodeHandle node, double value, int32_t unit)
     SelectModelNG::SetOptionHeight(frameNode, optionHeight);
 }
 
-void ResetSelectOptionHeight(NodeHandle node) {}
+void ResetSelectOptionHeight(ArkUINodeHandle node) {}
 
-void SetSelectWidth(NodeHandle node, double value, int32_t unit, const char* calcVlaue)
+void SetSelectWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
     if (unitEnum == DimensionUnit::CALC) {
         ViewAbstract::SetWidth(
-            frameNode, CalcLength(CalcLength(std::string(calcVlaue))));
+            frameNode, CalcLength(CalcLength(std::string(calcValue))));
     } else {
         ViewAbstract::SetWidth(frameNode, CalcLength(value, unitEnum));
     }
 }
 
-void ResetSelectWidth(NodeHandle node)
+void ResetSelectWidth(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, true);
 }
 
-void SetSelectHeight(NodeHandle node, double value, int32_t unit, const char* calcVlaue)
+void SetSelectHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
     if (unitEnum == DimensionUnit::CALC) {
         ViewAbstract::SetHeight(
-            frameNode, CalcLength(CalcLength(std::string(calcVlaue))));
+            frameNode, CalcLength(CalcLength(std::string(calcValue))));
     } else {
         ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
     }
 }
 
-void ResetSelectHeight(NodeHandle node)
+void ResetSelectHeight(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
-void SetSelectSize(NodeHandle node, const double* number, const int8_t* unit, const char** calc)
+void SetSelectSize(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit, ArkUI_CharPtr* calc)
 {
     CHECK_NULL_VOID(number);
     CHECK_NULL_VOID(unit);
@@ -456,7 +459,7 @@ void SetSelectSize(NodeHandle node, const double* number, const int8_t* unit, co
     }
 }
 
-void ResetSelectSize(NodeHandle node)
+void ResetSelectSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -464,9 +467,10 @@ void ResetSelectSize(NodeHandle node)
     ViewAbstract::SetHeight(frameNode, CalcLength(0.0));
 }
 
-ArkUISelectModifierAPI GetSelectModifier()
+namespace NodeModifier {
+const ArkUISelectModifier* GetSelectModifier()
 {
-    static const ArkUISelectModifierAPI modifier = { SetSpace, SetValue, SetSelected, SetSelectFontColor,
+    static const ArkUISelectModifier modifier = { SetSpace, SetValue, SetSelected, SetSelectFontColor,
         SetSelectedOptionBgColor, SetOptionBgColor, SetOptionFontColor, SetSelectedOptionFontColor, SetArrowPosition,
         SetMenuAlign, SetFont, SetOptionFont, SetSelectedOptionFont, ResetSpace, ResetValue, ResetSelected,
         ResetSelectFontColor, ResetSelectedOptionBgColor, ResetOptionBgColor, ResetOptionFontColor,
@@ -475,6 +479,7 @@ ArkUISelectModifierAPI GetSelectModifier()
         ResetSelectSize, SetSelectOptionWidthFitTrigger, SetSelectOptionWidth, ResetSelectOptionWidth,
         SetSelectOptionHeight, ResetSelectOptionHeight };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

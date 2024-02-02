@@ -24,7 +24,7 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemSelectable(ArkUIRuntimeCallInf
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> selectableArg = runtimeCallInfo->GetCallArgRef(NUM_1); // selectable value
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (selectableArg->IsBoolean()) {
         bool selectable = selectableArg->ToBoolean(vm)->Value();
         GetArkUINodeModifiers()->getGridItemModifier()->setGridItemSelectable(nativeNode, selectable);
@@ -39,7 +39,7 @@ ArkUINativeModuleValue GridItemBridge::ResetGridItemSelectable(ArkUIRuntimeCallI
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemSelectable(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -65,7 +65,7 @@ ArkUINativeModuleValue GridItemBridge::ResetGridItemSelected(ArkUIRuntimeCallInf
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemSelected(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

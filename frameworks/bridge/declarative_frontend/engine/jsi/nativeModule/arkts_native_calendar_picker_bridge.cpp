@@ -111,7 +111,7 @@ ArkUINativeModuleValue CalendarPickerBridge::SetEdgeAlign(ArkUIRuntimeCallInfo* 
             ArkTSUtils::ParseJsDimensionVp(vm, dyArg, dy);
         }
 
-        double values[SIZE_OF_TWO];
+        ArkUI_Float32 values[SIZE_OF_TWO];
         int units[SIZE_OF_TWO];
 
         values[NUM_0] = dx.Value();
@@ -186,7 +186,7 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerBorder(ArkUIRuntim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(5);   // 5: index of parameter left color
     Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(6);  // 6: index of parameter right color

@@ -68,7 +68,7 @@ ArkUINativeModuleValue GridColBridge::SetGridColOffset(ArkUIRuntimeCallInfo *run
         containerSizeArray[XXL] = -1;
     }
     GetArkUINodeModifiers()->getGridColModifier()->setGridColOffset(nativeNode, containerSizeArray,
-            MAX_NUMBER_BREAKPOINT);
+        MAX_NUMBER_BREAKPOINT);
     return panda::JSValueRef::Undefined(vm);
 }
 
