@@ -294,7 +294,7 @@ export struct SubHeader {
             .border({
               radius: MARGIN_NUM,
               width: BORDER_WIDTH,
-              color: $r('sys.color.ohos_id_color_focused_outline_transparent')
+              color: Color.Transparent
             })
           }
         })
