@@ -4194,12 +4194,12 @@ typedef enum {
      * @brief Scroll嵌套滚动选项，支持属性设置，属性重置和属性获取。
      *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[0]?.i32：可滚动组件往末尾端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。\n
-     * .value[1]?.i32：可滚动组件往起始端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。\n
+     * .value[0].i32：可滚动组件往末尾端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。\n
+     * .value[1].i32：可滚动组件往起始端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。\n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0]?.i32：可滚动组件往末尾端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。\n
-     * .value[1]?.i32：可滚动组件往起始端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。
+     * .value[0].i32：可滚动组件往末尾端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。\n
+     * .value[1].i32：可滚动组件往起始端滚动时的嵌套滚动，参数类型{@link ArkUI_ScrollNestedMode}。
      * 
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
