@@ -862,11 +862,11 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue sizeArray[] = { 20, 0 }
+     * ArkUI_NumberValue sizeArray[] = { 20, 0 };
      * ArkUI_AttributeItem item = { .value = sizeArray, .size = 2};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE);
-     * auto width = item->value[0].f32;
+     * auto imageSizeItem = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE);
+     * auto width = imageSizeItem->value[0].f32;
      * @endcode
      *
      */
@@ -883,11 +883,11 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue imageSizeStyle[] = { {.i32 = static_cast<int32_t>(ARKUI_IMAGE_SIZE_COVER) } }
+     * ArkUI_NumberValue imageSizeStyle[] = { {.i32 = static_cast<int32_t>(ARKUI_IMAGE_SIZE_COVER) } };
      * ArkUI_AttributeItem item = { .value = imageSizeStyle, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE_WITH_STYLE, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE_WITH_STYLE);
-     * auto blurStyle = item->value[0].i32
+     * auto imageSizeStyleItem = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE_WITH_STYLE);
+     * auto blurStyleValue = imageSizeStyleItem->value[0].i32;
      * @endcode
      */
     NODE_BACKGROUND_IMAGE_SIZE_WITH_STYLE,
@@ -913,11 +913,11 @@ typedef enum {
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue blurStyle[] = { { .i32 = static_cast<int32_t>(ARKUI_BLUR_STYLE_THICK)}}
+     * ArkUI_NumberValue blurStyle[] = { { .i32 = static_cast<int32_t>(ARKUI_BLUR_STYLE_THICK)}};
      * ArkUI_AttributeItem item = { .value = blurStyle, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_BLUR_STYLE , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_BLUR_STYLE);
-     * auto blurStyle = item->value[0].i32
+     * auto blurStyleItem = nativeNodeApi->getAttribute(nodeHandle, NODE_BACKGROUND_BLUR_STYLE);
+     * auto blurStyleType = blurStyleItem->value[0].i32;
      * @endcode
      *
      */
@@ -945,8 +945,8 @@ typedef enum {
      * ArkUI_NumberValue centerPointArray[] = { 20 };
      * ArkUI_AttributeItem item = { .value = centerPointArray, .size = 1};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TRANSFORM_CENTER , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TRANSFORM_CENTER);
-     * auto centerX = item->value[0].f32;
+     * auto transformCenterItem = nativeNodeApi->getAttribute(nodeHandle, NODE_TRANSFORM_CENTER);
+     * auto centerX = transformCenterItem->value[0].f32;
      * @endcode
      */
     NODE_TRANSFORM_CENTER,
@@ -978,8 +978,8 @@ typedef enum {
      * { .i32 = static_cast<int32_t>(ARKUI_CURVE_EASE_IN_OUT)}};
      * ArkUI_AttributeItem item = { .value = opacityTransition, .size = 3};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_OPACITY_TRANSITION , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_OPACITY_TRANSITION);
-     * auto opacity = item->value[0].f32;
+     * auto opacityTransitionItem = nativeNodeApi->getAttribute(nodeHandle, NODE_OPACITY_TRANSITION);
+     * auto opacity = opacityTransitionItem->value[0].f32;
      * @endcode
      */
     NODE_OPACITY_TRANSITION,
@@ -1019,8 +1019,8 @@ typedef enum {
      * { .i32 = static_cast<int32_t>(ARKUI_CURVE_SHARP)}};
      * ArkUI_AttributeItem item = { .value = rotateTransition, .size = 7};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_ROTATE_TRANSITION , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_ROTATE_TRANSITION);
-     * auto rotateX = item->value[0].f32;
+     * auto rotateTransitionItem = nativeNodeApi->getAttribute(nodeHandle, NODE_ROTATE_TRANSITION);
+     * auto rotateX = rotateTransitionItem->value[0].f32;
      * @endcode
      */
     NODE_ROTATE_TRANSITION,
@@ -1056,8 +1056,8 @@ typedef enum {
      * { .i32 = static_cast<int32_t>(ARKUI_CURVE_SHARP)}};
      * ArkUI_AttributeItem item = { .value = scaleTransition, .size = 5};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCALE_TRANSITION , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SCALE_TRANSITION);
-     * auto scaleX = item->value[0].f32;
+     * auto scaleTransitionItem = nativeNodeApi->getAttribute(nodeHandle, NODE_SCALE_TRANSITION);
+     * auto scaleX = scaleTransitionItem->value[0].f32;
      * @endcode
      */
     NODE_SCALE_TRANSITION,
@@ -1093,8 +1093,8 @@ typedef enum {
      * { .i32 = 3000}, { .i32 = static_cast<int32_t>(ARKUI_CURVE_SHARP)}};
      * ArkUI_AttributeItem item = { .value = translateTransition, .size = 5};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION);
-     * auto translateX = item->value[0].f32;
+     * auto translateTransitionItem = nativeNodeApi->getAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION);
+     * auto translateX = translateTransitionItem->value[0].f32;
      * @endcode
      */
     NODE_TRANSLATE_TRANSITION,
@@ -1499,8 +1499,8 @@ typedef enum {
      * ArkUI_NumberValue offsetArray[] = { 20, 0 };
      * ArkUI_AttributeItem item = { .value = offsetArray, .size = 2};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_OFFSET , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_OFFSET);
-     * auto offsetX = item->value[0].f32;
+     * auto offsetItem = nativeNodeApi->getAttribute(nodeHandle, NODE_OFFSET);
+     * auto offsetX = offsetItem->value[0].f32;
      * @endcode
      *
      */
@@ -1522,8 +1522,8 @@ typedef enum {
      * ArkUI_NumberValue pointArray[] = { 20, 0 };
      * ArkUI_AttributeItem item = { .value = pointArray, .size = 2};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_MARK_ANCHOR , &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_MARK_ANCHOR);
-     * auto pointX = item->value[0].f32;
+     * auto anchorItem = nativeNodeApi->getAttribute(nodeHandle, NODE_MARK_ANCHOR);
+     * auto pointX = anchorItem->value[0].f32;
      * @endcode
      *
      */
