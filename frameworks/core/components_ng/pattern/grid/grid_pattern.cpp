@@ -1299,7 +1299,7 @@ float GridPattern::EstimateHeight() const
     if (isSmoothScrolling_) {
         auto lineIndex = 0;
         scrollGridLayoutInfo_.GetLineIndexByIndex(gridLayoutInfo_.startIndex_, lineIndex);
-        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) +
+        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) - 
                gridLayoutInfo_.currentOffset_;
     } else {
         auto host = GetHost();
