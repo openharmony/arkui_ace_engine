@@ -20,6 +20,7 @@
 
 #include "ability_context.h"
 #include "ability_info.h"
+#include "base/memory/referenced.h"
 #include "configuration.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
@@ -243,21 +244,7 @@ public:
                 ContainerScope scope(instanceId_);
                 auto uiExtMgr = pipeline->GetUIExtensionManager();
                 if (uiExtMgr) {
-                    if (GreatNotEqual(keyboardRect.Height(), 0.0f)) {
-                        taskExecutor->PostTask(
-                            [pipeline] {
-                                CHECK_NULL_VOID(pipeline);
-                                pipeline->SetUIExtensionImeShow(true);
-                        },
-                        TaskExecutor::TaskType::UI);
-                    } else {
-                        taskExecutor->PostTask(
-                            [pipeline] {
-                                CHECK_NULL_VOID(pipeline);
-                                pipeline->SetUIExtensionImeShow(false);
-                        },
-                        TaskExecutor::TaskType::UI);
-                    }
+                    SetUIExtensionImeShow(keyboardRect, pipeline);
                 }
                 if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
                     return;
@@ -265,6 +252,7 @@ public:
             }
             auto curWindow = context->GetCurrentWindowRect();
             positionY -= curWindow.Top();
+            ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
                 [context, keyboardRect, rsTransaction, positionY, height] {
                     CHECK_NULL_VOID(context);
@@ -275,6 +263,25 @@ public:
     }
 
 private:
+    void SetUIExtensionImeShow(const Rect& keyboardRect, const RefPtr<NG::PipelineContext>& pipeline)
+    {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        if (GreatNotEqual(keyboardRect.Height(), 0.0f)) {
+            taskExecutor->PostTask(
+                [pipeline] {
+                    CHECK_NULL_VOID(pipeline);
+                    pipeline->SetUIExtensionImeShow(true);
+            }, TaskExecutor::TaskType::UI);
+        } else {
+            taskExecutor->PostTask(
+                [pipeline] {
+                    CHECK_NULL_VOID(pipeline);
+                    pipeline->SetUIExtensionImeShow(false);
+            }, TaskExecutor::TaskType::UI);
+        }
+    }
     int32_t instanceId_ = -1;
 };
 
