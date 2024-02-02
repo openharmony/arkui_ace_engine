@@ -36,24 +36,9 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    NavigationMode GetNavigationMode() const
-    {
-        return navigationMode_;
-    }
-
-    void SetNavigationMode(NavigationMode navigationMode)
-    {
-        navigationMode_ = navigationMode;
-    }
-
     void SetRealNavBarWidth(float realNavBarWidth)
     {
         realNavBarWidth_ = realNavBarWidth;
-    }
-
-    float GetRealNavBarWidth()
-    {
-        return realNavBarWidth_;
     }
 
     void SetIfNeedInit(bool ifNeedInit)
@@ -61,25 +46,9 @@ public:
         ifNeedInit_ = ifNeedInit;
     }
 
-    float GetRealNavBarHeight() const
-    {
-        return realNavBarHeight_;
-    }
-
-    float GetRealDividerWidth() const
-    {
-        return realDividerWidth_;
-    }
-
-    OffsetF GetNavBarOffset() const
-    {
-        return navBarOffset_;
-    }
-
     static bool IsAutoHeight(const RefPtr<LayoutProperty>& layoutProperty);
 
 private:
-    NavigationMode navigationMode_ = NavigationMode::AUTO;
     ACE_DISALLOW_COPY_AND_MOVE(NavigationLayoutAlgorithm);
     void MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& navBarSize);
@@ -108,7 +77,6 @@ private:
     void SetNavigationHeight(LayoutWrapper* layoutWrapper, SizeF& size);
 
     bool ifNeedInit_ = true;
-    OffsetF navBarOffset_;
 
     bool userSetNavBarRangeFlag_ = false;
     bool userSetMinContentFlag_ = false;
