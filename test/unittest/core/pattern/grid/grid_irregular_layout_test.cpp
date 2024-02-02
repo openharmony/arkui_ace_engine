@@ -323,8 +323,7 @@ HWTEST_F(GridIrregularLayoutTest, Fill001, TestSize.Level1)
     info.childrenCount_ = 10;
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
 
-    auto res = filler.Fill(
-        { .crossLens = { 50.0f, 50.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 0);
+    auto res = filler.Fill({ .crossLens = { 50.0f, 50.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 0);
 
     EXPECT_EQ(res.length, 6.0f);
 
@@ -352,8 +351,7 @@ HWTEST_F(GridIrregularLayoutTest, Fill002, TestSize.Level1)
     info.childrenCount_ = 10;
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
 
-    auto res = filler.Fill(
-        { .crossLens = { 50.0f, 50.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f,  0);
+    auto res = filler.Fill({ .crossLens = { 50.0f, 50.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 0);
 
     EXPECT_EQ(res.length, 6.0f);
 
@@ -363,8 +361,7 @@ HWTEST_F(GridIrregularLayoutTest, Fill002, TestSize.Level1)
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_11);
 
     // call Fill on an already filled matrix
-    res = filler.Fill(
-        { .crossLens = { 50.0f, 50.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 0);
+    res = filler.Fill({ .crossLens = { 50.0f, 50.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 0);
 
     EXPECT_EQ(res.length, 6.0f);
 
@@ -392,24 +389,21 @@ HWTEST_F(GridIrregularLayoutTest, Fill003, TestSize.Level1)
     info.childrenCount_ = 11;
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
 
-    auto res = filler.Fill(
-        { .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 600.0f, 0);
+    auto res = filler.Fill({ .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 600.0f, 0);
 
     EXPECT_EQ(res.length, 602.0f);
 
     EXPECT_EQ(res.endIndex, 3);
     EXPECT_EQ(res.endMainLineIndex, 5);
 
-    res = filler.Fill(
-        { .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 2);
+    res = filler.Fill({ .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 2);
 
     EXPECT_EQ(res.length, 1004.0f);
 
     EXPECT_EQ(res.endIndex, 8);
     EXPECT_EQ(res.endMainLineIndex, 10);
 
-    res = filler.Fill(
-        { .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 7);
+    res = filler.Fill({ .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 7);
 
     EXPECT_EQ(res.length, 803.0f);
 
@@ -436,8 +430,7 @@ HWTEST_F(GridIrregularLayoutTest, Fill004, TestSize.Level1)
     info.childrenCount_ = 8;
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
 
-    auto res = filler.Fill(
-        { .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 300.0f, 0);
+    auto res = filler.Fill({ .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 300.0f, 0);
 
     EXPECT_EQ(res.length, 401.0f);
 
@@ -445,8 +438,7 @@ HWTEST_F(GridIrregularLayoutTest, Fill004, TestSize.Level1)
     EXPECT_EQ(res.endMainLineIndex, 2);
 
     // call Fill on an already filled matrix
-    res = filler.Fill(
-        { .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 500.0f, 2);
+    res = filler.Fill({ .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 500.0f, 2);
 
     EXPECT_EQ(res.length, 602.0f);
 
@@ -917,6 +909,147 @@ HWTEST_F(GridIrregularLayoutTest, MeasureTarget001, TestSize.Level1)
     EXPECT_EQ(info.endIndex_, 8);
     EXPECT_EQ(info.startIndex_, 5);
     EXPECT_EQ(info.startMainLineIndex_, 7);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::TestReset001
+ * @tc.desc: Test changing crossCount to an existing matrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, TestReset001, TestSize.Level1)
+{
+    GridLayoutInfo oldInfo;
+    oldInfo.crossCount_ = 2;
+    oldInfo.childrenCount_ = 12;
+    oldInfo.gridMatrix_ = MATRIX_DEMO_6;
+    oldInfo.currentOffset_ = -10.0f;
+    oldInfo.startMainLineIndex_ = 2;
+    oldInfo.startIndex_ = 3;
+    oldInfo.endMainLineIndex_ = 7;
+    oldInfo.endIndex_ = 11;
+    oldInfo.lineHeightMap_ = {
+        { 0, 50.0f },
+        { 1, 50.0f },
+        { 2, 50.0f },
+        { 3, 50.0f },
+        { 4, 50.0f },
+        { 5, 50.0f },
+        { 6, 50.0f },
+        { 7, 50.0f },
+    };
+    // changing cross count, should jump to the current startIndex
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo6());
+        model.SetColumnsGap(Dimension { 5.0f });
+        model.SetRowsGap(Dimension { 1.0f });
+        CreateFixedItem(12);
+    });
+    LayoutConstraintF constraint { .maxSize = { 610.0f, 1000.0f }, .percentReference = { 610.0f, 1000.0f } };
+    layoutProperty_->layoutConstraint_ = constraint;
+
+    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
+    algo->wrapper_ = AceType::RawPtr(frameNode_);
+
+    algo->Measure(AceType::RawPtr(frameNode_));
+
+    const auto& info = algo->gridLayoutInfo_;
+    EXPECT_EQ(info.childrenCount_, 12);
+    EXPECT_EQ(info.crossCount_, 3);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_6_VARIATION);
+    EXPECT_EQ(info.startIndex_, 2);
+    EXPECT_EQ(info.endIndex_, 11);
+    EXPECT_EQ(info.startMainLineIndex_, 1);
+    EXPECT_EQ(info.endMainLineIndex_, 5);
+    EXPECT_EQ(info.currentOffset_, -10.0f);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::TestReset002
+ * @tc.desc: Test IrregularLayout::CheckForReset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, TestReset002, TestSize.Level1)
+{
+    GridLayoutInfo oldInfo;
+    oldInfo.crossCount_ = 2;
+    // matrix has been cleared
+    oldInfo.gridMatrix_ = {};
+    oldInfo.currentOffset_ = -70.0f;
+    oldInfo.startMainLineIndex_ = 3;
+    oldInfo.startIndex_ = 5;
+    oldInfo.endMainLineIndex_ = 7;
+    oldInfo.endIndex_ = 10;
+    oldInfo.crossCount_ = 3;
+    oldInfo.lineHeightMap_ = {
+        { 0, 50.0f },
+    };
+    // changing children count
+    Create([](GridModelNG model) { model.SetColumnsTemplate("1fr 1fr 1fr"); });
+    oldInfo.childrenCount_ = 8;
+    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
+    algo->wrapper_ = AceType::RawPtr(frameNode_);
+
+    algo->CheckForReset(3);
+
+    const auto& info = algo->gridLayoutInfo_;
+    EXPECT_TRUE(info.gridMatrix_.empty());
+    EXPECT_TRUE(info.lineHeightMap_.empty());
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::TestReset003
+ * @tc.desc: Test IrregularLayout::CheckForReset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, TestReset003, TestSize.Level1)
+{
+    GridLayoutInfo oldInfo;
+    // matrix has been cleared
+    oldInfo.gridMatrix_ = MATRIX_DEMO_1;
+    oldInfo.currentOffset_ = -20.0f;
+    oldInfo.startMainLineIndex_ = 3;
+    oldInfo.startIndex_ = 5;
+    oldInfo.endMainLineIndex_ = 6;
+    oldInfo.endIndex_ = 10;
+    oldInfo.crossCount_ = 3;
+    oldInfo.lineHeightMap_ = {
+        { 0, 50.0f },
+        { 1, 50.0f },
+        { 2, 50.0f },
+        { 3, 50.0f },
+        { 4, 50.0f },
+        { 5, 50.0f },
+        { 6, 50.0f },
+    };
+    // changing children count
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo1());
+    });
+    oldInfo.childrenCount_ = 11;
+    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
+    algo->wrapper_ = AceType::RawPtr(frameNode_);
+
+    frameNode_->childrenUpdatedFrom_ = 5;
+    algo->CheckForReset(3);
+
+    const auto& info = algo->gridLayoutInfo_;
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.jumpIndex_, 5);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(algo->postJumpOffset_, -20.0f);
+    EXPECT_EQ(info.lineHeightMap_.size(), 3);
+    const decltype(GridLayoutInfo::gridMatrix_) cmp = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 1 } } },   // 0 | 0 | 1
+        { 1, { { 0, 2 }, { 1, -2 }, { 2, -1 } } }, // 2 | 2 | 1
+        { 2, { { 0, 3 }, { 1, 4 }, { 2, -1 } } },  // 3 | 4 | 1
+    };
+    EXPECT_EQ(info.gridMatrix_, cmp);
 }
 
 /**

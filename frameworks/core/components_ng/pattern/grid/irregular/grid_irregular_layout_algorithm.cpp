@@ -113,21 +113,23 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
 }
 
 namespace {
-inline void ResetInfo(GridLayoutInfo& info)
+inline void PrepareJumpOnReset(GridLayoutInfo& info)
+{
+    info.jumpIndex_ = info.startIndex_;
+    info.scrollAlign_ = ScrollAlign::START;
+}
+inline void ResetMaps(GridLayoutInfo& info)
 {
     info.gridMatrix_.clear();
     info.lineHeightMap_.clear();
+} 
+inline void ResetLayoutRange(GridLayoutInfo& info)
+{
     info.startIndex_ = 0;
     info.endIndex_ = -1;
     info.startMainLineIndex_ = 0;
     info.endMainLineIndex_ = -1;
     info.currentOffset_ = 0.0f;
-}
-
-void PrepareJumpOnReset(GridLayoutInfo& info)
-{
-    info.jumpIndex_ = info.startIndex_;
-    info.scrollAlign_ = ScrollAlign::START;
 }
 } // namespace
 
@@ -136,14 +138,16 @@ void GridIrregularLayoutAlgorithm::CheckForReset(int32_t lastCrossCount)
     auto& info = gridLayoutInfo_;
     if (lastCrossCount > 0 && lastCrossCount != info.crossCount_) {
         // reset layout info and perform jump to current startIndex
-        PrepareJumpOnReset(info);
         postJumpOffset_ = info.currentOffset_;
-        ResetInfo(info);
+        PrepareJumpOnReset(info);
+        ResetMaps(info);
+        ResetLayoutRange(info);
         return;
     }
 
     if (info.IsResetted()) {
-        ResetInfo(info);
+        ResetMaps(info);
+        ResetLayoutRange(info);
         return;
     }
 
@@ -152,9 +156,10 @@ void GridIrregularLayoutAlgorithm::CheckForReset(int32_t lastCrossCount)
         auto it = info.FindInMatrix(updateIdx);
         info.ClearHeightsToEnd(it->first);
         info.ClearMatrixToEnd(updateIdx, it->first);
-        if (updateIdx < info.startIndex_) {
-            PrepareJumpOnReset(info);
+        if (updateIdx <= info.startIndex_) {
             postJumpOffset_ = info.currentOffset_;
+            PrepareJumpOnReset(info);
+            ResetLayoutRange(info);
         }
     }
 }

@@ -1103,9 +1103,9 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
         gridLayoutInfo_.offsetEnd_ = false;
     }
     if (!cacheValid) {
-        info.ClearHeightsToEnd(info.endMainLineIndex_ + 1);
+        info.ClearMapsToEnd(info.endMainLineIndex_ + 1);
         // run out of reord, startMainLineIndex is larger by 1 than real start main line index, so reduce 1
-        info.ClearHeightsFromStart(info.startMainLineIndex_ > info.endMainLineIndex_ ? info.startMainLineIndex_ - 1
+        info.ClearMapsFromStart(info.startMainLineIndex_ > info.endMainLineIndex_ ? info.startMainLineIndex_ - 1
                                                                                   : info.startMainLineIndex_);
     }
     return runOutOfRecord;

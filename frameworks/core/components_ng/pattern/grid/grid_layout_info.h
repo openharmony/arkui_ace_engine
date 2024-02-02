@@ -146,18 +146,25 @@ struct GridLayoutInfo {
     std::pair<int32_t, int32_t> FindItemInRange(int32_t target) const;
 
     /**
+     * @brief clears lineHeightMap_ and gridMatrix_ starting from line [idx]
+     *
+     * @param idx starting line index
+     */
+    void ClearMapsToEnd(int32_t idx);
+
+    /**
+     * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
+     *
+     * @param idx ending line index, exclusive.
+     */
+    void ClearMapsFromStart(int32_t idx);
+
+    /**
      * @brief clears lineHeightMap_ starting from line [idx]
      *
      * @param idx starting line index
      */
     void ClearHeightsToEnd(int32_t idx);
-
-    /**
-     * @brief clears lineHeightMap_ in range [0, idx)
-     *
-     * @param idx ending line index, exclusive.
-     */
-    void ClearHeightsFromStart(int32_t idx);
 
     /**
      * @brief clear gridMatrix_ in range [idx, end)
