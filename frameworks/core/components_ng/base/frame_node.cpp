@@ -3326,7 +3326,7 @@ bool FrameNode::SetParentLayoutConstraint(const SizeF& size) const
     layoutConstraint.UpdatePercentReference(size);
     layoutConstraint.UpdateMaxSizeWithCheck(size);
     layoutConstraint.UpdateIllegalParentIdealSizeWithCheck(OptionalSize(size));
-    layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty_->UpdateParentLayoutConstraint(layoutConstraint);
     return true;
 }
 

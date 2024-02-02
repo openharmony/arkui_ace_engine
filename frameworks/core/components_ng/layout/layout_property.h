@@ -73,6 +73,11 @@ public:
         return contentConstraint_;
     }
 
+    const std::optional<LayoutConstraintF>& GetParentLayoutConstraint() const
+    {
+        return parentLayoutConstraint_;
+    }
+
     const std::unique_ptr<MagicItemProperty>& GetMagicItemProperty() const
     {
         return magicItemProperty_;
@@ -183,6 +188,11 @@ public:
     virtual void UpdateCalcMaxSize(const CalcSize& value);
 
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
+
+    void UpdateParentLayoutConstraint(const LayoutConstraintF& parentConstraint)
+    {
+        parentLayoutConstraint_ = parentConstraint;
+    }
 
     void UpdateMarginSelfIdealSize(const SizeF& value);
 
@@ -310,6 +320,9 @@ private:
     // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;
     std::optional<LayoutConstraintF> contentConstraint_;
+
+    // layoutConstraint_ set by builderNode
+    std::optional<LayoutConstraintF> parentLayoutConstraint_;
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
     std::unique_ptr<PaddingProperty> padding_;
