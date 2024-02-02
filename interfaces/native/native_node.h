@@ -1447,10 +1447,10 @@ typedef enum {
      * @brief 对比度属性，支持属性设置，属性重置和属性获取接口.
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：对比度，等于1时为原图，越大则对比度越高； \n
+     * .value[0].f32：对比度，等于1时为原图，越大则对比度越高，取值范围：[0, 10)； \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：对比度； \n
+     * .value[0].f32：对比度，取值范围：[0, 10)； \n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
