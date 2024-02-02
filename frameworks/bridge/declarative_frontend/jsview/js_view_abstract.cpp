@@ -760,26 +760,6 @@ void SetPlacementOnTopVal(const JSRef<JSObject>& popupObj, const RefPtr<PopupPar
     }
 }
 
-bool IsPopupCreated()
-{
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_RETURN(targetNode, false);
-    auto targetId = targetNode->GetId();
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, false);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_RETURN(context, false);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_RETURN(overlayManager, false);
-    auto popupInfo = overlayManager->GetPopupInfo(targetId);
-    if (popupInfo.popupId == -1 || !popupInfo.popupNode) {
-        return false;
-    }
-    return true;
-}
-
 void ParsePopupCommonParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
@@ -5149,15 +5129,12 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     if (info.Length() < 2) {
         return;
     }
-
     if (!info[0]->IsBoolean() && !info[0]->IsObject()) {
         return;
     }
-
     if (!info[1]->IsObject()) {
         return;
     }
-
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     // Set IsShow to popupParam
     if (info[0]->IsBoolean()) {
@@ -5168,32 +5145,33 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         popupParam->SetOnStateChange(std::move(callback));
         popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
     }
-
     // Set popup to popupParam
     auto popupObj = JSRef<JSObject>::Cast(info[1]);
-
     if (popupObj->GetProperty("message")->IsString()) {
         ParsePopupParam(info, popupObj, popupParam); // Parse PopupOptions param
         ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
     } else if (!popupObj->GetProperty("builder").IsEmpty()) {
         ParseCustomPopupParam(info, popupObj, popupParam); // Parse CustomPopupOptions param
         auto builderValue = popupObj->GetProperty("builder");
-        if (!builderValue->IsObject() || (!IsPopupCreated() && !popupParam->IsShow())) {
+        if (!builderValue->IsObject()) {
             return;
         }
-
         JSRef<JSObject> builderObj;
         builderObj = JSRef<JSObject>::Cast(builderValue);
         auto builder = builderObj->GetProperty("builder");
         if (!builder->IsFunction()) {
             return;
         }
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-        CHECK_NULL_VOID(builderFunc);
-        ViewStackModel::GetInstance()->NewScope();
-        builderFunc->Execute();
-        auto customNode = ViewStackModel::GetInstance()->Finish();
-        ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
+        if (popupParam->IsShow()) {
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+            CHECK_NULL_VOID(builderFunc);
+            ViewStackModel::GetInstance()->NewScope();
+            builderFunc->Execute();
+            auto customNode = ViewStackModel::GetInstance()->Finish();
+            ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
+        } else {
+            ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
+        }
     } else {
         return;
     }
