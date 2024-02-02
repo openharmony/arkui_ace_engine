@@ -31,6 +31,8 @@
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
+#include "core/interfaces/native/node/node_checkbox_modifier.h"
+#include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "frameworks/core/common/container.h"
 
@@ -150,6 +152,14 @@ const ComponentAsyncEventHandler TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTimePickerOnChange,
 };
 
+const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetCheckboxChange,
+};
+
+const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetSliderChange,
+};
+
 /* clang-format on */
 void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId, void* extraParam)
 {
@@ -235,6 +245,24 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
                 return;
             }
             eventHandle = TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_CHECKBOX: {
+            // timepicker event type.
+            if (subKind >= sizeof(CHECKBOX_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SLIDER: {
+            // timepicker event type.
+            if (subKind >= sizeof(SLIDER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SLIDER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {

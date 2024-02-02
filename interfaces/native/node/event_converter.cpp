@@ -66,6 +66,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_TOUCH;
         case NODE_ON_CLICK:
             return ON_CLICK;
+        case NODE_CHECKBOX_EVENT_ON_CHANGE:
+            return ON_CHECKBOX_CHANGE;
+        case NODE_SLIDER_EVENT_ON_CHANGE:
+            return ON_SLIDER_CHANGE;
         default:
             return -1;
     }
@@ -116,6 +120,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_TOUCH_EVENT;
         case ON_CLICK:
             return NODE_ON_CLICK;
+        case ON_CHECKBOX_CHANGE:
+            return NODE_CHECKBOX_EVENT_ON_CHANGE;
+        case ON_SLIDER_CHANGE:
+            return NODE_SLIDER_EVENT_ON_CHANGE;
         default:
             return -1;
     }
