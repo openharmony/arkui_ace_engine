@@ -69,8 +69,8 @@ struct AutoScrollParam {
     bool isFirstRun_ = true;
 };
 
-class RichEditorPattern : public TextPattern, public TextInputClient {
-    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, TextInputClient);
+class RichEditorPattern : public TextPattern, public ScrollablePattern, public TextInputClient {
+    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient);
 
 public:
     RichEditorPattern();
@@ -346,6 +346,33 @@ public:
     bool OnBackPressed() override;
 
     // Add for Scroll
+
+    void OnAttachToFrameNode() override
+    {
+        TextPattern::OnAttachToFrameNode();
+    }
+
+    void OnDetachFromFrameNode(FrameNode* node) override
+    {
+        TextPattern::OnDetachFromFrameNode(node);
+        ScrollablePattern::OnDetachFromFrameNode(node);
+    }
+
+    bool IsAtBottom() const override
+    {
+        return true;
+    }
+
+    bool IsAtTop() const override
+    {
+        return true;
+    }
+
+    bool UpdateCurrentOffset(float offset, int32_t source) override
+    {
+        return true;
+    }
+
     const RectF& GetTextRect() override
     {
         return richTextRect_;
