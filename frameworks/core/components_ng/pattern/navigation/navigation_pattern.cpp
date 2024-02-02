@@ -316,8 +316,9 @@ void NavigationPattern::CheckTopNavPathChange(
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto textfieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-    CHECK_NULL_VOID(textfieldManager);
-    textfieldManager->ProcessNavKeyboard();
+    if (textfieldManager) {
+        textfieldManager->ProcessNavKeyboard();
+    }
 #endif
 
     isChanged_ = true;
