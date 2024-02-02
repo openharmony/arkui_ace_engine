@@ -397,10 +397,7 @@ public:
     void NotifyMemoryLevel(int32_t level) override;
     void FlushMessages() override;
 
-    void FlushUITasks() override
-    {
-        taskScheduler_->FlushTask();
-    }
+    void FlushUITasks() override;
 
     bool IsLayouting() const override
     {
@@ -601,6 +598,7 @@ public:
     const SerializedGesture& GetSerializedGesture() const override;
     // return value means whether it has printed info
     bool PrintVsyncInfoIfNeed() const override;
+    void SetUIExtensionImeShow(bool imeShow);
 
     void CheckVirtualKeyboardHeight() override;
 
@@ -625,7 +623,6 @@ protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
-    void FlushFrameTrace();
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;

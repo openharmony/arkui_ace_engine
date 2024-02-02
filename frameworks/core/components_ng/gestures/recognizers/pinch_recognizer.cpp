@@ -62,7 +62,6 @@ void PinchRecognizer::OnRejected()
     if (refereeState_ == RefereeState::SUCCEED) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 
@@ -76,6 +75,10 @@ bool PinchRecognizer::IsCtrlBeingPressed()
 void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
+        return;
+    }
+    if (!IsInAttachedNode(event)) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 

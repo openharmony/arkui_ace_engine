@@ -86,6 +86,7 @@ void JSIfElse::SetBranchId(const JSCallbackInfo& info)
     IfElseModel::GetInstance()->SetBranchId(branchid, removedElmtIds);
 
     if ((info.Length() < paramsLength) || (!info[0]->IsNumber()) || (!info[1]->IsArray())) {
+        TAG_LOGD(AceLogTag::ACE_IF, "If Params is not expected, maybe use old SDK");
         return;
     }
 

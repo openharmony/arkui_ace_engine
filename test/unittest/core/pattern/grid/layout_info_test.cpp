@@ -15,25 +15,13 @@
 #include "gtest/gtest.h"
 
 #define private public
-#include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include "irregular_matrices.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 class GridLayoutInfoTest : public testing::Test {};
 
-namespace {
-const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_1 = {
-    { 0, { { 0, 0 }, { 1, 1 } } },
-    { 1, { { 0, 2 }, { 1, -1 } } },
-    { 2, { { 0, 3 }, { 1, 4 } } },
-    { 3, { { 0, 5 }, { 1, -1 } } },
-    { 4, { { 0, 6 }, { 1, 7 } } },
-    { 5, { { 0, 8 }, { 1, 9 } } },
-    { 6, { { 0, 10 }, { 1, -1 } } },
-    { 7, { { 0, 11 } } },
-};
-}
 /**
  * @tc.name: GridLayoutInfo::GetContentHeight001
  * @tc.desc: test GetContentHeight while changing endIndex
@@ -44,7 +32,7 @@ HWTEST_F(GridLayoutInfoTest, GetContentHeight001, TestSize.Level1)
     GridLayoutInfo info;
     info.lineHeightMap_ = { { 0, 5.0f }, { 1, 10.0f }, { 2, 5.0f }, { 3, 10.0f }, { 4, 5.0f }, { 5, 5.0f },
         { 6, 10.0f }, { 7, 5.0f } };
-    info.gridMatrix_ = MATRIX_DEMO_1;
+    info.gridMatrix_ = MATRIX_DEMO_3;
 
     GridLayoutOptions option {
         .irregularIndexes = { 2, 5, 10 },
@@ -75,7 +63,7 @@ HWTEST_F(GridLayoutInfoTest, GetContentHeight002, TestSize.Level1)
     GridLayoutInfo info;
     info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f } };
     info.gridMatrix_ = {
-        { 0, { { 0, 0 }, { 1, -1 }, { 2, -1 } } },
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
         { 1, { { 0, 1 }, { 1, 2 }, { 2, 3 } } },
         { 2, { { 0, 4 } } },
     };
@@ -101,7 +89,7 @@ HWTEST_F(GridLayoutInfoTest, GetContentHeightBigItem001, TestSize.Level1)
     info.crossCount_ = 2;
     info.childrenCount_ = 12;
 
-    info.gridMatrix_ = MATRIX_DEMO_1;
+    info.gridMatrix_ = MATRIX_DEMO_3;
     constexpr float trueHeight = 47.0f;
     constexpr float error = trueHeight * 0.1f;
 
@@ -119,31 +107,6 @@ HWTEST_F(GridLayoutInfoTest, GetContentHeightBigItem001, TestSize.Level1)
     EXPECT_LE(std::abs(estimation - trueHeight), error);
 }
 
-namespace {
-const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_2 = {
-    { 0, { { 1, 0 }, { 2, 0 } } },
-    { 1, { { 0, 1 }, { 1, 0 }, { 2, 0 } } },
-    { 2, { { 0, 2 }, { 1, 3 }, { 2, 4 } } },
-    { 3, { { 0, 5 }, { 1, 6 }, { 2, 7 } } },
-    { 4, { { 0, 8 }, { 1, 8 }, { 1, 7 } } },
-    { 5, { { 0, 8 }, { 1, 8 }, { 2, 9 } } },
-    { 6, { { 0, 8 }, { 1, 8 }, { 2, 10 } } },
-    { 7, { { 0, 8 }, { 1, 8 }, { 2, 11 } } },
-    { 8, { { 0, 8 }, { 1, 8 }, { 2, 12 } } },
-    { 9, { { 0, 8 }, { 1, 8 }, { 2, 13 } } },
-    { 10, { { 0, 8 }, { 1, 8 }, { 2, 14 } } },
-    { 11, { { 0, 15 }, { 1, 16 }, { 2, 17 } } },
-    { 12, { { 0, 18 }, { 1, 19 } } },
-    { 13, { { 0, 20 }, { 1, 20 }, { 2, 21 } } },
-    { 14, { { 0, 20 }, { 1, 20 }, { 2, 22 } } },
-    { 15, { { 0, 23 }, { 1, 24 }, { 2, 25 } } },
-    { 16, { { 0, 26 }, { 1, 27 }, { 2, 28 } } },
-    { 17, { { 0, 29 }, { 1, 30 } } },
-    { 18, { { 0, 31 }, { 1, 31 } } },
-    { 19, { { 0, 31 }, { 1, 31 } } },
-};
-}
-
 /**
  * @tc.name: GridLayoutInfo::GetContentHeightBigItem002
  * @tc.desc: test GetContentHeight when hasBigItem_ == true, adapted from test demo.
@@ -156,7 +119,7 @@ HWTEST_F(GridLayoutInfoTest, GetContentHeightBigItem002, TestSize.Level1)
     info.crossCount_ = 3;
     info.childrenCount_ = 32;
 
-    info.gridMatrix_ = MATRIX_DEMO_2;
+    info.gridMatrix_ = MATRIX_DEMO_4;
     // using mainGap = 5.0f and lineHeight = 100.0f
     constexpr float trueHeight = 2095.0f;
     constexpr float error = trueHeight * 0.1f;
@@ -192,7 +155,7 @@ HWTEST_F(GridLayoutInfoTest, GetContentOffsetBigItem001, TestSize.Level1)
     info.crossCount_ = 3;
     info.childrenCount_ = 32;
 
-    info.gridMatrix_ = MATRIX_DEMO_2;
+    info.gridMatrix_ = MATRIX_DEMO_4;
 
     info.startIndex_ = 8;
     info.startMainLineIndex_ = 9;
@@ -225,7 +188,7 @@ HWTEST_F(GridLayoutInfoTest, GetContentOffsetBigItem002, TestSize.Level1)
     info.crossCount_ = 3;
     info.childrenCount_ = 32;
 
-    info.gridMatrix_ = MATRIX_DEMO_2;
+    info.gridMatrix_ = MATRIX_DEMO_4;
 
     info.startIndex_ = 15;
     info.startMainLineIndex_ = 11;
@@ -250,7 +213,7 @@ HWTEST_F(GridLayoutInfoTest, GetContentOffsetBigItem003, TestSize.Level1)
     info.crossCount_ = 3;
     info.childrenCount_ = 32;
 
-    info.gridMatrix_ = MATRIX_DEMO_2;
+    info.gridMatrix_ = MATRIX_DEMO_4;
 
     info.startIndex_ = 20;
     info.startMainLineIndex_ = 14;
@@ -272,16 +235,7 @@ HWTEST_F(GridLayoutInfoTest, GetContentOffset001, TestSize.Level1)
     GridLayoutInfo info;
     info.lineHeightMap_ = { { 0, 5.0f }, { 1, 10.0f }, { 2, 5.0f }, { 3, 10.0f }, { 4, 5.0f }, { 5, 5.0f },
         { 6, 10.0f }, { 7, 5.0f } };
-    info.gridMatrix_ = {
-        { 0, { { 0, 0 }, { 1, 1 } } },
-        { 1, { { 0, 2 }, { 1, -1 } } },
-        { 2, { { 0, 3 }, { 1, 4 } } },
-        { 3, { { 0, 5 }, { 1, -1 } } },
-        { 4, { { 0, 6 }, { 1, 7 } } },
-        { 5, { { 0, 8 }, { 1, 9 } } },
-        { 6, { { 0, 10 }, { 1, -1 } } },
-        { 7, { { 0, 11 } } },
-    };
+    info.gridMatrix_ = MATRIX_DEMO_6;
 
     GridLayoutOptions option {
         .irregularIndexes = { 2, 5, 10 },
@@ -362,12 +316,7 @@ HWTEST_F(GridLayoutInfoTest, GetContentHeightRegular001, TestSize.Level1)
 HWTEST_F(GridLayoutInfoTest, FindItemInRange001, TestSize.Level1)
 {
     GridLayoutInfo info;
-    info.gridMatrix_ = {
-        { 0, { { 0, 0 }, { 1, -1 }, { 2, -1 } } },
-        { 1, { { 0, 2 }, { 1, 3 }, { 2, 4 } } },
-        { 2, { { 0, 5 }, { 1, 6 }, { 2, -1 } } },
-        { 3, { { 0, 7 }, { 1, -1 }, { 2, 9 } } },
-    };
+    info.gridMatrix_ = MATRIX_DEMO_7;
     info.startMainLineIndex_ = 0;
     info.endMainLineIndex_ = 3;
     auto res = info.FindItemInRange(5);
@@ -390,30 +339,7 @@ HWTEST_F(GridLayoutInfoTest, FindItemInRange001, TestSize.Level1)
     EXPECT_EQ(info.FindItemInRange(7).first, -1);
 }
 
-/**
- * @tc.name: UpdateStartIdxToLastItem001
- * @tc.desc: Test GridLayoutInfo::UpdateStartIdxToLastItem
- * @tc.type: FUNC
- */
-HWTEST_F(GridLayoutInfoTest, UpdateStartIdxToLastItem001, TestSize.Level1)
-{
-    GridLayoutInfo info;
-    info.gridMatrix_ = {
-        { 0, { { 0, 0 }, { 1, -1 }, { 2, -1 } } },
-        { 1, { { 0, 2 }, { 1, 3 }, { 2, -1 } } },
-        { 2, { { 0, 5 }, { 1, -1 }, { 2, -1 } } },
-        { 3, { { 0, 7 }, { 1, -1 }, { 2, -1 } } },
-    };
-    info.UpdateStartIdxToLastItem();
-    EXPECT_EQ(info.startIndex_, 7);
-    EXPECT_EQ(info.startMainLineIndex_, 3);
-
-    info.gridMatrix_.clear();
-    info.UpdateStartIdxToLastItem();
-    EXPECT_EQ(info.startIndex_, 0);
-    EXPECT_EQ(info.startMainLineIndex_, 0);
-}
-
+namespace {
 void CheckEachIndex(const GridLayoutInfo& info, int32_t maxIdx)
 {
     for (int i = 0; i <= maxIdx; ++i) {
@@ -429,6 +355,7 @@ void CheckEachIndex(const GridLayoutInfo& info, int32_t maxIdx)
         EXPECT_TRUE(foundFlag);
     }
 }
+} // namespace
 
 /**
  * @tc.name: FindInMatrix001
@@ -441,7 +368,7 @@ HWTEST_F(GridLayoutInfoTest, FindInMatrix, TestSize.Level1)
     auto nullIt = info.FindInMatrix(1);
     EXPECT_EQ(nullIt, info.gridMatrix_.end());
 
-    info.gridMatrix_ = MATRIX_DEMO_2;
+    info.gridMatrix_ = MATRIX_DEMO_4;
 
     CheckEachIndex(info, 31);
 
@@ -457,11 +384,27 @@ HWTEST_F(GridLayoutInfoTest, FindInMatrix, TestSize.Level1)
 HWTEST_F(GridLayoutInfoTest, FindInMatrix002, TestSize.Level1)
 {
     GridLayoutInfo info;
-    info.gridMatrix_ = MATRIX_DEMO_1;
+    info.gridMatrix_ = MATRIX_DEMO_3;
 
     CheckEachIndex(info, 11);
 
     auto nullIt = info.FindInMatrix(12);
+    EXPECT_EQ(nullIt, info.gridMatrix_.end());
+}
+
+/**
+ * @tc.name: FindInMatrix003
+ * @tc.desc: Test GridLayoutInfo::FindInMatrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix003, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = MATRIX_DEMO_5;
+
+    CheckEachIndex(info, 10);
+
+    auto nullIt = info.FindInMatrix(11);
     EXPECT_EQ(nullIt, info.gridMatrix_.end());
 }
 } // namespace OHOS::Ace::NG

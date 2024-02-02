@@ -23,6 +23,8 @@
 #include "base/utils/type_definition.h"
 
 namespace OHOS::Ace {
+constexpr int32_t UNSUPPORTED_CODE = 801;
+
 struct TextDataDetectInfo {
     std::string text;
     std::string module;
@@ -30,7 +32,7 @@ struct TextDataDetectInfo {
 };
 
 struct TextDataDetectResult {
-    int32_t code = 0;
+    int32_t code = UNSUPPORTED_CODE;
     std::string entity;
     std::string wordPos;
     std::string menuOption;

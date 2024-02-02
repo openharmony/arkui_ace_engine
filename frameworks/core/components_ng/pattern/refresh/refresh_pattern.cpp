@@ -129,6 +129,11 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd(info.GetMainVelocity());
     };
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragCancel();
+    };
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
     if (panEvent_) {
@@ -136,7 +141,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
 
     panEvent_ = MakeRefPtr<PanEvent>(
-        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), nullptr);
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
@@ -315,6 +320,11 @@ void RefreshPattern::HandleDragEnd(float speed)
     } else {
         HandleDragEndLowVersion();
     }
+}
+
+void RefreshPattern::HandleDragCancel()
+{
+    HandleDragEnd(0.0f);
 }
 
 float RefreshPattern::CalculateFriction()

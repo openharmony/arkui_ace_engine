@@ -44,11 +44,17 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeDashArray(ArkUIRuntimeCallInf
     for (uint32_t index = 0; index < length; index++) {
         Local<JSValueRef> value = panda::ArrayRef::GetValueAt(vm, array, index);
         CalcDimension dimDash;
-        ArkTSUtils::ParseJsDimensionVp(vm, value, dimDash);
-        dashArray.emplace_back(dimDash.Value());
-        dimUnits.emplace_back(static_cast<int32_t>(dimDash.Unit()));
+        if (ArkTSUtils::ParseJsDimensionVpNG(vm, value, dimDash)) {
+            dashArray.emplace_back(dimDash.Value());
+            dimUnits.emplace_back(static_cast<int32_t>(dimDash.Unit()));
+        } else {
+            dashArray.clear();
+            dimUnits.clear();
+            break;
+        }
     }
-    if ((static_cast<uint32_t>(length) & 1)) {
+    // if odd,add twice
+    if (static_cast<uint32_t>(length) == dashArray.size() && (static_cast<uint32_t>(length) & 1)) {
         for (uint32_t i = 0; i < length; i++) {
             dashArray.emplace_back(dashArray[i]);
             dimUnits.emplace_back(dimUnits[i]);

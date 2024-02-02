@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/models/canvas_renderer_model_impl.h"
 
 #include "base/image/pixel_map.h"
+#include "core/components/common/properties/paint_state.h"
 #include "core/components/custom_paint/custom_paint_component.h"
 #include "core/components/custom_paint/offscreen_canvas.h"
 
@@ -1166,4 +1167,23 @@ void CanvasRendererModelImpl::GetImageDataModel(const BaseInfo& baseInfo, const 
         }
     }
 }
+
+TextMetrics CanvasRendererModelImpl::GetMeasureTextMetrics(const BaseInfo& baseInfo, const std::string& text)
+{
+    TextMetrics textMetrics;
+    if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
+        auto offscreenPattern = AceType::DynamicCast<OffscreenCanvas>(baseInfo.offscreenPattern);
+        CHECK_NULL_RETURN(offscreenPattern, textMetrics);
+        textMetrics = offscreenPattern->MeasureTextMetrics(text, baseInfo.paintState);
+        return textMetrics;
+    }
+
+    if (!baseInfo.isOffscreen && baseInfo.canvasPattern) {
+        auto canvasPattern = AceType::DynamicCast<CanvasTaskPool>(baseInfo.canvasPattern);
+        CHECK_NULL_RETURN(canvasPattern, textMetrics);
+        textMetrics = canvasPattern->MeasureTextMetrics(text, baseInfo.paintState);
+    }
+    return textMetrics;
+}
+
 } // namespace OHOS::Ace::Framework

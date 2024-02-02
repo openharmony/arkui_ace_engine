@@ -1905,6 +1905,7 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
         }
         canReplaceSwiperItem_ = false;
     }
+    FireAndCleanScrollingListener();
 }
 
 int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)

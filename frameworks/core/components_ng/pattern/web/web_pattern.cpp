@@ -292,6 +292,29 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetPanEventType(GestureTypeName::WEBSCROLL);
+    gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
+                                                const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+            if (!gestureInfo) {
+                // info is null, default case to continue
+                return GestureJudgeResult::CONTINUE;
+            }
+            if (gestureInfo->GetType() != GestureTypeName::WEBSCROLL) {
+                // not web pan event type, continue
+                return GestureJudgeResult::CONTINUE;
+            }
+
+            auto inputEventType = gestureInfo->GetInputEventType();
+            if (inputEventType == InputEventType::AXIS) {
+                // axis event type of web pan, dispatch to panEvent to process
+                return GestureJudgeResult::CONTINUE;
+            } else if (inputEventType == InputEventType::MOUSE_BUTTON) {
+                // mouse button event type of web pan, dispatch to DragEvent to process
+                return GestureJudgeResult::REJECT;
+            }
+            // In other cases, the panEvent is used by default
+            return GestureJudgeResult::CONTINUE;
+        });
 }
 
 void WebPattern::HandleDragMove(const GestureEvent& event)
@@ -398,9 +421,6 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
     CHECK_NULL_VOID(delegate_);
     if (info.GetAction() == MouseAction::PRESS) {
         delegate_->OnContextMenuHide("");
-    }
-
-    if (info.GetAction() == MouseAction::RELEASE) {
         WebRequestFocus();
     }
 
@@ -1867,8 +1887,11 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
     delegate_->HandleTouchMove(touchPointInfoList, fromOverlay);
 }
 
-void WebPattern::HandleTouchCancel(const TouchEventInfo& /*info*/)
+void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
 {
+    if (IsRootNeedExportTexture()) {
+        HandleTouchUp(info, false);
+    }
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleTouchCancel();
 }
@@ -2747,13 +2770,13 @@ void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, boo
 {
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
     if (!isFling) {
-        if (scrollState_ && ((velocity < 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST) ||
-                                (velocity > 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST))) {
+        if (scrollState_ && ((velocity < 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST) ||
+                                (velocity > 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST))) {
             HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         }
     } else {
-        if (((velocity > 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST) ||
-                (velocity < 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST))) {
+        if (((velocity > 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST) ||
+                (velocity < 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST))) {
             if (isFirstFlingScrollVelocity_) {
                 HandleScrollVelocity(velocity);
                 isFirstFlingScrollVelocity_ = false;
@@ -2822,8 +2845,8 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
 {
     float offset = GetAxis() == Axis::HORIZONTAL ? x : y;
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
-    if (((offset > 0 || velocity > 0) && nestedScrollForwardMode_ == NestedScrollMode::PARENT_FIRST) ||
-        ((offset < 0 || velocity < 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARENT_FIRST)) {
+    if (((offset > 0 || velocity > 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARENT_FIRST) ||
+        ((offset < 0 || velocity < 0) && nestedScrollForwardMode_ == NestedScrollMode::PARENT_FIRST)) {
         if (offset != 0) {
             auto result = HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
             CHECK_NULL_RETURN(delegate_, false);
@@ -2833,8 +2856,8 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
         } else {
             return HandleScrollVelocity(velocity);
         }
-    } else if (((offset > 0 || velocity > 0) && nestedScrollForwardMode_ == NestedScrollMode::PARALLEL) ||
-               ((offset < 0 || velocity < 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARALLEL)) {
+    } else if (((offset > 0 || velocity > 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARALLEL) ||
+               ((offset < 0 || velocity < 0) && nestedScrollForwardMode_ == NestedScrollMode::PARALLEL)) {
         if (offset != 0) {
             HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         } else {

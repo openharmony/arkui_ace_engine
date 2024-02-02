@@ -601,6 +601,8 @@ private:
 
     DeviceOrientation orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
 
+    std::unordered_set<std::string> resAdapterRecord_;
+
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;
     mutable std::mutex destructMutex_;

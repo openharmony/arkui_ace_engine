@@ -25,6 +25,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+const float DEFAULT_STEP = 1.0f;
+const float DEFAULT_MIN_VALUE = 0.0f;
+const float DEFAULT_MAX_VALUE = 100.0f;
+constexpr uint32_t BLOCK_COLOR = 0xffffffff;
+constexpr uint32_t TRACK_COLOR = 0x19182431;
+constexpr uint32_t SELECTED_COLOR = 0xff007dff;
+
 void SliderModelNG::Create(float value, float step, float min, float max)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -445,6 +452,98 @@ void SliderModelNG::SetReverse(FrameNode* frameNode, bool value)
 void SliderModelNG::SetStep(FrameNode* frameNode, float value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Step, value, frameNode);
+}
+
+Color SliderModelNG::GetBlockColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, BlockColor, value, frameNode, Color(BLOCK_COLOR));
+    return value;
+}
+
+Color SliderModelNG::GetTrackBackgroundColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, TrackBackgroundColor, value, frameNode, Color(TRACK_COLOR));
+    return value;
+}
+
+Color SliderModelNG::GetSelectColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, SelectColor, value, frameNode, Color(SELECTED_COLOR));
+    return value;
+}
+
+bool SliderModelNG::GetShowSteps(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, ShowSteps, value, frameNode, false);
+    return value;
+}
+
+SliderModel::BlockStyleType SliderModelNG::GetBlockType(FrameNode* frameNode)
+{
+    SliderModel::BlockStyleType value = SliderModel::BlockStyleType::DEFAULT;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, BlockType, value, frameNode, SliderModel::BlockStyleType::DEFAULT);
+    return value;
+}
+
+float SliderModelNG::GetSliderValue(FrameNode* frameNode)
+{
+    float value = DEFAULT_MIN_VALUE;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, Value, value, frameNode, DEFAULT_MIN_VALUE);
+    return value;
+}
+
+float SliderModelNG::GetMinLabel(FrameNode* frameNode)
+{
+    float value = DEFAULT_MIN_VALUE;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, Min, value, frameNode, DEFAULT_MIN_VALUE);
+    return value;
+}
+float SliderModelNG::GetMaxLabel(FrameNode* frameNode)
+{
+    float value = DEFAULT_MAX_VALUE;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, Max, value, frameNode, DEFAULT_MAX_VALUE);
+    return value;
+}
+
+SliderModel::SliderMode SliderModelNG::GetSliderMode(FrameNode* frameNode)
+{
+    SliderModel::SliderMode value = SliderModel::SliderMode::OUTSET;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, SliderMode, value, frameNode, SliderModel::SliderMode::OUTSET);
+    return value;
+}
+OHOS::Ace::Axis SliderModelNG::GetDirection(FrameNode* frameNode)
+{
+    OHOS::Ace::Axis value = OHOS::Ace::Axis::HORIZONTAL;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, Direction, value, frameNode, OHOS::Ace::Axis::HORIZONTAL);
+    return value;
+}
+bool SliderModelNG::GetReverse(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, Reverse, value, frameNode, false);
+    return value;
+}
+float SliderModelNG::GetStep(FrameNode* frameNode)
+{
+    float value = DEFAULT_STEP;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, Step, value, frameNode, DEFAULT_STEP);
+    return value;
 }
 
 } // namespace OHOS::Ace::NG

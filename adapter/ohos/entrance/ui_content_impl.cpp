@@ -240,14 +240,31 @@ public:
             CHECK_NULL_VOID(context);
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
             if (pipeline) {
+                ContainerScope scope(instanceId_);
                 auto uiExtMgr = pipeline->GetUIExtensionManager();
+                if (uiExtMgr) {
+                    if (GreatNotEqual(keyboardRect.Height(), 0.0f)) {
+                        taskExecutor->PostTask(
+                            [pipeline] {
+                                CHECK_NULL_VOID(pipeline);
+                                pipeline->SetUIExtensionImeShow(true);
+                        },
+                        TaskExecutor::TaskType::UI);
+                    } else {
+                        taskExecutor->PostTask(
+                            [pipeline] {
+                                CHECK_NULL_VOID(pipeline);
+                                pipeline->SetUIExtensionImeShow(false);
+                        },
+                        TaskExecutor::TaskType::UI);
+                    }
+                }
                 if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
                     return;
                 }
             }
             auto curWindow = context->GetCurrentWindowRect();
             positionY -= curWindow.Top();
-            ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
                 [context, keyboardRect, rsTransaction, positionY, height] {
                     CHECK_NULL_VOID(context);
@@ -551,6 +568,7 @@ void UIContentImpl::PreInitializeForm(OHOS::Rosen::Window* window, const std::st
     if (isFormRender_ && !window) {
         LOGI("CommonInitializeForm url = %{public}s", url.c_str());
         CommonInitializeForm(window, url, storage);
+        SystemProperties::AddWatchSystemParameter(this);
     }
 }
 
@@ -566,6 +584,7 @@ void UIContentImpl::RunFormPage()
 
 UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
+    SystemProperties::AddWatchSystemParameter(this);
     return InitializeInner(window, url, storage, false);
 }
 
@@ -575,6 +594,7 @@ UIContentErrorCode UIContentImpl::Initialize(
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, "", storage);
     CHECK_ERROR_CODE_RETURN(errorCode);
+    SystemProperties::AddWatchSystemParameter(this);
     if (content) {
         LOGI("Initialize by buffer, size:%{public}zu", content->size());
         // run page.
@@ -592,6 +612,7 @@ UIContentErrorCode UIContentImpl::Initialize(
 UIContentErrorCode UIContentImpl::InitializeByName(
     OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
+    SystemProperties::AddWatchSystemParameter(this);
     return InitializeInner(window, name, storage, true);
 }
 
@@ -605,6 +626,7 @@ void UIContentImpl::InitializeDynamic(
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
 
     CommonInitializeForm(nullptr, abcPath, nullptr);
+    SystemProperties::AddWatchSystemParameter(this);
 
     LOGI("Initialize DynamicComponent startUrl = %{public}s, entryPoint = %{public}s", startUrl_.c_str(),
         entryPoint.c_str());
@@ -619,6 +641,7 @@ void UIContentImpl::Initialize(
 {
     if (window) {
         CommonInitialize(window, url, storage);
+        SystemProperties::AddWatchSystemParameter(this);
     }
     if (focusWindowId != 0) {
         LOGI("UIExtension host window id:%{public}u", focusWindowId);
@@ -1538,6 +1561,7 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 void UIContentImpl::Foreground()
 {
     LOGI("[%{public}s][%{public}s]: window foreground", bundleName_.c_str(), moduleName_.c_str());
+    PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     ContainerScope::UpdateRecentForeground(instanceId_);
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
@@ -1602,6 +1626,7 @@ void UIContentImpl::UnFocus()
 void UIContentImpl::Destroy()
 {
     LOGI("%{public}s window destroy", bundleName_.c_str());
+    SystemProperties::RemoveWatchSystemParameter(this);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file

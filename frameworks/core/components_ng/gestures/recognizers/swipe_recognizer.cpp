@@ -71,7 +71,6 @@ void SwipeRecognizer::OnAccepted()
 
 void SwipeRecognizer::OnRejected()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 
@@ -85,6 +84,11 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 
     if (direction_.type == SwipeDirection::NONE) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+
+    if (!IsInAttachedNode(event)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }

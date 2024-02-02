@@ -135,8 +135,8 @@ void RichEditorPattern::OnModifyDone()
     HandleEnabled();
     ProcessInnerPadding();
     InitScrollablePattern();
-    if (textDetectEnable_ && (aiDetectTypesChanged_ || !aiDetectInitialized_)) {
-        TextPattern::StartAITask();
+    if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
+        dataDetectorAdapter_->StartAITask();
     }
     if (host->IsDraggable() && copyOption_ != CopyOptions::None) {
         InitDragDropEvent();
@@ -1466,7 +1466,9 @@ void RichEditorPattern::StopTwinkling()
 
 void RichEditorPattern::HandleClickEvent(GestureEvent& info)
 {
-    if (hasClicked_) {
+    if (dataDetectorAdapter_->hasClickedAISpan_) {
+        dataDetectorAdapter_->hasClickedAISpan_ = false;
+    } else if (hasClicked_) {
         hasClicked_ = false;
         TimeStamp clickTimeStamp = info.GetTimeStamp();
         std::chrono::duration<float, std::ratio<1, InputAIChecker::SECONDS_TO_MILLISECONDS>> timeout =
@@ -1491,11 +1493,19 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
         return;
     }
 
-    HandleClickAISpanEvent(info);
-    if (isClickOnAISpan_ && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-        selectOverlayProxy_->DisableMenu(true);
+    auto textRect = GetTextRect();
+    textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
+    textRect.SetHeight(textRect.Height() - std::max(baselineOffset_, 0.0f));
+    Offset textOffset = { info.GetLocalLocation().GetX() - textRect.GetX(),
+        info.GetLocalLocation().GetY() - textRect.GetY() };
+    HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
+    if (dataDetectorAdapter_->hasClickedAISpan_) {
+        if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+            selectOverlayProxy_->DisableMenu(true);
+        }
         return;
     }
+
     HandleUserClickEvent(info);
     if (textSelector_.IsValid() && !isMouseSelect_) {
         CloseSelectOverlay();
@@ -1505,19 +1515,13 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     caretUpdateType_ = CaretUpdateType::PRESSED;
     UseHostToUpdateTextFieldManager();
 
-    auto textRect = GetTextRect();
-    textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
-    textRect.SetHeight(textRect.Height() - std::max(baselineOffset_, 0.0f));
-    Offset textOffset = { info.GetLocalLocation().GetX() - textRect.GetX(),
-        info.GetLocalLocation().GetY() - textRect.GetY() };
-
     auto position = paragraphs_.GetIndex(textOffset);
     AdjustCursorPosition(position);
 
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (focusHub) {
         SetCaretPosition(position);
-        if (!isClickOnAISpan_ && focusHub->RequestFocusImmediately()) {
+        if (!dataDetectorAdapter_->hasClickedAISpan_ && focusHub->RequestFocusImmediately()) {
             float caretHeight = 0.0f;
             OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, false, false);
             CHECK_NULL_VOID(overlayMod_);
@@ -1586,25 +1590,6 @@ bool RichEditorPattern::HandleUserGestureEvent(
     return false;
 }
 
-void RichEditorPattern::HandleClickAISpanEvent(GestureEvent& info)
-{
-    isClickOnAISpan_ = false;
-    if (!NeedShowAIDetect()) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    PointF textOffset = { info.GetLocalLocation().GetX() - GetTextRect().GetX(),
-        info.GetLocalLocation().GetY() - GetTextRect().GetY() };
-    for (const auto& kv : aiSpanMap_) {
-        auto& aiSpan = kv.second;
-        isClickOnAISpan_ = ClickAISpan(textOffset, aiSpan);
-        if (isClickOnAISpan_) {
-            return;
-        }
-    }
-}
-
 bool RichEditorPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
 {
     auto calculateHandleFunc = [weak = WeakClaim(this)]() {
@@ -1621,6 +1606,7 @@ bool RichEditorPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSp
     std::vector<RectF> aiRects = paragraphs_.GetRects(aiSpan.start, aiSpan.end);
     for (auto&& rect : aiRects) {
         if (rect.IsInRegion(textOffset)) {
+            dataDetectorAdapter_->hasClickedAISpan_ = true;
             ShowUIExtensionMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
             return true;
         }
@@ -1719,7 +1705,9 @@ void RichEditorPattern::HandleBlurEvent()
 {
     if (textDetectEnable_) {
         isLongPress_ = false;
-        StartAITask();
+        if (CanStartAITask()) {
+            dataDetectorAdapter_->StartAITask();
+        }
     }
     StopTwinkling();
     // The pattern handles blurevent, Need to close the softkeyboard first.
@@ -1737,10 +1725,10 @@ void RichEditorPattern::HandleBlurEvent()
 void RichEditorPattern::HandleFocusEvent()
 {
     auto host = GetHost();
-    if (host && textDetectEnable_ && !aiSpanMap_.empty()) {
+    if (host && textDetectEnable_ && !dataDetectorAdapter_->aiSpanMap_.empty()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    CancelAITask();
+    dataDetectorAdapter_->CancelAITask();
     UseHostToUpdateTextFieldManager();
     StartTwinkling();
     if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_) {
@@ -2065,7 +2053,9 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
         showSelect_ = true;
         isShowMenu_ = false;
         CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        if (!IsUsingMouse()) {
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -4103,7 +4093,7 @@ void RichEditorPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInf
     }
     TextPattern::UpdateSelectOverlayOrCreate(selectInfo, animation);
     CHECK_NULL_VOID(selectOverlayProxy_);
-    selectOverlayProxy_->ShowOrHiddenMenu(!isOriginMenuShow);
+    selectOverlayProxy_->ShowOrHiddenMenu(!isOriginMenuShow || !isShowMenu_);
 }
 
 void RichEditorPattern::CheckEditorTypeChange()
@@ -5467,12 +5457,12 @@ void RichEditorPattern::HandleOnCameraInput()
 
 bool RichEditorPattern::CanStartAITask()
 {
-    return !HasFocus();
+    return TextPattern::CanStartAITask() && !HasFocus();
 }
 
 bool RichEditorPattern::NeedShowAIDetect()
 {
-    return textDetectEnable_ && !aiSpanMap_.empty() && enabled_ && copyOption_ != CopyOptions::None && !HasFocus();
+    return TextPattern::NeedShowAIDetect() && !HasFocus();
 }
 
 void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

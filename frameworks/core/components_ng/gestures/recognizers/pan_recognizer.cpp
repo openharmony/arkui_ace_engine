@@ -122,7 +122,6 @@ void PanRecognizer::OnAccepted()
 
 void PanRecognizer::OnRejected()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture has been rejected");
     // fix griditem drag interrupted by click while pull moving
     if (refereeState_ != RefereeState::SUCCEED) {
         refereeState_ = RefereeState::FAIL;
@@ -153,6 +152,10 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
     if (event.sourceType == SourceType::MOUSE && !isAllowMouse_) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+    if (!IsInAttachedNode(event)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }

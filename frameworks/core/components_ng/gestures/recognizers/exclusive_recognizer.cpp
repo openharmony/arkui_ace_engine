@@ -34,18 +34,11 @@ void ExclusiveRecognizer::OnAccepted()
 {
     refereeState_ = RefereeState::SUCCEED;
     if (activeRecognizer_) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE,
-            "The exclusive gesture recognizer has been accepted, active recognizer: %{public}s",
-            AceType::TypeName(activeRecognizer_));
         activeRecognizer_->AboutToAccept();
     }
 
     for (const auto& recognizer : recognizers_) {
         if (recognizer && (recognizer != activeRecognizer_)) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE,
-                "The sub gesture %{public}s is rejected because %{public}s is accepted",
-                AceType::TypeName(recognizer),
-                AceType::TypeName(activeRecognizer_));
             if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
                 auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
                 group->ForceReject();
@@ -65,10 +58,6 @@ void ExclusiveRecognizer::OnRejected()
     for (const auto& recognizer : recognizers_) {
         if (!recognizer) {
             continue;
-        }
-        if (recognizer->GetRefereeState() == RefereeState::FAIL) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE,
-                "The %{public}s gesture recognizer already failed", AceType::TypeName(recognizer));
         }
         if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
             auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
@@ -337,4 +326,18 @@ bool ExclusiveRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
     return true;
 }
 
+void ExclusiveRecognizer::CleanRecognizerState()
+{
+    for (const auto& child : recognizers_) {
+        if (child) {
+            child->CleanRecognizerState();
+        }
+    }
+    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+        currentFingers_ == 0) {
+        refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
+    }
+    activeRecognizer_ = nullptr;
+}
 } // namespace OHOS::Ace::NG

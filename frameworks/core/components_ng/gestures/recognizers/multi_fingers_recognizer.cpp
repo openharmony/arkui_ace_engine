@@ -79,4 +79,13 @@ void MultiFingersRecognizer::OnFinishGestureReferee(int32_t touchId, bool isBloc
         ResetStatusOnFinish(isBlocked);
     }
 }
+
+void MultiFingersRecognizer::CleanRecognizerState()
+{
+    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+        currentFingers_ == 0) {
+        refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -153,7 +153,8 @@ public:
     void InitMenuTestNg();
     void InitMenuItemTestNg();
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
-    RefPtr<FrameNode> GetPreviewMenuWrapper(SizeF itemSize = SizeF(0.0f, 0.0f));
+    RefPtr<FrameNode> GetPreviewMenuWrapper(
+        SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
     RefPtr<FrameNode> menuFrameNode_;
     RefPtr<MenuAccessibilityProperty> menuAccessibilityProperty_;
     RefPtr<FrameNode> menuItemFrameNode_;
@@ -217,7 +218,8 @@ PaintWrapper* MenuTestNg::GetPaintWrapper(RefPtr<MenuPaintProperty> paintPropert
     return paintWrapper;
 }
 
-RefPtr<FrameNode> MenuTestNg::GetPreviewMenuWrapper(SizeF itemSize)
+RefPtr<FrameNode> MenuTestNg::GetPreviewMenuWrapper(
+    SizeF itemSize, std::optional<MenuPreviewAnimationOptions> scaleOptions)
 {
     auto rootNode = FrameNode::CreateFrameNode(
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
@@ -228,7 +230,7 @@ RefPtr<FrameNode> MenuTestNg::GetPreviewMenuWrapper(SizeF itemSize)
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
-    if (!NearZero(itemSize.Width()) || !NearZero(itemSize.Height())) {
+    if (!(LessOrEqual(itemSize.Width(), 0.0) || LessOrEqual(itemSize.Height(), 0.0))) {
         auto itemGeometryNode = textNode->GetGeometryNode();
         CHECK_NULL_RETURN(itemGeometryNode, nullptr);
         itemGeometryNode->SetFrameSize(itemSize);
@@ -237,6 +239,9 @@ RefPtr<FrameNode> MenuTestNg::GetPreviewMenuWrapper(SizeF itemSize)
     MenuParam menuParam;
     menuParam.type = MenuType::CONTEXT_MENU;
     menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    if (scaleOptions != std::nullopt) {
+        menuParam.previewAnimationOptions = scaleOptions.value();
+    }
     auto customNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(customNode, nullptr);
@@ -3002,48 +3007,6 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNg002, TestSize.Level1)
     menuItemPattern->ShowSubMenu();
     menuItemPattern->CloseMenu();
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
-}
-
-/**
- * @tc.name: MenuItemPatternTestNg003
- * @tc.desc: Verify RegisterOnClick.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuTestNg, MenuItemPatternTestNg003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create item node and eventhub
-     * @tc.expected: pattern and eventhub is not null
-     */
-    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
-    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
-    ASSERT_NE(menuItemPattern, nullptr);
-    auto menuItemEventHub = menuItemNode->GetEventHub<MenuItemEventHub>();
-    ASSERT_NE(menuItemEventHub, nullptr);
-    /**
-     * @tc.steps: step2. excute RegisterOnClick
-     * @tc.expected: result as expected
-     */
-    bool isSelected = false;
-    auto changeEvent = [&isSelected](bool select) { isSelected = !select; };
-    menuItemEventHub->SetSelectedChangeEvent(changeEvent);
-    menuItemEventHub->SetOnChange(changeEvent);
-    menuItemPattern->RegisterOnClick();
-    // trigger click
-    auto gestureHub = menuItemNode->GetOrCreateGestureEventHub();
-    auto clickEventActuator = gestureHub->clickEventActuator_;
-    ASSERT_NE(clickEventActuator, nullptr);
-    auto event = clickEventActuator->GetClickEvent();
-    ASSERT_NE(event, nullptr);
-    GestureEvent gestureEvent;
-    event(gestureEvent);
-    EXPECT_TRUE(isSelected);
-    // update item pattern subbuilder, click item
-    std::function<void()> buildFun = [] {};
-    menuItemPattern->SetSubBuilder(buildFun);
-    menuItemPattern->RegisterOnClick();
-    event(gestureEvent);
-    EXPECT_FALSE(isSelected);
 }
 
 /**
@@ -6152,6 +6115,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5800, TestSize.Level1)
 /**
  * @tc.name: MenuLayoutAlgorithmTestNg5910
  * @tc.desc: Test Layout with preview content and stat/stop animation scale options
+ *           for MenuPreviewMode.IMAGE
  * @tc.type: FUNC
  */
 HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5910, TestSize.Level1)
@@ -6165,6 +6129,53 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5910, TestSize.Level1)
     MenuPreviewAnimationOptions scaleOptions { 0.5f, 2.0f };
 
     auto menuWrapperNode = GetImagePreviewMenuWrapper(std::make_optional(scaleOptions));
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    layoutAlgorithm->hierarchicalParameters_ = true;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
+    layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    layoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    layoutAlgorithm->Initialize(&layoutWrapper);
+    layoutAlgorithm->Measure(&layoutWrapper);
+
+    // @tc.expected: previewScale_ value set by user defined value after Measure and LayoutNormalPreviewMenu
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    EXPECT_EQ(menuPattern->GetPreviewBeforeAnimationScale(), scaleOptions.scaleFrom);
+    EXPECT_EQ(menuPattern->GetPreviewAfterAnimationScale(), scaleOptions.scaleTo);
+    layoutAlgorithm->LayoutNormalPreviewMenu(&layoutWrapper);
+    EXPECT_EQ(layoutAlgorithm->previewScale_, scaleOptions.scaleTo);
+}
+
+    /**
+    * @tc.name: MenuLayoutAlgorithmTestNg5920
+    * @tc.desc: Test Layout with preview content and stat/stop animation scale options
+    *           for MenuPreviewMode.CUSTOM
+    * @tc.type: FUNC
+    */
+HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5920, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node, preview node and menuLayoutAlgorithm, then set the initial properties
+     * @tc.expected: menu node and menuLayoutAlgorithm are not null
+     */
+    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    MenuPreviewAnimationOptions scaleOptions { 0.5f, 2.0f };
+
+    auto menuWrapperNode =
+        GetPreviewMenuWrapper(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT), std::make_optional(scaleOptions));
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
@@ -7643,7 +7654,7 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
     auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
     auto* wrapper = new LayoutWrapperNode(subMenu, geometryNode, layoutProp);
     ASSERT_TRUE(menuPattern);
-    
+
     // associated menuItem and submenu
     menuPattern->SetParentMenuItem(item);
     item->GetGeometryNode()->SetFrameOffset(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));

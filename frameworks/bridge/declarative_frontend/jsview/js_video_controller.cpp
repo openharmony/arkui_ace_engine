@@ -64,6 +64,7 @@ void JSVideoController::Destructor(JSVideoController* videoController)
 
 void JSVideoController::Start(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (videoController_) {
 #ifdef SUPPORT_JSSTACK
         HiviewDFX::ReportXPowerJsStackSysEvent(args.GetVm(), "STREAM_CHANGE", "SRC=Video");
@@ -74,6 +75,7 @@ void JSVideoController::Start(const JSCallbackInfo& args)
 
 void JSVideoController::Pause(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (videoController_) {
         videoController_->Pause();
     }
@@ -81,6 +83,7 @@ void JSVideoController::Pause(const JSCallbackInfo& args)
 
 void JSVideoController::Stop(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (videoController_) {
         videoController_->Stop();
     }
@@ -88,6 +91,7 @@ void JSVideoController::Stop(const JSCallbackInfo& args)
 
 void JSVideoController::SetCurrentTime(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     float value = 0;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], value)) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "JSVideoController set current time with invalid params");
@@ -106,6 +110,7 @@ void JSVideoController::SetCurrentTime(const JSCallbackInfo& args)
 
 void JSVideoController::RequestFullscreen(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     bool landscape = true;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], landscape)) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "JSVideoController request full screen with invalid params");
@@ -119,6 +124,7 @@ void JSVideoController::RequestFullscreen(const JSCallbackInfo& args)
 
 void JSVideoController::ExitFullscreen(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (videoController_) {
         videoController_->ExitFullscreen(false);
     }

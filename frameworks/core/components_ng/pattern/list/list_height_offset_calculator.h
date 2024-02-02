@@ -118,8 +118,12 @@ public:
             if (itor->first == startIndex_ || itor->first == endIndex_) {
                 auto child = node->GetFrameChildByIndex(itor->first - currentIndex_, false);
                 auto frameNode = AceType::DynamicCast<FrameNode>(child);
+                if (!frameNode) {
+                    itor++;
+                    continue;
+                }
                 auto group = frameNode->GetPattern<ListItemGroupPattern>();
-                if (!group->HasLayoutedItem()) {
+                if (!group || !group->HasLayoutedItem()) {
                     itor++;
                     continue;
                 }

@@ -141,7 +141,6 @@ void ClickRecognizer::OnAccepted()
 
 void ClickRecognizer::OnRejected()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 
@@ -159,6 +158,10 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         "Click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
         "%{public}d, %{public}d",
         event.id, equalsToFingers_, currentTouchPointsNum_);
+    if (!IsInAttachedNode(event)) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     // The last recognition sequence has been completed, reset the timer.
     if (tappedCount_ > 0 && currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
@@ -448,5 +451,15 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
 RefPtr<Gesture> ClickRecognizer::CreateGestureFromRecognizer() const
 {
     return AceType::MakeRefPtr<TapGesture>(count_, fingers_);
+}
+
+void ClickRecognizer::CleanRecognizerState()
+{
+    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+        currentFingers_ == 0) {
+        tappedCount_ = 0;
+        refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -79,6 +79,7 @@ constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
 constexpr int32_t ORIGINAL_IMAGE_SIZE_AUTO = 0;
 constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
+constexpr int32_t BLUR_STYLE_NONE_INDEX = 7;
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -1410,16 +1411,27 @@ void ResetLinearGradientBlur(ArkUINodeHandle node)
     ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
 }
 
+int32_t GetBlurStyle(int32_t originBlurStyle)
+{
+    if (originBlurStyle < BLUR_STYLE_NONE_INDEX) {
+        return originBlurStyle + 1;
+    } else if (originBlurStyle == BLUR_STYLE_NONE_INDEX) {
+        return static_cast<int32_t>(BlurStyle::NO_MATERIAL);
+    }
+    return originBlurStyle;
+}
+
 void SetBackgroundBlurStyle(
     ArkUINodeHandle node, ArkUI_Int32 blurStyle, ArkUI_Int32 colorMode, ArkUI_Int32 adaptiveColor, ArkUI_Float32 scale)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption bgBlurStyle;
-    if (blurStyle >= 0) {
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
-            bgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
+    int32_t inputBlurStyle = GetBlurStyle(blurStyle);
+    if (inputBlurStyle >= 0) {
+        if (inputBlurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            inputBlurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            bgBlurStyle.blurStyle = static_cast<BlurStyle>(inputBlurStyle);
         }
     }
     bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0));
@@ -3209,7 +3221,7 @@ void ResetBlendMode(ArkUINodeHandle node)
     ViewAbstract::SetBlendMode(frameNode, BlendMode::NONE);
 }
 
-void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float64* values, const ArkUI_Int32* units)
+void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3230,7 +3242,7 @@ void ResetConstraintSize(ArkUINodeHandle node)
 }
 
 void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-    ArkUI_Float32 strokeWidth, ArkUI_Float64* attribute, ArkUI_Int32 length)
+    ArkUI_Float32 strokeWidth, ArkUI_Float32* attribute, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3279,7 +3291,7 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
 }
 
 void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-    ArkUI_Float32 strokeWidth, ArkUI_Float64* attribute, ArkUI_CharPtr commands)
+    ArkUI_Float32 strokeWidth, ArkUI_Float32* attribute, ArkUI_CharPtr commands)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     auto strokeWidth_ = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(1));

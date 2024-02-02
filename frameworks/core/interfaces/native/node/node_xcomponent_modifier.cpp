@@ -25,9 +25,9 @@ namespace OHOS::Ace::NG {
 namespace {
 void SetXComponentBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!XComponentModelNG::IsTexture(frameNode)) {
+    if (XComponentModelNG::GetType(frameNode) == XComponentType::COMPONENT) {
         return;
     }
     ViewAbstract::SetBackgroundColor(frameNode, Color(color));
@@ -35,12 +35,13 @@ void SetXComponentBackgroundColor(ArkUINodeHandle node, uint32_t color)
 
 void ResetXComponentBackgroundColor(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!XComponentModelNG::IsTexture(frameNode)) {
+    auto type = XComponentModelNG::GetType(frameNode);
+    if (type == XComponentType::COMPONENT) {
         return;
     }
-    ViewAbstract::SetBackgroundColor(frameNode, Color(Color::TRANSPARENT));
+    ViewAbstract::SetBackgroundColor(frameNode, (type == XComponentType::SURFACE) ? Color::BLACK : Color::TRANSPARENT);
 }
 
 void SetXComponentOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)

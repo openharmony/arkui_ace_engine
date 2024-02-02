@@ -66,6 +66,16 @@ typedef enum {
 } ArkUI_NativeAPIVariantKind;
 
 /**
+ * @brief 定义ARKUI_NATIVE_NODE类型支持的版本号信息。
+ *
+ * @since 12 
+ */
+typedef enum {
+    /** ARKUI_NATIVE_NODE类型支持版本1的结构体{@link ArkUI_NativeNodeAPI_1}。*/
+    ARKUI_NATIVE_NODE_VERSION_1,
+} ArkUI_NativeNodeAPIVersion;
+
+/**
  * @brief 获取指定版本的Native接口集合。
  *
  * @param type ArkUI提供的Native接口集合大类，例如UI组件接口类：ARKUI_NATIVE_NODE。
@@ -84,6 +94,26 @@ typedef enum {
  * @since 12
  */
 ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32_t version);
+
+/**
+ * @brief 获取指定版本的Native模块接口集合。
+ *
+ * @param type ArkUI提供的Native接口集合大类，例如UI组件接口类：ARKUI_NATIVE_NODE。
+ * @param version native接口结构体的版本信息，通过结构体支持的版本枚举获得，如ARKUI_NATIVE_NODE的可用版本{@link ARKUI_NATIVE_NODE_VERSION_1}。
+ * @return ArkUI_AnyNativeAPI* 返回携带版本的Native接口抽象对象。
+ * @code {.cpp}
+ * #include<arkui/native_interface.h>
+ * #include<arkui/native_node.h>
+ *
+ * auto anyNativeAPI = OH_ArkUI_QueryModuleInterface(ARKUI_NATIVE_NODE, ARKUI_NATIVE_NODE_VERSION_1);
+ * if (anyNativeAPI->version == ARKUI_NATIVE_NODE_VERSION_1) {
+ *     auto nativeNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(anyNativeAPI);
+ * }
+ * @endcode
+ *
+ * @since 12
+ */
+ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t version);
 
 #ifdef __cplusplus
 };

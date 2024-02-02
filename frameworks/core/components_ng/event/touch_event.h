@@ -23,6 +23,14 @@
 
 namespace OHOS::Ace::NG {
 
+struct TouchTestResultInfo {
+    int32_t nodeId = 0;
+    std::string tag;
+    std::string inspectorId;
+    std::string frameRect;
+    int32_t depth = 0;
+};
+
 class GestureEventHub;
 
 class TouchEventImpl : public virtual AceType {

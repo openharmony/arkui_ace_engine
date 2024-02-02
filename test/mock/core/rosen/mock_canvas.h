@@ -58,6 +58,7 @@ public:
         DrawImageRect, void(const TestingImage& image, const TestingRect& dst, const TestingSamplingOptions& sampling));
     MOCK_METHOD5(DrawImageRect, void(const TestingImage& image, const TestingRect& src, const TestingRect& dst,
                                     const TestingSamplingOptions& sampling, SrcRectConstraint constraint));
+    MOCK_METHOD1(DrawOval, void(const TestingRect& oval));
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_ROSEN_MOCK_CANVAS_H

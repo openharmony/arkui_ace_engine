@@ -1350,6 +1350,10 @@ HWTEST_F(CalendarTestNg, CalendarPaintMethodTest003, TestSize.Level1)
     calendarPaintMethod.currentMonth_ = calendarMonth;
 
     Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     calendarDay.focused = true;
     calendarPaintMethod.DrawCalendar(
         rsCanvas, Offset(OFFSET_X, OFFSET_Y), Offset(VALID_LENGTH, VALID_LENGTH), calendarDay);
