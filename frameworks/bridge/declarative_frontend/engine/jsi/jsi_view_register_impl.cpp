@@ -130,6 +130,7 @@
 #include "bridge/declarative_frontend/jsview/js_render_image.h"
 #include "bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
+#include "bridge/declarative_frontend/jsview/js_repeat.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_row.h"
 #include "bridge/declarative_frontend/jsview/js_row_split.h"
@@ -610,6 +611,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
+    { "RepeatNative", JSRepeat::JSBind },
     { "NavDestination", JSNavDestination::JSBind },
     { "Navigation", JSNavigation::JSBind },
     { "NativeNavPathStack", JSNavPathStack::JSBind },

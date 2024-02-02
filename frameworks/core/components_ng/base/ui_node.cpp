@@ -1142,7 +1142,6 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
     }
 }
 
-
 // Collects  all the child elements of "children" in a recursive manner
 // Fills the "removedElmtId" list with the collected child elements
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,

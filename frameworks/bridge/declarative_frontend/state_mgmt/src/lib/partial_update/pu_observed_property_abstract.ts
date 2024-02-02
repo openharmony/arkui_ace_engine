@@ -152,6 +152,11 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return result;
   }
 
+  /**/
+  public hasDependencies(): boolean {
+    return this.dependentElmtIdsByProperty_.hasDependencies();
+  }
+
   /* for @Prop value from source we need to generate a @State
      that observes when this value changes. This ObservedPropertyPU
      sits inside SynchedPropertyOneWayPU.
@@ -568,4 +573,7 @@ class PropertyDependencies {
     return result;
   }
 
+  public hasDependencies() : boolean {
+    return this.propertyDependencies_.size > 0 || this.trackedObjectPropertyDependencies_.size > 0;
+  }
 }

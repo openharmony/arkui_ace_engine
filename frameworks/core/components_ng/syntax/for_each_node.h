@@ -32,8 +32,10 @@ class ACE_EXPORT ForEachNode : public UINode {
 
 public:
     static RefPtr<ForEachNode> GetOrCreateForEachNode(int32_t nodeId);
+    static RefPtr<ForEachNode> GetOrCreateRepeatNode(int32_t nodeId);
 
     explicit ForEachNode(int32_t nodeId) : UINode(V2::JS_FOR_EACH_ETS_TAG, nodeId) {}
+
     ~ForEachNode() override = default;
 
     bool IsAtomicNode() const override
@@ -46,6 +48,12 @@ public:
     void CompareAndUpdateChildren();
 
     void FlushUpdateAndMarkDirty() override;
+
+    // RepeatNode only
+    void FinishRepeatRender(std::list<int32_t>& removedElmtId);
+
+    // RepeatNode only
+    void MoveChild(uint32_t fromIndex);
 
     const std::list<std::string>& GetTempIds() const
     {
@@ -63,6 +71,16 @@ private:
     // temp items use to compare each update.
     std::list<std::string> tempIds_;
     std::list<RefPtr<UINode>> tempChildren_;
+
+    // RepeatNode only
+    std::vector<RefPtr<UINode>> tempChildrenOfRepeat_;
+
+    // true when this is actually RepeatNode (not "ForEach")
+    bool isThisRepeatNode_ = false;
+
+    void FindAndCollectRemovedChildren(std::list<RefPtr<UINode>>& oldChildren,
+                                        std::list<RefPtr<UINode>>& newChildren,
+                                        std::list<int32_t>& removedElmtId);
 
     ACE_DISALLOW_COPY_AND_MOVE(ForEachNode);
 };

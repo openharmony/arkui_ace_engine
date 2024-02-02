@@ -1985,6 +1985,31 @@ class Environment {
 }
 Environment.instance_ = undefined;
 /*
+ * Copyright (c) 2023-24 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+    global function Repeat()
+    returns an object that retains the state of Repeat instance between render calls
+    exec attribute functions on this instance.
+*/
+const Repeat = (arr, owningView) => {
+    if (!owningView) {
+        throw new Error("Transpilation error, Repeat lacks 2nd parameter owningView");
+    }
+    return owningView.__mkRepeatAPI(arr);
+};
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -3838,6 +3863,10 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         }
         return result;
     }
+    /**/
+    hasDependencies() {
+        return this.dependentElmtIdsByProperty_.hasDependencies();
+    }
     /* for @Prop value from source we need to generate a @State
        that observes when this value changes. This ObservedPropertyPU
        sits inside SynchedPropertyOneWayPU.
@@ -4208,6 +4237,9 @@ class PropertyDependencies {
             result += `  property '@Track ${propertyName}' change affects elmtIds: ${Array.from(propertyElmtId).map(formatElmtId).join(', ')}`;
         });
         return result;
+    }
+    hasDependencies() {
+        return this.propertyDependencies_.size > 0 || this.trackedObjectPropertyDependencies_.size > 0;
     }
 }
 /*
@@ -5284,6 +5316,8 @@ class ViewPU extends NativeViewPartialUpdate {
         this.extraInfo_ = undefined;
         // @Provide'd variables by this class and its ancestors
         this.providedVars_ = new Map();
+        // Map elmtId -> Repeat instance in this ViewPU
+        this.elmtId2Repeat_ = new Map();
         // Set of dependent elmtIds that need partial update
         // during next re-render
         this.dirtDescendantElementIds_ = new Set();
@@ -5293,6 +5327,25 @@ class ViewPU extends NativeViewPartialUpdate {
         // my LocalStorage instance, shared with ancestor Views.
         // create a default instance on demand if none is initialized
         this.localStoragebackStore_ = undefined;
+        /**
+         * on first render create a new Instance of Repeat
+         * on re-render connect to existing instance
+         * @param arr
+         * @returns
+         */
+        this.__mkRepeatAPI = (arr) => {
+            // factory is for future extensions, currently always return the same
+            const elmtId = this.getCurrentlyRenderedElmtId();
+            let repeat = this.elmtId2Repeat_.get(elmtId);
+            if (!repeat) {
+                repeat = new __Repeat(this, arr);
+                this.elmtId2Repeat_.set(elmtId, repeat);
+            }
+            else {
+                repeat.updateArr(arr);
+            }
+            return repeat;
+        };
         // if set use the elmtId also as the ViewPU object's subscribable id.
         // these matching is requirement for updateChildViewById(elmtId) being able to
         // find the child ViewPU object by given elmtId
@@ -7910,6 +7963,270 @@ ViewPU.prototype["updateStateVarsOfChildByElmtId"] = function (elmtId, params) {
   }
 }
 */
+/*
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * all definitions in this file are framework internal
+*/
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+// implementation for existing state observation system
+class __RepeatItem {
+    constructor(owningView, initialItem, initialIndex) {
+        this._observedItem = new ObservedPropertyPU(initialItem, owningView, "Repeat item");
+        if (initialIndex !== undefined) {
+            this._observedIndex = new ObservedPropertyPU(initialIndex, owningView, "Repeat index");
+        }
+    }
+    get item() {
+        return this._observedItem.get();
+    }
+    get index() {
+        var _a;
+        return (_a = this._observedIndex) === null || _a === void 0 ? void 0 : _a.get();
+    }
+    updateItem(newItemValue) {
+        this._observedItem.set(newItemValue);
+    }
+    updateIndex(newIndex) {
+        var _a, _b, _c;
+        if (!((_a = this._observedIndex) === null || _a === void 0 ? void 0 : _a.hasDependencies())) {
+            return;
+        }
+        if (((_b = this._observedIndex) === null || _b === void 0 ? void 0 : _b.getUnmonitored()) != newIndex) {
+            (_c = this._observedIndex) === null || _c === void 0 ? void 0 : _c.set(newIndex);
+        }
+    }
+}
+// framework internal, deep observation 
+// implementation for deep observation 
+let __RepeatItemDeep = class __RepeatItemDeep {
+    constructor(initialItem, initialIndex) {
+        this.item = initialItem;
+        this.index = initialIndex;
+    }
+    updateItem(newItemValue) {
+        this.item = newItemValue;
+    }
+    updateIndex(newIndex) {
+        if (this.index !== undefined) {
+            this.index = newIndex;
+        }
+    }
+};
+__decorate([
+    track
+], __RepeatItemDeep.prototype, "item", void 0);
+__decorate([
+    track
+], __RepeatItemDeep.prototype, "index", void 0);
+__RepeatItemDeep = __decorate([
+    observed
+], __RepeatItemDeep);
+// helper
+class __RepeatDefaultKeyGen {
+    // Return the same IDs for the same items
+    static func(item) {
+        try {
+            return __RepeatDefaultKeyGen.funcImpl(item);
+        }
+        catch (e) {
+            throw new Error(`Repeat(). Default id gen failed. Application Error!`);
+        }
+    }
+    // Return the same IDs for the same pairs <item, index>
+    static funcWithIndex(item, index) {
+        return `${index}__` + __RepeatDefaultKeyGen.func(item);
+    }
+    static funcImpl(item) {
+        // fast keygen logic can be used with objects/symbols only
+        if (typeof item != 'object' && typeof item != 'symbol') {
+            return JSON.stringify(item);
+        }
+        // generate a numeric key, store mappings in WeakMap
+        if (!this.weakMap_.has(item)) {
+            return this.weakMap_.set(item, ++this.lastKey_), `${this.lastKey_}`;
+        }
+        // use cached key
+        return `${this.weakMap_.get(item)}`;
+    }
+}
+__RepeatDefaultKeyGen.weakMap_ = new WeakMap();
+__RepeatDefaultKeyGen.lastKey_ = 0;
+// __Repeat implements ForEach with child re-use for both existing state observation
+// and deep observation , for non-virtual and virtual code paths (TODO)
+class __Repeat {
+    constructor(owningView, arr) {
+        this.isVirtualScroll = false;
+        this.key2Item_ = new Map();
+        //console.log(`Repeat.constructor`);
+        this.owningView_ = owningView;
+        this.arr_ = arr !== null && arr !== void 0 ? arr : [];
+        this.keyGenFunction_ = __RepeatDefaultKeyGen.func;
+    }
+    updateArr(arr) {
+        this.arr_ = arr !== null && arr !== void 0 ? arr : [];
+        return this;
+    }
+    each(itemGenFunc) {
+        //console.log(`Repeat.each`)
+        this.itemGenFunc_ = itemGenFunc;
+        return this;
+    }
+    key(idGenFunc) {
+        //console.log(`Repeat.key`)
+        this.keyGenFunction_ = idGenFunc !== null && idGenFunc !== void 0 ? idGenFunc : __RepeatDefaultKeyGen.func;
+        return this;
+    }
+    virtualScroll() {
+        //console.log(`Repeat.virtualScroll`)
+        this.isVirtualScroll = true;
+        return this;
+    }
+    genKeys() {
+        const key2Item = new Map();
+        this.arr_.forEach((item, index) => {
+            const key = this.keyGenFunction_(item, index);
+            key2Item.set(key, { key, index });
+        });
+        if (key2Item.size < this.arr_.length) {
+            stateMgmtConsole.warn("Duplicates detected, fallback to index-based keyGen.");
+            // Causes all items to be re-rendered
+            this.keyGenFunction_ = __RepeatDefaultKeyGen.funcWithIndex;
+            return this.genKeys();
+        }
+        //console.log(`value2ids: ${JSON.stringify(Array.from(id2Item), null, 4)} .`)
+        return key2Item;
+    }
+    mkRepeatItem(item, index) {
+        if ((typeof item == "object") && Reflect.has(item, "__is_observed")) {
+            return new __RepeatItemDeep(item, index);
+        }
+        else {
+            return new __RepeatItem(this.owningView_, item, index);
+        }
+    }
+    render(isInitialRender) {
+        if (!this.itemGenFunc_) {
+            throw new Error(`itemGen function undefined. Usage error`);
+        }
+        if (this.isVirtualScroll) {
+            // TODO haoyu: add render for LazyforEach with child update
+            // there might not any rerender , I am not sure.
+            throw new Error("TODO virtual code path");
+        }
+        else {
+            isInitialRender ? this.initialRenderNoneVirtual() : this.rerenderNoneVirtual();
+        }
+    }
+    initialRenderNoneVirtual() {
+        //console.log(`Repeat.initialRenderNoneVirtual`)
+        this.key2Item_ = this.genKeys();
+        RepeatNative.startRender();
+        let index = 0;
+        this.key2Item_.forEach((itemInfo, key) => {
+            itemInfo.repeatItem = this.mkRepeatItem(this.arr_[index], index);
+            this.initialRenderItem(key, itemInfo.repeatItem);
+            index++;
+        });
+        let removedChildElmtIds = new Array();
+        // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
+        RepeatNative.finishRender(removedChildElmtIds);
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
+        
+    }
+    rerenderNoneVirtual() {
+        //console.log(`Repeat.rerenderNoneVirtual`)
+        const oldKey2Item = this.key2Item_;
+        this.key2Item_ = this.genKeys();
+        // identify array items that have been deleted 
+        // these are candidates for re-use
+        const deletedKeysAndIndex = new Array();
+        for (const [key, feInfo] of oldKey2Item) {
+            if (!this.key2Item_.has(key)) {
+                deletedKeysAndIndex.push(feInfo);
+            }
+        }
+        // C++: mv children_ aside to tempchildren_
+        RepeatNative.startRender();
+        let index = 0;
+        this.key2Item_.forEach((itemInfo, key) => {
+            const item = this.arr_[index];
+            let oldItemInfo = oldKey2Item.get(key);
+            if (oldItemInfo) {
+                // case #1 retained array item
+                // moved from oldIndex to index
+                const oldIndex = oldItemInfo.index;
+                itemInfo.repeatItem = oldItemInfo.repeatItem;
+                
+                itemInfo.repeatItem.updateIndex(index);
+                // C++ mv from tempChildren[oldIndex] to end of children_
+                RepeatNative.moveChild(oldIndex);
+            }
+            else if (deletedKeysAndIndex.length) {
+                // case #2:
+                // new array item, there is an deleted array items whose 
+                // UINode children cab re-used
+                const oldItemInfo = deletedKeysAndIndex.pop();
+                const reuseKey = oldItemInfo.key;
+                const oldKeyIndex = oldItemInfo.index;
+                const oldRepeatItem = oldItemInfo.repeatItem;
+                itemInfo.repeatItem = oldRepeatItem;
+                
+                itemInfo.repeatItem.updateItem(item);
+                itemInfo.repeatItem.updateIndex(index);
+                // update key2item_ Map
+                this.key2Item_.set(key, itemInfo);
+                // C++ mv from tempChildren[oldIndex] to end of children_
+                RepeatNative.moveChild(oldKeyIndex);
+            }
+            else {
+                // case #3:
+                // new array item, there are no deleted array items
+                // render new UINode children
+                itemInfo.repeatItem = this.mkRepeatItem(item, index);
+                this.initialRenderItem(key, itemInfo.repeatItem);
+            }
+            index++;
+        });
+        // keep  this.id2item_. by removing all entries for remaining
+        // deleted items 
+        deletedKeysAndIndex.forEach(delItem => {
+            this.key2Item_.delete(delItem.key);
+        });
+        // Finish up for.each update
+        // C++  tempChildren.clear() , trigger re-layout
+        let removedChildElmtIds = new Array();
+        // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
+        RepeatNative.finishRender(removedChildElmtIds);
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
+        
+    }
+    initialRenderItem(key, repeatItem) {
+        // render new UINode children
+        
+        // C++: initial render will render to the end of children_
+        RepeatNative.createNewChildStart(key);
+        // execute the ItemGen function
+        this.itemGenFunc_(repeatItem);
+        RepeatNative.createNewChildFinish(key);
+    }
+}
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

@@ -46,15 +46,33 @@ RefPtr<ForEachNode> ForEachNode::GetOrCreateForEachNode(int32_t nodeId)
     return node;
 }
 
+RefPtr<ForEachNode> ForEachNode::GetOrCreateRepeatNode(int32_t nodeId)
+{
+    auto node = ForEachNode::GetOrCreateForEachNode(nodeId);
+    if (node) {
+        node->isThisRepeatNode_ = true;
+    }
+    return node;
+}
+
 void ForEachNode::CreateTempItems()
 {
     std::swap(ids_, tempIds_);
     std::swap(ModifyChildren(), tempChildren_);
+
+    // RepeatNode only
+    tempChildrenOfRepeat_ = std::vector<RefPtr<UINode>>(tempChildren_.begin(), tempChildren_.end());
 }
 
 // same as foundation/arkui/ace_engine/frameworks/core/components_part_upd/foreach/foreach_element.cpp.
 void ForEachNode::CompareAndUpdateChildren()
 {
+    ACE_SCOPED_TRACE("ForEachNode::CompareAndUpdateChildren");
+
+    if (isThisRepeatNode_) {
+        return;
+    }
+
     // result of id gen function of most re-recent render
     // create a map for quicker find/search
     std::unordered_set<std::string> newIdsSet(ids_.begin(), ids_.end());
@@ -124,19 +142,14 @@ void ForEachNode::CompareAndUpdateChildren()
     tempChildren_.clear();
 
     auto parent = GetParent();
-    while (parent) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(parent);
-        if (frameNode) {
-            frameNode->ChildrenUpdatedFrom(0);
-            break;
-        }
-        parent = parent->GetParent();
+    if (parent) {
+        parent->ChildrenUpdatedFrom(0);
     }
 }
 
 void ForEachNode::FlushUpdateAndMarkDirty()
 {
-    if (ids_ == tempIds_) {
+    if (ids_ == tempIds_ && !isThisRepeatNode_) {
         tempIds_.clear();
         return;
     }
@@ -144,6 +157,85 @@ void ForEachNode::FlushUpdateAndMarkDirty()
     // mark parent dirty to flush measure.
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
+// RepeatNode only. TBD move to repeat_node.cpp
+void ForEachNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
+{
+    ACE_SCOPED_TRACE("ForEachNode::FinishRepeatRender");
+
+    // Required to build unordered_set of RefPtr<UINodes>
+    struct Hash {
+        size_t operator()(const RefPtr<UINode>& node) const {
+            return node->GetId();
+        }
+    };
+
+    // includes "newly-added" and "reused" children
+    auto& children = ModifyChildren();
+
+    std::unordered_set<RefPtr<UINode>, Hash>
+        newNodeSet(children.begin(), children.end());
+
+    // remove "unused" children
+    for (const auto& oldNode: tempChildrenOfRepeat_) {
+        if (newNodeSet.find(oldNode) == newNodeSet.end()) {
+            // Adding silently, so that upon removal node is a part the tree.
+            AddChild(oldNode, DEFAULT_NODE_SLOT, true);
+            // Remove and trigger all Detach callback.
+            RemoveChild(oldNode, true);
+        }
+    }
+
+    // Load removedElmtId with all the descendant elementIDs of the
+    // removed children during re-render of repeat
+    FindAndCollectRemovedChildren(tempChildren_, children, removedElmtId);
+
+    tempChildren_.clear();
+    tempChildrenOfRepeat_.clear();
+
+    auto parent = GetParent();
+    if (parent) {
+        parent->ChildrenUpdatedFrom(0);        
+    }
+
+    // TBD call when children changed
+    //FlushUpdateAndMarkDirty();
+
+    //stack processor =>FlushRerenderTask();
+    LOGE("ForEachNode::FinishRepeatRender END");
+}
+
+// RepeatNode only. TBD move to repeat_node.cpp
+void ForEachNode::MoveChild(uint32_t fromIndex)
+{
+    // LOGE("ForEachNode::MoveChild %{public}d", fromIndex);
+    // copy child from tempChildrenOfRepeat_[fromIndex] and append to children_
+    if (fromIndex < tempChildrenOfRepeat_.size() ) {
+        auto& node = tempChildrenOfRepeat_.at(fromIndex);
+        AddChild(node, DEFAULT_NODE_SLOT, true);
+    }
+}
+
+void ForEachNode::FindAndCollectRemovedChildren(std::list<RefPtr<UINode>>& oldChildren,
+                                                std::list<RefPtr<UINode>>& newChildren,
+                                                std::list<int32_t>& removedElmtId)
+{
+    oldChildren.sort();
+    newChildren.sort();
+
+    std::list<RefPtr<UINode>> removedChildren;
+
+    // Find all the elements in oldChildren which are no longer in newChildren
+    // and fill the removedChildren with identified elements
+    std::set_difference(
+        oldChildren.begin(), oldChildren.end(),
+        newChildren.begin(), newChildren.end(),
+        std::inserter(removedChildren, removedChildren.begin())
+    );
+    // Collect the element IDs of all descendant children of "removedChildren"
+    // and add them to the list removedElmtId
+    CollectRemovedChildren(removedChildren, removedElmtId);
 }
 
 } // namespace OHOS::Ace::NG
