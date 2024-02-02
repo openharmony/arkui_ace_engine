@@ -339,6 +339,13 @@ bool TxtParagraph::CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& ext
     return false;
 }
 
+bool TxtParagraph::IsNewLine(int32_t extent)
+{
+    bool preIsPlaceholder = CalCulateAndCheckPreIsPlaceholder(extent - 1, extent);
+    char16_t prevChar = text_[std::max(0, extent - 1)];
+    return prevChar == NEWLINE_CODE && !text_[extent] && !preIsPlaceholder;
+}
+
 bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest)
 {
     if (!paragraph_) {
@@ -354,6 +361,11 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     }
     if (static_cast<size_t>(extent) > GetParagraphLength()) {
         extent = GetParagraphLength();
+    }
+
+    bool isNewLine = IsNewLine(extent);
+    if (isNewLine) {
+        --extent;
     }
 
     char16_t prevChar = 0;
@@ -400,10 +412,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     }
 
     const auto& textBox = boxes.back();
-    // when text_ ends with a \n, return the top position of the next line.
-    auto preIsPlaceholder = CalCulateAndCheckPreIsPlaceholder(extent - 1, extent);
-    prevChar = text_[std::max(0, extent - 1)];
-    if (prevChar == NEWLINE_CODE && !text_[extent] && !preIsPlaceholder) {
+
+    if (isNewLine) {
         // Return the start of next line.
         result.offset.SetX(MakeEmptyOffsetX());
 #ifndef USE_GRAPHIC_TEXT_GINE
