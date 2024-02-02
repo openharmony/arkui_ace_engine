@@ -35,7 +35,7 @@ class ResourceObject : public AceType {
     DECLARE_ACE_TYPE(ResourceObject, AceType);
 
 public:
-    ResourceObject(uint32_t id, uint32_t type, const std::vector<ResourceObjectParams>& params,
+    ResourceObject(int32_t id, int32_t type, const std::vector<ResourceObjectParams>& params,
         const std::string& bundleName, const std::string& moduleName)
         : id_(id), type_(type), params_(params), bundleName_(bundleName), moduleName_(moduleName) {};
     ResourceObject(const std::string& bundleName, const std::string& moduleName)
@@ -48,7 +48,7 @@ public:
         return id_;
     }
 
-    uint32_t GetType() const
+    int32_t GetType() const
     {
         return type_;
     }
@@ -70,7 +70,7 @@ public:
 
 private:
     int32_t id_;
-    uint32_t type_;
+    int32_t type_;
     std::vector<ResourceObjectParams> params_;
     std::string bundleName_;
     std::string moduleName_;
