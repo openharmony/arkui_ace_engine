@@ -117,14 +117,12 @@ void SelectOverlayContentModifier::ClipViewPort(RSCanvas& canvas)
     auto handleDiameter = handleRadius_->Get() * 2;
     if (upHandleIsShow) {
         left = std::min(upHandle.Left() + upHandle.Width() / 2 - handleRadius_->Get(), left);
-    }
-    if (downHandleIsShow) {
-        right = std::max(downHandle.Right() - downHandle.Width() / 2 + handleRadius_->Get(), right);
-    }
-    if (upHandleIsShow) {
+        right = std::max(upHandle.Right() - upHandle.Width() / 2 + handleRadius_->Get(), right);
         top = std::min(upHandle.Top() - handleDiameter, top);
     }
     if (downHandleIsShow) {
+        left = std::min(downHandle.Left() + downHandle.Width() / 2 - handleRadius_->Get(), left);
+        right = std::max(downHandle.Right() - downHandle.Width() / 2 + handleRadius_->Get(), right);
         bottom = std::max(downHandle.Bottom() + handleDiameter, bottom);
     }
     RSRect clipInnerRect = RSRect(left, top, right, bottom);
