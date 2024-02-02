@@ -427,6 +427,22 @@ void SwiperIndicatorPattern::UpdateTextContent(const RefPtr<SwiperIndicatorLayou
     UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
 }
 
+int32_t SwiperIndicatorPattern::GetCurrentIndex() const
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_RETURN(swiperNode, 0);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, 0);
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, 0);
+    auto currentIndex = swiperLayoutProperty->GetIndex().value_or(0);
+    if (swiperPattern->IsSwipeByGroup()) {
+        currentIndex = SwiperUtils::ComputePageIndex(currentIndex, swiperPattern->GetDisplayCount());
+    }
+
+    return currentIndex;
+}
+
 void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
     const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode)
 {
@@ -447,7 +463,7 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     if (currentIndex > swiperPattern->RealTotalCount()) {
         currentIndex = 1;
     } else if (swiperLayoutProperty->HasIndex()) {
-        currentIndex = swiperLayoutProperty->GetIndexValue() + 1;
+        currentIndex = GetCurrentIndex() + 1;
         if (currentIndex > swiperPattern->RealTotalCount()) {
             currentIndex = 1;
         }
