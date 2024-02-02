@@ -36,6 +36,8 @@ public:
     virtual void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) {}
     virtual void SetScrollElement(int32_t pageId, const WeakPtr<ScrollElement>& scrollElement) {}
     virtual void RemovePageId(int32_t pageId) {}
+    virtual bool GetImeShow() const { return false; }
+    virtual void SetUIExtensionImeShow(bool imeShow) {}
 };
 
 } // namespace OHOS::Ace

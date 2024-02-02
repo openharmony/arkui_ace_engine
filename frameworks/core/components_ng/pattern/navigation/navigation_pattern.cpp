@@ -21,11 +21,13 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "core/common/container.h"
+#include "core/common/manager_interface.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -311,10 +313,11 @@ void NavigationPattern::CheckTopNavPathChange(
 
     // close keyboard
 #if defined (ENABLE_STANDARD_INPUT)
-    if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav notNeedSoftKeyboard.");
-        FocusHub::NavCloseKeyboard();
-    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textfieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textfieldManager);
+    textfieldManager->ProcessNavKeyboard();
 #endif
 
     isChanged_ = true;

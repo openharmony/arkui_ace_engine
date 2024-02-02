@@ -6576,17 +6576,6 @@ void TextFieldPattern::RequestKeyboardAfterLongPress()
 #endif
 }
 
-void TextFieldPattern::NotifyKeyboardInfo(const KeyBoardInfo& info)
-{
-    if (!HasFocus()) {
-        return;
-    }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-    textFieldManager->SetImeShow(info.visible);
-}
-
 void TextFieldPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
 {
     OffsetF offset = selectController_->GetCaretRect().GetOffset();

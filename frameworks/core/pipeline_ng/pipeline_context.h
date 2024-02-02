@@ -598,6 +598,7 @@ public:
     const SerializedGesture& GetSerializedGesture() const override;
     // return value means whether it has printed info
     bool PrintVsyncInfoIfNeed() const override;
+    void SetUIExtensionImeShow(bool imeShow);
 
     void CheckVirtualKeyboardHeight() override;
 
