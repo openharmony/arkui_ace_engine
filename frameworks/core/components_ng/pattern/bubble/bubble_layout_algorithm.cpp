@@ -364,7 +364,7 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
         InitCaretTargetSizeAndPosition();
         // subtract the global offset of the overlay node,
         // because the final node position is set relative to the overlay node.
-        auto overlayGlobalOffset = bubbleNode->GetPaintRectOffset();
+        auto overlayGlobalOffset = bubbleNode->GetOffsetRelativeToWindow();
         targetOffset_ -= overlayGlobalOffset;
     }
     childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
