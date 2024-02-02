@@ -786,13 +786,7 @@ export class SubHeader extends ViewPU {
       Row.border({
         radius: 4,
         width: 2,
-        color: {
-          id: -1,
-          type: 10001,
-          params: ["sys.color.ohos_id_color_focused_outline_transparent"],
-          bundleName: "",
-          moduleName: ""
-        }
+        color: Color.Transparent
       });
       ViewStackProcessor.visualState();
       o || Row.pop();
