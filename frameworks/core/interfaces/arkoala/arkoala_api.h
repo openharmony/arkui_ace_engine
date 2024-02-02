@@ -28,7 +28,7 @@ extern "C" {
 #define ARKUI_BASIC_API_VERSION 5
 #define ARKUI_EXTENDED_API_VERSION 4
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
-#define ARKUI_NODE_MODIFIERS_API_VERSION 6
+#define ARKUI_NODE_MODIFIERS_API_VERSION 7
 #define ARKUI_AUTO_GENERATE_NODE_ID -2
 
 enum ArkUIAPIVariantKind {
@@ -1086,6 +1086,10 @@ struct ArkUIButtonModifier {
     void (*resetButtonBackgroundColor)(ArkUINodeHandle node);
     void (*setButtonBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*resetButtonBorderRadius)(ArkUINodeHandle node);
+    void (*setButtonSize)(ArkUINodeHandle node, ArkUI_CharPtr widthValue, ArkUI_Int32 widthUnit,
+        ArkUI_CharPtr heightValue, ArkUI_Int32 heightUnit);
+    void (*resetButtonSize)(ArkUINodeHandle node);
+
 };
 
 struct ArkUIImageModifier {
@@ -1687,6 +1691,8 @@ struct ArkUIWebModifier {
 struct ArkUIBlankModifier {
     void (*setColor)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetColor)(ArkUINodeHandle node);
+    void (*setBlankHeight)(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit);
+    void (*resetBlankHeight)(ArkUINodeHandle node);
 };
 
 struct ArkUICounterModifier {
@@ -1703,6 +1709,8 @@ struct ArkUICheckboxModifier {
     void (*setCheckboxWidth)(ArkUINodeHandle node, ArkUI_Float32 widthVal, ArkUI_Int32 widthUnit);
     void (*setCheckboxHeight)(ArkUINodeHandle node, ArkUI_Float32 heightVal, ArkUI_Int32 heightUnit);
     void (*setMark)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue);
+    void (*setCheckboxPadding)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Uint32 length);
+    void (*setCheckboxResponseRegion)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Uint32 length);
 
     void (*resetSelect)(ArkUINodeHandle node);
     void (*resetSelectedColor)(ArkUINodeHandle node);
@@ -1712,6 +1720,8 @@ struct ArkUICheckboxModifier {
     void (*resetMark)(ArkUINodeHandle node);
     void (*setCheckboxShape)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCheckboxShape)(ArkUINodeHandle node);
+    void (*resetCheckboxPadding)(ArkUINodeHandle node);
+    void (*resetCheckboxResponseRegion)(ArkUINodeHandle node);
 
     ArkUI_Bool (*getSelect)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getSelectedColor)(ArkUINodeHandle node);

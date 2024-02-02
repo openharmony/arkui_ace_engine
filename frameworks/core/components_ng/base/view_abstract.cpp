@@ -54,7 +54,7 @@ void BindMenu(const RefPtr<FrameNode> &menuNode, int32_t targetId, const NG::Off
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto context = AceType::DynamicCast<NG::ViewAbstract::ClearWidthOrHeightPipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -80,7 +80,7 @@ void ViewAbstract::SetWidth(const CalcLength &width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
-    }
+    }ViewAbstract::ClearWidthOrHeight
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();

@@ -185,7 +185,7 @@ void ResetTextpickerDefaultPickerItemHeight(ArkUINodeHandle node)
 } // namespace
 
 namespace NodeModifier {
-const ArkUITextPickerModifier* GetTextpickerModifier()
+const ArkUITextPickerModifier* GetTextPickerModifier()
 {
     static const ArkUITextPickerModifier modifier = {
         SetTextpickerBackgroundColor, SetTextpickerCanLoop,

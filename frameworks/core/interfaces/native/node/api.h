@@ -458,6 +458,8 @@ struct ArkUITextModifierAPI {
 };
 
 struct ArkUIButtonModifierAPI {
+    
+    
     void (*SetButtonType)(NodeHandle node, int type);
     void (*ResetButtonType)(NodeHandle node);
     void (*SetButtonStateEffect)(NodeHandle node, bool stateEffect);

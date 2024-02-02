@@ -36,6 +36,13 @@
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
+#include "core/interfaces/native/node/checkbox_modifier.h"
+#include "core/interfaces/native/node/column_modifier.h"
+#include "core/interfaces/native/node/blank_modifier.h"
+#include "core/interfaces/native/node/column_split_modifier.h"
+#include "core/interfaces/native/node/grid_col_modifier.h"
+#include "core/interfaces/native/node/grid_item_modifier.h"
+#include "core/interfaces/native/node/button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -47,28 +54,28 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     NodeModifier::GetTextModifier,
-    nullptr,
+    NodeModifier::GetButtonModifier,
     NodeModifier::GetToggleModifier,
     NodeModifier::GetImageSpanModifier,
+    NodeModifier::GetBlankModifier,
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetCheckboxModifier,
     NodeModifier::GetTimepickerModifier,
-    NodeModifier::GetTextpickerModifier,
+    NodeModifier::GetTextPickerModifier,
     nullptr,
     nullptr,
     nullptr,
     NodeModifier::GetStackModifier,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::GetGridColModifier,
     nullptr,
     nullptr,
     NodeModifier::GetTextAreaModifier,
     nullptr,
-    nullptr,
+    NodeModifier::GetColumnModifier,
     nullptr,
     NodeModifier::GetImageModifier,
     nullptr,
@@ -77,7 +84,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::GetColumnSplitModifier,
     nullptr,
     nullptr,
     nullptr,
@@ -99,7 +106,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     NodeModifier::GetScrollModifier,
-    nullptr,
+    NodeModifier::GetGridItemModifier,
     nullptr,
     nullptr,
     nullptr,

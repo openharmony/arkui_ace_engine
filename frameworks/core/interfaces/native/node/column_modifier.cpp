@@ -24,21 +24,21 @@
 namespace OHOS::Ace::NG {
 constexpr FlexAlign DEFAULT_JUSTIFY_CONTENT = FlexAlign::FLEX_START;
 
-void SetColumnJustifyContent(NodeHandle node, int32_t flexAlign)
+void SetColumnJustifyContent(ArkUINodeHandle node, int32_t flexAlign)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ColumnModelNG::SetJustifyContent(frameNode, static_cast<FlexAlign>(flexAlign));
 }
 
-void ResetColumnJustifyContent(NodeHandle node)
+void ResetColumnJustifyContent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ColumnModelNG::SetJustifyContent(frameNode, DEFAULT_JUSTIFY_CONTENT);
 }
 
-void SetColumnAlignItems(NodeHandle node, int32_t value)
+void SetColumnAlignItems(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -53,21 +53,24 @@ void SetColumnAlignItems(NodeHandle node, int32_t value)
     ColumnModelNG::SetAlignItems(frameNode, value_flexAlign);
 }
 
-void ResetColumnAlignItems(NodeHandle node)
+void ResetColumnAlignItems(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ColumnModelNG::SetAlignItems(frameNode, FlexAlign::CENTER);
 }
 
-ArkUIColumnModifierAPI GetColumnModifier()
+namespace NodeModifier
 {
-    static const ArkUIColumnModifierAPI modifier = {
+const ArkUIColumnModifier* GetColumnModifier()
+{
+    static const ArkUIColumnModifier modifier = {
         SetColumnJustifyContent,
         ResetColumnJustifyContent,
         SetColumnAlignItems,
         ResetColumnAlignItems
     };
-    return modifier;
+    return &modifier;
+}
 }
 }

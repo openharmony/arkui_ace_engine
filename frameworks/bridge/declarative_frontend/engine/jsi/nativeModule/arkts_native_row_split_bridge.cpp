@@ -16,28 +16,28 @@
 #include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
-ArkUINativeModuleValue RowSplitBridge::SetResizeable(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue RowSplitBridge::SetResizable(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> resizeableArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> resizableArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    bool resizeable = false;
-    if (resizeableArg->IsBoolean()) {
-        resizeable = resizeableArg->ToBoolean(vm)->BooleaValue();
+    bool resizable = false;
+    if (resizableArg->IsBoolean()) {
+        resizable = resizableArg->ToBoolean(vm)->BooleaValue();
     }
-    GetArkUIInternalNodeAPI()->GetRowSplitModifier().SetRowSplitResizeable(nativeNode, resizeable);
+    GetArkUIInternalNodeAPI()->GetRowSplitModifier().SetRowSplitResizable(nativeNode, resizable);
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue RowSplitBridge::ResetResizeable(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue RowSplitBridge::ResetResizable(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     void *nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRowSplitModifier().ResetRowSplitResizeable(nativeNode);
+    GetArkUIInternalNodeAPI()->GetRowSplitModifier().ResetRowSplitResizable(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

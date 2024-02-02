@@ -19,38 +19,43 @@
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/view_abstract.h"
+
 namespace OHOS::Ace::NG {
-void SetColor(NodeHandle node, uint32_t value)
+void SetColor(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     BlankModelNG::SetColor(frameNode, Color(value));
 }
 
-void ResetColor(NodeHandle node)
+void ResetColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     BlankModelNG::SetColor(frameNode, Color::TRANSPARENT);
 }
 
-void SetBlankHeight(NodeHandle node, double heightValue, int32_t heightUnit)
+void SetBlankHeight(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     BlankModelNG::SetHeight(frameNode, CalcDimension(heightValue, (DimensionUnit)heightUnit));
 }
 
-void ResetBlankHeight(NodeHandle node)
+void ResetBlankHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
-ArkUIBlankModifierAPI GetBlankModifier()
+namespace NodeModifier
 {
-    static const ArkUIBlankModifierAPI modifier = { SetColor, ResetColor, SetBlankHeight, ResetBlankHeight };
-    return modifier;
+const ArkUIBlankModifier* GetBlankModifier()
+{
+    static const ArkUIBlankModifier modifier = { SetColor, ResetColor, SetBlankHeight, ResetBlankHeight };
+    return &modifier;
+}
 }
 }

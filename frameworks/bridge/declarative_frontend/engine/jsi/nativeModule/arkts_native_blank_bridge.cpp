@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue BlankBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -23,13 +22,13 @@ ArkUINativeModuleValue BlankBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         uint32_t value = color.GetValue();
-        GetArkUIInternalNodeAPI()->GetBlankModifier().SetColor(nativeNode, value);
+        GetArkUINodeModifiers()->getBlankModifier()->setColor(nativeNode, value);
     } else {
-        GetArkUIInternalNodeAPI()->GetBlankModifier().ResetColor(nativeNode);
+        GetArkUINodeModifiers()->getBlankModifier()->resetColor(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -38,8 +37,8 @@ ArkUINativeModuleValue BlankBridge::ResetColor(ArkUIRuntimeCallInfo* runtimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetBlankModifier().ResetColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getBlankModifier()->resetColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue BlankBridge::SetBlankHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -48,7 +47,7 @@ ArkUINativeModuleValue BlankBridge::SetBlankHeight(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension height;
     std::string calcStr;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, valueArg, height)) {
@@ -68,7 +67,7 @@ ArkUINativeModuleValue BlankBridge::SetBlankHeight(ArkUIRuntimeCallInfo* runtime
     if (!ArkTSUtils::ParseJsDimensionVp(vm, valueArg, height)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUIInternalNodeAPI()->GetBlankModifier().SetBlankHeight(
+    GetArkUINodeModifiers()->getBlankModifier()->setBlankHeight(
         nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -77,8 +76,8 @@ ArkUINativeModuleValue BlankBridge::ResetBlankHeight(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetBlankModifier().ResetBlankHeight(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getBlankModifier()->resetBlankHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

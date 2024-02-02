@@ -8,8 +8,7 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KINDDimenge governing permissions and
  * limitations under the License.
  */
 #include "core/interfaces/native/node/checkbox_modifier.h"
@@ -25,28 +24,28 @@ namespace OHOS::Ace::NG {
 const DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
 
-void SetSelect(NodeHandle node, bool isSelected)
+void SetSelect(ArkUINodeHandle node, ArkUI_Bool isSelected)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelNG::SetSelect(frameNode, isSelected);
 }
 
-void SetSelectedColor(NodeHandle node, uint32_t color)
+void SetSelectedColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelNG::SetSelectedColor(frameNode, Color(color));
 }
 
-void SetUnSelectedColor(NodeHandle node, uint32_t color)
+void SetUnSelectedColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelNG::SetUnSelectedColor(frameNode, Color(color));
 }
 
-void SetCheckboxWidth(NodeHandle node, double value, int unit)
+void SetCheckboxWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -54,7 +53,7 @@ void SetCheckboxWidth(NodeHandle node, double value, int unit)
     CheckBoxModelNG::SetWidth(frameNode, width);
 }
 
-void SetCheckboxHeight(NodeHandle node, double value, int unit)
+void SetCheckboxHeight(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -62,7 +61,7 @@ void SetCheckboxHeight(NodeHandle node, double value, int unit)
     CheckBoxModelNG::SetHeight(frameNode, height);
 }
 
-void SetMark(NodeHandle node, uint32_t color, double sizeValue, double widthValue)
+void SetMark(ArkUINodeHandle node, uint32_t color, ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -74,14 +73,14 @@ void SetMark(NodeHandle node, uint32_t color, double sizeValue, double widthValu
     Dimension width = Dimension(widthValue, DEFAULT_UNIT);
     CheckBoxModelNG::SetCheckMarkWidth(frameNode, width);
 }
-void ResetSelect(NodeHandle node)
+void ResetSelect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelNG::SetSelect(frameNode, false);
 }
 
-void ResetSelectedColor(NodeHandle node)
+void ResetSelectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -93,7 +92,7 @@ void ResetSelectedColor(NodeHandle node)
     CheckBoxModelNG::SetSelectedColor(frameNode, checkBoxTheme->GetActiveColor());
 }
 
-void ResetUnSelectedColor(NodeHandle node)
+void ResetUnSelectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -105,7 +104,7 @@ void ResetUnSelectedColor(NodeHandle node)
     CheckBoxModelNG::SetUnSelectedColor(frameNode, checkBoxTheme->GetInactiveColor());
 }
 
-void ResetCheckboxWidth(NodeHandle node)
+void ResetCheckboxWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -121,7 +120,7 @@ void ResetCheckboxWidth(NodeHandle node)
     CheckBoxModelNG::SetWidth(frameNode, width);
 }
 
-void ResetCheckboxHeight(NodeHandle node)
+void ResetCheckboxHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -138,7 +137,7 @@ void ResetCheckboxHeight(NodeHandle node)
     CheckBoxModelNG::SetHeight(frameNode, height);
 }
 
-void ResetMark(NodeHandle node)
+void ResetMark(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -153,31 +152,31 @@ void ResetMark(NodeHandle node)
     CheckBoxModelNG::SetCheckMarkWidth(frameNode, checkBoxTheme->GetCheckStroke());
 }
 
-void SetCheckboxPadding(NodeHandle node, const double* values, const int* units, uint32_t length)
+void SetCheckboxPadding(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, uint32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (length != 4) { // 4 : data length
         return;
     }
-    CalcLength topDimen;
-    CalcLength rightDimen;
-    CalcLength bottomDimen;
-    CalcLength leftDimen;
-    topDimen = CalcLength(values[0], static_cast<DimensionUnit>(units[0])); // 0: top Dimension
-    rightDimen = CalcLength(values[1], static_cast<DimensionUnit>(units[1])); // 1: right Dimension
-    bottomDimen = CalcLength(values[2], static_cast<DimensionUnit>(units[2])); // 2: bottom Dimension
-    leftDimen = CalcLength(values[3], static_cast<DimensionUnit>(units[3])); // 3: left Dimension
+    CalcLength topDim;
+    CalcLength rightDim;
+    CalcLength bottomDim;
+    CalcLength leftDim;
+    topDim = CalcLength(values[0], static_cast<DimensionUnit>(units[0])); // 0: top Dimension
+    rightDim = CalcLength(values[1], static_cast<DimensionUnit>(units[1])); // 1: right Dimension
+    bottomDim = CalcLength(values[2], static_cast<DimensionUnit>(units[2])); // 2: bottom Dimension
+    leftDim = CalcLength(values[3], static_cast<DimensionUnit>(units[3])); // 3: left Dimension
     NG::PaddingProperty padding;
-    padding.top = std::optional<CalcLength>(topDimen);
-    padding.bottom = std::optional<CalcLength>(bottomDimen);
-    padding.left = std::optional<CalcLength>(leftDimen);
-    padding.right = std::optional<CalcLength>(rightDimen);
+    padding.top = std::optional<CalcLength>(topDim);
+    padding.bottom = std::optional<CalcLength>(bottomDim);
+    padding.left = std::optional<CalcLength>(leftDim);
+    padding.right = std::optional<CalcLength>(rightDim);
 
     CheckBoxModelNG::SetPadding(frameNode, padding);
 }
 
-void SetCheckboxResponseRegion(NodeHandle node, const double* values, const int32_t* units, uint32_t length)
+void SetCheckboxResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const int32_t* units, uint32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -199,7 +198,7 @@ void SetCheckboxResponseRegion(NodeHandle node, const double* values, const int3
     CheckBoxModelNG::SetResponseRegion(frameNode, region);
 }
 
-void ResetCheckboxPadding(NodeHandle node)
+void ResetCheckboxPadding(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -212,15 +211,17 @@ void ResetCheckboxPadding(NodeHandle node)
     CheckBoxModelNG::SetPadding(frameNode, padding);
 }
 
-void ResetCheckboxResponseRegion(NodeHandle node) {}
+void ResetCheckboxResponseRegion(ArkUINodeHandle node) {}
 
-ArkUICheckboxModifierAPI GetCheckboxModifier()
+namespace NodeModifier {
+const ArkUICheckboxModifier* GetCheckboxModifier()
 {
-    static const ArkUICheckboxModifierAPI modifier = { SetSelect, SetSelectedColor, SetUnSelectedColor,
+    static const ArkUICheckboxModifier modifier = { SetSelect, SetSelectedColor, SetUnSelectedColor,
         SetCheckboxWidth, SetCheckboxHeight, SetMark, SetCheckboxPadding, SetCheckboxResponseRegion, ResetSelect,
         ResetSelectedColor, ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark,
         ResetCheckboxPadding, ResetCheckboxResponseRegion };
 
-    return modifier;
+    return &modifier;
+}
 }
 }

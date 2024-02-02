@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "base/geometry/dimension.h"
-#include "core/interfaces/native/node/api.h"
+#include "core/interfaces/native/node/node_api.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_split_bridge.h"
 
@@ -22,28 +22,28 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 
-ArkUINativeModuleValue ColumnSplitBridge::SetResizeable(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue ColumnSplitBridge::SetResizable(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> resizeableArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> resizableArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    bool resizeable = false;
-    if (resizeableArg->IsBoolean()) {
-        resizeable = resizeableArg->ToBoolean(vm)->BooleaValue();
+    bool resizable = false;
+    if (resizableArg->IsBoolean()) {
+        resizable = resizableArg->ToBoolean(vm)->BooleaValue();
     }
-    GetArkUIInternalNodeAPI()->GetColumnSplitModifier().SetColumnSplitResizeable(nativeNode, resizeable);
+    GetArkUINodeModifiers()->getColumnSplitModifier()->setColumnSplitResizable(nativeNode, resizable);
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue ColumnSplitBridge::ResetResizeable(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue ColumnSplitBridge::ResetResizable(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     void *nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetColumnSplitModifier().ResetColumnSplitResizeable(nativeNode);
+    GetArkUINodeModifiers()->getColumnSplitModifier()->resetColumnSplitResizable(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -59,7 +59,7 @@ ArkUINativeModuleValue ColumnSplitBridge::SetDivider(ArkUIRuntimeCallInfo* runti
     CalcDimension endMargin(0.0, DimensionUnit::VP);
     ArkTSUtils::ParseJsDimensionVp(vm, startMarginArg, startMargin);
     ArkTSUtils::ParseJsDimensionVp(vm, endMarginArg, endMargin);
-    GetArkUIInternalNodeAPI()->GetColumnSplitModifier().SetColumnSplitDivider(nativeNode, startMargin.Value(),
+    GetArkUINodeModifiers()->getColumnSplitModifier()->setColumnSplitDivider(nativeNode, startMargin.Value(),
         static_cast<int32_t>(startMargin.Unit()), endMargin.Value(), static_cast<int32_t>(endMargin.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -70,7 +70,7 @@ ArkUINativeModuleValue ColumnSplitBridge::ResetDivider(ArkUIRuntimeCallInfo *run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetColumnSplitModifier().ResetColumnSplitDivider(nativeNode);
+    GetArkUINodeModifiers()->getColumnSplitModifier()->resetColumnSplitDivider(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

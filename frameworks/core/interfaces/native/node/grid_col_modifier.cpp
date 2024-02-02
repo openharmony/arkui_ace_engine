@@ -49,7 +49,7 @@ void InheritGridContainerSize(const RefPtr<OHOS::Ace::V2::GridContainerSize> &gr
     gridContainerSize->xxl = containerSizeArray[COL_5];
 }
 
-void SetSpan(NodeHandle node, int32_t *containerSizeArray, int32_t size)
+void SetSpan(ArkUINodeHandle node, int32_t *containerSizeArray, int32_t size)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -58,7 +58,7 @@ void SetSpan(NodeHandle node, int32_t *containerSizeArray, int32_t size)
     GridColModelNG::SetSpan(frameNode, span);
 }
 
-void ResetSpan(NodeHandle node)
+void ResetSpan(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -68,7 +68,7 @@ void ResetSpan(NodeHandle node)
     GridColModelNG::SetSpan(frameNode, span);
 }
 
-void SetGridColOffset(NodeHandle node, int32_t *containerSizeArray, int32_t size)
+void SetGridColOffset(ArkUINodeHandle node, int32_t *containerSizeArray, int32_t size)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -77,7 +77,7 @@ void SetGridColOffset(NodeHandle node, int32_t *containerSizeArray, int32_t size
     GridColModelNG::SetOffset(frameNode, offset);
 }
 
-void ResetGridColOffset(NodeHandle node)
+void ResetGridColOffset(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -87,7 +87,7 @@ void ResetGridColOffset(NodeHandle node)
     GridColModelNG::SetOffset(frameNode, offset);
 }
 
-void SetOrder(NodeHandle node, int32_t *containerSizeArray, int32_t size)
+void SetOrder(ArkUINodeHandle node, int32_t *containerSizeArray, int32_t size)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -96,7 +96,7 @@ void SetOrder(NodeHandle node, int32_t *containerSizeArray, int32_t size)
     GridColModelNG::SetOrder(frameNode, Order);
 }
 
-void ResetOrder(NodeHandle node)
+void ResetOrder(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -106,11 +106,14 @@ void ResetOrder(NodeHandle node)
     GridColModelNG::SetOrder(frameNode, Order);
 }
 
-ArkUIGridColModifierAPI GetGridColModifier()
+namespace NodeModifier
 {
-    static const ArkUIGridColModifierAPI modifier = {
+const ArkUIGridColModifier* GetGridColModifier()
+{
+    static const ArkUIGridColModifier modifier = {
         SetSpan, ResetSpan, SetGridColOffset, ResetGridColOffset, SetOrder, ResetOrder,
     };
-    return modifier;
+    return &modifier;
+}
 }
 }
