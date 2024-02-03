@@ -90,6 +90,7 @@ RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(const Size& size)
 RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(uint32_t index, const Size& size)
 {
     Media::DecodeOptions options;
+    options.preferDma = true;
     if (size.first > 0 && size.second > 0) {
         options.desiredSize = { size.first, size.second };
     }
