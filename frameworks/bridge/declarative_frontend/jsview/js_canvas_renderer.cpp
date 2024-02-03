@@ -834,6 +834,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
         CHECK_NULL_VOID(pixelMap);
     }
     imageInfo.isImage = false;
+    imageInfo.pixelMap = pixelMap;
 #else
     CHECK_NULL_VOID(jsImage);
     isImage = true;
@@ -850,7 +851,6 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
     baseInfo.offscreenPattern = offscreenPattern_;
     baseInfo.isOffscreen = isOffscreen_;
     imageInfo.image = image;
-    imageInfo.pixelMap = pixelMap;
 
     CanvasRendererModel::GetInstance()->DrawImage(baseInfo, imageInfo);
 }
