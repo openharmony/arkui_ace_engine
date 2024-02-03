@@ -73,7 +73,6 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest001, TestSize.Level1)
     MockPipelineContextGetTheme();
     NavDestinationModelNG NavDestinationModelNG;
     NavDestinationModelNG.Create();
-    NavDestinationModelNG.SetTitleHeight(0);
     NavDestinationModelNG.SetHideTitleBar(true);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, true);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
@@ -85,32 +84,6 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest001, TestSize.Level1)
     ASSERT_NE(navDestinationPattern, nullptr);
     auto navDestinationLayoutProperty = navDestinationPattern->GetLayoutProperty<NavDestinationLayoutProperty>();
     ASSERT_NE(navDestinationLayoutProperty, nullptr);
-}
-
-/**
- * @tc.name: NavDestinationTest002
- * @tc.desc: Test NavDestinationModelNG SetTitle & SetSubTitle.
- * @tc.type: FUNC
- */
-HWTEST_F(NavdestinationTestNg, NavdestinationTest002, TestSize.Level1)
-{
-    MockPipelineContextGetTheme();
-    NavDestinationModelNG NavDestinationModelNG;
-    NavDestinationModelNG.Create();
-    NavDestinationModelNG.SetHideTitleBar(true);
-    NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, true);
-    NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    ASSERT_NE(frameNode, nullptr);
-    auto navigationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    ASSERT_NE(navigationGroupNode, nullptr);
-    auto titleNode = navigationGroupNode->GetTitle();
-    ASSERT_NE(titleNode, nullptr);
-    auto subTitleNode = navigationGroupNode->GetSubtitle();
-    ASSERT_NE(subTitleNode, nullptr);
-    NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, false);
-    auto newSubTitleNode = navigationGroupNode->GetSubtitle();
-    ASSERT_EQ(newSubTitleNode, nullptr);
 }
 
 /**

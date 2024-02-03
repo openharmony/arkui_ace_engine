@@ -236,18 +236,17 @@ void JSNavigation::ParseToolbarItemsConfiguration(
     }
 }
 
-bool JSNavigation::ParseCommonTitle(const JSRef<JSVal>& jsValue)
+bool JSNavigation::ParseCommonTitle(const JSRef<JSObject>& jsObj)
 {
-    bool isCommonTitle = false;
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> subtitle = jsObj->GetProperty("sub");
     JSRef<JSVal> title = jsObj->GetProperty("main");
-    bool sub = subtitle->IsString();
-    bool main = title->IsString();
-    if (subtitle->IsString() || title->IsString()) {
-        NavigationModel::GetInstance()->ParseCommonTitle(sub, main, subtitle->ToString(), title->ToString());
+    bool hasSub = subtitle->IsString();
+    bool hasMain = title->IsString();
+    if (hasSub || hasMain) {
+        return NavigationModel::GetInstance()->ParseCommonTitle(
+            hasSub, hasMain, subtitle->ToString(), title->ToString());
     }
-    return isCommonTitle;
+    return false;
 }
 
 void JSNavigation::Create(const JSCallbackInfo& info)
@@ -265,9 +264,7 @@ void JSNavigation::Create(const JSCallbackInfo& info)
     }
 
     NavigationModel::GetInstance()->Create();
-    auto stackCreator = []() -> RefPtr<JSNavigationStack> {
-        return AceType::MakeRefPtr<JSNavigationStack>();
-    };
+    auto stackCreator = []() -> RefPtr<JSNavigationStack> { return AceType::MakeRefPtr<JSNavigationStack>(); };
     auto stackUpdater = [&newObj, &info](RefPtr<NG::NavigationStack> stack) {
         NavigationModel::GetInstance()->SetNavigationStackProvided(!newObj->IsEmpty());
         auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
@@ -283,7 +280,7 @@ void JSNavigation::Create(const JSCallbackInfo& info)
         } else if (!newObj->IsEmpty()) {
             auto objStrictEqual = [](const JSRef<JSVal>& obja, const JSRef<JSVal>& objb) -> bool {
                 return obja->GetLocalHandle()->IsStrictEquals(obja->GetEcmaVM(), objb->GetLocalHandle());
-                };
+            };
             if (objStrictEqual(newObj, oldObj)) {
                 return;
             }
@@ -334,24 +331,24 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsString()) {
-        NavigationModel::GetInstance()->SetTitle(info[0]->ToString());
+    // Resource and string type.
+    std::string title;
+    if (ParseJsString(info[0], title)) {
+        NavigationModel::GetInstance()->ParseCommonTitle(false, true, "", title);
     } else if (info[0]->IsObject()) {
-        if (ParseCommonTitle(info[0])) {
-            return;
-        }
-        std::string title;
-        if (ParseJsString(info[0], title)) {
-            NavigationModel::GetInstance()->SetTitle(title);
-        }
-        // CustomBuilder | NavigationCustomTitle
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
         do {
+            // NavigationCommonTitle
+            if (ParseCommonTitle(jsObj)) {
+                break;
+            }
+            // CustomBuilder | NavigationCustomTitle
+            CalcDimension titleHeight;
             if (!jsObj->HasProperty("height")) {
+                NavigationModel::GetInstance()->SetTitleHeight(titleHeight, false);
                 break;
             }
             JSRef<JSVal> height = jsObj->GetProperty("height");
-            CalcDimension titleHeight;
             bool isValid = JSContainerBase::ParseJsDimensionVpNG(height, titleHeight);
             if (height->IsString()) {
                 std::string heightValue;
@@ -366,8 +363,8 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
                 }
             }
             if (!isValid || titleHeight.Value() < 0) {
-                NavigationModel::GetInstance()->SetTitleHeight(titleHeight, false);
-                return;
+                NavigationModel::GetInstance()->SetTitleHeight(Dimension(), true);
+                break;
             }
             NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
         } while (0);
@@ -381,7 +378,9 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
             NavigationModel::GetInstance()->SetCustomTitle(customNode);
         }
     } else {
-        NavigationModel::GetInstance()->SetTitle("");
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetTitle is undefined");
+        NavigationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
+        return;
     }
 
     NG::NavigationTitlebarOptions options;
@@ -763,8 +762,8 @@ void JSNavigation::SetCustomNavContentTransition(const JSCallbackInfo& info)
         JSRef<JSVal> time = transitionObj->GetProperty("timeout");
         if (time->IsNumber()) {
             auto timeout = time->ToNumber<int32_t>();
-            transition.timeout = ((timeout >= 0)  && (timeout <= NAVIGATION_ANIMATION_TIMEOUT)) ?
-                timeout : NAVIGATION_ANIMATION_TIMEOUT;
+            transition.timeout =
+                ((timeout >= 0) && (timeout <= NAVIGATION_ANIMATION_TIMEOUT)) ? timeout : NAVIGATION_ANIMATION_TIMEOUT;
         } else {
             transition.timeout = NAVIGATION_ANIMATION_TIMEOUT;
         }

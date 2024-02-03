@@ -41,7 +41,6 @@ namespace {
 const std::string BAR_ITEM_ETS_TAG = "BarItem";
 const std::string FRAME_ITEM_ETS_TAG = "FrameItem";
 const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
-const char TEXT_ETS_TAG[] = "Text";
 const std::string EMPTY_STRING = "";
 const int32_t RET_OK = 0;
 constexpr float START = 50.0f;
@@ -136,7 +135,7 @@ void NavBarTestNg::InitializationParameters(TestParameters& testParameters)
     auto title = AceType::MakeRefPtr<FrameNode>(
         NAV_BAR_NODE_TITLE, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(title, nullptr);
-    navBarNode_->SetTitle(title);
+    titleBarNode_->SetTitle(title);
     auto menu = AceType::MakeRefPtr<FrameNode>(
         NAV_BAR_NODE_MENU, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(menu, nullptr);
@@ -144,7 +143,7 @@ void NavBarTestNg::InitializationParameters(TestParameters& testParameters)
     auto backButton = AceType::MakeRefPtr<FrameNode>(
         NAV_BAR_NODE_BACK_BUTTON, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(backButton, nullptr);
-    navBarNode_->SetBackButton(backButton);
+    titleBarNode_->SetBackButton(backButton);
     testParameters.navigationGroupNode = AceType::MakeRefPtr<NavigationGroupNode>(NAVIGATION_GROUP_NODE,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigationPattern>());
     ASSERT_NE(testParameters.navigationGroupNode, nullptr);
@@ -232,74 +231,6 @@ HWTEST_F(NavBarTestNg, AddChildToGroup002, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTitleString001
- * @tc.desc: Test get title string with error tag.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, GetTitleString001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    std::string frameTag = FRAME_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(BAR_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(frameTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    barNode->SetTitle(frameNode);
-    auto ret = barNode->GetTitleString();
-    EXPECT_EQ(ret, EMPTY_STRING);
-}
-
-/**
- * @tc.name: GetTitleString002
- * @tc.desc: Test get title string with right tag.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, GetTitleString002, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    std::string textTag = TEXT_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(textTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    barNode->SetTitle(frameNode);
-    auto ret = barNode->GetTitleString();
-    EXPECT_EQ(ret, EMPTY_STRING);
-}
-
-/**
- * @tc.name: GetSubtitleString001
- * @tc.desc: Test get sub title string with error tag.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, GetSubtitleString001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    std::string frameTag = FRAME_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(BAR_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(frameTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    barNode->SetSubtitle(frameNode);
-    auto ret = barNode->GetSubtitleString();
-    EXPECT_EQ(ret, EMPTY_STRING);
-}
-
-/**
- * @tc.name: GetSubtitleString002
- * @tc.desc: Test get sub title string with right tag.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, GetSubtitleString002, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    std::string textTag = TEXT_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(textTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    barNode->SetSubtitle(frameNode);
-    auto ret = barNode->GetSubtitleString();
-    EXPECT_EQ(ret, EMPTY_STRING);
-}
-
-/**
  * @tc.name: GetBarItemsString001
  * @tc.desc: Test get bar items string without menu.
  * @tc.type: FUNC
@@ -342,90 +273,6 @@ HWTEST_F(NavBarTestNg, IsAtomicNode001, TestSize.Level1)
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
     auto ret = barNode->IsAtomicNode();
-    EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: SetBackButton001
- * @tc.desc: Test SetBackButton interface.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, SetBackButton001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    barNode->SetBackButton(nullptr);
-    EXPECT_EQ(barNode->backButton_, nullptr);
-}
-
-/**
- * @tc.name: GetBackButton001
- * @tc.desc: Test GetBackButton interface.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, GetBackButton001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    auto ret = barNode->GetBackButton();
-    EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: SetTitle001
- * @tc.desc: Test SetTitle interface.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, SetTitle001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    barNode->SetTitle(nullptr);
-    EXPECT_EQ(barNode->title_, nullptr);
-}
-
-/**
- * @tc.name: GetTitle001
- * @tc.desc: Test GetTitle interface.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, GetTitle001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    auto ret = barNode->GetTitle();
-    EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: SetSubtitle001
- * @tc.desc: Test SetSubtitle interface.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, SetSubtitle001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    barNode->SetSubtitle(nullptr);
-    EXPECT_EQ(barNode->subtitle_, nullptr);
-}
-
-/**
- * @tc.name: GetSubtitle001
- * @tc.desc: Test GetSubtitle interface.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, GetSubtitle001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    auto ret = barNode->GetSubtitle();
     EXPECT_EQ(ret, false);
 }
 
@@ -611,54 +458,6 @@ HWTEST_F(NavBarTestNg, OnPrevToolBarIsCustomUpdate001, TestSize.Level1)
     auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
     int32_t ret = RET_OK;
     barNode->OnPrevToolBarIsCustomUpdate(true);
-    EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: OnBackButtonNodeOperationUpdate001
- * @tc.desc: Test OnBackButtonNodeOperationUpdate interface.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, OnBackButtonNodeOperationUpdate001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    int32_t ret = RET_OK;
-    ChildNodeOperation value = ChildNodeOperation::ADD;
-    barNode->OnBackButtonNodeOperationUpdate(value);
-    EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: OnTitleNodeOperationUpdate001
- * @tc.desc: Test OnTitleNodeOperationUpdate interface.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, OnTitleNodeOperationUpdate001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    int32_t ret = RET_OK;
-    ChildNodeOperation value = ChildNodeOperation::ADD;
-    barNode->OnTitleNodeOperationUpdate(value);
-    EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: OnSubtitleNodeOperationUpdate001
- * @tc.desc: Test OnSubtitleNodeOperationUpdate interface.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, OnSubtitleNodeOperationUpdate001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    int32_t ret = RET_OK;
-    ChildNodeOperation value = ChildNodeOperation::ADD;
-    barNode->OnSubtitleNodeOperationUpdate(value);
     EXPECT_EQ(ret, RET_OK);
 }
 
