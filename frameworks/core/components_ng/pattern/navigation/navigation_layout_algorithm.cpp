@@ -489,10 +489,10 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-  auto layoutAlgorithm = layoutWrapper->GetLayoutAlgorithm();
-  if (layoutAlgorithm && layoutAlgorithm->SkipLayout()) {
-    return;
-  }
+    auto layoutAlgorithm = layoutWrapper->GetLayoutAlgorithm();
+    if (layoutAlgorithm && layoutAlgorithm->SkipLayout()) {
+        return;
+    }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(layoutWrapper->GetLayoutProperty());
