@@ -117,16 +117,13 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
     }
 
     if (navDestinationLayoutProperty->HasNoPixMap()) {
-      if (navDestinationLayoutProperty->HasImageSource()) {
-        titleBarLayoutProperty->UpdateImageSource(
-            navDestinationLayoutProperty->GetImageSourceValue());
-      }
-      if (navDestinationLayoutProperty->HasPixelMap()) {
-        titleBarLayoutProperty->UpdatePixelMap(
-            navDestinationLayoutProperty->GetPixelMapValue());
-      }
-      titleBarLayoutProperty->UpdateNoPixMap(
-          navDestinationLayoutProperty->GetNoPixMapValue());
+        if (navDestinationLayoutProperty->HasImageSource()) {
+            titleBarLayoutProperty->UpdateImageSource(navDestinationLayoutProperty->GetImageSourceValue());
+        }
+        if (navDestinationLayoutProperty->HasPixelMap()) {
+            titleBarLayoutProperty->UpdatePixelMap(navDestinationLayoutProperty->GetPixelMapValue());
+        }
+        titleBarLayoutProperty->UpdateNoPixMap(navDestinationLayoutProperty->GetNoPixMapValue());
     }
 
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
