@@ -83,9 +83,6 @@ public:
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
 
 private:
-    static void PutComponentInsideNavigator(
-        NavigationGroupNode* navigationGroupNode, const RefPtr<NavBarNode>& navBarNode);
-
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     bool CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>& navBarNode);
     bool CreateContentNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

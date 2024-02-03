@@ -28,15 +28,14 @@ public:
     virtual ~NavDestinationModel() = default;
 
     virtual void Create() = 0;
-    virtual void Create(std::function<void()>&& deepRenderFunc,
-        RefPtr<NG::NavDestinationContext> context = nullptr) = 0;
+    virtual void Create(
+        std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) = 0;
     virtual void SetHideTitleBar(bool hideTitleBar) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle) = 0;
     virtual void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
-    virtual void SetTitleHeight(int32_t height) = 0;
     virtual void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) = 0;
     virtual void SetOnShown(std::function<void()>&& onShow) = 0;
     virtual void SetOnHidden(std::function<void()>&& onHidden) = 0;
@@ -46,6 +45,11 @@ public:
     virtual RefPtr<AceType> CreateEmpty()
     {
         return nullptr;
+    }
+    virtual bool ParseCommonTitle(
+        bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title)
+    {
+        return false;
     }
 
 private:

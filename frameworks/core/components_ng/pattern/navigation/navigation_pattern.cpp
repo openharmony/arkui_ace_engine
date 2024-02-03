@@ -18,8 +18,8 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
-#include "base/perfmonitor/perf_monitor.h"
 #include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/common/container.h"
 #include "core/common/manager_interface.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
@@ -129,7 +129,7 @@ void NavigationPattern::OnAttachToFrameNode()
 
     // when use router,  onShowCallback will be called when page show
     std::function<void()> onShowCallback = [weakNavigationNode = WeakPtr<NavigationGroupNode>(navigationNode),
-        pageId]() {
+                                               pageId]() {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto navigationNode = weakNavigationNode.Upgrade();
@@ -142,8 +142,7 @@ void NavigationPattern::OnAttachToFrameNode()
     };
     pipelineContext->AddNavigationStateCallback(pageId, navigationNode->GetId(), onShowCallback, true);
     // when use router,  onShowCallback will be called when page hide
-    std::function<void()> onHideCallback = [weakNavigationNode = WeakPtr<NavigationGroupNode>(navigationNode),
-        pageId]() {
+    std::function<void()> onHideCallback = [weakNavigationNode = WeakPtr<NavigationGroupNode>(navigationNode)]() {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto navigationNode = weakNavigationNode.Upgrade();
@@ -310,7 +309,7 @@ void NavigationPattern::CheckTopNavPathChange(
     }
 
     // close keyboard
-#if defined (ENABLE_STANDARD_INPUT)
+#if defined(ENABLE_STANDARD_INPUT)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto textfieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
@@ -867,7 +866,9 @@ void NavigationPattern::UpdateContextRect(
         curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
         curDestination->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-        auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
+        auto titleBarNode = DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+        CHECK_NULL_VOID(titleBarNode);
+        auto titleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
         CHECK_NULL_VOID(titleNode);
         titleNode->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
     }
@@ -1047,8 +1048,7 @@ void NavigationPattern::OnHover(bool isHover)
     auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(Dimension(0.0));
     auto userSetMaxNavBarWidthValue = layoutProperty->GetMaxNavBarWidthValue(Dimension(0.0));
     bool navBarWidthRangeEqual = userSetMinNavBarWidthValue.Value() >= userSetMaxNavBarWidthValue.Value();
-    if ((userSetNavBarWidthFlag_ && !userSetNavBarRangeFlag_) ||
-        (userSetNavBarRangeFlag_ && navBarWidthRangeEqual)) {
+    if ((userSetNavBarWidthFlag_ && !userSetNavBarRangeFlag_) || (userSetNavBarRangeFlag_ && navBarWidthRangeEqual)) {
         isDividerDraggable_ = false;
         return;
     }
@@ -1237,8 +1237,8 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         return false;
     }
     auto transition = navigationTransition.transition;
-    proxy->SetFinishTransitionEvent([weakPattern = WeakClaim(this), preTopNavDestination, newTopNavDestination,
-                                    proxy, isPopPage, endCallBack = navigationTransition.endCallback](bool isSuccess) {
+    proxy->SetFinishTransitionEvent([weakPattern = WeakClaim(this), preTopNavDestination, newTopNavDestination, proxy,
+                                        isPopPage, endCallBack = navigationTransition.endCallback](bool isSuccess) {
         auto navigationPattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(navigationPattern);
         if (proxy != nullptr && proxy->GetIsFinished()) {
