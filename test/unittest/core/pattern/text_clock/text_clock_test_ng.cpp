@@ -230,7 +230,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
      * @tc.expected: related function is called.
      */
     pattern->isStart_ = false;
-    pattern->UpdateTimeText();
+    pattern->UpdateTimeText(false);
     pattern->textClockController_ = nullptr;
     pattern->InitUpdateTimeTextCallBack();
     EXPECT_EQ(pattern->textClockController_, nullptr);
@@ -711,10 +711,10 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
      */
     pattern->isStart_ = true;
     pattern->OnVisibleAreaChange(false);
-    pattern->UpdateTimeText();
+    pattern->UpdateTimeText(false);
     EXPECT_EQ(utc, UTC_1);
     pattern->OnVisibleAreaChange(true);
-    pattern->UpdateTimeText();
+    pattern->UpdateTimeText(false);
     EXPECT_EQ(utc, UTC_2);
 
     /**
@@ -723,14 +723,14 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
      */
     utc = UTC_1;
     pattern->OnVisibleChange(false);
-    pattern->UpdateTimeText();
+    pattern->UpdateTimeText(false);
     EXPECT_EQ(utc, UTC_1);
     pattern->OnVisibleChange(true);
-    pattern->UpdateTimeText();
+    pattern->UpdateTimeText(false);
     EXPECT_EQ(utc, UTC_1);
     pattern->prevTime_ = "";
     pattern->OnVisibleChange(true);
-    pattern->UpdateTimeText();
+    pattern->UpdateTimeText(false);
     EXPECT_EQ(utc, UTC_2);
 
     /**
@@ -739,14 +739,14 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
      */
     utc = UTC_1;
     pattern->OnFormVisibleChange(false);
-    pattern->UpdateTimeText();
+    pattern->UpdateTimeText(false);
     EXPECT_EQ(utc, UTC_1);
     pattern->OnFormVisibleChange(true);
-    pattern->UpdateTimeText();
+    pattern->UpdateTimeText(false);
     EXPECT_EQ(utc, UTC_1);
     pattern->prevTime_ = "";
     pattern->OnFormVisibleChange(true);
-    pattern->UpdateTimeText();
+    pattern->UpdateTimeText(false);
     EXPECT_EQ(utc, UTC_2);
     MockPipelineContext::TearDown();
 }

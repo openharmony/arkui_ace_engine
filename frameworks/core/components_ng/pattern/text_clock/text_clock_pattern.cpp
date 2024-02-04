@@ -37,6 +37,8 @@ constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
 constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
+constexpr bool ON_TIME_CHANGE = true;
+constexpr bool NOT_ON_TIME_CHANGE = false;
 const std::string DEFAULT_FORMAT = "hms";
 const std::string FORM_FORMAT = "hm";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
@@ -142,7 +144,7 @@ void TextClockPattern::OnModifyDone()
     UpdateTextLayoutProperty(textClockProperty, textLayoutProperty);
     hourWest_ = GetHoursWest();
     delayTask_.Cancel();
-    UpdateTimeText();
+    UpdateTimeText(NOT_ON_TIME_CHANGE);
 }
 
 void TextClockPattern::InitTextClockController()
@@ -155,7 +157,7 @@ void TextClockPattern::InitTextClockController()
         auto textClock = wp.Upgrade();
         if (textClock) {
             textClock->isStart_ = true;
-            textClock->UpdateTimeText();
+            textClock->UpdateTimeText(NOT_ON_TIME_CHANGE);
         }
     });
     textClockController_->OnStop([wp = WeakClaim(this)]() {
@@ -171,7 +173,7 @@ void TextClockPattern::OnVisibleChange(bool isVisible)
 {
     if (isVisible && !isSetVisible_) {
         isSetVisible_ = isVisible;
-        UpdateTimeText();
+        UpdateTimeText(NOT_ON_TIME_CHANGE);
     } else if (!isVisible) {
         isSetVisible_ = isVisible;
         delayTask_.Cancel();
@@ -182,7 +184,7 @@ void TextClockPattern::OnVisibleAreaChange(bool visible)
 {
     if (visible && !isInVisibleArea_) {
         isInVisibleArea_ = visible;
-        UpdateTimeText();
+        UpdateTimeText(NOT_ON_TIME_CHANGE);
     } else if (!visible) {
         isInVisibleArea_ = visible;
         delayTask_.Cancel();
@@ -193,7 +195,7 @@ void TextClockPattern::OnFormVisibleChange(bool visible)
 {
     if (visible && !isFormVisible_) {
         isFormVisible_ = visible;
-        UpdateTimeText();
+        UpdateTimeText(NOT_ON_TIME_CHANGE);
     } else if (!visible) {
         isFormVisible_ = visible;
         delayTask_.Cancel();
@@ -235,7 +237,7 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
     RegistVisibleAreaChangeCallback();
 }
 
-void TextClockPattern::UpdateTimeText()
+void TextClockPattern::UpdateTimeText(bool isTimeChange)
 {
     if (!isStart_ || !isSetVisible_ || !isInVisibleArea_ || !isFormVisible_) {
         return;
@@ -260,9 +262,8 @@ void TextClockPattern::UpdateTimeText()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     textNode->MarkModifyDone();
     RequestUpdateForNextSecond();
-    if (currentTime != prevTime_ || isDateChange_) {
+    if (currentTime != prevTime_ || isTimeChange) {
         FireChangeEvent();
-        isDateChange_ = false;
     }
     prevTime_ = currentTime;
 }
@@ -299,7 +300,7 @@ void TextClockPattern::RequestUpdateForNextSecond()
         if (!textClock->isStart_) {
             return;
         }
-        textClock->UpdateTimeText();
+        textClock->UpdateTimeText(NOT_ON_TIME_CHANGE);
     });
     context->GetTaskExecutor()->PostDelayedTask(delayTask_, TaskExecutor::TaskType::UI, delayTime);
 }
@@ -333,9 +334,6 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     // get date time from third party
     std::string dateTimeFormat = DEFAULT_FORMAT; // the format to get datetime value from the thirdlib
     dateTimeFormat = "yyyyMMdd";
-    std::string prevDate = Localization::GetInstance()->FormatDateTime(dateTime, dateTimeFormat);
-    isDateChange_ = prevDate != prevDate_;
-    prevDate_ = prevDate;
     dateTimeFormat += is24H ? "HH" : "hh";
     dateTimeFormat += "mmss";
     dateTimeFormat += "SSS";
@@ -721,6 +719,6 @@ RefPtr<FrameNode> TextClockPattern::GetTextNode()
 void TextClockPattern::OnTimeChange()
 {
     is24H_ = SystemProperties::Is24HourClock();
-    UpdateTimeText();
+    UpdateTimeText(ON_TIME_CHANGE);
 }
 } // namespace OHOS::Ace::NG

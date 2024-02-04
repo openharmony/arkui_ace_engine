@@ -91,7 +91,7 @@ private:
     void InitTextClockController();
 
     void InitUpdateTimeTextCallBack();
-    void UpdateTimeText();
+    void UpdateTimeText(bool isTimeChange);
     void RequestUpdateForNextSecond();
     void FireChangeEvent() const;
     std::string GetCurrentFormatDateTime();
@@ -124,9 +124,7 @@ private:
     bool isInVisibleArea_ = true;
     bool isFormVisible_ = true;
     bool isForm_ = false;
-    bool isDateChange_ = false;
     std::string prevTime_;
-    std::string prevDate_;
     std::map<int32_t, TextClockFormatElement> formatElementMap;
     CancelableCallback<void()> delayTask_;
 
