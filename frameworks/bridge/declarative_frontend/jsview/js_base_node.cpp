@@ -66,18 +66,17 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
     }
     viewNode_ = newNode;
-    if (viewNode_ && EXPORT_TEXTURE_SUPPORT_TYPES.count(viewNode_->GetTag()) > 0) {
+    CHECK_NULL_VOID(viewNode_);
+    if (EXPORT_TEXTURE_SUPPORT_TYPES.count(viewNode_->GetTag()) > 0) {
         viewNode_->CreateExportTextureInfoIfNeeded();
         auto exportTextureInfo = viewNode_->GetExportTextureInfo();
         CHECK_NULL_VOID(exportTextureInfo);
         exportTextureInfo->SetSurfaceId(surfaceId_);
         exportTextureInfo->SetCurrentRenderType(renderType_);
     }
+    viewNode_->Build(nullptr);
     if (size_.IsValid()) {
         viewNode_->SetParentLayoutConstraint(size_.ConvertToSizeT());
-    }
-    if (viewNode_) {
-        viewNode_->Build(nullptr);
     }
 }
 
@@ -302,6 +301,9 @@ void JSBaseNode::UpdateStart(const JSCallbackInfo& info)
 
 void JSBaseNode::UpdateEnd(const JSCallbackInfo& info)
 {
+    if (viewNode_ && size_.IsValid()) {
+        viewNode_->SetParentLayoutConstraint(size_.ConvertToSizeT());
+    }
     scopedViewStackProcessor_ = nullptr;
 }
 
