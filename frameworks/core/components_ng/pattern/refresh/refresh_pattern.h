@@ -130,7 +130,6 @@ private:
     bool isKeyEventRegisted_ = false;
     RefPtr<FrameNode> progressChild_;
     RefPtr<FrameNode> customBuilder_;
-    RefPtr<FrameNode> scrollableNode_;
     bool isCustomBuilderExist_ = false;
     float builderMeasureBaseHeight_ = 0.0f;
     RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
