@@ -104,8 +104,7 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
             },
             TaskExecutor::TaskType::UI);
     };
-    auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
-    NG::ComponentSnapshot::Create(frameNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
 #else
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
