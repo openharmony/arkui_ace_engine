@@ -476,6 +476,8 @@ protected:
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
 
+    void FireOnWillScroll(float offset) const;
+
     // select with mouse
     struct ItemSelectedStatus {
         std::function<void(bool)> onSelected;

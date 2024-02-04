@@ -1966,6 +1966,17 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
     }
 }
 
+void ScrollablePattern::FireOnWillScroll(float offset) const
+{
+    auto eventHub = GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onScroll = eventHub->GetOnWillScroll();
+    CHECK_NULL_VOID(onScroll);
+    auto offsetPX = Dimension(offset);
+    auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+    onScroll(offsetVP, GetScrollState());
+}
+
 /**
  * @description: Register with the drag drop manager
  * @return None

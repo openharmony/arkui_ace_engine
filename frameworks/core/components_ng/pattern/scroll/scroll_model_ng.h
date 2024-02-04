@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,8 @@ public:
     void SetOnScrollBegin(OnScrollBeginEvent&& event) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event) override;
     void SetOnScroll(NG::ScrollEvent&& event) override;
+    void SetOnWillScroll(NG::ScrollEventWithState&& event) override;
+    void SetOnDidScroll(NG::ScrollEventWithState&& event) override;
     void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) override;
     void SetOnScrollEnd(NG::ScrollEndEvent&& event) override;
     void SetOnScrollStart(OnScrollStartEvent&& event) override;

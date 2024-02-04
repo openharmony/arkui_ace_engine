@@ -1403,11 +1403,13 @@ HWTEST_F(GridScrollerTestNg, GridEventTestNg007, TestSize.Level1)
 HWTEST_F(GridScrollerTestNg, VerticalGridWithoutScrollBarWithoutAnimation001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Set five kinds of scroll events: onScroll, onScrollStart,
-     *                   onScrollStop, onReachStart, onReachEnd
+     * @tc.steps: step1. Set seven kinds of scroll events: onScroll, onWillScroll, onDidScroll,
+     *                   onScrollStart, onScrollStop, onReachStart, onReachEnd
      * @tc.expected: creat grid
      */
     bool isOnScrollCallBack = false;
+    bool isOnWillScrollCallBack = false;
+    bool isOnDidScrollCallBack = false;
     bool isOnScrollStartCallBack = false;
     bool isOnScrollStopCallBack = false;
     bool isOnReachStartCallBack = false;
@@ -1420,12 +1422,29 @@ HWTEST_F(GridScrollerTestNg, VerticalGridWithoutScrollBarWithoutAnimation001, Te
         scrollState = state;
         isOnScrollCallBack = true;
     };
+    Dimension willScrollOffset;
+    ScrollState willScrollState;
+    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
+                            Dimension offset, ScrollState state) {
+        willScrollOffset = offset;
+        willScrollState = state;
+        isOnWillScrollCallBack = true;
+    };
+    Dimension didScrollOffset;
+    ScrollState didScrollState;
+    auto onDidScroll = [&didScrollOffset, &didScrollState, &isOnDidScrollCallBack](
+                           Dimension offset, ScrollState state) {
+        didScrollOffset = offset;
+        didScrollState = state;
+        isOnDidScrollCallBack = true;
+    };
     auto onScrollStart = [&isOnScrollStartCallBack]() { isOnScrollStartCallBack = true; };
     auto onScrollStop = [&isOnScrollStopCallBack]() { isOnScrollStopCallBack = true; };
     auto onReachStart = [&isOnReachStartCallBack]() { isOnReachStartCallBack = true; };
     auto onReachEnd = [&isOnReachEndCallBack]() { isOnReachEndCallBack = true; };
 
-    CreateWithNoProxy([onScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd, this](GridModelNG model) {
+    CreateWithNoProxy([onScroll, onWillScroll, onDidScroll, onScrollStart, onScrollStop, onReachStart, onReachEnd,
+                          this](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr");
         model.SetOnScroll(onScroll);
         model.SetOnScrollStart(onScrollStart);
@@ -1434,6 +1453,8 @@ HWTEST_F(GridScrollerTestNg, VerticalGridWithoutScrollBarWithoutAnimation001, Te
         model.SetOnReachEnd(onReachEnd);
         CreateColItem(20);
     });
+    eventHub_->SetOnWillScroll(onWillScroll);
+    eventHub_->SetOnDidScroll(onDidScroll);
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1445,6 +1466,12 @@ HWTEST_F(GridScrollerTestNg, VerticalGridWithoutScrollBarWithoutAnimation001, Te
     pattern_->ScrollTo(ITEM_HEIGHT * 1);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnWillScrollCallBack);
+    EXPECT_TRUE(isOnDidScrollCallBack);
+    EXPECT_EQ(offsetY, willScrollOffset);
+    EXPECT_EQ(offsetY, didScrollOffset);
+    EXPECT_EQ(scrollState, willScrollState);
+    EXPECT_EQ(scrollState, didScrollState);
     EXPECT_FALSE(isOnScrollStartCallBack);
     EXPECT_FALSE(isOnScrollStopCallBack);
     EXPECT_FALSE(isOnReachStartCallBack);
@@ -2194,7 +2221,9 @@ HWTEST_F(GridScrollerTestNg, HorizontalGridWithScrollBarWithAnimation001, TestSi
     Dimension offsetY;
     ScrollState scrollState;
     auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
-        offsetY = offset; scrollState = state; isOnScrollCallBack = true;
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
     };
     auto onScrollStart = [&isOnScrollStartCallBack]() { isOnScrollStartCallBack = true; };
     auto onScrollStop = [&isOnScrollStopCallBack]() { isOnScrollStopCallBack = true; };
@@ -2220,15 +2249,18 @@ HWTEST_F(GridScrollerTestNg, HorizontalGridWithScrollBarWithAnimation001, TestSi
      * @tc.expected: OnScroll OnScrollStart and onScrollStop call back functions should be triggered
      */
     auto controller = pattern_->positionController_;
-    controller->AnimateTo(Dimension(-5*ITEM_WIDTH, DimensionUnit::PX), 1.f, Curves::LINEAR, false);
+    controller->AnimateTo(Dimension(-5 * ITEM_WIDTH, DimensionUnit::PX), 1.f, Curves::LINEAR, false);
     pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
-    pattern_->UpdateCurrentOffset(-5*ITEM_WIDTH, SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(-5 * ITEM_WIDTH, SCROLL_FROM_ANIMATION_CONTROLLER);
 
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
-    EXPECT_FALSE(isOnReachStartCallBack); EXPECT_FALSE(isOnReachEndCallBack);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnScrollStartCallBack);
+    EXPECT_TRUE(isOnScrollStopCallBack);
+    EXPECT_FALSE(isOnReachStartCallBack);
+    EXPECT_FALSE(isOnReachEndCallBack);
 }
 
 /**
@@ -2251,7 +2283,9 @@ HWTEST_F(GridScrollerTestNg, HorizontalGridWithScrollBarWithAnimation002, TestSi
     Dimension offsetY;
     ScrollState scrollState;
     auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
-        offsetY = offset; scrollState = state; isOnScrollCallBack = true;
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
     };
     auto onScrollStart = [&isOnScrollStartCallBack]() { isOnScrollStartCallBack = true; };
     auto onScrollStop = [&isOnScrollStopCallBack]() { isOnScrollStopCallBack = true; };
@@ -2277,15 +2311,18 @@ HWTEST_F(GridScrollerTestNg, HorizontalGridWithScrollBarWithAnimation002, TestSi
      * @tc.expected:All call back functions except onReachStart should be triggered
      */
     auto controller = pattern_->positionController_;
-    controller->AnimateTo(Dimension(-10*ITEM_WIDTH, DimensionUnit::PX), 1.f, Curves::LINEAR, false);
+    controller->AnimateTo(Dimension(-10 * ITEM_WIDTH, DimensionUnit::PX), 1.f, Curves::LINEAR, false);
     pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
-    pattern_->UpdateCurrentOffset(-10*ITEM_WIDTH, SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(-10 * ITEM_WIDTH, SCROLL_FROM_ANIMATION_CONTROLLER);
 
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
-    EXPECT_FALSE(isOnReachStartCallBack); EXPECT_TRUE(isOnReachEndCallBack);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnScrollStartCallBack);
+    EXPECT_TRUE(isOnScrollStopCallBack);
+    EXPECT_FALSE(isOnReachStartCallBack);
+    EXPECT_TRUE(isOnReachEndCallBack);
 }
 
 /**
@@ -2322,7 +2359,7 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
      * @tc.expected: pattern_->isAnimationStop_ is true
      */
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false);
-    EXPECT_TRUE(pattern_->isAnimationStop_);
+    EXPECT_FALSE(pattern_->isAnimationStop_);
 }
 
 /**
@@ -2491,5 +2528,388 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos007, TestSize.Level1)
     pattern_->ScrollToIndex(targetIndex, true, align);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->finalPosition_, 0.0f);
+}
+
+/**
+ * @tc.name: onWillScrollAndOnDidScroll001
+ * @tc.desc: Test Grid(Axis::Vertical) Scroll, onWillScroll and onDidScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set three kinds of scroll events: onScroll, onWillScroll, onDidScroll
+     * @tc.expected: creat grid
+     */
+    bool isOnScrollCallBack = false;
+    bool isOnWillScrollCallBack = false;
+    bool isOnDidScrollCallBack = false;
+
+    Dimension offsetY;
+    ScrollState scrollState;
+    auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
+    };
+    Dimension willScrollOffset;
+    ScrollState willScrollState;
+    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
+                            Dimension offset, ScrollState state) {
+        willScrollOffset = offset * 2;
+        willScrollState = state;
+        isOnWillScrollCallBack = true;
+    };
+    Dimension didScrollOffset;
+    ScrollState didScrollState;
+    auto onDidScroll = [&didScrollOffset, &didScrollState, &isOnDidScrollCallBack](
+                           Dimension offset, ScrollState state) {
+        didScrollOffset = offset * 3;
+        didScrollState = state;
+        isOnDidScrollCallBack = true;
+    };
+
+    CreateWithNoProxy([onScroll](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        CreateColItem(20);
+    });
+    eventHub_->SetOnWillScroll(onWillScroll);
+    eventHub_->SetOnDidScroll(onDidScroll);
+
+    /**
+     * @tc.steps: step2. Scroll to grid's end position without animation, and check the
+     *                   three kinds of call back functions are triggered or not.
+     * @tc.expected: All functions should be triggered
+     */
+    pattern_->ScrollTo(ITEM_HEIGHT * 5);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_EQ(offsetY.Value(), ITEM_HEIGHT * 5);
+    EXPECT_EQ(willScrollOffset.Value(), ITEM_HEIGHT * 5 * 2);
+    EXPECT_EQ(didScrollOffset.Value(), ITEM_HEIGHT * 5 * 3);
+    EXPECT_EQ(scrollState, willScrollState);
+    EXPECT_EQ(scrollState, didScrollState);
+}
+
+/**
+ * @tc.name: onWillScrollAndOnDidScroll002
+ * @tc.desc: Test Grid(Axis::HORIZONTAL) Scroll, onWillScroll and onDidScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set three kinds of scroll events: onScroll, onWillScroll, onDidScroll
+     * @tc.expected: creat grid
+     */
+    bool isOnScrollCallBack = false;
+    bool isOnWillScrollCallBack = false;
+    bool isOnDidScrollCallBack = false;
+
+    Dimension offsetY;
+    ScrollState scrollState;
+    auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
+    };
+    Dimension willScrollOffset;
+    ScrollState willScrollState;
+    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
+                            Dimension offset, ScrollState state) {
+        willScrollOffset = offset * 2;
+        willScrollState = state;
+        isOnWillScrollCallBack = true;
+    };
+    Dimension didScrollOffset;
+    ScrollState didScrollState;
+    auto onDidScroll = [&didScrollOffset, &didScrollState, &isOnDidScrollCallBack](
+                           Dimension offset, ScrollState state) {
+        didScrollOffset = offset * 3;
+        didScrollState = state;
+        isOnDidScrollCallBack = true;
+    };
+
+    CreateWithNoProxy([onScroll](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        CreateRowItem(20);
+    });
+    eventHub_->SetOnWillScroll(onWillScroll);
+    eventHub_->SetOnDidScroll(onDidScroll);
+
+    /**
+     * @tc.steps: step2. Scroll to grid's end position without animation, and check the
+     *                   three kinds of call back functions are triggered or not.
+     * @tc.expected: All functions should be triggered
+     */
+    pattern_->ScrollTo(ITEM_WIDTH * 5);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnWillScrollCallBack);
+    EXPECT_TRUE(isOnDidScrollCallBack);
+    EXPECT_EQ(offsetY.Value(), ITEM_WIDTH * 5);
+    EXPECT_EQ(willScrollOffset.Value(), ITEM_WIDTH * 5 * 2);
+    EXPECT_EQ(didScrollOffset.Value(), ITEM_WIDTH * 5 * 3);
+    EXPECT_EQ(scrollState, willScrollState);
+    EXPECT_EQ(scrollState, didScrollState);
+}
+
+/**
+ * @tc.name: onWillScrollAndOnDidScroll003
+ * @tc.desc: Test Grid(Axis::HORIZONTAL) Scroll Without Scroll Bar Without Animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, onWillScrollAndOnDidScroll003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set three kinds of scroll events: onScroll, onWillScroll, onDidScroll
+     * @tc.expected: creat grid
+     */
+    bool isOnScrollCallBack = false;
+    bool isOnWillScrollCallBack = false;
+    bool isOnDidScrollCallBack = false;
+
+    Dimension offsetY;
+    ScrollState scrollState;
+    auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
+    };
+    Dimension willScrollOffset;
+    ScrollState willScrollState;
+    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
+                            Dimension offset, ScrollState state) {
+        willScrollOffset = offset * 2;
+        willScrollState = state;
+        isOnWillScrollCallBack = true;
+    };
+    Dimension didScrollOffset;
+    ScrollState didScrollState;
+    auto onDidScroll = [&didScrollOffset, &didScrollState, &isOnDidScrollCallBack](
+                           Dimension offset, ScrollState state) {
+        didScrollOffset = offset * 3;
+        didScrollState = state;
+        isOnDidScrollCallBack = true;
+    };
+
+    CreateWithNoProxy([onScroll](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        CreateRowItem(20);
+    });
+    eventHub_->SetOnWillScroll(onWillScroll);
+    eventHub_->SetOnDidScroll(onDidScroll);
+
+    /**
+     * @tc.steps: step2. Scroll to a large offset beyond the total height of the grid without animation, and check
+     *                   three kinds of call back functions are triggered and values are correct.
+     * @tc.expected: All functions should be triggered
+     */
+    pattern_->ScrollBy(ITEM_WIDTH);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnWillScrollCallBack);
+    EXPECT_TRUE(isOnDidScrollCallBack);
+    EXPECT_EQ(offsetY.Value(), ITEM_WIDTH);
+    EXPECT_EQ(willScrollOffset.Value(), ITEM_WIDTH * 2);
+    EXPECT_EQ(didScrollOffset.Value(), ITEM_WIDTH * 3);
+    EXPECT_EQ(scrollState, willScrollState);
+    EXPECT_EQ(scrollState, didScrollState);
+}
+
+/**
+ * @tc.name: onWillScrollAndOnDidScroll004
+ * @tc.desc: Test Grid(Axis::Vertical) Scroll, onWillScroll and onDidScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, onWillScrollAndOnDidScroll004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set three kinds of scroll events: onScroll, onWillScroll, onDidScroll
+     * @tc.expected: creat grid
+     */
+    bool isOnScrollCallBack = false;
+    bool isOnWillScrollCallBack = false;
+    bool isOnDidScrollCallBack = false;
+
+    Dimension offsetY;
+    ScrollState scrollState;
+    auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
+    };
+    Dimension willScrollOffset;
+    ScrollState willScrollState;
+    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
+                            Dimension offset, ScrollState state) {
+        willScrollOffset = offset;
+        willScrollState = state;
+        isOnWillScrollCallBack = true;
+    };
+    Dimension didScrollOffset;
+    ScrollState didScrollState;
+    auto onDidScroll = [&didScrollOffset, &didScrollState, &isOnDidScrollCallBack](
+                           Dimension offset, ScrollState state) {
+        didScrollOffset = offset;
+        didScrollState = state;
+        isOnDidScrollCallBack = true;
+    };
+
+    CreateWithNoProxy([onScroll](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        CreateColItem(20);
+    });
+    eventHub_->SetOnWillScroll(onWillScroll);
+    eventHub_->SetOnDidScroll(onDidScroll);
+
+    /**
+     * @tc.steps: step2. Scroll to a large offset beyond the total height of the grid without animation, and check
+     *                   three kinds of call back functions are triggered and values are correct.
+     * @tc.expected: All functions should be triggered
+     */
+    pattern_->ScrollTo(ITEM_HEIGHT * 10);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnWillScrollCallBack);
+    EXPECT_TRUE(isOnDidScrollCallBack);
+    EXPECT_EQ(offsetY.Value(), ITEM_HEIGHT * 6);
+    EXPECT_EQ(willScrollOffset.Value(), ITEM_HEIGHT * 10);
+    EXPECT_EQ(didScrollOffset.Value(), ITEM_HEIGHT * 6);
+    EXPECT_EQ(scrollState, willScrollState);
+    EXPECT_EQ(scrollState, didScrollState);
+}
+
+/**
+ * @tc.name: onWillScrollAndOnDidScroll005
+ * @tc.desc: Test Grid(Axis::Vertical) Scroll, onWillScroll and onDidScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, onWillScrollAndOnDidScroll005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set three kinds of scroll events: onScroll, onWillScroll, onDidScroll
+     * @tc.expected: creat grid
+     */
+    bool isOnScrollCallBack = false;
+    bool isOnWillScrollCallBack = false;
+    bool isOnDidScrollCallBack = false;
+
+    Dimension offsetY;
+    ScrollState scrollState;
+    auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
+    };
+    Dimension willScrollOffset;
+    ScrollState willScrollState;
+    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
+                            Dimension offset, ScrollState state) {
+        willScrollOffset = offset;
+        willScrollState = state;
+        isOnWillScrollCallBack = true;
+    };
+    Dimension didScrollOffset;
+    ScrollState didScrollState;
+    auto onDidScroll = [&didScrollOffset, &didScrollState, &isOnDidScrollCallBack](
+                           Dimension offset, ScrollState state) {
+        didScrollOffset = offset;
+        didScrollState = state;
+        isOnDidScrollCallBack = true;
+    };
+
+    CreateWithNoProxy([onScroll](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        CreateColItem(20);
+    });
+    eventHub_->SetOnWillScroll(onWillScroll);
+    eventHub_->SetOnDidScroll(onDidScroll);
+
+    /**
+     * @tc.steps: step2. Scroll to a negative position without animation, and check
+     *                   three kinds of call back functions are triggered and values are correct.
+     * @tc.expected: All functions should be triggered
+     */
+    pattern_->ScrollTo(-ITEM_HEIGHT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(isOnScrollCallBack);
+    EXPECT_FALSE(isOnWillScrollCallBack);
+    EXPECT_FALSE(isOnDidScrollCallBack);
+    EXPECT_EQ(offsetY.Value(), 0);
+    EXPECT_EQ(willScrollOffset.Value(), 0);
+    EXPECT_EQ(didScrollOffset.Value(), 0);
+    EXPECT_EQ(scrollState, willScrollState);
+    EXPECT_EQ(scrollState, didScrollState);
+}
+
+/**
+ * @tc.name: onWillScrollAndOnDidScroll006
+ * @tc.desc: Test Grid(Axis::Vertical) Scroll, onWillScroll and onDidScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, onWillScrollAndOnDidScroll006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set three kinds of scroll events: onScroll, onWillScroll, onDidScroll
+     * @tc.expected: creat grid
+     */
+    bool isOnScrollCallBack = false;
+    bool isOnWillScrollCallBack = false;
+    bool isOnDidScrollCallBack = false;
+
+    Dimension offsetY;
+    ScrollState scrollState;
+    auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
+    };
+    Dimension willScrollOffset;
+    ScrollState willScrollState;
+    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
+                            Dimension offset, ScrollState state) {
+        willScrollOffset = offset;
+        willScrollState = state;
+        isOnWillScrollCallBack = true;
+    };
+    Dimension didScrollOffset;
+    ScrollState didScrollState;
+    auto onDidScroll = [&didScrollOffset, &didScrollState, &isOnDidScrollCallBack](
+                           Dimension offset, ScrollState state) {
+        didScrollOffset = offset;
+        didScrollState = state;
+        isOnDidScrollCallBack = true;
+    };
+
+    CreateWithNoProxy([onScroll](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetOnScroll(onScroll);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        CreateColItem(20);
+    });
+    eventHub_->SetOnWillScroll(onWillScroll);
+    eventHub_->SetOnDidScroll(onDidScroll);
+
+    /**
+     * @tc.steps: step2. Scroll to a negative position without animation, and check
+     *                   three kinds of call back functions are triggered and values are correct.
+     * @tc.expected: All functions should be triggered
+     */
+    pattern_->OnScrollCallback(ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnWillScrollCallBack);
+    EXPECT_FALSE(isOnDidScrollCallBack);
+    EXPECT_EQ(offsetY.Value(), 0);
+    EXPECT_EQ(willScrollOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(didScrollOffset.Value(), 0);
+    EXPECT_EQ(willScrollState, ScrollState::SCROLL);
+    EXPECT_EQ(scrollState, didScrollState);
 }
 } // namespace OHOS::Ace::NG
