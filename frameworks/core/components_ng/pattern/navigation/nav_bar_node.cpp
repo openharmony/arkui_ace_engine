@@ -66,7 +66,9 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 
 std::string NavBarNode::GetTitleString() const
 {
-    auto title = DynamicCast<FrameNode>(GetTitle());
+    auto titleBarNode = DynamicCast<TitleBarNode>(titleBarNode_);
+    CHECK_NULL_RETURN(titleBarNode, "");
+    auto title = DynamicCast<FrameNode>(titleBarNode->GetTitle());
     CHECK_NULL_RETURN(title, "");
     if (title->GetTag() != V2::TEXT_ETS_TAG) {
         return "";
@@ -78,7 +80,9 @@ std::string NavBarNode::GetTitleString() const
 
 std::string NavBarNode::GetSubtitleString() const
 {
-    auto subtitle = DynamicCast<FrameNode>(GetSubtitle());
+    auto titleBarNode = DynamicCast<TitleBarNode>(titleBarNode_);
+    CHECK_NULL_RETURN(titleBarNode, "");
+    auto subtitle = DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
     CHECK_NULL_RETURN(subtitle, "");
     if (subtitle->GetTag() != V2::TEXT_ETS_TAG) {
         return "";

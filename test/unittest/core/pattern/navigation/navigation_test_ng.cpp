@@ -451,13 +451,6 @@ HWTEST_F(NavigationTestNg, NavigationModelTest004, TestSize.Level1)
     ASSERT_NE(navigationGroupNode, nullptr);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     ASSERT_NE(navBarNode, nullptr);
-    auto titleNode = navBarNode->GetTitle();
-    ASSERT_NE(titleNode, nullptr);
-    auto subTitleNode = navBarNode->GetSubtitle();
-    ASSERT_NE(subTitleNode, nullptr);
-    navigationModel.SetTitle("navigationView", false);
-    auto newSubTitleNode = navBarNode->GetSubtitle();
-    ASSERT_EQ(newSubTitleNode, nullptr);
 }
 
 /**
@@ -1385,99 +1378,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG001, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavigationModelNG002
- * @tc.desc: Test NavigationPatternTest
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, NavigationModelNG002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create title, navBarNode, navigation.
-     * @tc.expected: check whether the properties is correct.
-     */
-    auto title = CustomNode::CreateCustomNode(11, "customNode");
-    auto navBarNode =
-        NavBarNode::GetOrCreateNavBarNode("navBarNode", 22, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    navigation->navBarNode_ = navBarNode;
-    navBarNode->title_ = title;
-    /**
-     * @tc.steps: step1. create model, change properties, then call model.SetTitle().
-     * @tc.expected: check whether the properties is correct.
-     */
-    NavigationModelNG model;
-    model.SetTitle("title");
-    EXPECT_FALSE(navBarNode->propTitleNodeOperation_.has_value());
-    auto textTitle = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 36, AceType::MakeRefPtr<TextPattern>());
-    navBarNode->title_ = textTitle;
-    textTitle->GetLayoutProperty<TextLayoutProperty>()->propContent_ = "title";
-    model.SetTitle("title");
-    EXPECT_FALSE(navBarNode->propTitleNodeOperation_.has_value());
-    navBarNode->title_ = nullptr;
-    auto elementRegister = ElementRegister::GetInstance();
-    elementRegister->nextUniqueElementId_ = 36;
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
-    model.SetTitle("title");
-    EXPECT_FALSE(navBarNode->propTitleNodeOperation_.has_value());
-}
-
-/**
- * @tc.name: NavigationModelNG003
- * @tc.desc: Test NavigationPatternTest
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, NavigationModelNG003, TestSize.Level1)
-{
-    auto customNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 44, AceType::MakeRefPtr<TextPattern>());
-    auto title = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 33, AceType::MakeRefPtr<TextPattern>());
-    auto navBarNode =
-        NavBarNode::GetOrCreateNavBarNode("navBarNode", 22, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-
-    navigation->navBarNode_ = navBarNode;
-    NavigationModelNG model;
-    navBarNode->title_ = nullptr;
-    model.SetCustomTitle(customNode);
-    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::ADD);
-    navBarNode->title_ = title;
-    model.SetCustomTitle(customNode);
-    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::REPLACE);
-
-    model.SetCustomTitle(customNode);
-    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::NONE);
-}
-
-/**
- * @tc.name: NavigationModelNG004
- * @tc.desc: Test NavigationPatternTest
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, NavigationModelNG004, TestSize.Level1)
-{
-    auto customNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 44, AceType::MakeRefPtr<TextPattern>());
-    auto title = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 33, AceType::MakeRefPtr<TextPattern>());
-    auto navBarNode =
-        NavBarNode::GetOrCreateNavBarNode("navBarNode", 22, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    navigation->navBarNode_ = navBarNode;
-    NavigationModelNG model;
-
-    navigation->eventHub_->enabled_ = false;
-    navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
-    model.SetTitleMode(NavigationTitleMode::MINI);
-    navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
-    model.SetTitleMode(NavigationTitleMode::MINI);
-    navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
-    model.SetTitleMode(NavigationTitleMode::FREE);
-    ASSERT_FALSE(navBarNode->propBackButtonNodeOperation_.has_value());
-}
-
-/**
  * @tc.name: NavigationModelNG005
  * @tc.desc: Test ToolbarLayoutAlgorithm::Measure
  * @tc.type: FUNC
@@ -2261,48 +2161,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG009, TestSize.Level1)
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
     navigationPattern->UpdateContextRect(preTopNavDestination, navigation);
     ASSERT_EQ(navBarProperty->propVisibility_.value(), VisibleType::VISIBLE);
-}
-
-/**
- * @tc.name: NavigationModelNG0010
- * @tc.desc: Test NavigationModelNG::SetSubtitle
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, NavigationModelNG0010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create navigation.
-     */
-    NavigationModelNG model;
-    model.Create();
-    model.SetNavigationStack();
-    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    ASSERT_NE(navigation, nullptr);
-    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode());
-    ASSERT_NE(navBarNode, nullptr);
-    ASSERT_EQ(navBarNode->subtitle_, nullptr);
-    navBarNode->subtitle_ =
-        TitleBarNode::GetOrCreateTitleBarNode("subTitle", 111, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    model.SetSubtitle("mySubTitle");
-    ASSERT_EQ(navBarNode->GetSubtitleNodeOperationValue(), ChildNodeOperation::REPLACE);
-
-    auto customNode = CustomNode::CreateCustomNode(112, "customNode");
-    navBarNode->subtitle_ = customNode;
-    model.SetSubtitle("mySubTitle");
-    ASSERT_EQ(navBarNode->GetSubtitleNodeOperationValue(), ChildNodeOperation::REPLACE);
-
-    auto textNode = FrameNode::CreateFrameNode("text", 3, AceType::MakeRefPtr<TextPattern>());
-    navBarNode->subtitle_ = textNode;
-    auto subtitleProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    subtitleProperty->propContent_ = "title";
-    model.SetSubtitle("mySubTitle");
-    ASSERT_EQ(navBarNode->GetSubtitleNodeOperationValue(), ChildNodeOperation::NONE);
-
-    subtitleProperty->propContent_ = "mySubTitle";
-    model.SetSubtitle("mySubTitle");
-    ASSERT_EQ(navBarNode->GetSubtitleNodeOperationValue(), ChildNodeOperation::NONE);
 }
 
 /**

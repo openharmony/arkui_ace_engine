@@ -52,7 +52,7 @@ public:
     static void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<AceType>>& items);
     static void ParseBarItems(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
-    static bool ParseCommonTitle(const JSRef<JSVal>& jsValue);
+    static bool ParseCommonTitle(const JSRef<JSObject>& jsObj);
     static void ParseToolbarItemsConfiguration(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
 

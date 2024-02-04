@@ -16,22 +16,20 @@
 #ifndef FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVDESTINATION_NAVDESTINATION_MODEL_NG_H
 #define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVDESTINATION_NAVDESTINATION_MODEL_NG_H
 
-#include "core/components_ng/pattern/navrouter/navdestination_model.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_model.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT NavDestinationModelNG : public OHOS::Ace::NavDestinationModel {
 public:
     void Create() override;
-    void Create(std::function<void()>&& deepRenderFunc,
-        RefPtr<NG::NavDestinationContext> context = nullptr) override;
+    void Create(std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) override;
     void SetHideTitleBar(bool hideTitleBar) override;
     void SetTitle(const std::string& title, bool hasSubTitle) override;
     void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
-    void SetTitleHeight(int32_t height) override;
     void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) override;
     void SetOnShown(std::function<void()>&& onShow) override;
     void SetOnHidden(std::function<void()>&& onHidden) override;
@@ -40,6 +38,8 @@ public:
     RefPtr<AceType> CreateEmpty() override;
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);
     void SetNavDestinationMode(NavDestinationMode mode) override;
+    bool ParseCommonTitle(
+        bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

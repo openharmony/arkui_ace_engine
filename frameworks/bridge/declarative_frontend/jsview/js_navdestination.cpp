@@ -22,9 +22,9 @@
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
@@ -48,24 +48,17 @@ namespace OHOS::Ace::Framework {
 
 namespace {
 
-bool ParseCommonTitle(const JSRef<JSVal>& jsValue)
+bool ParseCommonTitle(const JSRef<JSObject>& jsObj)
 {
-    auto jsObj = JSRef<JSObject>::Cast(jsValue);
-    bool isCommonTitle = false;
-    bool hasSubTitle = false;
-    auto subtitle = jsObj->GetProperty("sub");
-    if (subtitle->IsString()) {
-        NavDestinationModel::GetInstance()->SetSubtitle(subtitle->ToString());
-        isCommonTitle = true;
-        hasSubTitle = true;
+    JSRef<JSVal> subtitle = jsObj->GetProperty("sub");
+    JSRef<JSVal> title = jsObj->GetProperty("main");
+    bool hasSub = subtitle->IsString();
+    bool hasMain = title->IsString();
+    if (hasSub || hasMain) {
+        return NG::NavDestinationModelNG::GetInstance()->ParseCommonTitle(
+            hasSub, hasMain, subtitle->ToString(), title->ToString());
     }
-    auto title = jsObj->GetProperty("main");
-    if (title->IsString()) {
-        NavDestinationModel::GetInstance()->SetTitle(title->ToString(), hasSubTitle);
-        isCommonTitle = true;
-    }
-
-    return isCommonTitle;
+    return false;
 }
 
 } // namespace
@@ -100,21 +93,24 @@ void JSNavDestination::SetHideTitleBar(bool hide)
 
 void JSNavDestination::SetTitle(const JSCallbackInfo& info)
 {
-    if (info[0]->IsString()) {
-        NavDestinationModel::GetInstance()->SetTitle(info[0]->ToString(), false);
+    // Resource and string type.
+    std::string title;
+    if (ParseJsString(info[0], title)) {
+        NavDestinationModel::GetInstance()->ParseCommonTitle(false, true, "", title);
     } else if (info[0]->IsObject()) {
-        if (ParseCommonTitle(info[0])) {
-            return;
-        }
-
-        // CustomBuilder | NavigationCustomTitle
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
         do {
+            // NavigationCommonTitle
+            if (ParseCommonTitle(jsObj)) {
+                break;
+            }
+            // CustomBuilder | NavigationCustomTitle
+            CalcDimension titleHeight;
             if (!jsObj->HasProperty("height")) {
+                NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight, false);
                 break;
             }
             JSRef<JSVal> height = jsObj->GetProperty("height");
-            CalcDimension titleHeight;
             bool isValid = JSContainerBase::ParseJsDimensionVpNG(height, titleHeight);
             if (height->IsString()) {
                 std::string heightValue;
@@ -129,8 +125,8 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
                 }
             }
             if (!isValid || titleHeight.Value() < 0) {
-                NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight, false);
-                return;
+                NavDestinationModel::GetInstance()->SetTitleHeight(Dimension(), true);
+                break;
             }
             NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
         } while (0);
@@ -144,7 +140,8 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
             NavDestinationModel::GetInstance()->SetCustomTitle(customNode);
         }
     } else {
-        NavDestinationModel::GetInstance()->SetTitle("", false);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetTitle is undefined");
+        NavDestinationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
     }
 }
 
@@ -227,8 +224,8 @@ void JSNavDestination::SetOnReady(const JSCallbackInfo& info)
         return;
     }
     auto onReadyCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onReady = [execCtx = info.GetExecutionContext(),
-        func = std::move(onReadyCallback)](RefPtr<NG::NavDestinationContext> context) {
+    auto onReady = [execCtx = info.GetExecutionContext(), func = std::move(onReadyCallback)](
+                       RefPtr<NG::NavDestinationContext> context) {
         auto jsContext = AceType::DynamicCast<JSNavDestinationContext>(context);
         CHECK_NULL_VOID(jsContext);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
