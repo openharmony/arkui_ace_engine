@@ -2355,8 +2355,8 @@ bool PipelineContext::HasDifferentDirectionGesture() const
     return eventManager_->HasDifferentDirectionGesture();
 }
 
-void PipelineContext::AddVisibleAreaChangeNode(
-    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback)
+void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
+    const std::vector<double>& ratios, const VisibleRatioCallback& callback, bool isUserCallback)
 {
     CHECK_NULL_VOID(node);
     VisibleCallbackInfo addInfo;
@@ -2364,9 +2364,9 @@ void PipelineContext::AddVisibleAreaChangeNode(
     addInfo.isCurrentVisible = false;
     onVisibleAreaChangeNodeIds_.emplace(node->GetId());
     if (isUserCallback) {
-        node->AddVisibleAreaUserCallback(ratio, addInfo);
+        node->SetVisibleAreaUserCallback(ratios, addInfo);
     } else {
-        node->AddVisibleAreaInnerCallback(ratio, addInfo);
+        node->SetVisibleAreaInnerCallback(ratios, addInfo);
     }
 }
 

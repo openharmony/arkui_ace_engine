@@ -170,18 +170,26 @@ public:
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
-    void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
+    void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
-        visibleAreaUserCallbacks_[ratio] = callback;
+        eventHub_->SetVisibleAreaRatios(ratios, true);
+        eventHub_->SetVisibleAreaCallback(callback, true);
     }
 
-    void ClearVisibleAreaUserCallback()
+    void CleanVisibleAreaUserCallback()
     {
-        visibleAreaUserCallbacks_.clear();
+        eventHub_->CleanVisibleAreaCallback(true);
     }
-    void AddVisibleAreaInnerCallback(double ratio, const VisibleCallbackInfo& callback)
+
+    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
-        visibleAreaInnerCallbacks_[ratio] = callback;
+        eventHub_->SetVisibleAreaRatios(ratios, false);
+        eventHub_->SetVisibleAreaCallback(callback, false);
+    }
+
+    void CleanVisibleAreaInnerCallback()
+    {
+        eventHub_->CleanVisibleAreaCallback(false);
     }
 
     void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
@@ -732,11 +740,8 @@ private:
 
     bool GetTouchable() const;
 
-    void ProcessAllVisibleCallback(
-        std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
-    void OnVisibleAreaChangeCallback(
-        std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks,
-        bool visibleType, double currentVisibleRatio, bool isHandled);
+    void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
+        VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio);
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
 
@@ -769,8 +774,6 @@ private:
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;
-    std::unordered_map<double, VisibleCallbackInfo> visibleAreaUserCallbacks_;
-    std::unordered_map<double, VisibleCallbackInfo> visibleAreaInnerCallbacks_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;
@@ -810,6 +813,7 @@ private:
     bool isFirstBuilding_ = true;
 
     double lastVisibleRatio_ = 0.0;
+    double lastVisibleCallbackRatio_ = 0.0;
 
     // internal node such as Text in Button CreateWithLabel
     // should not seen by preview inspector or accessibility
