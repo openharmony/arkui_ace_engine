@@ -357,7 +357,7 @@ sk_sp<SkImage> CustomPaintPaintMethod::GetImage(const std::string& src)
         return cacheImage->imagePtr;
     }
 
-    auto context = context_.Upgrade();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto image = Ace::ImageProvider::GetSkImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
@@ -376,7 +376,7 @@ std::shared_ptr<RSImage> CustomPaintPaintMethod::GetImage(const std::string& src
         return cacheImage->imagePtr;
     }
 
-    auto context = context_.Upgrade();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto image = Ace::ImageProvider::GetDrawingImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
@@ -663,79 +663,50 @@ void CustomPaintPaintMethod::InitImageCallbacks()
     onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
 }
 
+void CustomPaintPaintMethod::GetSvgRect(
+    const sk_sp<SkSVGDOM>& skiaDom, const Ace::CanvasImage& canvasImage, RSRect* srcRect, RSRect* dstRect)
+{
+    switch (canvasImage.flag) {
+        case DrawImageType::THREE_PARAMS:
+            *srcRect = RSRect(0, 0, skiaDom->containerSize().width(), skiaDom->containerSize().height());
+            *dstRect = RSRect(canvasImage.dx, canvasImage.dy, skiaDom->containerSize().width() + canvasImage.dx,
+                skiaDom->containerSize().height() + canvasImage.dy);
+            break;
+        case DrawImageType::FIVE_PARAMS: {
+            *srcRect = RSRect(0, 0, skiaDom->containerSize().width(), skiaDom->containerSize().height());
+            *dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            break;
+        }
+        case DrawImageType::NINE_PARAMS: {
+            *srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
+                canvasImage.sHeight + canvasImage.sy);
+            *dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage)
 {
     // Make the ImageSourceInfo
     canvasImage_ = canvasImage;
     loadingSource_ = ImageSourceInfo(canvasImage.src);
     // get the ImageObject
+    auto context = PipelineBase::GetCurrentContext();
     if (currentSource_ != loadingSource_) {
         ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
-            failedCallback_, context_, true, true, true, onPostBackgroundTask_);
+            failedCallback_, context, true, true, true, onPostBackgroundTask_);
     }
 
     CHECK_NULL_VOID(skiaDom_);
     // draw the svg
-#ifndef USE_ROSEN_DRAWING
-    SkRect srcRect;
-    SkRect dstRect;
-    switch (canvasImage.flag) {
-        case 0:
-            srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = SkRect::MakeXYWH(
-                canvasImage.dx, canvasImage.dy, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            break;
-        case 1: {
-            srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            break;
-        }
-        case 2: {
-            srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
-            dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            break;
-        }
-        default:
-            break;
-    }
-    float scaleX = dstRect.width() / srcRect.width();
-    float scaleY = dstRect.height() / srcRect.height();
-    OffsetF offset = GetContentOffset(paintWrapper);
-    OffsetF startPoint =
-        offset + OffsetF(dstRect.left(), dstRect.top()) - OffsetF(srcRect.left() * scaleX, srcRect.top() * scaleY);
-
-    SkCanvas* skCanvas = GetRawPtrOfSkCanvas();
-    skCanvas->save();
-    skCanvas->clipRect(dstRect);
-    skCanvas->translate(startPoint.GetX(), startPoint.GetY());
-    skCanvas->scale(scaleX, scaleY);
-    skiaDom_->render(skCanvas);
-    skCanvas->restore();
-#else
     RSRect srcRect;
     RSRect dstRect;
-    switch (canvasImage.flag) {
-        case 0:
-            srcRect = RSRect(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = RSRect(canvasImage.dx, canvasImage.dy, skiaDom_->containerSize().width() + canvasImage.dx,
-                skiaDom_->containerSize().height() + canvasImage.dy);
-            break;
-        case 1: {
-            srcRect = RSRect(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
-                canvasImage.dHeight + canvasImage.dy);
-            break;
-        }
-        case 2: {
-            srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
-                canvasImage.sHeight + canvasImage.sy);
-            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
-                canvasImage.dHeight + canvasImage.dy);
-            break;
-        }
-        default:
-            break;
-    }
+    GetSvgRect(skiaDom_, canvasImage, &srcRect, &dstRect);
     float scaleX = dstRect.GetWidth() / srcRect.GetWidth();
     float scaleY = dstRect.GetHeight() / srcRect.GetHeight();
     OffsetF offset = GetContentOffset(paintWrapper);
@@ -766,7 +737,6 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
         rsCanvas->DrawSVGDOM(skiaDom_);
     }
     rsCanvas->Restore();
-#endif
 }
 
 void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, RefPtr<SvgDomBase> svgDom,

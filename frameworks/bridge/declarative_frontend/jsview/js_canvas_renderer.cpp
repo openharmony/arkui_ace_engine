@@ -808,22 +808,17 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
     ContainerScope scope(instanceId_);
     CanvasImage image;
     ImageInfo imageInfo;
-    double imgWidth = 0.0;
-    double imgHeight = 0.0;
-    RefPtr<PixelMap> pixelMap = nullptr;
-    RefPtr<NG::SvgDomBase> svgDom = nullptr;
     bool isImage = false;
     if (!info[0]->IsObject()) {
         return;
     }
-
     JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
-
+#if !defined(PREVIEW)
+    RefPtr<PixelMap> pixelMap = nullptr;
+    RefPtr<NG::SvgDomBase> svgDom = nullptr;
     if ((jsImage && jsImage->IsSvg())) {
         svgDom = jsImage->GetSvgDom();
-        if (!svgDom) {
-            return;
-        }
+        CHECK_NULL_VOID(svgDom);
         ImageFit imageFit = jsImage->GetImageFit();
         isImage = true;
         imageInfo.svgDom = svgDom;
@@ -834,28 +829,28 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
             isImage = true;
             pixelMap = jsImage->GetPixelMap();
         } else {
-#if !defined(PREVIEW)
             pixelMap = CreatePixelMapFromNapiValue(info[0]);
-#endif
         }
-        if (!pixelMap) {
-            return;
-        }
+        CHECK_NULL_VOID(pixelMap);
     }
-
+    imageInfo.isImage = false;
+    imageInfo.pixelMap = pixelMap;
+#else
+    CHECK_NULL_VOID(jsImage);
+    isImage = true;
+    std::string imageValue = jsImage->GetSrc();
+    image.src = imageValue;
+    imageInfo.imgWidth = jsImage->GetWidth();
+    imageInfo.imgHeight = jsImage->GetHeight();
+    imageInfo.isImage = true;
+#endif
     ExtractInfoToImage(image, info, isImage);
     image.instanceId = jsImage ? jsImage->GetInstanceId() : 0;
-
     BaseInfo baseInfo;
     baseInfo.canvasPattern = canvasPattern_;
     baseInfo.offscreenPattern = offscreenPattern_;
     baseInfo.isOffscreen = isOffscreen_;
-
     imageInfo.image = image;
-    imageInfo.imgWidth = imgWidth;
-    imageInfo.imgHeight = imgHeight;
-    imageInfo.pixelMap = pixelMap;
-    imageInfo.isImage = false;
 
     CanvasRendererModel::GetInstance()->DrawImage(baseInfo, imageInfo);
 }
