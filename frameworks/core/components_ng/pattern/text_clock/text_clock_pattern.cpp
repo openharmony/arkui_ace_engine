@@ -333,9 +333,6 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     // get date time from third party
     std::string dateTimeFormat = DEFAULT_FORMAT; // the format to get datetime value from the thirdlib
     dateTimeFormat = "yyyyMMdd";
-    std::string prevDate = Localization::GetInstance()->FormatDateTime(dateTime, dateTimeFormat);
-    isDateChange_ = prevDate != prevDate_;
-    prevDate_ = prevDate;
     dateTimeFormat += is24H ? "HH" : "hh";
     dateTimeFormat += "mmss";
     dateTimeFormat += "SSS";
