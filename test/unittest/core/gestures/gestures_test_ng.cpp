@@ -6906,10 +6906,6 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerSendCallbackMsgTest002, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     TouchEvent touchEvent;
-    DimensionRect area;
-    DimensionOffset origin;
-    EventTarget target = {"", "", area, origin};
-    swipeRecognizer.recognizerTarget_ = std::make_optional(target);
     swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
     swipeRecognizer.touchPoints_[touchEvent.id] = touchEvent;
     swipeRecognizer.SendCallbackMsg(onAction);
@@ -6953,10 +6949,6 @@ HWTEST_F(GesturesTestNg, PanRecognizerSendCallbackMsgTest003, TestSize.Level1)
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
     panRecognizer.inputEventType_ = InputEventType::AXIS;
-    DimensionRect area;
-    DimensionOffset origin;
-    EventTarget target = {"", "", area, origin};
-    panRecognizer.recognizerTarget_ = std::make_optional(target);
     panRecognizer.SendCallbackMsg(onAction);
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
 
@@ -7004,10 +6996,6 @@ HWTEST_F(GesturesTestNg, ClickRecognizerSendCallbackMsgTest001, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    DimensionRect area;
-    DimensionOffset origin;
-    EventTarget target = {"", "", area, origin};
-    clickRecognizer.recognizerTarget_ = std::make_optional(target);
     clickRecognizer.SendCallbackMsg(onAction);
     EXPECT_EQ(clickRecognizer.touchPoints_.size(), 0);
 }
@@ -7055,10 +7043,6 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerSendCallbackMsgTest001, TestSize.Lev
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    DimensionRect area;
-    DimensionOffset origin;
-    EventTarget target = {"", "", area, origin};
-    longPressRecognizer.recognizerTarget_ = std::make_optional(target);
     longPressRecognizer.SendCallbackMsg(onAction, true);
     EXPECT_EQ(longPressRecognizer.touchPoints_.size(), 0);
 }
@@ -7082,10 +7066,6 @@ HWTEST_F(GesturesTestNg, PinchRecognizerSendCallbackMsgTest001, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    DimensionRect area;
-    DimensionOffset origin;
-    EventTarget target = {"", "", area, origin};
-    pinchRecognizer.recognizerTarget_ = std::make_optional(target);
     pinchRecognizer.SendCallbackMsg(onAction);
     EXPECT_EQ(pinchRecognizer.touchPoints_.size(), 0);
 }
@@ -7109,10 +7089,6 @@ HWTEST_F(GesturesTestNg, RotationRecognizerSendCallbackMsgTest001, TestSize.Leve
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    DimensionRect area;
-    DimensionOffset origin;
-    EventTarget target = {"", "", area, origin};
-    rotationRecognizer.recognizerTarget_ = std::make_optional(target);
     rotationRecognizer.SendCallbackMsg(onAction);
     EXPECT_EQ(rotationRecognizer.touchPoints_.size(), 0);
 }
@@ -12194,16 +12170,12 @@ HWTEST_F(GesturesTestNg, RotationRecognizerPtrHandleTouchUpEventTest001, TestSiz
     TouchEvent touchEvent;
     touchEvent.tiltX.emplace(1.0f);
     touchEvent.tiltY.emplace(1.0f);
-    DimensionRect area;
-    DimensionOffset origin;
-    EventTarget target = {"", "", area, origin};
     rotationRecognizerPtr->targetComponent_ = targetComponent;
     /**
      * @tc.steps: step2. test the function who calls TriggerGestureJudgeCallback.
      * @tc.expected: step2. result equals REJECT.
      */
     rotationRecognizerPtr->refereeState_ = RefereeState::DETECTING;
-    rotationRecognizerPtr->recognizerTarget_ = std::make_optional(target);
     rotationRecognizerPtr->currentFingers_ = 2;
     rotationRecognizerPtr->fingers_ = 2;
     rotationRecognizerPtr->activeFingers_.push_back(touchEvent.id);
@@ -12248,7 +12220,6 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerPtrHandleTouchUpEventTest001, TestSize.L
     EXPECT_EQ(swipeRecognizerPtr->disposal_, GestureDisposal::REJECT);
 
     swipeRecognizerPtr->refereeState_ = RefereeState::DETECTING;
-    swipeRecognizerPtr->recognizerTarget_ = std::make_optional(target);
     swipeRecognizerPtr->deviceType_ = SourceType::MOUSE;
     swipeRecognizerPtr->HandleTouchUpEvent(axisEvent);
     EXPECT_EQ(swipeRecognizerPtr->disposal_, GestureDisposal::REJECT);
@@ -12306,9 +12277,6 @@ HWTEST_F(GesturesTestNg, PinchRecognizerPtrHandleTouchMoveEventTest002, TestSize
     RefPtr<PinchRecognizer> pinchRecognizerPtr = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
         PINCH_GESTURE_DISTANCE);
     RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
-    DimensionRect area;
-    DimensionOffset origin;
-    EventTarget target = {"", "", area, origin};
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;};
     targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
@@ -12330,7 +12298,6 @@ HWTEST_F(GesturesTestNg, PinchRecognizerPtrHandleTouchMoveEventTest002, TestSize
     pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(pinchRecognizerPtr->disposal_, GestureDisposal::NONE);
 
-    pinchRecognizerPtr->recognizerTarget_ = std::make_optional(target);
     axisEvent.pinchAxisScale = 1.0;
     pinchRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     pinchRecognizerPtr->isPinchEnd_ = false;
@@ -12356,10 +12323,6 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerHandleOverdueDeadlineTest002, TestSi
     auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     PanDirection panDirection;
-    DimensionRect area;
-    DimensionOffset origin;
-    EventTarget target = {"", "", area, origin};
-    longPressRecognizerPtr->recognizerTarget_ = std::make_optional(target);
     targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
     longPressRecognizerPtr->targetComponent_ = targetComponent;
     longPressRecognizerPtr->targetComponent_->node_ = frameNode;
@@ -12422,10 +12385,6 @@ HWTEST_F(GesturesTestNg, PanPressRecognizerHandleTouchMoveEventTest001, TestSize
     auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     PanDirection panDirection;
-    DimensionRect area;
-    DimensionOffset origin;
-    EventTarget target = {"", "", area, origin};
-    panRecognizerPtr->recognizerTarget_ = std::make_optional(target);
     panRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
     panRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
     targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
@@ -12496,10 +12455,6 @@ HWTEST_F(GesturesTestNg, PanPressRecognizerHandleTouchMoveEventTest002, TestSize
     auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     PanDirection panDirection;
-    DimensionRect area;
-    DimensionOffset origin;
-    EventTarget target = {"", "", area, origin};
-    panRecognizerPtr->recognizerTarget_ = std::make_optional(target);
     panRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
     panRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
     targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
