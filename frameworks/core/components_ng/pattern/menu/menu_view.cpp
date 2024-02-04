@@ -20,7 +20,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -167,14 +166,6 @@ void MountScrollToMenu(
             BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
             renderContext->UpdateBorderRadius(borderRadius);
         }
-    }
-    if (type == MenuType::SELECT_OVERLAY_CUSTOM_MENU) {
-        BorderRadiusProperty borderRadiusProperty;
-        borderRadiusProperty.SetRadius(0.0_vp);
-        scroll->GetRenderContext()->UpdateBorderRadius(borderRadiusProperty);
-        scroll->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-        menuNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-        menuNode->GetRenderContext()->UpdateBackShadow(ShadowConfig::NoneShadow);
     }
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
