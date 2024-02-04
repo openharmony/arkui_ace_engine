@@ -504,7 +504,6 @@ HWTEST_F(ImageTestNg, ImagePatternCallback002, TestSize.Level1)
  */
 HWTEST_F(ImageTestNg, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level1)
 {
-    EXPECT_CALL(*(MockPipelineContext::GetCurrent()), FlushMessages()).Times(2);
     auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
@@ -1798,11 +1797,8 @@ HWTEST_F(ImageTestNg, MeasureContent001, TestSize.Level1)
             ImageSourceInfo(ALT_SRC_URL, Dimension(-1), Dimension(-1)), LoadNotifier(nullptr, nullptr, nullptr)) };
 
     LayoutConstraintF layoutConstraintSize;
-    std::vector<std::vector<SizeF>> cases = {
-        { {0, 0}, {720, 1440}, {0, 0} },
-        { {720, 480}, {720, 480}, {720, 480} },
-        { {0, 0}, {720, 1440}, {0, 0} }
-    };
+    std::vector<std::vector<SizeF>> cases = { { { 0, 0 }, { 720, 1440 }, { 0, 0 } },
+        { { 720, 480 }, { 720, 480 }, { 720, 480 } }, { { 0, 0 }, { 720, 1440 }, { 0, 0 } } };
 
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
