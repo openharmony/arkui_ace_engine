@@ -1102,12 +1102,7 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) == CopyOptions::None) {
         return;
     }
-    if (!IsSelected()) {
-        return;
-    }
-    if (IsInPasswordMode()) {
-        UpdateSelection(selectController_->GetEndIndex());
-        StartTwinkling();
+    if (!IsSelected() || IsInPasswordMode()) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On copy, text selector %{public}s", selectController_->ToString().c_str());
@@ -1261,12 +1256,7 @@ void TextFieldPattern::HandleOnCut()
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
     SwapIfLarger(start, end);
-    if (!IsSelected()) {
-        return;
-    }
-    if (IsInPasswordMode()) {
-        UpdateSelection(selectController_->GetEndIndex());
-        StartTwinkling();
+    if (!IsSelected() || IsInPasswordMode()) {
         return;
     }
     auto selectedText = contentController_->GetSelectedValue(start, end);
