@@ -242,6 +242,9 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
         return nullptr;
     }
 
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto nanoTimestamp = pipeline->GetVsyncTime();
     PointF point(globalX, globalY);
     std::vector<RefPtr<FrameNode>> hitFrameNodes;
     for (auto iterOfFrameNode = frameNodes.begin(); iterOfFrameNode != frameNodes.end(); iterOfFrameNode++) {
@@ -254,7 +257,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
             continue;
         }
         auto globalFrameRect = geometryNode->GetFrameRect();
-        globalFrameRect.SetOffset(frameNode->GetTransformRelativeOffset());
+        globalFrameRect.SetOffset(frameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp));
         if (globalFrameRect.IsInRegion(point)) {
             hitFrameNodes.push_back(frameNode);
         }
@@ -264,8 +267,6 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
         TAG_LOGD(AceLogTag::ACE_DRAG, "Cannot find targetNodes.");
         return nullptr;
     }
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
     auto manager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(manager, nullptr);
     auto rootNode = pipeline->GetRootElement();
