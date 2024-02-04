@@ -614,6 +614,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSMatrix2d::JSBind(globalObj);
     JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
     JSOffscreenRenderingContext::JSBind(globalObj);
+    JSRenderingContextSettings::JSBind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework
