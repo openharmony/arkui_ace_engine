@@ -566,14 +566,16 @@ bool TextSelectController::AdjustWordSelection(
         int32_t subIndex = index;
         // to avoid the content too large
         std::string content = contentController_->GetSelectedLimitValue(subIndex, startIndex);
-        DataDetectorMgr::GetInstance().AdjustWordSelection(subIndex, content, start, end);
-        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "after ai ,startIndex:%{public}d-sub:%{public}d", start, end);
-        if (start < 0 || end < 0) {
+        int32_t aiPosStart = -1;
+        int32_t aiPosEnd = -1;
+        DataDetectorMgr::GetInstance().AdjustWordSelection(subIndex, content, aiPosStart, aiPosEnd);
+        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "after ai ,startIndex:%{public}d-sub:%{public}d", aiPosStart, aiPosEnd);
+        if (aiPosStart < 0 || aiPosEnd < 0) {
             return false;
         }
         index = startIndex + subIndex;
-        start = startIndex + start;
-        end = startIndex + end;
+        start = startIndex + aiPosStart;
+        end = startIndex + aiPosEnd;
         return true;
     }
 
