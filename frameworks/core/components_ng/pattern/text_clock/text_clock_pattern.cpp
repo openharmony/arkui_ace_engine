@@ -38,7 +38,6 @@ constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
 constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
 constexpr bool ON_TIME_CHANGE = true;
-constexpr bool NOT_ON_TIME_CHANGE = false;
 const std::string DEFAULT_FORMAT = "hms";
 const std::string FORM_FORMAT = "hm";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
@@ -144,7 +143,7 @@ void TextClockPattern::OnModifyDone()
     UpdateTextLayoutProperty(textClockProperty, textLayoutProperty);
     hourWest_ = GetHoursWest();
     delayTask_.Cancel();
-    UpdateTimeText(NOT_ON_TIME_CHANGE);
+    UpdateTimeText();
 }
 
 void TextClockPattern::InitTextClockController()
@@ -157,7 +156,7 @@ void TextClockPattern::InitTextClockController()
         auto textClock = wp.Upgrade();
         if (textClock) {
             textClock->isStart_ = true;
-            textClock->UpdateTimeText(NOT_ON_TIME_CHANGE);
+            textClock->UpdateTimeText();
         }
     });
     textClockController_->OnStop([wp = WeakClaim(this)]() {
@@ -173,7 +172,7 @@ void TextClockPattern::OnVisibleChange(bool isVisible)
 {
     if (isVisible && !isSetVisible_) {
         isSetVisible_ = isVisible;
-        UpdateTimeText(NOT_ON_TIME_CHANGE);
+        UpdateTimeText();
     } else if (!isVisible) {
         isSetVisible_ = isVisible;
         delayTask_.Cancel();
@@ -184,7 +183,7 @@ void TextClockPattern::OnVisibleAreaChange(bool visible)
 {
     if (visible && !isInVisibleArea_) {
         isInVisibleArea_ = visible;
-        UpdateTimeText(NOT_ON_TIME_CHANGE);
+        UpdateTimeText();
     } else if (!visible) {
         isInVisibleArea_ = visible;
         delayTask_.Cancel();
@@ -195,7 +194,7 @@ void TextClockPattern::OnFormVisibleChange(bool visible)
 {
     if (visible && !isFormVisible_) {
         isFormVisible_ = visible;
-        UpdateTimeText(NOT_ON_TIME_CHANGE);
+        UpdateTimeText();
     } else if (!visible) {
         isFormVisible_ = visible;
         delayTask_.Cancel();
@@ -300,7 +299,7 @@ void TextClockPattern::RequestUpdateForNextSecond()
         if (!textClock->isStart_) {
             return;
         }
-        textClock->UpdateTimeText(NOT_ON_TIME_CHANGE);
+        textClock->UpdateTimeText();
     });
     context->GetTaskExecutor()->PostDelayedTask(delayTask_, TaskExecutor::TaskType::UI, delayTime);
 }
