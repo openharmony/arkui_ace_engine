@@ -931,6 +931,28 @@ TransformParam CustomPaintPattern::GetTransform() const
     return paintMethod_->GetTransform();
 }
 
+void CustomPaintPattern::SaveLayer()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SaveLayer();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::RestoreLayer()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.RestoreLayer();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void CustomPaintPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
 {
     CHECK_NULL_VOID(paintMethod_);

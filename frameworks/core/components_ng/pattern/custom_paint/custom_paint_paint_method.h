@@ -105,6 +105,8 @@ public:
     void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
+    void SaveLayer();
+    void RestoreLayer();
 
     void SetFilterParam(const std::string& filterStr)
     {
