@@ -195,9 +195,6 @@ void RefreshPattern::InitChildNode()
             host->RemoveChild(progressChild_);
             progressChild_ = nullptr;
         }
-        if (host->TotalChildCount() > 1) {
-            scrollableNode_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
-        }
     } else if (!progressChild_) {
         InitProgressNode();
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -206,9 +203,6 @@ void RefreshPattern::InitChildNode()
             progressContext->UpdateOpacity(0.0);
         } else {
             UpdateLoadingProgress();
-        }
-        if (host->TotalChildCount() > 1) {
-            scrollableNode_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         }
     }
 }
@@ -525,8 +519,20 @@ void RefreshPattern::UpdateFirstChildPlacement()
 
 void RefreshPattern::UpdateScrollTransition(float scrollOffset)
 {
-    CHECK_NULL_VOID(scrollableNode_);
-    auto scrollableRenderContext = scrollableNode_->GetRenderContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // If the refresh has no children without loadingProgress, it does not need to be offset.
+    if (host->TotalChildCount() <= 1) {
+        return;
+    }
+    // Need to search for frameNode and skip ComponentNode
+    auto childNode = host->GetFirstChild();
+    while (!AceType::InstanceOf<FrameNode>(childNode) && !childNode->GetChildren().empty()) {
+        childNode = childNode->GetFirstChild();
+    }
+    auto scrollableNode = AceType::DynamicCast<FrameNode>(childNode);
+    CHECK_NULL_VOID(scrollableNode);
+    auto scrollableRenderContext = scrollableNode->GetRenderContext();
     CHECK_NULL_VOID(scrollableRenderContext);
     scrollableRenderContext->UpdateTransformTranslate({ 0.0f, scrollOffset, 0.0f });
 }
