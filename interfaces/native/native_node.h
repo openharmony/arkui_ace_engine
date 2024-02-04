@@ -3726,7 +3726,93 @@ typedef enum {
      * @endcode
      */
     NODE_TEXT_PICKER_DEFAULT_PICKER_ITEM_HEIGHT,
-
+    /**
+     * @brief 设置日历选中态底板圆角半径的参数，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32： 日历选中态底板圆角半径，取值范围[0,+∞)，其中取值为0表示底板样式为直角矩形；
+     * 取值范围为(0, 16)时，底板样式为圆角矩形；取值范围为[16,+∞)时，底板样式为圆形。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32： 日历选中态底板圆角半径，取值范围[0,+∞)，其中取值为0表示底板样式为直角矩形；
+     * 取值范围为(0, 16)时，底板样式为圆角矩形；取值范围为[16,+∞)时，底板样式为圆形。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { 16.0f };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_HINT_RADIUS, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_HINT_RADIUS);
+     * auto borderRadius = item->value[0].f32;
+     * @endcode
+     */
+    NODE_CALENDAR_PICKER_HINT_RADIUS = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CALENDAR_PICKER,
+    /**
+     * @brief 设置日历选择选中日期的参数，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[1].u32： 选中的年。\n
+     * .value[2].u32： 选中的月。\n
+     * .value[3].u32： 选中的日。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[1].u32： 选中的年。\n
+     * .value[2].u32： 选中的月。\n
+     * .value[3].u32： 选中的日。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .u32 = 2028 }, { .u32 = 1 }, { .u32 = 1 } };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED_DATE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED_DATE);
+     * auto selectYear = item->value[0].u32;
+     * @endcode
+     */
+    NODE_CALENDAR_PICKER_SELECTED_DATE,
+    /**
+     * @brief 设置日历选择器与入口组件的对齐方式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 对齐方式类型，参数类型{@link ArkUI_CalendarAlignment}。\n
+     * .value[1]?.f32： 按照对齐方式对齐后，选择器相对入口组件的x轴方向相对偏移。\n
+     * .value[2]?.f32： 按照对齐方式对齐后，选择器相对入口组件的y轴方向相对偏移。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 对齐方式类型，参数类型{@link ArkUI_CalendarAlignment}。\n
+     * .value[1]?.f32： 按照对齐方式对齐后，选择器相对入口组件的x轴方向相对偏移。\n
+     * .value[2]?.f32： 按照对齐方式对齐后，选择器相对入口组件的y轴方向相对偏移。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = static_cast<int32_t>(ARKUI_CALENDAR_ALIGNMENT_END) }, 10.0f, 0.0f };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGNMENT, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGNMENT);
+     * auto alignType = item->value[0].i32;
+     * @endcode
+     */
+    NODE_CALENDAR_PICKER_EDGE_ALIGNMENT,
+    /**
+     * @brief 设置日历选择器入口区的文本颜色、字号、字体粗细。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0]?.u32： 入口区的文本颜色。\n
+     * .value[1]?.f32： 入口区的文本字号，单位为fp。\n
+     * .value[2]?.i32： 入口区的文本字体粗细，参数类型{@link ArkUI_FontWeight}。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0]?.u32： 入口区的文本颜色。\n
+     * .value[1]?.f32： 入口区的文本字号，单位为fp。\n
+     * .value[2]?.i32： 入口区的文本字体粗细，参数类型{@link ArkUI_FontWeight}。\n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .u32 = 0xff00ffff }, 16.0f, { .i32 =
+     * static_cast<int32_t>(ARKUI_FONT_WEIGHT_NORMAL)} };
+     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_TEXT_STYLE, &item);
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_TEXT_STYLE);
+     * auto textColor = item->value[0].u32;
+     * @endcode
+     */
+    NODE_CALENDAR_PICKER_TEXT_STYLE,
     /**
      * @brief Slider滑块的颜色，支持属性设置，属性重置和属性获取。
      *
@@ -4665,93 +4751,6 @@ typedef enum {
      * @endcode
      */
     NODE_LIST_ITEM_GROUP_SET_DIVIDER,
-    /**
-     * @brief 设置日历选中态底板圆角半径的参数，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32： 日历选中态底板圆角半径，取值范围[0,+∞)，其中取值为0表示底板样式为直角矩形；
-     * 取值范围为(0, 16)时，底板样式为圆角矩形；取值范围为[16,+∞)时，底板样式为圆形。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32： 日历选中态底板圆角半径，取值范围[0,+∞)，其中取值为0表示底板样式为直角矩形；
-     * 取值范围为(0, 16)时，底板样式为圆角矩形；取值范围为[16,+∞)时，底板样式为圆形。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { 16.0f };
-     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_HINT_RADIUS, &item);
-     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_HINT_RADIUS);
-     * auto borderRadius = item->value[0].f32;
-     * @endcode
-     */
-    NODE_CALENDAR_PICKER_HINT_RADIUS = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CALENDAR_PICKER,
-    /**
-     * @brief 设置日历选择选中日期的参数，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[1].u32： 选中的年。\n
-     * .value[2].u32： 选中的月。\n
-     * .value[3].u32： 选中的日。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[1].u32： 选中的年。\n
-     * .value[2].u32： 选中的月。\n
-     * .value[3].u32： 选中的日。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .u32 = 2028 }, { .u32 = 1 }, { .u32 = 1 } };
-     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED_DATE, &item);
-     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_SELECTED_DATE);
-     * auto selectYear = item->value[0].u32;
-     * @endcode
-     */
-    NODE_CALENDAR_PICKER_SELECTED_DATE,
-    /**
-     * @brief 设置日历选择器与入口组件的对齐方式，支持属性设置，属性重置和属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 对齐方式类型，参数类型{@link ArkUI_CalendarAlignment}。\n
-     * .value[1]?.f32： 按照对齐方式对齐后，选择器相对入口组件的x轴方向相对偏移。\n
-     * .value[2]?.f32： 按照对齐方式对齐后，选择器相对入口组件的y轴方向相对偏移。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32： 对齐方式类型，参数类型{@link ArkUI_CalendarAlignment}。\n
-     * .value[1]?.f32： 按照对齐方式对齐后，选择器相对入口组件的x轴方向相对偏移。\n
-     * .value[2]?.f32： 按照对齐方式对齐后，选择器相对入口组件的y轴方向相对偏移。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = static_cast<int32_t>(ARKUI_CALENDAR_ALIGNMENT_END) }, 10.0f, 0.0f };
-     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGNMENT, &item);
-     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_EDGE_ALIGNMENT);
-     * auto alignType = item->value[0].i32;
-     * @endcode
-     */
-    NODE_CALENDAR_PICKER_EDGE_ALIGNMENT,
-    /**
-     * @brief 设置日历选择器入口区的文本颜色、字号、字体粗细。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0]?.u32： 入口区的文本颜色。\n
-     * .value[1]?.f32： 入口区的文本字号，单位为fp。\n
-     * .value[2]?.i32： 入口区的文本字体粗细，参数类型{@link ArkUI_FontWeight}。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0]?.u32： 入口区的文本颜色。\n
-     * .value[1]?.f32： 入口区的文本字号，单位为fp。\n
-     * .value[2]?.i32： 入口区的文本字体粗细，参数类型{@link ArkUI_FontWeight}。\n
-     *
-     * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .u32 = 0xff00ffff }, 16.0f, { .i32 =
-     * static_cast<int32_t>(ARKUI_FONT_WEIGHT_NORMAL)} };
-     * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_CALENDAR_PICKER_TEXT_STYLE, &item);
-     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CALENDAR_PICKER_TEXT_STYLE);
-     * auto textColor = item->value[0].u32;
-     * @endcode
-     */
-    NODE_CALENDAR_PICKER_TEXT_STYLE,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
