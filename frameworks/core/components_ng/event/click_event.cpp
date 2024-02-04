@@ -47,7 +47,21 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     clickRecognizer_->SetOnAction(GetClickEvent());
     clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    auto sysJudgeFunc = GetSysJudgeFunc();
+    if (sysJudgeFunc.has_value()) {
+        clickRecognizer_->SetSysGestureJudge(sysJudgeFunc.value());
+    }
     result.emplace_back(clickRecognizer_);
+}
+
+std::optional<GestureJudgeFunc> ClickEventActuator::GetSysJudgeFunc() const
+{
+    for (const auto& callback : clickEvents_) {
+        if (callback->HasSysGestureJudge()) {
+            return callback->GetSysJudge();
+        }
+    }
+    return nullptr;
 }
 
 GestureEventFunc ClickEventActuator::GetClickEvent()
