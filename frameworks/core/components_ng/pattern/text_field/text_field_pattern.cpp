@@ -3557,6 +3557,7 @@ void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity)
 {
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
+    StartTwinkling();
     CloseSelectOverlay();
     selectController_->MoveCaretToContentRect(GetCaretIndex(), textAffinity);
     if (ResetObscureTickCountDown()) {
@@ -3700,7 +3701,6 @@ bool TextFieldPattern::CursorMoveLeftOperation()
     if (IsSelected()) {
         selectController_->UpdateCaretIndex(selectController_->GetStartIndex());
         CloseSelectOverlay();
-        StartTwinkling();
     } else {
         UpdateCaretPositionWithClamp(
             selectController_->GetCaretIndex() -
@@ -3799,7 +3799,6 @@ bool TextFieldPattern::CursorMoveRightOperation()
     if (IsSelected()) {
         CloseSelectOverlay();
         selectController_->UpdateCaretIndex(selectController_->GetEndIndex());
-        StartTwinkling();
     } else {
         UpdateCaretPositionWithClamp(
             selectController_->GetCaretIndex() +
@@ -3895,7 +3894,6 @@ bool TextFieldPattern::CursorMoveUpOperation()
     auto originCaretPosition = selectController_->GetCaretIndex();
     if (IsSelected()) {
         selectController_->UpdateCaretIndex(selectController_->GetStartIndex());
-        StartTwinkling();
     } else {
         auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
         auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
@@ -3924,7 +3922,6 @@ bool TextFieldPattern::CursorMoveDownOperation()
     auto originCaretPosition = selectController_->GetCaretIndex();
     if (IsSelected()) {
         selectController_->UpdateCaretIndex(selectController_->GetEndIndex());
-        StartTwinkling();
     } else {
         auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
         auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
