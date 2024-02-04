@@ -773,6 +773,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (eventRet == DragRet::DRAG_FAIL || eventRet == DragRet::DRAG_CANCEL) {
         return;
     }
+    if (GetTextDraggable() && !GetIsTextDraggable()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, forbidden drag");
+        return;
+    }
     std::string udKey;
     int32_t recordsSize = 1;
     auto unifiedData = dragEvent->GetData();
