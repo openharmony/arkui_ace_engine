@@ -4598,7 +4598,7 @@ int32_t SetLineHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    CalcDimension lineHeight(0.0f, DimensionUnit::FP);
+    CalcDimension lineHeight(item->value[0].f32, DimensionUnit::FP);
     switch (node->type) {
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextLineHeight(
