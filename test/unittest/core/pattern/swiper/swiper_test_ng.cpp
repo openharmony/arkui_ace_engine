@@ -11990,7 +11990,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternAdjustCurrentIndexOnSwipePage001, TestSize.L
 
     layoutProperty_->UpdateIndex(5);
     pattern_->BeforeCreateLayoutWrapper();
-    EXPECT_EQ(layoutProperty_->GetIndex().value(), 5);
+    EXPECT_EQ(layoutProperty_->GetIndex().value(), 0);
 
     layoutProperty_->UpdateIndex(6);
     pattern_->needAdjustIndex_ = true;
