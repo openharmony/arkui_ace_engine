@@ -3462,7 +3462,7 @@ void SetOnClick(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
         //timestamp
         event.componentAsyncEvent.data[2].f32 = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
         //source
-        event.componentAsyncEvent.data[2].i32 = static_cast<int32_t>(info.GetSourceDevice());
+        event.componentAsyncEvent.data[3].i32 = static_cast<int32_t>(info.GetSourceDevice());
         //windowX
         event.componentAsyncEvent.data[4].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX());
         //windowY
