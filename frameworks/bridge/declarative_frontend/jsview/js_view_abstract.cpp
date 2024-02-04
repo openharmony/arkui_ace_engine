@@ -1562,6 +1562,7 @@ void JSViewAbstract::JsResponseRegion(const JSCallbackInfo& info)
 {
     std::vector<DimensionRect> result;
     if (!JSViewAbstract::ParseJsResponseRegionArray(info[0], result)) {
+        ViewAbstractModel::GetInstance()->SetResponseRegion({});
         return;
     }
 
@@ -1572,6 +1573,7 @@ void JSViewAbstract::JsMouseResponseRegion(const JSCallbackInfo& info)
 {
     std::vector<DimensionRect> result;
     if (!JSViewAbstract::ParseJsResponseRegionArray(info[0], result)) {
+        ViewAbstractModel::GetInstance()->SetMouseResponseRegion({});
         return;
     }
     ViewAbstractModel::GetInstance()->SetMouseResponseRegion(result);
