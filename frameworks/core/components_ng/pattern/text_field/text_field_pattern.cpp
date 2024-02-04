@@ -5090,6 +5090,11 @@ void TextFieldPattern::SetShowError()
             renderContext->UpdateBorderColor(borderColor);
             renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
             layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
+        } else { // only show error text, reset border
+            layoutProperty->UpdateBorderWidth(passwordModeStyle_.borderwidth);
+            renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
+            renderContext->UpdateBackgroundColor(passwordModeStyle_.bgColor);
+            layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
         }
     } else if (preErrorState) { // need to clean error state
         underlineColor_ = textFieldTheme->GetUnderlineColor();
