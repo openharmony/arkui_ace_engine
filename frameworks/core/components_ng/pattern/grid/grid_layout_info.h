@@ -112,7 +112,7 @@ struct GridLayoutInfo {
     };
     /**
      * @brief Traverse the matrix backward to find the last item index, starting from Line [endLine].
-     * 
+     *
      * @param endLine index of the line to start traversing.
      * @return last item index above endLine (inclusive) and the position it resides in.
      */
@@ -181,10 +181,10 @@ struct GridLayoutInfo {
 
     /**
      * @brief clear gridMatrix_ in range [idx, end)
-     * 
+     *
      * REQUIRES: idx and lineIdx have to match each other.
      * @param idx item index to start clearing from.
-     * @param lineIdx already-found line index of the target item. 
+     * @param lineIdx already-found line index of the target item.
      */
     void ClearMatrixToEnd(int32_t idx, int32_t lineIdx);
 

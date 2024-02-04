@@ -391,7 +391,7 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
             // Using the full [mainSize]。
             float targetLen = mainSize / 2.0f;
             float backwardLen = filler.MeasureBackward({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx);
-            backwardLen -= info.lineHeightMap_[jumpLineIdx] / 2.0f;
+            backwardLen -= info.lineHeightMap_.at(jumpLineIdx) / 2.0f;
             if (backwardLen < targetLen) {
                 jumpLineIdx = 0;
                 info.scrollAlign_ = ScrollAlign::START;
@@ -399,7 +399,7 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
                 return;
             }
             float forwardLen = filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx).length;
-            forwardLen -= info.lineHeightMap_[jumpLineIdx] / 2.0f;
+            forwardLen -= info.lineHeightMap_.at(jumpLineIdx) / 2.0f;
             if (forwardLen < targetLen) {
                 jumpLineIdx = info.lineHeightMap_.rbegin()->first;
                 info.scrollAlign_ = ScrollAlign::END;

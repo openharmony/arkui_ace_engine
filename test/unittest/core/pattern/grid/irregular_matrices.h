@@ -29,7 +29,7 @@ const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_1 = {
     { 4, { { 0, -5 }, { 1, 8 }, { 2, -7 } } },   // 5 | 8 | 7
     { 5, { { 0, -5 }, { 1, 9 }, { 2, 10 } } },   // 5 | 9 | 10
     { 6, { { 0, -5 }, { 1, -9 }, { 2, -10 } } }, // 5 | 9 | 10
-};  
+};
 
 GridLayoutOptions GetOptionDemo2();
 const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_2 = {

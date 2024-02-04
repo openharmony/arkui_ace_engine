@@ -72,17 +72,16 @@ GridLayoutRangeSolver::RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t 
 
 Result GridLayoutRangeSolver::SolveForward(float mainGap, float targetLen, int32_t idx)
 {
-    float len = 0.0f;
-    while (len < targetLen) {
+    float len = -mainGap;
+    while (static_cast<size_t>(idx) < info_->gridMatrix_.size()) {
         auto [newRows, addLen] = AddNextRows(mainGap, idx);
-        if (len + addLen > targetLen) {
+        if (GreatNotEqual(len + addLen, targetLen)) {
             break;
         }
         len += addLen;
         idx += newRows;
     }
-
-    return { idx, len - targetLen };
+    return { idx, len - targetLen + mainGap };
 }
 
 std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int32_t idx)
@@ -109,12 +108,8 @@ std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int3
         }
     }
 
-    float len = info_->lineHeightMap_.at(idx);
-    if (idx > 0) {
-        // always add the main gap above the item in forward layout
-        len += mainGap;
-    }
-    for (int i = 1; i < rowCnt; ++i) {
+    float len = 0.0f;
+    for (int i = 0; i < rowCnt; ++i) {
         len += info_->lineHeightMap_.at(idx + i) + mainGap;
     }
 
@@ -133,15 +128,15 @@ std::pair<int32_t, int32_t> GridLayoutRangeSolver::SolveForwardForEndIdx(float m
 
 Result GridLayoutRangeSolver::SolveBackward(float mainGap, float targetLen, int32_t idx)
 {
-    float len = 0;
-    while (idx > 0 && len < targetLen) {
+    float len = mainGap;
+    while (idx > 0 && LessNotEqual(len, targetLen)) {
         len += info_->lineHeightMap_.at(--idx) + mainGap;
     }
 
     auto rowCnt = CheckMultiRow(idx);
     idx -= rowCnt - 1;
 
-    float newOffset = targetLen - len;
+    float newOffset = targetLen - len + mainGap;
     for (int i = 0; i < rowCnt - 1; ++i) {
         newOffset -= info_->lineHeightMap_.at(idx + i) + mainGap;
     }

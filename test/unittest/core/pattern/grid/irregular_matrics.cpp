@@ -111,7 +111,6 @@ GridLayoutOptions GetOptionDemo6()
         5,  // [2 x 1]
         10, // [2 x 1]
     };
-
     option.getSizeByIndex = [](int32_t index) -> GridItemSize { return { .rows = 1, .columns = 2 }; };
     return option;
 }

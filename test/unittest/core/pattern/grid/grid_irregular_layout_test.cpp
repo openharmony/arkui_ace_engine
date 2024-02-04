@@ -484,7 +484,7 @@ HWTEST_F(GridIrregularLayoutTest, AddNextRow001, TestSize.Level1)
     GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
     auto res = solver.AddNextRows(5.0f, 0);
     EXPECT_EQ(res.first, 2);
-    EXPECT_EQ(res.second, 80.0f + 5.0f); // top line doesn't have main gap
+    EXPECT_EQ(res.second, 80.0f + 5.0f * 2);
 }
 
 /**
@@ -524,7 +524,7 @@ HWTEST_F(GridIrregularLayoutTest, AddNextRows002, TestSize.Level1)
     GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
     auto res = solver.AddNextRows(5.0f, 0);
     EXPECT_EQ(res.first, 3);
-    EXPECT_EQ(res.second, 160.0f);
+    EXPECT_EQ(res.second, 165.0f);
 
     // in real scenario, parameter rowIdx = 1 is impossible
     res = solver.AddNextRows(5.0f, 1);
@@ -576,17 +576,19 @@ HWTEST_F(GridIrregularLayoutTest, SolveForward001, TestSize.Level1)
     // startMainLineIndex_ == 1 || startMainLineIndex_ == 2 is impossible.
     // LayoutRangeSolver always finds the first row of irregular items.
 
-    info.currentOffset_ = -11.0f;
-    info.startMainLineIndex_ = 3;
-    res = solver.FindStartingRow(1.0f);
-    EXPECT_EQ(res.row, 4);
-    EXPECT_EQ(res.pos, 0.0f);
-
-    info.currentOffset_ = -10.0f;
+    info.currentOffset_ = -9.0f;
     info.startMainLineIndex_ = 3;
     res = solver.FindStartingRow(1.0f);
     EXPECT_EQ(res.row, 3);
-    EXPECT_EQ(res.pos, -10.0f);
+    EXPECT_EQ(res.pos, -9.0f);
+
+    for (int i = 0; i < 3; ++i) {
+        info.currentOffset_ = -10.0f - i * 1.0f;
+        info.startMainLineIndex_ = 3;
+        res = solver.FindStartingRow(1.0f);
+        EXPECT_EQ(res.row, 4);
+        EXPECT_EQ(res.pos, 1.0f - i * 1.0f);
+    }
 
     info.currentOffset_ = -110.0f;
     info.startMainLineIndex_ = 3;
@@ -697,6 +699,50 @@ HWTEST_F(GridIrregularLayoutTest, SolveBackward001, TestSize.Level1)
     res = solver.FindStartingRow(5.0f);
     EXPECT_EQ(res.pos, 30.0f);
     EXPECT_EQ(res.row, 0);
+}
+
+/**
+ * @tc.name: LayoutRangeSolver::SolveBackward002
+ * @tc.desc: Test LayoutRangeSolver::SolveBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, SolveBackward002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo10());
+    });
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.gridMatrix_ = MATRIX_DEMO_10;
+    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 30.0f }, { 2, 40.0f }, { 3, 30.0f }, { 4, 50.0f } };
+
+    info.currentOffset_ = 20.0f;
+    info.startMainLineIndex_ = 3;
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+    auto res = solver.FindStartingRow(5.0f);
+    EXPECT_EQ(res.pos, -60.0f);
+    EXPECT_EQ(res.row, 1);
+
+    info.currentOffset_ = 6.0f;
+    info.startMainLineIndex_ = 3;
+    res = solver.FindStartingRow(5.0f);
+    EXPECT_EQ(res.pos, -74.0f);
+    EXPECT_EQ(res.row, 1);
+
+    info.currentOffset_ = 5.0f;
+    info.startMainLineIndex_ = 3;
+    res = solver.FindStartingRow(5.0f);
+    EXPECT_EQ(res.pos, 5.0f);
+    EXPECT_EQ(res.row, 3);
+
+    info.currentOffset_ = 4.0f;
+    info.startMainLineIndex_ = 3;
+    res = solver.FindStartingRow(5.0f);
+    EXPECT_EQ(res.pos, 4.0f);
+    EXPECT_EQ(res.row, 3);
 }
 
 /**
@@ -813,6 +859,160 @@ HWTEST_F(GridIrregularLayoutTest, Measure001, TestSize.Level1)
     EXPECT_EQ(info.endMainLineIndex_, 6);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 9);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::Measure002
+ * @tc.desc: Test GridIrregularLayout::Measure with offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Measure002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo5());
+        model.SetColumnsGap(Dimension { 5.0f });
+        model.SetRowsGap(Dimension { 1.0f });
+        CreateFixedItem(11);
+    });
+    LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
+    layoutProperty_->layoutConstraint_ = constraint;
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    auto& info = algorithm->gridLayoutInfo_;
+    info.currentOffset_ = 0.0f;
+    info.childrenCount_ = 11;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(610.0f, 600.0f));
+    std::vector<float> cmp = { 302.5f, 302.5f };
+    EXPECT_EQ(algorithm->crossLens_, cmp);
+    EXPECT_EQ(algorithm->mainGap_, 1.0f);
+    EXPECT_EQ(algorithm->crossGap_, 5.0f);
+    EXPECT_EQ(info.crossCount_, 2);
+
+    EXPECT_EQ(info.lineHeightMap_.at(0), 200.0f);
+    for (int i = 0; i < 9; ++i) {
+        info.currentOffset_ -= 20.0f;
+        algorithm->Measure(AceType::RawPtr(frameNode_));
+        EXPECT_EQ(info.currentOffset_, (i + 1) * -20.0f);
+        EXPECT_EQ(info.startMainLineIndex_, 0);
+        EXPECT_EQ(info.endMainLineIndex_, 6);
+        EXPECT_EQ(info.startIndex_, 0);
+        EXPECT_EQ(info.endIndex_, 4);
+    }
+
+    info.currentOffset_ -= 20.0f;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.currentOffset_, 1.0f); // 1.0f is mainGap
+    EXPECT_EQ(info.startMainLineIndex_, 1);
+    EXPECT_EQ(info.endMainLineIndex_, 6);
+    EXPECT_EQ(info.endIndex_, 4);
+    EXPECT_EQ(info.startIndex_, 2);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::Measure003
+ * @tc.desc: Test GridIrregularLayout::Measure with offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Measure003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo5());
+        model.SetRowsGap(Dimension { 1.0f });
+        CreateFixedItem(11);
+    });
+    LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
+    layoutProperty_->layoutConstraint_ = constraint;
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    auto& info = algorithm->gridLayoutInfo_;
+    info.currentOffset_ = 0.0f;
+    info.childrenCount_ = 11;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+
+    info.currentOffset_ = -401.0f;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startMainLineIndex_, 2);
+    EXPECT_EQ(info.startIndex_, 3);
+    EXPECT_EQ(info.currentOffset_, 1.0f);
+
+    info.currentOffset_ = -200.0f;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.currentOffset_, 1.0f);
+    EXPECT_EQ(info.startMainLineIndex_, 6);
+    EXPECT_EQ(info.endMainLineIndex_, 8);
+    EXPECT_EQ(info.startIndex_, 4);
+    EXPECT_EQ(info.endIndex_, 7);
+
+    info.startMainLineIndex_ = 2;
+    info.startIndex_ = 3;
+    info.currentOffset_ = -201.0f;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.startMainLineIndex_, 6);
+    EXPECT_EQ(info.endMainLineIndex_, 8);
+    EXPECT_EQ(info.startIndex_, 4);
+    EXPECT_EQ(info.endIndex_, 7);
+    std::map<int, int> lineCmp = { { 0, -5 }, { 1, 7 } };
+    EXPECT_EQ(info.gridMatrix_.at(8), lineCmp);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::Measure004
+ * @tc.desc: Test GridIrregularLayout::Measure with offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo2());
+        model.SetColumnsGap(Dimension { 5.0f });
+        model.SetRowsGap(Dimension { 1.0f });
+        CreateFixedItem(8);
+    });
+    LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
+    layoutProperty_->layoutConstraint_ = constraint;
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    auto& info = algorithm->gridLayoutInfo_;
+    info.currentOffset_ = 0.0f;
+    info.childrenCount_ = 8;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+
+    EXPECT_EQ(info.lineHeightMap_.at(0), 99.5f);
+    for (int i = -2; i < 3; ++i) {
+        info.currentOffset_ = i * 1.0f;
+        algorithm->Measure(AceType::RawPtr(frameNode_));
+        EXPECT_EQ(info.currentOffset_, i * 1.0f);
+        EXPECT_EQ(info.startMainLineIndex_, 0);
+        EXPECT_EQ(info.endMainLineIndex_, 3);
+        EXPECT_EQ(info.startIndex_, 0);
+        EXPECT_EQ(info.endIndex_, 4);
+    }
+
+    info.startMainLineIndex_ = 2;
+    info.startIndex_ = 2;
+    info.currentOffset_ = -400.0f;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.currentOffset_, -199.0f); // 1.0f is mainGap
+    EXPECT_EQ(info.startMainLineIndex_, 3);
+    EXPECT_EQ(info.endMainLineIndex_, 5);
+    EXPECT_EQ(info.startIndex_, 4);
+    EXPECT_EQ(info.endIndex_, 7);
+
+    info.startMainLineIndex_ = 2;
+    info.startIndex_ = 2;
+    info.currentOffset_ = -401.0f;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.currentOffset_, 1.0f); // 1.0f is mainGap
+    EXPECT_EQ(info.startMainLineIndex_, 4);
+    EXPECT_EQ(info.endMainLineIndex_, 5);
+    EXPECT_EQ(info.startIndex_, 5);
+    EXPECT_EQ(info.endIndex_, 7);
 }
 
 /**

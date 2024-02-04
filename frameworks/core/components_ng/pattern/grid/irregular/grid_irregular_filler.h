@@ -80,8 +80,8 @@ public:
     int32_t FillMatrixOnly(int32_t targetIdx);
 
     /**
-     * @brief Fills the gridMatrix in forward direction until lines prior to [targetLine] are all filled. Measure isn't performed,
-     * and lineHeightMap_ isn't updated.
+     * @brief Fills the gridMatrix in forward direction until lines prior to [targetLine] are all filled.
+     * Measure isn't performed, and lineHeightMap_ isn't updated.
      *
      * @param startingLine The starting line index.
      * @param targetLine The target GridItem index to fill up to.
@@ -146,7 +146,8 @@ private:
      * @brief Initializes the position of the filler in the grid to GridLayoutInfo::startIndex_.
      *
      * @param lineIdx The line index of the starting position.
-     * REQUIRES: lineIdx is a valid startMainLineIndex_, i.e. the top-left corner of an item resides in the first column.
+     * REQUIRES: lineIdx is a valid startMainLineIndex_,
+     * i.e. the top-left corner of an item resides in the first column.
      * @return startIndex_ - 1
      */
     int32_t InitPos(int32_t lineIdx);
