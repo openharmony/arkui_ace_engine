@@ -2463,6 +2463,34 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
     }
 }
 
+void JSCanvasRenderer::JsSaveLayer(const JSCallbackInfo& info)
+{
+    if (info.Length() != 0) {
+        return;
+    }
+
+    BaseInfo baseInfo;
+    baseInfo.canvasPattern = canvasPattern_;
+    baseInfo.offscreenPattern = offscreenPattern_;
+    baseInfo.isOffscreen = isOffscreen_;
+
+    CanvasRendererModel::GetInstance()->SaveLayer(baseInfo);
+}
+
+void JSCanvasRenderer::JsRestoreLayer(const JSCallbackInfo& info)
+{
+    if (info.Length() != 0) {
+        return;
+    }
+
+    BaseInfo baseInfo;
+    baseInfo.canvasPattern = canvasPattern_;
+    baseInfo.offscreenPattern = offscreenPattern_;
+    baseInfo.isOffscreen = isOffscreen_;
+
+    CanvasRendererModel::GetInstance()->RestoreLayer(baseInfo);
+}
+
 Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
 {
     Dimension dimension = StringToDimension(str);

@@ -1468,4 +1468,42 @@ void CanvasRendererModelNG::GetImageData(const BaseInfo& baseInfo, const std::sh
         canvasPattern->GetImageData(imageData);
     }
 }
+
+void CanvasRendererModelNG::SaveLayer(const BaseInfo& baseInfo)
+{
+    if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
+        auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
+        CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
+        offscreenPattern->SaveLayer();
+        return;
+    }
+
+    if (!baseInfo.isOffscreen && baseInfo.canvasPattern) {
+        auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(baseInfo.canvasPattern);
+        CHECK_NULL_VOID(canvasPattern);
+        canvasPattern->SaveLayer();
+    }
+}
+
+void CanvasRendererModelNG::RestoreLayer(const BaseInfo& baseInfo)
+{
+    if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
+        auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
+        CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
+        offscreenPattern->RestoreLayer();
+        return;
+    }
+
+    if (!baseInfo.isOffscreen && baseInfo.canvasPattern) {
+        auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(baseInfo.canvasPattern);
+        CHECK_NULL_VOID(canvasPattern);
+        canvasPattern->RestoreLayer();
+    }
+}
 } // namespace OHOS::Ace::NG

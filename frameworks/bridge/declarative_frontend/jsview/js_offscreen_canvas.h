@@ -123,6 +123,8 @@ public:
     void JsSetImageSmoothingQuality(const JSCallbackInfo& info) {}
     void JsGetImageSmoothingQuality(const JSCallbackInfo& info) {}
     void JSTransferFromImageBitmap(const JSCallbackInfo& info) {}
+    void JsSaveLayer(const JSCallbackInfo& info) {}
+    void JsRestoreLayer(const JSCallbackInfo& info) {}
 
     void SetWidth(double width)
     {

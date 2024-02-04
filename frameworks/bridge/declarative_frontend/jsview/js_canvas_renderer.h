@@ -86,6 +86,8 @@ public:
     void JsCreateLinearGradient(const JSCallbackInfo& info);
     void JsCreateRadialGradient(const JSCallbackInfo& info);
     void JsCreateConicGradient(const JSCallbackInfo& info);
+    void JsSaveLayer(const JSCallbackInfo& info);
+    void JsRestoreLayer(const JSCallbackInfo& info);
 
     void JsGetFillStyle(const JSCallbackInfo& info);
     void JsGetStrokeStyle(const JSCallbackInfo& info);
