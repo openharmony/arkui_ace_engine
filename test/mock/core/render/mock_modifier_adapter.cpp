@@ -25,4 +25,12 @@ void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity
     const AnimationOption &option, float value, float velocity, const FinishCallback &finishCallback)
 {
 }
+template<>
+void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetThresholdType(ThresholdType type)
+{
+}
+template<>
+void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetPropertyUnit(PropertyUnit unit)
+{
+}
 } // namespace OHOS::Ace::NG
