@@ -102,6 +102,8 @@ public:
     virtual void DrawBitmapMesh(const BitmapMeshInfo& bitmapMeshInfo) {}
     virtual RefPtr<Ace::PixelMap> GetPixelMap(const BaseInfo& baseInfo, const ImageSize& imageSize) = 0;
     virtual void GetImageDataModel(const BaseInfo& baseInfo, const ImageSize& imageSize, uint8_t* buffer) = 0;
+    virtual void SaveLayer(const BaseInfo& baseInfo) {};
+    virtual void RestoreLayer(const BaseInfo& baseInfo) {};
     virtual TextMetrics GetMeasureTextMetrics(const BaseInfo& baseInfo, const std::string& text)
     {
         return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };

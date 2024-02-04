@@ -142,10 +142,10 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
         &JSCanvasRenderer::JsGetImageSmoothingEnabled, &JSCanvasRenderer::JsSetImageSmoothingEnabled);
     JSClass<JSOffscreenRenderingContext>::CustomProperty("imageSmoothingQuality",
         &JSCanvasRenderer::JsGetImageSmoothingQuality, &JSCanvasRenderer::JsSetImageSmoothingQuality);
-
     JSClass<JSOffscreenRenderingContext>::CustomMethod("createConicGradient",
         &JSCanvasRenderer::JsCreateConicGradient);
-
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("saveLayer", &JSCanvasRenderer::JsSaveLayer);
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("restoreLayer", &JSCanvasRenderer::JsRestoreLayer);
     JSClass<JSOffscreenRenderingContext>::Bind(globalObj, JSOffscreenRenderingContext::Constructor,
         JSOffscreenRenderingContext::Destructor);
 }
