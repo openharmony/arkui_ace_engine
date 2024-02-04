@@ -1725,7 +1725,13 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     menuParam.type = MenuType::CONTEXT_MENU;
     viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.isShow = true;
+    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, buildFunc, menuParam, previewBuildFunc);
     EXPECT_EQ(flag, 0);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(container);
+    EXPECT_EQ(subwindow, nullptr);
+
     /**
      * @tc.steps: step4. create mouseInfo, set some useless params and call onMouseCallback_;
      * @tc.expected: StopPropagation in mouseInfo is false.
