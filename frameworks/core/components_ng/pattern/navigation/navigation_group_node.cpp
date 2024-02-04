@@ -111,7 +111,7 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t s
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             auto navBarContentNode = AceType::DynamicCast<FrameNode>(contentNode);
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
             navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
     }
@@ -535,7 +535,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 preTitle->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
             }
             preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-            preNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
+            preNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);                                                                                                                                      ---
             bool needSetInvisible = false;
             if (isNavBar) {
                 needSetInvisible = AceType::DynamicCast<NavBarNode>(preNode)->GetTransitionType() ==
