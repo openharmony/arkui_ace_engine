@@ -2694,4 +2694,18 @@ void CustomPaintPaintMethod::TranslateMatrix(double tx, double ty)
         matrix_.preTranslate(tx, ty);
     }
 }
+
+void CustomPaintPaintMethod::SaveLayer()
+{
+    RSBrush compositeOperationpBrush;
+    InitPaintBlend(compositeOperationpBrush);
+    auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+    RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+    rsCanvas_->SaveLayer(slo);
+}
+
+void CustomPaintPaintMethod::RestoreLayer()
+{
+    rsCanvas_->Restore();
+}
 } // namespace OHOS::Ace::NG
