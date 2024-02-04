@@ -38,7 +38,6 @@ public:
         auto copy = MakeRefPtr<NavDestinationLayoutProperty>();
         copy->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         copy->propHideTitleBar_ = CloneHideTitleBar();
-        copy->propTitleBarHeight_ = CloneTitleBarHeight();
         copy->propNoPixMap_ = CloneNoPixMap();
         copy->propImageSource_ = CloneImageSource();
         copy->propPixelMap_ = ClonePixelMap();
@@ -49,14 +48,12 @@ public:
     {
         LayoutProperty::Reset();
         ResetHideTitleBar();
-        ResetTitleBarHeight();
         ResetNoPixMap();
         ResetImageSource();
         ResetPixelMap();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleBarHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     // back button icon
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoPixMap, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSource, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);

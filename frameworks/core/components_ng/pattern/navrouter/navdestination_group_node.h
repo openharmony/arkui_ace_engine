@@ -43,26 +43,6 @@ public:
     static RefPtr<NavDestinationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
-    void SetTitle(const RefPtr<UINode>& title)
-    {
-        title_ = title;
-    }
-
-    const RefPtr<UINode>& GetTitle() const
-    {
-        return title_;
-    }
-
-    void SetSubtitle(const RefPtr<UINode>& subtitle)
-    {
-        subtitle_ = subtitle;
-    }
-
-    const RefPtr<UINode>& GetSubtitle() const
-    {
-        return subtitle_;
-    }
-
     void SetTitleBarNode(const RefPtr<UINode>& title)
     {
         titleBarNode_ = title;
@@ -97,19 +77,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);
     void OnPrevTitleIsCustomUpdate(bool value) {}
 
-    // node operation related
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TitleNodeOperation, ChildNodeOperation);
-    void OnTitleNodeOperationUpdate(ChildNodeOperation value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SubtitleNodeOperation, ChildNodeOperation);
-    void OnSubtitleNodeOperationUpdate(ChildNodeOperation value) {}
-
     void OnAttachToMainTree(bool recursive) override;
 
     void OnOffscreenProcess(bool recursive) override;
 
     void ProcessShallowBuilder();
-
-    void UpdateTitleFontSize(bool showBackButton);
 
     void SetTransitionType(PageTransitionType type)
     {
@@ -164,8 +136,6 @@ public:
     }
 
 private:
-    RefPtr<UINode> title_;
-    RefPtr<UINode> subtitle_;
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
     NavDestinationBackButtonEvent backButtonEvent_;

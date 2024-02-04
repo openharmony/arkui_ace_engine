@@ -29,7 +29,7 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, const SizeF& navigationSize)
 {
     CHECK_NULL_RETURN(hostNode, 0.0f);
-    auto titleBarNode = hostNode->GetTitleBarNode();
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, 0.0f);
     auto index = hostNode->GetChildIndexById(titleBarNode->GetId());
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
@@ -40,9 +40,7 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
         titleBarWrapper->Measure(constraint);
         return 0.0f;
     }
-    auto titleBarFrameNode = AceType::DynamicCast<FrameNode>(titleBarNode);
-    CHECK_NULL_RETURN(titleBarFrameNode, 0.0f);
-    auto titleBarLayoutProperty = titleBarFrameNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_RETURN(titleBarLayoutProperty, 0.0f);
     if (titleBarLayoutProperty->HasTitleHeight()) {
         auto titleHeight =
@@ -52,10 +50,9 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
         return static_cast<float>(titleHeight);
     }
 
-    // MINI 模式
+    // MINI mode
     if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-        // 有subtitle
-        if (hostNode->GetSubtitle()) {
+        if (titleBarNode->GetSubtitle()) {
             constraint.selfIdealSize =
                 OptionalSizeF(navigationSize.Width(), static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
             titleBarWrapper->Measure(constraint);
@@ -70,15 +67,13 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
 
     float titleBarHeight = 0.0f;
     if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
-        auto titleBar = AceType::DynamicCast<TitleBarNode>(titleBarNode);
-        CHECK_NULL_RETURN(titleBar, 0.0f);
-        auto titlePattern = titleBar->GetPattern<TitleBarPattern>();
+        auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
         CHECK_NULL_RETURN(titlePattern, 0.0f);
         titleBarHeight = titlePattern->GetTempTitleBarHeight();
     }
 
     // FREE 和 FULL 模式，有subtitle
-    if (hostNode->GetSubtitle()) {
+    if (titleBarNode->GetSubtitle()) {
         if (NearZero(titleBarHeight)) {
             titleBarHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
         }

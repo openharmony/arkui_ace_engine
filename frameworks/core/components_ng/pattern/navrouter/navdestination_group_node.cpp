@@ -109,27 +109,6 @@ void NavDestinationGroupNode::ProcessShallowBuilder()
     }
 }
 
-void NavDestinationGroupNode::UpdateTitleFontSize(bool showBackButton)
-{
-    // custom title
-    if (GetPrevTitleIsCustomValue(false)) {
-        return;
-    }
-    auto titleNode = AceType::DynamicCast<FrameNode>(title_);
-    CHECK_NULL_VOID(titleNode);
-    auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(titleLayoutProperty);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    if (showBackButton) {
-        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
-    } else {
-        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
-    }
-    titleNode->MarkModifyDone();
-    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-}
-
 RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
 {
     auto pattern = GetPattern<NavDestinationPattern>();
