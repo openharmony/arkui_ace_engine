@@ -118,19 +118,23 @@ void RosenRenderSurface::InitSurface()
             producerSurface_ = surfaceNode->GetSurface();
         }
     }
+    RegisterSurface();
+}
+
+void RosenRenderSurface::RegisterSurface() const
+{
+    CHECK_NULL_VOID(producerSurface_);
+    auto* surfaceUtils = SurfaceUtils::GetInstance();
+    CHECK_NULL_VOID(surfaceUtils);
+    auto ret = surfaceUtils->Add(producerSurface_->GetUniqueId(), producerSurface_);
+    if (ret != SurfaceError::SURFACE_ERROR_OK) {
+        LOGW("add surface error: %{public}d", ret);
+    }
 }
 
 void RosenRenderSurface::UpdateXComponentConfig()
 {
     CHECK_NULL_VOID(producerSurface_);
-
-    auto* surfaceUtils = SurfaceUtils::GetInstance();
-    CHECK_NULL_VOID(surfaceUtils);
-    auto ret = surfaceUtils->Add(producerSurface_->GetUniqueId(), producerSurface_);
-    if (ret != SurfaceError::SURFACE_ERROR_OK) {
-        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent add surface error: %{public}d", ret);
-    }
-
     producerSurface_->SetQueueSize(queueSize_);
     producerSurface_->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
     producerSurface_->SetUserData("SURFACE_FORMAT", std::to_string(GRAPHIC_PIXEL_FMT_RGBA_8888));
