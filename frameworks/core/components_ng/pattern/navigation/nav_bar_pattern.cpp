@@ -696,9 +696,6 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
     CHECK_NULL_VOID(navBarNode);
     // change menu num in landscape and orientation
     do {
-        if (type != WindowSizeChangeReason::ROTATION) {
-            break;
-        }
         if (navBarNode->GetPrevMenuIsCustomValue(false)) {
             break;
         }
