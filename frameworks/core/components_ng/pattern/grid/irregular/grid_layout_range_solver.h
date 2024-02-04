@@ -83,7 +83,7 @@ private:
 
     /**
      * @brief Traverse the matrix backward to find the last item index, starting from Line [endLine].
-     * 
+     *
      * @param endLine index of the line to start traversing.
      * @return last item index above endLine (inclusive)
      */

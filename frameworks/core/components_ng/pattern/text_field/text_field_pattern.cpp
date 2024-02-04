@@ -6089,6 +6089,9 @@ void TextFieldPattern::OnObscuredChanged(bool isObscured)
 
 void TextFieldPattern::CreateHandles()
 {
+    if (IsDragging()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     showSelect_ = true;

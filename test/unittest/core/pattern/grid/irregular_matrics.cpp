@@ -73,6 +73,36 @@ GridLayoutOptions GetOptionDemo2()
     return option;
 }
 
+GridLayoutOptions GetOptionDemo5()
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        2, // [2 x 1]
+        3, // [2 x 4]
+        4, // [2 x 1]
+        5, // [1 x 2]
+        8, // [2 x 2]
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 2) {
+            return { .rows = 1, .columns = 2 };
+        }
+        if (index == 3) {
+            return { .rows = 4, .columns = 2 };
+        }
+        if (index == 4) {
+            return { .rows = 1, .columns = 2 };
+        }
+        if (index == 5) {
+            return { .rows = 2, .columns = 1 };
+        }
+        return { .rows = 2, .columns = 2 };
+    };
+
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    return option;
+}
+
 GridLayoutOptions GetOptionDemo8()
 {
     GridLayoutOptions option;

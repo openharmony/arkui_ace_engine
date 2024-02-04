@@ -1675,11 +1675,12 @@ void ResetTranslate(ArkUINodeHandle node)
  * values[2]: scaleX;values[3]: scaleY;values[4]: scaleZ
  * @param length shadows length
  */
-void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, int valLength, const int* units, int unitLength)
+void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, int valLength,
+    const int* units, int unitLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (valLength != NUM_2 || unitLength != NUM_2) {
+    if (valLength != NUM_5 && valLength != NUM_2) {
         return;
     }
     auto x = values[NUM_0];
@@ -1687,9 +1688,11 @@ void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, int valLength, 
     // NOT support Z in source code
     VectorF scale(x, y);
     ViewAbstract::SetScale(frameNode, scale);
-
-    auto centerX = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
-    auto centerY = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    if (valLength != NUM_5) {
+        return;
+    }
+    auto centerX = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    auto centerY = Dimension(values[NUM_4], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
     auto centerZ = Dimension(0.0, OHOS::Ace::DimensionUnit::VP);
 
     DimensionOffset center(centerX, centerY);

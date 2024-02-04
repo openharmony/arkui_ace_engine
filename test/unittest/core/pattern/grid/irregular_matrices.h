@@ -75,6 +75,7 @@ const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_4 = {
     { 19, { { 0, 31 }, { 1, 31 } } },
 };
 
+GridLayoutOptions GetOptionDemo5();
 const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_5 = {
     { 0, { { 0, 0 }, { 1, 1 } } },
     { 1, { { 0, 2 }, { 1, -2 } } },

@@ -668,11 +668,9 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     }
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
     // make menu round rect
-    if (!renderContext->HasBorderRadius()) {
-        BorderRadiusProperty borderRadius;
-        borderRadius.SetRadius(theme->GetMenuBorderRadius());
-        renderContext->UpdateBorderRadius(borderRadius);
-    }
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    renderContext->UpdateBorderRadius(borderRadius);
 }
 
 void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
@@ -846,7 +844,7 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     BorderRadiusProperty radius;
     auto defaultRadius = theme->GetMenuBorderRadius();
     radius.SetRadius(defaultRadius);
-    if (!renderContext->HasBorderRadius() && menuProp->GetBorderRadius().has_value()) {
+    if (menuProp->GetBorderRadius().has_value()) {
         auto borderRadius = menuProp->GetBorderRadiusValue();
         auto topRadius =
             borderRadius.radiusTopLeft.value_or(Dimension()) + borderRadius.radiusTopRight.value_or(Dimension());

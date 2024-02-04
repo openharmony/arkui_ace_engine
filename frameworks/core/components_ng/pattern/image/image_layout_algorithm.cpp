@@ -127,7 +127,7 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     bool autoResize = props->GetAutoResize().value_or(true);
     // add API version protection
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         autoResize = props->GetAutoResize().value_or(false);
     }
     auto container = Container::Current();
