@@ -2016,6 +2016,13 @@ void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsSetFreeze(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetFreeze(info[0]->ToBoolean());
+    }
+}
+
 void JSViewAbstract::JsFlexBasis(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -6685,6 +6692,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("renderFit", &JSViewAbstract::JSRenderFit);
+
+    JSClass<JSViewAbstract>::StaticMethod("freeze", &JSViewAbstract::JsSetFreeze);
 
     JSClass<JSViewAbstract>::StaticMethod("expandSafeArea", &JSViewAbstract::JsExpandSafeArea);
 

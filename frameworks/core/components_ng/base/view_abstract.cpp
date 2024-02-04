@@ -1976,6 +1976,14 @@ void ViewAbstract::SetUseEffect(bool useEffect)
     ACE_UPDATE_RENDER_CONTEXT(UseEffect, useEffect);
 }
 
+void ViewAbstract::SetFreeze(bool freeze)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze);
+}
+
 void ViewAbstract::SetUseShadowBatching(bool useShadowBatching)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

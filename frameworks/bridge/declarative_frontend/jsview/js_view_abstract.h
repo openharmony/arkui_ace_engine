@@ -187,6 +187,7 @@ public:
     static void JsHitTestBehavior(const JSCallbackInfo& info);
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
+    static void JsSetFreeze(const JSCallbackInfo& info);
 
     // outer border
     static void ParseOuterBorderColor(const JSRef<JSVal>& args);
