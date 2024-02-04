@@ -3176,10 +3176,14 @@ void SwiperPattern::UpdateIndexOnAnimationStop()
     }
 }
 
-void SwiperPattern::UpdateIndexOnSwipePageStop()
+void SwiperPattern::UpdateIndexOnSwipePageStop(int32_t pauseTargetIndex)
 {
     auto iter = itemPosition_.find(currentIndex_);
     if (iter == itemPosition_.end()) {
+        UpdateCurrentIndex(pauseTargetIndex);
+        if (itemPosition_.find(pauseTargetIndex) != itemPosition_.end()) {
+            currentIndexOffset_ = itemPosition_.find(pauseTargetIndex)->second.startPos;
+        }
         return;
     }
 
@@ -3217,7 +3221,7 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
     auto pauseTargetIndex = pauseTargetIndex_.has_value() ? pauseTargetIndex_.value() : currentIndex_;
     if (currentIndex_ != pauseTargetIndex) {
         if (IsSwipeByGroup()) {
-            UpdateIndexOnSwipePageStop();
+            UpdateIndexOnSwipePageStop(pauseTargetIndex);
         } else {
             UpdateIndexOnAnimationStop();
         }
