@@ -3099,11 +3099,12 @@ int32_t SetSwiperInterval(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[0].i32 < 0) {
+    if (LessNotEqual(item->value[0].f32, 0.0f)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperInterval(node->uiNodeHandle, item->value[0].i32);
+    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperInterval(
+        node->uiNodeHandle, static_cast<uint32_t>(item->value[0].f32));
     return ERROR_CODE_NO_ERROR;
 }
 
