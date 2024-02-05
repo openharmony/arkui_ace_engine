@@ -18,6 +18,8 @@
 
 #include <future>
 #include <vector>
+#include <unordered_set>
+
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/font_collection.h"
 #else
@@ -73,7 +75,9 @@ private:
 #else
     std::shared_ptr<Rosen::FontCollection> fontCollection_;
 #endif
-    std::vector<std::string> families_;
+    std::unordered_set<std::string> families_;
+
+    std::string currentFamily_;
 
     bool isZawgyiMyanmar_ = false;
     std::once_flag fontFlag_;
