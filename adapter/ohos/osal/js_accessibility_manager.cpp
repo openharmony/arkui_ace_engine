@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -958,6 +958,21 @@ int64_t GetParentId(const RefPtr<NG::UINode>& uiNode)
     return INVALID_PARENT_ID;
 }
 
+void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo,
+    const RefPtr<PipelineBase>& context, const RefPtr<JsAccessibilityManager>& jsAccessibilityManager)
+{
+    std::list<AccessibilityElementInfo> elementInfos;
+    int32_t mode = 0;
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    jsAccessibilityManager->SearchElementInfoByAccessibilityIdNG(
+        elementId, mode, elementInfos, context, NG::UI_EXTENSION_OFFSET_MAX);
+    if (elementInfos.empty()) {
+        LOGE("Element infos is empty. Find element infos failed.");
+        return;
+    }
+    elementInfo = elementInfos.front();
+}
+
 void FillEventInfo(const RefPtr<NG::FrameNode>& node, AccessibilityEventInfo& eventInfo)
 {
     CHECK_NULL_VOID(node);
@@ -1868,7 +1883,8 @@ bool IsExtensionSendAccessibilitySyncEvent()
     return isEnabled;
 }
 
-void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo& eventInfo)
+void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo& eventInfo,
+    const RefPtr<PipelineBase>& context, const RefPtr<JsAccessibilityManager>& jsAccessibilityManager)
 {
     Accessibility::EventType type = Accessibility::EventType::TYPE_VIEW_INVALID;
     if (accessibilityEvent.type != AccessibilityEventType::UNKNOWN) {
@@ -1892,6 +1908,9 @@ void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent
     eventInfo.SetCurrentIndex(static_cast<int>(accessibilityEvent.currentItemIndex));
     eventInfo.SetItemCounts(static_cast<int>(accessibilityEvent.itemCount));
     eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
+    AccessibilityElementInfo elementInfo;
+    FillElementInfo(eventInfo.GetAccessibilityId(), elementInfo, context, jsAccessibilityManager);
+    eventInfo.SetElementInfo(elementInfo);
 }
 
 } // namespace
@@ -2031,6 +2050,12 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     }
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d aid:%{public}lld",
         eventInfo.GetEventType(), static_cast<int64_t>(eventInfo.GetAccessibilityId()));
+    auto elementInfo = eventInfo.GetElementInfo();
+    CHECK_NULL_RETURN(elementInfo, false);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "The element info bundleName: %{public}s, elementId: %{public}" PRId64
+        ", componentType: %{public}s, text: %{public}s", elementInfo->GetBundleName().c_str(),
+        static_cast<int64_t>(elementInfo->GetAccessibilityId()), elementInfo->GetComponentType().c_str(),
+        elementInfo->GetContent().c_str());
     return client->SendEvent(eventInfo);
 }
 
@@ -2102,7 +2127,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
 
-    GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
+    GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo, context, Claim(this));
 
     if (IsExtensionSendAccessibilitySyncEvent()) {
         SendExtensionAccessibilitySyncEvent(accessibilityEvent, eventInfo);
