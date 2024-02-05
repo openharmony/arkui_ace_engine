@@ -160,6 +160,11 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         if (scroll->dragCancelCallback_) {
             scroll->dragCancelCallback_();
         }
+        GestureEvent info;
+        scroll->HandleDragEnd(info);
+        if (scroll->actionEnd_) {
+            scroll->actionEnd_(info);
+        }
         scroll->isDragging_ = false;
     };
 
