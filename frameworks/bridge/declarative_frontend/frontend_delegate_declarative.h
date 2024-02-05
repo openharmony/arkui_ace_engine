@@ -166,6 +166,7 @@ public:
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
     std::string GetParams() override;
+    int32_t GetIndexByUrl(const std::string& url) override;
 
     void PostponePageTransition() override;
     void LaunchPageTransition() override;
