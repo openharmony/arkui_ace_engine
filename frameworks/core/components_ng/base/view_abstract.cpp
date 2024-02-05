@@ -2867,4 +2867,56 @@ void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventF
     gestureHub->SetTouchEvent(std::move(touchEventFunc));
 }
 
+bool ViewAbstract::GetFocusable(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsFocusable();
+}
+
+bool ViewAbstract::GetDefaultFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsDefaultFocus();
+}
+
+std::vector<DimensionRect> ViewAbstract::GetResponseRegion(FrameNode* frameNode)
+{
+    std::vector<DimensionRect> defaultRect;
+    CHECK_NULL_RETURN(frameNode, defaultRect);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, defaultRect);
+    return gestureHub->GetResponseRegion();
+}
+
+NG::OverlayOptions ViewAbstract::GetOverlay(FrameNode* frameNode)
+{
+    NG::OverlayOptions defaultOptions;
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetOverlayTextValue(defaultOptions);
+}
+
+void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (value) {
+        focusHub->RequestFocus();
+    } else {
+        focusHub->LostFocusToViewRoot();
+    }
+}
+
+bool ViewAbstract::GetNeedFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsCurrentFocus();
+}
+
 } // namespace OHOS::Ace::NG

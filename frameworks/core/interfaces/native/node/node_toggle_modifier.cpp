@@ -18,10 +18,12 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
+const int32_t ERROR_UINT_CODE = -1;
 namespace {
 void SetToggleSelectedColor(ArkUINodeHandle node, uint32_t selectedColor)
 {
@@ -58,6 +60,21 @@ void ResetToggleSwitchPointColor(ArkUINodeHandle node)
     }
     ToggleModelNG::SetSwitchPointColor(frameNode, Color(color));
 }
+
+ArkUI_Uint32 GetToggleSelectedColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return ToggleModelNG::GetSelectedColor(frameNode).GetValue();
+}
+
+ArkUI_Uint32 GetToggleSwitchPointColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return ToggleModelNG::GetSwitchPointColor(frameNode).GetValue();
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -68,6 +85,8 @@ const ArkUIToggleModifier* GetToggleModifier()
         ResetToggleSelectedColor,
         SetToggleSwitchPointColor,
         ResetToggleSwitchPointColor,
+        GetToggleSelectedColor,
+        GetToggleSwitchPointColor,
     };
 
     return &modifier;

@@ -34,6 +34,8 @@ constexpr double DEFAULT_SCROLLBARWIDTH_VALUE = 4.0;
 constexpr int32_t PARAM_SIZE = 4;
 constexpr float DEFAULT_OFFSET_VALUE = 0.0;
 
+constexpr int32_t EDGE_NONE = -1;
+
 const std::vector<RefPtr<Curve>> CurvesVector = { Curves::LINEAR, Curves::EASE, Curves::EASE_IN,
     Curves::EASE_OUT, Curves::EASE_IN_OUT, Curves::FAST_OUT_SLOW_IN, Curves::LINEAR_OUT_SLOW_IN,
     Curves::FAST_OUT_LINEAR_IN, Curves::EXTREME_DECELERATION, Curves::SHARP, Curves::RHYTHM,
@@ -299,6 +301,36 @@ void ResetScrollEnablePaging(ArkUINodeHandle node)
     ScrollModelNG::SetEnablePaging(frameNode, false);
 }
 
+void GetScrollNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NestedScrollOptions options = ScrollModelNG::GetNestedScroll(frameNode);
+    values[0] = static_cast<ArkUI_Int32>(options.forward);
+    values[1] = static_cast<ArkUI_Int32>(options.backward);
+}
+
+void GetScrollOffset(ArkUINodeHandle node, ArkUI_Float32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<ScrollControllerBase> scrollControllerBase = ScrollModelNG::GetOrCreateController(frameNode);
+    Offset offset = scrollControllerBase->GetCurrentOffset();
+    values[0] = offset.GetX();
+    values[1] = offset.GetY();
+}
+
+ArkUI_Int32 GetScrollEdge(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, EDGE_NONE);
+    int32_t type = ScrollModelNG::GetOnScrollEdge(frameNode);
+    if (type == static_cast<int32_t>(ScrollEdgeType::SCROLL_NONE)) {
+        return EDGE_NONE;
+    }
+    return static_cast<ArkUI_Int32>(type);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -332,6 +364,9 @@ const ArkUIScrollModifier* GetScrollModifier()
         ResetScrollEdge,
         SetScrollEnablePaging,
         ResetScrollEnablePaging,
+        GetScrollNestedScroll,
+        GetScrollOffset,
+        GetScrollEdge,
     };
     /* clang-format on */
     return &modifier;

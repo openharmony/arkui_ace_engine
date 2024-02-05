@@ -502,4 +502,78 @@ void TextModelNG::SetClipEdge()
     CHECK_NULL_VOID(frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
+
+std::vector<std::string> TextModelNG::GetFontFamily(FrameNode* frameNode)
+{
+    std::vector<std::string> value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextLayoutProperty, FontFamily, value, frameNode, value);
+    return value;
+}
+
+CopyOptions TextModelNG::GetCopyOption(FrameNode* frameNode)
+{
+    CopyOptions value = CopyOptions::None;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextLayoutProperty, CopyOption, value, frameNode, value);
+    return value;
+}
+
+TextHeightAdaptivePolicy TextModelNG::GetHeightAdaptivePolicy(FrameNode* frameNode)
+{
+    TextHeightAdaptivePolicy value = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextLayoutProperty, HeightAdaptivePolicy, value, frameNode, value);
+    return value;
+}
+
+Dimension TextModelNG::GetAdaptMinFontSize(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextLayoutProperty, AdaptMinFontSize, value, frameNode, Dimension());
+    return value;
+}
+
+Dimension TextModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextLayoutProperty, AdaptMaxFontSize, value, frameNode, Dimension());
+    return value;
+}
+
+Font TextModelNG::GetFont(FrameNode* frameNode)
+{
+    Font value;
+    value.fontSize = GetFontSize(frameNode);
+    value.fontWeight = GetFontWeight(frameNode);
+    value.fontFamilies = GetFontFamily(frameNode);
+    value.fontStyle = GetItalicFontStyle(frameNode);
+    return value;
+}
+
+Dimension TextModelNG::GetFontSize(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextLayoutProperty, FontSize, value, frameNode, Dimension());
+    return value;
+}
+
+Ace::FontWeight TextModelNG::GetFontWeight(FrameNode* frameNode)
+{
+    Ace::FontWeight value = Ace::FontWeight::NORMAL;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextLayoutProperty, FontWeight, value, frameNode, value);
+    return value;
+}
+
+Ace::FontStyle TextModelNG::GetItalicFontStyle(FrameNode* frameNode)
+{
+    Ace::FontStyle value = Ace::FontStyle::NORMAL;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextLayoutProperty, ItalicFontStyle, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG

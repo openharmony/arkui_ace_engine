@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_MODEL_NG_H
 
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/scroll/scroll_model.h"
 
 namespace OHOS::Ace::NG {
@@ -75,6 +76,9 @@ public:
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& event);
+    static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
+    static ScrollEdgeType GetOnScrollEdge(FrameNode* frameNode);
+    
 };
 
 } // namespace OHOS::Ace::NG

@@ -52,6 +52,8 @@ public:
     void SetProgressBackgroundColor(const Color& backgroundColor) override {}
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetRefreshing(FrameNode* frameNode, bool isRefreshing);
+    static bool GetRefreshing(FrameNode* frameNode);
     static void SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange);
     static void SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing);
 

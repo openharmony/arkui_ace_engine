@@ -45,6 +45,9 @@ public:
     static void SetPadding(FrameNode* frameNode, const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
 
+    static Color GetSelectedColor(FrameNode* frameNode);
+    static Color GetSwitchPointColor(FrameNode* frameNode);
+
 private:
     static void CreateCheckbox(int32_t nodeId);
     static void CreateSwitch(int32_t nodeId);
