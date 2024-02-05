@@ -41,6 +41,8 @@ public:
     static Matrix4 CreateMatrix2D(double m00, double m10, double m01, double m11, double m03, double m13);
     // Multiplies this matrix by another that skew through angle degrees.
     static Matrix4 CreateSkew(double x, double y);
+    // Multiplies this matrix by another that skew through shear factors.
+    static Matrix4 CreateFactorSkew(double x, double y);
     // Create an perspective matrix, the distance value represents the distance between the user and the z=0 plane. not
     // support percent
     static Matrix4 CreatePerspective(double distance);
