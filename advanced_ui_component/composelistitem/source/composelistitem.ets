@@ -492,6 +492,9 @@ struct OperateItemStruct {
           .fontColor($r('sys.color.ohos_id_color_text_secondary'))
           .focusable(true)
           .draggable(false)
+          .constraintSize({
+            maxWidth: `calc(100% - ${ OPERATEITEM_ARROW_WIDTH }vp)`
+          })
         Image(icon.value)
           .height(OPERATEITEM_ICONLIKE_SIZE)
           .width(OPERATEITEM_ARROW_WIDTH)
