@@ -57,7 +57,7 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             auto navdestinationContentNode = AceType::DynamicCast<FrameNode>(contentNode);
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
             navdestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
     }
