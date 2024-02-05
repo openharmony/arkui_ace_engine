@@ -971,6 +971,7 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
     }
     if (!isAnimationStop_) {
         currVelocity = GetCurrentVelocity();
+        scrollAbort_ = true;
         StopAnimation(springAnimation_);
         StopAnimation(curveAnimation_);
     }
