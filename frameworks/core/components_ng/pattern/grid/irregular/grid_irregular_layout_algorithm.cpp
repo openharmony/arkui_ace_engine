@@ -151,6 +151,13 @@ void GridIrregularLayoutAlgorithm::CheckForReset(int32_t lastCrossCount)
         return;
     }
 
+    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+        postJumpOffset_ = info.currentOffset_;
+        info.lineHeightMap_.clear();
+        PrepareJumpOnReset(info);
+        ResetLayoutRange(info);
+    }
+
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
     if (updateIdx != -1) {
         auto it = info.FindInMatrix(updateIdx);
@@ -171,19 +178,33 @@ void GridIrregularLayoutAlgorithm::MeasureOnOffset(float mainSize)
         return;
     }
 
+    GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
+    GridIrregularFiller::FillParameters params { crossLens_, crossGap_, mainGap_ };
+
+    bool backward = info.currentOffset_ > 0.0f;
+    if (backward) {
+        filler.MeasureBackward(params,
+            info.currentOffset_ + info.lineHeightMap_.at(info.startMainLineIndex_) + mainGap_,
+            info.startMainLineIndex_);
+    }
+
     GridLayoutRangeSolver solver(&info, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
 
     info.startMainLineIndex_ = res.row;
     info.currentOffset_ = res.pos;
-    // on init, gridMatrix_ is empty
     const auto row = info.gridMatrix_.find(res.row);
     info.startIndex_ = (row != info.gridMatrix_.end()) ? row->second.at(0) : 0;
 
-    GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
-    auto fillRes = filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize - res.pos, info.startMainLineIndex_);
-    info.endMainLineIndex_ = fillRes.endMainLineIndex;
-    info.endIndex_ = fillRes.endIndex;
+    if (backward) {
+        auto [endLine, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - res.pos, res.row);
+        info.endMainLineIndex_ = endLine;
+        info.endIndex_ = endIdx;
+    } else {
+        auto fillRes = filler.Fill(params, mainSize - res.pos, info.startMainLineIndex_);
+        info.endMainLineIndex_ = fillRes.endMainLineIndex;
+        info.endIndex_ = fillRes.endIndex;
+    }
 }
 
 bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
