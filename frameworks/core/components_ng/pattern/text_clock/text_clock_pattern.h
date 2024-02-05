@@ -91,7 +91,7 @@ private:
     void InitTextClockController();
 
     void InitUpdateTimeTextCallBack();
-    void UpdateTimeText();
+    void UpdateTimeText(bool isTimeChange = false);
     void RequestUpdateForNextSecond();
     void FireChangeEvent() const;
     std::string GetCurrentFormatDateTime();
