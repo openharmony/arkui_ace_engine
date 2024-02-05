@@ -218,7 +218,19 @@ void ImagePattern::OnImageLoadSuccess()
         DeleteAnalyzerOverlay();
     }
     UpdateAnalyzerOverlay();
-    CreateAnalyzerOverlay();
+
+    auto currentContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(currentContext);
+    int32_t instanceID = currentContext->GetInstanceId();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this), instanceID] {
+        ContainerScope scope(instanceID);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CreateAnalyzerOverlay();
+    });
     host->MarkNeedRenderOnly();
 }
 
