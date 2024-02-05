@@ -41,6 +41,30 @@ void AddOrChangeScaleModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     }
 }
 
+void AddOrChangeSkewModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSSkewModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSSkewModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
+
+void AddOrChangePivotModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSPivotModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSPivotModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
+
 void AddOrChangeTranslateZModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     std::shared_ptr<Rosen::RSTranslateZModifier>& modifier,
     std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float value)
