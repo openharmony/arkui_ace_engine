@@ -100,6 +100,7 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
         CHECK_NULL_VOID(overlayManager);
         RefPtr<NG::FrameNode> dialog;
         while (!dialogs.empty()) {
+            CHECK_NULL_VOID(&dialogs.back());
             dialog = AceType::DynamicCast<NG::FrameNode>(dialogs.back().Upgrade());
             if (dialog && !dialog->IsRemoving()) {
                 // get the dialog not removed currently
