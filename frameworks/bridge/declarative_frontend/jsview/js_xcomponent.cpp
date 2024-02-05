@@ -360,7 +360,7 @@ void JSXComponent::JsOnBlur(const JSCallbackInfo& args)
 void JSXComponent::JsBackgroundColor(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type == XComponentType::COMPONENT) {
+    if (!XComponentModel::IsBackGroundColorAvailable(type)) {
         return;
     }
     if (args.Length() < 1) {
