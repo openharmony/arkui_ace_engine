@@ -897,6 +897,8 @@ void Scrollable::ProcessSpringMotion(double position)
     }
     lastVsyncTime_ = currentVsync;
     if (NearEqual(currentPos_, position)) {
+        // trace stop at OnScrollStop
+        AceAsyncTraceBegin(0, TRAILING_ANIMATION);
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
         moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
@@ -930,6 +932,8 @@ void Scrollable::ProcessScrollMotion(double position)
         "needScrollSnapChange_ is %{public}u",
         position, currentVelocity_, needScrollSnapChange_);
     if ((NearEqual(currentPos_, position))) {
+        // trace stop at OnScrollStop
+        AceAsyncTraceBegin(0, TRAILING_ANIMATION);
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION);
     } else {
         // UpdateScrollPosition return false, means reach to scroll limit.
