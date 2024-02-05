@@ -65,35 +65,13 @@ void JSLocalStorage::RemoveStorage(int32_t key)
     }
 }
 
-int32_t JSLocalStorage::GetCurrentInstanceId()
+void JSLocalStorage::GetShared(const JSCallbackInfo& info)
 {
-    int32_t currentInstance = ContainerScope::RecentActiveId();
-    if (currentInstance != INSTANCE_ID_UNDEFINED) {
-        return currentInstance;
-    }
-    currentInstance = ContainerScope::RecentForegroundId();
-    if (currentInstance != INSTANCE_ID_UNDEFINED) {
-        return currentInstance;
-    }
-    currentInstance = ContainerScope::CurrentId();
-    if (currentInstance != INSTANCE_ID_UNDEFINED) {
-        return currentInstance;
-    }
-    currentInstance = ContainerScope::SingletonId();
+    int32_t currentInstance = Container::CurrentIdSafely();
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
         currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
     }
-    return currentInstance;
-}
-
-void JSLocalStorage::GetShared(const JSCallbackInfo& info)
-{
-    int32_t currentInstance = GetCurrentInstanceId();
     auto it = storages_.find(currentInstance);
-    if (it == storages_.end()) {
-        currentInstance = Container::CurrentIdSafely();
-        it = storages_.find(currentInstance);
-    }
     if (it == storages_.end()) {
         LOGW("LocalStorage with ID %{public}d not found!", currentInstance);
         return;
