@@ -76,6 +76,8 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     RefPtr<GridScrollLayoutAlgorithm> result;
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
         result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+    } else if (SystemProperties::GetGridIrregularLayoutEnabled()) {
+        return MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_);
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }

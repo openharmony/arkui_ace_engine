@@ -413,6 +413,8 @@ public:
 
     static bool GetGridCacheEnabled();
 
+    static bool GetGridIrregularLayoutEnabled();
+
     static bool GetSideBarContainerBlurEnable();
 
     static void AddWatchSystemParameter(void *context);
