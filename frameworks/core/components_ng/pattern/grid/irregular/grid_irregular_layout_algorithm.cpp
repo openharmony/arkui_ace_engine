@@ -156,6 +156,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset(int32_t lastCrossCount)
         info.lineHeightMap_.clear();
         PrepareJumpOnReset(info);
         ResetLayoutRange(info);
+        return;
     }
 
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
@@ -168,6 +169,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset(int32_t lastCrossCount)
             PrepareJumpOnReset(info);
             ResetLayoutRange(info);
         }
+        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
     }
 }
 
