@@ -711,7 +711,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
 
 ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     ImageSpanAttribute imageStyle;
     auto sizeObj = imageAttribute->GetProperty("size");
     if (sizeObj->IsArray()) {
@@ -767,7 +767,7 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
 void JSRichEditorController::ParseJsTextStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     Color textColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor)) {
@@ -815,7 +815,7 @@ void JSRichEditorController::ParseJsTextStyle(
 void JSRichEditorController::ParseJsSymbolSpanStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     updateSpanStyle.isSymbolStyle = true;
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     std::vector<Color> symbolColor;
@@ -863,7 +863,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
 void JSRichEditorController::ParseTextShadow(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto shadowObject = styleObject->GetProperty("textShadow");
     if (shadowObject->IsNull()) {
         return;
@@ -879,7 +879,7 @@ void JSRichEditorController::ParseTextShadow(
 void JSRichEditorController::ParseTextDecoration(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto decorationObj = styleObject->GetProperty("decoration");
     JSRef<JSObject> decorationObject = JSRef<JSObject>::Cast(decorationObj);
     if (!decorationObject->IsUndefined()) {
@@ -949,7 +949,7 @@ void ParseUserGesture(
 
 void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     if (args.Length() < 1) {
         return;
     }
@@ -1008,7 +1008,7 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
 
 ImageSpanOptions JSRichEditorController::CreateJsImageOptions(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     ImageSpanOptions options;
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, options);
@@ -1070,7 +1070,7 @@ bool JSRichEditorController::IsPixelMap(const JSRef<JSVal>& jsValue)
 
 void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     if (args.Length() < 1) {
         return;
     }
@@ -1123,7 +1123,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
 
 void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     if (args.Length() < 1) {
         return;
     }
@@ -1182,7 +1182,7 @@ JSRef<JSVal> JSRichEditorController::CreateJSSpansInfo(const SelectionInfo& info
 
 void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     int32_t end = -1;
     int32_t start = -1;
     if (args[0]->IsObject()) {
@@ -1206,7 +1206,7 @@ void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
 
 void JSRichEditorController::DeleteSpans(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     RangeOptions options;
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
@@ -1235,7 +1235,7 @@ void JSRichEditorController::DeleteSpans(const JSCallbackInfo& args)
 
 void JSRichEditorController::AddPlaceholderSpan(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     if (args.Length() < 1) {
         return;
     }
@@ -1271,7 +1271,7 @@ void JSRichEditorController::AddPlaceholderSpan(const JSCallbackInfo& args)
 
 void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     if (args.Length() < 2) {
         return;
     }
@@ -1288,7 +1288,7 @@ void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOption
 
 void JSRichEditorController::CloseSelectionMenu()
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
     controller->CloseSelectionMenu();
@@ -1296,7 +1296,7 @@ void JSRichEditorController::CloseSelectionMenu()
 
 void JSRichEditorController::SetSelection(int32_t selectionStart, int32_t selectionEnd)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
         controller->SetSelection(selectionStart, selectionEnd);
@@ -1305,7 +1305,7 @@ void JSRichEditorController::SetSelection(int32_t selectionStart, int32_t select
 
 void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
         SelectionInfo value = controller->GetSelectionSpansInfo();
@@ -1339,7 +1339,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
 
 void JSRichEditorController::GetCaretOffset(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
     int32_t caretOffset = -1;
     if (controller) {
@@ -1352,7 +1352,7 @@ void JSRichEditorController::GetCaretOffset(const JSCallbackInfo& args)
 
 void JSRichEditorController::SetCaretOffset(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
     int32_t caretPosition = -1;
     bool success = false;
@@ -1401,7 +1401,7 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
 
 bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto textAlignObj = styleObject->GetProperty("textAlign");
     if (!textAlignObj->IsNull() && textAlignObj->IsNumber()) {
         auto align = static_cast<TextAlign>(textAlignObj->ToNumber<int32_t>());
@@ -1454,7 +1454,7 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
 
 void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     if (!ValidationCheck(info)) {
         return;
     }
@@ -1489,7 +1489,7 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
 
 void JSRichEditorController::GetParagraphsInfo(const JSCallbackInfo& args)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     if (!args[0]->IsObject()) {
         return;
     }
@@ -1506,7 +1506,7 @@ void JSRichEditorController::GetParagraphsInfo(const JSCallbackInfo& args)
 
 void JSRichEditorController::UpdateParagraphStyle(const JSCallbackInfo& info)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     if (!ValidationCheck(info)) {
         return;
     }
@@ -1568,7 +1568,7 @@ JSRef<JSObject> JSRichEditorController::CreateTypingStyleResult(const struct Upd
 
 void JSRichEditorController::GetTypingStyle(const JSCallbackInfo& info)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
     auto style = CreateTypingStyleResult(typingStyle_);
@@ -1577,7 +1577,7 @@ void JSRichEditorController::GetTypingStyle(const JSCallbackInfo& info)
 
 void JSRichEditorController::SetTypingStyle(const JSCallbackInfo& info)
 {
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
     if (!info[0]->IsObject()) {
