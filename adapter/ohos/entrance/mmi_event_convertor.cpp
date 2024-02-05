@@ -276,12 +276,15 @@ void GetAxisEventAction(int32_t action, AxisEvent& event)
 {
     switch (action) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN:
             event.action = AxisAction::BEGIN;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_UPDATE:
             event.action = AxisAction::UPDATE;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_END:
             event.action = AxisAction::END;
             break;
         default:
@@ -308,8 +311,11 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
     event.pinchAxisScale = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
+    event.rotateAxisAngle = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ROTATE);
     int32_t orgAction = pointerEvent->GetPointerAction();
     GetAxisEventAction(orgAction, event);
+    event.isRotationEvent = (orgAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN) &&
+                            (orgAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     event.sourceTool = GetSourceTool(item.GetToolType());

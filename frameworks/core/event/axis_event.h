@@ -64,6 +64,8 @@ struct AxisEvent final {
     double verticalAxis = 0.0;
     double horizontalAxis = 0.0;
     double pinchAxisScale = 0.0;
+    double rotateAxisAngle = 0.0;
+    bool isRotationEvent = false;
     AxisAction action;
     TimeStamp time;
     int64_t deviceId = 0;
@@ -82,6 +84,8 @@ struct AxisEvent final {
                 .verticalAxis = verticalAxis,
                 .horizontalAxis = horizontalAxis,
                 .pinchAxisScale = pinchAxisScale,
+                .rotateAxisAngle = rotateAxisAngle,
+                .isRotationEvent = isRotationEvent,
                 .action = action,
                 .time = time,
                 .deviceId = deviceId,
@@ -97,6 +101,8 @@ struct AxisEvent final {
             .verticalAxis = verticalAxis,
             .horizontalAxis = horizontalAxis,
             .pinchAxisScale = pinchAxisScale,
+            .rotateAxisAngle = rotateAxisAngle,
+            .isRotationEvent = isRotationEvent,
             .action = action,
             .time = time,
             .deviceId = deviceId,
@@ -181,6 +187,8 @@ public:
         verticalAxis_ = static_cast<float>(event.verticalAxis);
         horizontalAxis_ = static_cast<float>(event.horizontalAxis);
         pinchAxisScale_ = static_cast<float>(event.pinchAxisScale);
+        rotateAxisAngle_ = static_cast<float>(event.rotateAxisAngle);
+        isRotationEvent_ = event.isRotationEvent;
         globalLocation_ = event.GetOffset();
         localLocation_ = localLocation;
         screenLocation_ = Offset();
@@ -231,6 +239,26 @@ public:
         return pinchAxisScale_;
     }
 
+    void SetRotateAxisAngle(float angle)
+    {
+        rotateAxisAngle_ = angle;
+    }
+
+    float GetRotateAxisAngle() const
+    {
+        return rotateAxisAngle_;
+    }
+
+    void SetIsRotationEvent(bool rotationFlag)
+    {
+        isRotationEvent_ = rotationFlag;
+    }
+
+    bool GetIsRotationEvent() const
+    {
+        return isRotationEvent_;
+    }
+
     AxisInfo& SetGlobalLocation(const Offset& globalLocation)
     {
         globalLocation_ = globalLocation;
@@ -267,6 +295,8 @@ private:
     float verticalAxis_ = 0.0;
     float horizontalAxis_ = 0.0;
     float pinchAxisScale_ = 0.0;
+    float rotateAxisAngle_ = 0.0;
+    bool isRotationEvent_ = false;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;
     // Different from global location, The local location refers to the location of the contact point relative to the

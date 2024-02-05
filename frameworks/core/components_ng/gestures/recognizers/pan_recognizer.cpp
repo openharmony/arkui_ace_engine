@@ -187,6 +187,9 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    if (event.isRotationEvent) {
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer receives axis start event, begin to detect pan event");
     fingers_ = newFingers_;
     distance_ = newDistance_;
@@ -345,7 +348,7 @@ void PanRecognizer::OnFlushTouchEventsEnd()
 
 void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
-    if (fingers_ != AXIS_PAN_FINGERS) {
+    if (fingers_ != AXIS_PAN_FINGERS || event.isRotationEvent) {
         return;
     }
 
@@ -717,7 +720,7 @@ RefPtr<GestureSnapshot> PanRecognizer::Dump() const
 {
     RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
     std::stringstream oss;
-    oss << "direction: " <<  direction_.type << ", "
+    oss << "direction: " << direction_.type << ", "
         << "isForDrag: " << isForDrag_ << ", "
         << "distance: " << distance_ << ", "
         << "fingers: " << fingers_;
