@@ -25,7 +25,6 @@
 #include "mock_touch_event_target.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_window.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
@@ -52,13 +51,12 @@
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/animation/animatable_properties.h"
 #include "frameworks/core/common/event_manager.h"
-
 #include "frameworks/core/common/font_manager.h"
 #include "frameworks/core/common/manager_interface.h"
-#include "core/pipeline/pipeline_context.h"
-#include "frameworks/core/animation/animatable_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -610,7 +608,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest011, TestSize.Level1)
      */
     AxisEvent axisEvent;
     axisEvent.sourceType = SourceType::TOUCH;
-   
+
     const int nodeId = 10002;
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
     TouchRestrict touchRestrict;
@@ -2339,7 +2337,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest043, TestSize.Level1)
                         touchTestResults_ has element;
      * @tc.expected: ret is false.
      */
-    event.pullType  = TouchType::PULL_MOVE;
+    event.pullType = TouchType::PULL_MOVE;
     ret = eventManager->DispatchTouchEvent(event);
     EXPECT_FALSE(ret);
 }

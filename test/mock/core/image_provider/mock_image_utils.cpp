@@ -27,7 +27,9 @@ std::vector<std::thread> g_threads;
 namespace NG {
 void ImageUtils::PostToUI(std::function<void()>&& task, const int32_t containerId)
 {
-    task();
+    if (task) {
+        task();
+    }
 }
 
 void ImageUtils::PostToBg(std::function<void()>&& task, const int32_t containerId)

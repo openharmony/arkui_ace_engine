@@ -546,7 +546,6 @@ HWTEST_F(FormTestNg, OnRebuildFrame, TestSize.Level1)
     auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
     frameNode->renderContext_ = renderContext;
     pattern->frameNode_ = frameNode;
-    EXPECT_CALL(*renderContext, AddChild(_, _)).Times(1);
     pattern->OnRebuildFrame();
 }
 

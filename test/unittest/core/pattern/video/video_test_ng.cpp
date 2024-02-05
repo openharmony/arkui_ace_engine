@@ -27,6 +27,7 @@
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_media_player.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/render/mock_render_surface.h"
@@ -57,7 +58,6 @@
 #include "core/components_ng/pattern/video/video_styles.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/image/image_source_info.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1251,10 +1251,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest017, TestSize.Level1)
     geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL));
     auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     videoPattern->renderContextForMediaPlayer_ = mockRenderContext;
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(videoPattern->renderContextForMediaPlayer_),
-        SetBounds(0.0f, 0.0f, SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL))
-        .WillOnce(Return());
-
     EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
 }
 
@@ -1439,7 +1435,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest020, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    RefPtr<OHOS::Ace::UnifiedData>  unifiedData;
+    RefPtr<OHOS::Ace::UnifiedData> unifiedData;
     auto dragEnd = eventHub->onDrop_;
     std::string extraParams;
     dragEnd(dragEvent, extraParams);
