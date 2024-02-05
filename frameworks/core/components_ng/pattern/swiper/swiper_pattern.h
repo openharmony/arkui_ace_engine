@@ -541,7 +541,7 @@ public:
     void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t GetDuration() const;
-    RefPtr<Curve> GetCurveIncludeMotion() const;
+    RefPtr<Curve> GetCurveIncludeMotion();
     void OnCustomContentTransition(int32_t toIndex);
     void OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged);
 
