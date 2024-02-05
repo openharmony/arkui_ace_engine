@@ -799,6 +799,7 @@ class OperateItemStruct extends ViewPU {
       });
       Text.focusable(!0);
       Text.draggable(!1);
+      Text.constraintSize({ maxWidth: 'calc(100% - 12vp)' });
       o || Text.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
