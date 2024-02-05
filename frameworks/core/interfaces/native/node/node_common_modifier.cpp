@@ -3461,26 +3461,17 @@ void SetOnClick(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
         event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
         //timestamp
         event.componentAsyncEvent.data[2].f32 = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
-        //target width
-        event.componentAsyncEvent.data[3].f32 = info.GetTarget().area.GetWidth().ConvertToVp();
-        //target height
-        event.componentAsyncEvent.data[4].f32 = info.GetTarget().area.GetHeight().ConvertToVp();
-        const auto& areaLocalOffset = info.GetTarget().area.GetOffset();
-        const auto& areaOrigin = info.GetTarget().origin;
-        //target position x
-        event.componentAsyncEvent.data[5].f32 = areaLocalOffset.GetX().ConvertToVp();
-        //target position y
-        event.componentAsyncEvent.data[6].f32 = areaLocalOffset.GetY().ConvertToVp();
-        //target globalPosition x
-        event.componentAsyncEvent.data[7].f32 = areaOrigin.GetX().ConvertToVp() + areaLocalOffset.GetX().ConvertToVp();
-        //target globalPosition y
-        event.componentAsyncEvent.data[8].f32 = areaOrigin.GetY().ConvertToVp() + areaLocalOffset.GetY().ConvertToVp();
         //source
-        event.componentAsyncEvent.data[9].i32 = static_cast<int32_t>(info.GetSourceDevice());
+        event.componentAsyncEvent.data[3].i32 = static_cast<int32_t>(info.GetSourceDevice());
         //windowX
-        event.componentAsyncEvent.data[10].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX());
+        event.componentAsyncEvent.data[4].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX());
         //windowY
-        event.componentAsyncEvent.data[11].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY());
+        event.componentAsyncEvent.data[5].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY());
+        //displayX
+        event.componentAsyncEvent.data[6].f32 = PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX());
+        //displayY
+        event.componentAsyncEvent.data[7].f32 = PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY());
+        
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
