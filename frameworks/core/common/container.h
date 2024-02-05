@@ -401,6 +401,11 @@ public:
         return false;
     }
 
+    virtual bool IsUIExtensionWindow()
+    {
+        return false;
+    }
+
     virtual bool IsSceneBoardEnabled()
     {
         return false;

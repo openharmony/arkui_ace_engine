@@ -228,7 +228,7 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     if (textFieldPattern->GetShowMagnifier()) {
         cursorVisible_->Set(true);
     }
-    if (!cursorVisible_->Get() || textFieldPattern->GetSelectMode() == SelectionMode::SELECT_ALL) {
+    if (!cursorVisible_->Get() || textFieldPattern->IsSelected()) {
         return;
     }
     canvas.Save();

@@ -94,7 +94,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.renderMode_ = renderProps->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
     ImageInterpolation intepolation = renderProps->GetImageInterpolation().value_or(ImageInterpolation::NONE);
     // add API version protection
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         intepolation = renderProps->GetImageInterpolation().value_or(ImageInterpolation::LOW);
     }
     auto container = Container::Current();

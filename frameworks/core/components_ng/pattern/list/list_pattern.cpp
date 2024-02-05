@@ -443,7 +443,8 @@ void ListPattern::CheckScrollable()
     } else {
         if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_) &&
             !IsScrollSnapAlignCenter()) {
-            scrollable_ = GetAlwaysEnabled() || GreatNotEqual((endMainPos_ - startMainPos_), contentMainSize_);
+            scrollable_ = GetAlwaysEnabled() || GreatNotEqual(endMainPos_ - startMainPos_,
+                contentMainSize_ - contentStartOffset_ - contentEndOffset_);
         } else {
             scrollable_ = true;
         }
@@ -1904,6 +1905,7 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
         }
         canReplaceSwiperItem_ = false;
     }
+    FireAndCleanScrollingListener();
 }
 
 int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)

@@ -129,8 +129,7 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
     GestureEvent gestureInfo;
     gestureInfo.SetDisplayX(item.GetDisplayX());
     gestureInfo.SetDisplayY(item.GetDisplayY());
-    gestureInfo.SetTimeStamp(TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime())));
-    gestureInfo.SetEnhanceData(pointerEvent->GetEnhanceData());
+    gestureInfo.SetPointerEvent(info.GetPointerEvent());
     int res = SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
         host, gestureInfo);
     if (res != 0) {

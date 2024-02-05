@@ -62,7 +62,6 @@ void PinchRecognizer::OnRejected()
     if (refereeState_ == RefereeState::SUCCEED) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 
@@ -76,6 +75,10 @@ bool PinchRecognizer::IsCtrlBeingPressed()
 void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
+        return;
+    }
+    if (!IsInAttachedNode(event)) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 
@@ -327,9 +330,6 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        if (recognizerTarget_.has_value()) {
-            info.SetTarget(recognizerTarget_.value());
-        }
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
             info.SetTiltX(lastTouchEvent_.tiltX.value());
@@ -358,9 +358,6 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     info->SetPinchCenter(pinchCenter_);
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
-    if (recognizerTarget_.has_value()) {
-        info->SetTarget(recognizerTarget_.value());
-    }
     info->SetForce(lastTouchEvent_.force);
     if (lastTouchEvent_.tiltX.has_value()) {
         info->SetTiltX(lastTouchEvent_.tiltX.value());

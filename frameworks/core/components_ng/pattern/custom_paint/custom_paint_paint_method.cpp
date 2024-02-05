@@ -47,6 +47,7 @@
 #include "core/image/image_provider.h"
 #include "core/image/sk_image_cache.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/common/font_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
@@ -54,6 +55,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double HANGING_PERCENT = 0.8;
 constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr double CONIC_START_ANGLE = 0.0;
@@ -123,6 +125,17 @@ void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
     rsRecordingCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
     rsCanvas_ = std::static_pointer_cast<RSCanvas>(rsRecordingCanvas_);
     contentModifier_->UpdateCanvas(rsRecordingCanvas_);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto fontManager = context->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (fontManager->IsDefaultFontChanged()) {
+        CHECK_NULL_VOID(rsRecordingCanvas_);
+        rsRecordingCanvas_->SetIsCustomTextType(true);
+    } else {
+        CHECK_NULL_VOID(rsRecordingCanvas_);
+        rsRecordingCanvas_->SetIsCustomTextType(false);
+    }
 #endif
 }
 
@@ -344,7 +357,7 @@ sk_sp<SkImage> CustomPaintPaintMethod::GetImage(const std::string& src)
         return cacheImage->imagePtr;
     }
 
-    auto context = context_.Upgrade();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto image = Ace::ImageProvider::GetSkImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
@@ -363,7 +376,7 @@ std::shared_ptr<RSImage> CustomPaintPaintMethod::GetImage(const std::string& src
         return cacheImage->imagePtr;
     }
 
-    auto context = context_.Upgrade();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto image = Ace::ImageProvider::GetDrawingImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
@@ -650,79 +663,50 @@ void CustomPaintPaintMethod::InitImageCallbacks()
     onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
 }
 
+void CustomPaintPaintMethod::GetSvgRect(
+    const sk_sp<SkSVGDOM>& skiaDom, const Ace::CanvasImage& canvasImage, RSRect* srcRect, RSRect* dstRect)
+{
+    switch (canvasImage.flag) {
+        case DrawImageType::THREE_PARAMS:
+            *srcRect = RSRect(0, 0, skiaDom->containerSize().width(), skiaDom->containerSize().height());
+            *dstRect = RSRect(canvasImage.dx, canvasImage.dy, skiaDom->containerSize().width() + canvasImage.dx,
+                skiaDom->containerSize().height() + canvasImage.dy);
+            break;
+        case DrawImageType::FIVE_PARAMS: {
+            *srcRect = RSRect(0, 0, skiaDom->containerSize().width(), skiaDom->containerSize().height());
+            *dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            break;
+        }
+        case DrawImageType::NINE_PARAMS: {
+            *srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
+                canvasImage.sHeight + canvasImage.sy);
+            *dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage)
 {
     // Make the ImageSourceInfo
     canvasImage_ = canvasImage;
     loadingSource_ = ImageSourceInfo(canvasImage.src);
     // get the ImageObject
+    auto context = PipelineBase::GetCurrentContext();
     if (currentSource_ != loadingSource_) {
         ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
-            failedCallback_, context_, true, true, true, onPostBackgroundTask_);
+            failedCallback_, context, true, true, true, onPostBackgroundTask_);
     }
 
     CHECK_NULL_VOID(skiaDom_);
     // draw the svg
-#ifndef USE_ROSEN_DRAWING
-    SkRect srcRect;
-    SkRect dstRect;
-    switch (canvasImage.flag) {
-        case 0:
-            srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = SkRect::MakeXYWH(
-                canvasImage.dx, canvasImage.dy, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            break;
-        case 1: {
-            srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            break;
-        }
-        case 2: {
-            srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
-            dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            break;
-        }
-        default:
-            break;
-    }
-    float scaleX = dstRect.width() / srcRect.width();
-    float scaleY = dstRect.height() / srcRect.height();
-    OffsetF offset = GetContentOffset(paintWrapper);
-    OffsetF startPoint =
-        offset + OffsetF(dstRect.left(), dstRect.top()) - OffsetF(srcRect.left() * scaleX, srcRect.top() * scaleY);
-
-    SkCanvas* skCanvas = GetRawPtrOfSkCanvas();
-    skCanvas->save();
-    skCanvas->clipRect(dstRect);
-    skCanvas->translate(startPoint.GetX(), startPoint.GetY());
-    skCanvas->scale(scaleX, scaleY);
-    skiaDom_->render(skCanvas);
-    skCanvas->restore();
-#else
     RSRect srcRect;
     RSRect dstRect;
-    switch (canvasImage.flag) {
-        case 0:
-            srcRect = RSRect(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = RSRect(canvasImage.dx, canvasImage.dy, skiaDom_->containerSize().width() + canvasImage.dx,
-                skiaDom_->containerSize().height() + canvasImage.dy);
-            break;
-        case 1: {
-            srcRect = RSRect(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
-                canvasImage.dHeight + canvasImage.dy);
-            break;
-        }
-        case 2: {
-            srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
-                canvasImage.sHeight + canvasImage.sy);
-            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
-                canvasImage.dHeight + canvasImage.dy);
-            break;
-        }
-        default:
-            break;
-    }
+    GetSvgRect(skiaDom_, canvasImage, &srcRect, &dstRect);
     float scaleX = dstRect.GetWidth() / srcRect.GetWidth();
     float scaleY = dstRect.GetHeight() / srcRect.GetHeight();
     OffsetF offset = GetContentOffset(paintWrapper);
@@ -753,7 +737,6 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
         rsCanvas->DrawSVGDOM(skiaDom_);
     }
     rsCanvas->Restore();
-#endif
 }
 
 void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, RefPtr<SvgDomBase> svgDom,
@@ -2003,6 +1986,48 @@ double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<O
     return x;
 }
 
+double CustomPaintPaintMethod::GetFontBaseline(
+    const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const
+{
+    switch (baseline) {
+        case TextBaseline::TOP:
+            return fontMetrics.fAscent;
+        case TextBaseline::HANGING:
+            return fontMetrics.fAscent * HANGING_PERCENT;
+        case TextBaseline::MIDDLE:
+            return fontMetrics.fAscent + fontMetrics.fDescent;
+        case TextBaseline::BOTTOM:
+        case TextBaseline::IDEOGRAPHIC:
+            return fontMetrics.fDescent;
+        case TextBaseline::ALPHABETIC:
+            return 0;
+        default:
+            break;
+    }
+    return 0;
+}
+
+double CustomPaintPaintMethod::GetFontAlign(
+    TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph) const
+{
+    TextDirection textDirection = fillState_.GetOffTextDirection();
+    switch (align) {
+        case TextAlign::LEFT:
+            return 0;
+        case TextAlign::START:
+            return (textDirection == TextDirection::LTR) ? 0.0 : paragraph->GetMaxIntrinsicWidth();
+        case TextAlign::RIGHT:
+            return paragraph->GetMaxIntrinsicWidth();
+        case TextAlign::END:
+            return (textDirection == TextDirection::LTR) ? paragraph->GetMaxIntrinsicWidth() : 0.0;
+        case TextAlign::CENTER:
+            return paragraph->GetMaxIntrinsicWidth() / 2.0;
+        default:
+            break;
+    }
+    return 0;
+}
+
 #ifndef USE_GRAPHIC_TEXT_GINE
 txt::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(txt::TextAlign align, txt::TextDirection direction) const
 #else
@@ -2668,5 +2693,19 @@ void CustomPaintPaintMethod::TranslateMatrix(double tx, double ty)
     if (tx || ty) {
         matrix_.preTranslate(tx, ty);
     }
+}
+
+void CustomPaintPaintMethod::SaveLayer()
+{
+    RSBrush compositeOperationpBrush;
+    InitPaintBlend(compositeOperationpBrush);
+    auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+    RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+    rsCanvas_->SaveLayer(slo);
+}
+
+void CustomPaintPaintMethod::RestoreLayer()
+{
+    rsCanvas_->Restore();
 }
 } // namespace OHOS::Ace::NG

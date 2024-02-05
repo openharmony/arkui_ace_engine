@@ -2211,7 +2211,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent008, TestSize.Level1)
     GetFocus();
 
     pattern_->PerformAction(TextInputAction::DONE, true);
-    EXPECT_FALSE(pattern_->GetCursorVisible());
+    EXPECT_TRUE(pattern_->GetCursorVisible());
 }
 
 /**
@@ -3286,7 +3286,6 @@ HWTEST_F(TextFieldUXTest, CopyOption001, TestSize.Level1)
      * @tc.step: step2. test default copyOption
      */
     frameNode_->MarkModifyDone();
-    EXPECT_EQ(pattern_->AllowCopy(), true);
     EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.Distributed");
 }
 
@@ -3303,6 +3302,7 @@ HWTEST_F(TextFieldUXTest, CopyOption002, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetCopyOption(CopyOptions::Local);
+        model.SetType(TextInputType::TEXT);
     });
 
     /**
@@ -3326,6 +3326,7 @@ HWTEST_F(TextFieldUXTest, CopyOption003, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetCopyOption(CopyOptions::InApp);
+        model.SetType(TextInputType::TEXT);
     });
 
     /**

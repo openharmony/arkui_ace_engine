@@ -16,9 +16,9 @@
 const vibrator = requireNativeModule('ohos.vibrator');
 const curves = requireNativeModule('ohos.curves');
 
-const composetitlebar = requireNapi('arkui.advanced.composetitlebar');
-const editabletitlebar = requireNapi('arkui.advanced.editabletitlebar');
-const subheader = requireNapi('arkui.advanced.subheader');
+const composetitlebar = requireNapi('arkui.advanced.ComposeTitleBar');
+const editabletitlebar = requireNapi('arkui.advanced.EditableTitleBar');
+const subheader = requireNapi('arkui.advanced.SubHeader');
 const ComposeTitleBar = composetitlebar.ComposeTitleBar;
 const EditableTitleBar = editabletitlebar.EditableTitleBar;
 const EditableLeftIconType = editabletitlebar.EditableLeftIconType;

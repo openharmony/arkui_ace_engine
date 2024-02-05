@@ -97,6 +97,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
             childConstraint.maxSize.SetWidth(sheetWidth_);
             childConstraint.maxSize.SetHeight(sheetHeight_);
+            secondChild->Measure(childConstraint);
         }
     }
 }

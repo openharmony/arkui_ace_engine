@@ -102,6 +102,7 @@ void JSTextClock::Create(const JSCallbackInfo& info)
     if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {
         auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextClockController>();
         if (jsController != nullptr) {
+            jsController->SetInstanceId(Container::CurrentId());
             if (controller) {
                 jsController->AddController(controller);
             }
@@ -330,6 +331,7 @@ void JSTextClockController::Destructor(JSTextClockController* scroller)
 
 void JSTextClockController::Start()
 {
+    ContainerScope scope(instanceId_);
     if (!controller_.empty()) {
         for (auto& i : controller_) {
             i->Start();
@@ -339,6 +341,7 @@ void JSTextClockController::Start()
 
 void JSTextClockController::Stop()
 {
+    ContainerScope scope(instanceId_);
     if (!controller_.empty()) {
         for (auto& i : controller_) {
             i->Stop();

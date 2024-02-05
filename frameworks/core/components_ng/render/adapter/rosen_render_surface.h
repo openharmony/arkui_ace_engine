@@ -113,6 +113,7 @@ public:
 
 private:
     void PostTaskToUI(const std::function<void()>&& task) const;
+    void RegisterSurface() const;
 
     std::mutex surfaceNodeMutex_;
     OffsetF orgin_ { 0, 0 };

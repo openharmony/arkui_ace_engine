@@ -226,7 +226,7 @@ bool SceneRecord::IsFirstFrame()
 
 bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
 {
-    if (sceneId == PerfConstants::APP_LIST_FLING) {
+    if (sceneId == PerfConstants::APP_LIST_FLING || sceneId == PerfConstants::APP_SWIPER_SCROLL) {
         return true;
     }
     return false;
@@ -505,7 +505,7 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 // for jank frame app
 bool PerfMonitor::IsExclusionFrame()
 {
-    return isResponseExclusion || isStartAppFrame || isBackgroundApp;
+    return isResponseExclusion || isStartAppFrame || isBackgroundApp || isExclusionWindow;
 }
 
 void PerfMonitor::SetAppStartStatus()

@@ -1208,15 +1208,15 @@ HWTEST_F(ListScrollerTestNg, Pattern002, TestSize.Level1)
 {
     CreateWithItem([](ListModelNG model) {});
 
-    pattern_->AnimateTo(0, 0, nullptr, true);
+    pattern_->AnimateTo(1, 0, nullptr, true);
     EXPECT_NE(pattern_->springAnimation_, nullptr);
 
     pattern_->StopAnimate();
-    pattern_->AnimateTo(0, 0, nullptr, true);
+    pattern_->AnimateTo(2, 0, nullptr, true);
     EXPECT_NE(pattern_->springAnimation_, nullptr);
 
     pattern_->StopAnimate();
-    pattern_->AnimateTo(0, 0, nullptr, false);
+    pattern_->AnimateTo(3, 0, nullptr, false);
     EXPECT_NE(pattern_->curveAnimation_, nullptr);
 }
 
@@ -1241,7 +1241,7 @@ HWTEST_F(ListScrollerTestNg, Pattern005, TestSize.Level1)
      * @tc.steps: step1. When has animator_ and not stop, call OnScrollCallback.
      * @tc.expected: Would stop.
      */
-    pattern_->AnimateTo(0, 0, nullptr, true);
+    pattern_->AnimateTo(1, 0, nullptr, true);
     EXPECT_FALSE(pattern_->AnimateStoped());
     double offset = 100.0;
     pattern_->OnScrollPosition(offset, SCROLL_FROM_START);
@@ -1495,7 +1495,7 @@ HWTEST_F(ListScrollerTestNg, Pattern016, TestSize.Level1)
 HWTEST_F(ListScrollerTestNg, ListPattern_UpdateScrollSnap001, TestSize.Level1)
 {
     CreateWithItem([](ListModelNG model) {});
-    pattern_->AnimateTo(0, 0, nullptr, true);
+    pattern_->AnimateTo(1, 0, nullptr, true);
     pattern_->UpdateScrollSnap();
     EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
 

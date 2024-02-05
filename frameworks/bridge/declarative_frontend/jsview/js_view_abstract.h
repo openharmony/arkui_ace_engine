@@ -187,6 +187,7 @@ public:
     static void JsHitTestBehavior(const JSCallbackInfo& info);
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
+    static void JsSetFreeze(const JSCallbackInfo& info);
 
     // outer border
     static void ParseOuterBorderColor(const JSRef<JSVal>& args);
@@ -202,7 +203,8 @@ public:
     // for dynamic $r
     static void CompleteResourceObject(JSRef<JSObject>& jsObj);
     static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
-    static bool ParseDollarResource(const JSRef<JSVal>& jsValue, ResourceType& resType, std::string& resName);
+    static bool ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
+        std::string& resName, bool isParseType);
 
     // mouse response response region
     static void JsMouseResponseRegion(const JSCallbackInfo& info);

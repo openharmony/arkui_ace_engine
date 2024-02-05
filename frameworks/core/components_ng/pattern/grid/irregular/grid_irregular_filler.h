@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,76 +41,115 @@ public:
 
     struct FillParameters {
         std::vector<float> crossLens; /**< The column widths of items. */
-        float targetLen = 0.0f;       /**< The target length of the main axis (total row height to fill). */
         float crossGap = 0.0f;        /**< The cross-axis gap between items. */
         float mainGap = 0.0f;         /**< The main-axis gap between items. */
+    };
+
+    struct FillResult {
+        float length = 0.0f;           /**< The total length filled on the main axis. */
+        int32_t endMainLineIndex = -1; /**< The last line filled to reach target length. */
+        int32_t endIndex = -1;         /**< The index of the last item measured. */
     };
 
     /**
      * @brief Fills the grid with items in the forward direction.
      *
-     * EFFECT: updates GridLayoutInfo::endIndex_ and GridLayoutInfo::endMainLineIndex_ to the last filled item.
+     * @param params The FillParameters object containing the fill parameters.
+     * @param targetLen The target length of the main axis (total row height to fill).
+     * @param startingLine The line index to start filling from.
+     */
+    FillResult Fill(const FillParameters& params, float targetLen, int32_t startingLine);
+
+    /**
+     * @brief Fills the grid with items in the forward direction until targetIdx is measured.
      *
      * @param params The FillParameters object containing the fill parameters.
-     * @param startIdx The line index to start filling from.
-     * @return The total length filled on the main axis.
+     * @param targetIdx The target index to fill up to.
+     * @param startingLine The line index to start filling from.
      */
-    float Fill(const FillParameters& params, int32_t startIdx);
+    void FillToTarget(const FillParameters& params, int32_t targetIdx, int32_t startingLine);
 
     /**
      * @brief Fills the gridMatrix in forward direction until the target GridItem is included. Measure isn't performed,
      * and lineHeightMap_ isn't updated.
      *
-     * EFFECT: updates GridLayoutInfo::endIndex_ to targetIdx and GridLayoutInfo::endMainLineIndex_ to the
-     * corresponding line index.
-     *
      * @param startingLine The starting line index.
      * @param targetIdx The target GridItem index to fill.
+     *
+     * @return Line index in which Item [targetIdx] resides.
      */
-    void FillMatrixOnly(int32_t startingLine, int32_t targetIdx);
+    int32_t FillMatrixOnly(int32_t startingLine, int32_t targetIdx);
+
+    /**
+     * @brief Fills the gridMatrix in forward direction until the target line is reached. Measure isn't performed,
+     * and lineHeightMap_ isn't updated.
+     *
+     * @param startingLine The starting line index.
+     * @param targetLine The target GridItem index to fill.
+     *
+     * @return Last item index filled.
+     */
+    int32_t FillMatrixByLine(int32_t startingLine, int32_t targetLine);
 
     /**
      * @brief Measures the GridItems in the backward direction until the target length is filled.
      *
-     * REQUIRES: GridMatrix prior to jumpIndex_ is already filled.
+     * REQUIRES: GridMatrix prior to startingLine is already filled.
      *
      * @param params The fill parameters for measuring GridItems.
-     * @param jumpLineIdx The line index to start measuring backward.
+     * @param targetLen The target length of the main axis (total row height to fill).
+     * @param startingLine The line index to start measuring backward.
      * @return The total length filled on the main axis.
      */
-    float MeasureBackward(const FillParameters& params, int32_t jumpLineIdx);
+    float MeasureBackward(const FillParameters& params, float targetLen, int32_t startingLine);
+
+    /**
+     * @brief Measures the GridItems in the backward direction until the target line is measured.
+     *
+     * REQUIRES: GridMatrix prior to startingLine is already filled.
+     *
+     * @param params The fill parameters for measuring GridItems.
+     * @param targetLine The target line index to fill backward to.
+     * @param startingLine The line index to start measuring backward.
+     */
+    void MeasureBackwardToTarget(const FillParameters& params, int32_t targetLine, int32_t startingLine);
 
 private:
     /**
      * @brief Fills one GridItem into the Grid.
+     *
+     * @param idx Item index to fill in the matrix.
      */
-    void FillOne();
+    void FillOne(int32_t idx);
 
     /**
-     * @brief Updates the length of the main axis after filling a row or column. Add heights in range [prevRow, curRow).
+     * @brief Updates the length of the main axis. Add heights in range [row, rowBound).
+     * Return immediately when [targetLen] is reached.
      *
      * @param len A reference to the filled length on the main axis.
-     * @param prevRow The index of the previous row or column.
-     * @param curRow The index of the current row or column.
-     * @param mainGap The gap between main axis items.
+     * @param row A reference to the current row index.
+     * @param rowBound Upper bound of row index to add heights.
+     * @return true if len >= targetLen after adding height of [row]. At this point, row = last
      */
-    void UpdateLength(float& len, int32_t prevRow, int32_t curRow, float mainGap);
+    bool UpdateLength(float& len, float targetLen, int32_t& row, int32_t rowBound, float mainGap) const;
 
     /**
      * @brief Measures a GridItem at endIndex_ and updates the grid layout information.
      *
      * @param params The FillParameters object containing the fill parameters.
+     * @param itemIdx The index of the GridItem.
      * @param col The column index where the item is being added.
      * @param row The row index where the item is being added.
      */
-    void MeasureItem(const FillParameters& params, int32_t col, int32_t row);
+    void MeasureItem(const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row);
 
     /**
      * @brief Initializes the position of the filler in the grid to GridLayoutInfo::startIndex_.
      *
      * @param lineIdx The line index of the starting position.
+     * @return startIndex_ - 1, for initializing endIndex_ in Fill
      */
-    void InitPos(int32_t lineIdx);
+    int32_t InitPos(int32_t lineIdx);
 
     /**
      * @brief Try to find the GridItem with target index in the grid matrix.
@@ -128,15 +167,6 @@ private:
     bool AdvancePos();
 
     /**
-     * @brief Checks if the grid is full based on the target length of the main axis.
-     *
-     * @param len Currently filled length.
-     * @param targetLen The target length of the main axis.
-     * @return True if the grid is full, false otherwise.
-     */
-    inline bool IsFull(float len, float targetLen);
-
-    /**
      * @brief Checks if an item can fit in the grid based on its width and the available space in the current row or
      * column.
      *
@@ -147,12 +177,12 @@ private:
     int32_t FitItem(const decltype(GridLayoutInfo::gridMatrix_)::iterator& it, int32_t itemWidth);
 
     /**
-     * @brief Gets the size of an item at the specified index.
+     * @brief Implementation of MeasureBackward algorithm on each row.
      *
-     * @param idx The index of the item.
-     * @return The size of the item.
+     * @param measured unordered_set to record irregular items that are already measured.
+     * @param params Fill Parameters needed for measure.
      */
-    GridItemSize GetItemSize(int32_t idx);
+    void BackwardImpl(std::unordered_set<int32_t>& measured, const FillParameters& params);
 
     /**
      * @brief Finds the top row index of an item in the grid.

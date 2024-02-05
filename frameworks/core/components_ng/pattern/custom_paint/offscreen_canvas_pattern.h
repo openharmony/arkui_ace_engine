@@ -114,7 +114,8 @@ public:
     void Translate(double x, double y);
     TransformParam GetTransform() const;
     std::string ToDataURL(const std::string& type, const double quality);
-
+    void SaveLayer();
+    void RestoreLayer();
     void UpdateSize(int32_t width, int32_t height);
     bool IsSucceed();
 

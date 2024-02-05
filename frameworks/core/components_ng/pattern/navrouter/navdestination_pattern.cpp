@@ -23,74 +23,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-void BuildTitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
-{
-    CHECK_NULL_VOID(navDestinationNode->GetTitle());
-    if (navDestinationNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
-        return;
-    }
-    if (navDestinationNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        titleBarNode->RemoveChild(titleBarNode->GetTitle());
-        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-        CHECK_NULL_VOID(titleBarLayoutProperty);
-        titleBarLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-    }
-    titleBarNode->SetTitle(navDestinationNode->GetTitle());
-    titleBarNode->AddChild(titleBarNode->GetTitle());
-}
-
-void BuildSubtitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
-{
-    if (!navDestinationNode->GetSubtitle() && titleBarNode->GetSubtitle()) {
-        auto subtitleNode = titleBarNode->GetSubtitle();
-        titleBarNode->SetSubtitle(nullptr);
-        titleBarNode->RemoveChild(subtitleNode);
-        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        return;
-    }
-    CHECK_NULL_VOID(navDestinationNode->GetSubtitle());
-    if (navDestinationNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
-        return;
-    }
-    if (navDestinationNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        titleBarNode->RemoveChild(titleBarNode->GetSubtitle());
-    }
-    titleBarNode->SetSubtitle(navDestinationNode->GetSubtitle());
-    titleBarNode->AddChild(titleBarNode->GetSubtitle());
-}
-
-void BuildTitleBar(const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode,
-    RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty)
-{
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-
-    // back button icon
-    if (navDestinationLayoutProperty->HasNoPixMap()) {
-        if (navDestinationLayoutProperty->HasImageSource()) {
-            titleBarLayoutProperty->UpdateImageSource(navDestinationLayoutProperty->GetImageSourceValue());
-        }
-        if (navDestinationLayoutProperty->HasPixelMap()) {
-            titleBarLayoutProperty->UpdatePixelMap(navDestinationLayoutProperty->GetPixelMapValue());
-        }
-        titleBarLayoutProperty->UpdateNoPixMap(navDestinationLayoutProperty->GetNoPixMapValue());
-    }
-
-    BuildTitle(navDestinationNode, titleBarNode);
-    BuildSubtitle(navDestinationNode, titleBarNode);
-}
-
-void MountTitleBar(const RefPtr<NavDestinationGroupNode>& hostNode)
-{
-    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navDestinationLayoutProperty);
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleBarNode);
-    BuildTitleBar(hostNode, titleBarNode, navDestinationLayoutProperty);
-}
-
-} // namespace
 
 void NavDestinationPattern::OnActive()
 {
@@ -184,17 +116,25 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
         navDestinationContentNode->MarkModifyDone();
     }
 
+    if (navDestinationLayoutProperty->HasNoPixMap()) {
+        if (navDestinationLayoutProperty->HasImageSource()) {
+            titleBarLayoutProperty->UpdateImageSource(navDestinationLayoutProperty->GetImageSourceValue());
+        }
+        if (navDestinationLayoutProperty->HasPixelMap()) {
+            titleBarLayoutProperty->UpdatePixelMap(navDestinationLayoutProperty->GetPixelMapValue());
+        }
+        titleBarLayoutProperty->UpdateNoPixMap(navDestinationLayoutProperty->GetNoPixMapValue());
+    }
+
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
         titleBarNode->SetJSViewActive(false);
     } else {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         titleBarNode->SetJSViewActive(true);
-        MountTitleBar(hostNode);
         if (opts && opts->Expansive()) {
             titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
         }
-        titleBarNode->MarkModifyDone();
     }
 
     auto navDesIndex = hostNode->GetIndex();
@@ -202,6 +142,8 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
         navDestinationLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         titleBarLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
+    titleBarNode->MarkModifyDone();
+    titleBarNode->MarkDirtyNode();
 }
 
 bool NavDestinationPattern::GetBackButtonState()
@@ -234,11 +176,7 @@ bool NavDestinationPattern::GetBackButtonState()
     auto index = stack->FindIndex(name_, navDestinationNode_.Upgrade(), true);
     bool showBackButton = true;
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    auto layoutWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(navigationNode->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutWrapper, showBackButton);
-    auto layout = AceType::DynamicCast<NavigationLayoutAlgorithm>(layoutWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layout, false);
-    if (index == 0 && (layout->GetNavigationMode() == NavigationMode::SPLIT ||
+    if (index == 0 && (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
         navigationLayoutProperty->GetHideNavBarValue(false))) {
         showBackButton = false;
     }

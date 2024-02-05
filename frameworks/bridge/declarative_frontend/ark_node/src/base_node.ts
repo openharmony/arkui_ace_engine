@@ -33,6 +33,8 @@ declare class __JSBaseNode__ {
   finishUpdateFunc(): void;
   postTouchEvent(touchEvent: TouchEvent): boolean;
   dispose(): void;
+  updateStart(): void;
+  updateEnd(): void;
   draw(drawContext: DrawContext): void;
 }
 

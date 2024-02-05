@@ -37,7 +37,9 @@ public:
 
     static void AddStorage(int32_t key, const JSRef<JSObject>& value);
     static void RemoveStorage(int32_t key);
+
 private:
+    static int32_t GetCurrentInstanceId();
     static thread_local std::unordered_map<int32_t, JSRef<JSObject>> storages_;
 };
 } // namespace OHOS::Ace::Framework

@@ -63,15 +63,7 @@ GridLayoutRangeSolver::RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t 
         }
         case ScrollAlign::END: {
             auto res = SolveBackward(mainGap, mainSize - info_->lineHeightMap_.at(jumpLineIdx), jumpLineIdx);
-            int32_t endIdx = 0;
-            const auto& lastRow = info_->gridMatrix_.at(jumpLineIdx);
-            for (auto it = lastRow.rbegin(); it != lastRow.rend(); ++it) {
-                if (it->second != -1) {
-                    endIdx = it->second;
-                    break;
-                }
-            }
-            return { res.row, res.pos, jumpLineIdx, endIdx };
+            return { res.row, res.pos, jumpLineIdx, FindEndIdx(jumpLineIdx) };
         }
         default:
             return {};
@@ -105,7 +97,10 @@ std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int3
             continue;
         }
         const auto& itemIdx = row.at(c);
-        if (itemIdx == -1) {
+        if (itemIdx < 0) {
+            continue;
+        }
+        if (itemIdx == 0 && (idx > 0 || c > 0)) {
             continue;
         }
         if (opts_->getSizeByIndex && irregulars.find(itemIdx) != irregulars.end()) {
@@ -126,24 +121,27 @@ std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int3
     return { rowCnt, len };
 }
 
-std::pair<int32_t, int32_t> GridLayoutRangeSolver::SolveForwardForEndIdx(float mainGap, float targetLen, int32_t idx)
+std::pair<int32_t, int32_t> GridLayoutRangeSolver::SolveForwardForEndIdx(float mainGap, float targetLen, int32_t line)
 {
     float len = 0.0f;
-    while (len < targetLen && idx <= info_->lineHeightMap_.rbegin()->first) {
-        len += info_->lineHeightMap_.at(idx++) + mainGap;
+    while (len < targetLen && line <= info_->lineHeightMap_.rbegin()->first) {
+        len += info_->lineHeightMap_.at(line++) + mainGap;
     }
-    --idx;
+    --line;
+    return { line, FindEndIdx(line) };
+}
 
-    for (int r = idx; r >= 0; --r) {
+int32_t GridLayoutRangeSolver::FindEndIdx(int32_t endLine)
+{
+    for (int r = endLine; r >= 0; --r) {
         const auto& row = info_->gridMatrix_.at(r);
         for (auto it = row.rbegin(); it != row.rend(); ++it) {
-            if (it->second != -1) {
-                return { idx, it->second };
+            if (it->second > 0) {
+                return it->second;
             }
         }
     }
-    // should never reach here
-    return {};
+    return 0;
 }
 
 Result GridLayoutRangeSolver::SolveBackward(float mainGap, float targetLen, int32_t idx)
@@ -175,12 +173,15 @@ int32_t GridLayoutRangeSolver::CheckMultiRow(int32_t idx)
         }
 
         int32_t r = idx;
-        if (row.at(c) == -1) {
+        if (row.at(c) < 0) {
             // traverse upwards to find the first row occupied by this item
-            while (r > 0 && mat.at(r).at(c) == -1) {
+            while (r > 0 && mat.at(r).at(c) < 0) {
                 --r;
             }
             rowCnt = std::max(rowCnt, idx - r + 1);
+        } else if (row.at(c) == 0) {
+            // Item 0 always start at [0, 0]
+            rowCnt = idx + 1;
         }
 
         // skip the columns occupied by this item

@@ -29,7 +29,6 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
@@ -37,7 +36,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
@@ -68,18 +66,17 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
     }
     viewNode_ = newNode;
-    if (viewNode_ && EXPORT_TEXTURE_SUPPORT_TYPES.count(viewNode_->GetTag()) > 0) {
+    CHECK_NULL_VOID(viewNode_);
+    if (EXPORT_TEXTURE_SUPPORT_TYPES.count(viewNode_->GetTag()) > 0) {
         viewNode_->CreateExportTextureInfoIfNeeded();
         auto exportTextureInfo = viewNode_->GetExportTextureInfo();
         CHECK_NULL_VOID(exportTextureInfo);
         exportTextureInfo->SetSurfaceId(surfaceId_);
         exportTextureInfo->SetCurrentRenderType(renderType_);
     }
+    viewNode_->Build(nullptr);
     if (size_.IsValid()) {
         viewNode_->SetParentLayoutConstraint(size_.ConvertToSizeT());
-    }
-    if (viewNode_) {
-        viewNode_->Build(nullptr);
     }
 }
 
@@ -297,6 +294,19 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
+void JSBaseNode::UpdateStart(const JSCallbackInfo& info)
+{
+    scopedViewStackProcessor_ = std::make_unique<NG::ScopedViewStackProcessor>();
+}
+
+void JSBaseNode::UpdateEnd(const JSCallbackInfo& info)
+{
+    if (viewNode_ && size_.IsValid()) {
+        viewNode_->SetParentLayoutConstraint(size_.ConvertToSizeT());
+    }
+    scopedViewStackProcessor_ = nullptr;
+}
+
 void JSBaseNode::JSBind(BindingTarget globalObj)
 {
     JSClass<JSBaseNode>::Declare("__JSBaseNode__");
@@ -306,6 +316,8 @@ void JSBaseNode::JSBind(BindingTarget globalObj)
     JSClass<JSBaseNode>::CustomMethod("finishUpdateFunc", &JSBaseNode::FinishUpdateFunc);
     JSClass<JSBaseNode>::CustomMethod("postTouchEvent", &JSBaseNode::PostTouchEvent);
     JSClass<JSBaseNode>::CustomMethod("dispose", &JSBaseNode::Dispose);
+    JSClass<JSBaseNode>::CustomMethod("updateStart", &JSBaseNode::UpdateStart);
+    JSClass<JSBaseNode>::CustomMethod("updateEnd", &JSBaseNode::UpdateEnd);
 
     JSClass<JSBaseNode>::Bind(globalObj, JSBaseNode::ConstructorCallback, JSBaseNode::DestructorCallback);
 }

@@ -29,6 +29,89 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+bool NavDestinationModelNG::ParseCommonTitle(
+    bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title)
+{
+    if (!hasSubTitle && !hasMainTitle) {
+        return false;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_RETURN(navDestinationNode, false);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleBarNode, false);
+    if (navDestinationNode->GetPrevTitleIsCustomValue(false)) {
+        // remove custom title if any.
+        titleBarNode->RemoveChild(titleBarNode->GetTitle());
+        titleBarNode->SetTitle(nullptr);
+        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+        CHECK_NULL_RETURN(titleBarLayoutProperty, false);
+        // reset custom title height if any.
+        if (titleBarLayoutProperty->HasTitleHeight()) {
+            titleBarLayoutProperty->ResetTitleHeight();
+        }
+    }
+    navDestinationNode->UpdatePrevTitleIsCustom(false);
+
+    // create or update main title
+    auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    if (hasMainTitle) {
+        if (mainTitle) {
+            // update main title
+            auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
+            textLayoutProperty->UpdateContent(title);
+        } else {
+            // create and init main title
+            mainTitle = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+            auto theme = NavigationGetTheme();
+            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
+            textLayoutProperty->UpdateContent(title);
+            textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
+            textLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
+            textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+            textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+            titleBarNode->SetTitle(mainTitle);
+            titleBarNode->AddChild(mainTitle);
+        }
+    } else {
+        // remove main title if any.
+        titleBarNode->RemoveChild(mainTitle);
+        titleBarNode->SetTitle(nullptr);
+    }
+
+    // create or update subtitle
+    auto subTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    if (!hasSubTitle) {
+        // remove subtitle if any.
+        titleBarNode->RemoveChild(subTitle);
+        titleBarNode->SetSubtitle(nullptr);
+        return true;
+    }
+    if (subTitle) {
+        // update subtitle
+        auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateContent(subtitle);
+    } else {
+        // create and init subtitle
+        subTitle = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateContent(subtitle);
+        textLayoutProperty->UpdateFontSize(SUBTITLE_FONT_SIZE);
+        textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
+        textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
+        textLayoutProperty->UpdateMaxLines(1);
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        titleBarNode->SetSubtitle(subTitle);
+        titleBarNode->AddChild(subTitle);
+    }
+    return true;
+}
+
 void NavDestinationModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -196,68 +279,7 @@ void NavDestinationModelNG::SetHideTitleBar(bool hideTitleBar)
 
 void NavDestinationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navDestinationNode);
-    do {
-        if (!navDestinationNode->GetTitle()) {
-            navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::ADD);
-            break;
-        }
-        // if previous title is not a frame node, we remove it and create a new node
-        auto titleNode = AceType::DynamicCast<FrameNode>(navDestinationNode->GetTitle());
-        if (!titleNode) {
-            navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::REPLACE);
-            break;
-        }
-        auto titleProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-        if (!hasSubTitle) {
-            if (navDestinationNode->GetSubtitle()) {
-                navDestinationNode->SetSubtitle(nullptr);
-            }
-            titleProperty->UpdateMaxLines(2); // 2:title's maxLine.
-        } else {
-            titleProperty->UpdateMaxLines(1); // 1:title's maxLine = 1.
-        }
-        // previous title is not a text node and might be custom, we remove it and create a new node
-        if (!titleProperty) {
-            navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::REPLACE);
-            break;
-        }
-        // text content is the same, do nothing
-        if (titleProperty->GetContentValue() == title) {
-            navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::NONE);
-            return;
-        }
-        // update title content only without changing node
-        titleProperty->UpdateContent(title);
-        titleNode->MarkModifyDone();
-        titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::NONE);
-        return;
-    } while (false);
-    int32_t titleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto titleNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, titleNodeId, AceType::MakeRefPtr<TextPattern>());
-    auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(title);
-
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    // max title font size should be 20.0 vp, because of backbutton
-    textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
-    // min title font size should be 14.0 vp
-    textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
-    textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
-    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
-    if (!hasSubTitle) {
-        textLayoutProperty->UpdateMaxLines(2); // 2:title's maxLine.
-    } else {
-        textLayoutProperty->UpdateMaxLines(1); // 1:title's maxLine = 1.
-    }
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    navDestinationNode->SetTitle(titleNode);
-    navDestinationNode->UpdatePrevTitleIsCustom(false);
+    ParseCommonTitle(hasSubTitle, true, "", title);
 }
 
 void NavDestinationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
@@ -280,47 +302,7 @@ void NavDestinationModelNG::SetBackButtonIcon(const std::string& src, bool noPix
 
 void NavDestinationModelNG::SetSubtitle(const std::string& subtitle)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navDestinationNode);
-    do {
-        if (!navDestinationNode->GetSubtitle()) {
-            navDestinationNode->UpdateSubtitleNodeOperation(ChildNodeOperation::ADD);
-            break;
-        }
-        auto subtitleNode = AceType::DynamicCast<FrameNode>(navDestinationNode->GetSubtitle());
-        if (!subtitleNode) {
-            navDestinationNode->UpdateSubtitleNodeOperation(ChildNodeOperation::REPLACE);
-            break;
-        }
-        auto subtitleProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
-        if (!subtitleProperty) {
-            navDestinationNode->UpdateSubtitleNodeOperation(ChildNodeOperation::REPLACE);
-            break;
-        }
-        if (subtitleProperty->GetContentValue() == subtitle) {
-            navDestinationNode->UpdateSubtitleNodeOperation(ChildNodeOperation::NONE);
-            return;
-        }
-        subtitleProperty->UpdateContent(subtitle);
-        navDestinationNode->UpdateSubtitleNodeOperation(ChildNodeOperation::NONE);
-        return;
-    } while (false);
-    int32_t subtitleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto subtitleNode =
-        FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, subtitleNodeId, AceType::MakeRefPtr<TextPattern>());
-    auto textLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(subtitle);
-    // max title font size should be 14.0 vp
-    textLayoutProperty->UpdateAdaptMaxFontSize(NavigationGetTheme()->GetSubTitleFontSize());
-    // min title font size should be 10.0 vp
-    textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-    textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
-    textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textLayoutProperty->UpdateMaxLines(1); // 1:title's maxLine = 1.
-    navDestinationNode->SetSubtitle(subtitleNode);
+    ParseCommonTitle(true, false, subtitle, "");
 }
 
 void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
@@ -330,30 +312,25 @@ void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationNode);
-    if (navDestinationNode->GetTitle()) {
-        if (customTitle->GetId() == navDestinationNode->GetTitle()->GetId()) {
-            navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::NONE);
-        } else {
-            navDestinationNode->SetTitle(customTitle);
-            navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::REPLACE);
-            navDestinationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    if (!navDestinationNode->GetPrevTitleIsCustomValue(false)) {
+        // remove main and subtitle if any.
+        titleBarNode->RemoveChild(titleBarNode->GetTitle());
+        titleBarNode->RemoveChild(titleBarNode->GetSubtitle());
+        titleBarNode->SetTitle(nullptr);
+        titleBarNode->SetSubtitle(nullptr);
+    }
+    navDestinationNode->UpdatePrevTitleIsCustom(true);
+    auto currentTitle = titleBarNode->GetTitle();
+    if (currentTitle && customTitle->GetId() == currentTitle->GetId()) {
+        // do nothing
         return;
     }
-    navDestinationNode->SetTitle(customTitle);
-    navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::ADD);
-    navDestinationNode->UpdatePrevTitleIsCustom(true);
-    navDestinationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void NavDestinationModelNG::SetTitleHeight(int32_t height)
-{
-    if (height == 0) {
-        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
-    }
-    if (height == 1) {
-        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
-    }
+    // update custom title
+    titleBarNode->RemoveChild(currentTitle);
+    titleBarNode->SetTitle(customTitle);
+    titleBarNode->AddChild(customTitle);
 }
 
 void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight, bool isValid)
@@ -361,15 +338,15 @@ void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight, bool is
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutProperty<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navDestinationLayoutProperty);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
     if (isValid) {
-        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, titleHeight);
+        titleBarLayoutProperty->UpdateTitleHeight(titleHeight);
     } else {
-        if (navDestinationLayoutProperty->HasTitleBarHeight()) {
-            return;
-        }
-        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, Dimension(0.0f));
+        titleBarLayoutProperty->ResetTitleHeight();
     }
 }
 

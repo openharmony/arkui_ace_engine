@@ -254,7 +254,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions001, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -292,7 +292,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp001, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -346,7 +346,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown001, Test
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -400,7 +400,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions002, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
@@ -439,7 +439,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp002, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
@@ -484,7 +484,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown002, Test
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
@@ -528,7 +528,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions003, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
@@ -577,7 +577,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions004, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
@@ -614,7 +614,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions005, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -646,7 +646,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions006, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
@@ -681,7 +681,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions007, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
@@ -716,7 +716,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions008, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -754,7 +754,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions009, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
@@ -793,7 +793,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions010, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
@@ -833,7 +833,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions011, TestSi
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 4;
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -873,7 +873,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions012, TestSi
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 4;
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
@@ -915,7 +915,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions013, TestSi
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
     theme->showOptionCount_ = 4;
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
@@ -958,7 +958,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions014, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
@@ -999,7 +999,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions015, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1046,7 +1046,7 @@ void InnerHandleScrollUp003Init()
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
@@ -1113,7 +1113,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp004, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1169,7 +1169,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown003, Test
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
@@ -1231,7 +1231,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll001, TestSize
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1307,7 +1307,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll003, TestSize
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, ICON);
@@ -1348,7 +1348,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll004, TestSize
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1389,7 +1389,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScroll005, TestSize
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
@@ -1433,7 +1433,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions016, TestSi
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     /**
@@ -1483,7 +1483,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue001, TestSize.Level1)
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
@@ -1520,7 +1520,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue002, TestSize.Level1)
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
@@ -1541,7 +1541,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue003, TestSize.Level1)
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
@@ -1585,7 +1585,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternProcessDepth001, TestSize.Level1)
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     /**
@@ -1614,7 +1614,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternProcessDepth002, TestSize.Level1)
 {
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     /**
@@ -4690,7 +4690,7 @@ HWTEST_F(TextPickerTestNg, PatternGetSelectedObject001, TestSize.Level1)
     /**
      * @tc.step: step. cover branch GetIsDeclarative() is true.
      */
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(true));
+    MockPipelineContext::GetCurrent()->isDeclarative_ = true;
 
     TextPickerModelNG::GetInstance()->MultiInit(theme);
     std::vector<std::string> values = { "0", "1", "2" };
@@ -4719,7 +4719,7 @@ HWTEST_F(TextPickerTestNg, PatternGetSelectedObject002, TestSize.Level1)
     /**
      * @tc.step: step. cover branch GetIsDeclarative() is true.
      */
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(true));
+    MockPipelineContext::GetCurrent()->isDeclarative_ = true;
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
 
     std::vector<std::string> values = { "text", "rating", "qrcode" };
@@ -4966,7 +4966,7 @@ HWTEST_F(TextPickerTestNg, PerformActionTest001, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     auto theme = pipeline->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
-    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
     TextPickerModelNG::GetInstance()->SetRange(range);

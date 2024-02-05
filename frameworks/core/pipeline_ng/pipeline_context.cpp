@@ -51,6 +51,7 @@
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
@@ -507,11 +508,12 @@ void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
 {
     if ((windowFocus_.has_value() && windowFocus_.value()) ||
         (windowShow_.has_value() && windowShow_.value())) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal Window focus first, set focusflag to window.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Normal Window focus first, set focusflag to window.");
         windowFocus_.reset();
         windowShow_.reset();
         focusOnNodeCallback_();
         preNodeId_ = curFrameNode->GetId();
+        FocusHub::IsCloseKeyboard(curFrameNode);
         return;
     }
 
@@ -522,7 +524,7 @@ void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
     preNodeId_ = -1;
 
     if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal WindowPage ready to close keyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Normal WindowPage ready to close keyboard.");
         FocusHub::IsCloseKeyboard(curFrameNode);
         needSoftKeyboard_ = std::nullopt;
     }
@@ -562,12 +564,12 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    window_->Lock();
     auto recvTime = GetSysTimestamp();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
-    FlushFrameTrace();
     resampleTimeStamp_ = nanoTimestamp - window_->GetVSyncPeriod() + ONE_MS_IN_NS;
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
@@ -641,10 +643,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     needRenderNode_.clear();
     taskScheduler_->FlushAfterRenderTask();
     // Keep the call sent at the end of the function
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().FlushEnd();
-    }
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
+    window_->Unlock();
 }
 
 void PipelineContext::InspectDrew()
@@ -680,13 +680,6 @@ void PipelineContext::ProcessDelayTasks()
             delayedTask.task();
         }
     });
-}
-
-void PipelineContext::FlushFrameTrace()
-{
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().FlushBegin();
-    }
 }
 
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
@@ -725,6 +718,13 @@ void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE();
     window_->FlushTasks();
+}
+
+void PipelineContext::FlushUITasks()
+{
+    window_->Lock();
+    taskScheduler_->FlushTask();
+    window_->Unlock();
 }
 
 void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node)
@@ -816,12 +816,14 @@ void PipelineContext::FlushPipelineImmediately()
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
     ACE_FUNCTION_TRACE();
+    window_->Lock();
     FlushBuild();
     FlushTouchEvents();
     taskScheduler_->FlushTask();
     FlushAnimationClosure();
     FlushMessages();
     FlushFocus();
+    window_->Unlock();
 }
 
 void PipelineContext::FlushFrameRate()
@@ -853,6 +855,7 @@ void PipelineContext::FlushAnimationClosure()
     if (animationClosuresList_.empty()) {
         return;
     }
+    window_->Lock();
     taskScheduler_->FlushTask();
 
     decltype(animationClosuresList_) temp(std::move(animationClosuresList_));
@@ -863,6 +866,7 @@ void PipelineContext::FlushAnimationClosure()
         taskScheduler_->CleanUp();
     }
     taskScheduler_ = std::move(scheduler);
+    window_->Unlock();
 }
 
 void PipelineContext::FlushBuildFinishCallbacks()
@@ -1463,9 +1467,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
     CHECK_NULL_VOID(safeAreaManager_);
-    if (NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length())) {
+    if (NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
+        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled()) {
         return;
     }
+    prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
 
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2650,6 +2656,9 @@ void PipelineContext::Destroy()
     needRenderNode_.clear();
     dirtyDefaultFocusNode_.Reset();
     dirtyRequestFocusNode_.Reset();
+    if (textFieldManager_->GetImeShow()) {
+        FocusHub::CloseKeyboard();
+    }
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_.Reset();
 #endif
@@ -3303,5 +3312,10 @@ void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
 void PipelineContext::FlushSyncGeometryNodeTasks()
 {
     taskScheduler_->FlushSyncGeometryNodeTasks();
+}
+
+void PipelineContext::SetUIExtensionImeShow(bool imeShow)
+{
+    textFieldManager_->SetUIExtensionImeShow(imeShow);
 }
 } // namespace OHOS::Ace::NG

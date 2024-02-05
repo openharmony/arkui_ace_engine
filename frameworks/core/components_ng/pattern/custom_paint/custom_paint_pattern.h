@@ -145,6 +145,9 @@ public:
     void SetFilterParam(const std::string& filterStr);
     TransformParam GetTransform() const;
 
+    void SaveLayer();
+    void RestoreLayer();
+
     void DumpAdvanceInfo() override;
 
 private:

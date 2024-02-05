@@ -35,12 +35,11 @@ void CheckExtremePoint(const LeastSquareImpl& axis, double extremX, uint32_t val
         LOGI("Extrem point %{public}f exists between tracker points.", extremX);
     }
     // dump points
-    int32_t i = static_cast<int32_t>(x.size() - 1);
-    for (int32_t cnt = VelocityTracker::POINT_NUMBER; i >= 0 && cnt > 0; --cnt) {
+    int32_t i = static_cast<int32_t>(x.size());
+    for (int32_t cnt = VelocityTracker::POINT_NUMBER; i > 0 && cnt > 0; --cnt) {
         --i;
         LOGI("Last tracker points[%{public}d] x=%{public}f y=%{public}f", cnt, x[i], y[i]);
     }
-
 }
 
 // true for increasing, false for decreasing, nullopt for nonmonotonic

@@ -24,6 +24,7 @@
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -41,35 +42,6 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
-    }
-    void SetBackButton(const RefPtr<UINode>& button)
-    {
-        backButton_ = button;
-    }
-
-    const RefPtr<UINode>& GetBackButton() const
-    {
-        return backButton_;
-    }
-
-    void SetTitle(const RefPtr<UINode>& title)
-    {
-        title_ = title;
-    }
-
-    const RefPtr<UINode>& GetTitle() const
-    {
-        return title_;
-    }
-
-    void SetSubtitle(const RefPtr<UINode>& subtitle)
-    {
-        subtitle_ = subtitle;
-    }
-
-    const RefPtr<UINode>& GetSubtitle() const
-    {
-        return subtitle_;
     }
 
     void SetMenu(const RefPtr<UINode>& menu)
@@ -201,12 +173,6 @@ public:
     void OnPrevToolBarIsCustomUpdate(bool value) {}
 
     // node operation related
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackButtonNodeOperation, ChildNodeOperation);
-    void OnBackButtonNodeOperationUpdate(ChildNodeOperation value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TitleNodeOperation, ChildNodeOperation);
-    void OnTitleNodeOperationUpdate(ChildNodeOperation value) {}
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SubtitleNodeOperation, ChildNodeOperation);
-    void OnSubtitleNodeOperationUpdate(ChildNodeOperation value) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MenuNodeOperation, ChildNodeOperation);
     void OnMenuNodeOperationUpdate(ChildNodeOperation value) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ToolBarNodeOperation, ChildNodeOperation);
@@ -223,9 +189,6 @@ public:
     }
 
 private:
-    RefPtr<UINode> backButton_;
-    RefPtr<UINode> title_;
-    RefPtr<UINode> subtitle_;
     RefPtr<UINode> menu_;
     RefPtr<UINode> toolbarMenu_;
     RefPtr<UINode> landscapeMenu_;

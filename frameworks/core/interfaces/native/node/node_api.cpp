@@ -31,6 +31,8 @@
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
+#include "core/interfaces/native/node/node_checkbox_modifier.h"
+#include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "frameworks/core/common/container.h"
 
@@ -94,10 +96,10 @@ typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eve
  */
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
+    NodeModifier::SetOnAppear,
     nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::SetOnTouch,
+    NodeModifier::SetOnClick,
     nullptr,
     NodeModifier::SetOnBlur,
     nullptr,
@@ -148,6 +150,14 @@ const ComponentAsyncEventHandler DATE_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTimePickerOnChange,
+};
+
+const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetCheckboxChange,
+};
+
+const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetSliderChange,
 };
 
 /* clang-format on */
@@ -237,6 +247,24 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
             eventHandle = TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_CHECKBOX: {
+            // timepicker event type.
+            if (subKind >= sizeof(CHECKBOX_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SLIDER: {
+            // timepicker event type.
+            if (subKind >= sizeof(SLIDER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SLIDER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         default: {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         }
@@ -313,34 +341,39 @@ const ArkUIBasicAPI* GetBasicAPI()
     return &basicImpl;
 }
 
+void ShowCrash(ArkUI_CharPtr message)
+{
+    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Arkoala crash: %{public}s", message);
+}
 /* clang-format off */
 ArkUIExtendedNodeAPI impl_extended = {
     ARKUI_EXTENDED_API_VERSION,
 
-    nullptr,
-    nullptr,
+    nullptr, // getUtilsModifier
+    nullptr, // getCanvasRenderingContext2DModifier
 
     SetCallbackMethod,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    nullptr, // setCustomCallback
+    nullptr, // measureLayoutAndDraw
+    nullptr, // measureNode
+    nullptr, // layoutNode
+    nullptr, // drawNode
+    nullptr, // setMeasureWidth
+    nullptr, // getMeasureWidth
+    nullptr, // setMeasureHeight
+    nullptr, // getMeasureHeight
+    nullptr, // setX
+    nullptr, // setY
+    nullptr, // indexerChecker
+    nullptr, // setRangeUpdater
+    nullptr, // setLazyItemIndexer
+    nullptr, // setVsyncCallback
+    nullptr, // unblockVsyncWait
+    nullptr, // checkEvent
+    nullptr, // sendEvent
+    nullptr, // callContinuation
+    nullptr, // setChildTotalCount
+    ShowCrash,
 };
 /* clang-format on */
 

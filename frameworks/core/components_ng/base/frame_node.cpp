@@ -56,6 +56,7 @@ constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t SUBSTR_LENGTH = 3;
 const char DIMENSION_UNIT_VP[] = "vp";
+const char FORM_COMPONENT_TAG[] = "FormComponent";
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -789,7 +790,7 @@ void FrameNode::OnVisibleChange(bool isVisible)
 {
     pattern_->OnVisibleChange(isVisible);
     UpdateChildrenVisible(isVisible);
-    TriggerVisibleAreaChangeCallback(!isVisible);
+    TriggerVisibleAreaChangeCallback(true);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive)
@@ -998,6 +999,12 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
             ProcessAllVisibleCallback(visibleAreaInnerCallbacks_, VISIBLE_RATIO_MIN);
             lastVisibleRatio_ = VISIBLE_RATIO_MIN;
         }
+        return;
+    }
+
+    if (GetTag() == FORM_COMPONENT_TAG && visibleAreaUserCallbacks_.empty() && !visibleAreaInnerCallbacks_.empty()) {
+        ProcessAllVisibleCallback(visibleAreaInnerCallbacks_, VISIBLE_RATIO_MAX);
+        lastVisibleRatio_ = VISIBLE_RATIO_MAX;
         return;
     }
 
@@ -3293,6 +3300,28 @@ RefPtr<FrameNode> FrameNode::GetDispatchFrameNode(const TouchResult& touchRes)
     return nullptr;
 }
 
+OffsetF FrameNode::CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto offset = context->GetPaintRectWithTransform().GetOffset();
+
+    auto parent = GetAncestorNodeOfFrame(true);
+    if (parent) {
+        auto parentTimestampOffset = parent->GetCachedTransformRelativeOffset();
+        if (parentTimestampOffset.first == nanoTimestamp) {
+            auto result = offset + parentTimestampOffset.second;
+            SetCachedTransformRelativeOffset({ nanoTimestamp, result });
+            return result;
+        }
+        auto result = offset + parent->CalculateCachedTransformRelativeOffset(nanoTimestamp);
+        SetCachedTransformRelativeOffset({ nanoTimestamp, result });
+        return result;
+    }
+    SetCachedTransformRelativeOffset({ nanoTimestamp, offset });
+    return offset;
+}
+
 OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp)
 {
     auto currOffset = geometryNode_->GetFrameOffset();
@@ -3351,7 +3380,7 @@ bool FrameNode::SetParentLayoutConstraint(const SizeF& size) const
     layoutConstraint.UpdatePercentReference(size);
     layoutConstraint.UpdateMaxSizeWithCheck(size);
     layoutConstraint.UpdateIllegalParentIdealSizeWithCheck(OptionalSize(size));
-    layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty_->UpdateParentLayoutConstraint(layoutConstraint);
     return true;
 }
 
@@ -3363,5 +3392,14 @@ const std::pair<uint64_t, OffsetF>& FrameNode::GetCachedGlobalOffset() const
 void FrameNode::SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
 {
     cachedGlobalOffset_ = timestampOffset;
+}
+const std::pair<uint64_t, OffsetF>& FrameNode::GetCachedTransformRelativeOffset() const
+{
+    return cachedTransformRelativeOffset_;
+}
+
+void FrameNode::SetCachedTransformRelativeOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
+{
+    cachedTransformRelativeOffset_ = timestampOffset;
 }
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -83,7 +84,8 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
     auto diffTop = caretRect.Top() - scrollableRect.Top();
     // caret height larger scroll's content region
     if (isShowKeyboard) {
-        if (diffTop <= 0 && LessNotEqual(bottomInset.start, caretRect.Bottom())) {
+        if (diffTop <= 0 &&
+            LessNotEqual(bottomInset.start, (caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()))) {
             return;
         }
     }
@@ -96,7 +98,7 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
 
     // caret inner scroll's content region
     if (isShowKeyboard) {
-        if (LessNotEqual(caretRect.Bottom(), bottomInset.start)) {
+        if (LessNotEqual((caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()), bottomInset.start)) {
             return;
         }
     }
@@ -104,9 +106,9 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(
     // caret below safeArea
     float diffBot = 0.0f;
     if (isShowKeyboard) {
-        diffBot = bottomInset.start - caretRect.Bottom();
+        diffBot = bottomInset.start - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     } else {
-        diffBot = scrollableRect.Bottom() - caretRect.Bottom();
+        diffBot = scrollableRect.Bottom() - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     }
     CHECK_NULL_VOID(diffBot < 0);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
@@ -145,5 +147,12 @@ void TextFieldManagerNG::UpdateScrollableParentViewPort(const RefPtr<FrameNode>&
     }
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
     scrollableNode->SetViewPort(scrollableRect);
+}
+void TextFieldManagerNG::ProcessNavKeyboard()
+{
+    if (imeShow_ || uiExtensionImeShow_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav notNeedSoftKeyboard.");
+        FocusHub::NavCloseKeyboard();
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -16,8 +16,6 @@
 #include "core/image/image_source_info.h"
 #define NAPI_VERSION 8
 
-#include "core/components_ng/pattern/image/image_pattern.h"
-
 #include <array>
 #include <cstdint>
 
@@ -36,6 +34,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -204,7 +203,7 @@ void ImagePattern::OnImageLoadSuccess()
         eventHub->FireCompleteEvent(event);
     }
 
-    SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg(), loadingCtx_->GetFrameCount());
+    SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo(), loadingCtx_->GetFrameCount());
     PrepareAnimation(image_);
     if (host->IsDraggable()) {
         EnableDrag();
@@ -251,9 +250,8 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     imageEventHub->FireErrorEvent(event);
 }
 
-void ImagePattern::SetImagePaintConfig(
-    const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
-    const RectF& dstRect, bool isSvg, int32_t frameCount)
+void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
+    const RectF& dstRect, const ImageSourceInfo& sourceInfo, int32_t frameCount)
 {
     auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
@@ -263,8 +261,9 @@ void ImagePattern::SetImagePaintConfig(
         .dstRect_ = dstRect,
     };
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
-    config.isSvg_ = isSvg;
+    config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
+    config.sourceInfo_ = sourceInfo;
     auto host = GetHost();
     if (!host) {
         canvasImage->SetPaintConfig(config);
@@ -308,9 +307,8 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && renderProp->HasImageResizableSlice() && image_) {
             loadingCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(
-                image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(),
-                loadingCtx_->GetSrc().IsSvg(), loadingCtx_->GetFrameCount());
+            SetImagePaintConfig(image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(), loadingCtx_->GetSrc(),
+                loadingCtx_->GetFrameCount());
         }
     }
 
@@ -318,9 +316,8 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && renderProp->HasImageResizableSlice() && altImage_) {
             altLoadingCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(
-                altImage_, altLoadingCtx_->GetSrcRect(), altLoadingCtx_->GetDstRect(),
-                altLoadingCtx_->GetSrc().IsSvg(), altLoadingCtx_->GetFrameCount());
+            SetImagePaintConfig(altImage_, altLoadingCtx_->GetSrcRect(), altLoadingCtx_->GetDstRect(),
+                altLoadingCtx_->GetSrc(), altLoadingCtx_->GetFrameCount());
         }
     }
 
@@ -344,7 +341,7 @@ void ImagePattern::CreateObscuredImage()
     if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
         if (!obscuredImage_) {
             obscuredImage_ = MakeRefPtr<ObscuredImage>();
-            SetImagePaintConfig(obscuredImage_, srcRect_, dstRect_, sourceInfo.IsSvg());
+            SetImagePaintConfig(obscuredImage_, srcRect_, dstRect_, sourceInfo);
         }
     }
 }
@@ -407,6 +404,34 @@ void ImagePattern::LoadImageDataIfNeed()
     }
 }
 
+void ImagePattern::UpdateGestureAndDragWhenModify()
+{
+    // remove long press and mouse events
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    if (longPressEvent_) {
+        gestureHub->SetLongPressEvent(nullptr);
+        longPressEvent_ = nullptr;
+    }
+
+    if (clickEvent_) {
+        gestureHub->RemoveClickEvent(clickEvent_);
+        clickEvent_ = nullptr;
+    }
+
+    if (mouseEvent_) {
+        auto inputHub = host->GetOrCreateInputEventHub();
+        inputHub->RemoveOnMouseEvent(mouseEvent_);
+        mouseEvent_ = nullptr;
+    }
+
+    if (host->IsDraggable()) {
+        EnableDrag();
+    }
+}
+
 void ImagePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -428,26 +453,11 @@ void ImagePattern::OnModifyDone()
     }
 
     CloseSelectOverlay();
-    // remove long press and mouse events
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    if (longPressEvent_) {
-        gestureHub->SetLongPressEvent(nullptr);
-        longPressEvent_ = nullptr;
-    }
-
-    if (clickEvent_) {
-        gestureHub->RemoveClickEvent(clickEvent_);
-        clickEvent_ = nullptr;
-    }
-
-    if (mouseEvent_) {
-        auto inputHub = host->GetOrCreateInputEventHub();
-        inputHub->RemoveOnMouseEvent(mouseEvent_);
-        mouseEvent_ = nullptr;
-    }
+    UpdateGestureAndDragWhenModify();
 
     if (isAnalyzerOverlayBuild_) {
         if (!IsSupportImageAnalyzerFeature()) {
@@ -522,7 +532,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
-            pattern->altLoadingCtx_->GetSourceInfo().IsSvg(), pattern->altLoadingCtx_->GetFrameCount());
+            pattern->altLoadingCtx_->GetSourceInfo(), pattern->altLoadingCtx_->GetFrameCount());
 
         pattern->PrepareAnimation(pattern->altImage_);
 
@@ -591,11 +601,31 @@ void ImagePattern::OnRecycle()
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->ClearDrawCommands();
+    UnregisterWindowStateChangedCallback();
 }
 
 void ImagePattern::OnReuse()
 {
+    RegisterWindowStateChangedCallback();
     LoadImageDataIfNeed();
+}
+
+void ImagePattern::RegisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+}
+
+void ImagePattern::UnregisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(host->GetId());
 }
 
 void ImagePattern::OnWindowHide()
@@ -653,7 +683,7 @@ void ImagePattern::EnableDrag()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string &
+    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string&
                          /* extraParams */) -> DragDropInfo {
         DragDropInfo info;
         auto imagePattern = weak.Upgrade();
@@ -934,7 +964,7 @@ void ImagePattern::OnConfigurationUpdate()
     }
 }
 
-void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig &config)
+void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig& config)
 {
     if (!isEnableAnalyzer_) {
         return;
@@ -1003,8 +1033,7 @@ void ImagePattern::UpdateAnalyzerOverlay()
     napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
     auto frameNode = GetHost();
     auto overlayNode = frameNode->GetOverlayNode();
-    ImageAnalyzerMgr::GetInstance().UpdateImage(
-        &overlayData_, pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_);
+    ImageAnalyzerMgr::GetInstance().UpdateImage(&overlayData_, pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_);
     overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1042,9 +1071,10 @@ bool ImagePattern::IsSupportImageAnalyzerFeature()
     CHECK_NULL_RETURN(imageRenderProperty, false);
     ImageRepeat repeat = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
 
-    return isEnabled && !hasObscured && isEnableAnalyzer_ && ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported()
-        && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && repeat == ImageRepeat::NO_REPEAT
-        && loadingCtx_->GetFrameCount() == 1;
+    return isEnabled && !hasObscured && isEnableAnalyzer_ &&
+           ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported() && image_ &&
+           !loadingCtx_->GetSourceInfo().IsSvg() && repeat == ImageRepeat::NO_REPEAT &&
+           loadingCtx_->GetFrameCount() == 1;
 }
 
 void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNode)

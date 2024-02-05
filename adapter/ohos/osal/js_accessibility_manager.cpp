@@ -548,6 +548,9 @@ void FindFocusedExtensionElementInfoNG(const SearchParameter& searchParam,
 RefPtr<NG::FrameNode> FindWebAccessibilityFocus(const RefPtr<NG::FrameNode>& frameNode)
 {
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        if (!frameNode->GetRenderContext()->GetAccessibilityFocus().value_or(false)) {
+            return nullptr;
+        }
         auto webPattern = frameNode->GetPattern<NG::WebPattern>();
         CHECK_NULL_RETURN(webPattern, nullptr);
         auto result = webPattern->GetFocusedAccessibilityNode(-1, true);
@@ -652,6 +655,9 @@ bool FindInputFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityN
 RefPtr<NG::FrameNode> FindWebInputFocus(const RefPtr<NG::FrameNode>& frameNode)
 {
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        if (!(frameNode->GetFocusHub() ? frameNode->GetFocusHub()->IsCurrentFocus() : false)) {
+            return nullptr;
+        }
         auto webPattern = frameNode->GetPattern<NG::WebPattern>();
         CHECK_NULL_RETURN(webPattern, nullptr);
         auto result = webPattern->GetFocusedAccessibilityNode(-1, false);
@@ -1486,7 +1492,7 @@ bool IsNodeInRoot(const RefPtr<NG::FrameNode>& node, const RefPtr<NG::PipelineCo
     auto root = ngPipeline->GetRootElement();
     CHECK_NULL_RETURN(root, false);
     auto rootRect = root->GetTransformRectRelativeToWindow();
-    return rect.IsWrappedBy(rootRect);
+    return LessNotEqual(rect.GetX(), rootRect.GetX() + rootRect.Width());
 }
 
 void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::FrameNode>& node,

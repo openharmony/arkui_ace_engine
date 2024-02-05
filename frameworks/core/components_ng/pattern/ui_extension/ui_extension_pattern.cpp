@@ -603,7 +603,11 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
     CHECK_NULL_VOID(sessionWrapper_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto displayArea = host->GetTransformRectRelativeToWindow();
+    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto displaySize = geometryNode->GetFrameSize();
+    auto displayArea = RectF(displayOffset, displaySize);
     if (displayArea_ != displayArea || isForce) {
         displayArea_ = displayArea;
         sessionWrapper_->RefreshDisplayArea(displayArea_);

@@ -781,7 +781,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest016, TestSize.Level1)
     json->Put("day", 31);
     pickerPattern->SetDate(json->ToString());
     pickerPattern->HandleMonthKeyEvent(3);
-    EXPECT_FALSE(pickerPattern->isKeyWaiting_);
+    EXPECT_TRUE(pickerPattern->isKeyWaiting_);
 
     pickerPattern->isKeyWaiting_ = false;
     json->Put("year", 2000);

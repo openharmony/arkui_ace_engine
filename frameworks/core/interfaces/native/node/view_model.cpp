@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -205,6 +206,13 @@ void* createListItemGroupNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createSliderSliderNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SliderModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -232,7 +240,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr,
         nullptr,
         nullptr,
-        nullptr,
+        createSliderSliderNode,
         nullptr,
         nullptr,
         nullptr,
@@ -248,6 +256,10 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr,
         nullptr,
         createListItemGroupNode,
+        nullptr, // DatePicker
+        nullptr, // TimePicker
+        nullptr, // TextPicker
+        nullptr, // GridItem
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);

@@ -516,6 +516,7 @@ public:
 
     bool IsLauncherContainer() override;
     bool IsScenceBoardWindow() override;
+    bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
@@ -600,6 +601,8 @@ private:
     bool useStageModel_ = false;
 
     DeviceOrientation orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
+
+    std::unordered_set<std::string> resAdapterRecord_;
 
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;

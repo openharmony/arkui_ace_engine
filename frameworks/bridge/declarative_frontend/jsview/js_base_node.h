@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
 
 namespace OHOS::Ace::Framework {
@@ -42,6 +43,8 @@ public:
     void BuildNode(const JSCallbackInfo& info);
     void PostTouchEvent(const JSCallbackInfo& info);
     void CreateRenderNode(const JSCallbackInfo& info);
+    void UpdateStart(const JSCallbackInfo& info);
+    void UpdateEnd(const JSCallbackInfo& info);
     void Dispose(const JSCallbackInfo& info)
     {
         viewNode_.Reset();
@@ -59,6 +62,7 @@ private:
     NG::OptionalSizeF size_;
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     std::string surfaceId_;
+    std::unique_ptr<NG::ScopedViewStackProcessor> scopedViewStackProcessor_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BASE_NODE_H

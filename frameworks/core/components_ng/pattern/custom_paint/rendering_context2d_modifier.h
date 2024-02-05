@@ -40,6 +40,8 @@ public:
     ~RenderingContext2DModifier() override = default;
     void onDraw(DrawingContext& drawingContext) override;
     std::string GetDumpInfo();
+    bool needResetSurface_ = false;
+    RefPtr<RenderContext> renderContext_ = nullptr;
 
     void MarkModifierDirty()
     {

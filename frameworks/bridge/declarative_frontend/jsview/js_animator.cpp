@@ -176,6 +176,7 @@ void JSAnimator::JSBind(BindingTarget globalObj)
 
 void JSAnimator::Create(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     if (info.Length() != 1) {
         return;
     }
@@ -191,6 +192,7 @@ void JSAnimator::Pop() {}
 
 void JSAnimator::SetState(int32_t state)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION, "animator component setState failed, id:%{public}s, state:%{public}d",
@@ -227,6 +229,7 @@ void JSAnimator::SetState(int32_t state)
 
 void JSAnimator::SetDuration(int32_t duration)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         return;
@@ -236,6 +239,7 @@ void JSAnimator::SetDuration(int32_t duration)
 
 void JSAnimator::SetCurve(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     if (info.Length() != 1) {
         return;
     }
@@ -254,6 +258,7 @@ void JSAnimator::SetCurve(const JSCallbackInfo& info)
 
 void JSAnimator::SetDelay(int32_t delay)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         return;
@@ -263,6 +268,7 @@ void JSAnimator::SetDelay(int32_t delay)
 
 void JSAnimator::SetFillMode(int32_t fillMode)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         return;
@@ -272,6 +278,7 @@ void JSAnimator::SetFillMode(int32_t fillMode)
 
 void JSAnimator::SetIteration(int32_t iteration)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         return;
@@ -281,6 +288,7 @@ void JSAnimator::SetIteration(int32_t iteration)
 
 void JSAnimator::SetPlayMode(int32_t playMode)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         return;
@@ -290,6 +298,7 @@ void JSAnimator::SetPlayMode(int32_t playMode)
 
 void JSAnimator::SetMotion(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     if (info.Length() != 1 || !info[0]->IsObject()) {
         return;
     }
@@ -308,36 +317,42 @@ void JSAnimator::SetMotion(const JSCallbackInfo& info)
 
 void JSAnimator::OnStart(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto callback = GetEventCallback(info, "Animator.onStart");
     AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::START, animatorId_);
 }
 
 void JSAnimator::OnPause(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto callback = GetEventCallback(info, "Animator.onPause");
     AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::PAUSE, animatorId_);
 }
 
 void JSAnimator::OnRepeat(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto callback = GetEventCallback(info, "Animator.onRepeat");
     AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::REPEAT, animatorId_);
 }
 
 void JSAnimator::OnCancel(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto callback = GetEventCallback(info, "Animator.onCancel");
     AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::CANCEL, animatorId_);
 }
 
 void JSAnimator::OnFinish(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto callback = GetEventCallback(info, "Animator.onFinish");
     AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::FINISH, animatorId_);
 }
 
 void JSAnimator::OnFrame(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     if (!info[0]->IsFunction()) {
         return;
     }
@@ -356,6 +371,7 @@ void JSAnimator::OnFrame(const JSCallbackInfo& info)
 
 void JSSpringProp::ConstructorCallback(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     if (info.Length() != 3 || !info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber()) {
         return;
     }
@@ -378,6 +394,7 @@ void JSSpringProp::DestructorCallback(JSSpringProp* obj)
 
 void JSMotion::ConstructorCallback(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     int32_t len = info.Length();
     if (len != FRICTION_MOTION_LENGTH && len != SPRING_MOTION_LENGTH && len != SCROLL_MOTION_LENGTH) {
         return;

@@ -76,10 +76,18 @@ private:
      *
      * @param mainGap The main gap between grid items.
      * @param targetLen The target length for the forward traversal.
-     * @param idx The starting line index.
+     * @param line The starting line index.
      * @return { ending line index, ending GridItem index }
      */
-    std::pair<int32_t, int32_t> SolveForwardForEndIdx(float mainGap, float targetLen, int32_t idx);
+    std::pair<int32_t, int32_t> SolveForwardForEndIdx(float mainGap, float targetLen, int32_t line);
+
+    /**
+     * @brief Traverse the matrix backward to find the last item index, starting from Line [endLine].
+     *
+     * @param endLine index of the line to start traversing.
+     * @return last item index above endLine (inclusive)
+     */
+    int32_t FindEndIdx(int32_t endLine);
 
     /**
      * @brief Adds the next rows to the layout in SolveForward.

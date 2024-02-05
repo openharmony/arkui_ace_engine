@@ -308,4 +308,24 @@ void NGGestureRecognizer::SetEventImportGestureGroup(const WeakPtr<NGGestureReco
 
     eventImportGestureGroup_ = gestureGroup;
 }
+
+bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event)
+{
+    PointF localPoint(event.x, event.y);
+    auto frameNode = GetAttachedNode();
+    if (!frameNode.Invalid()) {
+        auto host = frameNode.Upgrade();
+        CHECK_NULL_RETURN(host, false);
+        NGGestureRecognizer::Transform(localPoint, frameNode, false, isPostEventResult_);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        auto paintRect = renderContext->GetPaintRectWithoutTransform();
+        localPoint = localPoint + paintRect.GetOffset();
+        auto responseRegion = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
+        if (!host->InResponseRegionList(localPoint, responseRegion)) {
+            return false;
+        }
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG

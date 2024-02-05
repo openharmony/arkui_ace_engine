@@ -93,6 +93,11 @@ public:
         return apiVersion_;
     }
 
+    bool GreatOrEqualTargetAPIVersion(PlatformVersion version)
+    {
+        return (apiVersion_ % 1000) >= static_cast<int32_t>(version);
+    }
+
     void SetAppVersionName(const std::string& versionName)
     {
         versionName_ = versionName;

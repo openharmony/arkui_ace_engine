@@ -243,50 +243,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg004, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg005
- * @tc.desc: Test NavRouterGroupNode::OnAttachToMainTree.
- * @tc.type: FUNC
- */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create mock theme manager.
-     */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-    /**
-     * @tc.steps: step2. create model then call set function.
-     */
-    NavDestinationModelNG model;
-    model.Create();
-    auto func = []() {};
-    model.Create(func);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    model.SetHideTitleBar(false);
-    model.SetTitle("myTitle", true);
-    auto customNode = CustomNode::CreateCustomNode(11, "customNode");
-    navDestinationNode->title_ = customNode;
-    model.SetTitle("myTitle", false);
-    ASSERT_EQ(navDestinationNode->subtitle_, nullptr);
-
-    model.SetSubtitle("mySubTitle");
-    model.SetCustomTitle(customNode);
-    model.SetTitleHeight(0);
-    model.SetTitleHeight(1);
-    auto onShow = []() {};
-    model.SetOnShown(onShow);
-    auto onHidden = []() {};
-    model.SetOnHidden(onHidden);
-    auto onBackPressed = []() { return true; };
-    model.SetOnBackPressed(onBackPressed);
-    ASSERT_NE(customNode, nullptr);
-}
-
-/**
  * @tc.name: NavrouterTestNg006
  * @tc.desc: Test NavDestinationGroupNode::AddChildToGroup.
  * @tc.type: FUNC
@@ -387,7 +343,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg008, TestSize.Level1)
     algorithm->Measure(layoutWrapper);
     EXPECT_TRUE(navDestinationLayoutProperty->propHideTitleBar_.value());
     auto tempNode = FrameNode::CreateFrameNode("BackButton", 123, AceType::MakeRefPtr<ButtonPattern>());
-    navDestinationNode->subtitle_ = tempNode;
+    titleBarNode->subtitle_ = tempNode;
     navDestinationLayoutProperty->propHideTitleBar_ = false;
     algorithm->Measure(layoutWrapper);
     EXPECT_FALSE(navDestinationLayoutProperty->propHideTitleBar_.value());
@@ -443,7 +399,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg009, TestSize.Level1)
     algorithm->Layout(layoutWrapper);
     EXPECT_TRUE(navDestinationLayoutProperty->propHideTitleBar_.value());
     auto tempNode = FrameNode::CreateFrameNode("BackButton", 123, AceType::MakeRefPtr<ButtonPattern>());
-    navDestinationNode->subtitle_ = tempNode;
+    titleBarNode->subtitle_ = tempNode;
     navDestinationLayoutProperty->propHideTitleBar_ = false;
     algorithm->Layout(layoutWrapper);
     EXPECT_FALSE(navDestinationLayoutProperty->propHideTitleBar_.value());
@@ -485,11 +441,9 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0010, TestSize.Level1)
 
     auto titlePattern2 = AceType::MakeRefPtr<TitleBarPattern>();
     auto title = AceType::MakeRefPtr<TitleBarNode>("Title", 234, titlePattern2);
-    navDestinationNode->title_ = title;
 
     auto subTitlePattern = AceType::MakeRefPtr<TitleBarPattern>();
     auto subTitle = AceType::MakeRefPtr<TitleBarNode>("Title", 234, subTitlePattern);
-    navDestinationNode->subtitle_ = subTitle;
 
     auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
     navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
@@ -500,13 +454,9 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0010, TestSize.Level1)
      */
     layoutProperty->propNoPixMap_ = false;
     layoutProperty->propImageSource_ = std::nullopt;
-    navDestinationNode->propTitleNodeOperation_ = ChildNodeOperation::ADD;
-    navDestinationNode->propSubtitleNodeOperation_ = ChildNodeOperation::REPLACE;
     navDestinationPattern->OnModifyDone();
     EXPECT_TRUE(layoutProperty->HasNoPixMap());
     layoutProperty->propNoPixMap_ = std::nullopt;
-    navDestinationNode->propTitleNodeOperation_ = ChildNodeOperation::ADD;
-    navDestinationNode->propSubtitleNodeOperation_ = ChildNodeOperation::ADD;
     navDestinationPattern->OnModifyDone();
     EXPECT_FALSE(layoutProperty->HasNoPixMap());
 }
@@ -555,9 +505,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0011, TestSize.Level1)
 
     auto titlePattern2 = AceType::MakeRefPtr<TitleBarPattern>();
     auto title = AceType::MakeRefPtr<TitleBarNode>("Title", 234, titlePattern2);
-    navDestinationNode->title_ = title;
+    titleBarNode->title_ = title;
     navDestinationNode->propInspectorId_ = "test";
-    navDestinationNode->propTitleNodeOperation_ = ChildNodeOperation::REPLACE;
 
     auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
     navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
@@ -567,138 +516,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0011, TestSize.Level1)
      * @tc.steps: step3. change navDestinationLayoutProperty->HasNoPixMap().
      */
     layoutProperty->propNoPixMap_ = false;
-    navDestinationNode->propTitleNodeOperation_ = ChildNodeOperation::ADD;
-    navDestinationNode->propSubtitleNodeOperation_ = ChildNodeOperation::ADD;
     navDestinationPattern->OnModifyDone();
     EXPECT_TRUE(layoutProperty->HasNoPixMap());
-}
-
-/**
- * @tc.name: NavrouterTestNg0012
- * @tc.desc: Test NavDestinationModelNG::SetTitle.
- * @tc.type: FUNC
- */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0012, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create mock theme manager.
-     */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-    /**
-     * @tc.steps: step2. create model then call set function.
-     */
-    NavDestinationModelNG model;
-    model.Create();
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    ASSERT_NE(navDestinationNode, nullptr);
-    auto titleNode = TitleBarNode::GetOrCreateTitleBarNode(
-        "TitleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    auto layout = AceType::MakeRefPtr<TextLayoutProperty>();
-    layout->propContent_ = "myTitle2";
-    titleNode->layoutProperty_ = layout;
-    /**
-     * @tc.steps: step3. change properties then call set function.
-     */
-    navDestinationNode->title_ = titleNode;
-    model.SetTitle("myTitle", false);
-    layout->propContent_ = "myTitle2";
-    model.SetTitle("myTitle2", true);
-    EXPECT_EQ(layout->GetContentValue(), "myTitle2");
-    auto subTitle = TitleBarNode::GetOrCreateTitleBarNode(
-        "TitleBarNode", 67, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    navDestinationNode->subtitle_ = subTitle;
-    model.SetTitle("myTitle", false);
-    ASSERT_EQ(navDestinationNode->subtitle_, nullptr);
-}
-
-/**
- * @tc.name: NavrouterTestNg0013
- * @tc.desc: Test NavDestinationModelNG::SetTitle.
- * @tc.type: FUNC
- */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0013, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create mock theme manager.
-     */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-    /**
-     * @tc.steps: step2. create model then call set function.
-     */
-    NavDestinationModelNG model;
-    model.Create();
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    ASSERT_NE(navDestinationNode, nullptr);
-    auto titleNode = TitleBarNode::GetOrCreateTitleBarNode(
-        "TitleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    auto layout = AceType::MakeRefPtr<TextLayoutProperty>();
-    layout->propContent_ = "myTitle2";
-    titleNode->layoutProperty_ = layout;
-
-    auto subTitle = TitleBarNode::GetOrCreateTitleBarNode(
-        "TitleBarNode", 67, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    navDestinationNode->subtitle_ = subTitle;
-    /**
-     * @tc.steps: step3. change properties then call set function.
-     */
-    navDestinationNode->title_ = titleNode;
-    model.SetSubtitle("mySubTitle111");
-    layout->propContent_ = "myTitle2";
-    model.SetSubtitle("mySubTitle222");
-    EXPECT_EQ(layout->GetContentValue(), "myTitle2");
-
-    model.SetSubtitle("mySubTitle222");
-    ASSERT_NE(navDestinationNode->subtitle_, nullptr);
-
-    auto customNode = CustomNode::CreateCustomNode(11, "customNode");
-    navDestinationNode->subtitle_ = customNode;
-    model.SetSubtitle("mySubTitle444");
-}
-
-/**
- * @tc.name: NavrouterTestNg0014
- * @tc.desc: Test NavDestinationModelNG::SetCustomTitle.
- * @tc.type: FUNC
- */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0014, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create mock theme manager.
-     */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-    /**
-     * @tc.steps: step2. create model then call set function.
-     */
-    NavDestinationModelNG model;
-    model.Create();
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    ASSERT_NE(navDestinationNode, nullptr);
-    auto titleNode = TitleBarNode::GetOrCreateTitleBarNode(
-        "TitleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    auto subTitle = TitleBarNode::GetOrCreateTitleBarNode(
-        "TitleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    /**
-     * @tc.steps: step3. change properties then call set function.
-     */
-    model.SetCustomTitle(subTitle);
-    navDestinationNode->title_ = titleNode;
-    model.SetCustomTitle(subTitle);
-    ASSERT_EQ(navDestinationNode->title_->GetId(), subTitle->GetId());
 }
 
 /**
@@ -1376,7 +1195,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
     ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->HasTitleHeight());
 
     // subtitle_
-    navBar->subtitle_ = subTitle;
     layoutProperty->propHideTitleBar_ = false;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = std::nullopt;
     layoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
@@ -1392,7 +1210,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
     ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->HasTitleHeight());
 
     titleBarNode->GetPattern<TitleBarPattern>()->tempTitleBarHeight_ = 5.0f;
-    navBar->subtitle_ = nullptr;
     layoutProperty->propHideTitleBar_ = false;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = std::nullopt;
     layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
@@ -1401,7 +1218,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
     ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->HasTitleHeight());
 
     titleBarNode->GetPattern<TitleBarPattern>()->tempTitleBarHeight_ = 5.0f;
-    navBar->subtitle_ = subTitle;
     layoutProperty->propHideTitleBar_ = false;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = std::nullopt;
     layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
@@ -1410,109 +1226,12 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
     ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->HasTitleHeight());
 
     titleBarNode->GetPattern<TitleBarPattern>()->tempTitleBarHeight_ = 0.0f;
-    navBar->subtitle_ = nullptr;
     layoutProperty->propHideTitleBar_ = false;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = std::nullopt;
     layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
     ASSERT_FALSE(layoutProperty->propHideTitleBar_.value());
     ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->HasTitleHeight());
-}
-
-/**
- * @tc.name: NavrouterTestNg0031
- * @tc.desc: Test NavBarPattern::OnModifyDone.
- * @tc.type: FUNC
- */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0031, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create navBar.
-     */
-    auto navBar =
-        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-        "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ButtonPattern>());
-    auto menu = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<ButtonPattern>());
-    auto subtitle = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<ButtonPattern>());
-    auto title = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<ButtonPattern>());
-    auto toolBarNode = FrameNode::CreateFrameNode("BackButton", 44, AceType::MakeRefPtr<ButtonPattern>());
-
-    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 55, AceType::MakeRefPtr<ButtonPattern>());
-
-    auto pattern = navBar->GetPattern<NavBarPattern>();
-
-    navBar->toolBarNode_ = toolBarNode;
-    navBar->titleBarNode_ = titleBarNode;
-    /**
-     * @tc.steps: step2. call pattern->OnModifyDone();.
-     */
-    navBar->backButton_ = backButton;
-    pattern->OnModifyDone();
-    navBar->propToolBarNodeOperation_ = ChildNodeOperation::REPLACE;
-    navBar->GetLayoutProperty<NavBarLayoutProperty>()->propHideTitleBar_ = true;
-    navBar->GetLayoutProperty<NavBarLayoutProperty>()->propHideToolBar_ = true;
-    pattern->OnModifyDone();
-    ASSERT_EQ(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propVisibility_.value(), VisibleType::GONE);
-    navBar->menu_ = menu;
-    navBar->propBackButtonNodeOperation_ = ChildNodeOperation::NONE;
-    pattern->OnModifyDone();
-    ASSERT_EQ(navBar->title_, nullptr);
-    ASSERT_EQ(navBar->subtitle_, nullptr);
-    ASSERT_NE(navBar->menu_, nullptr);
-    ASSERT_NE(navBar->backButton_, nullptr);
-
-    navBar->subtitle_ = subtitle;
-    navBar->propBackButtonNodeOperation_ = ChildNodeOperation::ADD;
-    pattern->OnModifyDone();
-    ASSERT_EQ(navBar->title_, nullptr);
-    ASSERT_NE(navBar->subtitle_, nullptr);
-    ASSERT_NE(navBar->menu_, nullptr);
-    ASSERT_NE(navBar->backButton_, nullptr);
-
-    navBar->title_ = title;
-    navBar->propBackButtonNodeOperation_ = ChildNodeOperation::REMOVE;
-    pattern->OnModifyDone();
-    ASSERT_NE(navBar->title_, nullptr);
-    ASSERT_NE(navBar->subtitle_, nullptr);
-    ASSERT_NE(navBar->menu_, nullptr);
-    ASSERT_NE(navBar->backButton_, nullptr);
-    ASSERT_EQ(
-        AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton())->GetLayoutProperty()->propVisibility_.value(),
-        VisibleType::GONE);
-
-    ASSERT_NE(titleBarNode->GetBackButton(), nullptr);
-    ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->GetHideBackButtonValue(false));
-    navBar->propBackButtonNodeOperation_ = ChildNodeOperation::REPLACE;
-    navBar->GetLayoutProperty<NavBarLayoutProperty>()->propTitleMode_ = NavigationTitleMode::MINI;
-    navBar->propTitleNodeOperation_ = ChildNodeOperation::ADD;
-    navBar->propSubtitleNodeOperation_ = ChildNodeOperation::ADD;
-    navBar->propMenuNodeOperation_ = ChildNodeOperation::ADD;
-    pattern->OnModifyDone();
-    ASSERT_NE(navBar->title_, nullptr);
-    ASSERT_NE(navBar->subtitle_, nullptr);
-    ASSERT_NE(navBar->menu_, nullptr);
-    ASSERT_NE(navBar->backButton_, nullptr);
-    ASSERT_EQ(
-        AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton())->GetLayoutProperty()->propVisibility_.value(),
-        VisibleType::VISIBLE);
-
-    ASSERT_NE(titleBarNode->GetBackButton(), nullptr);
-    ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->GetHideBackButtonValue(false));
-    navBar->propBackButtonNodeOperation_ = ChildNodeOperation::REPLACE;
-    navBar->GetLayoutProperty<NavBarLayoutProperty>()->propTitleMode_ = NavigationTitleMode::MINI;
-    navBar->propTitleNodeOperation_ = ChildNodeOperation::REPLACE;
-    navBar->propSubtitleNodeOperation_ = ChildNodeOperation::REPLACE;
-    navBar->propMenuNodeOperation_ = ChildNodeOperation::REPLACE;
-    pattern->OnModifyDone();
-    ASSERT_NE(navBar->title_, nullptr);
-    ASSERT_NE(navBar->subtitle_, nullptr);
-    ASSERT_NE(navBar->menu_, nullptr);
-    ASSERT_NE(navBar->backButton_, nullptr);
-    ASSERT_EQ(
-        AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton())->GetLayoutProperty()->propVisibility_.value(),
-        VisibleType::VISIBLE);
 }
 
 /**

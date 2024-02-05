@@ -63,6 +63,7 @@ constexpr int32_t OPACITY_BACKBUTTON_IN_DURATION = 200;
 constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
 constexpr int32_t DEFAULT_REPLACE_DURATION = 150;
+const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const RefPtr<InterpolatingSpring> springCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
 const RefPtr<CubicCurve> replaceCurve = AceType::MakeRefPtr<CubicCurve>(0.33, 0.0, 0.67, 1.0);
 } // namespace
@@ -153,8 +154,6 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
                 pattern->DeleteOnStateChangeItem(iter->first);
             }
         }
-        hasChanged =
-            UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size());
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
         if (childIndex < 0) {
             navigationContentNode->AddChild(navDestination, slot);
@@ -164,6 +163,14 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             hasChanged = true;
         }
         slot++;
+    }
+
+    for (int32_t i = static_cast<int32_t>(navDestinationNodes.size()) - 1; i >= 0; --i) {
+        const auto& childNode = navDestinationNodes[i];
+        const auto& uiNode = childNode.second;
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
+        hasChanged = (UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size())
+         || hasChanged);
     }
 
     while (static_cast<size_t>(slot) < navigationContentNode->GetChildren().size()) {
@@ -414,6 +421,10 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
                 preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
             }
 
+            if (!preNavDesNode->IsCacheNode() && preNavDesNode->GetContentNode()) {
+                preNavDesNode->GetContentNode()->Clean();
+            }
+
             auto parent = preNavDesNode->GetParent();
             CHECK_NULL_VOID(parent);
             parent->RemoveChild(preNavDesNode);
@@ -469,7 +480,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             nullptr);
         curNode->GetRenderContext()->SetActualForegroundColor(MASK_COLOR);
         AnimationUtils::Animate(
-            maskOption, [curNode]() { curNode->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR); });
+            maskOption, [curNode]() { curNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT); });
     }
 
     // clear this flag for navBar layout only
@@ -524,7 +535,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 preTitle->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
             }
             preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-            preNode->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+            preNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
             bool needSetInvisible = false;
             if (isNavBar) {
                 needSetInvisible = AceType::DynamicCast<NavBarNode>(preNode)->GetTransitionType() ==
@@ -628,7 +639,7 @@ void NavigationGroupNode::MaskAnimation(const RefPtr<RenderContext>& transitionO
     maskOption.SetCurve(Curves::FRICTION);
     maskOption.SetDuration(MASK_DURATION);
     maskOption.SetFillMode(FillMode::FORWARDS);
-    transitionOutNodeContext->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+    transitionOutNodeContext->SetActualForegroundColor(Color::TRANSPARENT);
     AnimationUtils::Animate(
         maskOption, [transitionOutNodeContext]() { transitionOutNodeContext->SetActualForegroundColor(MASK_COLOR); },
         maskOption.GetOnFinishEvent());
@@ -800,8 +811,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     }
     if (index < lastStandardIndex_) {
         auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
-        if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild &&
-            !navDestination->IsOnAnimation()) {
+        if (!navDestination->IsOnAnimation()) {
             if (pattern && pattern->GetIsOnShow()) {
                 // fire hidden event
                 eventHub->FireOnHiddenEvent(pattern->GetName());
@@ -809,8 +819,10 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
                 pattern->SetIsOnShow(false);
                 NavigationPattern::FireNavigationStateChange(navDestination, false);
             }
-            navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-            navDestination->SetJSViewActive(false);
+            if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild) {
+                navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                navDestination->SetJSViewActive(false);
+            }
         }
         return false;
     }

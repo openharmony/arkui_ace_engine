@@ -988,14 +988,14 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
      */
     overlayManager->HideCustomPopups();
     EXPECT_FALSE(overlayManager->popupMap_.empty());
-    EXPECT_FALSE(rootNode->GetChildren().empty());
+    EXPECT_TRUE(rootNode->GetChildren().empty());
     /**
      * @tc.steps: step4. call RemoveOverlay when childCount is 2
      * @tc.expected: remove one popupNode at a time
      */
     overlayManager->HidePopup(targetId1, popups[0]);
     overlayManager->HidePopup(targetId2, popups[1]);
-    EXPECT_TRUE(overlayManager->RemoveOverlay(false));
+    EXPECT_FALSE(overlayManager->RemoveOverlay(false));
     EXPECT_FALSE(overlayManager->popupMap_.empty());
     overlayManager->ErasePopup(targetId1);
     overlayManager->ErasePopup(targetId2);
@@ -1045,7 +1045,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest003, TestSize.Level1)
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
-    EXPECT_TRUE(iter == rootChildren.begin());
+    EXPECT_TRUE(iter == rootChildren.end());
 }
 /**
  * @tc.name: MenuTest001
@@ -1087,7 +1087,7 @@ HWTEST_F(OverlayManagerTestNg, MenuTest001, TestSize.Level1)
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
     EXPECT_FALSE(overlayManager->menuMap_.empty());
-    overlayManager->SetShowMenuAnimation(menuNode, true);
+    overlayManager->ShowMenuAnimation(menuNode);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
@@ -1280,7 +1280,7 @@ HWTEST_F(OverlayManagerTestNg, MenuTest004, TestSize.Level1)
 
 /**
  * @tc.name: MenuTest005
- * @tc.desc: Test OverlayManager::SetShowMenuAnimation.
+ * @tc.desc: Test OverlayManager::ShowMenuAnimation.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestNg, MenuTest005, TestSize.Level1)
@@ -1311,10 +1311,10 @@ HWTEST_F(OverlayManagerTestNg, MenuTest005, TestSize.Level1)
     focusHub->parentFocusable_ = false;
     menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
     /**
-     * @tc.steps: step2. call SetShowMenuAnimation and call StartShowAnimation of menu pattern
+     * @tc.steps: step2. call ShowMenuAnimation and call StartShowAnimation of menu pattern
      * @tc.expected: the isFirstShow_ of preview pattern true and parentFocusable_ of menuWrapper's focus hub is true
      */
-    overlayManager->SetShowMenuAnimation(menuWrapperNode, false);
+    overlayManager->ShowMenuAnimation(menuWrapperNode);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     menuWrapperPattern->StartShowAnimation();
     pipeline->taskExecutor_ = nullptr;
@@ -1426,7 +1426,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest004, TestSize.Level1)
     overlayManager->ShowPopup(targetId, popupInfo);
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
-    EXPECT_FALSE(rootNode->GetChildren().empty());
+    EXPECT_TRUE(rootNode->GetChildren().empty());
     /**
      * @tc.steps: step3. update ShowInSubwindow and call HideAllPopups again.
      * @tc.expected: popupMap's data is updated successfully
@@ -2215,12 +2215,12 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     EXPECT_TRUE(NearEqual(topSheetPattern->currentOffset_, -10));
 
     /**
-     * @tc.steps: step5. Do OnCoordScrollUpdate when scrollOffset < 0 .
-     * @tc.expected: return true
+     * @tc.steps: step5. Do OnCoordScrollUpdate when scrollOffset < 0 and showstate = true.
+     * @tc.expected: return false
      */
     topSheetPattern->OnCoordScrollEnd(*topSheetPattern->sheetDetentHeight_.end());
     auto ret = topSheetPattern->OnCoordScrollUpdate(*topSheetPattern->sheetDetentHeight_.end());
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 /**
  * @tc.name: TestOnBindSheet

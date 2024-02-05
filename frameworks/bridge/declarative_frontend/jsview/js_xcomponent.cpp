@@ -22,9 +22,11 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #include "bridge/declarative_frontend/jsview/models/xcomponent_model_impl.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "frameworks/core/components_ng/base/view_abstract_model.h"
 #include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 namespace OHOS::Ace {
@@ -358,10 +360,17 @@ void JSXComponent::JsOnBlur(const JSCallbackInfo& args)
 void JSXComponent::JsBackgroundColor(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type == XComponentType::SURFACE || type == XComponentType::COMPONENT) {
+    if (type == XComponentType::COMPONENT) {
         return;
     }
-    JSViewAbstract::JsBackgroundColor(args);
+    if (args.Length() < 1) {
+        return;
+    }
+    Color backgroundColor;
+    if (!ParseJsColor(args[0], backgroundColor)) {
+        backgroundColor = (type == XComponentType::SURFACE) ? Color::BLACK : Color::TRANSPARENT;
+    }
+    ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
 void JSXComponent::JsBackgroundImage(const JSCallbackInfo& args)

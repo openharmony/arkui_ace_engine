@@ -4896,4 +4896,11 @@ void RosenRenderContext::SetCommandPathMask(
     std::shared_ptr<RSMask> mask = RSMask::CreatePathMask(path, pen, brush);
     rsNode_->SetMask(mask);
 }
+
+void RosenRenderContext::ResetSurface()
+{
+    auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
+    CHECK_NULL_VOID(rsCanvasDrawingNode);
+    rsCanvasDrawingNode->ResetSurface();
+}
 } // namespace OHOS::Ace::NG

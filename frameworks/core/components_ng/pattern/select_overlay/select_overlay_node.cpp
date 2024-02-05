@@ -95,6 +95,7 @@ float MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
 #endif
 }
 
+#ifdef OHOS_PLATFORM
 RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_t overlayId,
     float& buttonWidth, bool isSelectAll = false)
 {
@@ -149,6 +150,7 @@ RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_
     pasteButton->MarkModifyDone();
     return pasteButton;
 }
+#endif
 
 RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void()>& callback, int32_t overlayId,
     float& buttonWidth, bool isSelectAll = false)
@@ -986,7 +988,12 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     }
     if (info->menuInfo.showPaste) {
         float buttonWidth = 0.0f;
+#ifdef OHOS_PLATFORM
         auto button = BuildPasteButton(info->menuCallback.onPaste, GetId(), buttonWidth);
+#else
+        auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE),
+            info->menuCallback.onPaste, GetId(), buttonWidth);
+#endif
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;

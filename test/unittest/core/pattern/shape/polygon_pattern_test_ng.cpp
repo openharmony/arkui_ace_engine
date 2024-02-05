@@ -64,6 +64,16 @@ public:
         EXPECT_EQ(contentDraw == nullptr, false);
         std::shared_ptr<SkCanvas> canvas = std::make_shared<SkCanvas>();
         Testing::MockCanvas rsCavas(&canvas);
+        auto shapePaintProperty = AceType::DynamicCast<PolygonPaintProperty>(paintWrapper->GetPaintProperty()->Clone());
+        if (shapePaintProperty->HasPoints() && !shapePaintProperty->GetPoints()->empty()) {
+            if (!shapePaintProperty->HasStrokeWidth() || !NearZero(shapePaintProperty->GetStrokeWidth()->Value())) {
+                EXPECT_CALL(rsCavas, AttachPen(_)).WillOnce(ReturnRef(rsCavas));
+            }
+            EXPECT_CALL(rsCavas, AttachBrush(_)).WillOnce(ReturnRef(rsCavas));
+            EXPECT_CALL(rsCavas, DrawPath(_)).WillOnce(Return());
+            EXPECT_CALL(rsCavas, DetachPen()).WillOnce(ReturnRef(rsCavas));
+            EXPECT_CALL(rsCavas, DetachBrush()).WillOnce(ReturnRef(rsCavas));
+        }
         contentDraw(rsCavas);
     }
 

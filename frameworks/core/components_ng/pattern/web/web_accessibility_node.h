@@ -30,6 +30,23 @@ public:
         webNode_ = WeakPtr(webNode);
         accessibilityNodeInfo_.pageId = webNode->GetPageId();
         accessibilityNodeInfo_.selected = false;
+        accessibilityNodeInfo_.focused = false;
+        accessibilityNodeInfo_.heading = false;
+        accessibilityNodeInfo_.checked = false;
+        accessibilityNodeInfo_.editable = false;
+        accessibilityNodeInfo_.enabled = false;
+        accessibilityNodeInfo_.checkable = false;
+        accessibilityNodeInfo_.clickable = false;
+        accessibilityNodeInfo_.focusable = false;
+        accessibilityNodeInfo_.scrollable = false;
+        accessibilityNodeInfo_.password = false;
+        accessibilityNodeInfo_.visible = false;
+        accessibilityNodeInfo_.hinting = false;
+        accessibilityNodeInfo_.pluralLineSupported = false;
+        accessibilityNodeInfo_.popupSupported = false;
+        accessibilityNodeInfo_.contentInvalid = false;
+        accessibilityNodeInfo_.deletable = false;
+        accessibilityNodeInfo_.accessibilityFocus = false;
     }
     ~WebAccessibilityNode()
     {

@@ -857,8 +857,8 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         if (LessNotEqual(menuRadius, idealSize.Width())) {
             radius = borderRadius;
         }
+        renderContext->UpdateBorderRadius(radius);
     }
-    renderContext->UpdateBorderRadius(radius);
     return true;
 }
 

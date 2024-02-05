@@ -90,6 +90,7 @@ void JSSwiper::Create(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSwiperController>();
         if (jsController) {
+            jsController->SetInstanceId(Container::CurrentId());
             jsController->SetController(controller);
         }
     }
@@ -1027,6 +1028,7 @@ void JSSwiperController::Destructor(JSSwiperController* scroller)
 
 void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
 {
+    ContainerScope scope(instanceId_);
     if (!controller_) {
         return;
     }
