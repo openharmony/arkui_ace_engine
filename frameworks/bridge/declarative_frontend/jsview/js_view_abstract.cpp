@@ -1574,6 +1574,18 @@ NG::TransitionOptions JSViewAbstract::ParseJsTransition(const JSRef<JSVal>& tran
     return transitionOption;
 }
 
+RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseJsTransitionEffect(const JSCallbackInfo& info)
+{
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    auto transitionVal = obj->GetProperty("transition");
+    if (!transitionVal->IsObject()) {
+        return nullptr;
+    }
+    auto transitionObj = JSRef<JSObject>::Cast(transitionVal);
+    auto chainedEffect = ParseChainedTransition(transitionObj, info.GetExecutionContext());
+    return chainedEffect;
+}
+
 void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
     if (info.Length() > 1) {

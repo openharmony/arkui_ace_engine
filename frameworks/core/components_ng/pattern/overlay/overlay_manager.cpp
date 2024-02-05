@@ -459,6 +459,78 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     pipeline->RequestFrame();
 }
 
+void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "set dialog transition");
+    CHECK_NULL_VOID(node);
+    auto root = rootNodeWeak_.Upgrade();
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    dialogPattern->CallDialogWillAppearCallback();
+
+    auto layoutProperty = node->GetLayoutProperty();
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+
+    auto ctx = node->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    ctx->SetTransitionInCallback(
+        [weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node)] {
+            auto overlayManager = weak.Upgrade();
+            auto node = nodeWK.Upgrade();
+            CHECK_NULL_VOID(overlayManager && node);
+            overlayManager->FocusOverlayNode(node);
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            dialogPattern->CallDialogDidAppearCallback();
+        }
+    );
+
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        root = dialogPattern->GetDialogProperties().windowScene.Upgrade();
+    }
+
+    CHECK_NULL_VOID(root);
+    node->MountToParent(root);
+    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    BlurLowerNode(node);
+    node->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+}
+
+void OverlayManager::CloseDialogMatchTransition(const RefPtr<FrameNode>& node)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close dialog match transition");
+    CHECK_NULL_VOID(node);
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_KEYBOARD };
+    node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    dialogPattern->CallDialogWillDisappearCallback();
+
+    auto ctx = node->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    auto layoutProperty = node->GetLayoutProperty();
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
+    if (ctx->HasDisappearTransition()) {
+        ctx->SetTransitionOutCallback(
+            [weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), id = Container::CurrentId()] {
+                ContainerScope scope(id);
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->PostDialogFinishEvent(nodeWk);
+                auto node = nodeWk.Upgrade();
+                CHECK_NULL_VOID(node);
+                auto dialogPattern = node->GetPattern<DialogPattern>();
+                dialogPattern->CallDialogDidDisappearCallback();
+        });
+    } else {
+        auto id = Container::CurrentId();
+        ContainerScope scope(id);
+        auto overlayManager = WeakClaim(this).Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        auto nodeWk = WeakPtr<FrameNode>(node);
+        overlayManager->PostDialogFinishEvent(nodeWk);
+        dialogPattern->CallDialogDidDisappearCallback();
+    }
+}
+
 void OverlayManager::SetContainerButtonEnable(bool isEnabled)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1478,7 +1550,11 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
     BeforeShowDialog(dialog);
-    OpenDialogAnimation(dialog);
+    if (dialogProps.transitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog);
+    } else {
+        OpenDialogAnimation(dialog);
+    }
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
@@ -1766,7 +1842,13 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->ResetLowerNodeFocusable(dialogNode);
-    CloseDialogAnimation(dialogNode);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto transitionEffect = dialogPattern->GetDialogProperties().transitionEffect;
+    if (transitionEffect != nullptr) {
+        CloseDialogMatchTransition(dialogNode);
+    } else {
+        CloseDialogAnimation(dialogNode);
+    }
     dialogCount_--;
     // set close button enable
     if (dialogCount_ == 0) {
