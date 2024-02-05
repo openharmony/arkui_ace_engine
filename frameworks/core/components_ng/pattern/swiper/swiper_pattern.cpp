@@ -2221,7 +2221,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(bool isFinishAnimation, bool 
     OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation, true);
 }
 
-RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion() const
+RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
 {
     auto curve = GetCurve();
     auto container = Container::Current();
@@ -2229,6 +2229,11 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion() const
     if (!curve && !isLauncherFeature) {
         curve = Curves::LINEAR;
     }
+
+    if (isLauncherFeature) {
+        finishCallbackType_ = FinishCallbackType::LOGICALLY;
+    }
+
     if (curve) {
         if (InstanceOf<SpringCurve>(curve)) {
             auto springCurve = DynamicCast<SpringCurve>(curve);
