@@ -69,7 +69,7 @@ const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Defau
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
-constexpr double DIFF = 1e-14;
+constexpr double DIFF = 1e-10;
 template<typename T>
 inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
 {
