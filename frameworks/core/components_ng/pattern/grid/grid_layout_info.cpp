@@ -522,11 +522,11 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
     if (gridMatrix_.find(endLine) == gridMatrix_.end()) {
         return {};
     }
-    for (int r = endLine; r >= 0; --r) {
-        const auto& row = gridMatrix_.at(r);
+    for (int32_t rowIdx = endLine; rowIdx >= 0; --rowIdx) {
+        const auto& row = gridMatrix_.at(rowIdx);
         for (auto it = row.rbegin(); it != row.rend(); ++it) {
             if (it->second > 0) {
-                return { .itemIdx = it->second, .y = r, .x = it->first };
+                return { .itemIdx = it->second, .y = rowIdx, .x = it->first };
             }
         }
     }
