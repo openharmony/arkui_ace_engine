@@ -254,7 +254,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED) {
         if (currentFingers_ == fingers_) {
-            ResSchedReport::GetInstance().ResSchedDataReport("click");
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
             averageDistance_.Reset();
