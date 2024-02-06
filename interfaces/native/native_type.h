@@ -1049,6 +1049,54 @@ typedef enum {
     ARKUI_CALENDAR_ALIGNMENT_END,
 } ArkUI_CalendarAlignment;
 
+/**
+ * @brief 遮罩类型枚举。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 矩形类型。 */
+    ARKUI_MASK_TYPE_RECT = 0,
+    /** 圆形类型。 */
+    ARKUI_MASK_TYPE_CIRCLE,
+    /** 椭圆形类型。 */
+    ARKUI_MASK_TYPE_ELLIPSE,
+    /** 路径类型。 */
+    ARKUI_MASK_TYPE_PATH,
+    /** 进度类型。 */
+    ARKUI_MASK_TYPE_PROGRESS,
+} ArkUI_MaskType;
+
+/**
+ * @brief 裁剪类型枚举。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 矩形类型。 */
+    ARKUI_CLIP_TYPE_RECT = 0,
+    /** 圆形类型。 */
+    ARKUI_CLIP_TYPE_CIRCLE,
+    /** 椭圆形类型。 */
+    ARKUI_CLIP_TYPE_ELLIPSE,
+    /** 路径类型。 */
+    ARKUI_CLIP_TYPE_PATH,
+} ArkUI_ClipType;
+
+/**
+ * @brief 定义渐变色结构。
+ *
+ * @since 12
+ */
+typedef struct {
+    /** 颜色数组。*/
+    const uint32_t* colors;
+    /** 位置数组。*/
+    float* stops;
+    /** 数组长度。*/
+    int size;
+} ArkUI_ColorStop;
+
 #ifdef __cplusplus
 };
 #endif

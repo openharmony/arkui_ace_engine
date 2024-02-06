@@ -43,6 +43,9 @@ public:
     static void ResetWidth(FrameNode* frameNode);
     static void SetHeight(FrameNode* frameNode, Dimension& height);
     static void ResetHeight(FrameNode* frameNode);
+    static void SetStroke(FrameNode* frameNode, const Color& color);
+    static void SetFill(FrameNode* frameNode, const Color& color);
+    static void SetStrokeWidth(FrameNode* frameNode, const Ace::Dimension& lineWidth);
 };
 
 } // namespace OHOS::Ace::NG
