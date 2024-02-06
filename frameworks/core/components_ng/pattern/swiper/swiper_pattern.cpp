@@ -154,7 +154,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 
 void SwiperPattern::OnIndexChange()
 {
-    auto totalCount = TotalCount();
+    auto totalCount = RealTotalCount();
     if (NonPositive(totalCount)) {
         return;
     }
@@ -316,7 +316,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     oldIndex_ = currentIndex_;
     auto userSetCurrentIndex = CurrentIndex();
     auto oldIndex = GetLoopIndex(oldIndex_);
-    if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != TotalCount()) {
+    if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != RealTotalCount()) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
         if (HasIndicatorNode()) {
             StopIndicatorAnimation();
@@ -325,6 +325,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             auto indicatorNode = DynamicCast<FrameNode>(
                 host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
             if (indicatorNode && indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+                indicatorNode->MarkModifyDone();
                 indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             }
         }
@@ -752,7 +753,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     endIndex_ = swiperLayoutAlgorithm->GetEndIndex();
     crossMatchChild_ = swiperLayoutAlgorithm->IsCrossMatchChild();
     oldIndex_ = currentIndex_;
-    oldChildrenSize_ = TotalCount();
+    oldChildrenSize_ = RealTotalCount();
 
     if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
         StartAutoPlay();
