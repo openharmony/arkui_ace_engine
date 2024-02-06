@@ -2005,7 +2005,9 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     if (needToResetKeyboard) {
         // if keyboard attached and keyboard is shown, pull up keyboard again
         if (imeShown_ || isCustomKeyboardAttached_) {
-            RequestKeyboard(false, true, true);
+            if (HasFocus()) {
+                RequestKeyboard(false, true, true);
+            }
             return;
         }
 #if defined(ENABLE_STANDARD_INPUT)
