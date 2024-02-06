@@ -313,7 +313,10 @@ public:
     static void JsHueRotate(const JSCallbackInfo& info);
 
     static void JsClip(const JSCallbackInfo& info);
+    static void JsClipShape(const JSCallbackInfo& info);
+
     static void JsMask(const JSCallbackInfo& info);
+    static void JsMaskShape(const JSCallbackInfo& info);
 
     static void JsKey(const std::string& key);
     static void JsId(const JSCallbackInfo& info);

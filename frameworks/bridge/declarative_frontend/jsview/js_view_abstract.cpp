@@ -5871,6 +5871,17 @@ void JSViewAbstract::JsClip(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsClipShape(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject()) {
+        JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+        if (clipShape == nullptr) {
+            return;
+        }
+        ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
+    }
+}
+
 void JSViewAbstract::JsMask(const JSCallbackInfo& info)
 {
     JSRef<JSVal> arg = info[0];
@@ -5915,6 +5926,19 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
         };
         ViewAbstractModel::GetInstance()->SetMask(maskShape->GetBasicShape());
     }
+}
+
+void JSViewAbstract::JsMaskShape(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+    if (maskShape == nullptr) {
+        return;
+    };
+    ViewAbstractModel::GetInstance()->SetMask(maskShape->GetBasicShape());
 }
 
 void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
@@ -6992,7 +7016,9 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("systemBarEffect", &JSViewAbstract::JsSystemBarEffect);
     JSClass<JSViewAbstract>::StaticMethod("hueRotate", &JSViewAbstract::JsHueRotate);
     JSClass<JSViewAbstract>::StaticMethod("clip", &JSViewAbstract::JsClip);
+    JSClass<JSViewAbstract>::StaticMethod("clipShape", &JSViewAbstract::JsClip);
     JSClass<JSViewAbstract>::StaticMethod("mask", &JSViewAbstract::JsMask);
+    JSClass<JSViewAbstract>::StaticMethod("maskShape", &JSViewAbstract::JsMask);
     JSClass<JSViewAbstract>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSViewAbstract>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSViewAbstract>::StaticMethod("restoreId", &JSViewAbstract::JsRestoreId);

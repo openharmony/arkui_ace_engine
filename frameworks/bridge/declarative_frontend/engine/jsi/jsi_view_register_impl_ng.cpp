@@ -46,6 +46,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
@@ -58,6 +59,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_ellipse_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
@@ -100,6 +102,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_path_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
@@ -107,6 +110,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
@@ -484,6 +488,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSScrollBar::JSBind(globalObj);
     JSButton::JSBind(globalObj);
     JSRadio::JSBind(globalObj);
+    JSRectShape::JSBind(globalObj);
+    JSEllipseShape::JSBind(globalObj);
+    JSCircleShape::JSBind(globalObj);
+    JSPathShape::JSBind(globalObj);
     JSRect::JSBind(globalObj);
     JSAnimator::JSBind(globalObj);
     JSCanvas::JSBind(globalObj);
