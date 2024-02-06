@@ -973,7 +973,11 @@ void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo,
     elementInfo = elementInfos.front();
 }
 
-void FillEventInfo(const RefPtr<NG::FrameNode>& node, AccessibilityEventInfo& eventInfo)
+void FillEventInfo(const RefPtr<NG::FrameNode>& node,
+                   AccessibilityEventInfo& eventInfo,
+                   const RefPtr<PipelineBase>& context,
+                   int64_t elementId,
+                   const RefPtr<JsAccessibilityManager>& jsAccessibilityManager)
 {
     CHECK_NULL_VOID(node);
     if (node->GetTag() == V2::WEB_CORE_TAG) {
@@ -983,6 +987,9 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node, AccessibilityEventInfo& ev
         eventInfo.SetComponentType(nodeInfo.componentType);
         eventInfo.SetPageId(nodeInfo.pageId);
         eventInfo.AddContent(nodeInfo.content);
+        AccessibilityElementInfo elementInfo;
+        FillElementInfo(elementId, elementInfo, context, jsAccessibilityManager);
+        eventInfo.SetElementInfo(elementInfo);
         return;
     }
     eventInfo.SetComponentType(node->GetTag());
@@ -993,6 +1000,9 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node, AccessibilityEventInfo& ev
     eventInfo.SetItemCounts(accessibilityProperty->GetCollectionItemCounts());
     eventInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
     eventInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
+    AccessibilityElementInfo elementInfo;
+    FillElementInfo(elementId, elementInfo, context, jsAccessibilityManager);
+    eventInfo.SetElementInfo(elementInfo);
 }
 
 void FillEventInfo(const RefPtr<AccessibilityNode>& node, AccessibilityEventInfo& eventInfo)
@@ -1883,8 +1893,7 @@ bool IsExtensionSendAccessibilitySyncEvent()
     return isEnabled;
 }
 
-void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo& eventInfo,
-    const RefPtr<PipelineBase>& context, const RefPtr<JsAccessibilityManager>& jsAccessibilityManager)
+void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo& eventInfo)
 {
     Accessibility::EventType type = Accessibility::EventType::TYPE_VIEW_INVALID;
     if (accessibilityEvent.type != AccessibilityEventType::UNKNOWN) {
@@ -1908,9 +1917,6 @@ void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent
     eventInfo.SetCurrentIndex(static_cast<int>(accessibilityEvent.currentItemIndex));
     eventInfo.SetItemCounts(static_cast<int>(accessibilityEvent.itemCount));
     eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
-    AccessibilityElementInfo elementInfo;
-    FillElementInfo(eventInfo.GetAccessibilityId(), elementInfo, context, jsAccessibilityManager);
-    eventInfo.SetElementInfo(elementInfo);
 }
 
 } // namespace
@@ -2051,11 +2057,12 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d aid:%{public}lld",
         eventInfo.GetEventType(), static_cast<int64_t>(eventInfo.GetAccessibilityId()));
     auto elementInfo = eventInfo.GetElementInfo();
-    CHECK_NULL_RETURN(elementInfo, false);
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "The element info bundleName: %{public}s, elementId: %{public}" PRId64
-        ", componentType: %{public}s, text: %{public}s", elementInfo->GetBundleName().c_str(),
-        static_cast<int64_t>(elementInfo->GetAccessibilityId()), elementInfo->GetComponentType().c_str(),
-        elementInfo->GetContent().c_str());
+    if (elementInfo != nullptr) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "The element info bundleName: %{public}s, elementId: %{public}" PRId64
+            ", componentType: %{public}s, text: %{public}s", elementInfo->GetBundleName().c_str(),
+            static_cast<int64_t>(elementInfo->GetAccessibilityId()), elementInfo->GetComponentType().c_str(),
+            elementInfo->GetContent().c_str());
+    }
     return client->SendEvent(eventInfo);
 }
 
@@ -2115,7 +2122,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
         auto ngPipeline = FindPipelineByElementId(accessibilityEvent.nodeId, node);
         CHECK_NULL_VOID(ngPipeline);
         CHECK_NULL_VOID(node);
-        FillEventInfo(node, eventInfo);
+        FillEventInfo(node, eventInfo, ngPipeline, accessibilityEvent.nodeId, Claim(this));
     } else {
         auto node = GetAccessibilityNodeFromPage(accessibilityEvent.nodeId);
         CHECK_NULL_VOID(node);
@@ -2127,7 +2134,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
 
-    GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo, context, Claim(this));
+    GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
 
     if (IsExtensionSendAccessibilitySyncEvent()) {
         SendExtensionAccessibilitySyncEvent(accessibilityEvent, eventInfo);
