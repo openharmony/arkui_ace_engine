@@ -37,7 +37,7 @@ class NavDestinationPattern : public Pattern {
 public:
     explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
     NavDestinationPattern() = default;
-    ~NavDestinationPattern() override = default;
+    ~NavDestinationPattern() override;
 
     bool IsAtomicNode() const override
     {
@@ -114,14 +114,14 @@ public:
         return navDestinationContext_;
     }
 
-    void SetNavDestinationNode(const RefPtr<UINode>& navDestinationNode)
+    void SetCustomNode(const RefPtr<UINode>& customNode)
     {
-        navDestinationNode_ = navDestinationNode;
+        customNode_ = customNode;
     }
 
-    RefPtr<UINode> GetNavDestinationNode()
+    RefPtr<UINode> GetCustomNode()
     {
-        return navDestinationNode_.Upgrade();
+        return customNode_;
     }
 
     FocusPattern GetFocusPattern() const override
@@ -158,7 +158,7 @@ private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
     RefPtr<NavDestinationContext> navDestinationContext_;
-    WeakPtr<UINode> navDestinationNode_;
+    RefPtr<UINode> customNode_;
     WeakPtr<UINode> navigationNode_;
     bool isOnShow_ = false;
     void OnAttachToFrameNode() override;

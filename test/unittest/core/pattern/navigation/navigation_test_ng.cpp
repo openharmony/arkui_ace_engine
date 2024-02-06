@@ -2351,19 +2351,19 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0015, TestSize.Level1)
     navigationPattern->navigationStack_->Add("navDestination3", navDestination3);
 
     auto pattern5 = navDestination5->GetPattern<NavDestinationPattern>();
-    pattern5->navDestinationNode_ = AceType::WeakClaim(AceType::RawPtr(navDestination5));
+    pattern5->customNode_ = AceType::RawPtr(navDestination5);
 
     pattern5->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
         []() { return FrameNode::CreateFrameNode("temp", 234, AceType::MakeRefPtr<ButtonPattern>()); });
     navDestination5->contentNode_ = FrameNode::CreateFrameNode("temp", 235, AceType::MakeRefPtr<ButtonPattern>());
 
     auto pattern6 = navDestination6->GetPattern<NavDestinationPattern>();
-    pattern6->navDestinationNode_ = AceType::WeakClaim(AceType::RawPtr(navDestination6));
+    pattern6->customNode_ = AceType::RawPtr(navDestination6);
 
     auto pattern7 = navDestination7->GetPattern<NavDestinationPattern>();
-    pattern7->navDestinationNode_ = AceType::WeakClaim(AceType::RawPtr(navDestination7));
+    pattern7->customNode_ = AceType::RawPtr(navDestination7);
 
-    ASSERT_NE(navDestination7->GetPattern<NavDestinationPattern>()->GetNavDestinationNode(), nullptr);
+    ASSERT_NE(navDestination7->GetPattern<NavDestinationPattern>()->GetCustomNode(), nullptr);
     /**
      * @tc.steps: step4. add element to navigationContentNode->children_.
      */
@@ -2486,20 +2486,20 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0018, TestSize.Level1)
         "NavDestination", 163, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
 
     auto pattern5 = navDestination5->GetPattern<NavDestinationPattern>();
-    pattern5->navDestinationNode_ = AceType::WeakClaim(AceType::RawPtr(navDestination5));
+    pattern5->customNode_ = AceType::RawPtr(navDestination5);
 
     pattern5->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
         []() { return FrameNode::CreateFrameNode("temp", 236, AceType::MakeRefPtr<ButtonPattern>()); });
     navDestination5->contentNode_ = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
 
     auto pattern6 = navDestination6->GetPattern<NavDestinationPattern>();
-    pattern6->navDestinationNode_ = AceType::WeakClaim(AceType::RawPtr(navDestination6));
+    pattern6->customNode_ = AceType::RawPtr(navDestination6);
 
     auto pattern7 = navDestination7->GetPattern<NavDestinationPattern>();
-    pattern7->navDestinationNode_ = AceType::WeakClaim(AceType::RawPtr(temp));
+    pattern7->customNode_ = AceType::RawPtr(temp);
     navDestination7->eventHub_ = nullptr;
 
-    ASSERT_NE(navDestination7->GetPattern<NavDestinationPattern>()->GetNavDestinationNode(), nullptr);
+    ASSERT_NE(navDestination7->GetPattern<NavDestinationPattern>()->GetCustomNode(), nullptr);
     /**
      * @tc.steps: step4. add element to navigationContentNode->children_.
      */
