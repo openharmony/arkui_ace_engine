@@ -383,8 +383,6 @@ void ImagePattern::LoadImageDataIfNeed()
 {
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
@@ -447,6 +445,7 @@ void ImagePattern::UpdateGestureAndDragWhenModify()
 void ImagePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    UpdateFillColorIfForegroundColor();
     LoadImageDataIfNeed();
 
     if (copyOption_ != CopyOptions::None) {
