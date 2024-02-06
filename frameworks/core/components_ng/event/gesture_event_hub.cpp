@@ -747,8 +747,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                 },
                 TaskExecutor::TaskType::UI);
         };
-        auto customNode = AceType::DynamicCast<FrameNode>(dragDropInfo.customNode);
-        NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
         return;
     }
 #endif
