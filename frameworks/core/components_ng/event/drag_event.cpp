@@ -422,8 +422,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     }
                 };
 
-                auto customNode = AceType::DynamicCast<FrameNode>(dragPreviewInfo.customNode);
-                OHOS::Ace::NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+                OHOS::Ace::NG::ComponentSnapshot::Create(
+                    dragPreviewInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
 #endif
             } else {
                 auto context = frameNode->GetRenderContext();
