@@ -4496,10 +4496,10 @@ typedef enum {
      * @brief 设置Swiper自动播放时播放的时间间隔，支持属性设置，属性重置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：使用自动播放时播放的时间间隔，单位为毫秒。 \n
+     * .value[0].f32：使用自动播放时播放的时间间隔，单位为毫秒。 \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：使用自动播放时播放的时间间隔，单位为毫秒。 \n
+     * .value[0].f32：使用自动播放时播放的时间间隔，单位为毫秒。 \n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
@@ -4508,7 +4508,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INTERVAL, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_INTERVAL);
-     * auto nodeSwiperInterval = item->value[0].i32;
+     * auto nodeSwiperInterval = item->value[0].f32;
      * @endcode
      *
      */
