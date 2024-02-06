@@ -25,12 +25,6 @@ void NavigationModelImpl::Create()
     ViewStackProcessor::GetInstance()->Push(navigationContainer);
 }
 
-bool NavigationModelImpl::ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
-    const std::string& title)
-{
-    return false;
-}
-
 void NavigationModelImpl::SetTitle(const std::string& title, bool hasSubTitle)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
