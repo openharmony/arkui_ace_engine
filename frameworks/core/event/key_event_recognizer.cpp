@@ -523,9 +523,8 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(int32_t keyCode, int32_t 
     }
     event.pressedCodes = getPressedKeys();
     event.key = KeyCodeToString(keyCode);
-    if (!msg.empty()) {
-        event.msg = msg;
-    }
+    event.msg = msg;
+
     keyEvents.emplace_back(event);
     auto result = keyMap_.try_emplace(keyCode, false);
     auto iter = result.first;
