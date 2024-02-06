@@ -1043,6 +1043,17 @@ typedef enum {
     ARKUI_CALENDAR_ALIGNMENT_END,
 } ArkUI_CalendarAlignment;
 
+typedef enum {
+    /** 矩形类型。 */
+    ARKUI_SHAPE_TYPE_RECT = 0,
+    /** 圆形类型。 */
+    ARKUI_SHAPE_TYPE_CIRCLE,
+    /** 椭圆形类型。 */
+    ARKUI_SHAPE_TYPE_ELLIPSE,
+    /** 路径类型。 */
+    ARKUI_SHAPE_TYPE_PATH,
+} ArkUI_ShapeType;
+
 #ifdef __cplusplus
 };
 #endif
