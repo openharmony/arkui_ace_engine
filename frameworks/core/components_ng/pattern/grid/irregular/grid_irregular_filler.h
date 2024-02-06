@@ -73,21 +73,20 @@ public:
      * @brief Fills the gridMatrix in forward direction until the target GridItem is included. Measure isn't performed,
      * and lineHeightMap_ isn't updated.
      *
-     * @param startingLine The starting line index.
      * @param targetIdx The target GridItem index to fill.
      *
      * @return Line index in which Item [targetIdx] resides.
      */
-    int32_t FillMatrixOnly(int32_t startingLine, int32_t targetIdx);
+    int32_t FillMatrixOnly(int32_t targetIdx);
 
     /**
-     * @brief Fills the gridMatrix in forward direction until the target line is reached. Measure isn't performed,
-     * and lineHeightMap_ isn't updated.
+     * @brief Fills the gridMatrix in forward direction until lines prior to [targetLine] are all filled.
+     * Measure isn't performed, and lineHeightMap_ isn't updated.
      *
      * @param startingLine The starting line index.
-     * @param targetLine The target GridItem index to fill.
+     * @param targetLine The target GridItem index to fill up to.
      *
-     * @return Last item index filled.
+     * @return Last item index filled to reach [targetLine].
      */
     int32_t FillMatrixByLine(int32_t startingLine, int32_t targetLine);
 
@@ -147,9 +146,19 @@ private:
      * @brief Initializes the position of the filler in the grid to GridLayoutInfo::startIndex_.
      *
      * @param lineIdx The line index of the starting position.
-     * @return startIndex_ - 1, for initializing endIndex_ in Fill
+     * REQUIRES: lineIdx is a valid startMainLineIndex_,
+     * i.e. the top-left corner of an item resides in the first column.
+     * @return startIndex_ - 1
      */
     int32_t InitPos(int32_t lineIdx);
+
+    /**
+     * @brief Initializes the position of the filler to the last item above [lineIdx] in gridMatrix_.
+     *
+     * @param lineIdx The line index to start traversing backwards (inclusive).
+     * @return index of the last item.
+     */
+    int32_t InitPosToLastItem(int32_t lineIdx);
 
     /**
      * @brief Try to find the GridItem with target index in the grid matrix.
