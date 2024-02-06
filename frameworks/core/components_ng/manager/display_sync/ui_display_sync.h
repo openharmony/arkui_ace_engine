@@ -152,6 +152,7 @@ public:
     bool IsAddToPipeline(WeakPtr<PipelineBase>& pipelineContext);
     bool IsOnPipeline();
     void RequestFrame();
+    void JudgeWhetherRequestFrame();
 
     void RegisterOnFrame(OnFrameCallBack&& onFrameCallBack);
     void RegisterOnFrameWithData(OnFrameCallBackWithData&& onFrameCallBack);
