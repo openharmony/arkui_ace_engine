@@ -170,6 +170,8 @@ public:
     }
 
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
+
+    inline static void FlushSyncGeometryNodeTasks();
     
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;

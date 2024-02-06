@@ -3298,6 +3298,16 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
     return false;
 }
 
+void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
+{
+    taskScheduler_->AddSyncGeometryNodeTask(std::move(task));
+}
+
+void PipelineContext::FlushSyncGeometryNodeTasks()
+{
+    taskScheduler_->FlushSyncGeometryNodeTasks();
+}
+
 void PipelineContext::SetUIExtensionImeShow(bool imeShow)
 {
     textFieldManager_->SetUIExtensionImeShow(imeShow);

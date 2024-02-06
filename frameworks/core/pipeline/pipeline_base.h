@@ -1116,6 +1116,10 @@ public:
 
     virtual void StopWindowAnimation() {}
 
+    virtual void AddSyncGeometryNodeTask(std::function<void()>&& task) {}
+
+    virtual void FlushSyncGeometryNodeTasks() {}
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
