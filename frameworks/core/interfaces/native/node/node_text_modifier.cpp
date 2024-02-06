@@ -59,6 +59,8 @@ FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeig
     return StringUtils::StringToFontWeight(weightStr, defaultFontWeight);
 }
 
+char* g_CharValue = nullptr;
+
 namespace {
 void SetTextContext(ArkUINodeHandle node, const char* value)
 {
@@ -491,7 +493,8 @@ void GetFontFamily(ArkUINodeHandle node, ArkUI_CharPtr& values)
         }
         index ++;
     }
-    values = families.c_str();
+    g_CharValue = families.c_str();
+    values = g_CharValue;
 }
 
 ArkUI_Int32 GetCopyOption(ArkUINodeHandle node)
@@ -544,7 +547,8 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont *font)
             }
             index ++;
         }
-        font->fontFamilies = families.c_str();
+        g_CharValue = families.c_str();
+        font->fontFamilies = g_CharValue;
     }
     if (value.fontStyle.has_value()) {
         font->fontStyle = static_cast<ArkUI_Int32>(value.fontStyle.value());

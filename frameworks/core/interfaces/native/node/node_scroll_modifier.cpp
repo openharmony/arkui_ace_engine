@@ -324,8 +324,8 @@ ArkUI_Int32 GetScrollEdge(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, EDGE_NONE);
-    int32_t type = ScrollModelNG::GetOnScrollEdge(frameNode);
-    if (type == static_cast<int32_t>(ScrollEdgeType::SCROLL_NONE)) {
+    ScrollEdgeType type = ScrollModelNG::GetOnScrollEdge(frameNode);
+    if (type == ScrollEdgeType::SCROLL_NONE) {
         return EDGE_NONE;
     }
     return static_cast<ArkUI_Int32>(type);

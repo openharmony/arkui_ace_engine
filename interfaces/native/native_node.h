@@ -1773,28 +1773,6 @@ typedef enum {
     NODE_ACCESSIBILITY_DESCRIPTION,
 
     /**
-     * @brief 组件获取焦点属性，支持属性设置，属性获取。
-     *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[0].i32：参数类型为1或者0。
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：参数类型为1或者0。
-     * 
-     * @code {.c}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { { .i32 = 1 } };
-     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_NEED_FOCUS, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_NEED_FOCUS);
-     * auto value = item->data[0].i32;
-     * @endcode
-     *
-     */
-    NODE_NEED_FOCUS,
-
-    /**
      * @brief text组件设置文本内容属性，支持属性设置，属性重置，属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
@@ -3902,7 +3880,7 @@ typedef enum {
     NODE_SLIDER_SELECTED_COLOR,
 
     /**
-     * @brief 设置是否显示步长刻度值，支持属性设置，属性重置和属性获取。
+     * @brief Slider滑动时是否显示气泡提示，支持属性设置，属性重置和属性获取。
      *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
      * .value[0].i32：是否显示气泡，1表示显示，0表示不显示，默认值为0。\n
@@ -3916,14 +3894,14 @@ typedef enum {
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = { { .i32 = 1 } };
-     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_SLIDER_SHOW_STEPS, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SLIDER_SHOW_STEPS);
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue), "test"};
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SLIDER_SHOW_TIPS, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SLIDER_SELECTED_COLOR);
      * auto value = item->value[0].i32;
      * @endcode
      *
      */
-    NODE_SLIDER_SHOW_STEPS,
+    NODE_SLIDER_SHOW_TIPS,
 
     /**
      * @brief Slider滑块形状参数，支持属性设置，属性重置和属性获取。
@@ -4020,7 +3998,7 @@ typedef enum {
      * ArkUI_NumberValue value[] = { 100 };
      * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SLIDER_MAX_VALUE, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SLIDER_MAX_VALUE);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SLIDER_MIN_VALUE);
      * auto value = item->value[0].f32;
      * @endcode
      *
@@ -4773,27 +4751,6 @@ typedef enum {
      * @endcode
      */
     NODE_LIST_ITEM_GROUP_SET_DIVIDER,
-    /**
-     * @brief 设置组件是否正在刷新，支持属性设置，属性获取。
-     *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[0].i32：参数类型为1或者0。
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：参数类型为1或者0。
-     * 
-     * @code {.c}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { { .i32 = 0 } };
-     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_REFRESH_REFRESHING, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_REFRESH_REFRESHING);
-     * auto value = item->data[0].i32;
-     * @endcode
-     *
-     */
-    NODE_REFRESH_REFRESHING = MAX_NODE_SCOPE_NUM * ARKUI_NODE_REFRESH
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -4939,33 +4896,13 @@ typedef enum {
     NODE_TOGGLE_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TOGGLE,
 
     NODE_TEXT_INPUT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_INPUT,
-    /**
-     * @brief 定义ARKUI_NODE_TEXT_INPUT按下输入法回车键触发该回调。
-     *
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：输入法回车键类型。\n
-     */
     NODE_TEXT_INPUT_ON_SUBMIT,
     NODE_TEXT_INPUT_ON_CUT,
     NODE_TEXT_INPUT_ON_PASTE,
 
     NODE_TEXT_AREA_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_AREA,
 
-    /**
-     * @brief 定义ARKUI_NODE_REFRESH刷新状态变更触发该事件。
-     *
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：刷新状态。\n
-     */
-    NODE_REFRESH_STATE_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_REFRESH,
-    /**
-     * @brief 定义ARKUI_NODE_REFRESH进入刷新状态时触发该事件。
-     *
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中不包含参数：\n
-     */
+    NODE_REFRESH_STATE_CHANGE = 1000 * ARKUI_NODE_REFRESH + 1,
     NODE_REFRESH_ON_REFRESH,
 
     /**

@@ -83,6 +83,9 @@ constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
 const int32_t ERROR_INT_CODE = -1;
 
 constexpr int32_t BLUR_STYLE_NONE_INDEX = 7;
+
+char* g_CharValue = nullptr;
+
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -3396,25 +3399,28 @@ ArkUI_Bool GetAccessibilityGroup(ArkUINodeHandle node)
     return static_cast<ArkUI_Bool>(ViewAbstractModelNG::GetAccessibilityGroup(frameNode));
 }
 
-void GetAccessibilityText(ArkUINodeHandle node, ArkUI_CharPtr &value)
+void GetAccessibilityText(ArkUINodeHandle node, ArkUI_CharPtr& value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    value = ViewAbstractModelNG::GetAccessibilityText(frameNode).c_str();
+    g_CharValue = ViewAbstractModelNG::GetAccessibilityText(frameNode).c_str();
+    value = g_CharValue;
 }
 
-void GetAccessibilityDescription(ArkUINodeHandle node, ArkUI_CharPtr &value)
+void GetAccessibilityDescription(ArkUINodeHandle node, ArkUI_CharPtr& value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    value = ViewAbstractModelNG::GetAccessibilityDescription(frameNode).c_str();
+    g_CharValue = ViewAbstractModelNG::GetAccessibilityDescription(frameNode).c_str();
+    value = g_CharValue;
 }
 
-void GetAccessibilityLevel(ArkUINodeHandle node, ArkUI_CharPtr &value)
+void GetAccessibilityLevel(ArkUINodeHandle node, ArkUI_CharPtr& value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    value = ViewAbstractModelNG::GetAccessibilityImportance(frameNode).c_str();
+    g_CharValue = ViewAbstractModelNG::GetAccessibilityImportance(frameNode).c_str();
+    value = g_CharValue;
 }
 
 void SetNeedFocus(ArkUINodeHandle node, ArkUI_Bool value)

@@ -1357,6 +1357,7 @@ const ArkUI_AttributeItem* GetAccessibilityText(ArkUI_NodeHandle node)
     const char* value = nullptr;
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAccessibilityText(
         node->uiNodeHandle, value);
+    g_charValue = value
     g_attributeItem.string = value;
     g_attributeItem.size = 0;
     return &g_attributeItem;

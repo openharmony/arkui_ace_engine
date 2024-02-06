@@ -46,7 +46,7 @@ namespace NodeModifier {
 
 const ArkUIRefreshModifier* GetRefreshModifier()
 {
-    static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing};
+    static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing };
     return &modifier;
 }
 

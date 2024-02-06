@@ -962,9 +962,9 @@ struct ArkUICommonModifier {
     void (*getResponseRegion)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* size);
     void (*getOverlay)(ArkUINodeHandle node, ArkUIOverlayOptions* options);
     ArkUI_Bool (*getAccessibilityGroup)(ArkUINodeHandle node);
-    void (*getAccessibilityText)(ArkUINodeHandle node, ArkUI_CharPtr &value);
-    void (*getAccessibilityDescription)(ArkUINodeHandle node, ArkUI_CharPtr &value);
-    void (*getAccessibilityLevel)(ArkUINodeHandle node, ArkUI_CharPtr &value);
+    void (*getAccessibilityText)(ArkUINodeHandle node, ArkUI_CharPtr& value);
+    void (*getAccessibilityDescription)(ArkUINodeHandle node, ArkUI_CharPtr& value);
+    void (*getAccessibilityLevel)(ArkUINodeHandle node, ArkUI_CharPtr& value);
 
     void (*setNeedFocus)(ArkUINodeHandle node, ArkUI_Bool value);
     ArkUI_Bool (*getNeedFocus)(ArkUINodeHandle node);
@@ -1085,12 +1085,12 @@ struct ArkUITextModifier {
     void (*setTextFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
     void (*resetTextFont)(ArkUINodeHandle node);
     void (*setFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr weight);
-    void (*getFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr &values);
+    void (*getFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr& values);
     ArkUI_Int32 (*getCopyOption)(ArkUINodeHandle node);
     ArkUI_Int32 (*getHeightAdaptivePolicy)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextMinFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextMaxFontSize)(ArkUINodeHandle node);
-    void (*getFont)(ArkUINodeHandle node, ArkUITextFont *font);
+    void (*getFont)(ArkUINodeHandle node, ArkUITextFont* font);
     ArkUI_Float32 (*getFontSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getFontWeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getItalicFontStyle)(ArkUINodeHandle node);
