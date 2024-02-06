@@ -333,11 +333,17 @@ void GestureReferee::ForceCleanGestureReferee()
     gestureScopes_.clear();
 }
 
-void GestureReferee::CleanGestureRefereeState()
+void GestureReferee::CleanGestureRefereeState(int32_t touchId)
 {
-    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
-        iter->second->CleanGestureScopeState();
+    const auto& iter = gestureScopes_.find(touchId);
+    if (iter == gestureScopes_.end()) {
+        return;
     }
+
+    const auto& scope = iter->second;
+    CHECK_NULL_VOID(scope);
+
+    scope->CleanGestureScopeState();
 }
 
 void GestureReferee::Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
