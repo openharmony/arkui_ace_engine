@@ -58,6 +58,7 @@ public:
 
     static void ResetGlobalTransCfg();
 
+    // IsRealTime is true when using real-time layouts.
     static void Transform(
         PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false, bool isPostEventResult = false);
 
