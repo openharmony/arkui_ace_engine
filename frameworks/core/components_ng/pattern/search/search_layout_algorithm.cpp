@@ -396,9 +396,12 @@ double SearchLayoutAlgorithm::CalcSearchHeight(
 
     const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
     CHECK_NULL_RETURN(calcLayoutConstraint, searchHeightAdapt);
-    auto hasMinSize = calcLayoutConstraint->minSize->Height().has_value();
-    auto hasMaxSize = calcLayoutConstraint->maxSize->Height().has_value();
-    auto hasHeight = calcLayoutConstraint->selfIdealSize->Height().has_value();
+    auto hasMinSize = calcLayoutConstraint->minSize.has_value() &&
+        calcLayoutConstraint->minSize->Height().has_value();
+    auto hasMaxSize = calcLayoutConstraint->maxSize.has_value() &&
+        calcLayoutConstraint->maxSize->Height().has_value();
+    auto hasHeight = calcLayoutConstraint->selfIdealSize.has_value() &&
+        calcLayoutConstraint->selfIdealSize->Height().has_value();
     if (hasMinSize && ((hasMaxSize && constraint.minSize.Height() >= constraint.maxSize.Height())
         || (!hasMaxSize && !hasHeight))) {
         return constraint.minSize.Height();
