@@ -535,7 +535,6 @@ struct KeyEvent final {
         return IsKey({ KeyCode::KEY_CTRL_LEFT, expectCodes }) || IsKey({ KeyCode::KEY_CTRL_RIGHT, expectCodes });
     }
 
-    
     bool IsShiftWith(KeyCode expectCodes) const
     {
         return IsKey({ KeyCode::KEY_SHIFT_LEFT, expectCodes }) || IsKey({ KeyCode::KEY_SHIFT_RIGHT, expectCodes });
