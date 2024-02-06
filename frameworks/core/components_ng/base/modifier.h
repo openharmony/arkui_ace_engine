@@ -92,15 +92,11 @@ public:
     ~NormalProperty() override = default;
 
     void SetUpCallbacks(std::function<T()>&& getFunc, std::function<void(const T&)>&& setFunc,
-        std::function<T()>&& getStageFunc = nullptr,
-        std::function<void(ThresholdType)>&& setThresholdTypeFunc = nullptr,
-        std::function<void(PropertyUnit)>&& setPropertyUnitFunc = nullptr)
+        std::function<T()>&& getStageFunc = nullptr)
     {
         getFunc_ = std::move(getFunc);
         setFunc_ =  std::move(setFunc);
         getStageFunc_ =  std::move(getStageFunc);
-        setThresholdTypeFunc_ = std::move(setThresholdTypeFunc);
-        setPropertyUnitFunc_ = std::move(setPropertyUnitFunc);
     }
 
     T Get()
@@ -109,20 +105,6 @@ public:
             return getFunc_();
         } else {
             return value_;
-        }
-    }
-
-    void SetThresholdType(ThresholdType type)
-    {
-        if (setThresholdTypeFunc_) {
-            setThresholdTypeFunc_(type);
-        }
-    }
-
-    void SetPropertyUnit(PropertyUnit unit)
-    {
-        if (setPropertyUnitFunc_) {
-            setPropertyUnitFunc_(unit);
         }
     }
 
@@ -160,8 +142,6 @@ private:
     std::function<void(const T&)> setFunc_;
     std::function<T()> getStageFunc_;
     std::function<void(const T&)> updateCallback_;
-    std::function<void(ThresholdType)> setThresholdTypeFunc_;
-    std::function<void(PropertyUnit)> setPropertyUnitFunc_;
     ACE_DISALLOW_COPY_AND_MOVE(NormalProperty);
 };
 
@@ -342,21 +322,9 @@ public:
         }
     }
 
-    void SetThresholdType(ThresholdType type)
-    {
-        auto property = AceType::DynamicCast<S>(GetProperty());
-        if (property) {
-            property->SetThresholdType(type);
-        }
-    }
+    void SetThresholdType(ThresholdType type);
 
-    void SetPropertyUnit(PropertyUnit unit)
-    {
-        auto property = AceType::DynamicCast<S>(GetProperty());
-        if (property) {
-            property->SetPropertyUnit(unit);
-        }
-    }
+    void SetPropertyUnit(PropertyUnit unit);
 
     T Get() const
     {
