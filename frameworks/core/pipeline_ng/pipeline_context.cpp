@@ -1466,10 +1466,13 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
     CHECK_NULL_VOID(safeAreaManager_);
+    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    CHECK_NULL_VOID(manager);
     if (NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
-        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled()) {
+        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
         return;
     }
+    manager->UpdatePrevHasTextFieldPattern();
     prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
 
     ACE_FUNCTION_TRACE();
@@ -1481,7 +1484,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 #endif
 
     auto weak = WeakClaim(this);
-    auto func = [weak, keyboardHeight, positionY, height]() mutable {
+    auto func = [weak, keyboardHeight, positionY, height, manager]() mutable {
         auto context = weak.Upgrade();
         CHECK_NULL_VOID(context);
         context->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
@@ -1490,8 +1493,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
             keyboardHeight += context->safeAreaManager_->GetSystemSafeArea().bottom_.Length();
         }
 
-        auto manager = DynamicCast<TextFieldManagerNG>(context->PipelineBase::GetTextFieldManager());
-        CHECK_NULL_VOID(manager);
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
         float keyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
         float positionYWithOffset = positionY - keyboardOffset;
