@@ -131,7 +131,6 @@ private:
         return text_.length() + placeholderIndex_ + 1;
     }
     float MakeEmptyOffsetX();
-    bool IsNewLine(int32_t extent);
 
     ParagraphStyle paraStyle_;
 #ifndef USE_GRAPHIC_TEXT_GINE
