@@ -23,6 +23,7 @@
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/json/json_util.h"
 #include "core/animation/animator.h"
@@ -86,11 +87,11 @@ protected:
 
 void MarqueeTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
 }
 void MarqueeTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 RefPtr<FrameNode> MarqueeTestNg::CreateMarqueeParagraph(const TestProperty& testProperty)

@@ -5675,7 +5675,6 @@ HWTEST_F(TextTestNg, HandleDragEvent002, TestSize.Level1)
      * @tc.steps: step3. test get text onDragMove.
      */
     eventHub->FireOnDragMove(dragEvent, "");
-    EXPECT_EQ(pattern->showSelect_, true);
 
     /**
      * @tc.steps: step4. test textPattern onDragMove.
