@@ -218,7 +218,19 @@ void ImagePattern::OnImageLoadSuccess()
         DeleteAnalyzerOverlay();
     }
     UpdateAnalyzerOverlay();
-    CreateAnalyzerOverlay();
+
+    auto currentContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(currentContext);
+    int32_t instanceID = currentContext->GetInstanceId();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this), instanceID] {
+        ContainerScope scope(instanceID);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CreateAnalyzerOverlay();
+    });
     host->MarkNeedRenderOnly();
 }
 
@@ -371,8 +383,6 @@ void ImagePattern::LoadImageDataIfNeed()
 {
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
@@ -435,6 +445,7 @@ void ImagePattern::UpdateGestureAndDragWhenModify()
 void ImagePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    UpdateFillColorIfForegroundColor();
     LoadImageDataIfNeed();
 
     if (copyOption_ != CopyOptions::None) {

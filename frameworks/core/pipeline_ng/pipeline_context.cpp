@@ -1467,9 +1467,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
     CHECK_NULL_VOID(safeAreaManager_);
-    if (NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length())) {
+    if (NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
+        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled()) {
         return;
     }
+    prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
 
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
@@ -3300,6 +3302,16 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
         return true;
     }
     return false;
+}
+
+void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
+{
+    taskScheduler_->AddSyncGeometryNodeTask(std::move(task));
+}
+
+void PipelineContext::FlushSyncGeometryNodeTasks()
+{
+    taskScheduler_->FlushSyncGeometryNodeTasks();
 }
 
 void PipelineContext::SetUIExtensionImeShow(bool imeShow)

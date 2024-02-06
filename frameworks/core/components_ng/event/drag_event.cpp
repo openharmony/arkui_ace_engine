@@ -422,8 +422,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     }
                 };
 
-                auto customNode = AceType::DynamicCast<FrameNode>(dragPreviewInfo.customNode);
-                OHOS::Ace::NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+                OHOS::Ace::NG::ComponentSnapshot::Create(
+                    dragPreviewInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
 #endif
             } else {
                 auto context = frameNode->GetRenderContext();
@@ -577,6 +577,7 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
     imageNode->CreateLayoutTask();
+    FlushSyncGeometryNodeTasks();
 }
 
 void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode)
@@ -614,6 +615,7 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     columnNode->MarkModifyDone();
     columnNode->CreateLayoutTask();
+    FlushSyncGeometryNodeTasks();
 }
 
 void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
@@ -672,6 +674,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
     imageNode->CreateLayoutTask();
+    FlushSyncGeometryNodeTasks();
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -959,5 +962,12 @@ void DragEventActuator::CopyDragEvent(const RefPtr<DragEventActuator>& dragEvent
     actionCancel_ = dragEventActuator->actionCancel_;
     textDragCallback_ = dragEventActuator->textDragCallback_;
     longPressInfo_ = dragEventActuator->longPressInfo_;
+}
+
+void DragEventActuator::FlushSyncGeometryNodeTasks()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushSyncGeometryNodeTasks();
 }
 } // namespace OHOS::Ace::NG

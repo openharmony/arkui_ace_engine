@@ -599,16 +599,10 @@ typedef enum {
 typedef enum {
     /** 竖直方向上边缘。*/
     ARKUI_SCROLL_EDGE_TOP = 0,
-    /** 竖直方向居中位置。*/
-    ARKUI_SCROLL_EDGE_CENTER,
     /** 竖直方向下边缘。*/
     ARKUI_SCROLL_EDGE_BOTTOM,
-    /** 交叉轴方向文本基线位置。*/
-    ARKUI_SCROLL_EDGE_BASELINE,
     /** 水平方向起始位置。*/
     ARKUI_SCROLL_EDGE_START,
-    /** 水平方向居中位置。*/
-    ARKUI_SCROLL_EDGE_MIDDLE,
     /** 水平方向末尾位置。*/
     ARKUI_SCROLL_EDGE_END,
 } ArkUI_ScrollEdge;

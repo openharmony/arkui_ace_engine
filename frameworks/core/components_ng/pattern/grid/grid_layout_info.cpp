@@ -517,12 +517,27 @@ MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
     return gridMatrix_.end();
 }
 
+GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
+{
+    if (gridMatrix_.find(endLine) == gridMatrix_.end()) {
+        return {};
+    }
+    for (int32_t rowIdx = endLine; rowIdx >= 0; --rowIdx) {
+        const auto& row = gridMatrix_.at(rowIdx);
+        for (auto it = row.rbegin(); it != row.rend(); ++it) {
+            if (it->second > 0) {
+                return { .itemIdx = it->second, .y = rowIdx, .x = it->first };
+            }
+        }
+    }
+    return {};
+}
+
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
 {
     auto gridIt = gridMatrix_.lower_bound(idx);
     gridMatrix_.erase(gridIt, gridMatrix_.end());
-    auto lineIt = lineHeightMap_.lower_bound(idx);
-    lineHeightMap_.erase(lineIt, lineHeightMap_.end());
+    ClearHeightsToEnd(idx);
 }
 
 void GridLayoutInfo::ClearMapsFromStart(int32_t idx)
@@ -531,5 +546,29 @@ void GridLayoutInfo::ClearMapsFromStart(int32_t idx)
     gridMatrix_.erase(gridMatrix_.begin(), gridIt);
     auto lineIt = lineHeightMap_.lower_bound(idx);
     lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
+}
+
+void GridLayoutInfo::ClearHeightsToEnd(int32_t idx)
+{
+    auto lineIt = lineHeightMap_.lower_bound(idx);
+    lineHeightMap_.erase(lineIt, lineHeightMap_.end());
+}
+
+void GridLayoutInfo::ClearMatrixToEnd(int32_t idx, int32_t lineIdx)
+{
+    auto it = gridMatrix_.find(lineIdx);
+    for (; it != gridMatrix_.end(); ++it) {
+        for (auto itemIt = it->second.begin(); itemIt != it->second.end();) {
+            if (std::abs(itemIt->second) < idx) {
+                ++itemIt;
+                continue;
+            }
+            itemIt = it->second.erase(itemIt);
+        }
+        if (it->second.empty()) {
+            break;
+        }
+    }
+    gridMatrix_.erase(it, gridMatrix_.end());
 }
 } // namespace OHOS::Ace::NG

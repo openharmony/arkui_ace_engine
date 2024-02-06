@@ -91,6 +91,7 @@ const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_5 = {
     { 11, { { 0, 9 }, { 1, 10 } } },
 };
 
+GridLayoutOptions GetOptionDemo6();
 const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_6 = {
     { 0, { { 0, 0 }, { 1, 1 } } },
     { 1, { { 0, 2 }, { 1, -2 } } },
@@ -100,6 +101,15 @@ const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_6 = {
     { 5, { { 0, 8 }, { 1, 9 } } },
     { 6, { { 0, 10 }, { 1, -10 } } },
     { 7, { { 0, 11 } } },
+};
+
+const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_6_VARIATION = {
+    { 0, { { 0, 0 }, { 1, 1 } } },
+    { 1, { { 0, 2 }, { 1, -2 }, { 2, 3 } } },
+    { 2, { { 0, 4 }, { 1, 5 }, { 2, -5 } } },
+    { 3, { { 0, 6 }, { 1, 7 }, { 2, 8 } } },
+    { 4, { { 0, 9 }, { 1, 10 }, { 2, -10 } } },
+    { 5, { { 0, 11 } } },
 };
 
 const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_7 = {

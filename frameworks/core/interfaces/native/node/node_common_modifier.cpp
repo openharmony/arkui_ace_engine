@@ -14,7 +14,9 @@
  */
 #include "core/interfaces/native/node/node_common_modifier.h"
 
+#include <cstddef>
 #include <cstdint>
+#include <string>
 
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
@@ -84,7 +86,7 @@ const int32_t ERROR_INT_CODE = -1;
 
 constexpr int32_t BLUR_STYLE_NONE_INDEX = 7;
 
-char* g_CharValue = nullptr;
+std::string g_strValue;
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
@@ -3364,10 +3366,10 @@ ArkUI_Bool GetDefaultFocus(ArkUINodeHandle node)
     return static_cast<ArkUI_Bool>(ViewAbstract::GetDefaultFocus(frameNode));
 }
 
-void GetResponseRegion(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* size)
+ArkUI_Int32 GetResponseRegion(ArkUINodeHandle node, ArkUI_Float32* values)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     std::vector<DimensionRect> responseRegions = ViewAbstract::GetResponseRegion(frameNode);
     //set int default
     int index = 0;
@@ -3378,7 +3380,7 @@ void GetResponseRegion(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32*
         values[index++] = element.GetOffset().GetX().Value();
     }
     //values size
-    size[0] = index;
+    return index;
 }
 
 void GetOverlay(ArkUINodeHandle node, ArkUIOverlayOptions *options)
@@ -3399,28 +3401,28 @@ ArkUI_Bool GetAccessibilityGroup(ArkUINodeHandle node)
     return static_cast<ArkUI_Bool>(ViewAbstractModelNG::GetAccessibilityGroup(frameNode));
 }
 
-void GetAccessibilityText(ArkUINodeHandle node, ArkUI_CharPtr& value)
+ArkUI_CharPtr GetAccessibilityText(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    g_CharValue = ViewAbstractModelNG::GetAccessibilityText(frameNode).c_str();
-    value = g_CharValue;
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = ViewAbstractModelNG::GetAccessibilityText(frameNode);
+    return g_strValue.c_str();
 }
 
-void GetAccessibilityDescription(ArkUINodeHandle node, ArkUI_CharPtr& value)
+ArkUI_CharPtr GetAccessibilityDescription(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    g_CharValue = ViewAbstractModelNG::GetAccessibilityDescription(frameNode).c_str();
-    value = g_CharValue;
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = ViewAbstractModelNG::GetAccessibilityDescription(frameNode);
+    return g_strValue.c_str();
 }
 
-void GetAccessibilityLevel(ArkUINodeHandle node, ArkUI_CharPtr& value)
+ArkUI_CharPtr GetAccessibilityLevel(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    g_CharValue = ViewAbstractModelNG::GetAccessibilityImportance(frameNode).c_str();
-    value = g_CharValue;
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = ViewAbstractModelNG::GetAccessibilityImportance(frameNode);
+    return g_strValue.c_str();
 }
 
 void SetNeedFocus(ArkUINodeHandle node, ArkUI_Bool value)

@@ -77,6 +77,13 @@ private:
     void MeasureToTarget();
 
     /**
+     * @brief Check if layout states (matrix, height map) need to be reset during Init.
+     *
+     * @param lastCrossCount crossCount from the previous layout. For comparing against the current crossCount
+     */
+    void CheckForReset(int32_t lastCrossCount);
+
+    /**
      * @brief Performs the layout of the children based on the main offset.
      * @param mainOffset The main offset of the layout.
      */
@@ -152,6 +159,8 @@ private:
     std::vector<float> crossLens_; /**< The column widths of the GridItems. */
     float crossGap_ = 0.0f;        /**< The cross-axis gap between GridItems. */
     float mainGap_ = 0.0f;         /**< The main-axis gap between GridItems. */
+
+    float postJumpOffset_ = 0.0f; /**< The offset to be applied after performing a jump. */
 
     bool enableSkip_ = true;
 

@@ -418,26 +418,26 @@ ScrollEdgeType ScrollModelNG::GetOnScrollEdge(FrameNode* frameNode)
     Axis axis = Axis::VERTICAL;
     ACE_GET_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis, frameNode);
     switch (axis) {
-    case Axis::VERTICAL:
-        if (pattern->IsAtTop()) {
-            return ScrollEdgeType::SCROLL_TOP;
-        }
-        if (pattern->IsAtBottom()) {
-            return ScrollEdgeType::SCROLL_BOTTOM;
-        }
-        break;
-    case Axis::HORIZONTAL:
-        if (pattern->IsAtTop()) {
-            return ScrollEdgeType::SCROLL_LEFT;
-        }
-        if (pattern->IsAtBottom()) {
-            return ScrollEdgeType::SCROLL_RIGHT;
-        }
-        break;
-    default:
-        break;
+        case Axis::VERTICAL:
+            if (pattern->IsAtTop()) {
+                return ScrollEdgeType::SCROLL_TOP;
+            }
+            if (pattern->IsAtBottom()) {
+                return ScrollEdgeType::SCROLL_BOTTOM;
+            }
+            break;
+        case Axis::HORIZONTAL:
+            if (pattern->IsAtTop()) {
+                return ScrollEdgeType::SCROLL_LEFT;
+            }
+            if (pattern->IsAtBottom()) {
+                return ScrollEdgeType::SCROLL_RIGHT;
+            }
+            break;
+        default:
+            break;
     }
-   return ScrollEdgeType::SCROLL_NONE;
+    return ScrollEdgeType::SCROLL_NONE;
 }
 
 

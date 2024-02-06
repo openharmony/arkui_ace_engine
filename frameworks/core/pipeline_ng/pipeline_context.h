@@ -49,6 +49,9 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+
+using VsyncCallbackFun = std::function<void()>;
+
 class ACE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
@@ -612,6 +615,13 @@ public:
         isWindowAnimation_ = false;
     }
 
+    void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
+    void FlushSyncGeometryNodeTasks() override;
+    void SetVsyncListener(VsyncCallbackFun vsync)
+    {
+        vsyncListener_ = std::move(vsync);
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -768,6 +778,7 @@ private:
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
+    bool prevKeyboardAvoidMode_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
@@ -794,6 +805,7 @@ private:
     std::list<DelayedTask> delayedTasks_;
     RefPtr<PostEventManager> postEventManager_;
 
+    VsyncCallbackFun vsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;

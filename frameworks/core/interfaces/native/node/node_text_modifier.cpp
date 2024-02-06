@@ -59,7 +59,7 @@ FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeig
     return StringUtils::StringToFontWeight(weightStr, defaultFontWeight);
 }
 
-char* g_CharValue = nullptr;
+std::string g_strValue;
 
 namespace {
 void SetTextContext(ArkUINodeHandle node, const char* value)
@@ -478,10 +478,10 @@ void ResetTextFont(ArkUINodeHandle node)
     TextModelNG::SetFont(frameNode, font);
 }
 
-void GetFontFamily(ArkUINodeHandle node, ArkUI_CharPtr& values)
+ArkUI_CharPtr GetFontFamily(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     std::vector<std::string> fontFamilies = TextModelNG::GetFontFamily(frameNode);
     std::string families;
     //set index start
@@ -493,8 +493,8 @@ void GetFontFamily(ArkUINodeHandle node, ArkUI_CharPtr& values)
         }
         index ++;
     }
-    g_CharValue = families.c_str();
-    values = g_CharValue;
+    g_strValue = families;
+    return g_strValue.c_str();
 }
 
 ArkUI_Int32 GetCopyOption(ArkUINodeHandle node)
@@ -525,7 +525,7 @@ ArkUI_Float32 GetTextMaxFontSize(ArkUINodeHandle node)
     return static_cast<ArkUI_Float32>(TextModelNG::GetAdaptMaxFontSize(frameNode).Value());
 }
 
-void GetFont(ArkUINodeHandle node, ArkUITextFont *font)
+void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -547,8 +547,8 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont *font)
             }
             index ++;
         }
-        g_CharValue = families.c_str();
-        font->fontFamilies = g_CharValue;
+        g_strValue = families;
+        font->fontFamilies = g_strValue.c_str();
     }
     if (value.fontStyle.has_value()) {
         font->fontStyle = static_cast<ArkUI_Int32>(value.fontStyle.value());

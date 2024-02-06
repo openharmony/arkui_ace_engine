@@ -1343,4 +1343,24 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
     hasNotifiedTransformation_ = true;
 }
 
+void DragDropManager::SetDragResult(
+    const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
+{
+    DragRet result = DragRet::DRAG_FAIL;
+    switch (notifyMessage.result) {
+        case DragRet::DRAG_SUCCESS:
+            result = DragRet::DRAG_SUCCESS;
+            break;
+        case DragRet::DRAG_FAIL:
+            result = DragRet::DRAG_FAIL;
+            break;
+        case DragRet::DRAG_CANCEL:
+            result = DragRet::DRAG_CANCEL;
+            break;
+        default:
+            break;
+    }
+    CHECK_NULL_VOID(dragEvent);
+    dragEvent->SetResult(result);
+}
 } // namespace OHOS::Ace::NG

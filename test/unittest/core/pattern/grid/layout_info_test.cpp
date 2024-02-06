@@ -407,4 +407,67 @@ HWTEST_F(GridLayoutInfoTest, FindInMatrix003, TestSize.Level1)
     auto nullIt = info.FindInMatrix(11);
     EXPECT_EQ(nullIt, info.gridMatrix_.end());
 }
+
+/**
+ * @tc.name: ClearMatrixToEnd001
+ * @tc.desc: Test GridLayoutInfo::ClearMatrixToEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, ClearMatrixToEnd001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = MATRIX_DEMO_2;
+
+    info.ClearMatrixToEnd(7, 4);
+    const decltype(GridLayoutInfo::gridMatrix_) cmp7 = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 1 } } },
+        { 1, { { 0, 0 }, { 1, 0 }, { 2, -1 } } },
+        { 2, { { 0, 2 }, { 1, 3 }, { 2, -1 } } },
+        { 3, { { 0, 4 }, { 1, -4 }, { 2, -4 } } },
+        { 4, { { 0, 5 }, { 1, 6 } } },
+        { 5, { { 0, -5 } } },
+    };
+    EXPECT_EQ(info.gridMatrix_, cmp7);
+
+    info.gridMatrix_ = MATRIX_DEMO_2;
+    info.ClearMatrixToEnd(6, 4);
+    const decltype(GridLayoutInfo::gridMatrix_) cmp6 = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 1 } } },
+        { 1, { { 0, 0 }, { 1, 0 }, { 2, -1 } } },
+        { 2, { { 0, 2 }, { 1, 3 }, { 2, -1 } } },
+        { 3, { { 0, 4 }, { 1, -4 }, { 2, -4 } } },
+        { 4, { { 0, 5 } } },
+        { 5, { { 0, -5 } } },
+    };
+    EXPECT_EQ(info.gridMatrix_, cmp6);
+
+    info.gridMatrix_ = MATRIX_DEMO_2;
+    info.ClearMatrixToEnd(5, 4);
+    const decltype(GridLayoutInfo::gridMatrix_) cmp5 = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 1 } } },
+        { 1, { { 0, 0 }, { 1, 0 }, { 2, -1 } } },
+        { 2, { { 0, 2 }, { 1, 3 }, { 2, -1 } } },
+        { 3, { { 0, 4 }, { 1, -4 }, { 2, -4 } } },
+    };
+    EXPECT_EQ(info.gridMatrix_, cmp5);
+
+    info.gridMatrix_ = MATRIX_DEMO_2;
+    info.ClearMatrixToEnd(2, 2);
+    const decltype(GridLayoutInfo::gridMatrix_) cmp2 = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 1 } } },
+        { 1, { { 0, 0 }, { 1, 0 }, { 2, -1 } } },
+        { 2, { { 2, -1 } } },
+    };
+    EXPECT_EQ(info.gridMatrix_, cmp2);
+
+    info.gridMatrix_ = MATRIX_DEMO_2;
+    info.ClearMatrixToEnd(1, 0);
+    const decltype(GridLayoutInfo::gridMatrix_) cmp1 = { { 0, { { 0, 0 }, { 1, 0 } } }, { 1, { { 0, 0 }, { 1, 0 } } } };
+    EXPECT_EQ(info.gridMatrix_, cmp1);
+
+    info.gridMatrix_ = MATRIX_DEMO_2;
+    info.ClearMatrixToEnd(0, 0);
+    const decltype(GridLayoutInfo::gridMatrix_) cmp0 = {};
+    EXPECT_EQ(info.gridMatrix_, cmp0);
+}
 } // namespace OHOS::Ace::NG
