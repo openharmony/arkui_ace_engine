@@ -3797,7 +3797,7 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
     isFirstMouseSelect_ = true;
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
-    if(selectStart != selectEnd) {
+    if (selectStart != selectEnd) {
         FireOnSelect(selectStart, selectEnd);
     }
     StopAutoScroll();
