@@ -421,7 +421,11 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     node->UpdateLayoutPropertyFlag();
     node->SetActive();
     node->isLayoutDirtyMarked_ = true;
+    auto pipeline = PipelineContext::GetCurrentContext();
     node->CreateLayoutTask();
+    if (pipeline) {
+        pipeline->FlushSyncGeometryNodeTasks();
+    }
 
     auto paintProperty = node->GetPaintProperty<PaintProperty>();
     auto wrapper = node->CreatePaintWrapper();
@@ -429,7 +433,6 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
         wrapper->FlushRender();
     }
     paintProperty->CleanDirty();
-    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushMessages();
     node->SetActive(false);
@@ -2790,13 +2793,42 @@ void FrameNode::Layout()
     CHECK_NULL_VOID(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
     AvoidKeyboard(isFocusOnPage);
-    SyncGeometryNode();
+    auto task = [weak = WeakClaim(this)]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->SyncGeometryNode();
+    };
+    if (HasTransitionRunning()) {
+        task();
+    } else {
+        pipeline->AddSyncGeometryNodeTask(task);
+    }
+}
+
+bool FrameNode::HasTransitionRunning()
+{
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    return geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
+}
+
+bool FrameNode::SelfOrParentExpansive()
+{
+    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    if (opts && opts->Expansive()) {
+        return true;
+    }
+    auto parent = GetAncestorNodeOfFrame();
+    CHECK_NULL_RETURN(parent, false);
+    auto parentLayoutProperty = parent->GetLayoutProperty();
+    CHECK_NULL_RETURN(parentLayoutProperty, false);
+    auto&& parentOpts = parentLayoutProperty->GetSafeAreaExpandOpts();
+    return parentOpts && parentOpts->Expansive();
 }
 
 void FrameNode::SyncGeometryNode()
 {
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
+    bool hasTransition = HasTransitionRunning();
 
     if (!isActive_ && !hasTransition) {
         layoutAlgorithm_.Reset();
@@ -2850,7 +2882,7 @@ void FrameNode::SyncGeometryNode()
         if (geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
             isLayoutDirtyMarked_ = true;
         }
-    } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
+    } else if (frameSizeChange || frameOffsetChange || HasPositionProp() || SelfOrParentExpansive() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         isLayoutComplete_ = true;
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
