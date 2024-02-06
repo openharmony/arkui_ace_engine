@@ -49,8 +49,9 @@ void JSFormLink::Create(const JSCallbackInfo& info)
 {
 #if defined(PREVIEW)
     if (!Container::IsInFormContainer()) {
-        LOGW("[Engine Log] FormLink only support static widget.");
+        LOGW("[Engine Log] FormLink only support static widget IsInFormContainer.");
     }
+    LOGW("[Engine Log] FormLink only support static widget.");
 #endif
     if (info.Length() == 0 || !info[0]->IsObject()) {
         return;
