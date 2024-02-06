@@ -127,7 +127,7 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
     }
 
     ArkUI_Int32 id = -1;
-    if (nodeType == ARKUI_NODE_LOADING_PROGRESS) {
+    if (nodeType == ARKUI_NODE_LOADING_PROGRESS || nodeType == ARKUI_NODE_TEXT) {
         id = ARKUI_AUTO_GENERATE_NODE_ID;
     }
     auto* uiNode = impl->getBasicAPI()->createNode(nodes[nodeType - 1], id, 0);
