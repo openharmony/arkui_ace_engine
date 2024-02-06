@@ -107,10 +107,15 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    foldStatusDelayTask_.Reset([weak = WeakClaim(this), pipeline, currentFoldStatus = currentFoldStatus_, host]() {
+    foldStatusDelayTask_.Reset([weak = WeakClaim(this), currentFoldStatus = currentFoldStatus_]() {
         auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
         auto displayInfo = container->GetDisplayInfo();
         if (displayInfo->GetFoldStatus() != FoldStatus::HALF_FOLD) {
             pattern->RestoreScreenState();
