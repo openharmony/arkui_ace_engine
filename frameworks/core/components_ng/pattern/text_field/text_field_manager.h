@@ -86,6 +86,20 @@ public:
         uiExtensionImeShow_ = imeShow;
     }
 
+    bool PrevHasTextFieldPattern() const
+    {
+        return prevHasTextFieldPattern_;
+    }
+
+    void UpdatePrevHasTextFieldPattern()
+    {
+        if (onFocusTextField_.Upgrade()) {
+            prevHasTextFieldPattern_ = true;
+        } else {
+            prevHasTextFieldPattern_ = false;
+        }
+    }
+
 private:
     void ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
@@ -93,6 +107,7 @@ private:
     bool hasMove_ = false;
     bool imeShow_ = false;
     bool uiExtensionImeShow_ = false;
+    bool prevHasTextFieldPattern_ = true;
     Offset position_;
     float height_ = 0.0f;
     WeakPtr<Pattern> onFocusTextField_;
