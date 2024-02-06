@@ -57,8 +57,8 @@ struct SpanNodeInfo {
     RefPtr<UINode> containerSpanNode;
 };
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public ScrollablePattern, public TextDragBase, public TextBase {
-    DECLARE_ACE_TYPE(TextPattern, ScrollablePattern, TextDragBase, TextBase);
+class TextPattern : public virtual Pattern, public TextDragBase, public TextBase {
+    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
 
 public:
     TextPattern() = default;
@@ -449,22 +449,6 @@ public:
 
     void OnAreaChangedInner() override;
     void RemoveAreaChangeInner();
-    bool IsAtBottom() const override
-    {
-        return true;
-    }
-
-    bool IsAtTop() const override
-    {
-        return true;
-    }
-
-    bool UpdateCurrentOffset(float offset, int32_t source) override
-    {
-        return true;
-    }
-
-    virtual void UpdateScrollBarOffset() override {}
 
     void ResetDragOption() override
     {
@@ -508,6 +492,8 @@ public:
     void HandleSelectionChange(int32_t start, int32_t end);
 
 protected:
+    void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAfterModifyDone() override;
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
     void InitMouseEvent();
@@ -588,8 +574,6 @@ protected:
 
 private:
     void HandleOnCopy();
-    void OnDetachFromFrameNode(FrameNode* node) override;
-    void OnAttachToFrameNode() override;
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleMouseEvent(const MouseInfo& info);
     void OnHandleTouchUp();
