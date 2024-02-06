@@ -577,6 +577,9 @@ public:
         return GetTag();
     }
 
+    bool HasTransitionRunning();
+    bool SelfOrParentExpansive();
+
     bool IsActive() const override
     {
         return isActive_;
