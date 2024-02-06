@@ -3986,7 +3986,7 @@ typedef enum {
      * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SLIDER_BLOCK_STYLE, &item);
      *
-     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_SLIDER_BLOCK_STYLE_SHAPE}, 
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_SLIDER_BLOCK_STYLE_SHAPE},
      * {.i32 = ARKUI_CLIP_TYPE_RECT}, 100, 100, 15, 15 };
      * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SLIDER_BLOCK_STYLE, &item);
