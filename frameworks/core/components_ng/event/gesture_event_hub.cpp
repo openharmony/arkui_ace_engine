@@ -1191,27 +1191,14 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
     auto callback = [id = Container::CurrentId(), eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](
                         const DragNotifyMsgCore& notifyMessage) {
         ContainerScope scope(id);
-        DragRet result = DragRet::DRAG_FAIL;
-        switch (notifyMessage.result) {
-            case DragRet::DRAG_SUCCESS:
-                result = DragRet::DRAG_SUCCESS;
-                break;
-            case DragRet::DRAG_FAIL:
-                result = DragRet::DRAG_FAIL;
-                break;
-            case DragRet::DRAG_CANCEL:
-                result = DragRet::DRAG_CANCEL;
-                break;
-            default:
-                break;
-        }
-        dragEvent->SetResult(result);
         taskScheduler->PostTask(
-            [eventHub, dragEvent, dragDropManager, eventManager]() {
+            [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage]() {
+                dragDropManager->SetDragResult(notifyMessage, dragEvent);
                 dragDropManager->SetIsDragged(false);
                 dragDropManager->ResetDragging();
                 dragDropManager->SetDraggingPointer(-1);
                 dragDropManager->SetDraggingPressedState(false);
+                dragDropManager->ResetDragPreviewInfo();
                 auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
                 if (ret != 0) {
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Unregister coordination listener failed, error is %{public}d", ret);
