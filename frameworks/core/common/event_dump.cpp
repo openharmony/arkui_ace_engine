@@ -70,7 +70,8 @@ void EventTreeRecord::AddTouchPoint(const TouchEvent& event)
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
                 "EventTreeList last record touchPoint size is over limit! Last record is cleaned.");
         }
-        if (event.type == Ace::TouchType::DOWN && eventTreeList.back().downFingerIds_.count(event.id) > 0) {
+        if (!eventTreeList.empty() && event.type == Ace::TouchType::DOWN &&
+            eventTreeList.back().downFingerIds_.count(event.id) > 0) {
             eventTreeList.pop_back();
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
                 "EventTreeList last record receive DOWN event twice. Last record is cleaned.");
