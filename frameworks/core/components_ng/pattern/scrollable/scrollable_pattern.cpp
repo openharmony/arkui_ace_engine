@@ -1967,7 +1967,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
             StartScrollBarAnimatorByProxy();
         }
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::TRAILING_ANIMATION, false);
+        AceAsyncTraceEnd(0, TRAILING_ANIMATION);
         scrollStop_ = false;
         SetScrollAbort(false);
     }
