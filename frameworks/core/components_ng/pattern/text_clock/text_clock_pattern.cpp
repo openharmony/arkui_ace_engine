@@ -192,6 +192,9 @@ void TextClockPattern::OnVisibleAreaChange(bool visible)
 
 void TextClockPattern::OnFormVisibleChange(bool visible)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK,
+        "Form is %{public}s and clock %{public}s running",
+        visible ? "visible" : "invisible", visible ? "starts" : "stops");
     if (visible && !isFormVisible_) {
         isFormVisible_ = visible;
         UpdateTimeText();
