@@ -30,6 +30,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   };
   
   private owningView_ : ViewPU = undefined;
+
+  private dependentElementIds_: Set<number> = new Set<number>();
   
   // PU code stores object references to dependencies directly as class variable
   // SubscriberManager is not used for lookup in PU code path to speedup updates
@@ -105,6 +107,48 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   public debugInfoDependentElmtIds(): string {
     return this.dependentElmtIdsByProperty_.dumpInfoDependencies();
+  }
+
+  public debugInfoElmtId(elmtId: number): string {
+    if (this.owningView_) {
+      return this.owningView_.debugInfoElmtId(elmtId);
+    }
+    return "<unknown element id " + elmtId + ", missing owning view>";
+  }
+
+  public debugInfoDependentComponents(): string {
+    let result: string = `|--Dependent elements: `;
+    let sepa: string = "";
+
+    let queue: Array<ObservedPropertyAbstractPU<any>> = [this];
+    let seen = new Set<ObservedPropertyAbstractPU<any>>();
+
+    while (queue.length) {
+      let item = queue.shift();
+      seen.add(item);
+
+      if (item != this) {
+        result += `${sepa}${item.debugInfoOwningView()}`;
+        sepa = ", ";
+      }
+
+      if (item.owningView_) {
+        item.dependentElementIds_.forEach((elmtId: number) => {
+          const owningViewInfo = item.owningView_.debugInfoElmtId(elmtId);
+          result += `${owningViewInfo ? sepa : ""}${owningViewInfo}`;
+          sepa = ", ";
+        });
+      }
+
+      item.subscriberRefs_.forEach((subscriber: IPropertySubscriber) => {
+        if ((subscriber instanceof ObservedPropertyAbstractPU)) {
+          if (!seen.has(subscriber)) {
+            queue.push(subscriber);
+          }
+        }
+      });
+    }
+    return result;
   }
 
   /* for @Prop value from source we need to generate a @State

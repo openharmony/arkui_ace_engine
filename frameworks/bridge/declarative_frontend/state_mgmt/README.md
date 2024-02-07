@@ -201,3 +201,13 @@ All the following commands concern a hypothetical window with ID 11 and view wit
 |Dump view hierarchy only for the target view | `hidumper -s WindowManagerService -a '-w 11 -jsdump -viewHierarchy -viewId=42'`|
 |Dump the list of all registered element ids | `hidumper -s WindowManagerService -a '-w 11 -jsdump -registeredElementIds -viewId=42'`|
 |Dump the list of all dirty element ids | `hidumper -s WindowManagerService -a '-w 11 -jsdump -dirtyElementIds -viewId=42'`|
+
+### Example with dependent elements
+
+`hidumper -s WindowManagerService -a '-w 11 -jsdump -dumpAll'`
+
+Showing dependent elements for Link "stringValue".
+```
+@State/@Provide 'stringValue'[..]
+ |--Dependent elements: 'Text[..]'; @Component 'Child1'[..], 'Text[..]'; @Component 'Child2'[..], Text[..]';
+```
