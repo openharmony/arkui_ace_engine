@@ -3007,15 +3007,15 @@ int32_t SetTextFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 
 const ArkUI_AttributeItem* GetTextFont(ArkUI_NodeHandle node)
 {
-    ArkUITextFont *font = nullptr;
+    ArkUITextFont font;
     GetFullImpl()->getNodeModifiers()->getTextModifier()->getFont(
-        node->uiNodeHandle, font);
+        node->uiNodeHandle, &font);
     int index = 0;
-    g_numberValues[index++].f32 = font->fontSize;
-    g_numberValues[index++].i32 = font->fontWeight;
-    g_numberValues[index++].i32 = font->fontStyle;
+    g_numberValues[index++].f32 = font.fontSize;
+    g_numberValues[index++].i32 = font.fontWeight;
+    g_numberValues[index++].i32 = font.fontStyle;
     g_attributeItem.size = index;
-    g_attributeItem.string = font->fontFamilies;
+    g_attributeItem.string = font.fontFamilies;
     return &g_attributeItem;
 }
 
