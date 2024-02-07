@@ -47,6 +47,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double FORM_CLICK_OPEN_LIMIT_DISTANCE = 20.0;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
@@ -158,6 +159,9 @@ void FormPattern::HandleTouchDownEvent(const TouchEventInfo& event)
 {
     touchDownTime_ = event.GetTimeStamp();
     shouldResponseClick_ = true;
+    if (!event.GetTouches().empty()) {
+        lastTouchLocation_ = event.GetTouches().front().GetScreenLocation();
+    }
 }
 
 void FormPattern::HandleTouchUpEvent(const TouchEventInfo& event)
@@ -167,6 +171,13 @@ void FormPattern::HandleTouchUpEvent(const TouchEventInfo& event)
         TAG_LOGI(AceLogTag::ACE_FORM, "reject click. duration is %{public}lld.", duration);
         shouldResponseClick_ = false;
         return;
+    }
+    if (event.GetTouches().empty()) {
+        return;
+    }
+    auto distance = event.GetTouches().front().GetScreenLocation() - lastTouchLocation_;
+    if (distance.GetDistance() > FORM_CLICK_OPEN_LIMIT_DISTANCE) {
+        shouldResponseClick_ = false;
     }
 }
 
