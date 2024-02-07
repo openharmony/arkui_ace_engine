@@ -100,33 +100,29 @@ void JSLine::SetPoint(const JSRef<JSArray>& array, ShapePoint& point)
     if (array->Length() < 1) {
         return;
     }
-    if (array->GetValueAt(0)->IsNumber()) {
-        point.first = Dimension(array->GetValueAt(0)->ToNumber<double>(), DimensionUnit::VP);
-    } else if (array->GetValueAt(0)->IsString()) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            point.first = StringUtils::StringToDimension(array->GetValueAt(0)->ToString(), true);
-        } else {
-            if (!StringUtils::StringToDimensionWithUnitNG(
-                array->GetValueAt(0)->ToString(), point.first, DimensionUnit::VP, 0.0)) {
-                // unit is invalid, use default value(0.0vp) instead.
-                point.first = 0.0_vp;
-            }
-        }
-    }
 
-    if (array->GetValueAt(1)->IsNumber()) {
-        point.second = Dimension(array->GetValueAt(1)->ToNumber<double>(), DimensionUnit::VP);
-    } else if (array->GetValueAt(1)->IsString()) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            point.second = StringUtils::StringToDimension(array->GetValueAt(1)->ToString(), true);
-        } else {
-            if (!StringUtils::StringToDimensionWithUnitNG(
-                array->GetValueAt(1)->ToString(), point.second, DimensionUnit::VP, 0.0)) {
+    auto parseJsDimension = [](const JSRef<JSVal>& jsValue, Dimension &val) {
+        if (jsValue->IsNumber()) {
+            val = Dimension(jsValue->ToNumber<double>(), DimensionUnit::VP);
+        } else if (jsValue->IsString()) {
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+                val = StringUtils::StringToDimension(jsValue->ToString(), true);
+            } else if (!StringUtils::StringToDimensionWithUnitNG(jsValue->ToString(), val, DimensionUnit::VP, 0.0)) {
                 // unit is invalid, use default value(0.0vp) instead.
-                point.second = 0.0_vp;
+                val = 0.0_vp;
+            }
+        } else if (jsValue->IsObject()) {
+            CalcDimension value;
+            ParseJsDimensionVpNG(jsValue, value);
+            if (!StringUtils::StringToDimensionWithUnitNG(value.ToString(), val, DimensionUnit::VP, 0.0)) {
+                // unit is invalid, use default value(0.0vp) instead.
+                val = 0.0_vp;
             }
         }
-    }
+    };
+
+    parseJsDimension(array->GetValueAt(0), point.first);
+    parseJsDimension(array->GetValueAt(1), point.second);
 }
 
 } // namespace OHOS::Ace::Framework
