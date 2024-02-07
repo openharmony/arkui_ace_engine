@@ -1091,6 +1091,21 @@ typedef struct {
     int size;
 } ArkUI_ColorStop;
 
+/**
+ * @brief 自定义形状。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 矩形类型。 */
+    ARKUI_SHAPE_TYPE_RECT = 0,
+    /** 圆形类型。 */
+    ARKUI_SHAPE_TYPE_CIRCLE,
+    /** 椭圆形类型。 */
+    ARKUI_SHAPE_TYPE_ELLIPSE,
+    /** 路径类型。 */
+    ARKUI_SHAPE_TYPE_PATH,
+} ArkUI_ShapeType;
 #ifdef __cplusplus
 };
 #endif
