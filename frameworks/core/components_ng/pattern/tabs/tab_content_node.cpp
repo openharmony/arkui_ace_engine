@@ -37,6 +37,10 @@ void TabContentNode::OnDetachFromMainTree(bool recursive)
     auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
     CHECK_NULL_VOID(tabs);
 
+    if (!tabs->IsOnMainTree()) {
+        return;
+    }
+
     // Change focus to the other tab if current is being deleted
     auto swiper = AceType::DynamicCast<FrameNode>(tabs->GetTabs());
     CHECK_NULL_VOID(swiper);
