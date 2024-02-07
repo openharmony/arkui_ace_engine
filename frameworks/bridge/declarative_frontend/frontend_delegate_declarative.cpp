@@ -1557,6 +1557,19 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+void FrontendDelegateDeclarative::RemoveCustomDialog()
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootNode->GetLastChild());
+    CHECK_NULL_VOID(overlay);
+    overlayManager->RemoveDialog(overlay, false, false);
+}
+
 void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
     std::function<void(int32_t)> &&callback)
 {
@@ -1566,6 +1579,7 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
         .isSysBlurStyle = false,
         .customBuilder = dialogAttr.customBuilder,
         .maskRect = dialogAttr.maskRect,
+        .onWillDismiss = dialogAttr.customOnWillDismiss
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();

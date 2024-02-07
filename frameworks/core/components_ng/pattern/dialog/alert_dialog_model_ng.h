@@ -25,6 +25,8 @@ public:
         const std::string& property) override;
     void SetOnCancel(std::function<void()>&& eventFunc, DialogProperties& arg) override;
     void SetShowDialog(const DialogProperties& arg) override;
+    void SetOnWillDismiss(std::function<void(const int32_t& info)>&& onWillDismissFunc,
+        DialogProperties& arg) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_DIALOG_FORM_FORM_MODEL_NG_H

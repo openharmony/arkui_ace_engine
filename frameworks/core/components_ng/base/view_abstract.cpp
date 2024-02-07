@@ -1387,6 +1387,24 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     }
 }
 
+void ViewAbstract::DismissDialog()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+    CHECK_NULL_VOID(overlay);
+    overlayManager->RemoveDialog(overlay, false, false);
+    auto pattern = overlay->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (overlayManager->isMaskNode(pattern->GetHost()->GetId())) {
+        overlayManager->PopModalDialog(pattern->GetHost()->GetId());
+    }
+}
+
 void ViewAbstract::BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
     const NG::OffsetF &offset, const MenuParam &menuParam)
 {

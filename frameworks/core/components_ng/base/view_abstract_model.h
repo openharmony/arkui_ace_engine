@@ -296,6 +296,7 @@ public:
         std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss) = 0;
     virtual void DismissSheet() = 0;
+    virtual void DismissDialog() {};
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;
