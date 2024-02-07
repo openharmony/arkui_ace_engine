@@ -67,6 +67,21 @@ class UINodeRegisterProxy {
         UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
     }
 
+    // unregisters all the received removedElements in func parameter
+    public static unregisterRemovedElmtsFromViewPUs(removedElements: Array<number>): void {
+
+        stateMgmtConsole.debug(`UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs elmtIds ${removedElements}`);
+        UINodeRegisterProxy.instance_.populateRemoveElementInfo(removedElements);
+        UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
+    }
+
+    private populateRemoveElementInfo(removedElements: Array<number>) {
+        for (const elmtId of removedElements) {
+            const removedElementInfo: RemovedElementInfo = { elmtId, tag: "" };
+            this.removeElementsInfo_.push(removedElementInfo);
+        }
+    }
+
     /* just get the remove items from the native side
     */
     private obtainDeletedElmtIds(): void {

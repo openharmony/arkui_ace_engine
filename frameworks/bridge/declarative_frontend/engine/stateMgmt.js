@@ -4828,6 +4828,18 @@ class UINodeRegisterProxy {
         
         UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
     }
+    // unregisters all the received removedElements in func parameter
+    static unregisterRemovedElmtsFromViewPUs(removedElements) {
+        
+        UINodeRegisterProxy.instance_.populateRemoveElementInfo(removedElements);
+        UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
+    }
+    populateRemoveElementInfo(removedElements) {
+        for (const elmtId of removedElements) {
+            const removedElementInfo = { elmtId, tag: "" };
+            this.removeElementsInfo_.push(removedElementInfo);
+        }
+    }
     /* just get the remove items from the native side
     */
     obtainDeletedElmtIds() {
@@ -5747,9 +5759,11 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
         // ifElseNode stores the most recent branch, so we can compare
-        // removedChildElmtIds will be filled with the elmtIds of all childten and their children will be deleted in response to if .. else chnage
+        // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else chnage
         let removedChildElmtIds = new Array();
         If.branchId(branchId, removedChildElmtIds);
+        //unregisters the removed child elementIDs using proxy
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         // purging these elmtIds from state mgmt will make sure no more update function on any deleted child wi;ll be executed
         
         this.purgeDeletedElmtIds();
