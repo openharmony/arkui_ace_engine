@@ -47,12 +47,9 @@ namespace OHOS::Ace::Framework {
 
 void JSFormLink::Create(const JSCallbackInfo& info)
 {
-// #if defined(PREVIEW)
     if (!Container::IsInFormContainer()) {
-        APP_LOGE("[Engine Log] FormLink only support IsInFormContainer widget.");
+        APP_LOGE("[Engine Log] FormLink only support in form widget.");
     }
-    APP_LOGW("[Engine Log] FormLink create begin.");
-// #endif
     if (info.Length() == 0 || !info[0]->IsObject()) {
         return;
     }
