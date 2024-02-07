@@ -512,6 +512,8 @@ build_component_ng("pattern_ng") {
     "waterflow/water_flow_model_ng.cpp",
     "waterflow/water_flow_paint_method.cpp",
     "waterflow/water_flow_pattern.cpp",
+    "waterflow/water_flow_segmented_layout.cpp",
+    "waterflow/water_flow_layout_utils.cpp",
   ]
 
   external_deps = []

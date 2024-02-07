@@ -39,15 +39,23 @@ constexpr int32_t EMPTY_JUMP_INDEX = -2;
 
 class WaterFlowLayoutInfo {
 public:
-    int32_t GetCrossIndex(int32_t itemIndex);
+    int32_t GetCrossIndex(int32_t itemIndex) const;
     void UpdateStartIndex();
     int32_t GetEndIndexByOffset(float offset) const;
     float GetMaxMainHeight() const;
     float GetContentHeight() const;
-    bool IsAllCrossReachend(float mainSize) const;
-    FlowItemIndex GetCrossIndexForNextItem() const;
-    float GetMainHeight(int32_t crossIndex, int32_t itemIndex);
-    float GetStartMainPos(int32_t crossIndex, int32_t itemIndex);
+    bool IsAllCrossReachEnd(float mainSize) const;
+
+    /**
+     * @brief Get the next available cross index to place a new item.
+     * 
+     * @param segmentIdx index of the WaterFlow segment.
+     * @return FlowItemIndex 
+     */
+    FlowItemIndex GetCrossIndexForNextItem(int32_t segmentIdx) const;
+
+    float GetMainHeight(int32_t crossIndex, int32_t itemIndex) const;
+    float GetStartMainPos(int32_t crossIndex, int32_t itemIndex) const;
     void Reset();
     void Reset(int32_t resetFrom);
     int32_t GetCrossCount() const;
@@ -56,6 +64,25 @@ public:
 
     bool ReachStart(float prevOffset, bool firstLayout) const;
     bool ReachEnd(float prevOffset) const;
+
+    int32_t GetSegment(int32_t itemIdx) const;
+
+    void AddItemToCache(int32_t idx, float startPos, float height);
+
+    /**
+     * @brief FInd the first item inside viewport in log_n time using endPosReverseMap_.
+     * 
+     * @return index of the item. 
+     */
+    int32_t FastSolveStartIndex() const;
+
+    /**
+     * @brief Find the last item inside viewport in log_n time using itemInfos_.
+     * 
+     * @param mainSize main-axis length of viewport.
+     * @return index of the item.
+     */
+    int32_t FastSolveEndIndex(float mainSize) const;
 
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
@@ -66,9 +93,9 @@ public:
     float storedOffset_ = 0.0f;
     float restoreOffset_ = 0.0f;
 
-    bool itemEnd_ = false;
     bool itemStart_ = false;
-    bool offsetEnd_ = false;
+    bool itemEnd_ = false; // last item is partially in viewport
+    bool offsetEnd_ = false; // last item's bottom is in viewport
 
     int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
 
@@ -83,12 +110,29 @@ public:
     int32_t firstIndex_ = 0;
     std::optional<int32_t> targetIndex_;
 
-    // Map structure: [crossIndex, [index, (mainOffset, itemMainSize)]],
-    std::map<int32_t, std::map<int32_t, std::pair<float, float>>> waterFlowItems_;
+    // (mainOffset, itemMainSize)
+    using ItemInfo = std::pair<float, float>;
+    // Map structure: [crossIndex, [index, ItemInfo]],
+    using ItemMap = std::map<int32_t, std::map<int32_t, ItemInfo>>;
+
+    std::vector<ItemMap> items_ { ItemMap() };
+    // quick access to item info, ignores crossIndex and segments
+    std::map<int32_t, ItemInfo> itemInfos_;
+
+    /**
+     * @brief pair = { item bottom position, item index }.
+     * A strictly increasing array of item endPos to speed up startIndex solver.
+     * Only add to this map when a new endPos is greater than the last one in array.
+     */
+    std::vector<std::pair<float, int32_t>> endPosArray_;
+
+    std::vector<int32_t> segmentTails_;
+    // K: item index; V: corresponding segment index
+    mutable std::unordered_map<int32_t, int32_t> segmentCache_;
 
     void PrintWaterFlowItems() const
     {
-        for (const auto& [key1, map1] : waterFlowItems_) {
+        for (const auto& [key1, map1] : items_[0]) {
             std::stringstream ss;
             ss << key1 << ": {";
             for (const auto& [key2, pair] : map1) {

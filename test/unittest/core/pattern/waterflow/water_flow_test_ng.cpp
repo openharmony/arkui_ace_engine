@@ -1180,12 +1180,12 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest001, TestSize.Level1)
     });
 
     /**
-     * @tc.steps: Test IsAllCrossReachend function
+     * @tc.steps: Test IsAllCrossReachEnd function
      * @tc.expected: step1. Check whether the return value is correct.
      */
-    auto reached = pattern_->layoutInfo_.IsAllCrossReachend(ITEM_HEIGHT);
+    auto reached = pattern_->layoutInfo_.IsAllCrossReachEnd(ITEM_HEIGHT);
     EXPECT_TRUE(reached);
-    reached = pattern_->layoutInfo_.IsAllCrossReachend(WATERFLOW_HEIGHT);
+    reached = pattern_->layoutInfo_.IsAllCrossReachEnd(WATERFLOW_HEIGHT);
     EXPECT_TRUE(reached);
 
     /**
@@ -1410,8 +1410,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest002, TestSize.Level1)
      * @tc.steps: Test GetStartMainPos and GetMainHeight
      * @tc.expected: step2. Check whether the return value is correct.
      */
-    int32_t crossIndex = pattern_->layoutInfo_.waterFlowItems_.rbegin()->first;
-    int32_t itemIndex = pattern_->layoutInfo_.waterFlowItems_.rbegin()->second.rbegin()->first;
+    int32_t crossIndex = pattern_->layoutInfo_.items_[0].rbegin()->first;
+    int32_t itemIndex = pattern_->layoutInfo_.items_[0].rbegin()->second.rbegin()->first;
     EXPECT_EQ(pattern_->layoutInfo_.GetStartMainPos(crossIndex + 1, itemIndex), 0.0f);
     EXPECT_EQ(pattern_->layoutInfo_.GetMainHeight(crossIndex + 1, itemIndex), 0.0f);
 
@@ -1435,20 +1435,20 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest003, TestSize.Level1)
      * @tc.steps: Test GetMainCount function
      * @tc.expected: step2. Check whether the size is correct.
      */
-    std::size_t waterFlowItemsSize = pattern_->layoutInfo_.waterFlowItems_.size();
+    std::size_t waterFlowItemsSize = pattern_->layoutInfo_.items_[0].size();
     int32_t mainCount = pattern_->layoutInfo_.GetMainCount();
 
-    int32_t index = pattern_->layoutInfo_.waterFlowItems_.rbegin()->first;
-    pattern_->layoutInfo_.waterFlowItems_[index + 1] = std::map<int32_t, std::pair<float, float>>();
-    EXPECT_EQ(pattern_->layoutInfo_.waterFlowItems_.size(), waterFlowItemsSize + 1);
+    int32_t index = pattern_->layoutInfo_.items_[0].rbegin()->first;
+    pattern_->layoutInfo_.items_[0][index + 1] = std::map<int32_t, std::pair<float, float>>();
+    EXPECT_EQ(pattern_->layoutInfo_.items_[0].size(), waterFlowItemsSize + 1);
     EXPECT_EQ(pattern_->layoutInfo_.GetMainCount(), mainCount);
 
-    auto lastItem = pattern_->layoutInfo_.waterFlowItems_.begin()->second.rbegin();
+    auto lastItem = pattern_->layoutInfo_.items_[0].begin()->second.rbegin();
     float mainSize = lastItem->second.first + lastItem->second.second - 1.0f;
-    EXPECT_FALSE(pattern_->layoutInfo_.IsAllCrossReachend(mainSize));
+    EXPECT_FALSE(pattern_->layoutInfo_.IsAllCrossReachEnd(mainSize));
 
     pattern_->layoutInfo_.ClearCacheAfterIndex(index + 1);
-    EXPECT_EQ(pattern_->layoutInfo_.waterFlowItems_.size(), waterFlowItemsSize + 1);
+    EXPECT_EQ(pattern_->layoutInfo_.items_[0].size(), waterFlowItemsSize + 1);
 }
 
 /**
@@ -1492,16 +1492,16 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest005, TestSize.Level1)
      * @tc.expected: step2. Check whether the return value is correct.
      */
     float maxMainHeight = pattern_->layoutInfo_.GetMaxMainHeight();
-    int32_t crossIndex = pattern_->layoutInfo_.waterFlowItems_.rbegin()->first;
-    pattern_->layoutInfo_.waterFlowItems_[crossIndex + 1][0] = std::pair<float, float>(1.0f, maxMainHeight);
+    int32_t crossIndex = pattern_->layoutInfo_.items_[0].rbegin()->first;
+    pattern_->layoutInfo_.items_[0][crossIndex + 1][0] = std::pair<float, float>(1.0f, maxMainHeight);
     EXPECT_EQ(pattern_->layoutInfo_.GetMaxMainHeight(), maxMainHeight + 1.0f);
 
     /**
      * @tc.steps: Test GetCrossIndexForNextItem function
      * @tc.expected: step3. Check whether the return value is correct.
      */
-    pattern_->layoutInfo_.waterFlowItems_[crossIndex + 1][1] = std::pair<float, float>(0.0f, 0.0f);
-    FlowItemIndex position = pattern_->layoutInfo_.GetCrossIndexForNextItem();
+    pattern_->layoutInfo_.items_[0][crossIndex + 1][1] = std::pair<float, float>(0.0f, 0.0f);
+    FlowItemIndex position = pattern_->layoutInfo_.GetCrossIndexForNextItem(0);
     EXPECT_EQ(position.crossIndex, crossIndex + 1);
     EXPECT_EQ(position.lastItemIndex, 1);
 }
