@@ -447,27 +447,38 @@ typedef enum {
     /**
      * @brief 设置组件颜色渐变效果，支持属性设置，属性重置和属性获取接口。
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .string： 字符串组合参数，入参4个，以分号分割：\n
-     *      入参1： 指定某百分比位置处的渐变色颜色,设置非法颜色直接跳过。颜色和位置（单位vp）数组类型，以逗号分割；\n
-     *      入参2： 线性渐变的起始角度。0点方向顺时针旋转为正向角度，默认值：180；\n
-     *      入参3：
-     * 线性渐变的方向，设置angle后不生效。取值("left","top","right","bottom","left-top","left-bottom","right-top",\n
-     *             "right-bottom","none", 默认值 "bottom")；\n
-     *      入参4： 为渐变的颜色重复着色，默认值 false；\n
-     *      如 "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;;left;true" 。
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32： 线性渐变的起始角度。0点方向顺时针旋转为正向角度，默认值：180； \n
+     * .value[1].i32：线性渐变的方向，设置angle后不生效。取值("left","top","right","bottom","left-top","left-bottom","right-top", \n
+     *                "right-bottom","none", 默认值 "bottom")； \n
+     * .value[2].u32： 为渐变的颜色重复着色，默认值 false；如 "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;;left;true" 。 \n
+     * .object: 指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
+     * colors：渐变色颜色颜色。 \n
+     * stops：渐变位置。 \n
+     * size：颜色个数。 \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * * .string： 字符串组合参数，入参4个，以分号分割：\n
-     *      入参1： 指定某百分比位置处的渐变色颜色,设置非法颜色直接跳过。颜色和位置（单位vp）数组类型，以逗号分割；\n
-     *      入参2： 线性渐变的起始角度。0点方向顺时针旋转为正向角度；\n
-     *      入参3： 线性渐变的方向，设置angle后不生效；\n
-     *      入参4： 为渐变的颜色重复着色。\n
+     * .value[0].f32： 线性渐变的起始角度。0点方向顺时针旋转为正向角度，默认值：180；\n
+     * .value[1].i32：线性渐变的方向，设置angle后不生效。\n
+     * .value[0].u32： 为渐变的颜色重复着色，默认值 false；\n
+     * .object: 指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
+     * colors：渐变色颜色颜色。 \n
+     * stops：渐变位置。 \n
+     * size：颜色个数。 \n
      * @code {.cpp}
-     * ArkUI_AttributeItem item = { .string = "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;;left;true" };
+     * unsigned int colors[] = { 0xFFFFFFFF,0xFF0000FF };
+     * float stops[] = { 0.0, 0.5 };
+     * ArkUIColorStop colorStop = { colors, stops, 2 };
+     * ArkUI_ColorStop* ptr = &colorStop;
+     * ArkUI_NumberValue value[] = {{ .f32 = 60 } ,  { .i32 = left } , { .i32 = true }};
+     * ArkUI_AttributeItem item =
+     * { value, sizeof(value)/sizeof(ArkUI_NumberValue), .object = reinterpret_cast<void*>(ptr) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_LINEAR_GRADIENT, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_LINEAR_GRADIENT);
-     * auto nodeLinearGradient = item->string;
+     * auto nodeLinearGradientStartAngel = item->value[0];
+     * auto nodeLinearGradientDirection = item->value[1];
+     * auto nodeLinearGradientFill = item->value[2];
+     * auto nodeLinearGradientColorStop = item->object;
      * @endcode
      *
      */
@@ -701,29 +712,62 @@ typedef enum {
      */
     NODE_CLIP,
     /**
-     * @brief 组件进行裁剪、遮罩处理属性，支持属性设置，属性重置和属性获取接口。
+     * @brief 组件上指定形状的裁剪，支持属性设置和属性获取接口。
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .string:形状描述，可选： \n
-     * "rect(10,10,10,10)"括号内分别为width、height、radiusWidth与radiusHeight"; \n
-     * "circle(10,10)"括号内分别为width、height; \n
-     * "ellipse(10,10)"括号内分别为width、height; \n
-     * "path(10,10,M0 0 L600 0)"括号内分别为width、height、commands; \n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .string:形状描述： \n
-     * "rect(10,10,10,10)"括号内分别为width、height、radiusWidth与radiusHeight"; \n
-     * "circle(10,10)"括号内分别为width、height; \n
-     * "ellipse(10,10)"括号内分别为width、height; \n
-     * "path(10,10,M0 0 L600 0)"括号内分别为width、height、commands; \n
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式,共有5种类型： \n
+     * 1.rect类型： \n
+     * .value[0].i32：裁剪类型，参数类型{@link ArkUI_ClipType}，ARKUI_CLIP_TYPE_RECT； \n
+     * .value[1].f32：矩形宽度； \n
+     * .value[2].f32：矩形高度； \n
+     * .value[3].f32：矩形圆角宽度； \n
+     * .value[4].f32：矩形圆角高度； \n
+     * 2.circle类型： \n
+     * .value[0].i32：裁剪类型，参数类型{@link ArkUI_ClipType}，ARKUI_CLIP_TYPE_CIRCLE； \n
+     * .value[1].f32：圆形宽度； \n
+     * .value[2].f32：圆形高度； \n
+     * 3.ellipse类型： \n
+     * .value[0].i32：裁剪类型，参数类型{@link ArkUI_ClipType}，ARKUI_CLIP_TYPE_ELLIPSE； \n
+     * .value[1].f32：椭圆形宽度； \n
+     * .value[2].f32：椭圆形高度； \n
+     * 4.path类型： \n
+     * .value[0].i32：裁剪类型，参数类型{@link ArkUI_ClipType}，ARKUI_CLIP_TYPE_PATH； \n
+     * .value[1].f32：路径宽度； \n
+     * .value[2].f32：路径高度； \n
+     * .string：路径绘制的命令字符串； \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式,共有5种类型： \n
+     * 1.rect类型： \n
+     * .value[0].i32：裁剪类型，参数类型{@link ArkUI_ClipType}，ARKUI_CLIP_TYPE_RECT； \n
+     * .value[1].f32：矩形宽度； \n
+     * .value[2].f32：矩形高度； \n
+     * .value[3].f32：矩形圆角宽度； \n
+     * .value[4].f32：矩形圆角高度； \n
+     * 2.circle类型： \n
+     * .value[0].i32：裁剪类型，参数类型{@link ArkUI_ClipType}，ARKUI_CLIP_TYPE_CIRCLE； \n
+     * .value[1].f32：圆形宽度； \n
+     * .value[2].f32：圆形高度； \n
+     * 3.ellipse类型:： \n
+     * .value[0].i32：裁剪类型，参数类型{@link ArkUI_ClipType}，ARKUI_CLIP_TYPE_ELLIPSE； \n
+     * .value[1].f32：椭圆形宽度； \n
+     * .value[2].f32：椭圆形高度； \n
+     * 4.path类型： \n
+     * .value[0].i32：裁剪类型，参数类型{@link ArkUI_ClipType}，ARKUI_CLIP_TYPE_PATH； \n
+     * .value[1].f32：路径宽度； \n
+     * .value[2].f32：路径高度； \n
+     * .string：路径绘制的命令字符串； \n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     *     reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_AttributeItem item = { .string = "rect(10,10,10,10)" };
+     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] =
+     * { {.i32 = ARKUI_CLIP_TYPE_RECT}, 100, 100, 15, 15, { .u32 = 0xFFFF0000 }, { .u32 = 0xFFFF0000 }, 2 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_CLIP_SHAPE, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_CLIP);
-     * auto nodeClipShape = item->string;
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_CLIP_SHAPE);
+     * auto nodeClipType = item->value[0].i32;
+     * auto nodeClipWidth = item->value[1].f32;
+     * auto nodeClipHeight = item->value[2].f32;
+     * auto nodeClipRadiusWidth = item->value[3].f32;
+     * auto nodeClipRadiusHeight = item->value[4].f32;
      * @endcode
      *
      */
@@ -819,31 +863,37 @@ typedef enum {
     /**
      * @brief 自定义阴影效果，支持属性设置，属性重置和属性获取接口。
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .string: 字符串组合参数，入参6个，以分号分割： \n
-     * 入参1：阴影模糊半径。 \n
-     * 入参2：阴影的X轴偏移量。 \n
-     * 入参3：阴影的Y轴偏移量。 \n
-     * 入参4：阴影类型。 \n
-     * 入参5：阴影的颜色。 \n
-     * 入参6：阴影是否内部填充。 \n
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0]?.f32：阴影模糊半径，单位为vp；\n
+     * .value[1]?.i32：是否开启智能取色，0代表不开启，1代表开启，默认不开启；\n
+     * .value[2]?.f32：阴影X轴偏移量，单位为vp；\n
+     * .value[3]?.f32：阴影Y轴偏移量，单位为vp；\n
+     * .value[4]?.i32：阴影类型{@link ArkUI_ShadowType}，默认值为ARKUI_SHADOW_TYPE_COLOR；\n
+     * .value[5]?.u32：阴影颜色，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * .value[6]?.u32：阴影是否内部填充，，0表示不填充，1表示填充；\n
+     *
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .string: 字符串组合参数，入参6个，以分号分割： \n
-     * 入参1：阴影模糊半径。 \n
-     * 入参2：阴影的X轴偏移量。 \n
-     * 入参3：阴影的Y轴偏移量。 \n
-     * 入参4：阴影类型。 \n
-     * 入参5：阴影的颜色。 \n
-     * 入参6：阴影是否内部填充。 \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：阴影模糊半径，单位为vp；\n
+     * .value[1]?.i32：是否开启智能取色；\n
+     * .value[2].f32：阴影X轴偏移量，单位为vp；\n
+     * .value[3].f32：阴影Y轴偏移量，单位为vp；\n
+     * .value[4].i32：阴影类型{@link ArkUI_ShadowType}，默认值为ARKUI_SHADOW_TYPE_COLOR；\n
+     * .value[5].u32：阴影颜色，0xargb格式，形如 0xFFFF0000 表示红色；\n
+     * .value[6].u32：阴影是否内部填充，，0表示不填充，1表示填充；\n
      *
      * @code {.cpp}
-     * ArkUI_NativeNodeAPI_1* nativeNodeApi =
-     * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_AttributeItem item = { .string = "5; 10; 10; COLOR; #FFF00FFF; true" };
+     * ArkUI_NativeNodeAPI_1* nativeNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
+     * ArkUI_NumberValue value[] =
+     * { 10, {.i32 = 1},10, 10, {.i32=ARKUI_SHADOW_TYPE_COLOR}, {.u32=0xFFFF0000}, {.i32 = 1} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_CUSTOM_SHADOW, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_CUSTOM_SHADOW);
-     * auto nodeCustomShadow = item->string;
+     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_CUSTOM_SHADOW);
+     * auto nodeCustomShadowRadius = item->value[0].f32;
+     * auto nodeCustomShadowOffsetX = item->value[1].f32;
+     * auto nodeCustomShadowOffsetY = item->value[2].f32;
+     * auto nodeCustomShadowType = item->value[3].i32;
+     * auto nodeCustomShadowColor = item->value[4].u32;
      * @endcode
      *
      */
@@ -1213,32 +1263,48 @@ typedef enum {
      * @brief 角度渐变效果，支持属性设置，属性重置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .string: 字符串组合参数，入参7个，以分号分割： \n
-     * 入参1：指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
-     * 入参2：为角度渐变的中心点，即相对于当前组件左上角的坐标,X轴坐标。 \n
-     * 入参3：为角度渐变的中心点，即相对于当前组件左上角的坐标,Y轴坐标。 \n
-     * 入参4：角度渐变的起点，默认值0。 \n
-     * 入参5：角度渐变的终点，默认值0。 \n
-     * 入参6：角度渐变的旋转角度，默认值0。 \n
-     * 入参7：为渐变的颜色重复着色，默认值 false。 \n
+     * .value[0]?.f32:为角度渐变的中心点，即相对于当前组件左上角的坐标,X轴坐标 \n
+     * .value[1]?.f32:为角度渐变的中心点，即相对于当前组件左上角的坐标,Y轴坐标 \n
+     * .value[2]?.f32:角度渐变的起点，默认值0。 \n
+     * .value[3]?.f32:角度渐变的终点，默认值0。 \n
+     * .value[4]?.f32:角度渐变的旋转角度，默认值0。 \n
+     * .value[5]?.i32:为渐变的颜色重复着色，0表示不重复着色，1表示重复着色 \n
+     * .object: 指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
+     * colors：渐变色颜色颜色。 \n
+     * stops：渐变位置。 \n
+     * size：颜色个数。 \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .string: 字符串组合参数： \n
-     * 入参1：指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
-     * 入参2：为角度渐变的中心点，即相对于当前组件左上角的坐标,X轴坐标。 \n
-     * 入参3：为角度渐变的中心点，即相对于当前组件左上角的坐标,Y轴坐标。 \n
-     * 入参4：角度渐变的起点，默认值0。 \n
-     * 入参5：角度渐变的终点，默认值0。 \n
-     * 入参6：角度渐变的旋转角度，默认值0。 \n
-     * 入参7：为渐变的颜色重复着色，默认值 false。 \n
+     * .value[0]?.f32:为角度渐变的中心点，即相对于当前组件左上角的坐标,X轴坐标 \n
+     * .value[1]?.f32:为角度渐变的中心点，即相对于当前组件左上角的坐标,Y轴坐标 \n
+     * .value[2]?.f32:角度渐变的起点，默认值0。 \n
+     * .value[3]?.f32:角度渐变的终点，默认值0。 \n
+     * .value[4]?.f32:角度渐变的旋转角度，默认值0。 \n
+     * .value[5]?.i32:为渐变的颜色重复着色，0表示不重复着色，1表示重复着色 \n
+     * .object: 指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
+     * colors：渐变色颜色颜色。 \n
+     * stops：渐变位置。 \n
+     * size：颜色个数。 \n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_AttributeItem item = { .string = "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;5;10;60;180;60;true" };
+     * unsigned int colors[] = { 0xFFFFFFFF,0xFF0000FF };
+     * float stops[] = { 0.0, 0.5 };
+     * ArkUIColorStop colorStop = { colors, stops, 2 };
+     * ArkUI_ColorStop* ptr = &colorStop;
+     * ArkUI_NumberValue value[] = { 50, 50, 60, 180, 180, {.i32 = 1}};
+     * ArkUI_AttributeItem item =
+     * { value, sizeof(value)/sizeof(ArkUI_NumberValue), .object = reinterpret_cast<void*>(ptr) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SWEEP_GRADIENT, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWEEP_GRADIENT);
-     * auto nodeSweepGradient = item->string;
+     * auto nodeSweepGradientCeneterX = item->value[0];
+     * auto nodeSweepGradientCeneterY = item->value[1];
+     * auto nodeSweepGradientStart = item->value[2];
+     * auto nodeSweepGradientEnd = item->value[3];
+     * auto nodeSweepGradientRotation = item->value[4];
+     * auto nodeSweepGradientFill = item->value[5];
+     * auto nodeSweepGradientColorStop = item->object;
      * @endcode
      *
      */
@@ -1247,28 +1313,42 @@ typedef enum {
      * @brief 径向渐变渐变效果，支持属性设置，属性重置和属性获取接口。
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .string: 字符串组合参数，入5个，以分号分割： \n
-     * 入参1：指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
-     * 入参2：为径向渐变的中心点，即相对于当前组件左上角的坐标,X轴坐标。 \n
-     * 入参3：为径向渐变的中心点，即相对于当前组件左上角的坐标,Y轴坐标。 \n
-     * 入参4：径向渐变的半径，默认值0。 \n
-     * 入参5：为渐变的颜色重复着色。 \n
+     * .value[0]?.f32:为径向渐变的中心点，即相对于当前组件左上角的坐标,X轴坐标 \n
+     * .value[1]?.f32:为径向渐变的中心点，即相对于当前组件左上角的坐标,Y轴坐标 \n
+     * .value[2]?.f32:径向渐变的半径，默认值0。 \n
+     * .value[3]?.i32:为渐变的颜色重复着色，0表示不重复着色，1表示重复着色 \n
+     * .object: 指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
+     * colors：渐变色颜色颜色。 \n
+     * stops：渐变位置。 \n
+     * size：颜色个数。 \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .string: 字符串组合参数： \n
-     * 入参1：指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过。 \n
-     * 入参2：为径向渐变的中心点，即相对于当前组件左上角的坐标,X轴坐标。 \n
-     * 入参3：为径向渐变的中心点，即相对于当前组件左上角的坐标,Y轴坐标。 \n
-     * 入参4：径向渐变的半径，默认值0。 \n
-     * 入参5：为渐变的颜色重复着色。 \n
+     * .value[0]?.f32:为径向渐变的中心点，即相对于当前组件左上角的坐标,X轴坐标 \n
+     * .value[1]?.f32:为径向渐变的中心点，即相对于当前组件左上角的坐标,Y轴坐标 \n
+     * .value[2]?.f32:径向渐变的半径，默认值0。 \n
+     * .value[3]?.i32:为渐变的颜色重复着色，0表示不重复着色，1表示重复着色 \n
+     * .object: 指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
+     * colors：渐变色颜色颜色。 \n
+     * stops：渐变位置。 \n
+     * size：颜色个数。 \n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_AttributeItem item = { .string = "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;5;10;50;true" };
-     * nativeNodeApi->setAttribute(nodeHandle, NODE_RADIAL_GRADIENT, &item);
-     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_RADIAL_GRADIENT);
-     * auto nodeRadialGradient = item->string;
+     * unsigned int colors[] = { 0xFFFFFFFF,0xFF0000FF };
+     * float stops[] = { 0.0, 0.5 };
+     * ArkUIColorStop colorStop = { colors, stops, 2 };
+     * ArkUI_ColorStop* ptr = &colorStop;
+     * ArkUI_NumberValue value[] = { 50, 50, 20, {.i32 = 1}};
+     * ArkUI_AttributeItem item =
+     * { value, sizeof(value)/sizeof(ArkUI_NumberValue), .object = reinterpret_cast<void*>(ptr) };
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SWEEP_GRADIENT, &item);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWEEP_GRADIENT);
+     * auto nodeRadialGradientCeneterX = item->value[0];
+     * auto nodeRadialGradientCeneterY = item->value[1];
+     * auto nodeRadialGradientradius = item->value[2];
+     * auto nodeRadialGradientFill = item->value[3];
+     * auto nodeRadialGradientColorStop = item->object;
      * @endcode
      *
      */
@@ -1276,39 +1356,101 @@ typedef enum {
     /**
      * @brief 组件上加上指定形状的遮罩，支持属性设置和属性获取接口。
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0]?.u32：可选填充颜色，0xargb类型；\n
-     * .value[1]?.u32：可选描边颜色，0xargb类型；\n
-     * .value[2]?.f32：可选描边宽度，单位为vp；\n
-     * .string:形状描述，可选： \n
-     * "progressMask(10,10,#ff0000ff)"括号内分别为进度遮罩的当前值，进度遮罩的最大值与进度遮罩的颜色; \n
-     * "rect(10,10,10,10)"括号内分别为width、height、radiusWidth与radiusHeight"; \n
-     * "circle(10,10)"括号内分别为width、height; \n
-     * "ellipse(10,10)"括号内分别为width、height; \n
-     * "path(10,10,M0 0 L600 0)"括号内分别为width、height、commands; \n
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式,共有5种类型： \n
+     * 1.rect类型： \n
+     * .value[0].u32：可选填充颜色，0xargb类型； \n
+     * .value[1].u32：可选描边颜色，0xargb类型； \n
+     * .value[2].f32：可选描边宽度，单位为vp； \n
+     * .value[3].i32：遮罩类型，参数类型{@link ArkUI_MaskType}，ARKUI_MASK_TYPE_RECT； \n
+     * .value[4].f32：矩形宽度； \n
+     * .value[5].f32：矩形高度； \n
+     * .value[6].f32：矩形圆角宽度； \n
+     * .value[7].f32：矩形圆角高度； \n
+     * 2.circle类型： \n
+     * .value[0].u32：可选填充颜色，0xargb类型； \n
+     * .value[1].u32：可选描边颜色，0xargb类型； \n
+     * .value[2].f32：可选描边宽度，单位为vp； \n
+     * .value[3].i32：遮罩类型，参数类型{@link ArkUI_MaskType}，ARKUI_MASK_TYPE_CIRCLE； \n
+     * .value[4].f32：圆形宽度； \n
+     * .value[5].f32：圆形高度； \n
+     * 3.ellipse类型： \n
+     * .value[0].u32：可选填充颜色，0xargb类型； \n
+     * .value[1].u32：可选描边颜色，0xargb类型； \n
+     * .value[2].f32：可选描边宽度，单位为vp； \n
+     * .value[3].i32：遮罩类型，参数类型{@link ArkUI_MaskType}，ARKUI_MASK_TYPE_ELLIPSE； \n
+     * .value[4].f32：椭圆形宽度； \n
+     * .value[5].f32：椭圆形高度； \n
+     * 4.path类型： \n
+     * .value[0].u32：可选填充颜色，0xargb类型； \n
+     * .value[1].u32：可选描边颜色，0xargb类型； \n
+     * .value[2].f32：可选描边宽度，单位为vp； \n
+     * .value[3].i32：遮罩类型，参数类型{@link ArkUI_MaskType}，ARKUI_MASK_TYPE_PATH； \n
+     * .value[4].f32：路径宽度； \n
+     * .value[5].f32：路径高度； \n
+     * .string：路径绘制的命令字符串； \n
+     * 4.progress类型： \n
+     * .value[0].u32：可选填充颜色，0xargb类型； \n
+     * .value[1].u32：可选描边颜色，0xargb类型； \n
+     * .value[2].f32：可选描边宽度，单位为vp； \n
+     * .value[3].i32：遮罩类型，参数类型{@link ArkUI_MaskType}，ARKUI_MASK_TYPE_PROSGRESS； \n
+     * .value[4].f32：进度遮罩的当前值； \n
+     * .value[5].f32：进度遮罩的最大值； \n
+     * .value[6].u32：进度遮罩的颜色； \n
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].u32：填充颜色，0xargb类型；\n
-     * .value[1].u32：描边颜色，0xargb类型；\n
-     * .value[2].f32：描边宽度，单位为vp；\n
-     * .string:形状描述： \n
-     * "progressMask(10,10,#ff0000ff)"括号内分别为进度遮罩的当前值，进度遮罩的最大值与进度遮罩的颜色; \n
-     * "rect(10,10,10,10)"括号内分别为width、height、radiusWidth与radiusHeight"; \n
-     * "circle(10,10)"括号内分别为width、height; \n
-     * "ellipse(10,10)"括号内分别为width、height; \n
-     * "path(10,10,M0 0 L600 0)"括号内分别为width、height、commands; \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式,共有5种类型： \n
+     * 1.rect类型： \n
+     * .value[0].u32：可选填充颜色，0xargb类型； \n
+     * .value[1].u32：可选描边颜色，0xargb类型； \n
+     * .value[2].f32：可选描边宽度，单位为vp； \n
+     * .value[3].i32：遮罩类型； \n
+     * .value[4].f32：矩形宽度； \n
+     * .value[5].f32：矩形高度； \n
+     * .value[6].f32：矩形圆角宽度； \n
+     * .value[7].f32：矩形圆角高度； \n
+     * 2.circle类型： \n
+     * .value[0].u32：可选填充颜色，0xargb类型； \n
+     * .value[1].u32：可选描边颜色，0xargb类型； \n
+     * .value[2].f32：可选描边宽度，单位为vp； \n
+     * .value[3].i32：遮罩类型； \n
+     * .value[4].f32：圆形宽度； \n
+     * .value[5].f32：圆形高度； \n
+     * 3.ellipse类型： \n
+     * .value[0].u32：可选填充颜色，0xargb类型； \n
+     * .value[1].u32：可选描边颜色，0xargb类型； \n
+     * .value[2].f32：可选描边宽度，单位为vp； \n
+     * .value[3].i32：遮罩类型； \n
+     * .value[4].f32：椭圆形宽度； \n
+     * .value[5].f32：椭圆形高度； \n
+     * 4.path类型： \n
+     * .value[0].u32：可选填充颜色，0xargb类型； \n
+     * .value[1].u32：可选描边颜色，0xargb类型； \n
+     * .value[2].f32：可选描边宽度，单位为vp； \n
+     * .value[3].i32：遮罩类型； \n
+     * .value[4].f32：路径宽度； \n
+     * .value[5].f32：路径高度； \n
+     * .string：路径绘制的命令字符串； \n
+     * 4.progress类型： \n
+     * .value[0].i32：遮罩类型； \n
+     * .value[1].f32：进度遮罩的当前值； \n
+     * .value[2].f32：进度遮罩的最大值； \n
+     * .value[3].u32：进度遮罩的颜色； \n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { { .u32 = 0xFFFF0000 }, { .u32 = 0xFFFF0000 }, 2 };
-     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue), "rect(10,10,10,10)" };
+     * ArkUI_NumberValue value[] =
+     * {{ .u32 = 0xFFFF0000 }, { .u32 = 0xFFFF0000 }, 2 , {.i32 = ARKUI_MASK_TYPE_RECT}, 100, 100, 15, 15 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_MASK, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_MASK);
      * auto nodeMaskFill = item->value[0].u32;
      * auto nodeMaskStrokeColor = item->value[1].u32;
-     * auto nodeMaskStrokeWidth = item->value[1].f32;
-     * auto nodeMaskShape = item->string;
+     * auto nodeMaskStrokeWidth = item->value[2].f32;
+     * auto nodeMaskType = item->value[3].i32;
+     * auto nodeMaskWidth = item->value[4].f32;
+     * auto nodeMaskHeight = item->value[5].f32;
+     * auto nodeMaskRadiusWidth = item->value[6].f32;
+     * auto nodeMaskradiusHeight = item->value[7].f32;
      * @endcode
      *
      */

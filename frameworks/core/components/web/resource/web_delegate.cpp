@@ -628,7 +628,7 @@ void WebDelegateObserver::NotifyDestory()
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostDelayedTask(
-        [weak = WeakClaim(this)]() {
+        [weak = WeakClaim(this), taskExecutor = taskExecutor]() {
             auto observer = weak.Upgrade();
             CHECK_NULL_VOID(observer);
             if (observer->delegate_) {

@@ -113,7 +113,7 @@ RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
 {
     auto pattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    auto navDestinationNode = pattern->GetNavDestinationNode();
+    auto navDestinationNode = pattern->GetCustomNode();
     CHECK_NULL_RETURN(navDestinationNode, nullptr);
 
     auto child = navDestinationNode->GetFirstChild();

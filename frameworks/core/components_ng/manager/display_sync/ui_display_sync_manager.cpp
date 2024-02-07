@@ -32,11 +32,6 @@ void UIDisplaySyncManager::DispatchFunc(uint64_t nanoTimestamp)
     for (const auto& [Id, weakDisplaySync] : backupedMap) {
         auto displaySync = weakDisplaySync.Upgrade();
         if (displaySync) {
-            auto rateRange = displaySync->GetDisplaySyncData()->rateRange_;
-            if (rateRange->IsValid()) {
-                displaySyncRange_->Merge(*rateRange);
-            }
-
             displaySync->CheckRate(sourceVsyncRate_, refreshRateMode_);
             displaySync->UpdateData(nanoTimestamp, VSyncPeriod);
             if (IsAutoRefreshRateMode() ||
@@ -44,6 +39,11 @@ void UIDisplaySyncManager::DispatchFunc(uint64_t nanoTimestamp)
                 displaySync->JudgeWhetherSkip();
             }
             displaySync->OnFrame();
+
+            auto rateRange = displaySync->GetDisplaySyncData()->rateRange_;
+            if (rateRange->IsValid()) {
+                displaySyncRange_->Merge(*rateRange);
+            }
         } else {
             uiDisplaySyncMap_.erase(Id);
         }
@@ -66,6 +66,7 @@ bool UIDisplaySyncManager::AddDisplaySync(const RefPtr<UIDisplaySync>& displaySy
         return false;
     }
     uiDisplaySyncMap_[displaySync->GetId()] = displaySync;
+    displaySync->JudgeWhetherRequestFrame();
     return true;
 }
 

@@ -24,6 +24,11 @@
 
 namespace OHOS::Ace::NG {
 
+NavDestinationPattern::~NavDestinationPattern()
+{
+    customNode_ = nullptr;
+}
+
 void NavDestinationPattern::OnActive()
 {
     Pattern::OnActive();
@@ -173,7 +178,7 @@ bool NavDestinationPattern::GetBackButtonState()
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
     auto pattern = navigationNode->GetPattern<NavigationPattern>();
     auto stack = pattern->GetNavigationStack();
-    auto index = stack->FindIndex(name_, navDestinationNode_.Upgrade(), true);
+    auto index = stack->FindIndex(name_, customNode_, true);
     bool showBackButton = true;
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
     if (index == 0 && (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
