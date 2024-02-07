@@ -49,7 +49,7 @@ void JSFormLink::Create(const JSCallbackInfo& info)
 {
 // #if defined(PREVIEW)
     if (!Container::IsInFormContainer()) {
-        LOGW("[Engine Log] FormLink only support IsInFormContainer widget.");
+        APP_LOGE("[Engine Log] FormLink only support IsInFormContainer widget.");
     }
     APP_LOGW("[Engine Log] FormLink create begin.");
 // #endif
