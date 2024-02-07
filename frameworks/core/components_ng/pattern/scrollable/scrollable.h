@@ -531,6 +531,7 @@ private:
     bool isSnapScrollAnimationStop_ = true;
     float snapVelocity_ = 0.0f;
     float endPos_ = 0.0;
+    bool isSnapAnimation_ = false;
 };
 
 } // namespace OHOS::Ace::NG
