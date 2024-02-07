@@ -21,6 +21,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/syntax/for_each_node.h"
+#include "core/components_ng/syntax/if_else_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -111,7 +112,8 @@ void ViewStackProcessor::Pop()
         return;
     }
 
-    currentNode->MountToParent(parent, DEFAULT_NODE_SLOT, AceType::InstanceOf<ForEachNode>(parent));
+    currentNode->MountToParent(
+        parent, DEFAULT_NODE_SLOT, AceType::InstanceOf<ForEachNode>(parent), AceType::InstanceOf<IfElseNode>(parent));
     auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
     if (currentFrameNode) {
         currentFrameNode->OnMountToParentDone();
