@@ -445,7 +445,6 @@ void ImagePattern::UpdateGestureAndDragWhenModify()
 void ImagePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    UpdateFillColorIfForegroundColor();
     LoadImageDataIfNeed();
 
     if (copyOption_ != CopyOptions::None) {
