@@ -87,7 +87,8 @@ void ForEachNode::CompareAndUpdateChildren()
             std::advance(newCompsIter, additionalChildIndex++);
             if (newCompsIter != additionalChildComps.end()) {
                 // Call AddChild to execute AttachToMainTree of new child.
-                AddChild(*newCompsIter);
+                // Allow adding default transition.
+                AddChild(*newCompsIter, DEFAULT_NODE_SLOT, false, true);
             }
         } else {
             auto iter = oldNodeByIdMap.find(newId);
