@@ -32,6 +32,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
+
 namespace OHOS::Ace::NodeModel {
 namespace {
 const std::regex COLOR_WITH_MAGIC("#[0-9A-Fa-f]{8}");
@@ -125,6 +126,11 @@ const std::vector<std::string> CURVE_ARRAY = { "linear", "ease", "ease-in", "eas
     "friction" };
 const std::vector<std::string> PLAY_MODE_ARRAY = { "normal", "alternate", "reverse", "alternate_reverse" };
 const std::vector<std::string> FONT_STYLES = { "normal", "italic" };
+const std::vector<int32_t> SPAN_ATTRIBUTES = { static_cast<int32_t>(NODE_SPAN_CONTENT),
+    static_cast<int32_t>(NODE_TEXT_DECORATION), static_cast<int32_t>(NODE_FONT_COLOR),
+    static_cast<int32_t>(NODE_FONT_SIZE), static_cast<int32_t>(NODE_FONT_STYLE), static_cast<int32_t>(NODE_FONT_WEIGHT),
+    static_cast<int32_t>(NODE_TEXT_LINE_HEIGHT), static_cast<int32_t>(NODE_TEXT_CASE),
+    static_cast<int32_t>(NODE_TEXT_LETTER_SPACING) };
 const std::string DEFAULT_CURVE = "linear";
 constexpr int32_t ANIMATION_DURATION_INDEX = 0;
 constexpr int32_t ANIMATION_CURVE_INDEX = 1;
@@ -166,7 +172,6 @@ constexpr int32_t DEFAULT_TRUE = 1;
 constexpr int32_t DEFAULT_FALSE = 0;
 
 constexpr int32_t RETURN_SIZE_ONE = 1;
-
 void ResetAttributeItem()
 {
     for (int i = 0; i < MAX_ATTRIBUTE_ITEM_LEN; ++i) {
@@ -2053,7 +2058,8 @@ int32_t SetFontSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     } else if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->setFontSize(node->uiNodeHandle, item->value[0].f32, UNIT_FP);
     } else if (node->type == ARKUI_NODE_SPAN) {
-        fullImpl->getNodeModifiers()->getTextModifier()->setFontSize(node->uiNodeHandle, item->value[0].f32, UNIT_FP);
+        fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontSize(
+            node->uiNodeHandle, item->value[0].f32, UNIT_FP);
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -4796,18 +4802,18 @@ int32_t SetDecoration(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_PARAM_INVALID;
     }
     int32_t decoration = item->value[0].i32;
-    Color decorationColor(Color::BLACK);
+    auto decorationColor = Color::BLACK.GetValue();
     if (DECORATION_COLOR_INDEX < actualSize) {
-        decorationColor.SetValue(item->value[DECORATION_COLOR_INDEX].u32);
+        decorationColor = item->value[DECORATION_COLOR_INDEX].u32;
     }
     switch (node->type) {
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanDecoration(
-                node->uiNodeHandle, decoration, decorationColor.GetValue(), 0);
+                node->uiNodeHandle, decoration, decorationColor, 0);
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextDecoration(
-                node->uiNodeHandle, decoration, decorationColor.GetValue(), 0);
+                node->uiNodeHandle, decoration, decorationColor, 0);
         default:
             break;
     }
@@ -5760,6 +5766,18 @@ const ArkUI_AttributeItem* GetRefreshRefreshing(ArkUI_NodeHandle node)
 }
 
 
+bool CheckIfAttributeLegal(ArkUI_NodeHandle node, int32_t type)
+{
+    if (node->type == ARKUI_NODE_SPAN) {
+        auto it = std::find(SPAN_ATTRIBUTES.begin(), SPAN_ATTRIBUTES.end(), type);
+        if (it != SPAN_ATTRIBUTES.end()) {
+            return true;
+        }
+        return false;
+    }
+    return true;
+}
+
 using Setter = void(ArkUI_NodeHandle node, const char* value);
 using Resetter = void(ArkUI_NodeHandle node);
 
@@ -6564,7 +6582,8 @@ void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const
         SetTextPickerAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
-    if (subTypeClass > sizeof(setterClasses) / sizeof(AttributeSetterClass*)) {
+    if ((subTypeClass > sizeof(setterClasses) / sizeof(AttributeSetterClass*)) ||
+        !CheckIfAttributeLegal(node, type)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node attribute: %{public}d NOT IMPLEMENT", type);
         return;
     }
@@ -6607,8 +6626,8 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
         subTypeClass < MAX_NODE_SCOPE_NUM ? subTypeClass : (subTypeClass - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
-    if (nodeSubTypeClass > sizeof(setterClasses) / sizeof(AttributeSetterClass*)) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node attribute: %{public}d NOT IMPLEMENT", type);
+    if ((nodeSubTypeClass > sizeof(setterClasses) / sizeof(AttributeSetterClass*)) ||
+        !CheckIfAttributeLegal(node, type)) {
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
     auto result = setterClasses[nodeSubTypeClass](node, subTypeId, item);
@@ -6631,7 +6650,8 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
         subTypeClass < MAX_NODE_SCOPE_NUM ? subTypeClass : (subTypeClass - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
-    if (nodeSubTypeClass > sizeof(getterClasses) / sizeof(AttributeGetterClass*)) {
+    if ((nodeSubTypeClass > sizeof(getterClasses) / sizeof(AttributeGetterClass*)) ||
+        !CheckIfAttributeLegal(node, type)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node attribute: %{public}d NOT IMPLEMENT", type);
         return &g_attributeItem;
     }
@@ -6674,7 +6694,8 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
         subTypeClass < MAX_NODE_SCOPE_NUM ? subTypeClass : (subTypeClass - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
-    if (nodeSubTypeClass > sizeof(resetterClasses) / sizeof(AttributeResetterClass*)) {
+    if ((nodeSubTypeClass > sizeof(resetterClasses) / sizeof(AttributeResetterClass*)) ||
+        !CheckIfAttributeLegal(node, type)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node attribute: %{public}d NOT IMPLEMENT", type);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
