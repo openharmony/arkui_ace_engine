@@ -368,7 +368,7 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         if (LessNotEqual(startIndexInVisibleWindow, targetIndex_.value())) {
             AdjustStartInfoOnSwipeByGroup(startIndex, prevItemPosition_, startIndexInVisibleWindow, startPos);
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
-            if (GreatNotEqual(GetStartPosition(), startMainPos_)) {
+            if (GreatNotEqualCustomPrecision(GetStartPosition(), startMainPos_, 0.01f)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
             }
         } else if (GreatNotEqual(startIndexInVisibleWindow, targetIndex_.value())) {

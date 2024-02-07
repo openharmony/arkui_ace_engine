@@ -762,8 +762,7 @@ void JSNavigation::SetCustomNavContentTransition(const JSCallbackInfo& info)
         JSRef<JSVal> time = transitionObj->GetProperty("timeout");
         if (time->IsNumber()) {
             auto timeout = time->ToNumber<int32_t>();
-            transition.timeout =
-                ((timeout >= 0) && (timeout <= NAVIGATION_ANIMATION_TIMEOUT)) ? timeout : NAVIGATION_ANIMATION_TIMEOUT;
+            transition.timeout = (timeout >= 0) ? timeout : NAVIGATION_ANIMATION_TIMEOUT;
         } else {
             transition.timeout = NAVIGATION_ANIMATION_TIMEOUT;
         }

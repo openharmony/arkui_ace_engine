@@ -141,7 +141,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
         navDestinationPattern->SetName(childNode.first);
-        navDestinationPattern->SetNavDestinationNode(uiNode);
+        navDestinationPattern->SetCustomNode(uiNode);
         SetBackButtonEvent(navDestination);
         navDestination->SetIndex(i);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
@@ -185,7 +185,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         if (eventHub) {
             eventHub->FireChangeEvent(false);
         }
-        auto uiNode = navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode();
+        auto uiNode = navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode();
         if (uiNode != remainChild) {
             if (navDestination->IsOnAnimation()) {
                 // The NavDestination in the animation needs to be cleaned in the animation onfinish callback.
@@ -208,6 +208,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
                 navDestination->GetContentNode()->Clean();
             }
             navigationContentNode->RemoveChild(navDestination, true);
+            navDestinationPattern->SetCustomNode(nullptr);
             hasChanged = true;
         } else {
             // remain the last child for pop animation
@@ -428,6 +429,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto parent = preNavDesNode->GetParent();
             CHECK_NULL_VOID(parent);
             parent->RemoveChild(preNavDesNode);
+            preNavDesPattern->SetCustomNode(nullptr);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
@@ -742,6 +744,7 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
     auto parent = AceType::DynamicCast<FrameNode>(preNode->GetParent());
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(preNode);
+    navDestinationPattern->SetCustomNode(nullptr);
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -819,7 +822,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
                 pattern->SetIsOnShow(false);
                 NavigationPattern::FireNavigationStateChange(navDestination, false);
             }
-            if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild) {
+            if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild) {
                 navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 navDestination->SetJSViewActive(false);
             }
@@ -827,7 +830,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
         return false;
     }
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
-    if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild &&
+    if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild &&
         !navDestination->IsOnAnimation()) {
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
         navDestination->SetJSViewActive(true);

@@ -39,7 +39,6 @@ const std::regex BRACKETS("\\(.*?\\)");
 const std::regex FLOAT_MAGIC("^[0-9]+(\\.[0-9]+)?$");
 const std::regex SIZE_TYPE_MAGIC("([0-9]+)([a-z]+)");
 constexpr char PARAMS_SEPARATOR_LEVEL1 = ';';
-constexpr char PARAMS_SEPARATOR_LEVEL2 = ',';
 constexpr int DEFAULT_ANGLE = 180;
 constexpr int UNIT_VP = 1;
 constexpr int UNIT_FP = 2;
@@ -168,7 +167,6 @@ constexpr int32_t DEFAULT_FALSE = 0;
 
 constexpr int32_t RETURN_SIZE_ONE = 1;
 
-
 void ResetAttributeItem()
 {
     for (int i = 0; i < MAX_ATTRIBUTE_ITEM_LEN; ++i) {
@@ -285,6 +283,31 @@ std::string CurveToString(int curve)
     return curveStr;
 }
 
+std::string ShapeToString(int shape)
+{
+    std::string shapeStr = "rect";
+    switch (shape) {
+        case NUM_0:
+            shapeStr = "rect";
+            break;
+        case NUM_1:
+            shapeStr = "circle";
+            break;
+        case NUM_2:
+            shapeStr = "ellipse";
+            break;
+        case NUM_3:
+            shapeStr = "path";
+            break;
+        case NUM_4:
+            shapeStr = "progress";
+            break;
+        default:
+            break;
+    }
+    return shapeStr;
+}
+
 int32_t CheckAttributeItemArray(const ArkUI_AttributeItem* item, int32_t requiredAtLeastSize)
 {
     CHECK_NULL_RETURN(item, -1);
@@ -355,37 +378,29 @@ bool CheckAttributeIsScrollNestedMode(int32_t value)
 
 bool CheckAttributeIsSliderStyle(int32_t value)
 {
-    int32_t minEnumValue = static_cast<int32_t>(
-        ArkUI_SliderStyle::ARKUI_SLIDER_STYLE_OUT_SET);
-    int32_t maxEnumValue = static_cast<int32_t>(
-        ArkUI_SliderStyle::ARKUI_SLIDER_STYLE_IN_SET);
+    int32_t minEnumValue = static_cast<int32_t>(ArkUI_SliderStyle::ARKUI_SLIDER_STYLE_OUT_SET);
+    int32_t maxEnumValue = static_cast<int32_t>(ArkUI_SliderStyle::ARKUI_SLIDER_STYLE_IN_SET);
     return value >= minEnumValue && value <= maxEnumValue;
 }
 
 bool CheckAttributeIsSliderBlockStyle(int32_t value)
 {
-    int32_t minEnumValue = static_cast<int32_t>(
-        ArkUI_SliderBlockStyle::ARKUI_SLIDER_BLOCK_STYLE_DEFAULT);
-    int32_t maxEnumValue = static_cast<int32_t>(
-        ArkUI_SliderBlockStyle::ARKUI_SLIDER_BLOCK_STYLE_SHAPE);
+    int32_t minEnumValue = static_cast<int32_t>(ArkUI_SliderBlockStyle::ARKUI_SLIDER_BLOCK_STYLE_DEFAULT);
+    int32_t maxEnumValue = static_cast<int32_t>(ArkUI_SliderBlockStyle::ARKUI_SLIDER_BLOCK_STYLE_SHAPE);
     return value >= minEnumValue && value <= maxEnumValue;
 }
 
 bool CheckAttributeIsSliderDirection(int32_t value)
 {
-    int32_t minEnumValue = static_cast<int32_t>(
-        ArkUI_SliderDirection::ARKUI_SLIDER_DIRECTION_VERTICAL);
-    int32_t maxEnumValue = static_cast<int32_t>(
-        ArkUI_SliderDirection::ARKUI_SLIDER_DIRECTION_HORIZONTAL);
+    int32_t minEnumValue = static_cast<int32_t>(ArkUI_SliderDirection::ARKUI_SLIDER_DIRECTION_VERTICAL);
+    int32_t maxEnumValue = static_cast<int32_t>(ArkUI_SliderDirection::ARKUI_SLIDER_DIRECTION_HORIZONTAL);
     return value >= minEnumValue && value <= maxEnumValue;
 }
 
 bool CheckAttributeIsCheckboxShape(int32_t value)
 {
-    int32_t minEnumValue = static_cast<int32_t>(
-        ArkUI_CheckboxShape::ArkUI_CHECKBOX_SHAPE_CIRCLE);
-    int32_t maxEnumValue = static_cast<int32_t>(
-        ArkUI_CheckboxShape::ArkUI_CHECKBOX_SHAPE_ROUNDED_SQUARE);
+    int32_t minEnumValue = static_cast<int32_t>(ArkUI_CheckboxShape::ArkUI_CHECKBOX_SHAPE_CIRCLE);
+    int32_t maxEnumValue = static_cast<int32_t>(ArkUI_CheckboxShape::ArkUI_CHECKBOX_SHAPE_ROUNDED_SQUARE);
     return value >= minEnumValue && value <= maxEnumValue;
 }
 
@@ -795,44 +810,34 @@ void ResetBlur(ArkUI_NodeHandle node)
 
 int32_t SetLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!CheckAttributeString(item)) {
+    if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    auto fullImpl = GetFullImpl();
-    std::vector<std::string> params;
-    StringUtils::StringSplitter(item->string, ' ', params);
-    if (params.size() < NUM_1) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "params are invalid");
+    if (item->object == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
-
-    std::vector<std::string> colorsSrc;
-    StringUtils::StringSplitter(params[NUM_0], ',', colorsSrc);
-    if (colorsSrc.size() % NUM_2) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "colorsSrc is invalid");
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    auto size = colorsSrc.size() / NUM_2 * NUM_3;
-    ArkUI_Float32 colors[size];
-    for (int i = 0, j = 0; i < colorsSrc.size() && j < size; i += NUM_2, j += NUM_3) {
-        colors[j + NUM_0] = StringToColorInt(colorsSrc[i + NUM_0].c_str());
-        colors[j + NUM_1] = true;
-        colors[j + NUM_2] = StringUtils::StringToDouble(colorsSrc[i + NUM_1].c_str());
+    auto* fullImpl = GetFullImpl();
+    const ArkUI_ColorStop* colorStop = reinterpret_cast<ArkUI_ColorStop*>(item->object);
+    int size = colorStop->size;
+    ArkUI_Float32 colors[size * NUM_3];
+    for (int i = 0; i < size; i++) {
+        colors[i * NUM_3 + NUM_0] = colorStop->colors[i];
+        colors[i * NUM_3 + NUM_1] = true;
+        colors[i * NUM_3 + NUM_2] = colorStop->stops[i];
     }
 
     ArkUI_Float32 values[NUM_4] = { false, DEFAULT_ANGLE, NUM_3, false };
-    if (params.size() > NUM_1) {
+    if (item->size > NUM_0) {
         values[NUM_0] = true;
-        values[NUM_1] = StringUtils::StringToDouble(params[NUM_1].c_str());
+        values[NUM_1] = item->value[NUM_0].f32;
     }
 
-    if (params.size() > NUM_2) {
-        values[NUM_2] = StringToEnumInt(params[NUM_2].c_str(), COMMON_GRADIENT_DIRECTION, NUM_3);
+    if (item->size > NUM_1) {
+        values[NUM_2] = item->value[NUM_1].i32;
     }
-    values[NUM_3] = (params.size() > NUM_3) ? StringToBoolInt(params[NUM_3].c_str()) : false;
-
+    values[NUM_3] = (item->size > NUM_2) ? item->value[NUM_2].i32 : false;
     fullImpl->getNodeModifiers()->getCommonModifier()->setLinearGradient(
-        node->uiNodeHandle, values, NUM_4, colors, size);
+        node->uiNodeHandle, values, NUM_4, colors, size * NUM_3);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1095,39 +1100,32 @@ void ResetClip(ArkUI_NodeHandle node)
 
 int32_t SetClipShape(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->string == nullptr) {
+    if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    std::string clipStr(item->string);
-    StringUtils::TrimStr(clipStr);
-    if (std::regex_search(clipStr, BRACKETS)) {
-        std::size_t pos1 = clipStr.find_first_of('(');
-        std::size_t pos2 = clipStr.find_first_of(')');
-        std::string shape = clipStr.substr(0, pos1);
-        std::string content = clipStr.substr(pos1 + 1, pos2 - pos1 - 1);
-        std::vector<std::string> attributeProps;
-        StringUtils::StringSplitter(content.c_str(), PARAMS_SEPARATOR_LEVEL2, attributeProps);
-        if (shape == "path") {
-            ArkUI_Float32 pathAttributes[NUM_2];
-            for (int i = 0; i < NUM_2; ++i) {
-                pathAttributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
-            }
-            std::string commands(attributeProps[NUM_2]);
-            fullImpl->getNodeModifiers()->getCommonModifier()->setClipPath(
-                node->uiNodeHandle, shape.c_str(), pathAttributes, commands.c_str());
+    if (item->value[0].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_PATH) {
+        ArkUI_Float32 pathAttributes[NUM_2];
+        if (LessNotEqual(item->value[NUM_1].f32, 0.0f) || LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
+            return ERROR_CODE_PARAM_INVALID;
         } else {
-            ArkUI_Float32 attributes[attributeProps.size()];
-            for (int i = 0; i < attributeProps.size(); ++i) {
-                attributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
-            }
-            fullImpl->getNodeModifiers()->getCommonModifier()->setClipShape(
-                node->uiNodeHandle, shape.c_str(), attributes, attributeProps.size());
+            pathAttributes[NUM_0] = item->value[NUM_1].f32;
+            pathAttributes[NUM_1] = item->value[NUM_2].f32;
         }
+
+        fullImpl->getNodeModifiers()->getCommonModifier()->setClipPath(
+            node->uiNodeHandle, "path", pathAttributes, item->string);
     } else {
-        int isClip = StringToBoolInt(clipStr.c_str(), 0);
-        fullImpl->getNodeModifiers()->getCommonModifier()->setClip(node->uiNodeHandle, isClip);
+        ArkUI_Float32 attributes[item->size - NUM_1];
+        for (int i = NUM_1; i < item->size; i++) {
+            if (LessNotEqual(item->value[i].f32, 0.0f)) {
+                return ERROR_CODE_PARAM_INVALID;
+            } else {
+                attributes[i - NUM_1] = item->value[i].f32;
+            }
+        }
+        fullImpl->getNodeModifiers()->getCommonModifier()->setClipShape(
+            node->uiNodeHandle, ShapeToString(item->value[0].i32).c_str(), attributes, item->size - NUM_1);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -1140,14 +1138,14 @@ void ResetClipShape(ArkUI_NodeHandle node)
 
 int32_t SetTransform(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0 && item->size != ALLOW_SIZE_16) {
+    if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     float transforms[ALLOW_SIZE_16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
-    for (int i = 0; i < ALLOW_SIZE_16; ++i) {
-        transforms[i] = item->value[i].i32;
+    for (int i = 0; i < item->size; ++i) {
+        transforms[i] = item->value[i].f32;
     }
     fullImpl->getNodeModifiers()->getCommonModifier()->setTransform(node->uiNodeHandle, transforms, ALLOW_SIZE_16);
     return ERROR_CODE_NO_ERROR;
@@ -1228,61 +1226,52 @@ void ResetShadow(ArkUI_NodeHandle node)
 
 int32_t SetCustomShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->string == nullptr) {
+    if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    // already check in entry point.
     auto* fullImpl = GetFullImpl();
     ArkUI_Float32 shadows[ALLOW_SIZE_7] = { 0, 2, 0, 0, 0, StringToColorInt("#FFFFFFFF", 0), 0 };
-    std::vector<std::string> ShadowProps;
-    StringUtils::StringSplitter(item->string, PARAMS_SEPARATOR_LEVEL1, ShadowProps);
-    int length = ShadowProps.size();
+    int length = item->size;
     if (length > NUM_0) {
-        if (LessNotEqual(StringToFloat(StringUtils::TrimStr(ShadowProps[NUM_0]).c_str(), 0.0f), 0.0f)) {
+        if (LessNotEqual(item->value[NUM_0].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        shadows[NUM_0] = StringToFloat(StringUtils::TrimStr(ShadowProps[NUM_0]).c_str(), 0.0f); // radius
-    }
-    if (length > NUM_1) {
-        if (LessNotEqual(StringToFloat(StringUtils::TrimStr(ShadowProps[NUM_1]).c_str(), 0.0f), 0.0f)) {
-            return ERROR_CODE_PARAM_INVALID;
-        }
-        shadows[NUM_2] = StringToFloat(StringUtils::TrimStr(ShadowProps[NUM_1]).c_str(), 0.0f); // OffsetX
+        shadows[NUM_0] = item->value[NUM_0].f32; // radius
     }
     if (length > NUM_2) {
-        if (LessNotEqual(StringToFloat(StringUtils::TrimStr(ShadowProps[NUM_2]).c_str(), 0.0f), 0.0f)) {
+        if (LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        shadows[NUM_3] = StringToFloat(StringUtils::TrimStr(ShadowProps[NUM_2]).c_str(), 0.0f); // OffsetY
+        shadows[NUM_2] = item->value[NUM_2].f32; // OffsetX
     }
     if (length > NUM_3) {
-        if (StringToEnumInt(StringUtils::TrimStr(ShadowProps[NUM_3]).c_str(), COMMON_SHADOW_TYPE, 0) <
-                ArkUI_ShadowType::ARKUI_SHADOW_TYPE_COLOR ||
-            StringToEnumInt(StringUtils::TrimStr(ShadowProps[NUM_3]).c_str(), COMMON_SHADOW_TYPE, 0) >
-                ArkUI_ShadowType::ARKUI_SHADOW_TYPE_BLUR) {
+        if (LessNotEqual(item->value[NUM_3].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        shadows[NUM_4] = StringToEnumInt(StringUtils::TrimStr(ShadowProps[NUM_3]).c_str(), COMMON_SHADOW_TYPE, 0);
+        shadows[NUM_3] = item->value[NUM_3].f32; // OffsetY
     }
     if (length > NUM_4) {
-        std::string coloringStrategyValues = "invert average primary";
-        if (StringToEnumInt(StringUtils::TrimStr(ShadowProps[NUM_4]).c_str(), COMMON_SHADOW_COLORING_STRATEGY, 0) <
-                ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_INVERT ||
-            StringToEnumInt(StringUtils::TrimStr(ShadowProps[NUM_3]).c_str(), COMMON_SHADOW_TYPE, 0) >
-                ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_PRIMARY) {
+        if (item->value[NUM_3].i32 < ArkUI_ShadowType::ARKUI_SHADOW_TYPE_COLOR ||
+            item->value[NUM_3].i32 > ArkUI_ShadowType::ARKUI_SHADOW_TYPE_BLUR) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        if (coloringStrategyValues.find(StringUtils::TrimStr(ShadowProps[NUM_4])) != std::string::npos) {
-            shadows[NUM_1] = COLOR_STRATEGY_STYLE;
-            shadows[NUM_5] =
-                StringToEnumInt(StringUtils::TrimStr(ShadowProps[NUM_4]).c_str(), COMMON_SHADOW_COLORING_STRATEGY, 0);
-        } else {
-            shadows[NUM_1] = COLOR_STYLE;
-            shadows[NUM_5] = StringToColorInt(StringUtils::TrimStr(ShadowProps[NUM_4]).c_str(), 0);
-        }
+        shadows[NUM_4] = item->value[NUM_4].i32;
     }
     if (length > NUM_5) {
-        shadows[NUM_6] = StringToBoolInt(StringUtils::TrimStr(ShadowProps[NUM_5]).c_str(), 0);
+        if (item->value[NUM_1].i32) {
+            if (item->value[NUM_5].i32 < ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_INVERT ||
+                item->value[NUM_5].i32 > ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_PRIMARY) {
+                return ERROR_CODE_PARAM_INVALID;
+            }
+            shadows[NUM_1] = COLOR_STRATEGY_STYLE;
+            shadows[NUM_5] = item->value[NUM_5].i32;
+        } else {
+            shadows[NUM_1] = COLOR_STYLE;
+            shadows[NUM_5] = item->value[NUM_5].u32;
+        }
+    }
+    if (length > NUM_6) {
+        shadows[NUM_6] = item->value[NUM_6].i32;
     }
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_7);
     return ERROR_CODE_NO_ERROR;
@@ -1562,61 +1551,51 @@ void ResetBackgroundImagePosition(ArkUI_NodeHandle node)
 
 int32_t SetSweepGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->string == nullptr) {
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->object == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-
-    std::vector<std::string> params;
-    StringUtils::StringSplitter(item->string, PARAMS_SEPARATOR_LEVEL1, params);
-    if (params.size() < NUM_1) {
-        return ERROR_CODE_PARAM_INVALID;
+    const ArkUI_ColorStop* colorStop = reinterpret_cast<ArkUI_ColorStop*>(item->object);
+    int size = colorStop->size;
+    ArkUI_Float32 colors[size * NUM_3];
+    for (int i = 0; i < size; i++) {
+        colors[i * NUM_3 + NUM_0] = colorStop->colors[i];
+        colors[i * NUM_3 + NUM_1] = true;
+        colors[i * NUM_3 + NUM_2] = colorStop->stops[i];
     }
-
-    std::vector<std::string> colorsSrc;
-    StringUtils::StringSplitter(params[NUM_0], PARAMS_SEPARATOR_LEVEL2, colorsSrc);
-    if (colorsSrc.size() % NUM_2) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    auto size = colorsSrc.size() / NUM_2 * NUM_3;
-    ArkUI_Float32 colors[size];
-    for (int i = 0, j = 0; i < colorsSrc.size() && j < size; i += NUM_2, j += NUM_3) {
-        colors[j + NUM_0] = StringToColorInt(colorsSrc[i + NUM_0].c_str());
-        colors[j + NUM_1] = true;
-        colors[j + NUM_2] = StringUtils::StringToDouble(colorsSrc[i + NUM_1].c_str());
-    }
-
     ArkUI_Float32 values[NUM_13] = { false, DEFAULT_X, UNIT_VP, false, DEFAULT_Y, UNIT_VP, false, NUM_0, false, NUM_0,
         false, NUM_0, false };
-    if (params.size() > NUM_1) {
+    if (item->size > NUM_0) {
         values[NUM_0] = true;
-        values[NUM_1] = StringUtils::StringToDouble(params[NUM_1].c_str());
+        values[NUM_1] = item->value[NUM_0].f32;
     }
 
-    if (params.size() > NUM_2) {
+    if (item->size > NUM_1) {
         values[NUM_3] = true;
-        values[NUM_4] = StringUtils::StringToDouble(params[NUM_2].c_str());
+        values[NUM_4] = item->value[NUM_1].f32;
     }
 
-    if (params.size() > NUM_3) {
+    if (item->size > NUM_2) {
         values[NUM_6] = true;
-        values[NUM_7] = StringUtils::StringToDouble(params[NUM_3].c_str());
+        values[NUM_7] = item->value[NUM_2].f32;
     }
 
-    if (params.size() > NUM_4) {
+    if (item->size > NUM_3) {
         values[NUM_8] = true;
-        values[NUM_9] = StringUtils::StringToDouble(params[NUM_4].c_str());
+        values[NUM_9] = item->value[NUM_3].f32;
     }
 
-    if (params.size() > NUM_5) {
+    if (item->size > NUM_4) {
         values[NUM_10] = true;
-        values[NUM_11] = StringUtils::StringToDouble(params[NUM_5].c_str());
+        values[NUM_11] = item->value[NUM_4].f32;
     }
 
-    values[NUM_12] = (params.size() > NUM_6) ? StringToBoolInt(params[NUM_6].c_str()) : false;
-
+    values[NUM_12] = (item->size > NUM_5) ? item->value[NUM_5].i32 : false;
     fullImpl->getNodeModifiers()->getCommonModifier()->setSweepGradient(
-        node->uiNodeHandle, values, NUM_13, colors, size);
+        node->uiNodeHandle, values, NUM_13, colors, size * NUM_3);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1628,51 +1607,43 @@ void ResetSweepGradient(ArkUI_NodeHandle node)
 
 int32_t SetRadialGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->string == nullptr) {
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->object == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    std::vector<std::string> params;
-    StringUtils::StringSplitter(item->string, PARAMS_SEPARATOR_LEVEL1, params);
-    if (params.size() < NUM_1) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "params are invalid");
-        return ERROR_CODE_PARAM_INVALID;
-    }
-
-    std::vector<std::string> colorsSrc;
-    StringUtils::StringSplitter(params[NUM_0], PARAMS_SEPARATOR_LEVEL2, colorsSrc);
-    if (colorsSrc.size() % NUM_2) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    auto size = colorsSrc.size() / NUM_2 * NUM_3;
-    ArkUI_Float32 colors[size];
-    for (int i = 0, j = 0; i < colorsSrc.size() && j < size; i += NUM_2, j += NUM_3) {
-        colors[j + NUM_0] = StringToColorInt(colorsSrc[i + NUM_0].c_str());
-        colors[j + NUM_1] = true;
-        colors[j + NUM_2] = StringUtils::StringToDouble(colorsSrc[i + NUM_1].c_str());
+    const ArkUI_ColorStop* colorStop = reinterpret_cast<ArkUI_ColorStop*>(item->object);
+    int size = colorStop->size;
+    ArkUI_Float32 colors[size * NUM_3];
+    for (int i = 0; i < size; i++) {
+        colors[i * NUM_3 + NUM_0] = colorStop->colors[i];
+        colors[i * NUM_3 + NUM_1] = true;
+        colors[i * NUM_3 + NUM_2] = colorStop->stops[i];
     }
 
     ArkUI_Float32 values[NUM_10] = { false, DEFAULT_X, UNIT_VP, false, DEFAULT_Y, UNIT_VP, false, NUM_0, UNIT_VP,
         false };
-    if (params.size() > NUM_1) {
+    if (item->size > NUM_0) {
         values[NUM_0] = true;
-        values[NUM_1] = StringUtils::StringToDouble(params[NUM_1].c_str());
+        values[NUM_1] = item->value[NUM_0].f32;
     }
 
-    if (params.size() > NUM_2) {
+    if (item->size > NUM_1) {
         values[NUM_3] = true;
-        values[NUM_4] = StringUtils::StringToDouble(params[NUM_2].c_str());
+        values[NUM_4] = item->value[NUM_1].f32;
     }
 
-    if (params.size() > NUM_3) {
+    if (item->size > NUM_2) {
         values[NUM_6] = true;
-        values[NUM_7] = StringUtils::StringToDouble(params[NUM_3].c_str());
+        values[NUM_7] = item->value[NUM_2].f32;
     }
 
-    values[NUM_9] = (params.size() > NUM_4) ? StringToBoolInt(params[NUM_4].c_str()) : false;
+    values[NUM_9] = (item->size > NUM_4) ? item->value[NUM_3].i32 : false;
 
     fullImpl->getNodeModifiers()->getCommonModifier()->setRadialGradient(
-        node->uiNodeHandle, values, NUM_10, colors, size);
+        node->uiNodeHandle, values, NUM_10, colors, size * NUM_3);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1684,54 +1655,44 @@ void ResetRadialGradient(ArkUI_NodeHandle node)
 
 int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->string == nullptr) {
+    if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    if (!item && item->size != NUM_2) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "positions are invalid");
-        return ERROR_CODE_PARAM_INVALID;
-    }
     int fill = item->size > NUM_0 ? DEFAULT_FIll_COLOR : item->value[0].u32;
-    int strock = item->size > NUM_1 ? DEFAULT_FIll_COLOR : item->value[0].u32;
-    float strockWidth = item->size > NUM_2 ? NUM_0 : item->value[0].f32;
-    std::string maskStr(item->string);
-    StringUtils::TrimStr(maskStr);
-    if (std::regex_search(maskStr, BRACKETS)) {
-        std::size_t pos1 = maskStr.find_first_of('(');
-        std::size_t pos2 = maskStr.find_first_of(')');
-        std::string shape = maskStr.substr(0, pos1);
-        std::string content = maskStr.substr(pos1 + 1, pos2 - pos1 - 1);
-        std::vector<std::string> attributeProps;
-        StringUtils::StringSplitter(content.c_str(), PARAMS_SEPARATOR_LEVEL2, attributeProps);
-        if (shape == "path") {
-            ArkUI_Float32 pathAttributes[NUM_2];
-            for (int i = 0; i < NUM_2; ++i) {
-                pathAttributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
-            }
-            std::string commands(attributeProps[NUM_2]);
-            fullImpl->getNodeModifiers()->getCommonModifier()->setMaskPath(
-                node->uiNodeHandle, shape.c_str(), fill, strock, strockWidth, pathAttributes, commands.c_str());
-        } else if (shape == "progressMask") {
-            ArkUI_Float32 progressAttributes[NUM_3];
-            for (int i = 0; i < NUM_2; ++i) {
-                progressAttributes[i] = StringToInt(attributeProps[i].c_str(), 0);
-            }
-            progressAttributes[NUM_2] = StringToColorInt(attributeProps[NUM_2].c_str(), 0);
-            fullImpl->getNodeModifiers()->getCommonModifier()->setMaskShape(
-                node->uiNodeHandle, shape.c_str(), fill, strock, strockWidth, progressAttributes, NUM_3);
+    int strock = item->size > NUM_1 ? DEFAULT_FIll_COLOR : item->value[1].u32;
+    float strockWidth = item->size > NUM_2 ? NUM_0 : item->value[2].f32;
+    if (item->value[NUM_0].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_PATH) {
+        ArkUI_Float32 pathAttributes[NUM_2];
+        if (LessNotEqual(item->value[NUM_1].f32, 0.0f) || LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
+            return ERROR_CODE_PARAM_INVALID;
         } else {
-            ArkUI_Float32 attributes[attributeProps.size()];
-            for (int i = 0; i < attributeProps.size(); ++i) {
-                attributes[i] = StringToFloat(attributeProps[i].c_str(), 0.0f);
-            }
-            fullImpl->getNodeModifiers()->getCommonModifier()->setMaskShape(
-                node->uiNodeHandle, shape.c_str(), fill, strock, strockWidth, attributes, attributeProps.size());
+            pathAttributes[NUM_0] = item->value[NUM_1].f32;
+            pathAttributes[NUM_1] = item->value[NUM_2].f32;
         }
-        return ERROR_CODE_NO_ERROR;
+        fullImpl->getNodeModifiers()->getCommonModifier()->setMaskPath(
+            node->uiNodeHandle, "path", fill, strock, strockWidth, pathAttributes, item->string);
+    } else if (item->value[0].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS) {
+        ArkUI_Float32 progressAttributes[NUM_3];
+        for (int i = NUM_1; i < NUM_3; i++) {
+            progressAttributes[i] = item->value[i].f32;
+        }
+        uint32_t color = item->value[NUM_3].u32;
+        fullImpl->getNodeModifiers()->getCommonModifier()->setProgressMask(
+            node->uiNodeHandle, progressAttributes, color);
     } else {
-        return ERROR_CODE_PARAM_INVALID;
+        ArkUI_Float32 attributes[item->size - NUM_1];
+        for (int i = NUM_1; i < item->size; i++) {
+            if (LessNotEqual(item->value[i].f32, 0.0f)) {
+                return ERROR_CODE_PARAM_INVALID;
+            } else {
+                attributes[i - NUM_1] = item->value[i].f32;
+            }
+        }
+        fullImpl->getNodeModifiers()->getCommonModifier()->setMaskShape(node->uiNodeHandle,
+            ShapeToString(item->value[NUM_3].i32).c_str(), fill, strock, strockWidth, attributes, item->size - NUM_1);
     }
+    return ERROR_CODE_NO_ERROR;
 }
 
 int32_t SetBlendMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -1739,8 +1700,8 @@ int32_t SetBlendMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[0].i32 < ArkUI_BlendMode::ARKUI_BLEND_MODE_NONE ||
-        item->value[0].i32 > ArkUI_BlendMode::ARKUI_BLEND_MODE_LUMINOSITY) {
+    if (item->value[NUM_0].i32 < ArkUI_BlendMode::ARKUI_BLEND_MODE_NONE ||
+        item->value[NUM_0].i32 > ArkUI_BlendMode::ARKUI_BLEND_MODE_LUMINOSITY) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1860,16 +1821,16 @@ int32_t SetConstraintSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 
     auto* fullImpl = GetFullImpl();
     ArkUI_Float32 constraintSize[ALLOW_SIZE_4] = { 0.0f, FLT_MAX, 0.0f, FLT_MAX };
-    ArkUI_Int32 units[ALLOW_SIZE_4] = { 1, 1, 1, 1 };
+    ArkUI_Int32 units[ALLOW_SIZE_4] = { UNIT_VP, UNIT_VP, UNIT_VP, UNIT_VP };
 
     if (item->size == 1) {
         if (LessNotEqual(item->value[0].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        constraintSize[0] = item->value[0].f32;
-        constraintSize[1] = item->value[0].f32;
-        constraintSize[2] = item->value[0].f32;
-        constraintSize[3] = item->value[0].f32;
+        constraintSize[NUM_0] = item->value[NUM_0].f32;
+        constraintSize[NUM_1] = item->value[NUM_0].f32;
+        constraintSize[NUM_2] = item->value[NUM_0].f32;
+        constraintSize[NUM_3] = item->value[NUM_0].f32;
     } else if (item->size == ALLOW_SIZE_4) {
         for (int i = 0; i < ALLOW_SIZE_4; ++i) {
             if (LessNotEqual(item->value[0].f32, 0.0f)) {
@@ -5350,15 +5311,13 @@ int32_t SetCheckboxSelect(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     if (!CheckAttributeIsBool(item)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setSelect(
-        node->uiNodeHandle, item->value[0].i32);
+    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setSelect(node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetCheckboxSelect(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getSelect(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getSelect(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
     return &g_attributeItem;
 }
@@ -5373,15 +5332,13 @@ int32_t SetCheckboxSelectedColor(ArkUI_NodeHandle node, const ArkUI_AttributeIte
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setSelectedColor(
-        node->uiNodeHandle, item->value[0].u32);
+    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setSelectedColor(node->uiNodeHandle, item->value[0].u32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetCheckboxSelectedColor(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getSelectedColor(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getSelectedColor(node->uiNodeHandle);
     g_numberValues[0].u32 = resultValue;
     return &g_attributeItem;
 }
@@ -5403,8 +5360,7 @@ int32_t SetCheckboxUnSelectedColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
 
 const ArkUI_AttributeItem* GetCheckboxUnSelectedColor(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getUnSelectedColor(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getUnSelectedColor(node->uiNodeHandle);
     g_numberValues[0].u32 = resultValue;
     return &g_attributeItem;
 }
@@ -5448,12 +5404,9 @@ int32_t SetCheckboxMark(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 
 const ArkUI_AttributeItem* GetCheckboxMark(ArkUI_NodeHandle node)
 {
-    auto strokeColor = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getCheckMarkColor(
-        node->uiNodeHandle);
-    auto size = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getCheckMarkSize(
-        node->uiNodeHandle);
-    auto strokeWidth = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getCheckMarkWidth(
-        node->uiNodeHandle);
+    auto strokeColor = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getCheckMarkColor(node->uiNodeHandle);
+    auto size = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getCheckMarkSize(node->uiNodeHandle);
+    auto strokeWidth = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getCheckMarkWidth(node->uiNodeHandle);
     int index = 0;
     g_numberValues[index++].u32 = strokeColor;
     g_numberValues[index++].f32 = size;
@@ -5472,15 +5425,13 @@ int32_t SetCheckboxShape(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size == 0 || !CheckAttributeIsCheckboxShape(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setCheckboxShape(
-        node->uiNodeHandle, item->value[0].i32);
+    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setCheckboxShape(node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetCheckboxShape(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getCheckboxShape(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getCheckboxShape(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
     return &g_attributeItem;
 }
@@ -5496,23 +5447,20 @@ int32_t SetSliderBlockColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setBlockColor(
-        node->uiNodeHandle, item->value[0].u32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setBlockColor(node->uiNodeHandle, item->value[0].u32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetSliderBlockColor(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getBlockColor(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getBlockColor(node->uiNodeHandle);
     g_numberValues[0].u32 = resultValue;
     return &g_attributeItem;
 }
 
 void ResetSliderBlockColor(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetBlockColor(
-        node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetBlockColor(node->uiNodeHandle);
 }
 
 int32_t SetSliderTrackColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5527,16 +5475,15 @@ int32_t SetSliderTrackColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
 
 const ArkUI_AttributeItem* GetSliderTrackColor(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getTrackBackgroundColor(
-        node->uiNodeHandle);
+    auto resultValue =
+        GetFullImpl()->getNodeModifiers()->getSliderModifier()->getTrackBackgroundColor(node->uiNodeHandle);
     g_numberValues[0].u32 = resultValue;
     return &g_attributeItem;
 }
 
 void ResetSliderTrackColor(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(
-        node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(node->uiNodeHandle);
 }
 
 int32_t SetSliderSelectedColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5544,23 +5491,20 @@ int32_t SetSliderSelectedColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setSelectColor(
-        node->uiNodeHandle, item->value[0].u32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setSelectColor(node->uiNodeHandle, item->value[0].u32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetSliderSelectedColor(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getSelectColor(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getSelectColor(node->uiNodeHandle);
     g_numberValues[0].u32 = resultValue;
     return &g_attributeItem;
 }
 
 void ResetSliderSelectedColor(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSelectColor(
-        node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSelectColor(node->uiNodeHandle);
 }
 
 int32_t SetSliderShowSteps(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5568,23 +5512,20 @@ int32_t SetSliderShowSteps(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     if (!CheckAttributeIsBool(item)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setShowSteps(
-        node->uiNodeHandle, item->value[0].i32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setShowSteps(node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetSliderShowSteps(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getShowSteps(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getShowSteps(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
     return &g_attributeItem;
 }
 
 void ResetSliderShowSteps(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetShowSteps(
-        node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetShowSteps(node->uiNodeHandle);
 }
 
 int32_t SetSliderBlockStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5641,20 +5582,16 @@ int32_t SetSliderBlockStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
 
 const ArkUI_AttributeItem* GetSliderBlockStyle(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getBlockType(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getBlockType(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
     return &g_attributeItem;
 }
 
 void ResetSliderBlockStyle(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSliderBlockImage(
-        node->uiNodeHandle);
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSliderBlockShape(
-        node->uiNodeHandle);
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSliderBlockType(
-        node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSliderBlockImage(node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSliderBlockShape(node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSliderBlockType(node->uiNodeHandle);
 }
 
 int32_t SetSliderValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5662,23 +5599,20 @@ int32_t SetSliderValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size == 0 || !CheckRangFloat(ZERO_F, HUNDRED, item->value[0].f32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setSliderValue(
-        node->uiNodeHandle, item->value[0].f32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setSliderValue(node->uiNodeHandle, item->value[0].f32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetSliderValue(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getSliderValue(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getSliderValue(node->uiNodeHandle);
     g_numberValues[0].f32 = resultValue;
     return &g_attributeItem;
 }
 
 void ResetSliderValue(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSliderValue(
-        node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSliderValue(node->uiNodeHandle);
 }
 
 int32_t SetSliderMinValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5686,23 +5620,20 @@ int32_t SetSliderMinValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     if (item->size == 0 || !CheckRangFloat(ZERO_F, HUNDRED, item->value[0].f32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setMinLabel(
-        node->uiNodeHandle, item->value[0].f32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setMinLabel(node->uiNodeHandle, item->value[0].f32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetSliderMinValue(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getMinLabel(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getMinLabel(node->uiNodeHandle);
     g_numberValues[0].f32 = resultValue;
     return &g_attributeItem;
 }
 
 void ResetSliderMinValue(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetMinLabel(
-        node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetMinLabel(node->uiNodeHandle);
 }
 
 int32_t SetSliderMaxValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5710,23 +5641,20 @@ int32_t SetSliderMaxValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     if (item->size == 0 || !CheckRangFloat(ZERO_F, HUNDRED, item->value[0].f32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setMaxLabel(
-        node->uiNodeHandle, item->value[0].f32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setMaxLabel(node->uiNodeHandle, item->value[0].f32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetSliderMaxValue(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getMaxLabel(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getMaxLabel(node->uiNodeHandle);
     g_numberValues[0].f32 = resultValue;
     return &g_attributeItem;
 }
 
 void ResetSliderMaxValue(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetMaxLabel(
-        node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetMaxLabel(node->uiNodeHandle);
 }
 
 int32_t SetSliderStep(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5734,23 +5662,20 @@ int32_t SetSliderStep(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size == 0 || !CheckRangFloat(SLIDER_STEP_MIN_F, HUNDRED, item->value[0].f32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setStep(
-        node->uiNodeHandle, item->value[0].f32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setStep(node->uiNodeHandle, item->value[0].f32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetSliderStep(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getStep(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getStep(node->uiNodeHandle);
     g_numberValues[0].f32 = resultValue;
     return &g_attributeItem;
 }
 
 void ResetSliderStep(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetStep(
-        node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetStep(node->uiNodeHandle);
 }
 
 int32_t SetSliderDirection(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5758,23 +5683,20 @@ int32_t SetSliderDirection(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     if (item->size == 0 || !CheckAttributeIsSliderDirection(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setDirection(
-        node->uiNodeHandle, item->value[0].i32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setDirection(node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetSliderDirection(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getDirection(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getDirection(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
     return &g_attributeItem;
 }
 
 void ResetSliderDirection(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetDirection(
-        node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetDirection(node->uiNodeHandle);
 }
 
 int32_t SetSliderReverse(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5782,23 +5704,20 @@ int32_t SetSliderReverse(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (!CheckAttributeIsBool(item)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setReverse(
-        node->uiNodeHandle, item->value[0].i32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setReverse(node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetSliderReverse(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getReverse(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getReverse(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
     return &g_attributeItem;
 }
 
 void ResetSliderReverse(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetReverse(
-        node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetReverse(node->uiNodeHandle);
 }
 
 int32_t SetSliderStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -5806,23 +5725,20 @@ int32_t SetSliderStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size == 0 || !CheckAttributeIsSliderStyle(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setSliderStyle(
-        node->uiNodeHandle, item->value[0].i32);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setSliderStyle(node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetSliderStyle(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getSliderStyle(
-        node->uiNodeHandle);
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getSliderModifier()->getSliderStyle(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
     return &g_attributeItem;
 }
 
 void ResetSliderStyle(ArkUI_NodeHandle node)
 {
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSliderStyle(
-        node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSliderStyle(node->uiNodeHandle);
 }
 
 int32_t SetRefreshRefreshing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -6030,8 +5946,8 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
     using Setter = int32_t(ArkUI_NodeHandle node, const ArkUI_AttributeItem* value);
     static Setter* setters[] = { SetTextContent, SetFontColor, SetFontSize, SetFontStyle, SetFontWeight, SetLineHeight,
         SetDecoration, SetTextCase, SetLetterSpacing, SetMaxLines, SetTextAlign, SetTextOverflow, SetTextFontFamily,
-        SetTextCopyOption, SetTextBaselineOffset, SetTextShadow, SetTextMinFontSize, SetTextMaxFontSize,
-        SetTextFont, SetTextHeightAdaptivePolicy, SetTextIndent };
+        SetTextCopyOption, SetTextBaselineOffset, SetTextShadow, SetTextMinFontSize, SetTextMaxFontSize, SetTextFont,
+        SetTextHeightAdaptivePolicy, SetTextIndent };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -6506,8 +6422,8 @@ void ResetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetCheckboxAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     using Setter = int32_t(ArkUI_NodeHandle node, const ArkUI_AttributeItem* value);
-    static Setter* setters[] = { SetCheckboxSelect, SetCheckboxSelectedColor,
-        SetCheckboxUnSelectedColor, SetCheckboxMark, SetCheckboxShape };
+    static Setter* setters[] = { SetCheckboxSelect, SetCheckboxSelectedColor, SetCheckboxUnSelectedColor,
+        SetCheckboxMark, SetCheckboxShape };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Checkbox node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -6518,8 +6434,8 @@ int32_t SetCheckboxAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ark
 void ResetCheckboxAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     using Resetter = void(ArkUI_NodeHandle node);
-    static Resetter* resetters[] = { ResetCheckboxSelect, ResetCheckboxSelectedColor,
-        ResetCheckboxUnSelectedColor, ResetCheckboxMark, ResetCheckboxShape };
+    static Resetter* resetters[] = { ResetCheckboxSelect, ResetCheckboxSelectedColor, ResetCheckboxUnSelectedColor,
+        ResetCheckboxMark, ResetCheckboxShape };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Checkbox node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -6530,8 +6446,8 @@ void ResetCheckboxAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 const ArkUI_AttributeItem* GetCheckboxAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     using Getter = const ArkUI_AttributeItem*(ArkUI_NodeHandle node);
-    static Getter* getters[] = { GetCheckboxSelect, GetCheckboxSelectedColor,
-        GetCheckboxUnSelectedColor, GetCheckboxMark, GetCheckboxShape };
+    static Getter* getters[] = { GetCheckboxSelect, GetCheckboxSelectedColor, GetCheckboxUnSelectedColor,
+        GetCheckboxMark, GetCheckboxShape };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Checkbox node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -6543,10 +6459,20 @@ const ArkUI_AttributeItem* GetCheckboxAttribute(ArkUI_NodeHandle node, int32_t s
 int32_t SetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     using Setter = int32_t(ArkUI_NodeHandle node, const ArkUI_AttributeItem* value);
-    static Setter* setters[] = { SetSliderBlockColor, SetSliderTrackColor,
-        SetSliderSelectedColor, SetSliderShowSteps, SetSliderBlockStyle, SetSliderValue,
-        SetSliderMinValue, SetSliderMaxValue, SetSliderStep, SetSliderDirection, SetSliderReverse,
-        SetSliderStyle, };
+    static Setter* setters[] = {
+        SetSliderBlockColor,
+        SetSliderTrackColor,
+        SetSliderSelectedColor,
+        SetSliderShowSteps,
+        SetSliderBlockStyle,
+        SetSliderValue,
+        SetSliderMinValue,
+        SetSliderMaxValue,
+        SetSliderStep,
+        SetSliderDirection,
+        SetSliderReverse,
+        SetSliderStyle,
+    };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -6557,10 +6483,20 @@ int32_t SetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
 const ArkUI_AttributeItem* GetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     using Getter = const ArkUI_AttributeItem*(ArkUI_NodeHandle node);
-    static Getter* getters[] = { GetSliderBlockColor, GetSliderTrackColor,
-        GetSliderSelectedColor, GetSliderShowSteps, GetSliderBlockStyle, GetSliderValue,
-        GetSliderMinValue, GetSliderMaxValue, GetSliderStep, GetSliderDirection,
-        GetSliderReverse, GetSliderStyle, };
+    static Getter* getters[] = {
+        GetSliderBlockColor,
+        GetSliderTrackColor,
+        GetSliderSelectedColor,
+        GetSliderShowSteps,
+        GetSliderBlockStyle,
+        GetSliderValue,
+        GetSliderMinValue,
+        GetSliderMaxValue,
+        GetSliderStep,
+        GetSliderDirection,
+        GetSliderReverse,
+        GetSliderStyle,
+    };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -6572,10 +6508,20 @@ const ArkUI_AttributeItem* GetSliderAttribute(ArkUI_NodeHandle node, int32_t sub
 void ResetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     using Resetter = void(ArkUI_NodeHandle node);
-    static Resetter* resetters[] = { ResetSliderBlockColor, ResetSliderTrackColor,
-        ResetSliderSelectedColor, ResetSliderShowSteps, ResetSliderBlockStyle, ResetSliderValue,
-        ResetSliderMinValue, ResetSliderMaxValue, ResetSliderStep, ResetSliderDirection,
-        ResetSliderReverse, ResetSliderStyle, };
+    static Resetter* resetters[] = {
+        ResetSliderBlockColor,
+        ResetSliderTrackColor,
+        ResetSliderSelectedColor,
+        ResetSliderShowSteps,
+        ResetSliderBlockStyle,
+        ResetSliderValue,
+        ResetSliderMinValue,
+        ResetSliderMaxValue,
+        ResetSliderStep,
+        ResetSliderDirection,
+        ResetSliderReverse,
+        ResetSliderStyle,
+    };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -6629,12 +6575,33 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
 {
     using AttributeSetterClass = int32_t(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item);
     static AttributeSetterClass* setterClasses[] = {
-        SetCommonAttribute, SetTextAttribute, SetSpanAttribute, SetImageSpanAttribute, SetImageAttribute,
-        SetToggleAttribute, SetLoadingProgressAttribute, nullptr, nullptr, nullptr,
-        nullptr, SetCheckboxAttribute, nullptr, SetDatePickerAttribute, SetTimePickerAttribute,
-        SetTextPickerAttribute, nullptr, SetSliderAttribute, SetRefreshAttribute, SetStackAttribute, SetSwiperAttribute,
-        SetScrollAttribute, SetListAttribute,  nullptr, SetListItemGroupAttribute, nullptr, nullptr,
-        nullptr, nullptr,
+        SetCommonAttribute,
+        SetTextAttribute,
+        SetSpanAttribute,
+        SetImageSpanAttribute,
+        SetImageAttribute,
+        SetToggleAttribute,
+        SetLoadingProgressAttribute,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        SetCheckboxAttribute,
+        nullptr,
+        SetDatePickerAttribute,
+        SetTimePickerAttribute,
+        SetTextPickerAttribute,
+        SetSliderAttribute,
+        SetStackAttribute,
+        SetSwiperAttribute,
+        SetScrollAttribute,
+        SetListAttribute,
+        nullptr,
+        SetListItemGroupAttribute,
+        nullptr,
+        nullptr,
+        nullptr,
+        SetRefreshAttribute,
     };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
@@ -6658,8 +6625,8 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
     static AttributeGetterClass* getterClasses[] = { GetCommonAttribute, GetTextAttribute, nullptr, nullptr, nullptr,
         GetToggleAttribute, GetLoadingProgressAttribute, nullptr, nullptr, nullptr, nullptr,
         GetCheckboxAttribute, nullptr, nullptr, nullptr, nullptr, nullptr,
-        GetSliderAttribute, GetRefreshAttribute, GetScrollAttribute, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr };
+        GetSliderAttribute, nullptr, GetScrollAttribute, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, GetRefreshAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
@@ -6675,12 +6642,33 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
 {
     using AttributeResetterClass = void(ArkUI_NodeHandle node, int32_t subTypeId);
     static AttributeResetterClass* resetterClasses[] = {
-        ResetCommonAttribute, ResetTextAttribute, ResetSpanAttribute, ResetImageSpanAttribute, ResetImageAttribute,
-        ResetToggleAttribute, ResetLoadingProgressAttribute, nullptr, nullptr, nullptr,
-        nullptr, ResetCheckboxAttribute, nullptr, ResetDatePickerAttribute, ResetTimePickerAttribute,
-        ResetTextPickerAttribute, nullptr, ResetSliderAttribute, nullptr, ResetStackAttribute, ResetSwiperAttribute,
-        ResetScrollAttribute, ResetListAttribute, nullptr, ResetListItemGroupAttribute, nullptr, nullptr,
-        nullptr, nullptr,
+        ResetCommonAttribute,
+        ResetTextAttribute,
+        ResetSpanAttribute,
+        ResetImageSpanAttribute,
+        ResetImageAttribute,
+        ResetToggleAttribute,
+        ResetLoadingProgressAttribute,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        ResetCheckboxAttribute,
+        nullptr,
+        ResetDatePickerAttribute,
+        ResetTimePickerAttribute,
+        ResetTextPickerAttribute,
+        ResetSliderAttribute,
+        ResetStackAttribute,
+        ResetSwiperAttribute,
+        ResetScrollAttribute,
+        ResetListAttribute,
+        nullptr,
+        ResetListItemGroupAttribute,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
     };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;

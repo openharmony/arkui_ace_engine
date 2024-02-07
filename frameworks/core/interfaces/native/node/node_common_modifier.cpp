@@ -32,7 +32,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/pattern/shape/shape_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -716,15 +716,15 @@ void ResetTransform(ArkUINodeHandle node)
 }
 
 void SetBorderColor(
-    ArkUINodeHandle node, uint32_t leftColorInt, uint32_t rightColorInt, uint32_t topColorInt, uint32_t bottomColorInt)
+    ArkUINodeHandle node, uint32_t topColorInt, uint32_t rightColorInt, uint32_t bottomColorInt, uint32_t leftColorInt)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::BorderColorProperty borderColors;
-    borderColors.leftColor = Color(leftColorInt);
-    borderColors.rightColor = Color(rightColorInt);
     borderColors.topColor = Color(topColorInt);
+    borderColors.rightColor = Color(rightColorInt);
     borderColors.bottomColor = Color(bottomColorInt);
+    borderColors.leftColor = Color(leftColorInt);
     borderColors.multiValued = true;
 
     ViewAbstract::SetBorderColor(frameNode, borderColors);
@@ -1715,8 +1715,7 @@ void ResetTranslate(ArkUINodeHandle node)
  * values[2]: scaleX;values[3]: scaleY;values[4]: scaleZ
  * @param length shadows length
  */
-void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, int valLength,
-    const int* units, int unitLength)
+void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, int valLength, const int* units, int unitLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3301,36 +3300,34 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         shape->SetHeight(height);
         shape->SetRadiusWidth(radiusWidth);
         shape->SetRadiusHeight(radiusHeight);
+        shape->SetColor(Color(fill));
         ViewAbstract::SetMask(frameNode, shape);
+        ShapeAbstractModelNG::SetStroke(frameNode, Color(stroke));
+        ShapeAbstractModelNG::SetStrokeWidth(frameNode, strokeWidth_);
     } else if (shapeType == "circle") {
         auto shape = AceType::MakeRefPtr<Circle>();
         auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
         auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
         shape->SetWidth(width);
         shape->SetHeight(height);
+        shape->SetColor(Color(fill));
         ViewAbstract::SetMask(frameNode, shape);
+        ShapeAbstractModelNG::SetStroke(frameNode, Color(stroke));
+        ShapeAbstractModelNG::SetStrokeWidth(frameNode, strokeWidth_);
     } else if (shapeType == "ellipse") {
         auto shape = AceType::MakeRefPtr<Ellipse>();
         auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
         auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
         shape->SetWidth(width);
         shape->SetHeight(height);
+        shape->SetColor(Color(fill));
         ViewAbstract::SetMask(frameNode, shape);
-    } else if (shapeType == "progressMask") {
-        auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
-        int value = attribute[NUM_0];
-        int total = attribute[NUM_1];
-        progressMask->SetValue(value);
-        progressMask->SetMaxValue(total);
-        progressMask->SetColor(Color(attribute[NUM_2]));
-        ViewAbstract::SetProgressMask(frameNode, progressMask);
+        ShapeAbstractModelNG::SetStroke(frameNode, Color(stroke));
+        ShapeAbstractModelNG::SetStrokeWidth(frameNode, strokeWidth_);
     } else {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "type are invalid");
         return;
     }
-    ShapeModelNG::SetFill(frameNode, Color(fill));
-    ShapeModelNG::SetStroke(frameNode, Color(stroke));
-    ShapeModelNG::SetStrokeWidth(frameNode, strokeWidth_);
 }
 
 void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
@@ -3346,10 +3343,23 @@ void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, Ar
     path->SetWidth(width);
     path->SetHeight(height);
     path->SetValue(StringUtils::TrimStr(pathCommands));
+    path->SetColor(Color(fill));
     ViewAbstract::SetMask(frameNode, path);
-    ShapeModelNG::SetFill(frameNode, Color(fill));
-    ShapeModelNG::SetFill(frameNode, Color(stroke));
-    ShapeModelNG::SetStrokeWidth(frameNode, strokeWidth_);
+    ShapeAbstractModelNG::SetStroke(frameNode, Color(stroke));
+    ShapeAbstractModelNG::SetStrokeWidth(frameNode, strokeWidth_);
+}
+
+void SetProgressMask(ArkUINodeHandle node, ArkUI_Float32* attribute, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+    int value = attribute[NUM_0];
+    int total = attribute[NUM_1];
+    progressMask->SetValue(value);
+    progressMask->SetMaxValue(total);
+    progressMask->SetColor(Color(color));
+    ViewAbstract::SetProgressMask(frameNode, progressMask);
 }
 
 ArkUI_Bool GetFocusable(ArkUINodeHandle node)
@@ -3443,7 +3453,7 @@ ArkUI_Bool GetNeedFocus(ArkUINodeHandle node)
 
 namespace NodeModifier {
 namespace {
-    OHOS::Ace::TouchEventInfo globalEventInfo("global");
+OHOS::Ace::TouchEventInfo globalEventInfo("global");
 }
 
 const ArkUICommonModifier* GetCommonModifier()
@@ -3480,10 +3490,10 @@ const ArkUICommonModifier* GetCommonModifier()
         SetEnabled, ResetEnabled, SetDraggable, ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup,
         SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut,
         SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition, SetRotateTransition,
-        SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetBlendMode, ResetBlendMode,
-        SetConstraintSize, ResetConstraintSize, GetFocusable, GetDefaultFocus, GetResponseRegion, GetOverlay,
-        GetAccessibilityGroup, GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel, SetNeedFocus,
-        GetNeedFocus };
+        SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask, SetBlendMode,
+        ResetBlendMode, SetConstraintSize, ResetConstraintSize, GetFocusable, GetDefaultFocus, GetResponseRegion,
+        GetOverlay, GetAccessibilityGroup, GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel,
+        SetNeedFocus,GetNeedFocus };
 
     return &modifier;
 }
@@ -3635,7 +3645,7 @@ void SetOnTouch(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
         event.touchEvent.timeStamp = static_cast<double>(eventInfo.GetTimeStamp().time_since_epoch().count());
         event.touchEvent.sourceType = static_cast<ArkUISourceType>(eventInfo.GetSourceDevice());
 
-        auto getTouchPoints = [](ArkUITouchPoint** points)-> ArkUI_Int32 {
+        auto getTouchPoints = [](ArkUITouchPoint** points) -> ArkUI_Int32 {
             const std::list<TouchLocationInfo>& touchList = globalEventInfo.GetTouches();
             int index = 0;
             for (const auto& touchInfo : touchList) {

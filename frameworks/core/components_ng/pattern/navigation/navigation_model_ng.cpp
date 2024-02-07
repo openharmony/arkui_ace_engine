@@ -712,7 +712,7 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
 }
 
 bool NavigationModelNG::ParseCommonTitle(
-    bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title)
+    bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title, bool ignoreMainTitle)
 {
     if (!hasSubTitle && !hasMainTitle) {
         return false;
@@ -737,32 +737,38 @@ bool NavigationModelNG::ParseCommonTitle(
     navBarNode->UpdatePrevTitleIsCustom(false);
 
     // create or update main title
-    auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
-    if (hasMainTitle) {
+    do {
+        if (ignoreMainTitle) {
+            break;
+        }
+        auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+        if (!hasMainTitle) {
+            // remove main title if any.
+            titleBarNode->RemoveChild(mainTitle);
+            titleBarNode->SetTitle(nullptr);
+            break;
+        }
+
         if (mainTitle) {
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
             textLayoutProperty->UpdateContent(title);
-        } else {
-            // create and init main title
-            mainTitle = FrameNode::CreateFrameNode(
-                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-            auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            auto theme = NavigationGetTheme();
-            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
-            textLayoutProperty->UpdateContent(title);
-            textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
-            textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
-            textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-            titleBarNode->SetTitle(mainTitle);
-            titleBarNode->AddChild(mainTitle);
+            break;
         }
-    } else {
-        // remove main title if any.
-        titleBarNode->RemoveChild(mainTitle);
-        titleBarNode->SetTitle(nullptr);
-    }
+        // create and init main title
+        mainTitle = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+        auto theme = NavigationGetTheme();
+        textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
+        textLayoutProperty->UpdateContent(title);
+        textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
+        textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        titleBarNode->SetTitle(mainTitle);
+        titleBarNode->AddChild(mainTitle);
+    } while (false);
 
     // create or update subtitle
     auto subTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
@@ -950,7 +956,7 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
 
 void NavigationModelNG::SetSubtitle(const std::string& subtitle)
 {
-    ParseCommonTitle(true, false, subtitle, "");
+    ParseCommonTitle(true, false, subtitle, "", true);
 }
 
 void NavigationModelNG::SetHideTitleBar(bool hideTitleBar)
