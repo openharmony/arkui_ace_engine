@@ -96,6 +96,8 @@ public:
         needCallBack_ = needCallBack;
     }
 
+    void SetLayoutBeforeAnimation(const RefPtr<FolderStackGroupNode>& hostNode);
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void RegisterFoldStatusListener();
@@ -118,6 +120,7 @@ private:
     bool hasInHoverMode_ = false;
     bool needCallBack_ = false;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
+    FoldStatus lastFoldStatus_ = FoldStatus::UNKNOWN;
     CancelableCallback<void()> foldStatusDelayTask_;
 };
 } // namespace OHOS::Ace::NG
