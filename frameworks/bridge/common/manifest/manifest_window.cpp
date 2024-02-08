@@ -14,8 +14,14 @@
  */
 
 #include "frameworks/bridge/common/manifest/manifest_window.h"
+#include <regex>
+#include <string>
 
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/string_utils.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -29,8 +35,24 @@ void ManifestWindow::WindowParse(const std::unique_ptr<JsonValue>& root)
     if (!window || window->IsNull()) {
         return;
     }
-    auto designWidth = window->GetInt("designWidth", DEFAULT_DESIGN_WIDTH);
+    int32_t designWidth = 0;
+    auto designWidthValue = window->GetValue("designWidth");
+    if (designWidthValue->IsNumber()) {
+        designWidth = designWidthValue->GetInt();
+    } else if (designWidthValue->IsString()) {
+        std::string designString = window->GetString("designWidth");
+        std::regex reg("\\$(\\S+):(\\S+)");
+        std::smatch results;
+
+        auto resourceObject = AceType::MakeRefPtr<Ace::ResourceObject>("", "");
+        auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        if (std::regex_match(designString, results, reg) && resourceAdapter) {
+            designWidth = resourceAdapter->GetInt(StringUtils::StringToInt(results[2].str()));
+        }
+    }
     if (designWidth <= 0) {
+        LOGW("[designWidth] of [window] in main_pages.json set error. use default value: %{public}d",
+            DEFAULT_DESIGN_WIDTH);
         designWidth = DEFAULT_DESIGN_WIDTH;
     }
     windowConfig_.designWidth = designWidth;
