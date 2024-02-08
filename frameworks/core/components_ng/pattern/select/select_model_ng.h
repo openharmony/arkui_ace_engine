@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SelectModelNG : public OHOS::Ace::SelectModel {
 public:
-    void Create(const std::vector<SelectParam>& params, const ControlSize& controlSize) override;
+    void Create(const std::vector<SelectParam>& params) override;
     void SetSelected(int32_t idx) override;
     void SetValue(const std::string& value) override;
     void SetFontSize(const Dimension& value) override;
@@ -64,6 +64,7 @@ public:
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
+    ControlSize GetControlSize() override;
 
     static void SetArrowPosition(FrameNode* frameNode, const ArrowPosition value);
     static void SetSpace(FrameNode* frameNode, const Dimension& value);

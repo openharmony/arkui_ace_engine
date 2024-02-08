@@ -21,7 +21,7 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
-void SelectModelImpl::Create(const std::vector<SelectParam>& params, const ControlSize& controlSize)
+void SelectModelImpl::Create(const std::vector<SelectParam>& params)
 {
     auto selectTheme = JSViewAbstract::GetTheme<SelectTheme>();
     auto selectComponent = AceType::MakeRefPtr<SelectComponent>();
@@ -447,6 +447,4 @@ void SelectModelImpl::SetHasOptionWidth(bool haveOptionWidth) {}
 void SelectModelImpl::SetMenuBackgroundColor(const Color& color) {}
 
 void SelectModelImpl::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) {}
-
-void SelectModelImpl::SetControlSize(const std::optional<ControlSize>& controlSize) {}
 } // namespace OHOS::Ace::Framework

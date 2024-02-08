@@ -63,7 +63,6 @@ void JSSelect::Create(const JSCallbackInfo& info)
     if (info.Length() < 0) {
         return;
     }
-    auto controlSize = ControlSize::NORMAL;
     if (info[0]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
         size_t size = paramArray->Length();
@@ -82,10 +81,7 @@ void JSSelect::Create(const JSCallbackInfo& info)
             ParseJsMedia(selectIcon, icon);
             params[i] = { value, icon };
         }
-        if (info.Length() > 1 && info[1]->IsNumber()) {
-            controlSize = static_cast<ControlSize>(info[1]->ToNumber<int32_t>());
-        }
-        SelectModel::GetInstance()->Create(params, controlSize);
+        SelectModel::GetInstance()->Create(params);
     }
 }
 
@@ -213,7 +209,8 @@ void JSSelect::Font(const JSCallbackInfo& info)
         CHECK_NULL_VOID(selectTheme);
         auto textTheme = pipeline->GetTheme<TextTheme>();
         CHECK_NULL_VOID(textTheme);
-        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
+        auto controlSize = SelectModel::GetInstance()->GetControlSize();
+        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize(controlSize));
         SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
         SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
         SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
@@ -844,9 +841,14 @@ void JSSelect::SetMenuBackgroundBlurStyle(const JSCallbackInfo& info)
 
 void JSSelect::SetControlSize(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     if (info[0]->IsNumber()) {
         auto controlSize = static_cast<ControlSize>(info[0]->ToNumber<int32_t>());
         SelectModel::GetInstance()->SetControlSize(controlSize);
+    } else {
+        LOGE("JSSelect::SetControlSize Is not Number.");
     }
 }
 } // namespace OHOS::Ace::Framework

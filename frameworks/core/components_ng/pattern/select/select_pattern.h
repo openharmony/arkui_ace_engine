@@ -187,7 +187,7 @@ public:
     void ShowSelectMenu();
     
     Dimension GetFontSize();
-    void SetSelectDefaultTheme(const ControlSize& controlSize);
+    void SetSelectDefaultTheme();
     void SetOptionWidth(const Dimension& value);
     void SetOptionHeight(const Dimension& value);
     void SetOptionWidthFitTrigger(bool isFitTrigger);

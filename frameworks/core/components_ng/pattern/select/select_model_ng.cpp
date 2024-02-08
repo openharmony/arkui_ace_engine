@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-void SetSelectDefaultSize(const RefPtr<FrameNode>& select, const ControlSize& controlSize)
+void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -36,14 +36,13 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select, const ControlSize& co
 
     auto layoutProperty = select->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth(controlSize)),
-        std::nullopt));
+    layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
 }
 
 static constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
 } // namespace
 
-void SelectModelNG::Create(const std::vector<SelectParam>& params, const ControlSize& controlSize)
+void SelectModelNG::Create(const std::vector<SelectParam>& params)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
@@ -52,13 +51,15 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params, const Control
         V2::SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
     ViewStackProcessor::GetInstance()->Push(select);
 
-    SetSelectDefaultSize(select, controlSize);
+    SetSelectDefaultSize(select);
     auto pattern = select->GetPattern<SelectPattern>();
+    
     CHECK_NULL_VOID(pattern);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        pattern->SetSelectDefaultTheme(controlSize);
+        pattern->SetSelectDefaultTheme();
+
         NG::PaddingProperty paddings;
         paddings.top = std::nullopt;
         paddings.bottom = std::nullopt;
@@ -463,6 +464,13 @@ void SelectModelNG::SetControlSize(const std::optional<ControlSize>& controlSize
         CHECK_NULL_VOID(pattern);
         pattern->SetControlSize(controlSize.value());
     }
+}
+
+ControlSize SelectModelNG::GetControlSize()
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_RETURN(pattern, ControlSize::NORMAL);
+    return pattern->GetControlSize();
 }
 
 void SelectModelNG::SetArrowPosition(FrameNode* frameNode, const ArrowPosition value)

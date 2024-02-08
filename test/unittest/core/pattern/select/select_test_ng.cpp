@@ -1823,4 +1823,28 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
     layoutAlgorithm->Measure(layoutWrapper);
     EXPECT_NE(layoutWrapper->GetOrCreateChildByIndex(0), nullptr);
 }
+
+/**
+ * @tc.name: SelectControlSizeTest001
+ * @tc.desc: Test Control Size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectControlSizeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern, call SetControlSize.
+     * @tc.expected: Objects are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    selectModelInstance.SetControlSize(ControlSize::SMALL);
+    auto selectFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(selectFrameNode, nullptr);
+    auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step2. Get ControlSize, compare the set value with the ControlSize.
+     * @tc.expected: Setting is successful, ControlSize and set value are equal.
+     */
+    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::SMALL);
+}
 } // namespace OHOS::Ace::NG

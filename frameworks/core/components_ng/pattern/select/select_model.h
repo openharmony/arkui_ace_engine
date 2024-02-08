@@ -48,7 +48,7 @@ public:
     static SelectModel* GetInstance();
     virtual ~SelectModel() = default;
 
-    virtual void Create(const std::vector<SelectParam>& params, const ControlSize& controlSize);
+    virtual void Create(const std::vector<SelectParam>& params);
     virtual void SetSelected(int32_t idx);
     virtual void SetValue(const std::string& value);
     virtual void SetFontSize(const Dimension& value);
@@ -91,6 +91,7 @@ public:
     virtual void SetMenuBackgroundColor(const Color& color);
     virtual void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
     virtual void SetControlSize(const std::optional<ControlSize>& controlSize);
+    virtual ControlSize GetControlSize();
 private:
     static std::unique_ptr<SelectModel> instance_;
     static std::mutex mutex_;

@@ -63,6 +63,23 @@ constexpr Dimension CALIBERATE_X = 4.0_vp;
 
 constexpr Dimension CALIBERATE_Y = 4.0_vp;
 
+constexpr Dimension SELECT_SMALL_PADDING_VP = 4.0_vp;
+
+static std::string ConvertControlSizeToString(ControlSize controlSize)
+{
+    std::string result;
+    switch (controlSize) {
+        case ControlSize::SMALL:
+            result = "ControlSize.SMALL";
+            break;
+        case ControlSize::NORMAL:
+            result = "ControlSize.NORMAL";
+            break;
+        default:
+            break;
+    }
+    return result;
+}
 } // namespace
 
 void SelectPattern::OnAttachToFrameNode()
@@ -789,7 +806,7 @@ void SelectPattern::UpdateText(int32_t index)
 
 void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme)
 {
-    textProps->UpdateFontSize(theme->GetFontSize(controlSize_));
+    textProps->UpdateFontSize(theme->GetFontSize());
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateTextColor(theme->GetFontColor());
     textProps->UpdateTextDecoration(theme->GetTextDecoration());
@@ -811,8 +828,7 @@ void SelectPattern::InitSpinner(
     auto spinnerLayoutProperty = spinner->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
     spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    CalcSize idealSize = { CalcLength(selectTheme->GetSpinnerWidth(controlSize_)),
-        CalcLength(selectTheme->GetSpinnerHeight(controlSize_)) };
+    CalcSize idealSize = { CalcLength(selectTheme->GetSpinnerWidth()), CalcLength(selectTheme->GetSpinnerHeight()) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
@@ -853,7 +869,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     Color fontColor = props->GetTextColor().value_or(Color::BLACK);
     json->Put("fontColor", fontColor.ColorToString().c_str());
     json->Put("font", props->InspectorGetTextFont().c_str());
-
+    json->Put("controlSize", ConvertControlSizeToString(controlSize_).c_str()); //DEV中显示属性值
     json->Put("selectedOptionBgColor", selectedBgColor_->ColorToString().c_str());
     json->Put("selectedOptionFont", InspectorGetSelectedFont().c_str());
     json->Put("selectedOptionFontColor", selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str());
@@ -1120,7 +1136,7 @@ Dimension SelectPattern::GetFontSize()
     return props->GetFontSize().value_or(selectTheme->GetFontSize());
 }
 
-void SelectPattern::SetSelectDefaultTheme(const ControlSize& controlSize)
+void SelectPattern::SetSelectDefaultTheme()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1138,8 +1154,7 @@ void SelectPattern::SetSelectDefaultTheme(const ControlSize& controlSize)
         renderContext->UpdateBackgroundColor(selectDefaultBgColor_);
     }
     BorderRadiusProperty border;
-    controlSize_ = controlSize;
-    border.SetRadius(selectTheme->GetSelectDefaultBorderRadius(controlSize_));
+    border.SetRadius(selectTheme->GetSelectDefaultBorderRadius());
     renderContext->UpdateBorderRadius(border);
 }
 
@@ -1238,32 +1253,38 @@ void SelectPattern::ReSetpara()
     auto select = GetHost();
     auto layoutProperty = select->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    //设置最小宽度
     layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(selectTheme->GetSelectMinWidth(controlSize_)),
         std::nullopt));
+    //设置高度
     ViewAbstract::SetHeight(NG::CalcLength(selectTheme->GetSelectDefaultHeight(controlSize_)));
-    auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textProps);
-    textProps->UpdateFontSize(selectTheme->GetFontSize(controlSize_));
+    //设置字体大小
+    SetFontSize(selectTheme->GetFontSize(controlSize_));
 
+    //设置三角图标宽高
     auto spinnerLayoutProperty = spinner_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
     CalcSize idealSize = { CalcLength(selectTheme->GetSpinnerWidth(controlSize_)),
         CalcLength(selectTheme->GetSpinnerHeight(controlSize_)) };
-
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
+    //设置圆角
     auto renderContext = select->GetRenderContext();
     BorderRadiusProperty border;
     border.SetRadius(selectTheme->GetSelectDefaultBorderRadius(controlSize_));
     renderContext->UpdateBorderRadius(border);
+
+    NG::PaddingProperty paddings;
+    paddings.top = std::nullopt;
+    paddings.bottom = std::nullopt;
+    paddings.left = NG::CalcLength(SELECT_SMALL_PADDING_VP);
+    paddings.right = NG::CalcLength(SELECT_SMALL_PADDING_VP);
+    ViewAbstract::SetPadding(paddings);
 }
 
 void SelectPattern::SetControlSize(const ControlSize& controlSize)
 {
-    if (controlSize == controlSize_) {
-        return;
-    }
     controlSize_ = controlSize;
     ReSetpara();
 }

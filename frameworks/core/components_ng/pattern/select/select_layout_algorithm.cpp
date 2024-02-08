@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr float MIN_SPACE = 8.0f;
-    constexpr float MIN_CHAR_VAL = 2.0f;
+    constexpr float MIN_CHAR_VAL = 1.0f;
 } // namespace
 void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -84,8 +84,11 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
-    auto defaultHeight = static_cast<float>(theme->GetSelectDefaultHeight(pattern->GetControlSize()).ConvertToPx());
+    //计算的时候获得高度
+    auto host = layoutProps->GetHost();
+    auto selectPattern = host->GetPattern<SelectPattern>();
+    auto defaultHeight =
+        static_cast<float>(theme->GetSelectDefaultHeight(selectPattern->GetControlSize()).ConvertToPx());
     layoutWrapper->GetGeometryNode()->SetContentSize(
         SizeF(rowWidth, rowHeight > defaultHeight ? rowHeight : defaultHeight));
 
