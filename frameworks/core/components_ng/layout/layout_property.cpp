@@ -980,6 +980,15 @@ void LayoutProperty::UpdateChainStyle(const ChainInfo& chainInfo)
     if (!flexItemProperty_) {
         flexItemProperty_ = std::make_unique<FlexItemProperty>();
     }
+    if (!chainInfo.direction.has_value()) {
+        ChainInfo nullChainInfo;
+        if (flexItemProperty_->UpdateHorizontalChainStyle(nullChainInfo)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+        if (flexItemProperty_->UpdateVerticalChainStyle(nullChainInfo)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
     if (chainInfo.direction == LineDirection::HORIZONTAL) {
         if (flexItemProperty_->UpdateHorizontalChainStyle(chainInfo)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;

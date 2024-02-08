@@ -6891,13 +6891,24 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
 void JSViewAbstract::JsChainMode(const JSCallbackInfo& info)
 {
     ChainInfo chainInfo;
-    if (info.Length() >= 1 && info[0]->IsNumber()) {
-        auto direction = info[0]->ToNumber<int32_t>();
-        chainInfo.direction = static_cast<LineDirection>(direction);
+    if (info.Length() >= 1) {
+        auto tmpDirection = info[0];
+        if (tmpDirection->IsUndefined()) {
+            chainInfo.direction = std::nullopt;
+        } else if (tmpDirection->IsNumber()) {
+            auto direction = tmpDirection->ToNumber<int32_t>();
+            chainInfo.direction = static_cast<LineDirection>(direction);
+        }
     }
-    if (info.Length() >= 2 && info[1]->IsNumber()) { // 2 : two args
-        auto style = info[1]->ToNumber<int32_t>();
-        chainInfo.style = static_cast<ChainStyle>(style);
+
+    if (info.Length() >= 2) { // 2 : two args
+        auto tmpStyle = info[1];
+        if (tmpStyle->IsUndefined()) {
+            chainInfo.style = std::nullopt;
+        } else if (tmpStyle->IsNumber()) {
+            auto style = tmpStyle->ToNumber<int32_t>();
+            chainInfo.style = static_cast<ChainStyle>(style);
+        }
     }
     ViewAbstractModel::GetInstance()->SetChainStyle(chainInfo);
 }
