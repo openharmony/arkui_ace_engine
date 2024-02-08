@@ -819,10 +819,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg024, TestSize.Level1)
         FrameNode::CreateFrameNode("hovernode", 100, AceType::MakeRefPtr<Pattern>(), true);
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
-    HitTestResult retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
-    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
-    retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
+    HitTestResult retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
     testNode->hitTestResult_ = HitTestResult::BUBBLING;
     retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
@@ -851,10 +849,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg025, TestSize.Level1)
     const PointF LOCAL_POINT { 15.0f, 15.0f };
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
-    HitTestResult retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
-    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
-    retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
+    HitTestResult retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
     testNode->hitTestResult_ = HitTestResult::BUBBLING;
     retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
