@@ -133,6 +133,7 @@ template("ace_ohos_standard_source_set") {
       "window_manager:libwm",
       "window_manager:libwsutils",
       "window_manager:scene_session",
+      "window_manager:screen_session_manager_client",
     ]
 
     if (defined(config.media_library_exists) && config.media_library_exists) {
