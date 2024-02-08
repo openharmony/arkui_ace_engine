@@ -1887,6 +1887,10 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0038, TestSize.Level1)
      * @tc.steps: step1. create BarItemNode.
      * @tc.expected: check whether the properties is correct.
      */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
     auto barItemNode = AceType::MakeRefPtr<BarItemNode>("BarItemNode", 1);
     ASSERT_NE(barItemNode, nullptr);
     auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
@@ -1904,6 +1908,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0038, TestSize.Level1)
      * @tc.steps: step2. change status_ and iconStatus_.
      * @tc.expected: check whether the properties is correct.
      */
+    std::cout<<"trigger change status"<< std::endl;
     barItemPattern->status_ = NavToolbarItemStatus::ACTIVE;
     barItemPattern->iconStatus_ = ToolbarIconStatus::INITIAL;
     barItemPattern->UpdateBarItemActiveStatusResource();
