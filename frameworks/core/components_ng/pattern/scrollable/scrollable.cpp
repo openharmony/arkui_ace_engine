@@ -928,7 +928,8 @@ void Scrollable::ProcessSpringMotion(double position)
 
 void Scrollable::ProcessScrollMotion(double position)
 {
-    position = Round(position);
+    double nearPosition = isSnapAnimation_ ? endPos_ : finalPosition_;
+    position = NearEqual(position, nearPosition, 0.5) ? position : Round(position);
     currentVelocity_ = frictionVelocity_;
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
@@ -1055,6 +1056,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         if (scroll->isFrictionAnimationStop_ || scroll->isTouching_) {
             return;
         }
+        scroll->isSnapAnimation_ = false;
         scroll->ProcessScrollMotion(position);
         if (NearEqual(scroll->finalPosition_, position, 1.0)) {
             scroll->StopFrictionAnimation();
@@ -1114,6 +1116,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
             if (!scroll->isSnapScrollAnimationStop_) {
                 scroll->ProcessScrollSnapMotion(scroll->endPos_);
             } else if (!scroll->isSnapAnimationStop_) {
+                scroll->isSnapAnimation_ = true;
                 scroll->ProcessScrollMotion(scroll->endPos_);
             }
             scroll->StopSnapAnimation();
@@ -1121,6 +1124,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
             if (!scroll->isSnapScrollAnimationStop_) {
                 scroll->ProcessScrollSnapMotion(position);
             } else if (!scroll->isSnapAnimationStop_) {
+                scroll->isSnapAnimation_ = true;
                 scroll->ProcessScrollMotion(position);
             }
         }
