@@ -691,7 +691,7 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
         return;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
-        LOGI("DragController start on callback %{pubic}d", dragNotifyMsg.result);
+        LOGI("DragController start on callback %{public}d", dragNotifyMsg.result);
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(asyncCtx->env, &scope);
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
@@ -821,7 +821,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 true, false, summary };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
-                LOGI("DragController start on callback %{pubic}d", dragNotifyMsg.result);
+                LOGI("DragController start on callback %{public}d", dragNotifyMsg.result);
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(asyncCtx->env, &scope);
                 HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
