@@ -345,9 +345,6 @@ public:
 
     static void JsExpandSafeArea(const JSCallbackInfo& info);
 
-    static void ParseImageAnalyzerTextOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig);
-    static void ParseImageAnalyzerSubjectOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig);
-
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
 

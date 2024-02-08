@@ -43,21 +43,22 @@ bool ImageAnalyzerMgr::IsImageAnalyzerSupported()
     }
     return false;
 }
+
 void ImageAnalyzerMgr::BuildNodeFunc(
-    napi_value pixelMap, ImageAnalyzerConfig* config, ImageAnalyzerInnerConfig* uiConfig, void** overlayData)
+    void* pixelMap, void* config, ImageAnalyzerInnerConfig* uiConfig, void** overlayData)
 {
     if (engine_) {
         return engine_->BuildNodeFunc(pixelMap, config, uiConfig, overlayData);
     }
 }
 void ImageAnalyzerMgr::UpdateImage(
-    void** overlayData, napi_value pixelMap, ImageAnalyzerConfig* config, ImageAnalyzerInnerConfig* uiConfig)
+    void** overlayData, void* pixelMap, void* config, ImageAnalyzerInnerConfig* uiConfig)
 {
     if (engine_) {
         return engine_->UpdateImage(overlayData, pixelMap, config, uiConfig);
     }
 }
-void ImageAnalyzerMgr::UpdateConfig(void** overlayData, ImageAnalyzerConfig* config)
+void ImageAnalyzerMgr::UpdateConfig(void** overlayData, void* config)
 {
     if (engine_) {
         return engine_->UpdateConfig(overlayData, config);

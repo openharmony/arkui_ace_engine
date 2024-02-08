@@ -568,8 +568,6 @@ template("ace_core_source_set") {
       ]
     }
 
-    external_deps += [ "napi:ace_napi" ]
-
     # arkoala C interface
     deps += [ "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
 
@@ -984,7 +982,6 @@ template("ace_core_ng_source_set") {
     }
 
     deps += [ "$ace_root/frameworks/core/components_ng/pattern/security_component:ace_core_components_security_component_pattern_ng_$platform" ]
-    external_deps += [ "napi:ace_napi" ]
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
