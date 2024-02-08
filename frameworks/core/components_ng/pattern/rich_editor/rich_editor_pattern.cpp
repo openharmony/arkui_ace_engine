@@ -2093,6 +2093,7 @@ void RichEditorPattern::InitMouseEvent()
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "on hover event isHover=%{public}d", isHover);
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->OnHover(isHover);
@@ -3792,7 +3793,9 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
     isFirstMouseSelect_ = true;
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
-    FireOnSelect(selectStart, selectEnd);
+    if (selectStart != selectEnd) {
+        FireOnSelect(selectStart, selectEnd);
+    }
     StopAutoScroll();
     if (textSelector_.IsValid() && !textSelector_.StartEqualToDest() && IsSelectedBindSelectionMenu() &&
         oldMouseStatus == MouseStatus::MOVE) {
@@ -4439,7 +4442,9 @@ void RichEditorPattern::AdjustHandleRect(
 
 void RichEditorPattern::ResetSelection()
 {
-    if (textSelector_.IsValid()) {
+    bool selectNothing = textSelector_.SelectNothing();
+    textSelector_.Update(-1, -1);
+    if (!selectNothing) {
         textSelector_.Update(-1, -1);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
