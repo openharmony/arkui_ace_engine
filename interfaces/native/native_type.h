@@ -271,6 +271,11 @@ typedef enum {
     ARKUI_PROGRESS_CAPSULE,
 }ArkUI_ProgressType;
 
+/**
+ * @brief 定义装饰线样式枚举值。
+ *
+ * @since 12
+ */
 typedef enum {
     /** 不使用装饰线。*/
     ARKUI_TEXT_DECORATION_TYPE_NONE = 0,
@@ -282,6 +287,11 @@ typedef enum {
     ARKUI_TEXT_DECORATION_TYPE_LINE_THROUGH,
 } ArkUI_TextDecorationType;
 
+/**
+ * @brief 定义文本大小写枚举值。
+ *
+ * @since 12
+ */
 typedef enum {
     /** 保持原有大小写。*/
     ARKUI_TEXT_CASE_NORMAL = 0,
@@ -291,6 +301,11 @@ typedef enum {
     ARKUI_TEXT_CASE_UPPER,
 } ArkUI_TextCase;
 
+/**
+ * @brief 定义文本复制黏贴模式枚举值。
+ *
+ * @since 12
+ */
 typedef enum {
     /** 不支持复制。*/
     ARKUI_COPY_OPTIONS_NONE = 0,
@@ -302,6 +317,11 @@ typedef enum {
     ARKUI_COPY_OPTIONS_CROSS_DEVICE,
 } ArkUI_CopyOptions;
 
+/**
+ * @brief 定义阴影类型枚举值。
+ *
+ * @since 12
+ */
 typedef enum {
     /** 颜色。*/
     ARKUI_SHADOW_TYPE_COLOR = 0,
