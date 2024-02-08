@@ -1065,19 +1065,30 @@ HWTEST_F(ListLayoutTestNg, OnModifyDone001, TestSize.Level1)
 HWTEST_F(ListLayoutTestNg, Pattern003, TestSize.Level1)
 {
     CreateWithItem([](ListModelNG model) {});
-    EXPECT_TRUE(pattern_->OutBoundaryCallback());
-    ScrollDown();
+    EXPECT_NE(pattern_->scrollableEvent_, nullptr);
+    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
+    EXPECT_NE(scrollable, nullptr);
+    scrollable->isTouching_ = true;
     EXPECT_FALSE(pattern_->OutBoundaryCallback());
-    ScrollDown();
+    ScrollUp();
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
+    ScrollDown(2);
+    EXPECT_FALSE(pattern_->OutBoundaryCallback());
+    ScrollDown(2);
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
 
     CreateWithItem([](ListModelNG model) {
         model.SetChainAnimation(true);
         model.SetChainAnimationOptions({ Dimension(0), Dimension(10), 0, 0, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     });
+    EXPECT_NE(pattern_->scrollableEvent_, nullptr);
+    scrollable = pattern_->scrollableEvent_->GetScrollable();
+    EXPECT_NE(scrollable, nullptr);
+    scrollable->isTouching_ = true;
     EXPECT_NE(pattern_->springProperty_, nullptr);
     EXPECT_NE(pattern_->chainAnimation_, nullptr);
-    pattern_->OutBoundaryCallback();
+    ScrollUp();
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
     EXPECT_TRUE(pattern_->dragFromSpring_);
 }
 
