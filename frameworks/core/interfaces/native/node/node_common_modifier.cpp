@@ -41,6 +41,8 @@
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/view_model.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -594,6 +596,9 @@ void SetWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI
     } else {
         ViewAbstract::SetWidth(frameNode, CalcLength(value, unitEnum));
     }
+    auto* companion = ViewModel::GetCompanion(node);
+    companion->dimensionWidth.value = value;
+    companion->dimensionWidth.unit = unit;
 }
 
 void ResetWidth(ArkUINodeHandle node)
@@ -612,6 +617,9 @@ void SetHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkU
     } else {
         ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
     }
+    auto* companion = ViewModel::GetCompanion(node);
+    companion->dimensionHeight.value = value;
+    companion->dimensionHeight.unit = unit;
 }
 void ResetHeight(ArkUINodeHandle node)
 {
@@ -932,6 +940,8 @@ void SetAlign(ArkUINodeHandle node, ArkUI_Int32 align)
     CHECK_NULL_VOID(frameNode);
     Alignment alignment = ParseAlignment(align);
     ViewAbstract::SetAlign(frameNode, alignment);
+    auto* companion = ViewModel::GetCompanion(node);
+    companion->alignment = align;
 }
 
 void ResetAlign(ArkUINodeHandle node)

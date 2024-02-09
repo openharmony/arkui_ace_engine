@@ -32,7 +32,7 @@ extern "C" {
 #define ARKUI_NODE_API_VERSION 68
 
 #define ARKUI_BASIC_API_VERSION 5
-#define ARKUI_EXTENDED_API_VERSION 4
+#define ARKUI_EXTENDED_API_VERSION 5
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 6
 #define ARKUI_AUTO_GENERATE_NODE_ID -2
@@ -3149,6 +3149,8 @@ struct ArkUIExtendedNodeAPI {
     ArkUI_Float32 (*getMeasureHeight)(ArkUINodeHandle node);
     void (*setX)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*setY)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setAlignment)(ArkUINodeHandle node, ArkUI_Int32 value);
+    ArkUI_Int32 (*getAlignment)(ArkUINodeHandle node);
     ArkUI_Int32 (*indexerChecker)(ArkUIVMContext context, ArkUINodeHandle node);
     void (*setRangeUpdater)(ArkUINodeHandle node, ArkUI_Int32 updaterId);
     void (*setLazyItemIndexer)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 indexerId);
