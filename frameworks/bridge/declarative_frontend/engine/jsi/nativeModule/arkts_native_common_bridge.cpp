@@ -2752,9 +2752,9 @@ ArkUINativeModuleValue CommonBridge::SetScale(ArkUIRuntimeCallInfo *runtimeCallI
         units[NUM_0] = static_cast<int>(centerX.Unit());
         values[NUM_1] = static_cast<ArkUI_Float32>(centerY.Value());
         units[NUM_1] = static_cast<int>(centerY.Unit());
-        values[NUM_2] = scaleX;
-        values[NUM_3] = scaleY;
-        values[NUM_4] = scaleZ;
+        values[NUM_2] = static_cast<ArkUI_Float32>(scaleX);
+        values[NUM_3] = static_cast<ArkUI_Float32>(scaleY);
+        values[NUM_4] = static_cast<ArkUI_Float32>(scaleZ);
         GetArkUINodeModifiers()->getCommonModifier()->setScale(nativeNode, values, SIZE_OF_FIVE, units, SIZE_OF_TWO);
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetScale(nativeNode);
