@@ -69,18 +69,8 @@ void RepeatModelNG::CreateNewChildFinish(const std::string& key)
 {
     ACE_SCOPED_TRACE("RepeatModelNG::CreateNewChildFinish()");
     auto* stack = ViewStackProcessor::GetInstance();
-    auto  child = stack->GetMainElementNode();
-    CHECK_NULL_VOID(child);
     stack->PopKey();
     stack->PopContainer();
-
-    auto repeatNode = AceType::DynamicCast<ForEachNode>(stack->GetMainElementNode());
-    CHECK_NULL_VOID(repeatNode);
-    repeatNode->AddChild(child);
-
-    if (repeatNode->IsOnMainTree()) {
-      child->AttachToMainTree();
-    }
 }
 
 } // namespace OHOS::Ace::NG
