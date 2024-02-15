@@ -33,6 +33,15 @@ void MakeNodeMapById(const std::list<RefPtr<UINode>>& nodes, const std::list<std
         ++nodeIter;
     }
 }
+
+void AppendNodeAndChildrenIds(const RefPtr<UINode>& root, std::list<int32_t>& ids)
+{
+    ids.emplace_back(root->GetId());
+    for (auto& node : root->GetChildren()) {
+        AppendNodeAndChildrenIds(node, ids);
+    }
+}
+
 } // namespace
 
 RefPtr<ForEachNode> ForEachNode::GetOrCreateForEachNode(int32_t nodeId)
@@ -166,13 +175,14 @@ void ForEachNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
 
     // Required to build unordered_set of RefPtr<UINodes>
     struct Hash {
-        size_t operator()(const RefPtr<UINode>& node) const {
+        size_t operator()(const RefPtr<UINode>& node) const
+        {
             return node->GetId();
         }
     };
 
     // includes "newly-added" and "reused" children
-    auto& children = ModifyChildren();
+    const auto& children = GetChildren();
 
     std::unordered_set<RefPtr<UINode>, Hash>
         newNodeSet(children.begin(), children.end());
@@ -184,58 +194,34 @@ void ForEachNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
             AddChild(oldNode, DEFAULT_NODE_SLOT, true);
             // Remove and trigger all Detach callback.
             RemoveChild(oldNode, true);
+            // Load removedElmtId with all the descendant elementIDs of the removed nodes
+            AppendNodeAndChildrenIds(oldNode, removedElmtId);
         }
     }
-
-    // Load removedElmtId with all the descendant elementIDs of the
-    // removed children during re-render of repeat
-    FindAndCollectRemovedChildren(tempChildren_, children, removedElmtId);
 
     tempChildren_.clear();
     tempChildrenOfRepeat_.clear();
 
     auto parent = GetParent();
     if (parent) {
-        parent->ChildrenUpdatedFrom(0);        
+        parent->ChildrenUpdatedFrom(0);
     }
 
-    // TBD call when children changed
+    // call when children changed
     //FlushUpdateAndMarkDirty();
-
     //stack processor =>FlushRerenderTask();
+
     LOGE("ForEachNode::FinishRepeatRender END");
 }
 
-// RepeatNode only. TBD move to repeat_node.cpp
+// RepeatNode only
 void ForEachNode::MoveChild(uint32_t fromIndex)
 {
-    // LOGE("ForEachNode::MoveChild %{public}d", fromIndex);
     // copy child from tempChildrenOfRepeat_[fromIndex] and append to children_
-    if (fromIndex < tempChildrenOfRepeat_.size() ) {
+    if (fromIndex < tempChildrenOfRepeat_.size()) {
         auto& node = tempChildrenOfRepeat_.at(fromIndex);
         AddChild(node, DEFAULT_NODE_SLOT, true);
     }
-}
-
-void ForEachNode::FindAndCollectRemovedChildren(std::list<RefPtr<UINode>>& oldChildren,
-                                                std::list<RefPtr<UINode>>& newChildren,
-                                                std::list<int32_t>& removedElmtId)
-{
-    oldChildren.sort();
-    newChildren.sort();
-
-    std::list<RefPtr<UINode>> removedChildren;
-
-    // Find all the elements in oldChildren which are no longer in newChildren
-    // and fill the removedChildren with identified elements
-    std::set_difference(
-        oldChildren.begin(), oldChildren.end(),
-        newChildren.begin(), newChildren.end(),
-        std::inserter(removedChildren, removedChildren.begin())
-    );
-    // Collect the element IDs of all descendant children of "removedChildren"
-    // and add them to the list removedElmtId
-    CollectRemovedChildren(removedChildren, removedElmtId);
 }
 
 } // namespace OHOS::Ace::NG

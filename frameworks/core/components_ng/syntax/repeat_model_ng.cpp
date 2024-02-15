@@ -32,7 +32,7 @@ void RepeatModelNG::StartRender()
     auto repeatNode = ForEachNode::GetOrCreateRepeatNode(nodeId);
     stack->Push(repeatNode);
 
-    // move children_ to tempChildren_
+    // move current id array and children to temp
     repeatNode->CreateTempItems();
 }
 

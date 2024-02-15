@@ -78,10 +78,6 @@ private:
     // true when this is actually RepeatNode (not "ForEach")
     bool isThisRepeatNode_ = false;
 
-    void FindAndCollectRemovedChildren(std::list<RefPtr<UINode>>& oldChildren,
-                                        std::list<RefPtr<UINode>>& newChildren,
-                                        std::list<int32_t>& removedElmtId);
-
     ACE_DISALLOW_COPY_AND_MOVE(ForEachNode);
 };
 

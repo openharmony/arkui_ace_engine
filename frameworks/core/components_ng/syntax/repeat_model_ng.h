@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT RepeatModelNG : public RepeatModel{
+class ACE_EXPORT RepeatModelNG : public RepeatModel {
 public:
     virtual ~RepeatModelNG() override = default;
 

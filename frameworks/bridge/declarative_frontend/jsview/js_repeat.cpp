@@ -18,8 +18,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/syntax/repeat_model_ng.h"
 #include "bridge/declarative_frontend/jsview/js_repeat.h"
-//#include "bridge/declarative_frontend/view_stack_processor.h"
-//#include "core/common/container.h"
 
 
 namespace OHOS::Ace {
@@ -38,13 +36,11 @@ RepeatModel* RepeatModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-//
 void JSRepeat::StartRender()
 {
     RepeatModel::GetInstance()->StartRender();
 }
 
-//
 void JSRepeat::FinishRender(const JSCallbackInfo& info)
 {
     std::list<int32_t> removedElmtIds;
@@ -111,8 +107,6 @@ void JSRepeat::CreateNewChildFinish(const JSCallbackInfo& info)
 void JSRepeat::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRepeat>::Declare("RepeatNative");
-    //JSClass<JSRepeat>::StaticMethod("create", &JSRepeat::Create);
-    //JSClass<JSRepeat>::StaticMethod("pop", &JSRepeat::FinishRender);
     JSClass<JSRepeat>::StaticMethod("startRender", &JSRepeat::StartRender);
     JSClass<JSRepeat>::StaticMethod("finishRender", &JSRepeat::FinishRender);
     JSClass<JSRepeat>::StaticMethod("moveChild", &JSRepeat::MoveChild);
