@@ -1109,7 +1109,6 @@ public:
     }
 
     void CleanNodeResponseKeyEvent();
-    void FireSelectEvent();
 
     void OnVirtualKeyboardAreaChanged() override;
 

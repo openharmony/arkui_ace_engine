@@ -171,7 +171,9 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
     textFieldOverlayModifier_->SetShowSelect(textFieldPattern->GetShowSelect());
     textFieldOverlayModifier_->SetChangeSelectedRects(textFieldPattern->NeedPaintSelect());
-    textFieldPattern->FireSelectEvent();
+    auto textSelectController = textFieldPattern->GetTextSelectController();
+    CHECK_NULL_VOID(textSelectController);
+    textSelectController->FireSelectEvent();
 
     textFieldOverlayModifier_->SetTextRect(textFieldPattern->GetTextRect());
     UpdateScrollBar();
