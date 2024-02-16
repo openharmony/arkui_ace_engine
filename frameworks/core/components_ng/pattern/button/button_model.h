@@ -34,7 +34,7 @@ public:
     virtual void SetFontColor(const Color& textColor) = 0;
     virtual void SetType(const int value) = 0;
     virtual void SetStateEffect(const bool stateEffect) = 0;
-    virtual void SetLableStyle(ButtonParameters& buttonParameters) {}
+    virtual void SetLabelStyle(ButtonParameters& buttonParameters) {}
     virtual void CreateWithLabel(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren) = 0;
     virtual void Create(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren) = 0;
     virtual void CreateWithChild(const CreateWithPara& para) = 0;

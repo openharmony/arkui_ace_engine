@@ -37,9 +37,9 @@ void LinearSplitModelNG::Create(SplitType splitType)
     ACE_UPDATE_RENDER_CONTEXT(ClipEdge, true);
 }
 
-void LinearSplitModelNG::SetResizeable(NG::SplitType splitType, bool resizeable)
+void LinearSplitModelNG::SetResizable(NG::SplitType splitType, bool resizable)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Resizeable, resizeable);
+    ACE_UPDATE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Resizable, resizable);
 }
 
 void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ItemDivider& divider)
@@ -47,10 +47,10 @@ void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ItemDivider& 
     ACE_UPDATE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider);
 }
 
-void LinearSplitModelNG::SetResizeable(FrameNode* frameNode, NG::SplitType splitType, bool resizeable)
+void LinearSplitModelNG::SetResizable(FrameNode* frameNode, NG::SplitType splitType, bool resizable)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Resizeable, resizeable, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Resizable, resizable, frameNode);
 }
 void LinearSplitModelNG::SetDivider(FrameNode* frameNode, NG::SplitType splitType, const ItemDivider& divider)
 {

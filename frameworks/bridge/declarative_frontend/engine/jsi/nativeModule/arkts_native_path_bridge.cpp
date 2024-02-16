@@ -14,22 +14,20 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h"
 
-#include "core/interfaces/native/node/api.h"
-
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue PathBridge::SetPathCommands(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
 
     if (secondArg->IsString()) {
         std::string commands = secondArg->ToString(vm)->ToString();
-        GetArkUIInternalNodeAPI()->GetPathModifier().SetPathCommands(nativeNode, commands.c_str());
+        GetArkUINodeModifiers()->getPathModifier()->setPathCommands(nativeNode, commands.c_str());
     } else {
-        GetArkUIInternalNodeAPI()->GetPathModifier().ResetPathCommands(nativeNode);
+        GetArkUINodeModifiers()->getPathModifier()->resetPathCommands(nativeNode);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -40,8 +38,8 @@ ArkUINativeModuleValue PathBridge::ResetPathCommands(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPathModifier().ResetPathCommands(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPathModifier()->resetPathCommands(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -27,12 +25,12 @@ ArkUINativeModuleValue MenuBridge::SetMenuFontColor(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetMenuModifier().ResetMenuFontColor(nativeNode);
+        GetArkUINodeModifiers()->getMenuModifier()->resetMenuFontColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetMenuModifier().SetMenuFontColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getMenuModifier()->setMenuFontColor(nativeNode, color.GetValue());
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -43,8 +41,8 @@ ArkUINativeModuleValue MenuBridge::ResetMenuFontColor(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetMenuModifier().ResetMenuFontColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMenuModifier()->resetMenuFontColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -57,9 +55,9 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> weightArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of font weight value
     Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(3); // 3: index of font family value
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(4);  // 4: index of font style value
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (sizeArg->IsUndefined() && weightArg->IsUndefined() && familyArg->IsUndefined() && styleArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetMenuModifier().ResetFont(nativeNode);
+        GetArkUINodeModifiers()->getMenuModifier()->resetFont(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -89,7 +87,7 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), family.c_str());
 
-    GetArkUIInternalNodeAPI()->GetMenuModifier().SetFont(nativeNode, fontInfo.c_str(), style);
+    GetArkUINodeModifiers()->getMenuModifier()->setFont(nativeNode, fontInfo.c_str(), style);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -98,8 +96,8 @@ ArkUINativeModuleValue MenuBridge::ResetFont(ArkUIRuntimeCallInfo* runtimeCallIn
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetMenuModifier().ResetFont(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMenuModifier()->resetFont(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -108,14 +106,14 @@ ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(1);     // 1: index of top left value
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(2);    // 2: index of top right value
     Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(3);  // 3: index of bottom left value
     Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(4); // 4: index of bottom right value
     if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
         bottomRightArgs->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetMenuModifier().ResetRadius(nativeNode);
+        GetArkUINodeModifiers()->getMenuModifier()->resetRadius(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -139,7 +137,7 @@ ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
         bottomRight = CalcDimension(0.0, DimensionUnit::VP);
     }
 
-    std::vector<double> radiusValues;
+    std::vector<ArkUI_Float32> radiusValues;
     std::vector<int32_t> radiusUnits;
     radiusUnits.push_back(static_cast<int32_t>(topLeft.Unit()));
     radiusUnits.push_back(static_cast<int32_t>(topRight.Unit()));
@@ -149,7 +147,7 @@ ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     radiusValues.push_back(topRight.Value());
     radiusValues.push_back(bottomLeft.Value());
     radiusValues.push_back(bottomRight.Value());
-    GetArkUIInternalNodeAPI()->GetMenuModifier().SetRadius(nativeNode, radiusValues.data(), radiusUnits.data());
+    GetArkUINodeModifiers()->getMenuModifier()->setRadius(nativeNode, radiusValues.data(), radiusUnits.data());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -158,8 +156,8 @@ ArkUINativeModuleValue MenuBridge::ResetRadius(ArkUIRuntimeCallInfo* runtimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetMenuModifier().ResetRadius(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMenuModifier()->resetRadius(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -169,13 +167,13 @@ ArkUINativeModuleValue MenuBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallInf
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension width;
     if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width, false)) {
-        GetArkUIInternalNodeAPI()->GetMenuModifier().ResetMenuWidth(nativeNode);
+        GetArkUINodeModifiers()->getMenuModifier()->resetMenuWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUIInternalNodeAPI()->GetMenuModifier().SetMenuWidth(
+    GetArkUINodeModifiers()->getMenuModifier()->setMenuWidth(
         nativeNode, width.Value(), static_cast<int32_t>(width.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -185,8 +183,8 @@ ArkUINativeModuleValue MenuBridge::ResetWidth(ArkUIRuntimeCallInfo* runtimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetMenuModifier().ResetMenuWidth(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMenuModifier()->resetMenuWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

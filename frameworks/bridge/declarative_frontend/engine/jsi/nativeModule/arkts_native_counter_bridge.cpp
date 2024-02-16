@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
-
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue CounterBridge::SetEnableInc(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -24,13 +22,13 @@ ArkUINativeModuleValue CounterBridge::SetEnableInc(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> flagArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (flagArg->IsUndefined() || !flagArg->IsBoolean()) {
-        GetArkUIInternalNodeAPI()->GetCounterModifier().ReSetEnableInc(nativeNode);
+        GetArkUINodeModifiers()->getCounterModifier()->resetEnableInc(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     bool flag = flagArg->ToBoolean(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCounterModifier().SetEnableInc(nativeNode, flag);
+    GetArkUINodeModifiers()->getCounterModifier()->setEnableInc(nativeNode, flag);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -39,8 +37,8 @@ ArkUINativeModuleValue CounterBridge::ResetEnableInc(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCounterModifier().ReSetEnableInc(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCounterModifier()->resetEnableInc(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -50,13 +48,13 @@ ArkUINativeModuleValue CounterBridge::SetEnableDec(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> flagArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (flagArg->IsUndefined() || !flagArg->IsBoolean()) {
-        GetArkUIInternalNodeAPI()->GetCounterModifier().ReSetEnableDec(nativeNode);
+        GetArkUINodeModifiers()->getCounterModifier()->resetEnableDec(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     bool flag = flagArg->ToBoolean(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCounterModifier().SetEnableDec(nativeNode, flag);
+    GetArkUINodeModifiers()->getCounterModifier()->setEnableDec(nativeNode, flag);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -65,8 +63,8 @@ ArkUINativeModuleValue CounterBridge::ResetEnableDec(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCounterModifier().ReSetEnableDec(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCounterModifier()->resetEnableDec(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -76,15 +74,15 @@ ArkUINativeModuleValue CounterBridge::SetCounterHeight(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> heightValue = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     CalcDimension height;
     ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height, false);
     if (LessNotEqual(height.Value(), 0.0)) {
-        GetArkUIInternalNodeAPI()->GetCounterModifier().ResetCounterHeight(nativeNode);
+        GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUIInternalNodeAPI()->GetCounterModifier().SetCounterHeight(
+    GetArkUINodeModifiers()->getCounterModifier()->setCounterHeight(
         nativeNode, height.Value(), static_cast<int>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -94,8 +92,8 @@ ArkUINativeModuleValue CounterBridge::ResetCounterHeight(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCounterModifier().ResetCounterHeight(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -105,16 +103,16 @@ ArkUINativeModuleValue CounterBridge::SetCounterWidth(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     CalcDimension width;
     ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width, false);
     if (LessNotEqual(width.Value(), 0.0)) {
-        GetArkUIInternalNodeAPI()->GetCounterModifier().ResetCounterWidth(nativeNode);
+        GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
-    GetArkUIInternalNodeAPI()->GetCounterModifier().SetCounterWidth(
+    GetArkUINodeModifiers()->getCounterModifier()->setCounterWidth(
         nativeNode, width.Value(), static_cast<int>(width.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -124,8 +122,8 @@ ArkUINativeModuleValue CounterBridge::ResetCounterWidth(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCounterModifier().ResetCounterWidth(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -135,12 +133,12 @@ ArkUINativeModuleValue CounterBridge::SetCounterBackgroundColor(ArkUIRuntimeCall
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetCounterModifier().ResetCounterBackgroundColor(nativeNode);
+        GetArkUINodeModifiers()->getCounterModifier()->resetCounterBackgroundColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetCounterModifier().SetCounterBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getCounterModifier()->setCounterBackgroundColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -150,8 +148,8 @@ ArkUINativeModuleValue CounterBridge::ResetCounterBackgroundColor(ArkUIRuntimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCounterModifier().ResetCounterBackgroundColor(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCounterModifier()->resetCounterBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -160,19 +158,19 @@ ArkUINativeModuleValue CounterBridge::SetCounterSize(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1); // 1: width Value
     Local<JSValueRef> heightValue = runtimeCallInfo->GetCallArgRef(2); // 2: height Value
     CalcDimension width;
     ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width, false);
     if (GreatNotEqual(width.Value(), 0.0)) {
-        GetArkUIInternalNodeAPI()->GetCounterModifier().SetCounterWidth(
+        GetArkUINodeModifiers()->getCounterModifier()->setCounterWidth(
             nativeNode, width.Value(), static_cast<int>(width.Unit()));
     }
     CalcDimension height;
     ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height, false);
     if (GreatNotEqual(height.Value(), 0.0)) {
-        GetArkUIInternalNodeAPI()->GetCounterModifier().SetCounterHeight(
+        GetArkUINodeModifiers()->getCounterModifier()->setCounterHeight(
             nativeNode, height.Value(), static_cast<int>(height.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -183,9 +181,9 @@ ArkUINativeModuleValue CounterBridge::ResetCounterSize(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCounterModifier().ResetCounterWidth(nativeNode);
-    GetArkUIInternalNodeAPI()->GetCounterModifier().ResetCounterHeight(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
+    GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

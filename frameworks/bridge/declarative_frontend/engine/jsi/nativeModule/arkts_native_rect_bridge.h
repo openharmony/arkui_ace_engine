@@ -30,8 +30,10 @@ public:
 
 private:
     static void SetRadiusWithArray(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-        std::vector<double>& radiusValues, std::vector<int32_t>& radiusUnits, std::vector<uint32_t>& radiusValidPairs);
-    static void SetRadiusArraysInvalidValue(std::vector<double>& radiusValues, std::vector<int32_t>& radiusUnits,
+        std::vector<ArkUI_Float32>& radiusValues, std::vector<int32_t>& radiusUnits,
+        std::vector<uint32_t>& radiusValidPairs);
+    static void SetRadiusArraysInvalidValue(std::vector<ArkUI_Float32>& radiusValues,
+        std::vector<int32_t>& radiusUnits,
         std::vector<uint32_t>& radiusValidPairs, int index);
 };
 } // namespace OHOS::Ace::NG

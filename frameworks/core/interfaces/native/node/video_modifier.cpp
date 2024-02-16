@@ -24,82 +24,82 @@
 #include "frameworks/core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
-constexpr bool DEFAULT_CONTROLS_VALUE = true;
-constexpr bool DEFAULT_LOOP = false;
-constexpr bool DEFAULT_MUTED = false;
+constexpr ArkUI_Bool DEFAULT_CONTROLS_VALUE = true;
+constexpr ArkUI_Bool DEFAULT_LOOP = false;
+constexpr ArkUI_Bool DEFAULT_MUTED = false;
 constexpr ImageFit DEFAULT_OBJECT_FIT = ImageFit::COVER;
 
-void SetAutoPlay(NodeHandle node, uint32_t autoPlay)
+void SetAutoPlay(ArkUINodeHandle node, ArkUI_Uint32 autoPlay)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    VideoModelNG::SetAutoPlay(frameNode, static_cast<bool>(autoPlay));
+    VideoModelNG::SetAutoPlay(frameNode, static_cast<ArkUI_Bool>(autoPlay));
 }
 
-void ResetAutoPlay(NodeHandle node)
+void ResetAutoPlay(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelNG::SetAutoPlay(frameNode, false);
 }
 
-void SetVideoObjectFit(NodeHandle node, int32_t objectFit)
+void SetVideoObjectFit(ArkUINodeHandle node, ArkUI_Int32 objectFit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelNG::SetObjectFit(frameNode, static_cast<ImageFit>(objectFit));
 }
 
-void ResetVideoObjectFit(NodeHandle node)
+void ResetVideoObjectFit(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelNG::SetObjectFit(frameNode, DEFAULT_OBJECT_FIT);
 }
 
-void SetVideoControls(NodeHandle node, uint32_t controlsValue)
+void SetVideoControls(ArkUINodeHandle node, ArkUI_Uint32 controlsValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    VideoModelNG::SetControls(frameNode, static_cast<bool>(controlsValue));
+    VideoModelNG::SetControls(frameNode, static_cast<ArkUI_Bool>(controlsValue));
 }
 
-void ResetVideoControls(NodeHandle node)
+void ResetVideoControls(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelNG::SetControls(frameNode, DEFAULT_CONTROLS_VALUE);
 }
 
-void SetVideoLoop(NodeHandle node, uint32_t value)
+void SetVideoLoop(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    VideoModelNG::SetLoop(frameNode, static_cast<bool>(value));
+    VideoModelNG::SetLoop(frameNode, static_cast<ArkUI_Bool>(value));
 }
 
-void ResetVideoLoop(NodeHandle node)
+void ResetVideoLoop(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelNG::SetLoop(frameNode, DEFAULT_LOOP);
 }
 
-void SetVideoMuted(NodeHandle node, uint32_t value)
+void SetVideoMuted(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    VideoModelNG::SetMuted(frameNode, static_cast<bool>(value));
+    VideoModelNG::SetMuted(frameNode, static_cast<ArkUI_Bool>(value));
 }
 
-void ResetVideoMuted(NodeHandle node)
+void ResetVideoMuted(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelNG::SetMuted(frameNode, DEFAULT_MUTED);
 }
 
-void SetVideoOpacity(NodeHandle node, double opacity)
+void SetVideoOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -109,19 +109,32 @@ void SetVideoOpacity(NodeHandle node, double opacity)
     ViewAbstract::SetOpacity(frameNode, opacity);
 }
 
-void ResetVideoOpacity(NodeHandle node)
+void ResetVideoOpacity(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
 
-ArkUIVideoModifierAPI GetVideoModifier()
+namespace NodeModifier {
+const ArkUIVideoModifier* GetVideoModifier()
 {
-    static const ArkUIVideoModifierAPI modifier = { SetAutoPlay, ResetAutoPlay, SetVideoObjectFit, ResetVideoObjectFit,
-        SetVideoControls, ResetVideoControls, SetVideoLoop, ResetVideoLoop, SetVideoMuted, ResetVideoMuted,
-        SetVideoOpacity, ResetVideoOpacity };
+    static const ArkUIVideoModifier modifier = {
+        SetAutoPlay,
+        ResetAutoPlay,
+        SetVideoObjectFit,
+        ResetVideoObjectFit,
+        SetVideoControls,
+        ResetVideoControls,
+        SetVideoLoop,
+        ResetVideoLoop,
+        SetVideoMuted,
+        ResetVideoMuted,
+        SetVideoOpacity,
+        ResetVideoOpacity
+    };
 
-    return modifier;
+    return &modifier;
 }
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

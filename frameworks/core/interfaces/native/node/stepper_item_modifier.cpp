@@ -20,7 +20,7 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-void SetNextLabel(NodeHandle node, const char* value)
+void SetNextLabel(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -28,17 +28,19 @@ void SetNextLabel(NodeHandle node, const char* value)
     StepperItemModelNG::SetNextLabel(frameNode, rightLabel);
 }
 
-void ResetNextLabel(NodeHandle node)
+void ResetNextLabel(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     StepperItemModelNG::ResetNextLabel(frameNode);
 }
 
-ArkUIStepperItemModifierAPI GetStepperItemModifier()
+namespace NodeModifier {
+const ArkUIStepperItemModifier* GetStepperItemModifier()
 {
-    static const ArkUIStepperItemModifierAPI modifier = { SetNextLabel, ResetNextLabel };
+    static const ArkUIStepperItemModifier modifier = { SetNextLabel, ResetNextLabel };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

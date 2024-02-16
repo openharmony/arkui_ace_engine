@@ -33,7 +33,7 @@ public:
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
-    std::string GetResizeable() const;
+    std::string GetResizable() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

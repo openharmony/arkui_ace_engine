@@ -20,24 +20,26 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-void SetHideTitleBar(NodeHandle node, bool hideTitle)
+void SetHideTitleBar(ArkUINodeHandle node, ArkUI_Bool hideTitle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavDestinationModelNG::SetHideTitleBar(frameNode, hideTitle);
 }
 
-void ResetHideTitleBar(NodeHandle node)
+void ResetHideTitleBar(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavDestinationModelNG::SetHideTitleBar(frameNode, false);
 }
 
-ArkUINavDestinationModifierAPI GetNavDestinationModifier()
+namespace NodeModifier {
+const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
-    static const ArkUINavDestinationModifierAPI modifier = { SetHideTitleBar, ResetHideTitleBar };
+    static const ArkUINavDestinationModifier modifier = { SetHideTitleBar, ResetHideTitleBar };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

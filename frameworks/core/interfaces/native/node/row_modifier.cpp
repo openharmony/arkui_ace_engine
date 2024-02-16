@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/row_modifier.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
@@ -23,38 +21,40 @@
 namespace OHOS::Ace::NG {
 constexpr FlexAlign DEFAULT_ROW_JUSTIFY_CONTENT = FlexAlign::FLEX_START;
 constexpr FlexAlign DEFAULT_ROW_ALIGN_ITEMS = FlexAlign::CENTER;
-void SetRowJustifyContent(NodeHandle node, int32_t flexAlign)
+void SetRowJustifyContent(ArkUINodeHandle node, int32_t flexAlign)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     RowModelNG::SetJustifyContent(frameNode, static_cast<FlexAlign>(flexAlign));
 }
 
-void ResetRowJustifyContent(NodeHandle node)
+void ResetRowJustifyContent(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     RowModelNG::SetJustifyContent(frameNode, DEFAULT_ROW_JUSTIFY_CONTENT);
 }
 
-void SetRowAlignItems(NodeHandle node, int32_t verticalAlign)
+void SetRowAlignItems(ArkUINodeHandle node, int32_t verticalAlign)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     RowModelNG::SetAlignItems(frameNode, static_cast<FlexAlign>(verticalAlign));
 }
 
-void ResetRowAlignItems(NodeHandle node)
+void ResetRowAlignItems(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     RowModelNG::SetAlignItems(frameNode, DEFAULT_ROW_ALIGN_ITEMS);
 }
 
-ArkUIRowModifierAPI GetRowModifier()
+namespace NodeModifier {
+const ArkUIRowModifier* GetRowModifier()
 {
-    static const ArkUIRowModifierAPI modifier = { SetRowJustifyContent, ResetRowJustifyContent, SetRowAlignItems,
-                                                  ResetRowAlignItems };
-    return modifier;
+    static const ArkUIRowModifier modifier = { SetRowJustifyContent, ResetRowJustifyContent, SetRowAlignItems,
+                                               ResetRowAlignItems };
+    return &modifier;
+}
 }
 }

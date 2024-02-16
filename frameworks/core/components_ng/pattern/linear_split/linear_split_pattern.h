@@ -96,7 +96,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanEvent> panEvent_;
-    bool resizeable_ = false;
+    bool resizable_ = false;
 
     std::size_t dragedSplitIndex_ = -1;
     std::size_t mouseDragedSplitIndex_ = -1;

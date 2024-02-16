@@ -69,7 +69,7 @@ void ButtonModelNG::SetStateEffect(const bool stateEffect)
     buttonEventHub->SetStateEffect(stateEffect);
 }
 
-void ButtonModelNG::SetLableStyle(ButtonParameters& buttonParameters)
+void ButtonModelNG::SetLabelStyle(ButtonParameters& buttonParameters)
 {
     if (buttonParameters.textOverflow.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextOverflow, buttonParameters.textOverflow.value());
@@ -360,7 +360,7 @@ void ButtonModelNG::SetStateEffect(FrameNode* frameNode, const bool stateEffect)
     buttonEventHub->SetStateEffect(stateEffect);
 }
 
-void ButtonModelNG::SetLableStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters)
+void ButtonModelNG::SetLabelStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters)
 {
     if (buttonParameters.textOverflow.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(

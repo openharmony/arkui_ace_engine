@@ -36,13 +36,13 @@ public:
     {}
     ~SplitContainerComponent() override = default;
 
-    bool GetResizeable()
+    bool GetResizable()
     {
-        return resizeable_;
+        return resizable_;
     }
-    void SetResizeable(bool resizeable)
+    void SetResizable(bool resizable)
     {
-        resizeable_ = resizeable;
+        resizable_ = resizable;
     }
 
     SplitType GetSplitType() const
@@ -51,7 +51,7 @@ public:
     }
 
 private:
-    bool resizeable_ = false;
+    bool resizable_ = false;
     SplitType splitType_ = SplitType::ROW_SPLIT;
 };
 

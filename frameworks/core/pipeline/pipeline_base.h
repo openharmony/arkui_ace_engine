@@ -189,7 +189,7 @@ public:
     // Called by window when received vsync signal.
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
-    // Called by view
+    // Called by viewr
     virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) = 0;
 
     // Called by view when idle event.

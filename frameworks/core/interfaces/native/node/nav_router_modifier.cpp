@@ -20,24 +20,26 @@
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
-void SetNavRouteMode(NodeHandle node, int32_t mode)
+void SetNavRouteMode(ArkUINodeHandle node, int32_t mode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavRouterModelNG::SetNavRouteMode(frameNode, mode);
 }
 
-void ResetNavRouteMode(NodeHandle node)
+void ResetNavRouteMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavRouterModelNG::SetNavRouteMode(frameNode, 0);
 }
 
-ArkUINavRouterModifierAPI GetNavRouterModifier()
+namespace NodeModifier {
+const ArkUINavRouterModifier* GetNavRouterModifier()
 {
-    static const ArkUINavRouterModifierAPI modifier = {SetNavRouteMode, ResetNavRouteMode};
+    static const ArkUINavRouterModifier modifier = {SetNavRouteMode, ResetNavRouteMode};
 
-    return modifier;
+    return &modifier;
+}
 }
 }

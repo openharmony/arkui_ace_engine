@@ -26,7 +26,7 @@ class JSColumnSplit : public JSContainerBase {
 public:
     static void Create();
     static void JSBind(BindingTarget globalObj);
-    static void JsResizeable(bool resizeable);
+    static void JsResizable(bool resizable);
     static void JsDivider(const JSCallbackInfo& args);
     static void JsClip(const JSCallbackInfo& info);
 };

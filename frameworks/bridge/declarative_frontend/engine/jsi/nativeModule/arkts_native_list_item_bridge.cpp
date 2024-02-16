@@ -14,8 +14,6 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.h"
 
-#include "core/interfaces/native/node/api.h"
-
 namespace OHOS::Ace::NG {
 constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
@@ -26,13 +24,13 @@ ArkUINativeModuleValue ListItemBridge::SetListItemSelected(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     bool selected = false;
     if (secondArg->IsBoolean()) {
         selected = secondArg->ToBoolean(vm)->Value();
     }
-    GetArkUIInternalNodeAPI()->GetListItemModifier().SetListItemSelected(nativeNode, selected);
+    GetArkUINodeModifiers()->getListItemModifier()->setListItemSelected(nativeNode, selected);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -42,8 +40,8 @@ ArkUINativeModuleValue ListItemBridge::ResetListItemSelected(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetListItemModifier().ResetListItemSelected(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListItemModifier()->resetListItemSelected(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -53,10 +51,10 @@ ArkUINativeModuleValue ListItemBridge::SetSelectable(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!secondArg->IsUndefined() && secondArg->IsBoolean()) {
         bool selectable = secondArg->ToBoolean(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetListItemModifier().SetSelectable(nativeNode, selectable);
+        GetArkUINodeModifiers()->getListItemModifier()->setSelectable(nativeNode, selectable);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -67,8 +65,8 @@ ArkUINativeModuleValue ListItemBridge::ResetSelectable(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetListItemModifier().ResetSelectable(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListItemModifier()->resetSelectable(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -15,7 +15,6 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 
-#include "core/interfaces/native/node/api.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -28,21 +27,21 @@ constexpr uint32_t INDEX_ARGUMENT_4 = 4;
 
 void SetHeightInner(const EcmaVM* vm, const Local<JSValueRef>& nodeArg, const Local<JSValueRef>& heightArg)
 {
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension height;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, heightArg, height)) {
-        GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleHeight(nativeNode);
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleHeight(nativeNode);
     } else {
         if (height.IsNegative()) {
-            GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleHeight(nativeNode);
+            GetArkUINodeModifiers()->getToggleModifier()->resetToggleHeight(nativeNode);
         } else {
-            GetArkUIInternalNodeAPI()->GetToggleModifier().SetToggleHeight(
+            GetArkUINodeModifiers()->getToggleModifier()->setToggleHeight(
                 nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
         }
     }
 }
 
-void PushDimensionVector(const std::optional<Dimension>& valueDimen, std::vector<double>& dimensions)
+void PushDimensionVector(const std::optional<Dimension>& valueDimen, std::vector<ArkUI_Float32>& dimensions)
 {
     dimensions.push_back(static_cast<double>(valueDimen.has_value()));
     if (valueDimen.has_value()) {
@@ -55,19 +54,19 @@ void PushDimensionVector(const std::optional<Dimension>& valueDimen, std::vector
 }
 
 void PushToggleDimension(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<double>& fontSizesVector, int32_t argIndex)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& fontSizesVector, int32_t argIndex)
 {
     Local<JSValueRef> arg = runtimeCallInfo->GetCallArgRef(argIndex);
-    std::optional<CalcDimension> dimemstionOptinal = std::nullopt;
+    std::optional<CalcDimension> dimensionOptional = std::nullopt;
     CalcDimension parsedDimension;
     if (ArkTSUtils::ParseJsDimensionVp(vm, arg, parsedDimension)) {
-        dimemstionOptinal = parsedDimension;
+        dimensionOptional = parsedDimension;
     }
-    PushDimensionVector(dimemstionOptinal, fontSizesVector);
+    PushDimensionVector(dimensionOptional, fontSizesVector);
 }
 
 void PutToggleDimensionParameters(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<double>& lengthVector)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& lengthVector)
 {
     std::vector<int32_t> indexVector = { INDEX_ARGUMENT_1, INDEX_ARGUMENT_2, INDEX_ARGUMENT_3, INDEX_ARGUMENT_4 };
     for (size_t index = 0; index < indexVector.size(); index++) {
@@ -75,19 +74,20 @@ void PutToggleDimensionParameters(
     }
 }
 } // namespace
+
 ArkUINativeModuleValue ToggleBridge::SetSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Color color;
     if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
-        GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleSelectedColor(nativeNode);
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleSelectedColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetToggleModifier().SetToggleSelectedColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleSelectedColor(nativeNode, color.GetValue());
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -98,8 +98,8 @@ ArkUINativeModuleValue ToggleBridge::ResetSelectedColor(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleSelectedColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleSelectedColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -109,13 +109,13 @@ ArkUINativeModuleValue ToggleBridge::SetSwitchPointColor(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Color color;
     if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
-        GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleSwitchPointColor(nativeNode);
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleSwitchPointColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetToggleModifier().SetToggleSwitchPointColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleSwitchPointColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -125,8 +125,8 @@ ArkUINativeModuleValue ToggleBridge::ResetSwitchPointColor(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleSwitchPointColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleSwitchPointColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -145,8 +145,8 @@ ArkUINativeModuleValue ToggleBridge::ResetHeight(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleHeight(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -157,15 +157,15 @@ ArkUINativeModuleValue ToggleBridge::SetResponseRegion(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
     Local<JSValueRef> regionArrayArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_1);
     Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_2);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     uint32_t length = lengthArg->Uint32Value(vm);
-    double regionValueArray[length];
+    ArkUI_Float32 regionValueArray[length];
     int32_t regionUnitsArray[length];
     if (!ArkTSUtils::ParseResponseRegion(vm, regionArrayArg, regionValueArray, regionUnitsArray, length)) {
-        GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleResponseRegion(nativeNode);
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleResponseRegion(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUIInternalNodeAPI()->GetToggleModifier().SetToggleResponseRegion(
+    GetArkUINodeModifiers()->getToggleModifier()->setToggleResponseRegion(
         nativeNode, regionValueArray, regionUnitsArray, length);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -175,8 +175,8 @@ ArkUINativeModuleValue ToggleBridge::ResetResponseRegion(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleResponseRegion(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleResponseRegion(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -185,10 +185,10 @@ ArkUINativeModuleValue ToggleBridge::SetPadding(ArkUIRuntimeCallInfo* runtimeCal
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    std::vector<double> lengthVector;
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    std::vector<ArkUI_Float32> lengthVector;
     PutToggleDimensionParameters(runtimeCallInfo, vm, lengthVector);
-    GetArkUIInternalNodeAPI()->GetToggleModifier().SetTogglePadding(
+    GetArkUINodeModifiers()->getToggleModifier()->setTogglePadding(
         nativeNode, lengthVector.data(), lengthVector.size());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -198,8 +198,8 @@ ArkUINativeModuleValue ToggleBridge::ResetPadding(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetToggleModifier().ResetTogglePadding(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getToggleModifier()->resetTogglePadding(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -209,12 +209,12 @@ ArkUINativeModuleValue ToggleBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
-        GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleBackgroundColor(nativeNode);
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleBackgroundColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetToggleModifier().SetToggleBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleBackgroundColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -224,8 +224,8 @@ ArkUINativeModuleValue ToggleBridge::ResetBackgroundColor(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleBackgroundColor(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -234,15 +234,15 @@ ArkUINativeModuleValue ToggleBridge::SetHoverEffect(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> hoverEffectArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_1);
 
     if (hoverEffectArg->IsUndefined() || !hoverEffectArg->IsNumber()) {
-        GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleHoverEffect(nativeNode);
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleHoverEffect(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     int32_t hoverEffectValue = hoverEffectArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetToggleModifier().SetToggleHoverEffect(nativeNode, hoverEffectValue);
+    GetArkUINodeModifiers()->getToggleModifier()->setToggleHoverEffect(nativeNode, hoverEffectValue);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -251,8 +251,8 @@ ArkUINativeModuleValue ToggleBridge::ResetHoverEffect(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetToggleModifier().ResetToggleHoverEffect(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleHoverEffect(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

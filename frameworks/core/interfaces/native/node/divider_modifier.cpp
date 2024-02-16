@@ -21,13 +21,14 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/components/theme/theme_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr bool DEFAULT_DIVIDER_VERTICAL = false;
 const Dimension DEFAULT_DIVIDER_STROKE_WIDTH(1, DimensionUnit::PX);
 const LineCap DEFAULT_DIVIDER_LINE_CAP = LineCap::BUTT;
 
-void SetDividerStrokeWidth(NodeHandle node, double value, int32_t unit)
+void SetDividerStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -35,14 +36,14 @@ void SetDividerStrokeWidth(NodeHandle node, double value, int32_t unit)
     DividerModelNG::StrokeWidth(frameNode, strokeWidthDimension);
 }
 
-void ResetDividerStrokeWidth(NodeHandle node)
+void ResetDividerStrokeWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DividerModelNG::StrokeWidth(frameNode, DEFAULT_DIVIDER_STROKE_WIDTH);
 }
 
-void SetDividerLineCap(NodeHandle node, int32_t lineCap)
+void SetDividerLineCap(ArkUINodeHandle node, int32_t lineCap)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -57,21 +58,21 @@ void SetDividerLineCap(NodeHandle node, int32_t lineCap)
     DividerModelNG::LineCap(frameNode, lineCapStyle);
 }
 
-void ResetDividerLineCap(NodeHandle node)
+void ResetDividerLineCap(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DividerModelNG::LineCap(frameNode, DEFAULT_DIVIDER_LINE_CAP);
 }
 
-void SetDividerColor(NodeHandle node, uint32_t color)
+void SetDividerColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DividerModelNG::SetDividerColor(frameNode, Color(color));
 }
 
-void ResetDividerColor(NodeHandle node)
+void ResetDividerColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -81,24 +82,26 @@ void ResetDividerColor(NodeHandle node)
     DividerModelNG::SetDividerColor(frameNode, dividerColor);
 }
 
-void SetDividerVertical(NodeHandle node, bool value)
+void SetDividerVertical(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DividerModelNG::SetVertical(frameNode, value);
 }
 
-void ResetDividerVertical(NodeHandle node)
+void ResetDividerVertical(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DividerModelNG::SetVertical(frameNode, DEFAULT_DIVIDER_VERTICAL);
 }
 
-ArkUIDividerModifierAPI GetDividerModifier()
+namespace NodeModifier {
+const ArkUIDividerModifier* GetDividerModifier()
 {
-    static const ArkUIDividerModifierAPI modifier = { SetDividerStrokeWidth, ResetDividerStrokeWidth, SetDividerLineCap,
+    static const ArkUIDividerModifier modifier = { SetDividerStrokeWidth, ResetDividerStrokeWidth, SetDividerLineCap,
         ResetDividerLineCap, SetDividerColor, ResetDividerColor, SetDividerVertical, ResetDividerVertical };
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

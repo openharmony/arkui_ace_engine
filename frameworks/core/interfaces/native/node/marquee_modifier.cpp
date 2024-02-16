@@ -26,7 +26,8 @@ namespace OHOS::Ace::NG {
 constexpr bool DEFAULT_ALLOW_SCALE = true;
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 const std::string DEFAULT_FONT_FAMILY = "cursive";
-void SetMarqueeFontSize(NodeHandle node, double fontSize, int unit)
+
+void SetMarqueeFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -45,7 +46,7 @@ void SetMarqueeFontSize(NodeHandle node, double fontSize, int unit)
     }
 }
 
-void ResetMarqueeFontSize(NodeHandle node)
+void ResetMarqueeFontSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -57,48 +58,48 @@ void ResetMarqueeFontSize(NodeHandle node)
     MarqueeModelNG::SetFontSize(frameNode, fontSize);
 }
 
-void SetMarqueeFontColor(NodeHandle node, uint32_t color)
+void SetMarqueeFontColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MarqueeModelNG::SetTextColor(frameNode, Color(color));
 }
-void ResetMarqueeFontColor(NodeHandle node)
+void ResetMarqueeFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<Color> colorOpt;
     MarqueeModelNG::SetTextColor(frameNode, colorOpt);
 }
-void SetMarqueeAllowScale(NodeHandle node, bool allowScale)
+void SetMarqueeAllowScale(ArkUINodeHandle node, ArkUI_Bool allowScale)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MarqueeModelNG::SetAllowScale(frameNode, allowScale);
 }
 
-void ResetMarqueeAllowScale(NodeHandle node)
+void ResetMarqueeAllowScale(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MarqueeModelNG::SetAllowScale(frameNode, DEFAULT_ALLOW_SCALE);
 }
 
-void SetMarqueeFontWeight(NodeHandle node, const char* fontWeight)
+void SetMarqueeFontWeight(ArkUINodeHandle node, const char* fontWeight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MarqueeModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeight));
 }
 
-void ResetMarqueeFontWeight(NodeHandle node)
+void ResetMarqueeFontWeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MarqueeModelNG::SetFontWeight(frameNode, DEFAULT_FONT_WEIGHT);
 }
 
-void SetMarqueeFontFamily(NodeHandle node, const char* fontFamily)
+void SetMarqueeFontFamily(ArkUINodeHandle node, const char* fontFamily)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -107,7 +108,7 @@ void SetMarqueeFontFamily(NodeHandle node, const char* fontFamily)
     MarqueeModelNG::SetFontFamily(frameNode, fontFamilyResult);
 }
 
-void ResetMarqueeFontFamily(NodeHandle node)
+void ResetMarqueeFontFamily(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -116,11 +117,13 @@ void ResetMarqueeFontFamily(NodeHandle node)
     MarqueeModelNG::SetFontFamily(frameNode, fontFamilyResult);
 }
 
-ArkUIMarqueeModifierAPI GetMarqueeModifier()
+namespace NodeModifier {
+const ArkUIMarqueeModifier* GetMarqueeModifier()
 {
-    static const ArkUIMarqueeModifierAPI modifier = { SetMarqueeFontSize, ResetMarqueeFontSize, SetMarqueeFontColor,
+    static const ArkUIMarqueeModifier modifier = { SetMarqueeFontSize, ResetMarqueeFontSize, SetMarqueeFontColor,
         ResetMarqueeFontColor, SetMarqueeAllowScale, ResetMarqueeAllowScale, SetMarqueeFontWeight,
         ResetMarqueeFontWeight, SetMarqueeFontFamily, ResetMarqueeFontFamily };
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

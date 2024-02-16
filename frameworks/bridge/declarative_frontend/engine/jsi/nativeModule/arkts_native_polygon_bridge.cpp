@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -27,7 +25,7 @@ ArkUINativeModuleValue PolygonBridge::SetPolygonPoints(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> xPoint = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> yPoint = runtimeCallInfo->GetCallArgRef(NUM_2);
     if (!xPoint->IsArray(vm) || !yPoint->IsArray(vm)) {
@@ -39,15 +37,15 @@ ArkUINativeModuleValue PolygonBridge::SetPolygonPoints(ArkUIRuntimeCallInfo* run
     auto xlength = xPointArray->Length(vm);
     auto ylength = yPointArray->Length(vm);
     if (xlength <= 0 || xlength != ylength) {
-        GetArkUIInternalNodeAPI()->GetPolygonModifier().ResetPolygonPoints(nativeNode);
+        GetArkUINodeModifiers()->getPolygonModifier()->resetPolygonPoints(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
     bool flag = true;
     CalcDimension x;
     CalcDimension y;
-    std::vector<double> xPointValues;
-    std::vector<double> yPointValues;
+    std::vector<ArkUI_Float32> xPointValues;
+    std::vector<ArkUI_Float32> yPointValues;
     for (size_t i = 0; i < xlength; i++) {
         Local<JSValueRef> xValue = panda::ArrayRef::GetValueAt(vm, xPointArray, i);
         Local<JSValueRef> yValue = panda::ArrayRef::GetValueAt(vm, yPointArray, i);
@@ -62,10 +60,10 @@ ArkUINativeModuleValue PolygonBridge::SetPolygonPoints(ArkUIRuntimeCallInfo* run
     }
 
     if (flag) {
-        GetArkUIInternalNodeAPI()->GetPolygonModifier().
-            SetPolygonPoints(nativeNode, xPointValues.data(), yPointValues.data(), xlength);
+        GetArkUINodeModifiers()->getPolygonModifier()->
+            setPolygonPoints(nativeNode, xPointValues.data(), yPointValues.data(), xlength);
     } else {
-        GetArkUIInternalNodeAPI()->GetPolygonModifier().ResetPolygonPoints(nativeNode);
+        GetArkUINodeModifiers()->getPolygonModifier()->resetPolygonPoints(nativeNode);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -76,8 +74,8 @@ ArkUINativeModuleValue PolygonBridge::ResetPolygonPoints(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPolygonModifier().ResetPolygonPoints(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPolygonModifier()->resetPolygonPoints(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

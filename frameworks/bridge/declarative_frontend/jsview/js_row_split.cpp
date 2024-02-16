@@ -27,9 +27,9 @@ void JSRowSplit::Create()
     LinearSplitModel::GetInstance()->Create(NG::SplitType::ROW_SPLIT);
 }
 
-void JSRowSplit::JsResizeable(bool resizeable)
+void JSRowSplit::JsResizable(bool resizable)
 {
-    LinearSplitModel::GetInstance()->SetResizeable(NG::SplitType::ROW_SPLIT, resizeable);
+    LinearSplitModel::GetInstance()->SetResizable(NG::SplitType::ROW_SPLIT, resizable);
 }
 
 void JSRowSplit::JsClip(const JSCallbackInfo& info)
@@ -53,7 +53,7 @@ void JSRowSplit::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRowSplit>::Declare("RowSplit");
     JSClass<JSRowSplit>::StaticMethod("create", &JSRowSplit::Create, MethodOptions::NONE);
-    JSClass<JSRowSplit>::StaticMethod("resizeable", &JSRowSplit::JsResizeable, MethodOptions::NONE);
+    JSClass<JSRowSplit>::StaticMethod("resizeable", &JSRowSplit::JsResizable, MethodOptions::NONE);
     JSClass<JSRowSplit>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSRowSplit>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRowSplit>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

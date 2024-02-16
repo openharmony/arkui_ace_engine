@@ -19,25 +19,27 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/theme_manager.h"
 
 namespace OHOS::Ace::NG {
 constexpr bool DEFAULT_CHECKED = false;
-void SetRadioChecked(NodeHandle node, bool isCheck)
+void SetRadioChecked(ArkUINodeHandle node, ArkUI_Bool isCheck)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RadioModelNG::SetChecked(frameNode, isCheck);
 }
 
-void ResetRadioChecked(NodeHandle node)
+void ResetRadioChecked(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RadioModelNG::SetChecked(frameNode, DEFAULT_CHECKED);
 }
 
-void SetRadioStyle(NodeHandle node,
-    uint32_t checkedBackgroundColor, uint32_t uncheckedBorderColor, uint32_t indicatorColor)
+void SetRadioStyle(ArkUINodeHandle node,
+    ArkUI_Uint32 checkedBackgroundColor, ArkUI_Uint32 uncheckedBorderColor, ArkUI_Uint32 indicatorColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -47,7 +49,7 @@ void SetRadioStyle(NodeHandle node,
     RadioModelNG::SetIndicatorColor(frameNode, Color(indicatorColor));
 }
 
-void ResetRadioStyle(NodeHandle node)
+void ResetRadioStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -64,7 +66,7 @@ void ResetRadioStyle(NodeHandle node)
     RadioModelNG::SetIndicatorColor(frameNode, theme->GetPointColor());
 }
 
-void SetRadioWidth(NodeHandle node, double value, uint32_t unit)
+void SetRadioWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Uint32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -72,7 +74,7 @@ void SetRadioWidth(NodeHandle node, double value, uint32_t unit)
     RadioModelNG::SetWidth(frameNode, width);
 }
 
-void ResetRadioWidth(NodeHandle node)
+void ResetRadioWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -86,7 +88,7 @@ void ResetRadioWidth(NodeHandle node)
     RadioModelNG::SetWidth(frameNode, width);
 }
 
-void SetRadioHeight(NodeHandle node, double value, uint32_t unit)
+void SetRadioHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Uint32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -94,7 +96,7 @@ void SetRadioHeight(NodeHandle node, double value, uint32_t unit)
     RadioModelNG::SetHeight(frameNode, height);
 }
 
-void ResetRadioHeight(NodeHandle node)
+void ResetRadioHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -108,7 +110,8 @@ void ResetRadioHeight(NodeHandle node)
     RadioModelNG::SetHeight(frameNode, height);
 }
 
-void SetRadioSize(NodeHandle node, double widthValue, int32_t widthUnit, double heightValue, int32_t heightUnit)
+void SetRadioSize(ArkUINodeHandle node, ArkUI_Float32 widthValue, ArkUI_Int32 widthUnit,
+    ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -118,7 +121,7 @@ void SetRadioSize(NodeHandle node, double widthValue, int32_t widthUnit, double 
         frameNode, Dimension(heightValue, static_cast<OHOS::Ace::DimensionUnit>(heightUnit)));
 }
 
-void ResetRadioSize(NodeHandle node)
+void ResetRadioSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -137,7 +140,7 @@ void ResetRadioSize(NodeHandle node)
     RadioModelNG::SetHeight(frameNode, height);
 }
 
-void SetRadioHoverEffect(NodeHandle node, int32_t hoverEffectValue)
+void SetRadioHoverEffect(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -146,14 +149,14 @@ void SetRadioHoverEffect(NodeHandle node, int32_t hoverEffectValue)
     RadioModelNG::SetHoverEffect(frameNode, hoverEffect);
 }
 
-void ResetRadioHoverEffect(NodeHandle node)
+void ResetRadioHoverEffect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RadioModelNG::SetHoverEffect(frameNode, OHOS::Ace::HoverEffectType::AUTO);
 }
 
-void SetRadioPadding(NodeHandle node, const struct ArkUISizeType *top, const struct ArkUISizeType *right,
+void SetRadioPadding(ArkUINodeHandle node, const struct ArkUISizeType *top, const struct ArkUISizeType *right,
     const struct ArkUISizeType *bottom, const struct ArkUISizeType *left)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -190,7 +193,7 @@ void SetRadioPadding(NodeHandle node, const struct ArkUISizeType *top, const str
     RadioModelNG::SetPadding(frameNode, paddings);
 }
 
-void ResetRadioPadding(NodeHandle node)
+void ResetRadioPadding(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -202,7 +205,8 @@ void ResetRadioPadding(NodeHandle node)
     RadioModelNG::SetPadding(frameNode, paddings);
 }
 
-void SetRadioResponseRegion(NodeHandle node, const double* values, const int32_t* units, uint32_t length)
+void SetRadioResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Uint32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -223,7 +227,7 @@ void SetRadioResponseRegion(NodeHandle node, const double* values, const int32_t
     RadioModelNG::SetResponseRegion(frameNode, region);
 }
 
-void ResetRadioResponseRegion(NodeHandle node)
+void ResetRadioResponseRegion(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -238,13 +242,15 @@ void ResetRadioResponseRegion(NodeHandle node)
     RadioModelNG::SetResponseRegion(frameNode, region);
 }
 
-ArkUIRadioModifierAPI GetRadioModifier()
+namespace NodeModifier {
+const ArkUIRadioModifier* GetRadioModifier()
 {
-    static const ArkUIRadioModifierAPI modifier = {SetRadioChecked, ResetRadioChecked, SetRadioStyle, ResetRadioStyle,
+    static const ArkUIRadioModifier modifier = {SetRadioChecked, ResetRadioChecked, SetRadioStyle, ResetRadioStyle,
         SetRadioWidth, ResetRadioWidth, SetRadioHeight, ResetRadioHeight, SetRadioSize, ResetRadioSize,
         SetRadioHoverEffect, ResetRadioHoverEffect, SetRadioPadding, ResetRadioPadding, SetRadioResponseRegion,
         ResetRadioResponseRegion};
 
-    return modifier;
+    return &modifier;
+}
 }
 }

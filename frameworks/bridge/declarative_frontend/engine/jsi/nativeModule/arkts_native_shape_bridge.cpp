@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_shape_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -29,7 +27,7 @@ ArkUINativeModuleValue ShapeBridge::SetViewPort(ArkUIRuntimeCallInfo* runtimeCal
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> xArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> yArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
@@ -42,17 +40,17 @@ ArkUINativeModuleValue ShapeBridge::SetViewPort(ArkUIRuntimeCallInfo* runtimeCal
     ArkTSUtils::ParseJsDimensionVp(vm, widthArg, dimWidth);
     CalcDimension dimHeight;
     ArkTSUtils::ParseJsDimensionVp(vm, heightArg, dimHeight);
-    std::vector<double> dimValues;
+    std::vector<ArkUI_Float32> dimValues;
     std::vector<int32_t> dimUnits;
-    dimValues.push_back(dimLeft.Value());
-    dimValues.push_back(dimTop.Value());
-    dimValues.push_back(dimWidth.Value());
-    dimValues.push_back(dimHeight.Value());
+    dimValues.push_back(static_cast<ArkUI_Float32>(dimLeft.Value()));
+    dimValues.push_back(static_cast<ArkUI_Float32>(dimTop.Value()));
+    dimValues.push_back(static_cast<ArkUI_Float32>(dimWidth.Value()));
+    dimValues.push_back(static_cast<ArkUI_Float32>(dimHeight.Value()));
     dimUnits.push_back(static_cast<int32_t>(dimLeft.Unit()));
     dimUnits.push_back(static_cast<int32_t>(dimTop.Unit()));
     dimUnits.push_back(static_cast<int32_t>(dimWidth.Unit()));
     dimUnits.push_back(static_cast<int32_t>(dimHeight.Unit()));
-    GetArkUIInternalNodeAPI()->GetShapeModifier().SetShapeViewPort(nativeNode, dimValues.data(), dimUnits.data());
+    GetArkUINodeModifiers()->getShapeModifier()->setShapeViewPort(nativeNode, dimValues.data(), dimUnits.data());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -61,8 +59,8 @@ ArkUINativeModuleValue ShapeBridge::ResetViewPort(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetShapeModifier().ResetShapeViewPort(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getShapeModifier()->resetShapeViewPort(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -71,11 +69,11 @@ ArkUINativeModuleValue ShapeBridge::SetMesh(ArkUIRuntimeCallInfo* runtimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArrayArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> columnArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> rowArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    std::vector<double> mesh;
+    std::vector<ArkUI_Float32> mesh;
     if (valueArrayArg->IsArray(vm)) {
         auto arrayVal = panda::Local<panda::ArrayRef>(valueArrayArg);
         auto length = arrayVal->Length(vm);
@@ -86,7 +84,7 @@ ArkUINativeModuleValue ShapeBridge::SetMesh(ArkUIRuntimeCallInfo* runtimeCallInf
             Local<JSValueRef> radiusItem = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
             double vert;
             if (ArkTSUtils::ParseJsDouble(vm, radiusItem, vert)) {
-                mesh.push_back(vert);
+                mesh.push_back(static_cast<ArkUI_Float32>(vert));
             }
         }
     }
@@ -98,7 +96,7 @@ ArkUINativeModuleValue ShapeBridge::SetMesh(ArkUIRuntimeCallInfo* runtimeCallInf
     if (!ArkTSUtils::ParseJsInteger(vm, rowArg, row)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUIInternalNodeAPI()->GetShapeModifier().SetShapeMesh(nativeNode, mesh.data(), mesh.size(), column, row);
+    GetArkUINodeModifiers()->getShapeModifier()->setShapeMesh(nativeNode, mesh.data(), mesh.size(), column, row);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -107,8 +105,8 @@ ArkUINativeModuleValue ShapeBridge::ResetMesh(ArkUIRuntimeCallInfo* runtimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetShapeModifier().ResetShapeMesh(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getShapeModifier()->resetShapeMesh(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

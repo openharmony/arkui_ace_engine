@@ -22,20 +22,20 @@
 namespace OHOS::Ace::NG {
 constexpr int32_t STARS_DEFAULT = 5;
 constexpr double STEPS_DEFAULT = 0.5;
-void SetStars(NodeHandle node, int32_t value)
+void SetStars(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RatingModelNG::SetStars(frameNode, value);
 }
 
-void SetRatingStepSize(NodeHandle node, double value)
+void SetRatingStepSize(ArkUINodeHandle node, ArkUI_Float32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RatingModelNG::SetStepSize(frameNode, value);
 }
-void SetStarStyle(NodeHandle node,
+void SetStarStyle(ArkUINodeHandle node,
     const char* backgroundUri, const char* foregroundUri, const char* secondaryUri)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -64,21 +64,21 @@ void SetStarStyle(NodeHandle node,
     }
 }
 
-void ResetStars(NodeHandle node)
+void ResetStars(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RatingModelNG::SetStars(frameNode, STARS_DEFAULT);
 }
 
-void ResetRatingStepSize(NodeHandle node)
+void ResetRatingStepSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RatingModelNG::SetStepSize(frameNode, STEPS_DEFAULT);
 }
 
-void ResetStarStyle(NodeHandle node)
+void ResetStarStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -87,10 +87,12 @@ void ResetStarStyle(NodeHandle node)
     RatingModelNG::SetSecondarySrc(frameNode, "", true);
 }
 
-ArkUIRatingModifierAPI GetRatingModifier()
+namespace NodeModifier {
+const ArkUIRatingModifier* GetRatingModifier()
 {
-    static const ArkUIRatingModifierAPI modifier = {SetStars, SetRatingStepSize, SetStarStyle,
+    static const ArkUIRatingModifier modifier = {SetStars, SetRatingStepSize, SetStarStyle,
         ResetStars, ResetRatingStepSize, ResetStarStyle};
-    return modifier;
+    return &modifier;
+}
 }
 }

@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 const int32_t DEFAULT_VISIBILITY = 0;
 const int32_t DEFAULT_FORM_DIM = 1;
 const bool DEFAULT_ALLOW_UPDATE = true;
-void SetFormVisibility(NodeHandle node, int32_t visible)
+void SetFormVisibility(ArkUINodeHandle node, ArkUI_Int32 visible)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -33,21 +33,21 @@ void SetFormVisibility(NodeHandle node, int32_t visible)
     FormModelNG::SetVisibility(frameNode, visibility);
 }
 
-void AllowUpdate(NodeHandle node, bool value)
+void AllowUpdate(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     FormModelNG::AllowUpdate(frameNode, value);
 }
 
-void SetDimension(NodeHandle node, int32_t dimension)
+void SetDimension(ArkUINodeHandle node, ArkUI_Int32 dimension)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     FormModelNG::SetDimension(frameNode, dimension);
 }
 
-void SetModuleName(NodeHandle node, const char* value)
+void SetModuleName(ArkUINodeHandle node, const char* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -55,7 +55,8 @@ void SetModuleName(NodeHandle node, const char* value)
     FormModelNG::SetModuleName(frameNode, moduleName);
 }
 
-void SetFormSize(NodeHandle node, double widthValue, int32_t widthUnit, double heightValue, int32_t heightUnit)
+void SetFormSize(ArkUINodeHandle node, ArkUI_Float32 widthValue, ArkUI_Int32 widthUnit,
+    ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -64,7 +65,7 @@ void SetFormSize(NodeHandle node, double widthValue, int32_t widthUnit, double h
         Dimension(heightValue, static_cast<OHOS::Ace::DimensionUnit>(heightUnit)));
 }
 
-void ResetFormVisibility(NodeHandle node)
+void ResetFormVisibility(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -72,23 +73,23 @@ void ResetFormVisibility(NodeHandle node)
     FormModelNG::SetVisibility(frameNode, visibility);
 }
 
-void DisallowUpdate(NodeHandle node)
+void DisallowUpdate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     FormModelNG::AllowUpdate(frameNode, DEFAULT_ALLOW_UPDATE);
 }
 
-void ResetDimension(NodeHandle node)
+void ResetDimension(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     FormModelNG::SetDimension(frameNode, DEFAULT_FORM_DIM);
 }
 
-void ResetModuleName(NodeHandle node) {}
+void ResetModuleName(ArkUINodeHandle node) {}
 
-void ResetFormSize(NodeHandle node)
+void ResetFormSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -97,12 +98,14 @@ void ResetFormSize(NodeHandle node)
     FormModelNG::SetSize(frameNode, width, height);
 }
 
-ArkUIFormComponentModifierAPI GetFormComponentModifier()
+namespace NodeModifier {
+const ArkUIFormComponentModifier* GetFormComponentModifier()
 {
-    static const ArkUIFormComponentModifierAPI modifier = { SetFormVisibility, AllowUpdate, SetDimension,
+    static const ArkUIFormComponentModifier modifier = { SetFormVisibility, AllowUpdate, SetDimension,
         SetModuleName, SetFormSize, ResetFormVisibility, DisallowUpdate, ResetDimension, ResetModuleName,
         ResetFormSize };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

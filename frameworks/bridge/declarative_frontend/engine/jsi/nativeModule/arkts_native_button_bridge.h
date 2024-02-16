@@ -48,11 +48,12 @@ public:
 
 private:
     static void PushValuesVector(const std::optional<int32_t>& value, std::vector<int32_t>& valuesVector);
-    static void PushDimensionVector(const std::optional<Dimension>& valueDimen, std::vector<double>& dimensions);
+    static void PushDimensionVector(const std::optional<Dimension>& valueDimen, std::vector<ArkUI_Float32>& dimensions);
     static void PushButtonDimension(
-        ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<double>& fontSizesVector, int32_t argIndex);
+        ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& fontSizesVector,
+        int32_t argIndex);
     static void PutButtonDimensionParameters(
-        ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<double>& fontSizes);
+        ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& fontSizes);
     static void PutButtonStringParameters(
         ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<const char*>& stringParameters);
     static void PutButtonValuesParameters(

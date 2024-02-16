@@ -29,9 +29,11 @@ void Rebuild(int32_t nodeId)
     pattern->RemakeNode();
 }
 
-ArkUINodeContainerModifierAPI GetNodeContainerModifier()
+namespace NodeModifier {
+const ArkUINodeContainerModifier* GetNodeContainerModifier()
 {
-    static const ArkUINodeContainerModifierAPI modifier = { Rebuild };
-    return modifier;
+    static const ArkUINodeContainerModifier modifier = { Rebuild };
+    return &modifier;
+}
 }
 }

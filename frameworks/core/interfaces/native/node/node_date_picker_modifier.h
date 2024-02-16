@@ -16,8 +16,7 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_DATE_PICKER_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_DATE_PICKER_MODIFIER_H
 
-#include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIDatePickerModifier* GetDatePickerModifier();

@@ -40,18 +40,18 @@ void LinearSplitModelImpl::Create(NG::SplitType splitType)
     }
 }
 
-void LinearSplitModelImpl::SetResizeable(NG::SplitType splitType, bool resizeable)
+void LinearSplitModelImpl::SetResizable(NG::SplitType splitType, bool resizable)
 {
     if (splitType == NG::SplitType::ROW_SPLIT) {
         auto rowSplit = AceType::DynamicCast<RowSplitComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (rowSplit) {
-            rowSplit->SetResizeable(resizeable);
+            rowSplit->SetResizable(resizable);
         }
     } else if (splitType == NG::SplitType::COLUMN_SPLIT) {
         auto columnSplit =
             AceType::DynamicCast<ColumnSplitComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (columnSplit) {
-            columnSplit->SetResizeable(resizeable);
+            columnSplit->SetResizable(resizable);
         }
     }
 }

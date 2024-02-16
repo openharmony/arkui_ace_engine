@@ -21,7 +21,7 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-void SetShapeViewPort(NodeHandle node, double* dimValues, int32_t* dimUnits)
+void SetShapeViewPort(ArkUINodeHandle node, const ArkUI_Float32* dimValues, const ArkUI_Int32* dimUnits)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -32,7 +32,7 @@ void SetShapeViewPort(NodeHandle node, double* dimValues, int32_t* dimUnits)
     ShapeModelNG::SetViewPort(frameNode, dimLeft, dimTop, dimWidth, dimHeight);
 }
 
-void ResetShapeViewPort(NodeHandle node)
+void ResetShapeViewPort(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -43,28 +43,30 @@ void ResetShapeViewPort(NodeHandle node)
     ShapeModelNG::SetViewPort(frameNode, dimLeft, dimTop, dimWidth, dimHeight);
 }
 
-void SetShapeMesh(NodeHandle node, const double* mesh, size_t arrayItemCount, int32_t column, int32_t row)
+void SetShapeMesh(ArkUINodeHandle node, const ArkUI_Float32* mesh, ArkUI_Uint32 arrayItemCount,
+    ArkUI_Int32 column, ArkUI_Int32 row)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::vector<double> meshVaules(mesh, mesh + arrayItemCount);
-    ShapeModelNG::SetBitmapMesh(frameNode, meshVaules, column, row);
+    std::vector<double> meshValues(mesh, mesh + arrayItemCount);
+    ShapeModelNG::SetBitmapMesh(frameNode, meshValues, column, row);
 }
 
-void ResetShapeMesh(NodeHandle node)
+void ResetShapeMesh(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::vector<double> meshVaules;
+    std::vector<double> meshValues;
     int32_t column = 0;
     int32_t row = 0;
-    ShapeModelNG::SetBitmapMesh(frameNode, meshVaules, column, row);
+    ShapeModelNG::SetBitmapMesh(frameNode, meshValues, column, row);
 }
 
-ArkUIShapeModifierAPI GetShapeModifier()
+namespace NodeModifier {
+const ArkUIShapeModifier* GetShapeModifier()
 {
-    static const ArkUIShapeModifierAPI modifier = { SetShapeViewPort, ResetShapeViewPort, SetShapeMesh,
-        ResetShapeMesh };
-    return modifier;
+    static const ArkUIShapeModifier modifier = { SetShapeViewPort, ResetShapeViewPort, SetShapeMesh, ResetShapeMesh };
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

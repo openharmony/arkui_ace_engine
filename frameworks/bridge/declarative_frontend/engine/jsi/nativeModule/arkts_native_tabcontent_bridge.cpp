@@ -14,8 +14,6 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabcontent_bridge.h"
 
-#include "core/interfaces/native/node/api.h"
-
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue TabContentBridge::SetTabContentWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {

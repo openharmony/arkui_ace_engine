@@ -18,7 +18,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t NUM_0 = 0;
@@ -30,12 +29,12 @@ ArkUINativeModuleValue VideoBridge::SetAutoPlay(ArkUIRuntimeCallInfo* runtimeCal
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsBoolean()) {
         uint32_t autoPlay = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
-        GetArkUIInternalNodeAPI()->GetVideoModifier().SetAutoPlay(nativeNode, autoPlay);
+        GetArkUINodeModifiers()->getVideoModifier()->setAutoPlay(nativeNode, autoPlay);
     } else {
-        GetArkUIInternalNodeAPI()->GetVideoModifier().ResetAutoPlay(nativeNode);
+        GetArkUINodeModifiers()->getVideoModifier()->resetAutoPlay(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -45,8 +44,8 @@ ArkUINativeModuleValue VideoBridge::ResetAutoPlay(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetVideoModifier().ResetAutoPlay(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getVideoModifier()->resetAutoPlay(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -56,12 +55,12 @@ ArkUINativeModuleValue VideoBridge::SetControls(ArkUIRuntimeCallInfo* runtimeCal
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsBoolean()) {
         uint32_t controlsValue = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
-        GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoControls(nativeNode, controlsValue);
+        GetArkUINodeModifiers()->getVideoModifier()->setVideoControls(nativeNode, controlsValue);
     } else {
-        GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoControls(nativeNode);
+        GetArkUINodeModifiers()->getVideoModifier()->resetVideoControls(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -71,8 +70,8 @@ ArkUINativeModuleValue VideoBridge::ResetControls(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoControls(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getVideoModifier()->resetVideoControls(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -82,12 +81,12 @@ ArkUINativeModuleValue VideoBridge::SetObjectFit(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsInt()) {
         int32_t imageFit = secondArg->Int32Value(vm);
-        GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoObjectFit(nativeNode, imageFit);
+        GetArkUINodeModifiers()->getVideoModifier()->setVideoObjectFit(nativeNode, imageFit);
     } else {
-        GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoObjectFit(nativeNode);
+        GetArkUINodeModifiers()->getVideoModifier()->resetVideoObjectFit(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -97,8 +96,8 @@ ArkUINativeModuleValue VideoBridge::ResetObjectFit(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoObjectFit(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getVideoModifier()->resetVideoObjectFit(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -108,12 +107,12 @@ ArkUINativeModuleValue VideoBridge::SetLoop(ArkUIRuntimeCallInfo* runtimeCallInf
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsBoolean()) {
         uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
-        GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoLoop(nativeNode, value);
+        GetArkUINodeModifiers()->getVideoModifier()->setVideoLoop(nativeNode, value);
     } else {
-        GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoLoop(nativeNode);
+        GetArkUINodeModifiers()->getVideoModifier()->resetVideoLoop(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -123,8 +122,8 @@ ArkUINativeModuleValue VideoBridge::ResetLoop(ArkUIRuntimeCallInfo* runtimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoLoop(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getVideoModifier()->resetVideoLoop(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -134,12 +133,12 @@ ArkUINativeModuleValue VideoBridge::SetMuted(ArkUIRuntimeCallInfo* runtimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsBoolean()) {
         uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
-        GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoMuted(nativeNode, value);
+        GetArkUINodeModifiers()->getVideoModifier()->setVideoMuted(nativeNode, value);
     } else {
-        GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoMuted(nativeNode);
+        GetArkUINodeModifiers()->getVideoModifier()->resetVideoMuted(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -149,8 +148,8 @@ ArkUINativeModuleValue VideoBridge::ResetMuted(ArkUIRuntimeCallInfo* runtimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoMuted(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getVideoModifier()->resetVideoMuted(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -160,12 +159,12 @@ ArkUINativeModuleValue VideoBridge::SetOpacity(ArkUIRuntimeCallInfo* runtimeCall
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> opacityArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     double opacity;
     if (!ArkTSUtils::ParseJsDouble(vm, opacityArg, opacity)) {
-        GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoOpacity(nativeNode);
+        GetArkUINodeModifiers()->getVideoModifier()->resetVideoOpacity(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoOpacity(nativeNode, opacity);
+        GetArkUINodeModifiers()->getVideoModifier()->setVideoOpacity(nativeNode, static_cast<ArkUI_Float32>(opacity));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -175,8 +174,8 @@ ArkUINativeModuleValue VideoBridge::ResetOpacity(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoOpacity(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getVideoModifier()->resetVideoOpacity(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

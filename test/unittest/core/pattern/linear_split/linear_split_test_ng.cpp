@@ -79,7 +79,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitCreatorTest001, TestSize.Level1)
      */
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
-    model.SetResizeable(SplitType::COLUMN_SPLIT, true);
+    model.SetResizable(SplitType::COLUMN_SPLIT, true);
 
     /**
      * @tc.steps: step2. Get split frameNode.
@@ -94,7 +94,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitCreatorTest001, TestSize.Level1)
      */
     auto renderProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
     EXPECT_NE(renderProperty, nullptr);
-    EXPECT_EQ(renderProperty->GetResizeableValue(), true);
+    EXPECT_EQ(renderProperty->GetResizableValue(), true);
 }
 
 /**
@@ -109,7 +109,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest001, TestSize.Level1)
      */
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
-    model.SetResizeable(SplitType::COLUMN_SPLIT, true);
+    model.SetResizable(SplitType::COLUMN_SPLIT, true);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -169,7 +169,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest002, TestSize.Level1)
      */
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
-    model.SetResizeable(SplitType::COLUMN_SPLIT, true);
+    model.SetResizable(SplitType::COLUMN_SPLIT, true);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
@@ -185,7 +185,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest002, TestSize.Level1)
      * @tc.expected: OnModifyDone success and result correct.
      */
     linearSPlitPattern->OnModifyDone();
-    EXPECT_TRUE(linearSPlitPattern->resizeable_);
+    EXPECT_TRUE(linearSPlitPattern->resizable_);
     EXPECT_NE(linearSPlitPattern->panEvent_, nullptr);
     EXPECT_NE(linearSPlitPattern->mouseEvent_, nullptr);
 }
@@ -202,7 +202,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest003, TestSize.Level1)
      */
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
-    model.SetResizeable(SplitType::COLUMN_SPLIT, true);
+    model.SetResizable(SplitType::COLUMN_SPLIT, true);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -224,7 +224,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest003, TestSize.Level1)
 }
 /**
  * @tc.name: LinearSplitPatternTest004
- * @tc.desc: Test linerSplit pattern HandlePanEvent  when resizeable is false.
+ * @tc.desc: Test linerSplit pattern HandlePanEvent  when resizable is false.
  * @tc.type: FUNC
  */
 HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest004, TestSize.Level1)
@@ -237,7 +237,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest004, TestSize.Level1)
          */
         LinearSplitModelNG model;
         model.Create(SplitType::COLUMN_SPLIT);
-        model.SetResizeable(SplitType::COLUMN_SPLIT, false);
+        model.SetResizable(SplitType::COLUMN_SPLIT, false);
 
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         ASSERT_NE(frameNode, nullptr);
@@ -268,7 +268,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest004, TestSize.Level1)
 }
 /**
  * @tc.name: LinearSplitPatternTest005
- * @tc.desc: Test linerSplit pattern HandlePanEvent  when resizeable is true.
+ * @tc.desc: Test linerSplit pattern HandlePanEvent  when resizable is true.
  * @tc.type: FUNC
  */
 HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest005, TestSize.Level1)
@@ -278,7 +278,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest005, TestSize.Level1)
      */
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
-    model.SetResizeable(SplitType::COLUMN_SPLIT, true);
+    model.SetResizable(SplitType::COLUMN_SPLIT, true);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -317,7 +317,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest006, TestSize.Level1)
          */
         LinearSplitModelNG model;
         model.Create(splitType[turn]);
-        model.SetResizeable(splitType[turn], true);
+        model.SetResizable(splitType[turn], true);
 
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         ASSERT_NE(frameNode, nullptr);
@@ -369,7 +369,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest007, TestSize.Level1)
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
-    model.SetResizeable(SplitType::COLUMN_SPLIT, true);
+    model.SetResizable(SplitType::COLUMN_SPLIT, true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     /**
@@ -563,7 +563,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest008, TestSize.Level1)
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
     LinearSplitModelNG model;
     model.Create(SplitType::ROW_SPLIT);
-    model.SetResizeable(SplitType::ROW_SPLIT, true);
+    model.SetResizable(SplitType::ROW_SPLIT, true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     /**
@@ -735,7 +735,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest008, TestSize.Level1)
 }
 /**
  * @tc.name: LinearSplitPatternTest009
- * @tc.desc: Test linerSplit pattern HandleMouseEvent  when resizeable is true.
+ * @tc.desc: Test linerSplit pattern HandleMouseEvent  when resizable is true.
  * @tc.type: FUNC
  */
 HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest009, TestSize.Level1)
@@ -746,7 +746,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest009, TestSize.Level1)
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
-    model.SetResizeable(SplitType::COLUMN_SPLIT, true);
+    model.SetResizable(SplitType::COLUMN_SPLIT, true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     /**
@@ -788,7 +788,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest010, TestSize.Level1)
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_9);
     LinearSplitModelNG model;
     model.Create(SplitType::ROW_SPLIT);
-    model.SetResizeable(SplitType::ROW_SPLIT, true);
+    model.SetResizable(SplitType::ROW_SPLIT, true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     /**
@@ -968,7 +968,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest011, TestSize.Level1)
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_9);
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
-    model.SetResizeable(SplitType::COLUMN_SPLIT, true);
+    model.SetResizable(SplitType::COLUMN_SPLIT, true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     /**
@@ -1159,7 +1159,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest012, TestSize.Level1)
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_9);
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
-    model.SetResizeable(SplitType::COLUMN_SPLIT, true);
+    model.SetResizable(SplitType::COLUMN_SPLIT, true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     

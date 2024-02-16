@@ -14,13 +14,14 @@
  */
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_COLUMN_SPLIT_BRIDGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_COLUMN_SPLIT_BRIDGE_H
+
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
 namespace OHOS::Ace::NG {
 class ColumnSplitBridge {
 public:
-    static ArkUINativeModuleValue SetResizeable(ArkUIRuntimeCallInfo *runtimeCallInfo);
-    static ArkUINativeModuleValue ResetResizeable(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetResizable(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetResizable(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetDivider(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetDivider(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };

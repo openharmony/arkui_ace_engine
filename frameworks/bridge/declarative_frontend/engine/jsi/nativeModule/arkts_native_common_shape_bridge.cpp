@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_shape_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -35,11 +33,11 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeDashArray(ArkUIRuntimeCallInf
     if (!secondArg->IsArray(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto array = Local<panda::ArrayRef>(secondArg);
     auto length = array->Length(vm);
 
-    std::vector<double> dashArray;
+    std::vector<ArkUI_Float32> dashArray;
     std::vector<int32_t> dimUnits;
     for (uint32_t index = 0; index < length; index++) {
         Local<JSValueRef> value = panda::ArrayRef::GetValueAt(vm, array, index);
@@ -60,7 +58,7 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeDashArray(ArkUIRuntimeCallInf
             dimUnits.emplace_back(dimUnits[i]);
         }
     }
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetStrokeDashArray(nativeNode, dashArray.data(),
+    GetArkUINodeModifiers()->getCommonShapeModifier()->setStrokeDashArray(nativeNode, dashArray.data(),
         dimUnits.data(), dashArray.size());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -70,8 +68,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetStrokeDashArray(ArkUIRuntimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeDashArray(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeDashArray(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -81,12 +79,12 @@ ArkUINativeModuleValue CommonShapeBridge::SetStroke(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStroke(nativeNode);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->resetStroke(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetStroke(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getCommonShapeModifier()->setStroke(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -96,8 +94,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetStroke(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStroke(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetStroke(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -107,16 +105,16 @@ ArkUINativeModuleValue CommonShapeBridge::SetFill(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString() && secondArg->ToString(vm)->ToString() == "none") {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetFill(nativeNode, TRANSPARENT_COLOR);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->setFill(nativeNode, TRANSPARENT_COLOR);
         return panda::JSValueRef::Undefined(vm);
     }
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetFill(nativeNode);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->resetFill(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetFill(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getCommonShapeModifier()->setFill(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -126,8 +124,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetFill(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetFill(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetFill(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -137,13 +135,13 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeDashOffset(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension strokeDashOffset;
     std::string calcStr;
     if (secondArg->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, strokeDashOffset)) {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeDashOffset(nativeNode);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeDashOffset(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetStrokeDashOffset(
+        GetArkUINodeModifiers()->getCommonShapeModifier()->setStrokeDashOffset(
             nativeNode, strokeDashOffset.Value(), static_cast<int>(strokeDashOffset.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -154,8 +152,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetStrokeDashOffset(ArkUIRuntimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeDashOffset(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeDashOffset(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -165,12 +163,12 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeLineCap(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeLineCap(nativeNode);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeLineCap(nativeNode);
     } else {
         int strokeLineCap = secondArg->ToNumber(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetStrokeLineCap(nativeNode, strokeLineCap);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->setStrokeLineCap(nativeNode, strokeLineCap);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -180,8 +178,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetStrokeLineCap(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeLineCap(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeLineCap(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -191,12 +189,12 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeLineJoin(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeLineJoin(nativeNode);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeLineJoin(nativeNode);
     } else {
         int strokeLineJoin = secondArg->ToNumber(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetStrokeLineJoin(nativeNode, strokeLineJoin);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->setStrokeLineJoin(nativeNode, strokeLineJoin);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -206,8 +204,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetStrokeLineJoin(ArkUIRuntimeCallIn
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeLineJoin(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeLineJoin(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -217,12 +215,12 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeMiterLimit(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double strokeMiterLimit = STROKE_MITERLIMIT_DEFAULT;
     if (secondArg->IsUndefined() || !ArkTSUtils::ParseJsDouble(vm, secondArg, strokeMiterLimit)) {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeMiterLimit(nativeNode);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeMiterLimit(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetStrokeMiterLimit(nativeNode, strokeMiterLimit);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->setStrokeMiterLimit(nativeNode, strokeMiterLimit);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -232,8 +230,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetStrokeMiterLimit(ArkUIRuntimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeMiterLimit(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeMiterLimit(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -243,13 +241,13 @@ ArkUINativeModuleValue CommonShapeBridge::SetFillOpacity(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetFillOpacity(nativeNode);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->resetFillOpacity(nativeNode);
     } else {
         double opacity =  DEFAULT_OPACITY;
         if (!ArkTSUtils::ParseJsDouble(vm, secondArg, opacity)) {
-            GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetFillOpacity(nativeNode);
+            GetArkUINodeModifiers()->getCommonShapeModifier()->resetFillOpacity(nativeNode);
         } else {
             if (opacity > DEFAULT_OPACITY) {
                 opacity = DEFAULT_OPACITY;
@@ -257,7 +255,7 @@ ArkUINativeModuleValue CommonShapeBridge::SetFillOpacity(ArkUIRuntimeCallInfo* r
             if (opacity < MIN_OPACITY) {
                 opacity = MIN_OPACITY;
             }
-            GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetFillOpacity(nativeNode, opacity);
+            GetArkUINodeModifiers()->getCommonShapeModifier()->setFillOpacity(nativeNode, opacity);
         }
     }
     return panda::JSValueRef::Undefined(vm);
@@ -268,8 +266,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetFillOpacity(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetFillOpacity(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetFillOpacity(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -279,13 +277,13 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeOpacity(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeOpacity(nativeNode);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeOpacity(nativeNode);
     } else {
         double opacity =  DEFAULT_OPACITY;
         if (!ArkTSUtils::ParseJsDouble(vm, secondArg, opacity)) {
-            GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeOpacity(nativeNode);
+            GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeOpacity(nativeNode);
         } else {
             if (opacity > DEFAULT_OPACITY) {
                 opacity = DEFAULT_OPACITY;
@@ -293,7 +291,7 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeOpacity(ArkUIRuntimeCallInfo*
             if (opacity < MIN_OPACITY) {
                 opacity = MIN_OPACITY;
             }
-            GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetStrokeOpacity(nativeNode, opacity);
+            GetArkUINodeModifiers()->getCommonShapeModifier()->setStrokeOpacity(nativeNode, opacity);
         }
     }
     return panda::JSValueRef::Undefined(vm);
@@ -304,8 +302,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetStrokeOpacity(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeOpacity(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeOpacity(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -315,7 +313,7 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeWidth(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension strokeWidth = CalcDimension(1.0, DimensionUnit::VP);
     if (secondArg->IsString()) {
         const std::string& value = secondArg->ToString(vm)->ToString();
@@ -326,7 +324,7 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeWidth(ArkUIRuntimeCallInfo* r
     if (strokeWidth.IsNegative()) {
         strokeWidth = CalcDimension(1.0, DimensionUnit::VP);
     }
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetStrokeWidth(
+    GetArkUINodeModifiers()->getCommonShapeModifier()->setStrokeWidth(
         nativeNode, strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -336,8 +334,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetStrokeWidth(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeWidth(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetStrokeWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -347,12 +345,12 @@ ArkUINativeModuleValue CommonShapeBridge::SetAntiAlias(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetAntiAlias(nativeNode);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->resetAntiAlias(nativeNode);
     } else {
         bool antiAlias = secondArg->ToBoolean(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetAntiAlias(nativeNode, antiAlias);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->setAntiAlias(nativeNode, antiAlias);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -362,8 +360,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetAntiAlias(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetAntiAlias(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetAntiAlias(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -372,17 +370,17 @@ ArkUINativeModuleValue CommonShapeBridge::SetWidth(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CalcDimension width;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, widthArg, width)) {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetShapeWidth(nativeNode);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->resetShapeWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     if (LessNotEqual(width.Value(), 0.0)) {
         width.SetValue(0.0);
     }
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetShapeWidth(
+    GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeWidth(
         nativeNode, width.Value(), static_cast<int32_t>(width.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -393,8 +391,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetWidth(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetShapeWidth(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetShapeWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -403,17 +401,17 @@ ArkUINativeModuleValue CommonShapeBridge::SetHeight(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CalcDimension height;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, heightArg, height)) {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetShapeHeight(nativeNode);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->resetShapeHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     if (LessNotEqual(height.Value(), 0.0)) {
         height.SetValue(0.0);
     }
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetShapeHeight(
+    GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeHeight(
         nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -424,8 +422,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetHeight(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetShapeHeight(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetShapeHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -434,19 +432,19 @@ ArkUINativeModuleValue CommonShapeBridge::SetForegroundColor(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ForegroundColorStrategy strategy;
     if (ArkTSUtils::ParseJsColorStrategy(vm, colorArg, strategy)) {
         auto castedStrategy = static_cast<uint32_t>(strategy);
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetShapeForegroundColor(nativeNode, false, castedStrategy);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeForegroundColor(nativeNode, false, castedStrategy);
         return panda::JSValueRef::Undefined(vm);
     }
     Color foregroundColor;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor)) {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetShapeForegroundColor(nativeNode);
+        GetArkUINodeModifiers()->getCommonShapeModifier()->resetShapeForegroundColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetShapeForegroundColor(
+        GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeForegroundColor(
             nativeNode, true, foregroundColor.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
@@ -457,8 +455,8 @@ ArkUINativeModuleValue CommonShapeBridge::ResetForegroundColor(ArkUIRuntimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetShapeForegroundColor(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonShapeModifier()->resetShapeForegroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
