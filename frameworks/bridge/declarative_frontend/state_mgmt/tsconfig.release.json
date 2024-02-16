@@ -35,6 +35,7 @@
     "src/lib/common/observed_property_abstract.ts",
     "src/lib/common/custom_dialog_controller_native.d.ts",
     "src/lib/common/custom_dialog_controller.ts",
+    "src/lib/common/utils.ts",
 
     // ark runtime debug tools
     "src/lib/common/ark_tools.d.ts",

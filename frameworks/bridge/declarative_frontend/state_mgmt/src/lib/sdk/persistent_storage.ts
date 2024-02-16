@@ -329,7 +329,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   // does everything except writing prop to disk
   private persistProp1<T>(propName: string, defaultValue: T): boolean {
     stateMgmtConsole.debug(`PersistentStorage: persistProp1 ${propName} ${defaultValue}`);
-    if (defaultValue == null || defaultValue == undefined) {
+    if (defaultValue == null && !Utils.isApiVersionEQAbove(12)) {
       stateMgmtConsole.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
       return false;
     }
@@ -344,14 +344,13 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
       stateMgmtConsole.debug(`PersistentStorage: persistProp ${propName} in AppStorage, using that`);
       this.links_.set(propName, link);
     } else {
-      let newValue: T = this.readFromPersistentStorage(propName);
       let returnValue: T;
-      if (newValue == undefined || newValue == null) {
+      if (!PersistentStorage.storage_.has(propName)) {
         stateMgmtConsole.debug(`PersistentStorage: no entry for ${propName}, will initialize with default value`);
         returnValue = defaultValue;
       }
       else {
-        returnValue = newValue;
+        returnValue = this.readFromPersistentStorage(propName);
       }
       link = AppStorage.setAndLink(propName, returnValue, this);
       this.links_.set(propName, link);
