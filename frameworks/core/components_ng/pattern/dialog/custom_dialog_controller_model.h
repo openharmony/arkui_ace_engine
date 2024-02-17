@@ -31,13 +31,14 @@ public:
     static CustomDialogControllerModel* GetInstance();
     virtual ~CustomDialogControllerModel() = default;
 
-    virtual void SetOpenDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
-        bool& pending, bool& isShown, std::function<void()>&& cancelTask, std::function<void()>&& buildFunc,
+    virtual void SetOpenDialog(DialogProperties& dialogProperties, const WeakPtr<AceType>& controller,
+        std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
+        std::function<void()>&& buildFunc, RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
+        std::list<DialogOperation>& dialogOperation) = 0;
+    virtual void SetCloseDialog(DialogProperties& dialogProperties, const WeakPtr<AceType>& controller,
+        std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
         RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
         std::list<DialogOperation>& dialogOperation) = 0;
-    virtual void SetCloseDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
-        bool& pending, bool& isShown, std::function<void()>&& cancelTask, RefPtr<AceType>& dialogComponent,
-        RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation) = 0;
 
 private:
     static std::unique_ptr<CustomDialogControllerModel> instance_;
