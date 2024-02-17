@@ -585,7 +585,7 @@ bool ListPattern::IsAtBottom() const
 
 bool ListPattern::OutBoundaryCallback()
 {
-    bool outBoundary = IsAtTop() || IsAtBottom();
+    bool outBoundary = IsOutOfBoundary();
     if (!dragFromSpring_ && outBoundary && chainAnimation_) {
         chainAnimation_->SetOverDrag(false);
         auto delta = chainAnimation_->SetControlIndex(IsAtTop() ? 0 : maxListItemIndex_);
