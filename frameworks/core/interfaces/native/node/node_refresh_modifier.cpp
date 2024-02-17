@@ -25,8 +25,30 @@
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace::NG {
+namespace {
 
+void SetRefreshing(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetRefreshing(frameNode, static_cast<bool>(value));
+}
+
+ArkUI_Bool GetRefreshing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Bool>(RefreshModelNG::GetRefreshing(frameNode));
+}
+
+}
 namespace NodeModifier {
+
+const ArkUIRefreshModifier* GetRefreshModifier()
+{
+    static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing };
+    return &modifier;
+}
 
 void SetRefreshOnStateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
 {

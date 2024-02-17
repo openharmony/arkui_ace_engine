@@ -1131,6 +1131,12 @@ public:
     {
         ViewAbstract::SetKeyboardShortcut(frameNode, value, keys, std::move(onKeyboardShortcutAction));
     }
+
+    static bool GetAccessibilityGroup(FrameNode* frameNode);
+    static std::string GetAccessibilityText(FrameNode* frameNode);
+    static std::string GetAccessibilityDescription(FrameNode* frameNode);
+    static std::string GetAccessibilityImportance(FrameNode* frameNode);
+
 private:
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);

@@ -851,6 +851,11 @@ void ScrollablePattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     nestedScroll_ = nestedOpt;
 }
 
+NestedScrollOptions ScrollablePattern::GetNestedScroll()
+{
+    return nestedScroll_;
+}
+
 void ScrollablePattern::SetFriction(double friction)
 {
     if (LessOrEqual(friction, 0.0)) {

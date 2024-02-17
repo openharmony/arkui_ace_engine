@@ -18,10 +18,12 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
+const int32_t ERROR_UINT_CODE = -1;
 namespace {
 constexpr uint32_t RESPONSE_REGION_STEP = 4;
 constexpr uint32_t OFFSET_0 = 0;
@@ -91,6 +93,20 @@ void ResetToggleSwitchPointColor(ArkUINodeHandle node)
         color = theme->GetPointColor();
     }
     ToggleModelNG::SetSwitchPointColor(frameNode, Color(color));
+}
+
+ArkUI_Uint32 GetToggleSelectedColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return ToggleModelNG::GetSelectedColor(frameNode).GetValue();
+}
+
+ArkUI_Uint32 GetToggleSwitchPointColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return ToggleModelNG::GetSwitchPointColor(frameNode).GetValue();
 }
 
 void SetToggleHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
@@ -254,7 +270,9 @@ const ArkUIToggleModifier* GetToggleModifier()
         SetToggleBackgroundColor,
         ResetToggleBackgroundColor,
         SetToggleHoverEffect,
-        ResetToggleHoverEffect
+        ResetToggleHoverEffect,
+        GetToggleSelectedColor,
+        GetToggleSwitchPointColor,
     };
 
     return &modifier;

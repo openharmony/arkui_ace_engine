@@ -14,7 +14,9 @@
  */
 #include "core/interfaces/native/node/node_common_modifier.h"
 
+#include <cstddef>
 #include <cstdint>
+#include <string>
 
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
@@ -77,7 +79,13 @@ constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
 constexpr int32_t ORIGINAL_IMAGE_SIZE_AUTO = 0;
 constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
+
+const int32_t ERROR_INT_CODE = -1;
+
 constexpr int32_t BLUR_STYLE_NONE_INDEX = 7;
+
+std::string g_strValue;
+
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -122,6 +130,38 @@ Alignment ParseAlignment(int32_t align)
             break;
     }
     return alignment;
+}
+
+int32_t ParseAlignmentToIndex(Alignment align)
+{
+    if (align == Alignment::TOP_LEFT) {
+        return NUM_0;
+    }
+    if (align == Alignment::TOP_CENTER) {
+        return NUM_1;
+    }
+    if (align == Alignment::TOP_RIGHT) {
+        return NUM_2;
+    }
+    if (align == Alignment::CENTER_LEFT) {
+        return NUM_3;
+    }
+    if (align == Alignment::CENTER) {
+        return NUM_4;
+    }
+    if (align == Alignment::CENTER_RIGHT) {
+        return NUM_5;
+    }
+    if (align == Alignment::BOTTOM_LEFT) {
+        return NUM_6;
+    }
+    if (align == Alignment::BOTTOM_CENTER) {
+        return NUM_7;
+    }
+    if (align == Alignment::BOTTOM_RIGHT) {
+        return NUM_8;
+    }
+    return ERROR_INT_CODE;
 }
 
 /**
@@ -3595,6 +3635,92 @@ void ResetOutline(ArkUINodeHandle node)
     ViewAbstract::SetOuterBorderRadius(frameNode, borderWidth);
     ViewAbstract::SetOuterBorderStyle(frameNode, BorderStyle::SOLID);
 }
+ArkUI_Bool GetFocusable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Bool>(ViewAbstract::GetFocusable(frameNode));
+}
+
+ArkUI_Bool GetDefaultFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Bool>(ViewAbstract::GetDefaultFocus(frameNode));
+}
+
+ArkUI_Int32 GetResponseRegion(ArkUINodeHandle node, ArkUI_Float32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    std::vector<DimensionRect> responseRegions = ViewAbstract::GetResponseRegion(frameNode);
+    //set int default
+    int index = 0;
+    for (auto& element : responseRegions) {
+        values[index++] = element.GetWidth().Value();
+        values[index++] = element.GetHeight().Value();
+        values[index++] = element.GetOffset().GetX().Value();
+        values[index++] = element.GetOffset().GetX().Value();
+    }
+    //values size
+    return index;
+}
+
+void GetOverlay(ArkUINodeHandle node, ArkUIOverlayOptions *options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OverlayOptions overlayOptions = ViewAbstract::GetOverlay(frameNode);
+    options->align = ParseAlignmentToIndex(overlayOptions.align);
+    options->x = overlayOptions.x.Value();
+    options->y = overlayOptions.y.Value();
+    options->content = overlayOptions.content.c_str();
+}
+
+ArkUI_Bool GetAccessibilityGroup(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Bool>(ViewAbstractModelNG::GetAccessibilityGroup(frameNode));
+}
+
+ArkUI_CharPtr GetAccessibilityText(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = ViewAbstractModelNG::GetAccessibilityText(frameNode);
+    return g_strValue.c_str();
+}
+
+ArkUI_CharPtr GetAccessibilityDescription(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = ViewAbstractModelNG::GetAccessibilityDescription(frameNode);
+    return g_strValue.c_str();
+}
+
+ArkUI_CharPtr GetAccessibilityLevel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = ViewAbstractModelNG::GetAccessibilityImportance(frameNode);
+    return g_strValue.c_str();
+}
+
+void SetNeedFocus(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetNeedFocus(frameNode, value);
+}
+
+ArkUI_Bool GetNeedFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Bool>(ViewAbstract::GetNeedFocus(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -3642,6 +3768,9 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize, ResetConstraintSize,
         SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius,
         SetOutlineWidth, ResetOutlineWidth, SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline,
+        GetFocusable, GetDefaultFocus, GetResponseRegion,
+        GetOverlay, GetAccessibilityGroup, GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel,
+        SetNeedFocus, GetNeedFocus
     };
 
     return &modifier;

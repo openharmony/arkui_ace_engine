@@ -232,6 +232,7 @@ public:
     }
 
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
+    NestedScrollOptions GetNestedScroll();
     void GetParentNavigation();
     void GetParentModalSheet();
 

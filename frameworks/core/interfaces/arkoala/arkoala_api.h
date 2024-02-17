@@ -713,6 +713,20 @@ struct ArkUIAnimationOptionType {
     ArkUI_Float32 tempo;
 };
 
+struct ArkUITextFont {
+    ArkUI_Int32 fontWeight;
+    ArkUI_Float32 fontSize;
+    ArkUI_Int32 fontStyle;
+    ArkUI_CharPtr fontFamilies;
+};
+
+struct ArkUIOverlayOptions {
+    ArkUI_Int32 align;
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
+    ArkUI_CharPtr content;
+};
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -967,7 +981,6 @@ struct ArkUICommonModifier {
     void (*resetMonopolizeEvents)(ArkUINodeHandle node);
     void (*setConstraintSize)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units);
     void (*resetConstraintSize)(ArkUINodeHandle node);
-
     void (*setOutlineColor)(ArkUINodeHandle node, const ArkUI_Uint32* values, ArkUI_Int32 valuesSize);
     void (*resetOutlineColor)(ArkUINodeHandle node);
     void (*setOutlineRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
@@ -979,6 +992,16 @@ struct ArkUICommonModifier {
     void (*setOutline)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
         const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
     void (*resetOutline)(ArkUINodeHandle node);
+    ArkUI_Bool (*getFocusable)(ArkUINodeHandle node);
+    ArkUI_Bool (*getDefaultFocus)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getResponseRegion)(ArkUINodeHandle node, ArkUI_Float32* values);
+    void (*getOverlay)(ArkUINodeHandle node, ArkUIOverlayOptions* options);
+    ArkUI_Bool (*getAccessibilityGroup)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getAccessibilityText)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getAccessibilityDescription)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getAccessibilityLevel)(ArkUINodeHandle node);
+    void (*setNeedFocus)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Bool (*getNeedFocus)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -1105,6 +1128,15 @@ struct ArkUITextModifier {
     void (*setFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr weight);
     void (*setWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
     void (*resetWordBreak)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getFontFamily)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCopyOption)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getHeightAdaptivePolicy)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextMinFontSize)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextMaxFontSize)(ArkUINodeHandle node);
+    void (*getFont)(ArkUINodeHandle node, ArkUITextFont* font);
+    ArkUI_Float32 (*getFontSize)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getFontWeight)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getItalicFontStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -1459,6 +1491,9 @@ struct ArkUIScrollModifier {
     void (*resetScrollEdge)(ArkUINodeHandle node);
     void (*setScrollEnablePaging)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetScrollEnablePaging)(ArkUINodeHandle node);
+    void (*getScrollNestedScroll)(ArkUINodeHandle node, ArkUI_Int32* values);
+    void (*getScrollOffset)(ArkUINodeHandle node, ArkUI_Float32* values);
+    ArkUI_Int32 (*getScrollEdge)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemModifier {
@@ -1899,6 +1934,8 @@ struct ArkUIToggleModifier {
     void (*resetToggleBackgroundColor)(ArkUINodeHandle node);
     void (*setToggleHoverEffect)(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue);
     void (*resetToggleHoverEffect)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getToggleSelectedColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getToggleSwitchPointColor)(ArkUINodeHandle node);
 };
 
 struct ArkUINavigationModifier {
@@ -1969,7 +2006,8 @@ struct ArkUIBadgeModifier {
 };
 
 struct ArkUIRefreshModifier {
-    void (*setRefreshFriction)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setRefreshing)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Bool (*getRefreshing)(ArkUINodeHandle node);
 };
 
 struct ArkUIHyperlinkModifier {

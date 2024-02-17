@@ -402,4 +402,43 @@ void ScrollModelNG::SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& 
     eventHub->SetOnScrollEdge(std::move(event));
 }
 
+NestedScrollOptions ScrollModelNG::GetNestedScroll(FrameNode* frameNode)
+{
+    NestedScrollOptions defaultOptions;
+    CHECK_NULL_RETURN(frameNode, defaultOptions);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, defaultOptions);
+    return pattern->GetNestedScroll();
+}
+
+ScrollEdgeType ScrollModelNG::GetOnScrollEdge(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ScrollEdgeType::SCROLL_TOP);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    Axis axis = Axis::VERTICAL;
+    ACE_GET_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis, frameNode);
+    switch (axis) {
+        case Axis::VERTICAL:
+            if (pattern->IsAtTop()) {
+                return ScrollEdgeType::SCROLL_TOP;
+            }
+            if (pattern->IsAtBottom()) {
+                return ScrollEdgeType::SCROLL_BOTTOM;
+            }
+            break;
+        case Axis::HORIZONTAL:
+            if (pattern->IsAtTop()) {
+                return ScrollEdgeType::SCROLL_LEFT;
+            }
+            if (pattern->IsAtBottom()) {
+                return ScrollEdgeType::SCROLL_RIGHT;
+            }
+            break;
+        default:
+            break;
+    }
+    return ScrollEdgeType::SCROLL_NONE;
+}
+
+
 } // namespace OHOS::Ace::NG

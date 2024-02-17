@@ -502,4 +502,33 @@ void ViewAbstractModelNG::SetAccessibilityGroup(FrameNode* frameNode, bool acces
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SetAccessibilityGroup(accessible);
 }
+
+bool ViewAbstractModelNG::GetAccessibilityGroup(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    return accessibilityProperty->IsAccessibilityGroup();
+}
+
+std::string ViewAbstractModelNG::GetAccessibilityText(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    return accessibilityProperty->GetAccessibilityText();
+}
+
+std::string ViewAbstractModelNG::GetAccessibilityDescription(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    return accessibilityProperty->GetAccessibilityDescription();
+}
+
+std::string ViewAbstractModelNG::GetAccessibilityImportance(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    return accessibilityProperty->GetAccessibilityLevel();
+}
+
 } // namespace OHOS::Ace::NG

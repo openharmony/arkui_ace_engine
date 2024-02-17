@@ -46,11 +46,21 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeigh
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 
-FontWeight ConvertStrToFontWeight(ArkUI_CharPtr weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
+std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = {
+    { TextHeightAdaptivePolicy::MAX_LINES_FIRST, 0 },
+    { TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, 1 },
+    { TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST, 2 } };
+
+const float ERROR_FLOAT_CODE = -1.0f;
+const int32_t ERROR_INT_CODE = -1;
+
+FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
 {
     std::string weightStr(weight);
     return StringUtils::StringToFontWeight(weightStr, defaultFontWeight);
 }
+
+std::string g_strValue;
 
 namespace {
 void SetTextContent(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -485,6 +495,104 @@ void ResetWordBreak(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[2]); // 2 is the default value of WordBreak::BREAK_WORD
 }
+
+ArkUI_CharPtr GetFontFamily(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    std::vector<std::string> fontFamilies = TextModelNG::GetFontFamily(frameNode);
+    std::string families;
+    //set index start
+    int index = 0;
+    for (auto& family : fontFamilies) {
+        families += family;
+        if (index != fontFamilies.size() - 1) {
+            families += ",";
+        }
+        index ++;
+    }
+    g_strValue = families;
+    return g_strValue.c_str();
+}
+
+ArkUI_Int32 GetCopyOption(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetCopyOption(frameNode));
+}
+
+ArkUI_Int32 GetHeightAdaptivePolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return TEXT_HEIGHT_ADAPTIVE_POLICY_MAP[TextModelNG::GetHeightAdaptivePolicy(frameNode)];
+}
+
+ArkUI_Float32 GetTextMinFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Float32>(TextModelNG::GetAdaptMinFontSize(frameNode).Value());
+}
+
+ArkUI_Float32 GetTextMaxFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Float32>(TextModelNG::GetAdaptMaxFontSize(frameNode).Value());
+}
+
+void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Font value = TextModelNG::GetFont(frameNode);
+    if (value.fontSize.has_value()) {
+        font->fontSize = value.fontSize.value().Value();
+    }
+    if (value.fontWeight.has_value()) {
+        font->fontWeight = static_cast<ArkUI_Int32>(value.fontWeight.value());
+    }
+    if (!value.fontFamilies.empty()) {
+        std::string families;
+        //set index start
+        int index = 0;
+        for (auto& family : value.fontFamilies) {
+            families += family;
+            if (index != value.fontFamilies.size() - 1) {
+                families += ",";
+            }
+            index ++;
+        }
+        g_strValue = families;
+        font->fontFamilies = g_strValue.c_str();
+    }
+    if (value.fontStyle.has_value()) {
+        font->fontStyle = static_cast<ArkUI_Int32>(value.fontStyle.value());
+    }
+}
+
+ArkUI_Float32 GetFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Float32>(TextModelNG::GetFontSize(frameNode).Value());
+}
+
+ArkUI_Int32 GetFontWeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetFontWeight(frameNode));
+}
+
+ArkUI_Int32 GetItalicFontStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetItalicFontStyle(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -536,7 +644,16 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextFont,
         SetFontWeightStr,
         SetWordBreak,
-        ResetWordBreak
+        ResetWordBreak,
+        GetFontFamily,
+        GetCopyOption,
+        GetHeightAdaptivePolicy,
+        GetTextMinFontSize,
+        GetTextMaxFontSize,
+        GetFont,
+        GetFontSize,
+        GetFontWeight,
+        GetItalicFontStyle,
     };
 
     return &modifier;

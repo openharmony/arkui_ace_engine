@@ -19,6 +19,7 @@
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
+    const ArkUIRefreshModifier* GetRefreshModifier();
     void SetRefreshOnStateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
     void SetOnRefreshing(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier

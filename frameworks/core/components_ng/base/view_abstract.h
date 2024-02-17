@@ -491,6 +491,14 @@ public:
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
     static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc);
     static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
+
+    static bool GetFocusable(FrameNode* frameNode);
+    static bool GetDefaultFocus(FrameNode* frameNode);
+    static std::vector<DimensionRect> GetResponseRegion(FrameNode* frameNode);
+    static NG::OverlayOptions GetOverlay(FrameNode* frameNode);
+    static void SetNeedFocus(FrameNode* frameNode, bool value);
+    static bool GetNeedFocus(FrameNode* frameNode);
+
 private:
     static void AddDragFrameNodeToManager();
 };

@@ -133,4 +133,17 @@ void RefreshModelNG::SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& ref
     eventHub->SetOnRefreshing(std::move(refreshing));
 }
 
+void RefreshModelNG::SetRefreshing(FrameNode* frameNode, bool isRefreshing)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefreshing, isRefreshing, frameNode);
+}
+
+bool RefreshModelNG::GetRefreshing(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefreshing, value, frameNode);
+    return value;
+}
+
+
 } // namespace OHOS::Ace::NG
