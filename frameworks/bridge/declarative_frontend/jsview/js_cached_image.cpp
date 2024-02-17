@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::Framework {
 
-static bool IsAstcResource(const JSRef<JSVal>& jsValue)
+static bool IsASTCResource(const JSRef<JSVal>& jsValue)
 {
     if (!jsValue->IsObject()) {
         return false;
@@ -41,7 +41,7 @@ void JSCachedImage::Create(const JSCallbackInfo& info)
         return;
     }
 
-    if (!IsAstcResource(info[0])) {
+    if (!IsASTCResource(info[0])) {
         JSImage::Create(info);
     }
 }
@@ -49,6 +49,14 @@ void JSCachedImage::Create(const JSCallbackInfo& info)
 void JSCachedImage::JSBind(BindingTarget globalObj)
 {
     JSClass<JSCachedImage>::Declare("CachedImage");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSCachedImage>::StaticMethod("create", &JSCachedImage::Create, opt);
+    JSClass<JSCachedImage>::InheritAndBind<JSImage>(globalObj);
+}
+
+void JSCachedImage::JSBindMediaCachedImage(BindingTarget globalObj)
+{
+    JSClass<JSCachedImage>::Declare("MediaCachedImage");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSCachedImage>::StaticMethod("create", &JSCachedImage::Create, opt);
     JSClass<JSCachedImage>::InheritAndBind<JSImage>(globalObj);
