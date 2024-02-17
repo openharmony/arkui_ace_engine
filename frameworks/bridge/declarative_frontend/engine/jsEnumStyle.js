@@ -1720,6 +1720,8 @@ class NavPathStack {
     this.nativeStack = undefined;
     // parent stack
     this.parentStack = undefined;
+    // Array of remove destination indexes
+    this.removeArray = [];
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
@@ -1777,7 +1779,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
-  
+
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
       this.pathArray.pop();
@@ -1982,8 +1984,16 @@ class NavPathStack {
       return 0;
     }
     let originLength = this.pathArray.length;
-    this.pathArray = this.pathArray.filter((item, index) => {
-      return item && !indexes.includes(index) });
+    let tempArray = this.pathArray.slice(0);
+    this.removeArray = [];
+    this.pathArray = [];
+    for (let index = 0 ; index < tempArray.length ; index++) {
+      if (tempArray[index] && !indexes.includes(index)) {
+        this.pathArray.push(tempArray[index]);
+      } else {
+        this.removeArray.push(index);
+      }
+    }
     let cnt = originLength - this.pathArray.length;
     if (cnt > 0) {
       this.changeFlag = this.changeFlag + 1;
@@ -1991,6 +2001,12 @@ class NavPathStack {
       this.nativeStack?.onStateChanged();
     }
     return cnt;
+  }
+  getRemoveArray() {
+    return this.removeArray;
+  }
+  clearRemoveArray() {
+    this.removeArray = [];
   }
   removeByName(name) {
     let originLength = this.pathArray.length;

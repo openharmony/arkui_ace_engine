@@ -229,6 +229,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
 void NavigationPattern::UpdateNavPathList()
 {
     CHECK_NULL_VOID(navigationStack_);
+    navigationStack_->UpdateRemovedNavPathList(); // Delete Removed NavPathList
     auto preTopNavPath = navigationStack_->GetPreTopNavPath();
     auto pathNames = navigationStack_->GetAllPathName();
     auto cacheNodes = navigationStack_->GetAllCacheNodes();
