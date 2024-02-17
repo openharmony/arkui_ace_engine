@@ -6601,11 +6601,6 @@ void TextFieldPattern::UpdatePasswordModeState()
     }
 }
 
-void TextFieldPattern::FireSelectEvent()
-{
-    selectController_->FireSelectEvent();
-}
-
 RectF TextFieldPattern::GetSelectArea()
 {
     auto selectRects = selectController_->GetSelectedRects();
