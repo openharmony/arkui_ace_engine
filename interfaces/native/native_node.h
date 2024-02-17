@@ -5116,19 +5116,55 @@ typedef enum {
      *
      */
     NODE_TOGGLE_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TOGGLE,
-
+    /**
+     * @brief 输入内容发生变化时触发该事件。
+     *
+     * 触发该事件的条件：输入内容发生变化时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
+     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>：输入的文本内容。
+     *
+     */
     NODE_TEXT_INPUT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_INPUT,
     /**
-     * @brief 定义ARKUI_NODE_TEXT_INPUT按下输入法回车键触发该回调。
+     * @brief 按下输入法回车键触发该事件。
      *
+     * 触发该事件的条件：按下输入法回车键。\n
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
      * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：输入法回车键类型。\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：输入法回车键类型。
+     *
      */
     NODE_TEXT_INPUT_ON_SUBMIT,
+    /**
+     * @brief 长按输入框内部区域弹出剪贴板后，点击剪切板剪切按钮，触发该回调。
+     *
+     * 触发该事件的条件：长按输入框内部区域弹出剪贴板后，点击剪切板剪切按钮。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
+     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>：剪切的文本内容。
+     *
+     */
     NODE_TEXT_INPUT_ON_CUT,
+    /**
+     * @brief 长按输入框内部区域弹出剪贴板后，点击剪切板粘贴按钮，触发该回调。
+     *
+     * 触发该事件的条件：长按输入框内部区域弹出剪贴板后，点击剪切板粘贴按钮。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
+     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>：粘贴的文本内容。
+     *
+     */
     NODE_TEXT_INPUT_ON_PASTE,
-
+    /**
+     * @brief 输入内容发生变化时，触发该回调。
+     *
+     * 触发该事件的条件：输入内容发生变化时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
+     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>：当前输入的文本内容。
+     *
+     */
     NODE_TEXT_AREA_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_AREA,
 
     /**
