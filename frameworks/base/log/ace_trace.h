@@ -27,6 +27,7 @@
 #include "base/utils/system_properties.h"
 
 #define ACE_SCOPED_TRACE(fmt, ...) AceScopedTrace aceScopedTrace(fmt, ##__VA_ARGS__)
+#define ACE_SCOPED_TRACE_FLAG(flag, fmt, ...) AceScopedTraceFlag aceScopedTraceFlag(flag, fmt, ##__VA_ARGS__)
 #define ACE_SVG_SCOPED_TRACE(fmt, ...) \
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetSvgTraceEnabled(), fmt, ##__VA_ARGS__)
 #define ACE_LAYOUT_SCOPED_TRACE(fmt, ...) \

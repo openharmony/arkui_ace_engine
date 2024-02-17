@@ -544,7 +544,7 @@ void Animator::Cancel()
         return;
     }
     status_ = Status::IDLE;
-    LOGE("animation cancel. id: %{public}d", controllerId_);
+    TAG_LOGD(AceLogTag::ACE_ANIMATION, "animation cancel. id: %{public}d", controllerId_);
     elapsedTime_ = 0;
     repeatTimesLeft_ = repeatTimes_;
     UpdateScaledTime();
@@ -560,6 +560,7 @@ void Animator::Cancel()
     if (scheduler_ && scheduler_->IsActive()) {
         scheduler_->Stop();
     }
+    asyncTrace_ = nullptr;
     NotifyIdleListener();
 }
 
@@ -572,9 +573,7 @@ int32_t Animator::GetId() const
 void Animator::OnFrame(int64_t duration)
 {
     CHECK_RUN_ON(UI);
-    if (iteration_ == ANIMATION_REPEAT_INFINITE) {
-        ACE_SCOPED_TRACE("onFrame %s", animatorName_.c_str());
-    }
+    ACE_SCOPED_TRACE_FLAG(iteration_ == ANIMATION_REPEAT_INFINITE, "onFrame %s, iteration -1", animatorName_.c_str());
     // notify child first
     for (auto& controller : proxyControllers_) {
         controller->OnFrame(duration);
