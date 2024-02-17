@@ -3962,6 +3962,9 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     eventObj->SetProperty("targetDisplayId", static_cast<int32_t>(info.GetTargetDisplayId()));
     eventObj->SetProperty("deviceId", static_cast<int64_t>(info.GetDeviceId()));
 
+    if (info.GetChangedTouches().empty()) {
+        return JSRef<JSVal>::Cast(obj);
+    }
     uint32_t index = 0;
     TouchLocationInfo changeTouch = info.GetChangedTouches().back();
     JSRef<JSObject> changeTouchElement = CreateTouchInfo(changeTouch, info);
