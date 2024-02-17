@@ -32,7 +32,7 @@ public:
     {
         auto value = MakeRefPtr<LinearSplitLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propResizeable_ = CloneResizeable();
+        value->propResizable_ = CloneResizable();
         value->propDivider_ = CloneDivider();
         return value;
     }
@@ -40,14 +40,14 @@ public:
     void Reset() override
     {
         LayoutProperty::Reset();
-        ResetResizeable();
+        ResetResizable();
         ResetDivider();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
-        json->Put("resizeable", propResizeable_.value_or(false) ? "true" : "false");
+        json->Put("resizeable", propResizable_.value_or(false) ? "true" : "false");
         if (propDivider_.has_value()) {
             auto divider = JsonUtil::Create(true);
             divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
@@ -59,7 +59,7 @@ public:
         }
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Resizeable, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Resizable, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, ItemDivider, PROPERTY_UPDATE_MEASURE);
 
 private:

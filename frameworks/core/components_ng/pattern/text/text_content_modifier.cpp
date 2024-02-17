@@ -393,7 +393,9 @@ void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
         auto offsetX = shadow.offsetX->Get();
         auto offsetY = shadow.offsetY->Get();
         auto color = shadow.color->Get();
-        if (shadow.shadow != Shadow(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue()))) {
+        auto compareShadow = Shadow(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue()));
+        compareShadow.SetShadowType(shadow.shadow.GetShadowType());
+        if (shadow.shadow != compareShadow) {
             flag |= PROPERTY_UPDATE_MEASURE;
             return;
         }

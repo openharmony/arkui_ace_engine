@@ -18,6 +18,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -28,35 +29,35 @@ constexpr double DEFAULT_OFFSET_X = 5.0;
 constexpr double DEFAULT_OFFSET_Y = 5.0;
 const std::string DEFAULT_TRACK_BACKGROUND = "#08182431";
 }
-void SetCloseEffect(NodeHandle node, bool value)
+void SetCloseEffect(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DataPanelModelNG::SetCloseEffect(frameNode, value);
 }
 
-void ResetCloseEffect(NodeHandle node)
+void ResetCloseEffect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DataPanelModelNG::SetCloseEffect(frameNode, IS_CLOSE_EFFECT);
 }
 
-void SetDataPanelTrackBackgroundColor(NodeHandle node, uint32_t value)
+void SetDataPanelTrackBackgroundColor(ArkUINodeHandle node, uint32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DataPanelModelNG::SetTrackBackground(frameNode, Color(value));
 }
 
-void ResetDataPanelTrackBackgroundColor(NodeHandle node)
+void ResetDataPanelTrackBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DataPanelModelNG::SetTrackBackground(frameNode, Color::FromString(DEFAULT_TRACK_BACKGROUND));
 }
 
-void SetDataPanelStrokeWidth(NodeHandle node, double value, int32_t unit)
+void SetDataPanelStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -64,7 +65,7 @@ void SetDataPanelStrokeWidth(NodeHandle node, double value, int32_t unit)
     DataPanelModelNG::SetStrokeWidth(frameNode, Dimension(value, unitEnum));
 }
 
-void ResetDataPanelStrokeWidth(NodeHandle node)
+void ResetDataPanelStrokeWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -95,7 +96,7 @@ void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors)
     }
 }
 
-void SetValueColors(NodeHandle node, const struct ArkUIGradientType* gradient)
+void SetValueColors(ArkUINodeHandle node, const struct ArkUIGradientType* gradient)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -120,7 +121,7 @@ void SetValueColors(NodeHandle node, const struct ArkUIGradientType* gradient)
     DataPanelModelNG::SetValueColors(frameNode, shadowColors);
 }
 
-void ResetValueColors(NodeHandle node)
+void ResetValueColors(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -129,8 +130,8 @@ void ResetValueColors(NodeHandle node)
     DataPanelModelNG::SetValueColors(frameNode, colors);
 }
 
-void SetTrackShadow(
-    NodeHandle node, const struct ArkUIGradientType* gradient, double radius, double offsetX, double offsetY)
+void SetTrackShadow(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Float32 radius,
+    ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -162,7 +163,7 @@ void SetTrackShadow(
     DataPanelModelNG::SetShadowOption(frameNode, shadow);
 }
 
-void SetNullTrackShadow(NodeHandle node)
+void SetNullTrackShadow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -171,7 +172,7 @@ void SetNullTrackShadow(NodeHandle node)
     DataPanelModelNG::SetShadowOption(frameNode, shadow);
 }
 
-void ResetTrackShadow(NodeHandle node)
+void ResetTrackShadow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -186,13 +187,15 @@ void ResetTrackShadow(NodeHandle node)
     DataPanelModelNG::SetShadowOption(frameNode, shadow);
 }
 
-ArkUIDataPanelModifierAPI GetDataPanelModifier()
+namespace NodeModifier {
+const ArkUIDataPanelModifier* GetDataPanelModifier()
 {
-    static const ArkUIDataPanelModifierAPI modifier = { SetCloseEffect, ResetCloseEffect,
+    static const ArkUIDataPanelModifier modifier = { SetCloseEffect, ResetCloseEffect,
         SetDataPanelTrackBackgroundColor, ResetDataPanelTrackBackgroundColor, SetDataPanelStrokeWidth,
         ResetDataPanelStrokeWidth, SetValueColors, ResetValueColors, SetTrackShadow, SetNullTrackShadow,
         ResetTrackShadow };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

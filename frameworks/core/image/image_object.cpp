@@ -60,7 +60,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
         if (rsData == nullptr) {
             return nullptr;
         }
-        auto skData = rsData->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+        auto skData = SkData::MakeWithoutCopy(rsData->GetData(), rsData->GetSize());
         const auto svgStream = std::make_unique<SkMemoryStream>(skData);
 #endif
         if (!svgStream) {
@@ -113,7 +113,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
     if (rsData == nullptr) {
         return nullptr;
     }
-    auto skData = rsData->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto skData = SkData::MakeWithoutCopy(rsData->GetData(), rsData->GetSize());
     auto codec = SkCodec::MakeFromData(skData);
 #endif
     int32_t totalFrames = 1;

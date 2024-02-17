@@ -39,9 +39,9 @@ public:
     void PerformLayout() override;
     void InitializeRecognizer();
 
-    bool GetResizeable() const
+    bool GetResizable() const
     {
-        return resizeable_;
+        return resizable_;
     }
 
     bool HandleMouseEvent(const MouseEvent& event) override;
@@ -52,7 +52,7 @@ protected:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     virtual void ResetComponentMember();
     RefPtr<DragRecognizer> dragDetector_;
-    bool resizeable_ = false;
+    bool resizable_ = false;
     double layoutWidth_ = 0.0;
     double layoutHeight_ = 0.0;
     bool preIsDraged_ = false;

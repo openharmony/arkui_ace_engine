@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
 
 namespace OHOS::Ace::NG {
@@ -23,7 +22,7 @@ ArkUINativeModuleValue ImageSpanBridge::SetVerticalAlign(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> verticalAlign = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = node->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     int32_t value = static_cast<int32_t>(VerticalAlign::BOTTOM);
     if (verticalAlign->IsNumber()) {
         value = verticalAlign->Int32Value(vm);
@@ -33,7 +32,7 @@ ArkUINativeModuleValue ImageSpanBridge::SetVerticalAlign(ArkUIRuntimeCallInfo* r
         }
         value = static_cast<int32_t>(align);
     }
-    GetArkUIInternalNodeAPI()->GetImageSpanModifier().SetImageSpanVerticalAlign(nativeNode, value);
+    GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanVerticalAlign(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -42,8 +41,8 @@ ArkUINativeModuleValue ImageSpanBridge::ResetVerticalAlign(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = node->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetImageSpanModifier().ResetImageSpanVerticalAlign(nativeNode);
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanVerticalAlign(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -53,7 +52,7 @@ ArkUINativeModuleValue ImageSpanBridge::SetObjectFit(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> objectFit = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = node->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     int32_t value = static_cast<int32_t>(ImageFit::COVER);
     if (objectFit->IsNumber()) {
         value = objectFit->Int32Value(vm);
@@ -63,7 +62,7 @@ ArkUINativeModuleValue ImageSpanBridge::SetObjectFit(ArkUIRuntimeCallInfo* runti
         }
         value = static_cast<int32_t>(fit);
     }
-    GetArkUIInternalNodeAPI()->GetImageSpanModifier().SetImageSpanObjectFit(nativeNode, value);
+    GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanObjectFit(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -72,8 +71,8 @@ ArkUINativeModuleValue ImageSpanBridge::ResetObjectFit(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = node->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetImageSpanModifier().ResetImageSpanObjectFit(nativeNode);
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanObjectFit(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

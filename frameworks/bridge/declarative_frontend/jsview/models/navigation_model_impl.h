@@ -25,8 +25,6 @@ public:
     void SetNavigationStack() override;
     void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) override;
     void SetNavigationStackProvided(bool provided) override;
-    bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
-        const std::string& title) override;
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
     void SetCustomTitle(const RefPtr<AceType>& customTitle) override;
     void SetTitleHeight(const Dimension& height, bool isValid = true) override;

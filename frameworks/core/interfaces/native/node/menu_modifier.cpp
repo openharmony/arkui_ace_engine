@@ -28,14 +28,14 @@ const std::string DEFAULT_FONT_WEIGHT = "normal";
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
-void SetMenuFontColor(NodeHandle node, uint32_t color)
+void SetMenuFontColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuModelNG::SetFontColor(frameNode, Color(color));
 }
 
-void ResetMenuFontColor(NodeHandle node)
+void ResetMenuFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -43,7 +43,7 @@ void ResetMenuFontColor(NodeHandle node)
     MenuModelNG::SetFontColor(frameNode, color);
 }
 
-void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
+void SetMenuFont(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -80,7 +80,7 @@ void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     }
 }
 
-void ResetMenuFont(NodeHandle node)
+void ResetMenuFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -92,7 +92,7 @@ void ResetMenuFont(NodeHandle node)
     MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
 }
 
-void SetRadius(NodeHandle node, const double* values, const int32_t* units)
+void SetRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int32_t* units)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -107,7 +107,7 @@ void SetRadius(NodeHandle node, const double* values, const int32_t* units)
     MenuModelNG::SetBorderRadius(frameNode, topLeft, topRight, bottomLeft, bottomRight);
 }
 
-void ResetRadius(NodeHandle node)
+void ResetRadius(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -115,7 +115,7 @@ void ResetRadius(NodeHandle node)
     MenuModelNG::SetBorderRadius(frameNode, reset);
 }
 
-void SetMenuWidth(NodeHandle node, double value, int32_t unit)
+void SetMenuWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -123,7 +123,7 @@ void SetMenuWidth(NodeHandle node, double value, int32_t unit)
     MenuModelNG::SetWidth(frameNode, width);
 }
 
-void ResetMenuWidth(NodeHandle node)
+void ResetMenuWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -131,11 +131,13 @@ void ResetMenuWidth(NodeHandle node)
     MenuModelNG::SetWidth(frameNode, reset);
 }
 
-ArkUIMenuModifierAPI GetMenuModifier()
+namespace NodeModifier {
+const ArkUIMenuModifier* GetMenuModifier()
 {
-    static const ArkUIMenuModifierAPI modifier = { SetMenuFontColor, ResetMenuFontColor, SetMenuFont, ResetMenuFont,
+    static const ArkUIMenuModifier modifier = { SetMenuFontColor, ResetMenuFontColor, SetMenuFont, ResetMenuFont,
         SetRadius, ResetRadius, SetMenuWidth, ResetMenuWidth };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

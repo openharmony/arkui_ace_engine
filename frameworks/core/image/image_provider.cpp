@@ -313,7 +313,7 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
 #ifndef USE_ROSEN_DRAWING
             const auto svgStream = std::make_unique<SkMemoryStream>(std::move(imageData));
 #else
-            auto skData = imageData->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+            auto skData = SkData::MakeWithoutCopy(imageData->GetData(), imageData->GetSize());
             const auto svgStream = std::make_unique<SkMemoryStream>(std::move(skData));
 #endif
             if (svgStream) {
@@ -362,7 +362,7 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const std::shared_ptr<RSData>& d
 #ifndef USE_ROSEN_DRAWING
         const auto svgStream = std::make_unique<SkMemoryStream>(skData);
 #else
-        auto skData = data->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+        auto skData = SkData::MakeWithoutCopy(data->GetData(), data->GetSize());
         const auto svgStream = std::make_unique<SkMemoryStream>(skData);
 #endif
         if (svgStream) {
@@ -716,12 +716,11 @@ std::shared_ptr<RSImage> ImageProvider::GetDrawingImage(
         LOGE("fetch data failed. src: %{private}s", src.c_str());
         return nullptr;
     }
-    auto skImage = SkImage::MakeFromEncoded(imageData->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData());
-    if (!skImage) {
+    std::shared_ptr<RSImage> rawImage = std::make_shared<RSImage>();
+    if (!rawImage->MakeFromEncoded(imageData)) {
         LOGE("MakeFromEncoded failed! src: %{private}s", src.c_str());
         return nullptr;
     }
-    auto rawImage = std::make_shared<RSImage>(static_cast<void*>(&skImage));
     auto image = ResizeDrawingImage(rawImage, src, targetSize);
     return image;
 }

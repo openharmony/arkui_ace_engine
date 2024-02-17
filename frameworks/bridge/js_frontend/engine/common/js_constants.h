@@ -164,6 +164,7 @@ ACE_EXPORT extern const char MATRIX_COMBINE[];
 ACE_EXPORT extern const char MATRIX_INVERT[];
 ACE_EXPORT extern const char MATRIX_TRANSLATE[];
 ACE_EXPORT extern const char MATRIX_SCALE[];
+ACE_EXPORT extern const char MATRIX_SKEW[];
 ACE_EXPORT extern const char MATRIX_ROTATE[];
 ACE_EXPORT extern const char MATRIX_TRANSFORM_POINT[];
 ACE_EXPORT extern const char MATRIX_4X4[];

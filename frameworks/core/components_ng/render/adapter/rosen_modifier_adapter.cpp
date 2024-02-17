@@ -97,12 +97,7 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
         auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get()); \
         castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },       \
             [rsProp](const propType& value) { rsProp->Set(value); },                     \
-            [rsProp]() -> propType { return rsProp->GetStagingValue(); },                \
-            [rsProp](ThresholdType type) { if (type == ThresholdType::LAYOUT) {          \
-                auto rsBaseProp = std::static_pointer_cast<RSPropertyBase>(rsProp);      \
-                rsBaseProp->SetThresholdType(Rosen::ThresholdType::LAYOUT); }},          \
-            [rsProp](PropertyUnit unit) { if (unit == PropertyUnit::PIXEL_POSITION) {    \
-                rsProp->SetPropertyUnit(Rosen::RSPropertyUnit::PIXEL_POSITION); }});     \
+            [rsProp]() -> propType { return rsProp->GetStagingValue(); });               \
         rsProp->SetUpdateCallback(castProp->GetUpdateCallback());                        \
         return rsProp;                                                                   \
     }
@@ -247,5 +242,25 @@ void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity
                 targetValue, initialVelocity, finishCallback, nullptr);
         }
     }
+}
+
+template<>
+void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetThresholdType(ThresholdType type)
+{
+    auto modify = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
+    CHECK_NULL_VOID(modify);
+    auto property = std::static_pointer_cast<RSPropertyBase>(modify->GetProperty());
+    CHECK_NULL_VOID(property);
+    property->SetThresholdType(static_cast<Rosen::ThresholdType>(type));
+}
+
+template<>
+void NodeAnimatableProperty<float, AnimatablePropertyFloat>::SetPropertyUnit(PropertyUnit unit)
+{
+    auto modify = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
+    CHECK_NULL_VOID(modify);
+    auto property = std::static_pointer_cast<RSAnimatableProperty<float>>(modify->GetProperty());
+    CHECK_NULL_VOID(property);
+    property->SetPropertyUnit(static_cast<Rosen::RSPropertyUnit>(unit));
 }
 } // namespace OHOS::Ace::NG

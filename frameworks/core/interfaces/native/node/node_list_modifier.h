@@ -18,7 +18,5 @@
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-
 const ArkUIListModifier* GetListModifier();
-
 } // namespace OHOS::Ace::NG::NodeModifier

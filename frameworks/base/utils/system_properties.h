@@ -257,7 +257,10 @@ public:
         return svgTraceEnable_;
     }
 
-    static bool GetLayoutTraceEnabled();
+    static bool GetLayoutTraceEnabled()
+    {
+        return layoutTraceEnable_;
+    }
 
     static bool GetBuildTraceEnabled()
     {
@@ -410,7 +413,15 @@ public:
 
     static bool GetGridCacheEnabled();
 
+    static bool GetGridIrregularLayoutEnabled();
+
     static bool GetSideBarContainerBlurEnable();
+
+    static void AddWatchSystemParameter(void *context);
+
+    static void EnableSystemParameterCallback(const char *key, const char *value, void *context);
+
+    static void RemoveWatchSystemParameter(void *context);
 
 private:
     static bool traceEnabled_;

@@ -17,6 +17,7 @@ ace_unittest("relative_container_test_ng") {
   type = "new"
   sources = [
     "relative_container_common_ng.cpp",
+    "relative_container_guideline_test_ng.cpp",
     "relative_container_test_ng.cpp",
   ]
 }

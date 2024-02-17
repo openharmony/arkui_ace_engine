@@ -196,21 +196,30 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
         [weak = AceType::WeakClaim(this), animationId = animationId_, needSecondPlay, playCount,
             id = Container::CurrentId()]() {
             ContainerScope scope(id);
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            if (animationId != pattern->animationId_) {
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            auto onFinish = [weak, needSecondPlay, playCount, animationId]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (animationId != pattern->animationId_) {
+                    return;
+                }
+                if (!needSecondPlay) {
+                    pattern->OnAnimationFinish();
+                    return;
+                }
+                auto newPlayCount = playCount > 0 ? playCount - 1 : playCount;
+                if (newPlayCount == 0) {
+                    return;
+                }
+                auto newStart = pattern->CalculateStart();
+                pattern->PlayMarqueeAnimation(newStart, newPlayCount, false);
+            };
+            if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+                onFinish();
                 return;
             }
-            if (!needSecondPlay) {
-                pattern->OnAnimationFinish();
-                return;
-            }
-            auto newPlayCount = playCount > 0 ? playCount - 1 : playCount;
-            if (newPlayCount == 0) {
-                return;
-            }
-            auto newStart = pattern->CalculateStart();
-            pattern->PlayMarqueeAnimation(newStart, newPlayCount, false);
+            taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI);
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
@@ -234,22 +243,24 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(0);
-    AnimationUtils::Animate(
-        option,
-        [weak = AceType::WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->SetTextOffset(0.0f);
-        },
-        [weak = AceType::WeakClaim(this), restart = stopAndStart, animationId = animationId_,
-            id = Container::CurrentId()]() {
-            ContainerScope scope(id);
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            if (restart && animationId == pattern->animationId_) {
-                pattern->StartMarqueeAnimation();
-            }
-        });
+    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetTextOffset(0.0f);
+    });
+    if (stopAndStart) {
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weak = AceType::WeakClaim(this), animationId = animationId_]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (animationId == pattern->animationId_) {
+                    pattern->StartMarqueeAnimation();
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    }
 }
 
 void MarqueePattern::FireStartEvent() const

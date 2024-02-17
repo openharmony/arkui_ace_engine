@@ -258,6 +258,11 @@ public:
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
     void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event);
+    void SetDragResult(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    void ResetDragPreviewInfo()
+    {
+        info_ = DragPreviewInfo();
+    }
 
 private:
     double CalcDragPreviewDistanceWithPoint(

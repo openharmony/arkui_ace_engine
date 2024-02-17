@@ -87,8 +87,8 @@ struct GuidelineInfo {
 };
 
 struct ChainInfo {
-    LineDirection direction = LineDirection::VERTICAL;
-    ChainStyle style = ChainStyle::SPREAD;
+    std::optional<LineDirection> direction;
+    std::optional<ChainStyle> style;
 
     bool operator==(const ChainInfo& right) const
     {

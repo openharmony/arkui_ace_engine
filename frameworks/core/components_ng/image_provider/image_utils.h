@@ -16,13 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_UTILS_H
 
+#include <cstdint>
+#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class ImageUtils {
 public:
-    static void PostToUI(std::function<void()>&& task);
-    static void PostToBg(std::function<void()>&& task);
+    static void PostToUI(std::function<void()> &&task, const int32_t containerId = Container::CurrentId());
+    static void PostToBg(std::function<void()> &&task, const int32_t containerId = Container::CurrentId());
 
     inline static std::string GenerateImageKey(const ImageSourceInfo& src, const NG::SizeF& targetSize)
     {

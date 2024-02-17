@@ -820,7 +820,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg024, TestSize.Level1)
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
     HitTestResult retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
-    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
+    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
     retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
@@ -852,7 +852,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg025, TestSize.Level1)
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
     HitTestResult retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
-    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
+    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
     retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);

@@ -293,13 +293,19 @@ NavPathList NavigationStack::GetAllCacheNodes()
 }
 
 void NavigationStack::AddCacheNode(
-    const std::string& name, const RefPtr<UINode>& navDestinationNode)
+    const std::string& name, const RefPtr<UINode>& uiNode)
 {
-    if (name.empty() || navDestinationNode == nullptr) {
+    if (name.empty() || uiNode == nullptr) {
         return;
     }
 
-    cacheNodes_.emplace_back(std::make_pair(name, navDestinationNode));
+    auto navDestination = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+        NG::NavigationGroupNode::GetNavDestinationNode(uiNode));
+    if (navDestination) {
+        navDestination->SetIsCacheNode(true);
+    }
+
+    cacheNodes_.emplace_back(std::make_pair(name, uiNode));
 }
 
 void NavigationStack::RemoveCacheNode(int32_t handle)
@@ -310,6 +316,11 @@ void NavigationStack::RemoveCacheNode(int32_t handle)
 
     for (auto it = cacheNodes_.begin(); it != cacheNodes_.end(); ++it) {
         if ((*it).second->GetId() == handle) {
+            auto navDestination = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+                NG::NavigationGroupNode::GetNavDestinationNode(it->second));
+            if (navDestination) {
+                navDestination->SetIsCacheNode(false);
+            }
             cacheNodes_.erase(it);
             return;
         }

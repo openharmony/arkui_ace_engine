@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_row_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "core/components/common/layout/constants.h"
 
@@ -25,20 +23,20 @@ ArkUINativeModuleValue GridRowBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsNumber()) {
         int32_t alignItem = secondArg->Int32Value(vm);
         if (alignItem == static_cast<int32_t>(OHOS::Ace::FlexAlign::FLEX_START) ||
             alignItem == static_cast<int32_t>(OHOS::Ace::FlexAlign::FLEX_END) ||
             alignItem == static_cast<int32_t>(OHOS::Ace::FlexAlign::CENTER) ||
             alignItem == static_cast<int32_t>(OHOS::Ace::FlexAlign::STRETCH)) {
-            GetArkUIInternalNodeAPI()->GetGridRowModifier().SetAlignItems(nativeNode, alignItem);
+            GetArkUINodeModifiers()->getGridRowModifier()->setAlignItems(nativeNode, alignItem);
         } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            GetArkUIInternalNodeAPI()->GetGridRowModifier().SetAlignItems(nativeNode,
+            GetArkUINodeModifiers()->getGridRowModifier()->setAlignItems(nativeNode,
                 static_cast<int32_t>(OHOS::Ace::FlexAlign::FLEX_START));
         }
     } else {
-        GetArkUIInternalNodeAPI()->GetGridRowModifier().ResetAlignItems(nativeNode);
+        GetArkUINodeModifiers()->getGridRowModifier()->resetAlignItems(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -48,8 +46,8 @@ ArkUINativeModuleValue GridRowBridge::ResetAlignItems(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetGridRowModifier().ResetAlignItems(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridRowModifier()->resetAlignItems(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

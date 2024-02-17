@@ -148,6 +148,11 @@ public:
         return WeakClaim(AceType::RawPtr(altLoadingCtx_));
     }
 
+protected:
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback();
+    bool isShow_ = true;
+
 private:
     class ObscuredImage : public CanvasImage {
         void DrawToRSCanvas(
@@ -167,6 +172,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     void OnModifyDone() override;
+    void UpdateGestureAndDragWhenModify();
 
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -178,9 +184,8 @@ private:
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
-    void SetImagePaintConfig(
-        const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
-        const RectF& dstRect, bool isSvg, int32_t frameCount = 1);
+    void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
+        const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
@@ -248,7 +253,6 @@ private:
     void* overlayData_ = nullptr;
 
     bool syncLoad_ = false;
-    bool isShow_ = true;
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerOverlayBuild_ = false;
  

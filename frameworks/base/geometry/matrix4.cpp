@@ -81,6 +81,12 @@ Matrix4 Matrix4::CreateSkew(double x, double y)
         1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 }
 
+Matrix4 Matrix4::CreateFactorSkew(double x, double y)
+{
+    return Matrix4(1.0f, x, 0.0f, 0.0f, y, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+}
+
 Matrix4 Matrix4::CreatePerspective(double distance)
 {
     auto result = CreateIdentity();

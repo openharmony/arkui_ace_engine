@@ -19,7 +19,7 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
-#include "core/interfaces/native/node/api.h"
+#include "core/interfaces/native/node/node_api.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
@@ -97,7 +97,7 @@ public:
         const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result);
     static bool ParseResponseRegion(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-        double* regionValues, int32_t* regionUnits, uint32_t length);
+        ArkUI_Float32* regionValues, int32_t* regionUnits, uint32_t length);
     template<typename T>
     static RefPtr<T> GetTheme()
     {

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_TEST_NG_H
 
 #include <type_traits>
+
 #include "gtest/gtest.h"
 
 #define private public

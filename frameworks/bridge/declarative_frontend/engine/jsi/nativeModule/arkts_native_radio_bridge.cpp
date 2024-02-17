@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_radio_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/checkable/checkable_theme.h"
 
@@ -29,9 +27,9 @@ ArkUINativeModuleValue RadioBridge::SetRadioChecked(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     bool isCheck = secondArg->ToBoolean(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRadioModifier().SetRadioChecked(nativeNode, isCheck);
+    GetArkUINodeModifiers()->getRadioModifier()->setRadioChecked(nativeNode, isCheck);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -40,8 +38,8 @@ ArkUINativeModuleValue RadioBridge::ResetRadioChecked(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioChecked(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRadioModifier()->resetRadioChecked(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -53,7 +51,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> checkedBackgroundColor = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> uncheckedBorderColor = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> indicatorColor = runtimeCallInfo->GetCallArgRef(NUM_3);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
@@ -76,7 +74,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
         indicatorColorVal = radioTheme->GetPointColor();
     }
 
-    GetArkUIInternalNodeAPI()->GetRadioModifier().SetRadioStyle(nativeNode,
+    GetArkUINodeModifiers()->getRadioModifier()->setRadioStyle(nativeNode,
         checkedBackgroundColorVal.GetValue(), uncheckedBorderColorVal.GetValue(), indicatorColorVal.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -86,8 +84,8 @@ ArkUINativeModuleValue RadioBridge::ResetRadioStyle(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioStyle(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRadioModifier()->resetRadioStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -97,15 +95,15 @@ ArkUINativeModuleValue RadioBridge::SetRadioWidth(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); //0 is node arguments
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1); //1 is JsValue
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     CalcDimension width;
     double valueResult = jsValue->ToNumber(vm)->Value();
     if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, width) || LessNotEqual(valueResult, 0.0)) {
-        GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioWidth(nativeNode);
+        GetArkUINodeModifiers()->getRadioModifier()->resetRadioWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUIInternalNodeAPI()->GetRadioModifier().SetRadioWidth(
+    GetArkUINodeModifiers()->getRadioModifier()->setRadioWidth(
         nativeNode, width.Value(), static_cast<int>(width.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -115,8 +113,8 @@ ArkUINativeModuleValue RadioBridge::ResetRadioWidth(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); //0 is node arguments
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioWidth(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRadioModifier()->resetRadioWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -126,14 +124,14 @@ ArkUINativeModuleValue RadioBridge::SetRadioHeight(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); //0 is node arguments
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1); //1 is Jsvalue
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     CalcDimension height;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
-        GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioHeight(nativeNode);
+        GetArkUINodeModifiers()->getRadioModifier()->resetRadioHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUIInternalNodeAPI()->GetRadioModifier().SetRadioHeight(
+    GetArkUINodeModifiers()->getRadioModifier()->setRadioHeight(
         nativeNode, height.Value(), static_cast<int>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -143,8 +141,8 @@ ArkUINativeModuleValue RadioBridge::ResetRadioHeight(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); //0 is node arguments
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioHeight(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRadioModifier()->resetRadioHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -155,7 +153,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioSize(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);     //0 is node arguments
     Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1);  //1 is width value
     Local<JSValueRef> heightValue = runtimeCallInfo->GetCallArgRef(2); //2 is height value
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     CalcDimension width = 0.0_vp;
     CalcDimension height = 0.0_vp;
@@ -164,9 +162,9 @@ ArkUINativeModuleValue RadioBridge::SetRadioSize(ArkUIRuntimeCallInfo* runtimeCa
     bool hasHeight = (!heightValue->IsNull() && !heightValue->IsUndefined() &&
         ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height));
     if (!hasWidth && !hasHeight) {
-        GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioSize(nativeNode);
+        GetArkUINodeModifiers()->getRadioModifier()->resetRadioSize(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetRadioModifier().SetRadioSize(nativeNode,
+        GetArkUINodeModifiers()->getRadioModifier()->setRadioSize(nativeNode,
             width.Value(), static_cast<int>(width.Unit()), height.Value(), static_cast<int>(height.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -177,8 +175,8 @@ ArkUINativeModuleValue RadioBridge::ResetRadioSize(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); //0 is node arguments
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioSize(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRadioModifier()->resetRadioSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -188,14 +186,14 @@ ArkUINativeModuleValue RadioBridge::SetRadioHoverEffect(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);  //0 is node arguments
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1); //1 is Jsvalue
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     if (valueArg->IsUndefined() || !valueArg->IsNumber()) {
-        GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioHoverEffect(nativeNode);
+        GetArkUINodeModifiers()->getRadioModifier()->resetRadioHoverEffect(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     int32_t intValue = valueArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetRadioModifier().SetRadioHoverEffect(nativeNode, intValue);
+    GetArkUINodeModifiers()->getRadioModifier()->setRadioHoverEffect(nativeNode, intValue);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -204,8 +202,8 @@ ArkUINativeModuleValue RadioBridge::ResetRadioHoverEffect(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); //0 is node arguments
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioHoverEffect(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRadioModifier()->resetRadioHoverEffect(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -218,7 +216,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioPadding(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(2);  //2 is right arguments
     Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(3); //3 is bottom arguments
     Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(4);   //4 is left arguments
-    void *nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
     struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
@@ -233,7 +231,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioPadding(ArkUIRuntimeCallInfo *runtim
     ArkTSUtils::ParsePadding(vm, rightArg, rightDimen, right);
     ArkTSUtils::ParsePadding(vm, bottomArg, bottomDimen, bottom);
     ArkTSUtils::ParsePadding(vm, leftArg, leftDimen, left);
-    GetArkUIInternalNodeAPI()->GetRadioModifier().SetRadioPadding(nativeNode, &top, &right, &bottom, &left);
+    GetArkUINodeModifiers()->getRadioModifier()->setRadioPadding(nativeNode, &top, &right, &bottom, &left);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -243,8 +241,8 @@ ArkUINativeModuleValue RadioBridge::ResetRadioPadding(ArkUIRuntimeCallInfo *runt
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); //0 is node arguments
-    void *nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioPadding(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRadioModifier()->resetRadioPadding(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -253,17 +251,17 @@ ArkUINativeModuleValue RadioBridge::SetRadioResponseRegion(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);   //0 is node arguments
-    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);  //1 is Jsvalue
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);  //1 is JsValue
     Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(2); //2 is length arguments
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    uint32_t length = lengthArg->Int32Value(vm);
-    double regionArray[length];
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    uint32_t length = static_cast<uint32_t>(lengthArg->Int32Value(vm));
+    ArkUI_Float32 regionArray[length];
     int32_t regionUnits[length];
     if (!ArkTSUtils::ParseResponseRegion(vm, valueArg, regionArray, regionUnits, length)) {
-        GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioResponseRegion(nativeNode);
+        GetArkUINodeModifiers()->getRadioModifier()->resetRadioResponseRegion(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUIInternalNodeAPI()->GetRadioModifier().SetRadioResponseRegion(
+    GetArkUINodeModifiers()->getRadioModifier()->setRadioResponseRegion(
         nativeNode, regionArray, regionUnits, length);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -273,8 +271,8 @@ ArkUINativeModuleValue RadioBridge::ResetRadioResponseRegion(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0); //0 is node arguments
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioResponseRegion(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRadioModifier()->resetRadioResponseRegion(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

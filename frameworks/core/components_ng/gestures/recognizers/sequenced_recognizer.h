@@ -45,6 +45,8 @@ public:
         return GestureMode::Sequence;
     }
 
+    void CleanRecognizerState() override;
+    
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};
     void HandleTouchUpEvent(const TouchEvent& event) override {};

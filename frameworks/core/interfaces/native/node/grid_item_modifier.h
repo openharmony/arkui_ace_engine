@@ -15,10 +15,10 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_ITEM_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_ITEM_MODIFIER_H
 
-#include "core/interfaces/native/node/api.h"
+#include "core/interfaces/native/node/node_api.h"
 
-namespace OHOS::Ace::NG {
-ArkUIGridItemModifierAPI GetGridItemModifier();
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUIGridItemModifier* GetGridItemModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_ITEM_MODIFIER_H

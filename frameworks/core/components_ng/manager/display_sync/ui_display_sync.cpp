@@ -73,10 +73,7 @@ void UIDisplaySync::OnFrame()
         data_->onFrameWithTimestamp_(data_->timestamp_);
     }
 
-    bool isNeedRequest = data_->onFrame_ || data_->onFrameWithData_ || data_->onFrameWithTimestamp_;
-    if (isNeedRequest) {
-        RequestFrame();
-    }
+    JudgeWhetherRequestFrame();
 }
 
 void UIDisplaySync::AddToPipeline(WeakPtr<PipelineBase>& pipelineContext)
@@ -149,6 +146,14 @@ void UIDisplaySync::RequestFrame()
         return;
     }
     context->RequestFrame();
+}
+
+void UIDisplaySync::JudgeWhetherRequestFrame()
+{
+    bool isNeedRequest = data_->onFrame_ || data_->onFrameWithData_ || data_->onFrameWithTimestamp_;
+    if (isNeedRequest) {
+        RequestFrame();
+    }
 }
 
 void UIDisplaySync::RegisterOnFrame(OnFrameCallBack&& onFrameCallBack)

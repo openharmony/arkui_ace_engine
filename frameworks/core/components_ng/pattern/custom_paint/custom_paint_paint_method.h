@@ -105,6 +105,8 @@ public:
     void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
+    void SaveLayer();
+    void RestoreLayer();
 
     void SetFilterParam(const std::string& filterStr)
     {
@@ -422,6 +424,8 @@ protected:
 #else
     std::shared_ptr<RSImage> GetImage(const std::string& src);
 #endif
+    void GetSvgRect(const sk_sp<SkSVGDOM>& skiaDom, const Ace::CanvasImage& canvasImage,
+        RSRect* srcRect, RSRect* dstRect);
     void DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage);
 #ifndef USE_ROSEN_DRAWING
     virtual SkCanvas* GetRawPtrOfSkCanvas() = 0;
@@ -443,6 +447,8 @@ protected:
     double GetAlignOffset(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
     OHOS::Rosen::TextAlign GetEffectiveAlign(OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const;
 #endif
+    double GetFontBaseline(const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const;
+    double GetFontAlign(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph) const;
 
     PaintState fillState_;
     StrokePaintState strokeState_;
@@ -502,6 +508,11 @@ protected:
 
     SizeF lastLayoutSize_;
     RefPtr<ImageCache> imageCache_;
+    enum DrawImageType {
+        THREE_PARAMS,
+        FIVE_PARAMS,
+        NINE_PARAMS,
+    };
 };
 } // namespace OHOS::Ace::NG
 

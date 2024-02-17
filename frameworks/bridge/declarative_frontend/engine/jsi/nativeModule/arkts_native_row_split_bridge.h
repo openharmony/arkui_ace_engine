@@ -21,8 +21,8 @@
 namespace OHOS::Ace::NG {
 class RowSplitBridge {
 public:
-    static ArkUINativeModuleValue SetResizeable(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResetResizeable(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetResizable(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetResizable(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

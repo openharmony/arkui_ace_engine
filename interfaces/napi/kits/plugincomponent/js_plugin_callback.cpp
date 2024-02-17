@@ -306,11 +306,6 @@ void JSPluginCallback::OnRequestEvent(const AAFwk::Want& want, const std::string
         return;
     }
 
-    uvWorkData_.that = (void*)this;
-    uvWorkData_.want = want;
-    uvWorkData_.data = data;
-    uvWorkData_.name = name;
-
     auto container = AceEngine::Get().GetContainer(cbInfo_.containerId);
     if (!container) {
         return;
@@ -323,11 +318,17 @@ void JSPluginCallback::OnRequestEvent(const AAFwk::Want& want, const std::string
 
     std::weak_ptr<PluginComponentCallBack> weak = weak_from_this();
     taskExecutor->PostTask(
-        [weak]() {
+        [weak, want, name, data]() {
             auto callBack = weak.lock();
             if (callBack) {
+                OnPluginUvWorkData uvWorkData;
+                uvWorkData.that = callBack.get();
+                uvWorkData.want = want;
+                uvWorkData.data = data;
+                uvWorkData.name = name;
+
                 auto jsCallback = std::static_pointer_cast<JSPluginCallback>(callBack);
-                jsCallback->OnRequestEventInner(&jsCallback->uvWorkData_);
+                jsCallback->OnRequestEventInner(&uvWorkData);
             }
         },
         TaskExecutor::TaskType::JS);
@@ -408,7 +409,9 @@ void JSPluginCallback::OnRequestCallBack(
 
             {
                 std::unique_lock<std::mutex> lock(resultData->mtx);
-                resultData->cv.wait(lock, [&] { return resultData->ready; });
+                if (!resultData->ready) {
+                    resultData->cv.wait(lock, [&] { return resultData->ready; });
+                }
             }
         } else {
             OnRequestCallBackInner(&uvWorkData_);

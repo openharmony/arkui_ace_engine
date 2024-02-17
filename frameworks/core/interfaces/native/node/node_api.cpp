@@ -31,10 +31,45 @@
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
+#include "core/interfaces/native/node/node_checkbox_modifier.h"
+#include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::NG {
+
+ArkUINodeHandle GetFrameNodeById(ArkUI_Int32 nodeId)
+{
+    auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
+}
+
+ArkUI_Int64 GetUIState(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, 0);
+    return eventHub->GetCurrentUIState();
+}
+
+void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->AddSupportedState(static_cast<uint64_t>(state));
+}
+
+namespace NodeModifier {
+const ArkUIStateModifier* GetUIStateModifier()
+{
+    static const ArkUIStateModifier modifier = { GetFrameNodeById, GetUIState, SetSupportedUIState };
+    return &modifier;
+}
+}
 
 namespace NodeEvent {
 std::deque<ArkUINodeEvent> g_eventQueue;
@@ -94,10 +129,10 @@ typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eve
  */
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
+    NodeModifier::SetOnAppear,
     nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::SetOnTouch,
+    NodeModifier::SetOnClick,
     nullptr,
     NodeModifier::SetOnBlur,
     nullptr,
@@ -150,6 +185,14 @@ const ComponentAsyncEventHandler TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTimePickerOnChange,
 };
 
+const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetCheckboxChange,
+};
+
+const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetSliderChange,
+};
+
 /* clang-format on */
 void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId, void* extraParam)
 {
@@ -172,7 +215,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
                 return;
             }
             eventHandle = imageNodeAsyncEventHandlers[subKind];
-            break;            
+            break;
         }
         case ARKUI_SCROLL: {
             // scroll event type.
@@ -237,6 +280,24 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
             eventHandle = TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_CHECKBOX: {
+            // timepicker event type.
+            if (subKind >= sizeof(CHECKBOX_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SLIDER: {
+            // timepicker event type.
+            if (subKind >= sizeof(SLIDER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SLIDER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         default: {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         }
@@ -282,6 +343,35 @@ static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
     callbacks = method;
 }
 
+ArkUIAPICallbackMethod* GetArkUIAPICallbackMethod()
+{
+    return callbacks;
+}
+
+int SetVsyncCallback(ArkUIVMContext vmContext, ArkUI_Int32 device, ArkUI_Int32 callbackId)
+{
+    static int vsyncCount = 1;
+    auto vsync = [vmContext, callbackId]() {
+        ArkUIEventCallbackArg args[] = { { vsyncCount++ } };
+        ArkUIAPICallbackMethod* cbs = GetArkUIAPICallbackMethod();
+        CHECK_NULL_VOID(vmContext);
+        CHECK_NULL_VOID(cbs);
+        cbs->CallInt(vmContext, callbackId, 1, &args[0]);
+    };
+    PipelineContext::GetCurrentContext()->SetVsyncListener(vsync);
+    return 0;
+}
+
+void UnblockVsyncWait(ArkUIVMContext vmContext, ArkUI_Int32 device)
+{
+    PipelineContext::GetCurrentContext()->RequestFrame();
+}
+
+ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootPtr)
+{
+    return 0;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     /* clang-format off */
@@ -313,34 +403,39 @@ const ArkUIBasicAPI* GetBasicAPI()
     return &basicImpl;
 }
 
+void ShowCrash(ArkUI_CharPtr message)
+{
+    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Arkoala crash: %{public}s", message);
+}
 /* clang-format off */
 ArkUIExtendedNodeAPI impl_extended = {
     ARKUI_EXTENDED_API_VERSION,
 
-    nullptr,
-    nullptr,
+    nullptr, // getUtilsModifier
+    nullptr, // getCanvasRenderingContext2DModifier
 
     SetCallbackMethod,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    nullptr, // setCustomCallback
+    MeasureLayoutAndDraw,
+    nullptr, // measureNode
+    nullptr, // layoutNode
+    nullptr, // drawNode
+    nullptr, // setMeasureWidth
+    nullptr, // getMeasureWidth
+    nullptr, // setMeasureHeight
+    nullptr, // getMeasureHeight
+    nullptr, // setX
+    nullptr, // setY
+    nullptr, // indexerChecker
+    nullptr, // setRangeUpdater
+    nullptr, // setLazyItemIndexer
+    OHOS::Ace::NG::SetVsyncCallback,
+    OHOS::Ace::NG::UnblockVsyncWait,
+    OHOS::Ace::NG::NodeEvent::CheckEvent,
+    nullptr, // sendEvent
+    nullptr, // callContinuation
+    nullptr, // setChildTotalCount
+    ShowCrash,
 };
 /* clang-format on */
 

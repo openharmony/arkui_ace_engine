@@ -372,7 +372,16 @@ void MenuLayoutAlgorithm::InitWrapperRect(
             wrapperRect_ = pipelineContext->GetDisplayAvailableRect();
         } else {
             // wrapperIdealSize.Height = windowGlobalRect.Height()-navigation_indicator.height,no AR to avoid navigation
-            wrapperRect_.SetRect(0, top, windowGlobalRect.Width(), windowGlobalRect.Height() - top - bottom);
+            auto windowManager = pipelineContext->GetWindowManager();
+            auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+                    windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+            double width = windowGlobalRect.Width();
+            double height = windowGlobalRect.Height();
+            if (isContainerModal) {
+                LimitContainerModalMenuRect(width, height);
+            }
+            wrapperRect_.SetRect(0, top, width, height - top - bottom);
+
         }
     }
 
@@ -425,7 +434,9 @@ void MenuLayoutAlgorithm::InitSpace(const RefPtr<MenuLayoutProperty>& props, con
 
 void MenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
 {
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1535,6 +1546,18 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
     float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
     y = std::clamp(y, yMinAvoid, yMaxAvoid);
     return { x, y };
+}
+
+void MenuLayoutAlgorithm::LimitContainerModalMenuRect(double& rectWidth, double& rectHeight)
+{
+    auto containerOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
+                          static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
+                          static_cast<float>(CONTENT_PADDING.ConvertToPx());
+    auto containerOffsetY = static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx()) +
+                          static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
+                          static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+    rectWidth -= containerOffsetX;
+    rectHeight -= containerOffsetY;
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)

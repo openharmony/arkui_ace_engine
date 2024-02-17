@@ -101,10 +101,6 @@ const RefPtr<Curve> SHOW_CUSTOM_KEYBOARD_ANIMATION_CURVE =
 const RefPtr<Curve> HIDE_CUSTOM_KEYBOARD_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(4.0f, 1.0f, 342.0f, 37.0f);
 
-const std::map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
-    {TextDataDetectType::PHONE_NUMBER, "phoneNum"}, {TextDataDetectType::URL, "url"},
-    {TextDataDetectType::EMAIL, "email"}, {TextDataDetectType::ADDRESS, "location"} };
-
 RefPtr<FrameNode> GetLastPage()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -277,7 +273,7 @@ void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offse
     if (overlayManager->IsOriginDragMoveVector() || !overlayManager->IsUpdateDragMoveVector()) {
         return;
     }
-    
+
     if (menuMap_.empty()) {
         return;
     }
@@ -462,7 +458,7 @@ void OverlayManager::SetContainerButtonEnable(bool isEnabled)
     pipeline->SetCloseButtonStatus(isEnabled);
 }
 
-void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow)
+void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
 {
     BlurLowerNode(menu);
     auto menuWrapper = menu->GetPattern<MenuWrapperPattern>();
@@ -473,16 +469,12 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
     option.SetDuration(MENU_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent(
-        [weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(), isInSubWindow] {
+        [weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId()] {
             auto menu = menuWK.Upgrade();
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(menu && overlayManager);
             ContainerScope scope(id);
-            if (isInSubWindow) {
-                SubwindowManager::GetInstance()->RequestFocusSubwindow(id);
-            } else {
-                overlayManager->FocusOverlayNode(menu);
-            }
+            overlayManager->FocusOverlayNode(menu);
             auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
             menuWrapperPattern->CallMenuAppearCallback();
         });
@@ -547,6 +539,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         overlayManager->SetContextMenuDragHideFinished(true);
         auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
         menuWrapperPattern->CallMenuDisappearCallback();
+        menuWrapperPattern->SetShow(false);
         auto mainPipeline = PipelineContext::GetMainPipelineContext();
         if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
             mainPipeline->FlushPipelineImmediately();
@@ -1114,7 +1107,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
         menu->MountToParent(rootNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        SetShowMenuAnimation(menu);
+        ShowMenuAnimation(menu);
         menu->MarkModifyDone();
     }
     menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
@@ -1141,7 +1134,7 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     CHECK_NULL_VOID(rootNode);
     rootNode->Clean();
     menu->MountToParent(rootNode);
-    SetShowMenuAnimation(menu, true);
+    ShowMenuAnimation(menu);
     menu->MarkModifyDone();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto pattern = menu->GetPattern<MenuWrapperPattern>();
@@ -1173,7 +1166,9 @@ void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDr
     auto rootNode = rootNodeWeak_.Upgrade();
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
-        PopMenuAnimation(node, showPreviewAnimation, startDrag);
+        if (node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            PopMenuAnimation(node, showPreviewAnimation, startDrag);
+        }
     }
 }
 
@@ -2634,7 +2629,7 @@ void OverlayManager::PlaySheetTransition(
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
     auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
-
+    CHECK_NULL_VOID(sheetParent);
     if (isTransitionIn) {
         sheetPattern->SetCurrentHeight(sheetHeight_);
         float offset = 0.0f;
@@ -3540,6 +3535,13 @@ bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode,
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show ui extension menu enter");
     CHECK_NULL_RETURN(uiExtNode, false);
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(root, false);
+    for (const auto& child : root->GetChildren()) {
+        if (child->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            return false;
+        }
+    }
     auto menuNode = BindUIExtensionToMenu(uiExtNode, targetNode, longestContent, menuSize);
     CHECK_NULL_RETURN(menuNode, false);
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();

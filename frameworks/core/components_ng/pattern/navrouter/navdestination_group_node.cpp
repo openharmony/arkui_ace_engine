@@ -57,7 +57,7 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             auto navdestinationContentNode = AceType::DynamicCast<FrameNode>(contentNode);
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
             navdestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
     }
@@ -87,6 +87,10 @@ void NavDestinationGroupNode::OnOffscreenProcess(bool recursive)
 
 void NavDestinationGroupNode::ProcessShallowBuilder()
 {
+    if (isCacheNode_) {
+        return;
+    }
+
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "render navDestination content");
     auto navDestinationPattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);
@@ -105,34 +109,11 @@ void NavDestinationGroupNode::ProcessShallowBuilder()
     }
 }
 
-void NavDestinationGroupNode::UpdateTitleFontSize(bool showBackButton)
-{
-    // custom title
-    if (GetPrevTitleIsCustomValue(false)) {
-        return;
-    }
-    auto titleNode = AceType::DynamicCast<FrameNode>(title_);
-    CHECK_NULL_VOID(titleNode);
-    auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(titleLayoutProperty);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    if (showBackButton) {
-        titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
-        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
-    } else {
-        titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
-        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
-    }
-    titleNode->MarkModifyDone();
-    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-}
-
 RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
 {
     auto pattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    auto navDestinationNode = pattern->GetNavDestinationNode();
+    auto navDestinationNode = pattern->GetCustomNode();
     CHECK_NULL_RETURN(navDestinationNode, nullptr);
 
     auto child = navDestinationNode->GetFirstChild();

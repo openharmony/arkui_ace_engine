@@ -53,6 +53,13 @@ bool UnwrapOwnerWantFromJS(napi_env env, napi_value param, ACEAsyncJSCallbackInf
     if (!AceUnwrapWant(env, jsValue, asyncCallbackInfo->wantStage)) {
         return false;
     }
+
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "This application is not system-app, can not use system-api");
+        return false;
+    }
+
     return true;
 }
 
@@ -215,12 +222,6 @@ napi_value NAPI_JSPushWrap(napi_env env, napi_callback_info info, ACEAsyncJSCall
 
 static napi_value JSPush(napi_env env, napi_callback_info info)
 {
-    auto selfToken = IPCSkeleton::GetSelfTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
-        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "This application is not system-app, can not use system-api");
-        return nullptr;
-    }
-
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = AceCreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
         return AceWrapVoidToJS(env);
@@ -439,12 +440,6 @@ napi_value NAPI_JSRequestWrap(napi_env env, napi_callback_info info, ACEAsyncJSC
 
 static napi_value JSRequest(napi_env env, napi_callback_info info)
 {
-    auto selfToken = IPCSkeleton::GetSelfTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
-        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "This application is not system-app, can not use system-api");
-        return nullptr;
-    }
-
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = AceCreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
         return AceWrapVoidToJS(env);

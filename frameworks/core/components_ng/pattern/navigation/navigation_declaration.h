@@ -36,7 +36,7 @@ inline RefPtr<NavigationBarTheme> NavigationGetTheme()
 
 // TODO：move some items to theme
 // title bar back button
-const std::string BACK_BUTTON = "Back";
+constexpr const char* BACK_BUTTON = "Back";
 constexpr InternalResource::ResourceId BACK_ICON = InternalResource::ResourceId::IC_BACK;
 constexpr InternalResource::ResourceId MORE_ICON = InternalResource::ResourceId::IC_MORE;
 // title bar and tool bar, bar item
@@ -110,10 +110,6 @@ constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;
 // maximum number of toolbar items
 constexpr uint32_t MAXIMUM_TOOLBAR_ITEMS_IN_BAR = 5;
 constexpr uint32_t ONE_TOOLBAR_ITEM = 1;
-
-// navigation mask color
-const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
-const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 
 enum class NavToolbarItemStatus {
     NORMAL = 0,

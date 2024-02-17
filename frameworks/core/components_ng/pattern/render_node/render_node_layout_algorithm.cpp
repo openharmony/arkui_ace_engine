@@ -22,10 +22,13 @@ namespace OHOS::Ace::NG {
 void RenderNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        if (child->GetHostTag() == "RenderNode" || child->GetLayoutProperty()->GetLayoutConstraint().has_value()) {
-            child->Measure(child->GetLayoutProperty()->GetLayoutConstraint());
+        if (child->GetHostTag() == "RenderNode") {
+            child->Measure(std::nullopt);
+        } else if (child->GetLayoutProperty()->GetParentLayoutConstraint().has_value()) {
+            child->Measure(child->GetLayoutProperty()->GetParentLayoutConstraint());
         } else {
             LayoutConstraintF layoutConstraint;
+            layoutConstraint.maxSize = SizeF(0, 0);
             layoutConstraint.UpdateParentIdealSizeWithCheck({ 0, 0 });
             layoutConstraint.UpdateSelfMarginSizeWithCheck({ 0, 0 });
             child->Measure(layoutConstraint);

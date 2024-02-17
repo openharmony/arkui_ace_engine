@@ -76,6 +76,7 @@ public:
         paintMethod->SetAxis(swiperPattern->GetDirection());
         paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
+        paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
         paintMethod->SetItemCount(swiperPattern->RealTotalCount());
         paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
         paintMethod->SetGestureState(swiperPattern->GetGestureState());
@@ -193,6 +194,7 @@ private:
     void HandleLongDragUpdate(const TouchLocationInfo& info);
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
     float HandleTouchClickMargin();
+    int32_t GetCurrentIndex() const;
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

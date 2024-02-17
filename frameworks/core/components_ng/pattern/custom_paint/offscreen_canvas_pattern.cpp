@@ -434,6 +434,17 @@ TransformParam OffscreenCanvasPattern::GetTransform() const
 {
     return offscreenPaintMethod_->GetTransform();
 }
+
+void OffscreenCanvasPattern::SaveLayer()
+{
+    offscreenPaintMethod_->SaveLayer();
+}
+
+void OffscreenCanvasPattern::RestoreLayer()
+{
+    offscreenPaintMethod_->RestoreLayer();
+}
+
 size_t OffscreenCanvasPattern::GetBitmapSize()
 {
     CHECK_NULL_RETURN(offscreenPaintMethod_, 0);

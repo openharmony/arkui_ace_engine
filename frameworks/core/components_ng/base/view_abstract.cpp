@@ -1984,6 +1984,14 @@ void ViewAbstract::SetUseEffect(bool useEffect)
     ACE_UPDATE_RENDER_CONTEXT(UseEffect, useEffect);
 }
 
+void ViewAbstract::SetFreeze(bool freeze)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze);
+}
+
 void ViewAbstract::SetUseShadowBatching(bool useShadowBatching)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2843,6 +2851,20 @@ void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     focusHub->SetOnBlurCallback(std::move(onBlurCallback));
+}
+
+void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+}
+
+void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTouchEvent(std::move(touchEventFunc));
 }
 
 } // namespace OHOS::Ace::NG

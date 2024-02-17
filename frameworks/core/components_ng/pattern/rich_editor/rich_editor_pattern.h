@@ -69,8 +69,8 @@ struct AutoScrollParam {
     bool isFirstRun_ = true;
 };
 
-class RichEditorPattern : public TextPattern, public TextInputClient {
-    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, TextInputClient);
+class RichEditorPattern : public TextPattern, public ScrollablePattern, public TextInputClient {
+    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient);
 
 public:
     RichEditorPattern();
@@ -174,7 +174,6 @@ public:
     std::wstring DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
-    void HandleClickAISpanEvent(GestureEvent& info);
     void NotifyKeyboardClosedByUser() override
     {
         FocusHub::LostFocusToViewRoot();
@@ -347,6 +346,33 @@ public:
     bool OnBackPressed() override;
 
     // Add for Scroll
+
+    void OnAttachToFrameNode() override
+    {
+        TextPattern::OnAttachToFrameNode();
+    }
+
+    void OnDetachFromFrameNode(FrameNode* node) override
+    {
+        TextPattern::OnDetachFromFrameNode(node);
+        ScrollablePattern::OnDetachFromFrameNode(node);
+    }
+
+    bool IsAtBottom() const override
+    {
+        return true;
+    }
+
+    bool IsAtTop() const override
+    {
+        return true;
+    }
+
+    bool UpdateCurrentOffset(float offset, int32_t source) override
+    {
+        return true;
+    }
+
     const RectF& GetTextRect() override
     {
         return richTextRect_;
@@ -560,6 +586,10 @@ private:
     void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
 
+    RectF GetSelectArea();
+    void UpdateOverlaySelectArea();
+    bool IsTouchInFrameArea(const PointF& touchPoint);
+
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
@@ -630,7 +660,6 @@ private:
     TimeStamp lastClickTimeStamp_;
     TimeStamp lastAiPosTimeStamp_;
     bool adjusted_ = false;
-    Offset touchDownOffset_;
     bool isShowMenu_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };

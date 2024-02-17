@@ -417,6 +417,8 @@ public:
     virtual void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) {}
 
     virtual void SetActualForegroundColor(const Color& value) {}
+
+    virtual void ResetSurface() {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
 

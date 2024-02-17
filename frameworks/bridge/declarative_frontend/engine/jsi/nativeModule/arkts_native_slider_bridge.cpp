@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_slider_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
@@ -31,7 +29,7 @@ ArkUINativeModuleValue SliderBridge::SetShowTips(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> showTipArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> contentArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     bool showTips = false;
     if (showTipArg->IsBoolean()) {
@@ -40,9 +38,9 @@ ArkUINativeModuleValue SliderBridge::SetShowTips(ArkUIRuntimeCallInfo* runtimeCa
     
     std::string content;
     if (ArkTSUtils::ParseJsString(vm, contentArg, content)) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().SetShowTips(nativeNode, showTips, content.c_str());
+        GetArkUINodeModifiers()->getSliderModifier()->setShowTips(nativeNode, showTips, content.c_str());
     } else {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().SetShowTips(nativeNode, showTips, nullptr);
+        GetArkUINodeModifiers()->getSliderModifier()->setShowTips(nativeNode, showTips, nullptr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -52,8 +50,8 @@ ArkUINativeModuleValue SliderBridge::ResetShowTips(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().ResetShowTips(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetShowTips(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -63,18 +61,18 @@ ArkUINativeModuleValue SliderBridge::SetSliderStepSize(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension stepSize;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, stepSize, false)) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetSliderStepSize(nativeNode);
+        GetArkUINodeModifiers()->getSliderModifier()->resetSliderStepSize(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     } else {
         if (LessNotEqual(stepSize.Value(), 0.0)) {
-            GetArkUIInternalNodeAPI()->GetSliderModifier().ResetSliderStepSize(nativeNode);
+            GetArkUINodeModifiers()->getSliderModifier()->resetSliderStepSize(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
 
-        GetArkUIInternalNodeAPI()->GetSliderModifier().SetSliderStepSize(
+        GetArkUINodeModifiers()->getSliderModifier()->setSliderStepSize(
             nativeNode, stepSize.Value(), static_cast<int>(stepSize.Unit()));
     }
 
@@ -86,8 +84,8 @@ ArkUINativeModuleValue SliderBridge::ResetSliderStepSize(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().ResetSliderStepSize(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetSliderStepSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -98,17 +96,17 @@ ArkUINativeModuleValue SliderBridge::SetBlockSize(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     CalcDimension blockWidth;
     CalcDimension blockHeight;
     bool hasBlockWidth = ArkTSUtils::ParseJsDimensionVp(vm, secondArg, blockWidth);
     bool hasBlockHeight = ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, blockHeight);
     if (!hasBlockWidth && !hasBlockHeight) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetBlockSize(nativeNode);
+        GetArkUINodeModifiers()->getSliderModifier()->resetBlockSize(nativeNode);
     }
 
-    GetArkUIInternalNodeAPI()->GetSliderModifier().SetBlockSize(nativeNode,
+    GetArkUINodeModifiers()->getSliderModifier()->setBlockSize(nativeNode,
         blockWidth.Value(), static_cast<int>(blockWidth.Unit()),
         blockHeight.Value(), static_cast<int>(blockHeight.Unit()));
     return panda::JSValueRef::Undefined(vm);
@@ -119,8 +117,8 @@ ArkUINativeModuleValue SliderBridge::ResetBlockSize(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().ResetBlockSize(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetBlockSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -130,20 +128,20 @@ ArkUINativeModuleValue SliderBridge::SetTrackBorderRadius(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     CalcDimension trackBorderRadius;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, trackBorderRadius, true)) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetTrackBorderRadius(nativeNode);
+        GetArkUINodeModifiers()->getSliderModifier()->resetTrackBorderRadius(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
     if (LessNotEqual(trackBorderRadius.Value(), 0.0)) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetTrackBorderRadius(nativeNode);
+        GetArkUINodeModifiers()->getSliderModifier()->resetTrackBorderRadius(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
-    GetArkUIInternalNodeAPI()->GetSliderModifier().SetTrackBorderRadius(nativeNode,
+    GetArkUINodeModifiers()->getSliderModifier()->setTrackBorderRadius(nativeNode,
         trackBorderRadius.Value(), static_cast<int>(trackBorderRadius.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -153,8 +151,8 @@ ArkUINativeModuleValue SliderBridge::ResetTrackBorderRadius(ArkUIRuntimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().ResetTrackBorderRadius(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetTrackBorderRadius(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -164,12 +162,12 @@ ArkUINativeModuleValue SliderBridge::SetStepColor(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetStepColor(nativeNode);
+        GetArkUINodeModifiers()->getSliderModifier()->resetStepColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().SetStepColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getSliderModifier()->setStepColor(nativeNode, color.GetValue());
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -180,8 +178,8 @@ ArkUINativeModuleValue SliderBridge::ResetStepColor(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().ResetStepColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetStepColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -191,12 +189,12 @@ ArkUINativeModuleValue SliderBridge::SetBlockBorderColor(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetBlockBorderColor(nativeNode);
+        GetArkUINodeModifiers()->getSliderModifier()->resetBlockBorderColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().SetBlockBorderColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getSliderModifier()->setBlockBorderColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -206,8 +204,8 @@ ArkUINativeModuleValue SliderBridge::ResetBlockBorderColor(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().ResetBlockBorderColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetBlockBorderColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -217,20 +215,20 @@ ArkUINativeModuleValue SliderBridge::SetBlockBorderWidth(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     CalcDimension blockBorderWidth;
     if (!ArkTSUtils::ParseJsDimensionVp(vm, secondArg, blockBorderWidth)) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetBlockBorderWidth(nativeNode);
+        GetArkUINodeModifiers()->getSliderModifier()->resetBlockBorderWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
     if (LessNotEqual(blockBorderWidth.Value(), 0.0)) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetBlockBorderWidth(nativeNode);
+        GetArkUINodeModifiers()->getSliderModifier()->resetBlockBorderWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
-    GetArkUIInternalNodeAPI()->GetSliderModifier().SetBlockBorderWidth(nativeNode,
+    GetArkUINodeModifiers()->getSliderModifier()->setBlockBorderWidth(nativeNode,
         blockBorderWidth.Value(), static_cast<int>(blockBorderWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -240,8 +238,8 @@ ArkUINativeModuleValue SliderBridge::ResetBlockBorderWidth(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().ResetBlockBorderWidth(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetBlockBorderWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -251,12 +249,12 @@ ArkUINativeModuleValue SliderBridge::SetBlockColor(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetBlockColor(nativeNode);
+        GetArkUINodeModifiers()->getSliderModifier()->resetBlockColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().SetBlockColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getSliderModifier()->setBlockColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -266,8 +264,8 @@ ArkUINativeModuleValue SliderBridge::ResetBlockColor(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().ResetBlockColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetBlockColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -277,12 +275,12 @@ ArkUINativeModuleValue SliderBridge::SetTrackBackgroundColor(ArkUIRuntimeCallInf
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetTrackBackgroundColor(nativeNode);
+        GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().SetTrackBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getSliderModifier()->setTrackBackgroundColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -292,8 +290,8 @@ ArkUINativeModuleValue SliderBridge::ResetTrackBackgroundColor(ArkUIRuntimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().ResetTrackBackgroundColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -303,12 +301,12 @@ ArkUINativeModuleValue SliderBridge::SetSelectColor(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
         Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetSelectColor(nativeNode);
+        GetArkUINodeModifiers()->getSliderModifier()->resetSelectColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().SetSelectColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getSliderModifier()->setSelectColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -318,8 +316,8 @@ ArkUINativeModuleValue SliderBridge::ResetSelectColor(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().ResetSelectColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetSelectColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -329,9 +327,9 @@ ArkUINativeModuleValue SliderBridge::SetShowSteps(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     bool flag = secondArg->ToBoolean(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().SetShowSteps(nativeNode, flag);
+    GetArkUINodeModifiers()->getSliderModifier()->setShowSteps(nativeNode, flag);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -340,8 +338,8 @@ ArkUINativeModuleValue SliderBridge::ResetShowSteps(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().ResetShowSteps(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetShowSteps(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -351,15 +349,15 @@ ArkUINativeModuleValue SliderBridge::SetThickness(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     CalcDimension thickness;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, thickness, true)) {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().ResetThickness(nativeNode);
+        GetArkUINodeModifiers()->getSliderModifier()->resetThickness(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
-    GetArkUIInternalNodeAPI()->GetSliderModifier().SetThickness(nativeNode,
+    GetArkUINodeModifiers()->getSliderModifier()->setThickness(nativeNode,
         thickness.Value(), static_cast<int>(thickness.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -369,8 +367,8 @@ ArkUINativeModuleValue SliderBridge::ResetThickness(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSliderModifier().ResetThickness(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetThickness(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -379,7 +377,7 @@ ArkUINativeModuleValue SliderBridge::SetBlockStyle(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     if (!info[1]->IsObject()) {
@@ -427,7 +425,7 @@ ArkUINativeModuleValue SliderBridge::ResetBlockStyle(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     SliderModelNG::ResetBlockType(frameNode);
     SliderModelNG::ResetBlockImage(frameNode);

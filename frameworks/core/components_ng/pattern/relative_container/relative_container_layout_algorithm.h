@@ -69,9 +69,9 @@ private:
     void GetDependencyRelationship();
     void GetDependencyRelationshipInChain(const std::string& anchor, const std::string& nodeName);
     void GetDependencyRelationshipInBarrier();
-    void CalcHorizontalGuideline(std::optional<CalcSize>& selfIdealSize, const float& containerHeight,
+    void CalcHorizontalGuideline(std::optional<CalcSize>& selfIdealSize, float containerHeight,
         const GuidelineInfo& guidelineInfo);
-    void CalcVerticalGuideline(std::optional<CalcSize>& selfIdealSize, const float& containerWidth,
+    void CalcVerticalGuideline(std::optional<CalcSize>& selfIdealSize, float containerWidth,
         const GuidelineInfo& guidelineInfo);
     void CalcGuideline(LayoutWrapper* layoutWrapper);
     void CalcBarrier(LayoutWrapper* layoutWrapper);
@@ -92,7 +92,8 @@ private:
     float GetHorizontalAnchorValueByAlignRule(AlignRule& alignRule);
     float GetVerticalAnchorValueByAlignRule(AlignRule& alignRule);
     std::pair<float, float> CalcOffsetInChainGetStart(const float& anchorDistance, const float& contentSize,
-        const ChainParam& chainParam, LineDirection direction);
+        int32_t itemCount, const ChainParam& chainParam, LineDirection direction);
+    void RecordOffsetInChain(float offset, float spaceSize, const std::string& chainName, LineDirection direction);
     bool CalcOffsetInChain(const std::string& chainName, LineDirection direction);
     void PreTopologicalLoopDetectionGetAnchorSet(
         const std::string& nodeName, const AlignRulesItem& alignRulesItem, std::set<std::string>& anchorSet);
@@ -122,6 +123,7 @@ private:
         const std::unique_ptr<FlexItemProperty>& flexItemProperty, const ChildIdealSize& childIdealSize);
     void UpdateTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule, LineDirection direction);
     void UpdateSizeWhenChildrenEmpty(LayoutWrapper* layoutWrapper);
+    bool IsAnchorLegal(const std::string& anchorName);
 
     bool isHorizontalRelyOnContainer_ = false;
     bool isVerticalRelyOnContainer_ = false;

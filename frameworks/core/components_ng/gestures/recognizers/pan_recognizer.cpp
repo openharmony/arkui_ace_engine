@@ -122,7 +122,6 @@ void PanRecognizer::OnAccepted()
 
 void PanRecognizer::OnRejected()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture has been rejected");
     // fix griditem drag interrupted by click while pull moving
     if (refereeState_ != RefereeState::SUCCEED) {
         refereeState_ = RefereeState::FAIL;
@@ -153,6 +152,10 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
     if (event.sourceType == SourceType::MOUSE && !isAllowMouse_) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+    if (!IsInAttachedNode(event)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -251,7 +254,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED) {
         if (currentFingers_ == fingers_) {
-            ResSchedReport::GetInstance().ResSchedDataReport("click");
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
             averageDistance_.Reset();
@@ -572,9 +574,6 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             info.SetSourceTool(lastTouchEvent_.sourceTool);
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        if (recognizerTarget_.has_value()) {
-            info.SetTarget(recognizerTarget_.value());
-        }
         info.SetInputEventType(inputEventType_);
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
@@ -619,9 +618,6 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
         info->SetSourceTool(lastTouchEvent_.sourceTool);
     }
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
-    if (recognizerTarget_.has_value()) {
-        info->SetTarget(recognizerTarget_.value());
-    }
     info->SetForce(lastTouchEvent_.force);
     if (lastTouchEvent_.tiltX.has_value()) {
         info->SetTiltX(lastTouchEvent_.tiltX.value());

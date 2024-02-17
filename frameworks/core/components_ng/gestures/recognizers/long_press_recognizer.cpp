@@ -81,7 +81,6 @@ void LongPressRecognizer::OnAccepted()
 
 void LongPressRecognizer::OnRejected()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 
@@ -116,6 +115,10 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     TAG_LOGI(AceLogTag::ACE_GESTURE,
         "Long press recognizer receives %{public}d touch down event, begin to detect long press event", event.id);
+    if (!IsInAttachedNode(event)) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     int32_t curDuration = duration_;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (!IsPostEventResult()) {
@@ -315,9 +318,6 @@ void LongPressRecognizer::SendCallbackMsg(
         info.SetScreenLocation(trackPoint.GetScreenOffset());
         info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        if (recognizerTarget_.has_value()) {
-            info.SetTarget(recognizerTarget_.value());
-        }
         info.SetForce(trackPoint.force);
         if (trackPoint.tiltX.has_value()) {
             info.SetTiltX(trackPoint.tiltX.value());
@@ -415,9 +415,6 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     }
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
-    if (recognizerTarget_.has_value()) {
-        info->SetTarget(recognizerTarget_.value());
-    }
     info->SetForce(trackPoint.force);
     if (trackPoint.tiltX.has_value()) {
         info->SetTiltX(trackPoint.tiltX.value());

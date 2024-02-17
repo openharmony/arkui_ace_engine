@@ -97,9 +97,11 @@ void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width,
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto rect = pipeline->GetDisplayWindowRectInfo();
+    auto windowScale = GetWindowScale();
+    int32_t windowX = static_cast<int32_t>(info.GetGlobalPoint().GetX() * windowScale);
+    int32_t windowY = static_cast<int32_t>(info.GetGlobalPoint().GetY() * windowScale);
     dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
-        static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
-        static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(), width, height);
+        windowX + rect.Left(), windowY + rect.Top(), width, height);
     if (dragWindow_) {
         dragWindow_->SetOffset(rect.Left(), rect.Top());
     }
@@ -240,6 +242,9 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
         return nullptr;
     }
 
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto nanoTimestamp = pipeline->GetVsyncTime();
     PointF point(globalX, globalY);
     std::vector<RefPtr<FrameNode>> hitFrameNodes;
     for (auto iterOfFrameNode = frameNodes.begin(); iterOfFrameNode != frameNodes.end(); iterOfFrameNode++) {
@@ -252,7 +257,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
             continue;
         }
         auto globalFrameRect = geometryNode->GetFrameRect();
-        globalFrameRect.SetOffset(frameNode->GetTransformRelativeOffset());
+        globalFrameRect.SetOffset(frameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp));
         if (globalFrameRect.IsInRegion(point)) {
             hitFrameNodes.push_back(frameNode);
         }
@@ -262,8 +267,6 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
         TAG_LOGD(AceLogTag::ACE_DRAG, "Cannot find targetNodes.");
         return nullptr;
     }
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
     auto manager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(manager, nullptr);
     auto rootNode = pipeline->GetRootElement();
@@ -1340,4 +1343,24 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
     hasNotifiedTransformation_ = true;
 }
 
+void DragDropManager::SetDragResult(
+    const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
+{
+    DragRet result = DragRet::DRAG_FAIL;
+    switch (notifyMessage.result) {
+        case DragRet::DRAG_SUCCESS:
+            result = DragRet::DRAG_SUCCESS;
+            break;
+        case DragRet::DRAG_FAIL:
+            result = DragRet::DRAG_FAIL;
+            break;
+        case DragRet::DRAG_CANCEL:
+            result = DragRet::DRAG_CANCEL;
+            break;
+        default:
+            break;
+    }
+    CHECK_NULL_VOID(dragEvent);
+    dragEvent->SetResult(result);
+}
 } // namespace OHOS::Ace::NG

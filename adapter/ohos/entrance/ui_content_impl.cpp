@@ -20,6 +20,7 @@
 
 #include "ability_context.h"
 #include "ability_info.h"
+#include "base/memory/referenced.h"
 #include "configuration.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
@@ -240,7 +241,11 @@ public:
             CHECK_NULL_VOID(context);
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
             if (pipeline) {
+                ContainerScope scope(instanceId_);
                 auto uiExtMgr = pipeline->GetUIExtensionManager();
+                if (uiExtMgr) {
+                    SetUIExtensionImeShow(keyboardRect, pipeline);
+                }
                 if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
                     return;
                 }
@@ -258,6 +263,25 @@ public:
     }
 
 private:
+    void SetUIExtensionImeShow(const Rect& keyboardRect, const RefPtr<NG::PipelineContext>& pipeline)
+    {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        if (GreatNotEqual(keyboardRect.Height(), 0.0f)) {
+            taskExecutor->PostTask(
+                [pipeline] {
+                    CHECK_NULL_VOID(pipeline);
+                    pipeline->SetUIExtensionImeShow(true);
+            }, TaskExecutor::TaskType::UI);
+        } else {
+            taskExecutor->PostTask(
+                [pipeline] {
+                    CHECK_NULL_VOID(pipeline);
+                    pipeline->SetUIExtensionImeShow(false);
+            }, TaskExecutor::TaskType::UI);
+        }
+    }
     int32_t instanceId_ = -1;
 };
 
@@ -551,6 +575,7 @@ void UIContentImpl::PreInitializeForm(OHOS::Rosen::Window* window, const std::st
     if (isFormRender_ && !window) {
         LOGI("CommonInitializeForm url = %{public}s", url.c_str());
         CommonInitializeForm(window, url, storage);
+        SystemProperties::AddWatchSystemParameter(this);
     }
 }
 
@@ -566,6 +591,7 @@ void UIContentImpl::RunFormPage()
 
 UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
+    SystemProperties::AddWatchSystemParameter(this);
     return InitializeInner(window, url, storage, false);
 }
 
@@ -575,6 +601,7 @@ UIContentErrorCode UIContentImpl::Initialize(
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, "", storage);
     CHECK_ERROR_CODE_RETURN(errorCode);
+    SystemProperties::AddWatchSystemParameter(this);
     if (content) {
         LOGI("Initialize by buffer, size:%{public}zu", content->size());
         // run page.
@@ -592,6 +619,7 @@ UIContentErrorCode UIContentImpl::Initialize(
 UIContentErrorCode UIContentImpl::InitializeByName(
     OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
+    SystemProperties::AddWatchSystemParameter(this);
     return InitializeInner(window, name, storage, true);
 }
 
@@ -605,6 +633,7 @@ void UIContentImpl::InitializeDynamic(
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
 
     CommonInitializeForm(nullptr, abcPath, nullptr);
+    SystemProperties::AddWatchSystemParameter(this);
 
     LOGI("Initialize DynamicComponent startUrl = %{public}s, entryPoint = %{public}s", startUrl_.c_str(),
         entryPoint.c_str());
@@ -619,6 +648,7 @@ void UIContentImpl::Initialize(
 {
     if (window) {
         CommonInitialize(window, url, storage);
+        SystemProperties::AddWatchSystemParameter(this);
     }
     if (focusWindowId != 0) {
         LOGI("UIExtension host window id:%{public}u", focusWindowId);
@@ -1510,7 +1540,8 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
 {
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
     auto pipeline = container->GetPipelineContext();
-    if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow()) {
+    if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
+        (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow())) {
         avoidAreaChangedListener_ = new AvoidAreaChangedListener(instanceId_);
         window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
@@ -1538,6 +1569,7 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 void UIContentImpl::Foreground()
 {
     LOGI("[%{public}s][%{public}s]: window foreground", bundleName_.c_str(), moduleName_.c_str());
+    PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     ContainerScope::UpdateRecentForeground(instanceId_);
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
@@ -1602,6 +1634,7 @@ void UIContentImpl::UnFocus()
 void UIContentImpl::Destroy()
 {
     LOGI("%{public}s window destroy", bundleName_.c_str());
+    SystemProperties::RemoveWatchSystemParameter(this);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file

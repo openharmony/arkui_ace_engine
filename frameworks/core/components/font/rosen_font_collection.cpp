@@ -91,12 +91,11 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
 #endif
     });
 
-    auto it = std::find(families_.begin(), families_.end(), familyName);
-    if (it != families_.end()) {
+    if (families_.find(familyName) != families_.end()) {
         return;
     }
 
-    families_.emplace_back(familyName);
+    families_.emplace(familyName);
 
     if (fontCollection_) {
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -165,8 +164,12 @@ void RosenFontCollection::LoadThemeFont(const char* fontFamily, std::unique_ptr<
 
 void RosenFontCollection::LoadFontFamily(const char* fontFamily, const char* familySrc)
 {
-    InitializeFontCollection();
     const std::string path = familySrc;
+    if (currentFamily_ == path) {
+        LOGI("This font has already been registered.");
+        return;
+    }
+    InitializeFontCollection();
     auto ret = StdFilesystemExists(path);
     if (!ret) {
         LOGE("font is not exist");
@@ -204,6 +207,7 @@ void RosenFontCollection::LoadFontFamily(const char* fontFamily, const char* fam
         return;
     }
     ifs.close();
+    currentFamily_ = path;
     LoadThemeFont(fontFamily, std::move(buffer), size);
 }
 

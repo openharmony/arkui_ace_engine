@@ -30,7 +30,7 @@ public:
         std::function<void(RefPtr<NG::NavigationStack>)> updater) override;
     void SetNavigationStackProvided(bool provided) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
-        const std::string& title) override;
+        const std::string& title, bool ignoreMainTitle = false) override;
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
     void SetTitlebarOptions(NavigationTitlebarOptions&& opt) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
@@ -83,9 +83,6 @@ public:
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
 
 private:
-    static void PutComponentInsideNavigator(
-        NavigationGroupNode* navigationGroupNode, const RefPtr<NavBarNode>& navBarNode);
-
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     bool CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>& navBarNode);
     bool CreateContentNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

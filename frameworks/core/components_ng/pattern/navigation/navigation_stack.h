@@ -92,7 +92,7 @@ public:
     }
 
     NavPathList GetAllCacheNodes();
-    void AddCacheNode(const std::string& name, const RefPtr<UINode>& navDestinationNode);
+    void AddCacheNode(const std::string& name, const RefPtr<UINode>& uiNode);
     RefPtr<UINode> GetFromCacheNode(NavPathList& cacheNodes, const std::string& name);
     RefPtr<UINode> GetFromCacheNode(const std::string& name);
     std::optional<std::pair<std::string, RefPtr<UINode>>> GetFromCacheNode(int32_t handle);

@@ -1475,10 +1475,17 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
             static_cast<float>(transform.quaternion.GetY()), static_cast<float>(transform.quaternion.GetZ()),
             static_cast<float>(transform.quaternion.GetW()) };
         Rosen::Vector2f scaleValue { transform.scale[0], transform.scale[1] };
+        Rosen::Vector2f skewValue { transform.skew[0], transform.skew[1] };
+        Rosen::Vector2f pivotValue { 0.0, 0.0 };
+
+        AddOrChangePivotModifier(
+            rsNode_, transformMatrixModifier_->pivotXY, transformMatrixModifier_->pivotXYValue, pivotValue);
         AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
             transformMatrixModifier_->translateXYValue, xyTranslateValue);
         AddOrChangeScaleModifier(
             rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, scaleValue);
+        AddOrChangeSkewModifier(
+            rsNode_, transformMatrixModifier_->skewXY, transformMatrixModifier_->skewXYValue, skewValue);
         AddOrChangeQuaternionModifier(
             rsNode_, transformMatrixModifier_->quaternion, transformMatrixModifier_->quaternionValue, quaternion);
     }
@@ -1511,6 +1518,33 @@ void SetCorner(double& x, double& y, double width, double height, int32_t degree
     }
 }
 
+void SkewRect(float sx, float sy, RectF& rect)
+{
+    auto left = rect.Left();
+    auto right = rect.Right();
+    auto top = rect.Top();
+    auto bottom = rect.Bottom();
+
+    auto leftAfterSkew = sx > 0? left + sx * top: left + sx * bottom;
+    auto rightAfterSkew = sx > 0? right + sx * bottom: right + sx * top;
+    auto topAfterSkew = sy > 0? top + sy * left: top + sy * right;
+    auto bottomAfterSkew = sy > 0? bottom + sy * right: bottom + sy * left;
+
+    rect.SetLeft(leftAfterSkew);
+    rect.SetWidth(rightAfterSkew - leftAfterSkew);
+    rect.SetTop(topAfterSkew);
+    rect.SetHeight(bottomAfterSkew - topAfterSkew);
+}
+
+void SkewPoint(float sx, float sy, PointF& point)
+{
+    auto x = point.GetX();
+    auto y = point.GetY();
+
+    point.SetX(x + y * sx);
+    point.SetY(y + x * sy);
+}
+
 RectF RosenRenderContext::GetPaintRectWithTransform()
 {
     RectF rect;
@@ -1518,6 +1552,7 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto skew = rsNode_->GetStagingProperties().GetSkew();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     auto center = rsNode_->GetStagingProperties().GetPivot();
     auto degree = rsNode_->GetStagingProperties().GetRotation();
@@ -1533,6 +1568,8 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     rect.SetSize(newSize);
     transInfo_ = { scale[0], scale[1], centerPos.GetX(), centerPos.GetY(), rect.GetX(), rect.GetY(), translate[0],
         translate[1], degree };
+    // calculate skew
+    SkewRect(skew[0], skew[1], rect);
     // calculate rotate
     degree = static_cast<int32_t>(degree) % 360;
     auto radian = Degree2Radian(degree);
@@ -1594,6 +1631,7 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
     }
 
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto skew = rsNode_->GetStagingProperties().GetSkew();
     auto scale = rsNode_->GetStagingProperties().GetScale();
 
     RectF rect = GetPaintRectWithoutTransform();
@@ -1604,11 +1642,14 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
     auto rotationMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
                        Matrix4::CreateRotate(degree, 0, 0, 1) *
                        Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+    auto skewMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                    Matrix4::CreateFactorSkew(skew[0], skew[1]) *
+                    Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
     auto scaleMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
                     Matrix4::CreateScale(scale[0], scale[1], 1) *
                     Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
 
-    return Matrix4::Invert(translateMat * rotationMat * scaleMat);
+    return Matrix4::Invert(translateMat * rotationMat * skewMat * scaleMat);
 }
 
 Matrix4 RosenRenderContext::GetMatrix()
@@ -1622,6 +1663,7 @@ Matrix4 RosenRenderContext::GetMatrix()
     }
 
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto skew = rsNode_->GetStagingProperties().GetSkew();
     auto scale = rsNode_->GetStagingProperties().GetScale();
 
     RectF rect = GetPaintRectWithoutTransform();
@@ -1632,11 +1674,14 @@ Matrix4 RosenRenderContext::GetMatrix()
     auto rotationMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
                        Matrix4::CreateRotate(degree, 0, 0, 1) *
                        Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+    auto skewMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                    Matrix4::CreateFactorSkew(skew[0], skew[1]) *
+                    Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
     auto scaleMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
                     Matrix4::CreateScale(scale[0], scale[1], 1) *
                     Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
 
-    return translateMat * rotationMat * scaleMat;
+    return translateMat * rotationMat * skewMat * scaleMat;
 }
 
 Matrix4 RosenRenderContext::GetLocalTransformMatrix()
@@ -1670,8 +1715,10 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     CHECK_NULL_VOID(rsNode_);
     // TODO: add rotation and center support
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto skew = rsNode_->GetStagingProperties().GetSkew();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
+    SkewPoint(skew[0], skew[1], point);
     RectF rect = GetPaintRectWithoutTransform();
     auto center = rsNode_->GetStagingProperties().GetPivot();
     int32_t degree = rsNode_->GetStagingProperties().GetRotation();
@@ -4895,5 +4942,12 @@ void RosenRenderContext::SetCommandPathMask(
 
     std::shared_ptr<RSMask> mask = RSMask::CreatePathMask(path, pen, brush);
     rsNode_->SetMask(mask);
+}
+
+void RosenRenderContext::ResetSurface()
+{
+    auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
+    CHECK_NULL_VOID(rsCanvasDrawingNode);
+    rsCanvasDrawingNode->ResetSurface();
 }
 } // namespace OHOS::Ace::NG

@@ -29,7 +29,8 @@ namespace OHOS::Ace {
 using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
-constexpr int64_t RESPONSE_TIMEOUT = 1000000000;
+constexpr int64_t RESPONSE_TIMEOUT = 60000000;
+constexpr int64_t STARTAPP_FRAME_TIMEOUT = 100000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
 const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
 const int32_t DEFAULT_JANK_REPORT_THRESHOLD = 3;
@@ -226,7 +227,7 @@ bool SceneRecord::IsFirstFrame()
 
 bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
 {
-    if (sceneId == PerfConstants::APP_LIST_FLING) {
+    if (sceneId == PerfConstants::APP_LIST_FLING || sceneId == PerfConstants::APP_SWIPER_SCROLL) {
         return true;
     }
     return false;
@@ -505,7 +506,7 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 // for jank frame app
 bool PerfMonitor::IsExclusionFrame()
 {
-    return isResponseExclusion || isStartAppFrame || isBackgroundApp;
+    return isResponseExclusion || isStartAppFrame || isBackgroundApp || isExclusionWindow;
 }
 
 void PerfMonitor::SetAppStartStatus()
@@ -518,7 +519,7 @@ void PerfMonitor::CheckInStartAppStatus()
 {
     if (isStartAppFrame) {
         int64_t curTime = GetCurrentRealTimeNs();
-        if (curTime - startAppTime >= RESPONSE_TIMEOUT) {
+        if (curTime - startAppTime >= STARTAPP_FRAME_TIMEOUT) {
             isStartAppFrame = false;
             startAppTime = curTime;
         }

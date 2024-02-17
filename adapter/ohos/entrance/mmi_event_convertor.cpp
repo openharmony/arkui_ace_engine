@@ -114,9 +114,6 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         touchPoint.sourceTool };
     AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
-#ifdef SECURITY_COMPONENT_ENABLE
-    event.enhanceData = pointerEvent->GetEnhanceData();
-#endif
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
@@ -265,9 +262,6 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     TimeStamp time(microseconds);
     events.time = time;
     events.pointerEvent = pointerEvent;
-#ifdef SECURITY_COMPONENT_ENABLE
-    events.enhanceData = pointerEvent->GetEnhanceData();
-#endif
     auto sourceTool = GetSourceTool(item.GetToolType());
     if (events.sourceType == SourceType::TOUCH && sourceTool == SourceTool::PEN) {
         events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);

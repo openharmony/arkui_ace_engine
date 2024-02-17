@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LOADING_PROGRESS_MODIFIER_H
-#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LOADING_PROGRESS_MODIFIER_H
+#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_CHECKBOX_MODIFIER_H
+#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_CHECKBOX_MODIFIER_H
 
-#include "core/interfaces/native/node/api.h"
+#include "core/interfaces/native/node/node_api.h"
 
-namespace OHOS::Ace::NG {
-ArkUILoadingProgressModifierAPI GetLoadingProgressModifier();
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUICheckboxModifier* GetCheckboxModifier();
+void SetCheckboxChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 }
-
-#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LOADING_PROGRESS_MODIFIER_H
+#endif

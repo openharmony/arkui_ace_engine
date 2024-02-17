@@ -182,6 +182,10 @@ public:
         return 0;
     }
 
+    virtual void Lock() {}
+
+    virtual void Unlock() {}
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

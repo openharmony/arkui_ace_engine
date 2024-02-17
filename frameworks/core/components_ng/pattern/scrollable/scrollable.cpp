@@ -160,6 +160,11 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         if (scroll->dragCancelCallback_) {
             scroll->dragCancelCallback_();
         }
+        GestureEvent info;
+        scroll->HandleDragEnd(info);
+        if (scroll->actionEnd_) {
+            scroll->actionEnd_(info);
+        }
         scroll->isDragging_ = false;
     };
 
@@ -897,6 +902,8 @@ void Scrollable::ProcessSpringMotion(double position)
     }
     lastVsyncTime_ = currentVsync;
     if (NearEqual(currentPos_, position)) {
+        // trace stop at OnScrollStop
+        AceAsyncTraceBegin(0, TRAILING_ANIMATION);
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
         moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
@@ -921,7 +928,8 @@ void Scrollable::ProcessSpringMotion(double position)
 
 void Scrollable::ProcessScrollMotion(double position)
 {
-    position = Round(position);
+    double nearPosition = isSnapAnimation_ ? endPos_ : finalPosition_;
+    position = NearEqual(position, nearPosition, 0.5) ? position : Round(position);
     currentVelocity_ = frictionVelocity_;
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
@@ -930,6 +938,8 @@ void Scrollable::ProcessScrollMotion(double position)
         "needScrollSnapChange_ is %{public}u",
         position, currentVelocity_, needScrollSnapChange_);
     if ((NearEqual(currentPos_, position))) {
+        // trace stop at OnScrollStop
+        AceAsyncTraceBegin(0, TRAILING_ANIMATION);
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION);
     } else {
         // UpdateScrollPosition return false, means reach to scroll limit.
@@ -1046,6 +1056,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         if (scroll->isFrictionAnimationStop_ || scroll->isTouching_) {
             return;
         }
+        scroll->isSnapAnimation_ = false;
         scroll->ProcessScrollMotion(position);
         if (NearEqual(scroll->finalPosition_, position, 1.0)) {
             scroll->StopFrictionAnimation();
@@ -1105,6 +1116,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
             if (!scroll->isSnapScrollAnimationStop_) {
                 scroll->ProcessScrollSnapMotion(scroll->endPos_);
             } else if (!scroll->isSnapAnimationStop_) {
+                scroll->isSnapAnimation_ = true;
                 scroll->ProcessScrollMotion(scroll->endPos_);
             }
             scroll->StopSnapAnimation();
@@ -1112,6 +1124,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
             if (!scroll->isSnapScrollAnimationStop_) {
                 scroll->ProcessScrollSnapMotion(position);
             } else if (!scroll->isSnapAnimationStop_) {
+                scroll->isSnapAnimation_ = true;
                 scroll->ProcessScrollMotion(position);
             }
         }
@@ -1190,7 +1203,7 @@ void Scrollable::OnCollectTouchTarget(
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
 {
     if (panRecognizerNG_) {
-        panRecognizerNG_->AssignNodeId(frameNode->GetId());
+        panRecognizerNG_->SetNodeId(frameNode->GetId());
         panRecognizerNG_->AttachFrameNode(frameNode);
         panRecognizerNG_->SetTargetComponent(targetComponent);
         panRecognizerNG_->SetIsSystemGesture(true);

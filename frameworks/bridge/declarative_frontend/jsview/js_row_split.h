@@ -25,7 +25,7 @@ class JSRowSplit : public JSContainerBase {
 public:
     static void Create();
     static void JSBind(BindingTarget globalObj);
-    static void JsResizeable(bool resizeable);
+    static void JsResizable(bool resizable);
     static void JsClip(const JSCallbackInfo& info);
 };
 

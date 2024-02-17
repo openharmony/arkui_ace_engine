@@ -260,20 +260,6 @@ HWTEST_F(TitleBarTestNg, SetBackButton001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetBackButton001
- * @tc.desc: Test GetBackButton interface.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, GetBackButton001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>(barTag, nodeId);
-    auto ret = titleBarNode->GetBackButton();
-    EXPECT_EQ(ret, nullptr);
-}
-
-/**
  * @tc.name: SetTitle001
  * @tc.desc: Test SetTitle interface.
  * @tc.type: FUNC
@@ -313,20 +299,6 @@ HWTEST_F(TitleBarTestNg, SetSubtitle001, TestSize.Level1)
     auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>(barTag, nodeId);
     titleBarNode->SetSubtitle(nullptr);
     EXPECT_EQ(titleBarNode->subtitle_, nullptr);
-}
-
-/**
- * @tc.name: GetSubtitle001
- * @tc.desc: Test GetSubtitle interface.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, GetSubtitle001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>(barTag, nodeId);
-    auto ret = titleBarNode->GetSubtitle();
-    EXPECT_EQ(ret, nullptr);
 }
 
 /**

@@ -19,6 +19,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/search/search_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -187,13 +188,12 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
-    auto defaultImageHeight =
-        imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
+    auto defaultImageHeight = searchTheme->GetIconSize().ConvertToPx();
     auto iconStretchSize = (NearZero(defaultImageHeight) || !imageConstraint->maxSize.IsPositive()) &&
         !layoutProperty->HasSearchIconUDSize();
-    auto imageHeight =
-        std::min(iconStretchSize ? static_cast<float>(searchTheme->GetIconSize().ConvertToPx()) : defaultImageHeight,
-            static_cast<float>(searchHeight));
+    auto imageHeight = static_cast<float>(std::min(layoutProperty->HasSearchIconUDSize() ?
+        layoutProperty->GetSearchIconUDSizeValue().ConvertToPx() : defaultImageHeight,
+        searchHeight));
     CalcSize imageCalcSize;
     if (iconStretchSize) {
         imageCalcSize.SetWidth(CalcLength(imageHeight));
@@ -240,6 +240,13 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     // searchButton Measure
     auto buttonLayoutConstraint = layoutProperty->CreateChildConstraint();
     buttonWrapper->Measure(buttonLayoutConstraint);
+
+    // deal with pixel round
+    auto pixelRound = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                        static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM) |
+                        static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                        static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
+    buttonLayoutProperty->UpdatePixelRound(pixelRound);
 
     // compute searchButton width
     auto searchWidthMax = CalcSearchWidth(constraint.value(), layoutWrapper);
@@ -389,9 +396,12 @@ double SearchLayoutAlgorithm::CalcSearchHeight(
 
     const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
     CHECK_NULL_RETURN(calcLayoutConstraint, searchHeightAdapt);
-    auto hasMinSize = calcLayoutConstraint->minSize->Height().has_value();
-    auto hasMaxSize = calcLayoutConstraint->maxSize->Height().has_value();
-    auto hasHeight = calcLayoutConstraint->selfIdealSize->Height().has_value();
+    auto hasMinSize = calcLayoutConstraint->minSize.has_value() &&
+        calcLayoutConstraint->minSize->Height().has_value();
+    auto hasMaxSize = calcLayoutConstraint->maxSize.has_value() &&
+        calcLayoutConstraint->maxSize->Height().has_value();
+    auto hasHeight = calcLayoutConstraint->selfIdealSize.has_value() &&
+        calcLayoutConstraint->selfIdealSize->Height().has_value();
     if (hasMinSize && ((hasMaxSize && constraint.minSize.Height() >= constraint.maxSize.Height())
         || (!hasMaxSize && !hasHeight))) {
         return constraint.minSize.Height();

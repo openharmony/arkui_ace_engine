@@ -94,6 +94,7 @@ public:
 
     bool CheckGestureScopeState();
     void ForceCleanGestureScope();
+    void CleanGestureScopeState();
 private:
     bool Existed(const RefPtr<NGGestureRecognizer>& recognizer);
     std::list<WeakPtr<NGGestureRecognizer>> recognizers_;
@@ -135,6 +136,7 @@ public:
 
     bool CheckGestureRefereeState();
     void ForceCleanGestureReferee();
+    void CleanGestureRefereeState(int32_t touchId);
 private:
     void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandlePendingDisposal(const RefPtr<NGGestureRecognizer>& recognizer);

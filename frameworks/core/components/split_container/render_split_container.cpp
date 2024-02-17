@@ -44,7 +44,7 @@ void RenderSplitContainer::Update(const RefPtr<Component>& component)
 void RenderSplitContainer::ResetComponentMember()
 {
     dragDetector_.Reset();
-    resizeable_ = false;
+    resizable_ = false;
     layoutWidth_ = 0.0;
     layoutHeight_ = 0.0;
 }
@@ -52,7 +52,7 @@ void RenderSplitContainer::ResetComponentMember()
 void RenderSplitContainer::UpdateComponentAttr(const RefPtr<Component>& component)
 {
     auto splitComponent = AceType::DynamicCast<SplitContainerComponent>(component);
-    resizeable_ = splitComponent->GetResizeable();
+    resizable_ = splitComponent->GetResizable();
     splitType_ = splitComponent->GetSplitType();
 }
 
@@ -237,7 +237,7 @@ void RenderSplitContainer::LayoutChildren()
 
 void RenderSplitContainer::InitializeRecognizer()
 {
-    if (!resizeable_) {
+    if (!resizable_) {
         return;
     }
     if (!dragDetector_) {

@@ -183,8 +183,8 @@
                 }
             ],
             "test": [
-                "//foundation/arkui/ace_engine/test/unittest:unittest",
-                "//foundation/arkui/ace_engine/test/fuzztest:fuzztest"
+                "//foundation/arkui/ace_engine/test/fuzztest:fuzztest",
+                "//foundation/arkui/ace_engine/test/unittest:unittest"
             ]
         }
     }

@@ -76,6 +76,8 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     RefPtr<GridScrollLayoutAlgorithm> result;
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
         result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+    } else if (SystemProperties::GetGridIrregularLayoutEnabled()) {
+        return MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_);
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }
@@ -1297,8 +1299,9 @@ float GridPattern::EstimateHeight() const
     }
     // During the scrolling animation, the exact current position is used. Other times use the estimated location
     if (isSmoothScrolling_) {
-        // startMainLineIndex corresponds with currentOffset_, but startIndex_ might not if hasBigItem_ is true
-        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(gridLayoutInfo_.startMainLineIndex_, GetMainGap()) -
+        auto lineIndex = 0;
+        scrollGridLayoutInfo_.GetLineIndexByIndex(gridLayoutInfo_.startIndex_, lineIndex);
+        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) -
                gridLayoutInfo_.currentOffset_;
     } else {
         auto host = GetHost();

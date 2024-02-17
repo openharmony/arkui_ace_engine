@@ -27,103 +27,175 @@
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
-#include "core/interfaces/native/node/node_xcomponent_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/interfaces/native/node/node_checkbox_modifier.h"
+#include "core/interfaces/native/node/node_slider_modifier.h"
+
+#include "core/interfaces/native/node/alphabet_indexer_modifier.h"
+#include "core/interfaces/native/node/checkboxgroup_modifier.h"
+#include "core/interfaces/native/node/calendar_picker_modifier.h"
+#include "core/interfaces/native/node/column_modifier.h"
+#include "core/interfaces/native/node/blank_modifier.h"
+#include "core/interfaces/native/node/column_split_modifier.h"
+#include "core/interfaces/native/node/grid_modifier.h"
+#include "core/interfaces/native/node/grid_col_modifier.h"
+#include "core/interfaces/native/node/grid_item_modifier.h"
+#include "core/interfaces/native/node/button_modifier.h"
+#include "core/interfaces/native/node/row_split_modifier.h"
+#include "core/interfaces/native/node/common_shape_modifier.h"
+#include "core/interfaces/native/node/data_panel_modifier.h"
+#include "core/interfaces/native/node/counter_modifier.h"
+#include "core/interfaces/native/node/divider_modifier.h"
+#include "core/interfaces/native/node/gauge_modifier.h"
+#include "core/interfaces/native/node/line_modifier.h"
+#include "core/interfaces/native/node/hyperlink_modifier.h"
+#include "core/interfaces/native/node/row_modifier.h"
+#include "core/interfaces/native/node/grid_row_modifier.h"
+#include "core/interfaces/native/node/image_animator_modifier.h"
+#include "core/interfaces/native/node/list_item_modifier.h"
+#include "core/interfaces/native/node/nav_router_modifier.h"
+#include "core/interfaces/native/node/nav_destination_modifier.h"
+#include "core/interfaces/native/node/marquee_modifier.h"
+#include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/node_container_modifier.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/interfaces/native/node/navigator_modifier.h"
+#include "core/interfaces/native/node/panel_modifier.h"
+#include "core/interfaces/native/node/navigation_modifier.h"
+#include "core/interfaces/native/node/path_modifier.h"
+#include "core/interfaces/native/node/pattern_lock_modifier.h"
+#include "core/interfaces/native/node/polygon_modifier.h"
+#include "core/interfaces/native/node/polyline_modifier.h"
+#include "core/interfaces/native/node/progress_modifier.h"
+#include "core/interfaces/native/node/rating_modifier.h"
+#include "core/interfaces/native/node/qrcode_modifier.h"
+#include "core/interfaces/native/node/radio_modifier.h"
+#include "core/interfaces/native/node/render_node_modifier.h"
+#include "core/interfaces/native/node/video_modifier.h"
+#include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/node/text_clock_modifier.h"
+#include "core/interfaces/native/node/text_timer_modifier.h"
+#include "core/interfaces/native/node/tabs_modifier.h"
+#include "core/interfaces/native/node/search_modifier.h"
+#include "core/interfaces/native/node/select_modifier.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
+#include "core/interfaces/native/node/shape_modifier.h"
+#include "core/interfaces/native/node/rect_modifier.h"
+#include "core/interfaces/native/node/side_bar_container_modifier.h"
+#include "core/interfaces/native/node/stepper_item_modifier.h"
+
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "core/interfaces/native/node/plugin_modifier.h"
+#endif
+
+#ifdef XCOMPONENT_SUPPORTED
+#include "core/interfaces/native/node/node_xcomponent_modifier.h"
+#endif
+
+#ifdef FORM_SUPPORTED
+#include "core/interfaces/native/node/form_component_modifier.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
 const ArkUINodeModifiers impl = {
     ARKUI_NODE_MODIFIERS_API_VERSION,
     NodeModifier::GetCommonModifier,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetCheckboxGroupModifier,
+    NodeModifier::GetCounterModifier,
+    NodeModifier::GetRowModifier,
+    NodeModifier::GetRowSplitModifier,
     NodeModifier::GetTextModifier,
-    nullptr,
+    NodeModifier::GetButtonModifier,
     NodeModifier::GetToggleModifier,
     NodeModifier::GetImageSpanModifier,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetBlankModifier,
+    NodeModifier::GetSearchModifier,
+    NodeModifier::GetSelectModifier,
+    NodeModifier::GetRadioModifier,
+    NodeModifier::GetCheckboxModifier,
     NodeModifier::GetTimepickerModifier,
-    NodeModifier::GetTextpickerModifier,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetTextPickerModifier,
+    NodeModifier::GetRatingModifier,
+    NodeModifier::GetSliderModifier,
+    NodeModifier::GetDividerModifier,
     NodeModifier::GetStackModifier,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetNavDestinationModifier,
+    NodeModifier::GetGridModifier,
+    NodeModifier::GetGridColModifier,
+    NodeModifier::GetGridRowModifier,
+    NodeModifier::GetPanelModifier,
     NodeModifier::GetTextAreaModifier,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetNavigationModifier,
+    NodeModifier::GetColumnModifier,
+    NodeModifier::GetRichEditorModifier,
     NodeModifier::GetImageModifier,
+    NodeModifier::GetVideoModifier,
     nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetNavigatorModifier,
+    NodeModifier::GetNavRouterModifier,
+    NodeModifier::GetNodeContainerModifier,
+    NodeModifier::GetPatternLockModifier,
+    NodeModifier::GetColumnSplitModifier,
+    NodeModifier::GetLineModifier,
+    NodeModifier::GetPathModifier,
+    NodeModifier::GetPolygonModifier,
+    NodeModifier::GetPolylineModifier,
+    NodeModifier::GetSpanModifier,
+    NodeModifier::GetImageAnimatorModifier,
+    NodeModifier::GetSideBarContainerModifier,
+    NodeModifier::GetCalendarPickerModifier,
     NodeModifier::GetTextInputModifier,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetTabsModifier,
+    NodeModifier::GetStepperItemModifier,
+    NodeModifier::GetHyperlinkModifier,
+    NodeModifier::GetMarqueeModifier,
+    NodeModifier::GetMenuItemModifier,
+    NodeModifier::GetMenuModifier,
     NodeModifier::GetDatePickerModifier,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetWaterFlowModifier,
+    NodeModifier::GetAlphabetIndexerModifier,
+    NodeModifier::GetDataPanelModifier,
+    NodeModifier::GetGaugeModifier,
     NodeModifier::GetScrollModifier,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetGridItemModifier,
+    NodeModifier::GetProgressModifier,
+    NodeModifier::GetCommonShapeModifier,
+    NodeModifier::GetShapeModifier,
+    NodeModifier::GetRectModifier,
     NodeModifier::GetSwiperModifier,
-    nullptr,
+    NodeModifier::GetListItemModifier,
     NodeModifier::GetListModifier,
     NodeModifier::GetListItemGroupModifier,
-    nullptr,
+    NodeModifier::GetQRCodeModifier,
     NodeModifier::GetLoadingProgressModifier,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetTextClockModifier,
+    NodeModifier::GetTextTimerModifier,
+    NodeModifier::GetRenderNodeModifier,
+
 #ifdef PLUGIN_COMPONENT_SUPPORTED
-    nullptr,
+    NodeModifier::GetPluginModifier,
 #else
     nullptr,
 #endif
+
 #ifdef XCOMPONENT_SUPPORTED
     NodeModifier::GetXComponentModifier,
 #else
     nullptr,
 #endif
+
+    NodeModifier::GetUIStateModifier,
+
 #ifdef FORM_SUPPORTED
-    nullptr,
+    NodeModifier::GetFormComponentModifier,
 #else
     nullptr,
 #endif
+
     nullptr, // FlexModifier
     nullptr, // ScrollBarModifier
     nullptr, // ScrollerModifier

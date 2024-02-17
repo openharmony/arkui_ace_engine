@@ -161,21 +161,21 @@ void RosenRenderCircleBlock::Paint(RenderContext& context, const Offset& offset)
     }
 #else
     if (isHover_) {
-        RSPen hoverPen;
-        hoverPen.SetColor(HOVER_BORDER_COLOR);
+        RSBrush brush;
+        brush.SetColor(HOVER_BORDER_COLOR);
         double hoverRadius = NormalizeToPx(HOVER_RADIUS);
-        canvas->AttachPen(hoverPen);
+        canvas->AttachBrush(brush);
         canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), hoverRadius);
-        canvas->DetachPen();
+        canvas->DetachBrush();
     }
 
     if (isPress_) {
-        RSPen pressPen;
-        pressPen.SetColor(PRESS_BORDER_COLOR);
+        RSBrush brush;
+        brush.SetColor(PRESS_BORDER_COLOR);
         double pressRadius = NormalizeToPx(PRESS_RADIUS);
-        canvas->AttachPen(pressPen);
+        canvas->AttachBrush(brush);
         canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), pressRadius);
-        canvas->DetachPen();
+        canvas->DetachBrush();
     }
 #endif
 
@@ -222,21 +222,21 @@ void RosenRenderCircleBlock::Paint(RenderContext& context, const Offset& offset)
         canvas->AttachPen(focusPen);
         canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), radius + RADIUS_PADDING);
         canvas->DetachPen();
-        RSPen blockPen;
-        blockPen.SetColor(RSColor::ColorQuadSetARGB(GetBlockColor().GetAlpha(),
+        RSBrush brush;
+        brush.SetColor(RSColor::ColorQuadSetARGB(GetBlockColor().GetAlpha(),
             GetBlockColor().GetRed(), GetBlockColor().GetGreen(), GetBlockColor().GetBlue()));
-        blockPen.SetAntiAlias(true);
-        canvas->AttachPen(blockPen);
+        brush.SetAntiAlias(true);
+        canvas->AttachBrush(brush);
         canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), radius);
-        canvas->DetachPen();
+        canvas->DetachBrush();
     } else {
-        RSPen blockPen;
-        blockPen.SetColor(RSColor::ColorQuadSetARGB(GetBlockColor().GetAlpha(),
+        RSBrush brush;
+        brush.SetColor(RSColor::ColorQuadSetARGB(GetBlockColor().GetAlpha(),
             GetBlockColor().GetRed(), GetBlockColor().GetGreen(), GetBlockColor().GetBlue()));
-        blockPen.SetAntiAlias(true);
-        canvas->AttachPen(blockPen);
+        brush.SetAntiAlias(true);
+        canvas->AttachBrush(brush);
         canvas->DrawCircle(RSPoint(offset.GetX(), offset.GetY()), radius);
-        canvas->DetachPen();
+        canvas->DetachBrush();
     }
 
     // Draw block border

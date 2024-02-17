@@ -93,6 +93,7 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
     if (controllerObj->IsObject()) {
         auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextTimerController>();
         if (jsController) {
+            jsController->SetInstanceId(Container::CurrentId());
             jsController->SetController(controller);
         }
     }
@@ -269,7 +270,7 @@ void JSTextTimer::OnTimer(const JSCallbackInfo& info)
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                        const std::string& utc, const std::string& elapsedTime) {
+                        int64_t utc, int64_t elapsedTime) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("TextTimer.onTimer");
         PipelineContext::SetCallBackNode(node);
@@ -307,6 +308,7 @@ void JSTextTimerController::Destructor(JSTextTimerController* timerController)
 
 void JSTextTimerController::Start(const JSCallbackInfo& info)
 {
+    ContainerScope scope(instanceId_);
     if (controller_) {
         controller_->Start();
     }
@@ -314,6 +316,7 @@ void JSTextTimerController::Start(const JSCallbackInfo& info)
 
 void JSTextTimerController::Pause(const JSCallbackInfo& info)
 {
+    ContainerScope scope(instanceId_);
     if (controller_) {
         controller_->Pause();
     }
@@ -321,6 +324,7 @@ void JSTextTimerController::Pause(const JSCallbackInfo& info)
 
 void JSTextTimerController::Reset(const JSCallbackInfo& info)
 {
+    ContainerScope scope(instanceId_);
     if (controller_) {
         controller_->Reset();
     }

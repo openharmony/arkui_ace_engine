@@ -28,14 +28,15 @@ const std::vector<std::string> DEFAULT_FONT_FAMILY = { "HarmonyOS Sans" };
 const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 
-void SetTextTimerFontColor(NodeHandle node, uint32_t color)
+namespace TextTimerModifier {
+void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextTimerModelNG::SetFontColor(frameNode, Color(color));
 }
 
-void ResetTextTimerFontColor(NodeHandle node)
+void ResetFontColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -46,35 +47,35 @@ void ResetTextTimerFontColor(NodeHandle node)
     TextTimerModelNG::SetFontColor(frameNode, theme->GetTextStyle().GetTextColor());
 }
 
-void SetTextTimerFontSize(NodeHandle node, double value, int32_t unit)
+void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextTimerModelNG::SetFontSize(frameNode, Dimension(value, static_cast<DimensionUnit>(unit)));
 }
 
-void ResetTextTimerFontSize(NodeHandle node)
+void ResetFontSize(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextTimerModelNG::SetFontSize(frameNode, DEFAULT_FONT_SIZE);
 }
 
-void SetTextTimerFontStyle(NodeHandle node, uint32_t value)
+void SetFontStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextTimerModelNG::SetFontStyle(frameNode, static_cast<Ace::FontStyle>(value));
 }
 
-void ResetTextTimerFontStyle(NodeHandle node)
+void ResetFontStyle(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextTimerModelNG::SetFontStyle(frameNode, OHOS::Ace::FontStyle::NORMAL);
 }
 
-void SetTextTimerFontWeight(NodeHandle node, const char *fontWeight)
+void SetFontWeight(ArkUINodeHandle node, ArkUI_CharPtr fontWeight)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -82,14 +83,14 @@ void SetTextTimerFontWeight(NodeHandle node, const char *fontWeight)
     TextTimerModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeightStr));
 }
 
-void ResetTextTimerFontWeight(NodeHandle node)
+void ResetFontWeight(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextTimerModelNG::SetFontWeight(frameNode, DEFAULT_FONT_WEIGHT);
 }
 
-void SetTextTimerFontFamily(NodeHandle node, const char* fontFamily)
+void SetFontFamily(ArkUINodeHandle node, ArkUI_CharPtr fontFamily)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -98,14 +99,14 @@ void SetTextTimerFontFamily(NodeHandle node, const char* fontFamily)
     TextTimerModelNG::SetFontFamily(frameNode, fontFamilyResult);
 }
 
-void ResetTextTimerFontFamily(NodeHandle node)
+void ResetFontFamily(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextTimerModelNG::SetFontFamily(frameNode, DEFAULT_FONT_FAMILY);
 }
 
-void SetTextTimerFormat(NodeHandle node, const char* format)
+void SetFormat(ArkUINodeHandle node, ArkUI_CharPtr format)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -132,29 +133,33 @@ void SetTextTimerFormat(NodeHandle node, const char* format)
     TextTimerModelNG::SetFormat(frameNode, formatStr);
 }
 
-void ResetTextTimerFormat(NodeHandle node)
+void ResetFormat(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextTimerModelNG::SetFormat(frameNode, DEFAULT_FORMAT);
 }
+} // namespace TextTimerModifier
 
-ArkUITextTimerModifierAPI GetTextTimerModifier()
+namespace NodeModifier {
+const ArkUITextTimerModifier* GetTextTimerModifier()
 {
-    static const ArkUITextTimerModifierAPI modifier = { SetTextTimerFontColor,
-                                                        ResetTextTimerFontColor,
-                                                        SetTextTimerFontSize,
-                                                        ResetTextTimerFontSize,
-                                                        SetTextTimerFontStyle,
-                                                        ResetTextTimerFontStyle,
-                                                        SetTextTimerFontWeight,
-                                                        ResetTextTimerFontWeight,
-                                                        SetTextTimerFontFamily,
-                                                        ResetTextTimerFontFamily,
-                                                        SetTextTimerFormat,
-                                                        ResetTextTimerFormat
-                                                       };
+    static const ArkUITextTimerModifier modifier = {
+        TextTimerModifier::SetFontColor,
+        TextTimerModifier::ResetFontColor,
+        TextTimerModifier::SetFontSize,
+        TextTimerModifier::ResetFontSize,
+        TextTimerModifier::SetFontStyle,
+        TextTimerModifier::ResetFontStyle,
+        TextTimerModifier::SetFontWeight,
+        TextTimerModifier::ResetFontWeight,
+        TextTimerModifier::SetFontFamily,
+        TextTimerModifier::ResetFontFamily,
+        TextTimerModifier::SetFormat,
+        TextTimerModifier::ResetFormat
+    };
 
-    return modifier;
+    return &modifier;
 }
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

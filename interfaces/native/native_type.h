@@ -271,6 +271,11 @@ typedef enum {
     ARKUI_PROGRESS_CAPSULE,
 }ArkUI_ProgressType;
 
+/**
+ * @brief 定义装饰线样式枚举值。
+ *
+ * @since 12
+ */
 typedef enum {
     /** 不使用装饰线。*/
     ARKUI_TEXT_DECORATION_TYPE_NONE = 0,
@@ -282,6 +287,11 @@ typedef enum {
     ARKUI_TEXT_DECORATION_TYPE_LINE_THROUGH,
 } ArkUI_TextDecorationType;
 
+/**
+ * @brief 定义文本大小写枚举值。
+ *
+ * @since 12
+ */
 typedef enum {
     /** 保持原有大小写。*/
     ARKUI_TEXT_CASE_NORMAL = 0,
@@ -291,6 +301,11 @@ typedef enum {
     ARKUI_TEXT_CASE_UPPER,
 } ArkUI_TextCase;
 
+/**
+ * @brief 定义文本复制黏贴模式枚举值。
+ *
+ * @since 12
+ */
 typedef enum {
     /** 不支持复制。*/
     ARKUI_COPY_OPTIONS_NONE = 0,
@@ -302,6 +317,11 @@ typedef enum {
     ARKUI_COPY_OPTIONS_CROSS_DEVICE,
 } ArkUI_CopyOptions;
 
+/**
+ * @brief 定义阴影类型枚举值。
+ *
+ * @since 12
+ */
 typedef enum {
     /** 颜色。*/
     ARKUI_SHADOW_TYPE_COLOR = 0,
@@ -599,16 +619,10 @@ typedef enum {
 typedef enum {
     /** 竖直方向上边缘。*/
     ARKUI_SCROLL_EDGE_TOP = 0,
-    /** 竖直方向居中位置。*/
-    ARKUI_SCROLL_EDGE_CENTER,
     /** 竖直方向下边缘。*/
     ARKUI_SCROLL_EDGE_BOTTOM,
-    /** 交叉轴方向文本基线位置。*/
-    ARKUI_SCROLL_EDGE_BASELINE,
     /** 水平方向起始位置。*/
     ARKUI_SCROLL_EDGE_START,
-    /** 水平方向居中位置。*/
-    ARKUI_SCROLL_EDGE_MIDDLE,
     /** 水平方向末尾位置。*/
     ARKUI_SCROLL_EDGE_END,
 } ArkUI_ScrollEdge;
@@ -857,7 +871,7 @@ typedef enum {
  */
 typedef enum {
     /** 将上层图像直接覆盖到下层图像上，不进行任何混合操作。 */
-    ARKUI_BLEND_MODE_NONE,
+    ARKUI_BLEND_MODE_NONE = 0,
     /** 将源像素覆盖的目标像素清除为完全透明。 */
     ARKUI_BLEND_MODE_CLEAR,
     /** r = s，只显示源像素。 */
@@ -1035,6 +1049,83 @@ typedef enum {
     ARKUI_VISIBILITY_NONE,
 } ArkUI_Visibility;
 
+/**
+ * @brief 日历选择器与入口组件对齐方式。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 选择器和入口组件左对齐方式。 */
+    ARKUI_CALENDAR_ALIGNMENT_START = 0,
+    /** 选择器和入口组件居中对齐方式。 */
+    ARKUI_CALENDAR_ALIGNMENT_CENTER,
+    /** 选择器和入口组件右对齐方式。 */
+    ARKUI_CALENDAR_ALIGNMENT_END,
+} ArkUI_CalendarAlignment;
+
+/**
+ * @brief 遮罩类型枚举。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 矩形类型。 */
+    ARKUI_MASK_TYPE_RECT = 0,
+    /** 圆形类型。 */
+    ARKUI_MASK_TYPE_CIRCLE,
+    /** 椭圆形类型。 */
+    ARKUI_MASK_TYPE_ELLIPSE,
+    /** 路径类型。 */
+    ARKUI_MASK_TYPE_PATH,
+    /** 进度类型。 */
+    ARKUI_MASK_TYPE_PROGRESS,
+} ArkUI_MaskType;
+
+/**
+ * @brief 裁剪类型枚举。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 矩形类型。 */
+    ARKUI_CLIP_TYPE_RECT = 0,
+    /** 圆形类型。 */
+    ARKUI_CLIP_TYPE_CIRCLE,
+    /** 椭圆形类型。 */
+    ARKUI_CLIP_TYPE_ELLIPSE,
+    /** 路径类型。 */
+    ARKUI_CLIP_TYPE_PATH,
+} ArkUI_ClipType;
+
+/**
+ * @brief 定义渐变色结构。
+ *
+ * @since 12
+ */
+typedef struct {
+    /** 颜色数组。*/
+    const uint32_t* colors;
+    /** 位置数组。*/
+    float* stops;
+    /** 数组长度。*/
+    int size;
+} ArkUI_ColorStop;
+
+/**
+ * @brief 自定义形状。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 矩形类型。 */
+    ARKUI_SHAPE_TYPE_RECT = 0,
+    /** 圆形类型。 */
+    ARKUI_SHAPE_TYPE_CIRCLE,
+    /** 椭圆形类型。 */
+    ARKUI_SHAPE_TYPE_ELLIPSE,
+    /** 路径类型。 */
+    ARKUI_SHAPE_TYPE_PATH,
+} ArkUI_ShapeType;
 #ifdef __cplusplus
 };
 #endif

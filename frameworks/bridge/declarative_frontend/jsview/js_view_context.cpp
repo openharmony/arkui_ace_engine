@@ -115,8 +115,8 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         }
         context->PrepareCloseImplicitAnimation();
     });
-    pipelineContext->SetSyncAnimationOption(AnimationOption());
     pipelineContext->CloseImplicitAnimation();
+    pipelineContext->SetSyncAnimationOption(AnimationOption());
     if (immediately) {
         pipelineContext->FlushMessages();
     } else {
@@ -133,8 +133,8 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
     pipelineContext->FlushBuild();
-    pipelineContext->SetSyncAnimationOption(AnimationOption());
     pipelineContext->CloseImplicitAnimation();
+    pipelineContext->SetSyncAnimationOption(AnimationOption());
     if (immediately) {
         pipelineContext->FlushMessages();
     } else {

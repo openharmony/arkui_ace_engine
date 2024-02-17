@@ -123,6 +123,8 @@ public:
     void JsSetImageSmoothingQuality(const JSCallbackInfo& info) {}
     void JsGetImageSmoothingQuality(const JSCallbackInfo& info) {}
     void JSTransferFromImageBitmap(const JSCallbackInfo& info) {}
+    void JsSaveLayer(const JSCallbackInfo& info) {}
+    void JsRestoreLayer(const JSCallbackInfo& info) {}
 
     void SetWidth(double width)
     {
@@ -189,7 +191,7 @@ private:
     RefPtr<JSRenderingContextSettings> offscreenCanvasSettings_;
     double width_ = 0.0f;
     double height_ = 0.0f;
-    int32_t instanceId_ = -1;
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     ContextType contextType_;
     bool isGetContext_ = false;
     bool isDetached_ = false;

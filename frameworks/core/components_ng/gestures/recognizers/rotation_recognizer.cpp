@@ -53,7 +53,6 @@ void RotationRecognizer::OnAccepted()
 
 void RotationRecognizer::OnRejected()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation gesture has been rejected");
     if (refereeState_ != RefereeState::SUCCEED) {
         refereeState_ = RefereeState::FAIL;
     }
@@ -65,6 +64,10 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives touch down event, begin to detect rotation event");
+    if (!IsInAttachedNode(event)) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     if (fingers_ > MAX_ROTATION_FINGERS) {
         fingers_ = DEFAULT_ROTATION_FINGERS;
     }
@@ -215,9 +218,6 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        if (recognizerTarget_.has_value()) {
-            info.SetTarget(recognizerTarget_.value());
-        }
         TouchEvent touchPoint = {};
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
@@ -249,9 +249,6 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
     info->SetAngle(resultAngle_);
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
-    if (recognizerTarget_.has_value()) {
-        info->SetTarget(recognizerTarget_.value());
-    }
     TouchEvent touchPoint = {};
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;

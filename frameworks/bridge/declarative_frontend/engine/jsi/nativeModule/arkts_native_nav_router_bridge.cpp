@@ -14,30 +14,29 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.h"
 
-#include "core/interfaces/native/node/api.h"
-
 namespace OHOS::Ace::NG {
 constexpr int32_t CALL_ARG_0 = 0;
 constexpr int32_t CALL_ARG_1 = 1;
 constexpr int32_t NAV_ROUTE_MODE_RANGE = 2;
 constexpr int32_t NAV_ROUTE_MODE_DEFAULT = 0;
+
 ArkUINativeModuleValue NavRouterBridge::SetMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     if (valueArg->IsNumber()) {
         int32_t value = valueArg->Int32Value(vm);
         if (value >= NAV_ROUTE_MODE_DEFAULT && value <= NAV_ROUTE_MODE_RANGE) {
-            GetArkUIInternalNodeAPI()->GetNavRouterModifier().SetNavRouteMode(nativeNode, value);
+            GetArkUINodeModifiers()->getNavRouterModifier()->setNavRouteMode(nativeNode, value);
         } else {
-            GetArkUIInternalNodeAPI()->GetNavRouterModifier().ResetNavRouteMode(nativeNode);
+            GetArkUINodeModifiers()->getNavRouterModifier()->resetNavRouteMode(nativeNode);
         }
     } else {
-        GetArkUIInternalNodeAPI()->GetNavRouterModifier().ResetNavRouteMode(nativeNode);
+        GetArkUINodeModifiers()->getNavRouterModifier()->resetNavRouteMode(nativeNode);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -48,8 +47,8 @@ ArkUINativeModuleValue NavRouterBridge::ResetMode(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavRouterModifier().ResetNavRouteMode(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavRouterModifier()->resetNavRouteMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

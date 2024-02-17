@@ -30,4 +30,10 @@ void CommonViewModelNG::Create()
     blankNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     stack->Push(blankNode);
 }
+RefPtr<FrameNode> CommonViewModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, nodeId,
+        AceType::MakeRefPtr<CommonViewPattern>());
+    return frameNode;
+}
 } // namespace OHOS::Ace::NG

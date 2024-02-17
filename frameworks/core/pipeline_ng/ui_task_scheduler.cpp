@@ -92,6 +92,16 @@ void UITaskScheduler::ExpandSafeArea()
     safeAreaManager->ExpandSafeArea();
 }
 
+void UITaskScheduler::FlushSyncGeometryNodeTasks()
+{
+    auto tasks = std::move(syncGeometryNodeTasks_);
+    for (auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
 void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
@@ -132,7 +142,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
         }
     }
     ExpandSafeArea();
-
+    FlushSyncGeometryNodeTasks();
 #ifdef FFRT_EXISTS
     if (is64BitSystem_) {
         longFrame->ReportEndEvent();

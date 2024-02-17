@@ -201,6 +201,8 @@ void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 
 void PipelineContext::FlushMessages() {}
 
+void PipelineContext::FlushUITasks() {}
+
 void PipelineContext::Finish(bool autoFinish) const {}
 
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
@@ -338,6 +340,9 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
         task();
     }
 }
+
+void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task) {}
+void PipelineContext::FlushSyncGeometryNodeTasks() {}
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
 

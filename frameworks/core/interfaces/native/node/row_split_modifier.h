@@ -16,10 +16,10 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_ROW_SPLIT_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_ROW_SPLIT_MODIFIER_H
 
-#include "core/interfaces/native/node/api.h"
+#include "core/interfaces/native/node/node_api.h"
 
-namespace OHOS::Ace::NG {
-ArkUIRowSplitModifierAPI GetRowSplitModifier();
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUIRowSplitModifier* GetRowSplitModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_ROW_SPLIT_MODIFIER_H

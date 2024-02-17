@@ -23,6 +23,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 constexpr int32_t MATRIX_LENGTH = 16;
+constexpr int32_t ARGS_COUNT_TWO = 2;
 
 Matrix4 ConvertToMatrix(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value)
 {
@@ -116,6 +117,26 @@ shared_ptr<JsValue> Translate(const shared_ptr<JsRuntime>& runtime, const shared
     double dz = ConvertToDouble(runtime, dzJSValue, 0.0);
 
     matrix = Matrix4::CreateTranslate(static_cast<float>(dx), static_cast<float>(dy), static_cast<float>(dz)) * matrix;
+    thisObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, matrix));
+    return thisObj;
+}
+
+shared_ptr<JsValue> Skew(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != ARGS_COUNT_TWO) {
+        return runtime->NewNull();
+    }
+    if (!argv[0]->IsNumber(runtime) || !argv[1]->IsNumber(runtime)) {
+        return runtime->NewNull();
+    }
+
+    auto matrixArray = thisObj->GetProperty(runtime, MATRIX_4X4);
+    auto matrix = ConvertToMatrix(runtime, matrixArray);
+    double sx = ConvertToDouble(runtime, argv[0], 0.0);
+    double sy = ConvertToDouble(runtime, argv[1], 0.0);
+
+    matrix = Matrix4::CreateFactorSkew(static_cast<float>(sx), static_cast<float>(sy)) * matrix;
     thisObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, matrix));
     return thisObj;
 }
@@ -228,6 +249,7 @@ void AddCommonMatrixProperties(const shared_ptr<JsRuntime>& runtime, const share
     obj->SetProperty(runtime, MATRIX_INVERT, runtime->NewFunction(Invert));
     obj->SetProperty(runtime, MATRIX_TRANSLATE, runtime->NewFunction(Translate));
     obj->SetProperty(runtime, MATRIX_SCALE, runtime->NewFunction(Scale));
+    obj->SetProperty(runtime, MATRIX_SKEW, runtime->NewFunction(Skew));
     obj->SetProperty(runtime, MATRIX_ROTATE, runtime->NewFunction(Rotate));
     obj->SetProperty(runtime, MATRIX_TRANSFORM_POINT, runtime->NewFunction(TransformPoint));
 }

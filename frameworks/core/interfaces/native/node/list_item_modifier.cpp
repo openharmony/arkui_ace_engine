@@ -20,38 +20,40 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-void SetListItemSelected(NodeHandle node, bool selected)
+void SetListItemSelected(ArkUINodeHandle node, ArkUI_Bool selected)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListItemModelNG::SetSelected(frameNode, selected);
 }
 
-void ResetListItemSelected(NodeHandle node)
+void ResetListItemSelected(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListItemModelNG::SetSelected(frameNode, false);
 }
 
-void SetSelectable(NodeHandle node, bool selectable)
+void SetSelectable(ArkUINodeHandle node, ArkUI_Bool selectable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListItemModelNG::SetSelectable(frameNode, selectable);
 }
 
-void ResetSelectable(NodeHandle node)
+void ResetSelectable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListItemModelNG::SetSelectable(frameNode, true);
 }
 
-ArkUIListItemModifierAPI GetListItemModifier()
+namespace NodeModifier {
+const ArkUIListItemModifier* GetListItemModifier()
 {
-    static const ArkUIListItemModifierAPI modifier = { SetListItemSelected,
+    static const ArkUIListItemModifier modifier = { SetListItemSelected,
         ResetListItemSelected, SetSelectable, ResetSelectable };
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

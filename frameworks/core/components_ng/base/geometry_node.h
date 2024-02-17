@@ -178,8 +178,7 @@ public:
 
     OffsetF GetPixelRoundContentOffset() const
     {
-        auto deltaOffset = GetPixelGridRoundOffset() - GetFrameOffset();
-        return content_ ? (content_->rect_.GetOffset() + deltaOffset) : OffsetF();
+        return content_ ? content_->rect_.GetOffset() : OffsetF();
     }
 
     const std::unique_ptr<GeometryProperty>& GetContent() const

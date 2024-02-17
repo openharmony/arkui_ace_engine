@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components/select/select_theme.h"
 
 namespace OHOS::Ace::NG {
 constexpr double DEFAULT_PROGRESS_VALUE = 0;
@@ -40,11 +41,11 @@ constexpr int32_t MIN_COLOR_STOPS_HAS_DIMENSION_INDEX = 1;
 constexpr int32_t MIN_COLOR_STOPS_DIMENSION_INDEX = 2;
 constexpr int32_t MIN_COLOR_STOPS_LENGTH = 3;
 constexpr double PERCENT_100 = 100;
-constexpr int32_t DEFAULT_SCALECOUNT = 120;
-constexpr double DEFAULTSTROKEWIDTH = 4;
-constexpr double DEFAULTBORDERWIDTH = 1;
-constexpr double DEFAULTSCALEWIDTHS = 2;
-constexpr double DEFAULTFONTSIZE = 12;
+constexpr int32_t DEFAULT_SCALE_COUNT = 120;
+constexpr double DEFAULT_STROKE_WIDTH = 4;
+constexpr double DEFAULT_BORDER_WIDTH = 1;
+constexpr double DEFAULT_SCALE_WIDTHS = 2;
+constexpr double DEFAULT_FONT_SIZE = 12;
 /**
  * @param colors color value
  * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
@@ -52,7 +53,7 @@ constexpr double DEFAULTFONTSIZE = 12;
  * ...
  * @param colorsLength colors length
  */
-void SetGradientColors(NG::Gradient& gradient, const double* colors, int32_t colorsLength)
+void SetGradientColors(NG::Gradient& gradient, const ArkUI_Float32* colors, int32_t colorsLength)
 {
     if ((colors == nullptr) || (colorsLength % MIN_COLOR_STOPS_LENGTH) != 0) {
         return;
@@ -74,21 +75,21 @@ void SetGradientColors(NG::Gradient& gradient, const double* colors, int32_t col
     }
 }
 
-void SetProgressValue(NodeHandle node, double value)
+void SetProgressValue(ArkUINodeHandle node, ArkUI_Float32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ProgressModelNG::SetValue(frameNode, value);
 }
 
-void ResetProgressValue(NodeHandle node)
+void ResetProgressValue(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ProgressModelNG::SetValue(frameNode, DEFAULT_PROGRESS_VALUE);
 }
 
-void SetProgressGradientColor(NodeHandle node, const struct ArkUIGradientType* gradient, int32_t length)
+void SetProgressGradientColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -104,7 +105,7 @@ void SetProgressGradientColor(NodeHandle node, const struct ArkUIGradientType* g
     ProgressModelNG::SetGradientColor(frameNode, tempGradient);
 }
 
-void SetProgressColor(NodeHandle node, uint32_t color)
+void SetProgressColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -121,7 +122,7 @@ void SetProgressColor(NodeHandle node, uint32_t color)
     ProgressModelNG::SetColor(frameNode, Color(color));
 }
 
-void ResetProgressColor(NodeHandle node)
+void ResetProgressColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -161,7 +162,7 @@ void SetLinearStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
 {
     if ((value->strokeWidthValue < 0) ||
         (static_cast<DimensionUnit>(value->strokeWidthUnit) == DimensionUnit::PERCENT)) {
-        ProgressModelNG::SetStrokeWidth(node, Dimension(DEFAULTSTROKEWIDTH, DimensionUnit::VP));
+        ProgressModelNG::SetStrokeWidth(node, Dimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP));
     } else {
         ProgressModelNG::SetStrokeWidth(
             node, Dimension(value->strokeWidthValue, static_cast<DimensionUnit>(value->strokeWidthUnit)));
@@ -180,7 +181,7 @@ void SetRingStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
 {
     if ((value->strokeWidthValue < 0) ||
         (static_cast<DimensionUnit>(value->strokeWidthUnit) == DimensionUnit::PERCENT)) {
-        ProgressModelNG::SetStrokeWidth(node, Dimension(DEFAULTSTROKEWIDTH, DimensionUnit::VP));
+        ProgressModelNG::SetStrokeWidth(node, Dimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP));
     } else {
         ProgressModelNG::SetStrokeWidth(
             node, Dimension(value->strokeWidthValue, static_cast<DimensionUnit>(value->strokeWidthUnit)));
@@ -194,7 +195,7 @@ void SetProgressStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
 {
     if ((value->strokeWidthValue < 0) ||
         (static_cast<DimensionUnit>(value->strokeWidthUnit) == DimensionUnit::PERCENT)) {
-        ProgressModelNG::SetStrokeWidth(node, Dimension(DEFAULTSTROKEWIDTH, DimensionUnit::VP));
+        ProgressModelNG::SetStrokeWidth(node, Dimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP));
     } else {
         ProgressModelNG::SetStrokeWidth(
             node, Dimension(value->strokeWidthValue, static_cast<DimensionUnit>(value->strokeWidthUnit)));
@@ -202,7 +203,7 @@ void SetProgressStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
     ProgressModelNG::SetScaleCount(node, value->scaleCount);
     if ((static_cast<DimensionUnit>(value->scaleWidthUnit) == DimensionUnit::PERCENT) ||
         (value->scaleWidthValue > value->strokeWidthValue)) {
-        ProgressModelNG::SetScaleWidth(node, Dimension(DEFAULTSCALEWIDTHS, DimensionUnit::VP));
+        ProgressModelNG::SetScaleWidth(node, Dimension(DEFAULT_SCALE_WIDTHS, DimensionUnit::VP));
     } else {
         ProgressModelNG::SetScaleWidth(
             node, Dimension(value->scaleWidthValue, static_cast<DimensionUnit>(value->scaleWidthUnit)));
@@ -226,7 +227,7 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
     }
     if ((value->borderWidthValue < 0) ||
         (static_cast<DimensionUnit>(value->borderWidthUnit) == DimensionUnit::PERCENT)) {
-        ProgressModelNG::SetBorderWidth(node, Dimension(DEFAULTBORDERWIDTH, DimensionUnit::VP));
+        ProgressModelNG::SetBorderWidth(node, Dimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP));
     } else {
         ProgressModelNG::SetBorderWidth(
             node, Dimension(value->borderWidthValue, static_cast<DimensionUnit>(value->borderWidthUnit)));
@@ -246,7 +247,7 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
     ProgressModelNG::SetItalicFontStyle(node, static_cast<Ace::FontStyle>(fontStyle));
 }
 
-void SetProgressStyle(NodeHandle node, ArkUIProgressStyle* value)
+void SetProgressStyle(ArkUINodeHandle node, ArkUIProgressStyle* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -269,14 +270,14 @@ void SetProgressStyle(NodeHandle node, ArkUIProgressStyle* value)
 
 void SetLinearStyleOptions(FrameNode* node)
 {
-    ProgressModelNG::SetStrokeWidth(node, Dimension(DEFAULTSTROKEWIDTH, DimensionUnit::VP));
+    ProgressModelNG::SetStrokeWidth(node, Dimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP));
     ProgressModelNG::SetLinearSweepingEffect(node, false);
     ProgressModelNG::ResetStrokeRadius(node);
 }
 
 void SetRingStyleOptions(FrameNode* node)
 {
-    ProgressModelNG::SetStrokeWidth(node, Dimension(DEFAULTSTROKEWIDTH, DimensionUnit::VP));
+    ProgressModelNG::SetStrokeWidth(node, Dimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP));
     ProgressModelNG::SetPaintShadow(node, false);
     ProgressModelNG::SetProgressStatus(node, ProgressStatus::PROGRESSING);
     ProgressModelNG::SetRingSweepingEffect(node, false);
@@ -284,9 +285,9 @@ void SetRingStyleOptions(FrameNode* node)
 
 void SetProgressStyleOptions(FrameNode* node)
 {
-    ProgressModelNG::SetStrokeWidth(node, Dimension(DEFAULTSTROKEWIDTH, DimensionUnit::VP));
-    ProgressModelNG::SetScaleCount(node, DEFAULT_SCALECOUNT);
-    ProgressModelNG::SetScaleWidth(node, Dimension(DEFAULTSCALEWIDTHS, DimensionUnit::VP));
+    ProgressModelNG::SetStrokeWidth(node, Dimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP));
+    ProgressModelNG::SetScaleCount(node, DEFAULT_SCALE_COUNT);
+    ProgressModelNG::SetScaleWidth(node, Dimension(DEFAULT_SCALE_WIDTHS, DimensionUnit::VP));
 }
 
 void SetCapsuleStyleOptions(FrameNode* node)
@@ -301,19 +302,19 @@ void SetCapsuleStyleOptions(FrameNode* node)
     auto textTheme = themeManager->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     std::optional<std::string> textOpt = std::nullopt;
-    ProgressModelNG::SetBorderWidth(node, Dimension(DEFAULTBORDERWIDTH, DimensionUnit::VP));
+    ProgressModelNG::SetBorderWidth(node, Dimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP));
     ProgressModelNG::SetBorderColor(node, Color(0x33006cde));
     ProgressModelNG::SetSweepingEffect(node, false);
     ProgressModelNG::SetShowText(node, false);
     ProgressModelNG::SetText(node, textOpt);
     ProgressModelNG::SetFontColor(node, Color(0xff182431));
-    ProgressModelNG::SetFontSize(node, Dimension(DEFAULTFONTSIZE, DimensionUnit::FP));
+    ProgressModelNG::SetFontSize(node, Dimension(DEFAULT_FONT_SIZE, DimensionUnit::FP));
     ProgressModelNG::SetFontWeight(node, textTheme->GetTextStyle().GetFontWeight());
     ProgressModelNG::SetFontFamily(node, textTheme->GetTextStyle().GetFontFamilies());
     ProgressModelNG::SetItalicFontStyle(node, textTheme->GetTextStyle().GetFontStyle());
 }
 
-void ResetProgressStyle(NodeHandle node)
+void ResetProgressStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -333,14 +334,14 @@ void ResetProgressStyle(NodeHandle node)
     }
 }
 
-void SetProgressBackgroundColor(NodeHandle node, uint32_t color)
+void SetProgressBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ProgressModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
-void ResetProgressBackgroundColor(NodeHandle node)
+void ResetProgressBackgroundColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -364,12 +365,13 @@ void ResetProgressBackgroundColor(NodeHandle node)
     ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 
-ArkUIProgressModifierAPI GetProgressModifier()
+namespace NodeModifier {
+const ArkUIProgressModifier* GetProgressModifier()
 {
-    static const ArkUIProgressModifierAPI modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
+    static const ArkUIProgressModifier modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
         SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle, SetProgressBackgroundColor,
         ResetProgressBackgroundColor };
-    return modifier;
+    return &modifier;
 }
-
+}
 } // namespace OHOS::Ace::NG

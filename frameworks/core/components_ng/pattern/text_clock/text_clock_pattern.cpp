@@ -37,6 +37,7 @@ constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
 constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
+constexpr bool ON_TIME_CHANGE = true;
 const std::string DEFAULT_FORMAT = "hms";
 const std::string FORM_FORMAT = "hm";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
@@ -191,6 +192,9 @@ void TextClockPattern::OnVisibleAreaChange(bool visible)
 
 void TextClockPattern::OnFormVisibleChange(bool visible)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK,
+        "Form is %{public}s and clock %{public}s running",
+        visible ? "visible" : "invisible", visible ? "starts" : "stops");
     if (visible && !isFormVisible_) {
         isFormVisible_ = visible;
         UpdateTimeText();
@@ -235,7 +239,7 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
     RegistVisibleAreaChangeCallback();
 }
 
-void TextClockPattern::UpdateTimeText()
+void TextClockPattern::UpdateTimeText(bool isTimeChange)
 {
     if (!isStart_ || !isSetVisible_ || !isInVisibleArea_ || !isFormVisible_) {
         return;
@@ -260,7 +264,7 @@ void TextClockPattern::UpdateTimeText()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     textNode->MarkModifyDone();
     RequestUpdateForNextSecond();
-    if (currentTime != prevTime_) {
+    if (currentTime != prevTime_ || isTimeChange) {
         FireChangeEvent();
     }
     prevTime_ = currentTime;
@@ -717,6 +721,6 @@ RefPtr<FrameNode> TextClockPattern::GetTextNode()
 void TextClockPattern::OnTimeChange()
 {
     is24H_ = SystemProperties::Is24HourClock();
-    UpdateTimeText();
+    UpdateTimeText(ON_TIME_CHANGE);
 }
 } // namespace OHOS::Ace::NG

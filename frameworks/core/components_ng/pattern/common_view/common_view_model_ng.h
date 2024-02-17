@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_COMMON_VIEW_COMMON_VIEW_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_COMMON_VIEW_COMMON_VIEW_MODEL_NG_H
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/common_view/common_view_model.h"
 #include "frameworks/base/utils/macros.h"
 
@@ -23,6 +24,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT CommonViewModelNG : public OHOS::Ace::CommonViewModel {
 public:
     void Create() override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_COMMON_VIEW_COMMON_VIEW_MODEL_NG_H

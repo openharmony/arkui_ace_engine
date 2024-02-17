@@ -233,7 +233,7 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
         return 0.0f;
     }
     float averageHeight = heightSum / itemCount;
-    
+
     if (itemCount == childrenCount_) {
         return heightSum - mainGap;
     }
@@ -336,37 +336,42 @@ float GridLayoutInfo::GetCurrentLineHeight() const
     return 0.0f;
 }
 
-void GridLayoutInfo::UpdateStartIdxToLastItem()
-{
-    // find last index in gridMatrix
-    for (auto line = gridMatrix_.rbegin(); line != gridMatrix_.rend(); ++line) {
-        const auto& row = line->second;
-        for (auto c = row.rbegin(); c != row.rend(); ++c) {
-            if (c->second != -1) {
-                startIndex_ = c->second;
-                startMainLineIndex_ = line->first;
-                return;
-            }
-        }
-    }
-    startIndex_ = 0;
-    startMainLineIndex_ = 0;
-}
-
-int32_t GridLayoutInfo::FindItemInRange(int32_t target) const
+std::pair<int32_t, int32_t> GridLayoutInfo::FindItemInRange(int32_t target) const
 {
     if (gridMatrix_.empty()) {
-        return -1;
+        return { -1, -1 };
     }
     for (int r = startMainLineIndex_; r <= endMainLineIndex_; ++r) {
         const auto& row = gridMatrix_.at(r);
         for (auto it : row) {
             if (it.second == target) {
-                return r;
+                return { r, it.first };
             }
         }
     }
-    return -1;
+    return { -1, -1 };
+}
+
+bool GridLayoutInfo::ItemAboveViewport(int32_t idx, float mainGap) const
+{
+    auto [line, _] = FindItemInRange(idx);
+    float len = currentOffset_;
+    for (int i = startMainLineIndex_; i < line; ++i) {
+        len += lineHeightMap_.at(i) + mainGap;
+    }
+    return len < 0.0f;
+}
+
+bool GridLayoutInfo::ItemBelowViewport(int32_t idx, int32_t itemHeight, float mainSize, float mainGap) const
+{
+    auto [line, col] = FindItemInRange(idx);
+
+    float len = currentOffset_;
+    for (int i = startMainLineIndex_; i < line + itemHeight; ++i) {
+        len += lineHeightMap_.at(i) + mainGap;
+    }
+    len -= mainGap;
+    return len > mainSize;
 }
 
 // Use the index to get the line number where the item is located
@@ -466,12 +471,73 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
     return true;
 }
 
+namespace {
+bool CheckRow(int32_t& maxV, const std::map<int, int>& row, int32_t target)
+{
+    for (auto [_, item] : row) {
+        maxV = std::max(maxV, std::abs(item));
+        if (item == target) {
+            return true;
+        }
+    }
+    return false;
+}
+
+using MatIter = decltype(GridLayoutInfo::gridMatrix_)::const_iterator;
+} // namespace
+
+MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
+{
+    if (index == 0) {
+        return gridMatrix_.begin();
+    }
+    size_t count = gridMatrix_.size();
+    size_t step = 0;
+    auto left = gridMatrix_.begin();
+    auto it = left;
+    while (count > 0) {
+        it = left;
+        step = count / 2;
+        std::advance(it, step);
+
+        // with irregular items, only the max index on each row is guaranteed to be in order.
+        int32_t maxV = -1;
+        if (CheckRow(maxV, it->second, index)) {
+            return it;
+        }
+
+        if (index <= maxV) {
+            count = step;
+        } else {
+            // index on the right side of current row
+            left = ++it;
+            count -= step + 1;
+        }
+    }
+    return gridMatrix_.end();
+}
+
+GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
+{
+    if (gridMatrix_.find(endLine) == gridMatrix_.end()) {
+        return {};
+    }
+    for (int32_t rowIdx = endLine; rowIdx >= 0; --rowIdx) {
+        const auto& row = gridMatrix_.at(rowIdx);
+        for (auto it = row.rbegin(); it != row.rend(); ++it) {
+            if (it->second > 0) {
+                return { .itemIdx = it->second, .y = rowIdx, .x = it->first };
+            }
+        }
+    }
+    return {};
+}
+
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
 {
     auto gridIt = gridMatrix_.lower_bound(idx);
     gridMatrix_.erase(gridIt, gridMatrix_.end());
-    auto lineIt = lineHeightMap_.lower_bound(idx);
-    lineHeightMap_.erase(lineIt, lineHeightMap_.end());
+    ClearHeightsToEnd(idx);
 }
 
 void GridLayoutInfo::ClearMapsFromStart(int32_t idx)
@@ -480,5 +546,29 @@ void GridLayoutInfo::ClearMapsFromStart(int32_t idx)
     gridMatrix_.erase(gridMatrix_.begin(), gridIt);
     auto lineIt = lineHeightMap_.lower_bound(idx);
     lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
+}
+
+void GridLayoutInfo::ClearHeightsToEnd(int32_t idx)
+{
+    auto lineIt = lineHeightMap_.lower_bound(idx);
+    lineHeightMap_.erase(lineIt, lineHeightMap_.end());
+}
+
+void GridLayoutInfo::ClearMatrixToEnd(int32_t idx, int32_t lineIdx)
+{
+    auto it = gridMatrix_.find(lineIdx);
+    for (; it != gridMatrix_.end(); ++it) {
+        for (auto itemIt = it->second.begin(); itemIt != it->second.end();) {
+            if (std::abs(itemIt->second) < idx) {
+                ++itemIt;
+                continue;
+            }
+            itemIt = it->second.erase(itemIt);
+        }
+        if (it->second.empty()) {
+            break;
+        }
+    }
+    gridMatrix_.erase(it, gridMatrix_.end());
 }
 } // namespace OHOS::Ace::NG

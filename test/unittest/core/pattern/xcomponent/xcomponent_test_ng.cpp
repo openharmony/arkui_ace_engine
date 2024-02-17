@@ -21,6 +21,10 @@
 #include "gtest/gtest.h"
 
 #define private public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/render/mock_render_surface.h"
+
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -30,11 +34,8 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/property/measure_property.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/render/mock_render_surface.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -477,12 +478,6 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(xComponentLayoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     EXPECT_FALSE(pattern->hasXComponentInit_);
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
-        SetBounds(0.0f, 0.0f, MAX_WIDTH, MAX_HEIGHT))
-        .WillOnce(Return());
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext()),
-        AddChild(pattern->renderContextForSurface_, 0))
-        .WillOnce(Return());
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), IsSurfaceValid())
         .WillOnce(Return(true))
         .WillOnce(Return(true))
@@ -508,9 +503,6 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
      */
     bool frameOffsetChanges[2] = { false, true };
     bool contentOffsetChanges[2] = { false, true };
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
-        SetBounds(0.0f, 0.0f, MAX_WIDTH, MAX_HEIGHT))
-        .Times(4);
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
         AdjustNativeWindowSize(MAX_WIDTH, MAX_HEIGHT))
         .WillOnce(Return());

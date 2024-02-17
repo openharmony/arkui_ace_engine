@@ -209,6 +209,7 @@ public:
     virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
     virtual void SetUseEffect(bool useEffect) = 0;
     virtual void SetUseShadowBatching(bool useShadowBatching) = 0;
+    virtual void SetFreeze(bool freeze) = 0;
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;

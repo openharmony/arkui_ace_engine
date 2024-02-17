@@ -994,6 +994,21 @@ std::string FrontendDelegateDeclarative::GetParams()
     return "";
 }
 
+int32_t FrontendDelegateDeclarative::GetIndexByUrl(const std::string& url)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_RETURN(pageRouterManager_, INVALID_PAGE_ID);
+        return pageRouterManager_->GetIndexByUrl(url);
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (int32_t i = 0; i < pageRouteStack_.size(); ++ i) {
+        if (pageRouteStack_[i].url == url) {
+            return i;
+        }
+    }
+    return INVALID_PAGE_ID;
+}
+
 void FrontendDelegateDeclarative::AddRouterTask(const RouterTask& task)
 {
     if (routerQueue_.size() < MAX_ROUTER_STACK) {

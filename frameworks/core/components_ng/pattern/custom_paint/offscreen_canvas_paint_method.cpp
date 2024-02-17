@@ -15,13 +15,8 @@
 
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "txt/paragraph_builder.h"
-#include "txt/paragraph_style.h"
-#else
 #include "rosen_text/typography_create.h"
 #include "rosen_text/typography_style.h"
-#endif
 #include "include/core/SkColorFilter.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/effects/SkImageFilters.h"
@@ -107,6 +102,7 @@ void OffscreenCanvasPaintMethod::InitBitmap(int32_t width, int32_t height)
     RSBitmapFormat bitmapFormat = { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_UNPREMUL };
     bitmap_.Build(width, height, bitmapFormat);
     bitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    bitmapSize_ = bitmap_.ComputeByteSize();
     rsCanvas_ = std::make_unique<RSCanvas>();
     rsCanvas_->Bind(bitmap_);
 #endif
@@ -603,49 +599,47 @@ double OffscreenCanvasPaintMethod::MeasureTextHeight(const std::string& text, co
 TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-    TextMetrics textMetrics = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-#ifndef USE_GRAPHIC_TEXT_GINE
-    txt::ParagraphStyle style;
-    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
-    style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
-#else
+    TextMetrics textMetrics;
     Rosen::TypographyStyle style;
     style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
-    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
-#endif
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, textMetrics);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
-    txt::TextStyle txtStyle;
-#else
     std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
     Rosen::TextStyle txtStyle;
-#endif
-    ConvertTxtStyle(state.GetTextStyle(), txtStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
-#else
+    ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
     txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
-#endif
     builder->PushStyle(txtStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    builder->AddText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->Build();
-#else
     builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
-#endif
-    paragraph->Layout(Size::INFINITE_SIZE);
 
+    auto paragraph = builder->CreateTypography();
+    paragraph->Layout(Size::INFINITE_SIZE);
+    /**
+     * @brief reference: https://html.spec.whatwg.org/multipage/canvas.html#dom-textmetrics-alphabeticbaseline
+     *
+     */
+    auto fontMetrics = paragraph->MeasureText();
+    auto glyphsBoundsTop = paragraph->GetGlyphsBoundsTop();
+    auto glyphsBoundsBottom = paragraph->GetGlyphsBoundsBottom();
+    auto glyphsBoundsLeft = paragraph->GetGlyphsBoundsLeft();
+    auto glyphsBoundsRight = paragraph->GetGlyphsBoundsRight();
     auto textAlign = state.GetTextAlign();
     auto textBaseLine = state.GetTextStyle().GetTextBaseline();
+    const double baseLineY = GetFontBaseline(fontMetrics, textBaseLine);
+    const double baseLineX = GetFontAlign(textAlign, paragraph);
+
     textMetrics.width = paragraph->GetMaxIntrinsicWidth();
     textMetrics.height = paragraph->GetHeight();
-    textMetrics.actualBoundingBoxLeft = -GetAlignOffset(textAlign, paragraph);
-    textMetrics.actualBoundingBoxRight = textMetrics.width - textMetrics.actualBoundingBoxLeft;
-    textMetrics.actualBoundingBoxAscent = -GetBaselineOffset(textBaseLine, paragraph);
-    textMetrics.actualBoundingBoxDescent = textMetrics.height - textMetrics.actualBoundingBoxAscent;
+    textMetrics.actualBoundingBoxAscent = baseLineY - glyphsBoundsTop;
+    textMetrics.actualBoundingBoxDescent = glyphsBoundsBottom - baseLineY;
+    textMetrics.actualBoundingBoxLeft = baseLineX - glyphsBoundsLeft;
+    textMetrics.actualBoundingBoxRight = glyphsBoundsRight - baseLineX;
+    textMetrics.alphabeticBaseline = baseLineY;
+    textMetrics.ideographicBaseline = baseLineY - fontMetrics.fDescent;
+    textMetrics.fontBoundingBoxAscent = baseLineY - fontMetrics.fTop;
+    textMetrics.fontBoundingBoxDescent = fontMetrics.fBottom - baseLineY;
+    textMetrics.hangingBaseline = baseLineY - (HANGING_PERCENT * fontMetrics.fAscent);
+    textMetrics.emHeightAscent = baseLineY - fontMetrics.fAscent;
+    textMetrics.emHeightDescent = fontMetrics.fDescent - baseLineY;
     return textMetrics;
 }
 

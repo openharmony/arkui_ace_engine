@@ -225,6 +225,10 @@ napi_value ObserverProcess::ProcessRouterPageUnRegister(napi_env env, napi_callb
 {
     GET_PARAMS(env, info, 3);
 
+    if (argc == 1) {
+        UIObserver::UnRegisterRouterPageCallback(0, nullptr);
+    }
+
     if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
         UIObserver::UnRegisterRouterPageCallback(0, argv[1]);
     }

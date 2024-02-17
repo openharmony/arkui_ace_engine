@@ -23,96 +23,98 @@ namespace OHOS::Ace::NG {
 
 constexpr int32_t DEFAULT_GRID_ITEM_VALUE = 0;
 
-void SetGridItemSelectable(NodeHandle node, bool selectable)
+void SetGridItemSelectable(ArkUINodeHandle node, ArkUI_Bool selectable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetSelectable(frameNode, selectable);
 }
 
-void ResetGridItemSelectable(NodeHandle node)
+void ResetGridItemSelectable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetSelectable(frameNode, true);
 }
 
-void SetGridItemSelected(NodeHandle node, bool selected)
+void SetGridItemSelected(ArkUINodeHandle node, ArkUI_Bool selected)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetSelected(frameNode, selected);
 }
 
-void ResetGridItemSelected(NodeHandle node)
+void ResetGridItemSelected(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetSelected(frameNode, false);
 }
 
-void SetGridItemRowStart(NodeHandle node, int32_t rowStart)
+void SetGridItemRowStart(ArkUINodeHandle node, int32_t rowStart)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetRowStart(frameNode, rowStart);
 }
 
-void ResetGridItemRowStart(NodeHandle node)
+void ResetGridItemRowStart(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetRowStart(frameNode, DEFAULT_GRID_ITEM_VALUE);
 }
 
-void SetGridItemRowEnd(NodeHandle node, int32_t rowEnd)
+void SetGridItemRowEnd(ArkUINodeHandle node, int32_t rowEnd)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetRowEnd(frameNode, rowEnd);
 }
 
-void ResetGridItemRowEnd(NodeHandle node)
+void ResetGridItemRowEnd(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetRowEnd(frameNode, DEFAULT_GRID_ITEM_VALUE);
 }
 
-void SetGridItemColumnStart(NodeHandle node, int32_t columnStart)
+void SetGridItemColumnStart(ArkUINodeHandle node, int32_t columnStart)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetColumnStart(frameNode, columnStart);
 }
 
-void ResetGridItemColumnStart(NodeHandle node)
+void ResetGridItemColumnStart(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetColumnStart(frameNode, DEFAULT_GRID_ITEM_VALUE);
 }
 
-void SetGridItemColumnEnd(NodeHandle node, int32_t columnEnd)
+void SetGridItemColumnEnd(ArkUINodeHandle node, int32_t columnEnd)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetColumnEnd(frameNode, columnEnd);
 }
 
-void ResetGridItemColumnEnd(NodeHandle node)
+void ResetGridItemColumnEnd(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetColumnEnd(frameNode, DEFAULT_GRID_ITEM_VALUE);
 }
 
-ArkUIGridItemModifierAPI GetGridItemModifier()
+namespace NodeModifier {
+const ArkUIGridItemModifier* GetGridItemModifier()
 {
-    static const ArkUIGridItemModifierAPI modifier = { SetGridItemSelectable, ResetGridItemSelectable,
+    static const ArkUIGridItemModifier modifier = { SetGridItemSelectable, ResetGridItemSelectable,
         SetGridItemSelected, ResetGridItemSelected, SetGridItemRowStart, ResetGridItemRowStart,
         SetGridItemRowEnd, ResetGridItemRowEnd, SetGridItemColumnStart, ResetGridItemColumnStart,
         SetGridItemColumnEnd, ResetGridItemColumnEnd };
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

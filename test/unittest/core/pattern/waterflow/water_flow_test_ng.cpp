@@ -354,6 +354,90 @@ HWTEST_F(WaterFlowTestNg, Property009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Property010
+ * @tc.desc: Test ToJsonValue of WaterFlowLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Property010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Waterflow node
+     */
+    CreateWithItem([](WaterFlowModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr");
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetRowsGap(Dimension(5));
+        model.SetColumnsGap(Dimension(10));
+        model.SetLayoutDirection(FlexDirection::ROW);
+        model.SetItemMinWidth(Dimension(10));
+        model.SetItemMinHeight(Dimension(20));
+        model.SetItemMaxWidth(Dimension(200));
+        model.SetItemMaxHeight(Dimension(500));
+    });
+
+    /**
+     * @tc.steps: step2. test function.
+     * @tc.expected: function ToJsonValue is called.
+     */
+    auto json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json);
+    EXPECT_NE(json, nullptr);
+
+    layoutProperty_->Reset();
+    json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json);
+    EXPECT_NE(json, nullptr);
+}
+
+/**
+ * @tc.name: Property011
+ * @tc.desc: Test ToJsonValue of WaterFlowLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Property011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create WaterFlow
+     */
+    WaterFlowModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(WATERFLOW_HEIGHT));
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. set valid value.
+     * @tc.expected: the value of layoutProperty_ is right.
+     */
+    const std::string value = "1fr 1fr";
+    const Dimension gaps = Dimension(10.f);
+    model.SetColumnsTemplate(AceType::RawPtr(frameNode_), value);
+    model.SetRowsTemplate(AceType::RawPtr(frameNode_), value);
+    model.SetColumnsGap(AceType::RawPtr(frameNode_), gaps);
+    model.SetRowsGap(AceType::RawPtr(frameNode_), gaps);
+
+    EXPECT_EQ(layoutProperty_->GetColumnsTemplateValue("1fr"), value);
+    EXPECT_EQ(layoutProperty_->GetRowsTemplateValue("1fr"), value);
+    EXPECT_EQ(layoutProperty_->GetColumnsGapValue(Dimension(0.f)), gaps);
+    EXPECT_EQ(layoutProperty_->GetRowsGapValue(Dimension(0.f)), gaps);
+
+    /**
+     * @tc.steps: step3. set invalid value.
+     * @tc.expected: the value of layoutProperty_ is right.
+     */
+    model.SetColumnsTemplate(AceType::RawPtr(frameNode_), "");
+    model.SetRowsTemplate(AceType::RawPtr(frameNode_), "");
+    model.SetColumnsGap(AceType::RawPtr(frameNode_), -gaps);
+    model.SetRowsGap(AceType::RawPtr(frameNode_), -gaps);
+
+    EXPECT_EQ(layoutProperty_->GetColumnsTemplateValue("1fr"), "1fr");
+    EXPECT_EQ(layoutProperty_->GetRowsTemplateValue("1fr"), "1fr");
+    EXPECT_EQ(layoutProperty_->GetColumnsGapValue(Dimension(0.f)), gaps);
+    EXPECT_EQ(layoutProperty_->GetRowsGapValue(Dimension(0.f)), gaps);
+}
+
+/**
  * @tc.name: WaterFlowTest001
  * @tc.desc: Fill all items to waterFlow with fixed row and column
  * @tc.type: FUNC
@@ -938,7 +1022,7 @@ HWTEST_F(WaterFlowTestNg, Callback001, TestSize.Level1)
 }
 
 /**
- * @tc.name: onScroll
+ * @tc.name: onScroll001
  * @tc.desc: Test onScroll event
  * @tc.type: FUNC
  */
@@ -979,7 +1063,7 @@ HWTEST_F(WaterFlowTestNg, OnScroll001, TestSize.Level1)
 }
 
 /**
- * @tc.name: onScroll
+ * @tc.name: onScroll002
  * @tc.desc: Test onScroll event
  * @tc.type: FUNC
  */
@@ -1003,7 +1087,7 @@ HWTEST_F(WaterFlowTestNg, OnScroll002, TestSize.Level1)
 }
 
 /**
- * @tc.name: onScrollIndex
+ * @tc.name: onScrollIndex001
  * @tc.desc: Test onScrollIndex event
  * @tc.type: FUNC
  */
@@ -1043,7 +1127,7 @@ HWTEST_F(WaterFlowTestNg, onScrollIndex001, TestSize.Level1)
 }
 
 /**
- * @tc.name: onScrollStart and onScrollStop
+ * @tc.name: OnScrollStart001
  * @tc.desc: Verify onScrollStart and onScrollStop event
  * @tc.type: FUNC
  */
@@ -1113,7 +1197,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: WaterFlowPattern_SetFriction001
+ * @tc.name: WaterFlowSetFriction001
  * @tc.desc: Test SetFriction. friction shouled be more than 0.0,if out of range,should be default value.
  * @tc.type: FUNC
  */
@@ -1163,30 +1247,46 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_distributed001, TestSize.Level1)
 }
 
 /**
- * @tc.name: WaterFlowPattern_CreateNodePaintMethod001
- * @tc.desc: Test CreateNodePaintMethod.
+ * @tc.name: WaterFlowPaintMethod001
+ * @tc.desc: Test UpdateOverlayModifier.
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowTestNg, WaterFlowPattern_CreateNodePaintMethod001, TestSize.Level1)
+HWTEST_F(WaterFlowTestNg, WaterFlowPaintMethod001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Init Waterflow node
+     * @tc.steps: step1. create waterFloW
      */
-    CreateWithItem([](WaterFlowModelNG model) {});
+    CreateWithItem([](WaterFlowModelNG model) {
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+        model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    });
 
     /**
-     * @tc.steps: step1. not set contentModifier_
+     * @tc.steps: step2. not set positionMode.
+     * @tc.expected: the positionMode_ of scrollBarOverlayModifier_ is default value.
      */
-    RefPtr<NodePaintMethod> ret = pattern_->CreateNodePaintMethod();
-    EXPECT_NE(ret, nullptr);
+    pattern_->SetScrollBar(DisplayMode::AUTO);
+    auto scrollBar = pattern_->GetScrollBar();
+    scrollBar->SetScrollable(true);
+
+    auto paintMethod = pattern_->CreateNodePaintMethod();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(),
+        frameNode_->GetPaintProperty<ScrollablePaintProperty>());
+    paintMethod->UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
+    EXPECT_EQ(pattern_->GetScrollBarOverlayModifier()->positionMode_, PositionMode::RIGHT);
 
     /**
-     * @tc.steps: step1. set contentModifier_
+     * @tc.steps: step3. scrollBar setting positionMode set to bottom.
+     * @tc.expected: the positionMode_ of scrollBarOverlayModifier_ is bottom.
      */
-    std::string res = "";
-    pattern_->OnRestoreInfo(res);
-    ret = pattern_->CreateNodePaintMethod();
-    EXPECT_NE(ret, nullptr);
+    pattern_->SetEdgeEffect(EdgeEffect::FADE);
+    scrollBar->SetPositionMode(PositionMode::BOTTOM);
+
+    paintMethod = pattern_->CreateNodePaintMethod();
+    paintWrapper = AceType::MakeRefPtr<PaintWrapper>(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(),
+        frameNode_->GetPaintProperty<ScrollablePaintProperty>());
+    paintMethod->UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
+    EXPECT_EQ(pattern_->GetScrollBarOverlayModifier()->positionMode_, PositionMode::BOTTOM);
 }
 
 /**
@@ -1233,13 +1333,18 @@ HWTEST_F(WaterFlowTestNg, WaterFlowContentModifier_onDraw001, TestSize.Level1)
      * @tc.steps: step1. Init Waterflow node
      */
     CreateWithItem([](WaterFlowModelNG model) {});
+
+    /**
+     * @tc.steps: step2. Init contentModifier
+     */
     pattern_->CreateNodePaintMethod();
     auto contentModifier = pattern_->contentModifier_;
-    ASSERT_NE(contentModifier, nullptr);
     Testing::MockCanvas canvas;
-    DrawingContext context = { canvas, 1, 1 };
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(AtLeast(1));
+    DrawingContext context = { canvas, 1.f, 1.f };
+
     /**
-     * @tc.steps: step2. test function.
+     * @tc.steps: step3. test function.
      * @tc.expected: function onDraw is called.
      */
     contentModifier->SetClip(true);
@@ -1267,6 +1372,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_OnDirtyLayoutWrapperSwap001, TestSize
     EXPECT_NE(pattern_->scrollableEvent_, nullptr);
     pattern_->OnModifyDone();
     EXPECT_FALSE(pattern_->CanOverScroll(SCROLL_FROM_UPDATE));
+
     /**
      * @tc.steps: step2. test function.
      * @tc.expected: function OnDirtyLayoutWrapperSwap is called.
@@ -1284,44 +1390,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_OnDirtyLayoutWrapperSwap001, TestSize
     config.skipLayout = false;
     config.skipMeasure = true;
     EXPECT_EQ(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config), false);
-}
-
-/**
- * @tc.name: Property010
- * @tc.desc: Test ToJsonValue of WaterFlowLayoutProperty.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, Property010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init Waterflow node
-     */
-    CreateWithItem([](WaterFlowModelNG model) {
-        model.SetRowsTemplate("1fr 1fr 1fr");
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetRowsGap(Dimension(5));
-        model.SetColumnsGap(Dimension(10));
-        model.SetLayoutDirection(FlexDirection::ROW);
-        model.SetItemMinWidth(Dimension(10));
-        model.SetItemMinHeight(Dimension(20));
-        model.SetItemMaxWidth(Dimension(200));
-        model.SetItemMaxHeight(Dimension(500));
-    });
-
-    /**
-     * @tc.steps: step2. test function.
-     * @tc.expected: function ToJsonValue is called.
-     */
-    EXPECT_NE(layoutProperty_->Clone(), nullptr);
-    auto json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
-    EXPECT_NE(json, nullptr);
-
-    layoutProperty_->Reset();
-    EXPECT_NE(layoutProperty_->Clone(), nullptr);
-    json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
-    EXPECT_NE(json, nullptr);
 }
 
 /**
@@ -1398,7 +1466,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest004, TestSize.Level1)
      * @tc.expected: step2. Check whether the endIndex_ is correct.
      */
     int32_t resetFrom = pattern_->layoutInfo_.endIndex_;
-    pattern_->layoutInfo_.Reset(resetFrom);
+    pattern_->layoutInfo_.Reset(resetFrom + 1);
     EXPECT_EQ(pattern_->layoutInfo_.endIndex_, resetFrom);
 
     pattern_->layoutInfo_.Reset(resetFrom - 1);

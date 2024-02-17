@@ -455,6 +455,8 @@ public:
         return focusStyleType_;
     }
 
+    static void CloseKeyboard();
+
     static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
 
     static void PushPageCloseKeyboard();

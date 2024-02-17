@@ -48,7 +48,7 @@ public:
     virtual ~LinearSplitModel() = default;
 
     virtual void Create(NG::SplitType splitType) = 0;
-    virtual void SetResizeable(NG::SplitType splitType, bool resizeable) = 0;
+    virtual void SetResizable(NG::SplitType splitType, bool resizable) = 0;
     virtual void SetDivider(NG::SplitType splitType, const NG::ItemDivider& divider) = 0;
 
 private:

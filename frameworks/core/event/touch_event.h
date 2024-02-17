@@ -94,7 +94,6 @@ struct TouchEvent final {
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
     std::shared_ptr<MMI::PointerEvent> pointerEvent { nullptr };
-    std::vector<uint8_t> enhanceData;
     // historical points
     std::vector<TouchEvent> history;
 
@@ -171,7 +170,7 @@ struct TouchEvent final {
     {
         if (NearZero(scale)) {
             return { id, x, y, screenX, screenY, type, pullType, time, size, force, tiltX, tiltY, deviceId,
-                targetDisplayId, sourceType, sourceTool, isInterpolated, pointers, pointerEvent, enhanceData };
+                targetDisplayId, sourceType, sourceTool, isInterpolated, pointers, pointerEvent };
         }
         auto temp = pointers;
         std::for_each(temp.begin(), temp.end(), [scale](auto&& point) {
@@ -181,7 +180,7 @@ struct TouchEvent final {
             point.screenY = point.screenY / scale;
         });
         return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, pullType, time, size, force, tiltX,
-            tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated, temp, pointerEvent, enhanceData };
+            tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated, temp, pointerEvent };
     }
 
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
@@ -196,7 +195,7 @@ struct TouchEvent final {
             });
             return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, pullType, time,
                 size, force, tiltX, tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated, temp,
-                pointerEvent, enhanceData };
+                pointerEvent };
         }
 
         std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
@@ -207,7 +206,7 @@ struct TouchEvent final {
         });
         return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, (screenX - offsetX) / scale,
             (screenY - offsetY) / scale, type, pullType, time, size, force, tiltX, tiltY, deviceId, targetDisplayId,
-            sourceType, sourceTool, isInterpolated, temp, pointerEvent, enhanceData };
+            sourceType, sourceTool, isInterpolated, temp, pointerEvent };
     }
 
     TouchEvent UpdatePointers() const
@@ -234,8 +233,8 @@ struct TouchEvent final {
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
             .isInterpolated = isInterpolated,
-            .pointerEvent = pointerEvent,
-            .enhanceData = enhanceData };
+            .pointerEvent = pointerEvent
+        };
         event.pointers.emplace_back(std::move(point));
         return event;
     }
@@ -609,7 +608,7 @@ public:
         return nodeName_;
     }
 
-    virtual void AssignNodeId(int id)
+    void SetNodeId(int id)
     {
         if (nodeId_ != -1) {
             return;

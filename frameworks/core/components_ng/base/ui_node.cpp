@@ -86,7 +86,7 @@ UINode::~UINode()
     }
 }
 
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
+void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently, bool addDefaultTransition)
 {
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
@@ -98,7 +98,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
     RemoveDisappearingChild(child);
     it = children_.begin();
     std::advance(it, slot);
-    DoAddChild(it, child, silently);
+    DoAddChild(it, child, silently, addDefaultTransition);
 }
 
 void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
@@ -230,10 +230,10 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition)
     MarkNeedSyncRenderTree(true);
 }
 
-void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently)
+void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently, bool addDefaultTransition)
 {
     CHECK_NULL_VOID(parent);
-    parent->AddChild(AceType::Claim(this), slot, silently);
+    parent->AddChild(AceType::Claim(this), slot, silently, addDefaultTransition);
     if (parent->IsInDestroying()) {
         parent->SetChildrenInDestroying();
     }
@@ -275,7 +275,7 @@ void UINode::ResetParent()
 }
 
 void UINode::DoAddChild(
-    std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool allowTransition)
+    std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool addDefaultTransition)
 {
     children_.insert(it, child);
 
@@ -286,7 +286,7 @@ void UINode::DoAddChild(
     }
 
     if (!silently && onMainTree_) {
-        child->AttachToMainTree(!allowTransition);
+        child->AttachToMainTree(!addDefaultTransition);
     }
     MarkNeedSyncRenderTree(true);
 }
@@ -987,8 +987,8 @@ void UINode::DoSetActiveChildRange(int32_t start, int32_t end)
     for (const auto& child : children_) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
         child->DoSetActiveChildRange(start, end);
-        start -= count;
-        end -= count;
+        start -= static_cast<int32_t>(count);
+        end -= static_cast<int32_t>(count);
     }
 }
 

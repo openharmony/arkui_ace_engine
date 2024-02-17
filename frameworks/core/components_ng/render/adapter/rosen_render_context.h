@@ -343,6 +343,7 @@ public:
     void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) override;
     void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
+    void ResetSurface() override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

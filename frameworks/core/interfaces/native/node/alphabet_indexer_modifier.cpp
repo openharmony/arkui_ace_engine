@@ -48,7 +48,7 @@ constexpr double DEFAULT_POPUP_POSITION_X = 60.0;
 constexpr double DEFAULT_POPUP_POSITION_Y = 48.0;
 } // namespace
 
-void SetPopupItemFont(NodeHandle node, double size, int unit, const char* weight)
+void SetPopupItemFont(ArkUINodeHandle node, ArkUI_Float32 size, int unit, const char* weight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -57,7 +57,7 @@ void SetPopupItemFont(NodeHandle node, double size, int unit, const char* weight
     IndexerModelNG::SetFontWeight(frameNode, StringUtils::StringToFontWeight(std::string(weight), FontWeight::MEDIUM));
 }
 
-void ResetPopupItemFont(NodeHandle node)
+void ResetPopupItemFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -65,7 +65,7 @@ void ResetPopupItemFont(NodeHandle node)
     IndexerModelNG::SetFontWeight(frameNode, FontWeight::MEDIUM);
 }
 
-void SetSelectedFont(NodeHandle node, const char* fontInfo, int32_t style)
+void SetSelectedFont(ArkUINodeHandle node, const char* fontInfo, int32_t style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -83,7 +83,7 @@ void SetSelectedFont(NodeHandle node, const char* fontInfo, int32_t style)
     IndexerModelNG::SetSelectedFont(frameNode, fontSize, fontWeight, fontFamily, fontStyle);
 }
 
-void ResetSelectedFont(NodeHandle node)
+void ResetSelectedFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -96,7 +96,7 @@ void ResetSelectedFont(NodeHandle node)
     IndexerModelNG::SetSelectedFont(frameNode, fontSize, fontWeight, fontFamily, fontStyle);
 }
 
-void SetPopupFont(NodeHandle node, const char* fontInfo, int32_t style)
+void SetPopupFont(ArkUINodeHandle node, const char* fontInfo, int32_t style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -114,7 +114,7 @@ void SetPopupFont(NodeHandle node, const char* fontInfo, int32_t style)
     IndexerModelNG::SetPopupFont(frameNode, fontSize, fontWeight, fontFamily, fontStyle);
 }
 
-void ResetPopupFont(NodeHandle node)
+void ResetPopupFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -127,7 +127,7 @@ void ResetPopupFont(NodeHandle node)
     IndexerModelNG::SetPopupFont(frameNode, fontSize, fontWeight, fontFamily, fontStyle);
 }
 
-void SetAlphabetIndexerFont(NodeHandle node, const char* fontInfo, int32_t style)
+void SetAlphabetIndexerFont(ArkUINodeHandle node, const char* fontInfo, int32_t style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -145,7 +145,7 @@ void SetAlphabetIndexerFont(NodeHandle node, const char* fontInfo, int32_t style
     IndexerModelNG::SetFont(frameNode, fontSize, fontWeight, fontFamily, fontStyle);
 }
 
-void ResetAlphabetIndexerFont(NodeHandle node)
+void ResetAlphabetIndexerFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -158,188 +158,188 @@ void ResetAlphabetIndexerFont(NodeHandle node)
     IndexerModelNG::SetFont(frameNode, fontSize, fontWeight, fontFamily, fontStyle);
 }
 
-void SetPopupItemBackgroundColor(NodeHandle node, uint32_t color)
+void SetPopupItemBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupItemBackground(frameNode, Color(color));
 }
 
-void ResetPopupItemBackgroundColor(NodeHandle node)
+void ResetPopupItemBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupItemBackground(frameNode, Color(DEFAULT_ITEM_BG_COLOR));
 }
 
-void SetAlphabetIndexerColor(NodeHandle node, uint32_t color)
+void SetAlphabetIndexerColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetColor(frameNode, Color(color));
 }
 
-void ResetAlphabetIndexerColor(NodeHandle node)
+void ResetAlphabetIndexerColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetColor(frameNode, Color(DEFAULT_COLOR));
 }
 
-void SetPopupColor(NodeHandle node, uint32_t color)
+void SetPopupColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupColor(frameNode, Color(color));
 }
 
-void ResetPopupColor(NodeHandle node)
+void ResetPopupColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupColor(frameNode, Color(DEFAULT_POPUP_COLOR));
 }
 
-void SetAlphabetIndexerSelectedColor(NodeHandle node, uint32_t color)
+void SetAlphabetIndexerSelectedColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetSelectedColor(frameNode, Color(color));
 }
 
-void ResetAlphabetIndexerSelectedColor(NodeHandle node)
+void ResetAlphabetIndexerSelectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetSelectedColor(frameNode, Color(DEFAULT_SELECTED_COLOR));
 }
 
-void SetPopupBackground(NodeHandle node, uint32_t color)
+void SetPopupBackground(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupBackground(frameNode, Color(color));
 }
 
-void ResetPopupBackground(NodeHandle node)
+void ResetPopupBackground(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupBackground(frameNode, Color(DEFAULT_POPUP_BG_COLOR));
 }
 
-void SetSelectedBackgroundColor(NodeHandle node, uint32_t color)
+void SetSelectedBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
 }
 
-void ResetSelectedBackgroundColor(NodeHandle node)
+void ResetSelectedBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetSelectedBackgroundColor(frameNode, Color(DEFAULT_SELECTED_BG_COLOR));
 }
 
-void SetPopupUnselectedColor(NodeHandle node, uint32_t color)
+void SetPopupUnselectedColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupUnselectedColor(frameNode, Color(color));
 }
 
-void ResetPopupUnselectedColor(NodeHandle node)
+void ResetPopupUnselectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupUnselectedColor(frameNode, Color(DEFAULT_POPUP_SELECTED_COLOR));
 }
 
-void SetAlignStyle(NodeHandle node, int32_t value)
+void SetAlignStyle(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetAlignStyle(frameNode, value);
 }
 
-void ResetAlignStyle(NodeHandle node)
+void ResetAlignStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetAlignStyle(frameNode, DEFAULT_ALIGN_STYLE);
 }
 
-void SetPopupHorizontalSpace(NodeHandle node, double value, int unit)
+void SetPopupHorizontalSpace(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupHorizontalSpace(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
 }
 
-void ResetPopupHorizontalSpace(NodeHandle node)
+void ResetPopupHorizontalSpace(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupHorizontalSpace(frameNode, DEFAULT_POPUPHORIZONTALSPACE);
 }
 
-void SetUsingPopup(NodeHandle node, bool value)
+void SetUsingPopup(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetUsingPopup(frameNode, value);
 }
 
-void ResetUsingPopup(NodeHandle node)
+void ResetUsingPopup(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetUsingPopup(frameNode, DEFAULT_USINGPOPUP);
 }
 
-void SetAlphabetIndexerSelected(NodeHandle node, int32_t value)
+void SetAlphabetIndexerSelected(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetSelected(frameNode, value);
 }
 
-void ResetAlphabetIndexerSelected(NodeHandle node)
+void ResetAlphabetIndexerSelected(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetSelected(frameNode, DEFAULT_SELECTED);
 }
 
-void SetPopupSelectedColor(NodeHandle node, uint32_t color)
+void SetPopupSelectedColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupSelectedColor(frameNode, Color(color));
 }
-void ResetPopupSelectedColor(NodeHandle node)
+void ResetPopupSelectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetPopupSelectedColor(frameNode, Color(DEFAULT_POPUP_SELECTED_COLOR));
 }
 
-void SetItemSize(NodeHandle node, double value, int unit)
+void SetItemSize(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetItemSize(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
 }
 
-void ResetItemSize(NodeHandle node)
+void ResetItemSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetItemSize(frameNode, Dimension(DEFAULT_ITEM_SIZE, DimensionUnit::VP));
 }
 
-void SetPopupPosition(NodeHandle node, double xValue, int xUnit, double yValue, int yUnit)
+void SetPopupPosition(ArkUINodeHandle node, ArkUI_Float32 xValue, int xUnit, ArkUI_Float32 yValue, int yUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -347,7 +347,7 @@ void SetPopupPosition(NodeHandle node, double xValue, int xUnit, double yValue, 
     IndexerModelNG::SetPopupPositionY(frameNode, Dimension(yValue, static_cast<OHOS::Ace::DimensionUnit>(yUnit)));
 }
 
-void ResetPopupPosition(NodeHandle node)
+void ResetPopupPosition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -355,9 +355,10 @@ void ResetPopupPosition(NodeHandle node)
     IndexerModelNG::SetPopupPositionY(frameNode, Dimension(DEFAULT_POPUP_POSITION_Y, DimensionUnit::VP));
 }
 
-ArkUIAlphabetIndexerModifierAPI GetAlphabetIndexerModifier()
+namespace NodeModifier {
+const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
-    static const ArkUIAlphabetIndexerModifierAPI modifier = { SetPopupItemFont, ResetPopupItemFont, SetSelectedFont,
+    static const ArkUIAlphabetIndexerModifier modifier = { SetPopupItemFont, ResetPopupItemFont, SetSelectedFont,
         ResetSelectedFont, SetPopupFont, ResetPopupFont, SetAlphabetIndexerFont, ResetAlphabetIndexerFont,
         SetPopupItemBackgroundColor, ResetPopupItemBackgroundColor, SetAlphabetIndexerColor, ResetAlphabetIndexerColor,
         SetPopupColor, ResetPopupColor, SetAlphabetIndexerSelectedColor, ResetAlphabetIndexerSelectedColor,
@@ -367,6 +368,7 @@ ArkUIAlphabetIndexerModifierAPI GetAlphabetIndexerModifier()
         ResetPopupHorizontalSpace, SetPopupSelectedColor, ResetPopupSelectedColor, SetItemSize, ResetItemSize,
         SetPopupPosition, ResetPopupPosition };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

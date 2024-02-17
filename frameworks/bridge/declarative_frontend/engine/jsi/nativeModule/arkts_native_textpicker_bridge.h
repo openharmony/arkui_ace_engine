@@ -19,7 +19,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
 namespace OHOS::Ace::NG {
-class TextpickerBridge {
+class TextPickerBridge {
 public:
     static ArkUINativeModuleValue SetCanLoop(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSelectedIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
