@@ -540,7 +540,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw001, TestSize.Level1)
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, Save()).Times(1).WillOnce(Return());
     EXPECT_CALL(rsCanvas, Scale(_, _)).Times(1).WillOnce(Return());
-    EXPECT_CALL(rsCanvas, DrawBitmap(_, _, _)).Times(1).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, DrawImage(_, _, _, _)).Times(1).WillOnce(Return());
     EXPECT_CALL(rsCanvas, Restore()).Times(1).WillOnce(Return());
     DrawingContext context = { rsCanvas, 10.0f, 10.0f };
     qrCodePaintMethod->qrCodeSize_ = 100.0f;
