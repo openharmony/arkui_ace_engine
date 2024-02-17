@@ -38,7 +38,10 @@ class ACE_EXPORT ImagePattern : public Pattern, public SelectionHost {
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
-    ImagePattern() = default;
+    ImagePattern()
+    {
+        InitDefaultValue();
+    }
     ~ImagePattern() override = default;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
@@ -60,7 +63,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_);
+        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_, autoResizeDefault_);
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -224,6 +227,7 @@ private:
     void DeleteAnalyzerOverlay();
     bool IsSupportImageAnalyzerFeature();
     void UpdateAnalyzerOverlayLayout();
+    void InitDefaultValue();
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;
@@ -255,7 +259,9 @@ private:
     bool syncLoad_ = false;
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerOverlayBuild_ = false;
- 
+    bool autoResizeDefault_ = true;
+    ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
+
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };
 
