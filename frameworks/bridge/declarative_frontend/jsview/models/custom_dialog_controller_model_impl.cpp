@@ -221,9 +221,9 @@ void CustomDialogControllerModelImpl::CloseDialog(DialogProperties& dialogProper
 }
 
 void CustomDialogControllerModelImpl::SetOpenDialog(DialogProperties& dialogProperties,
-    std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
-    std::function<void()>&& buildFunc, RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
-    std::list<DialogOperation>& dialogOperation)
+    const WeakPtr<AceType>& controller, std::vector<WeakPtr<AceType>>& dialogs,
+    bool& pending, bool& isShown, std::function<void()>&& cancelTask, std::function<void()>&& buildFunc,
+    RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation)
 {
     // Cannot reuse component because might depend on state
     if (customDialog) {
@@ -242,8 +242,9 @@ void CustomDialogControllerModelImpl::SetOpenDialog(DialogProperties& dialogProp
 }
 
 void CustomDialogControllerModelImpl::SetCloseDialog(DialogProperties& dialogProperties,
-    std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
-    RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation)
+    const WeakPtr<AceType>& controller, std::vector<WeakPtr<AceType>>& dialogs,
+    bool& pending, bool& isShown, std::function<void()>&& cancelTask, RefPtr<AceType>& dialogComponent,
+    RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation)
 {
     CloseDialog(
         dialogProperties, pending, isShown, std::move(cancelTask), dialogComponent, customDialog, dialogOperation);
