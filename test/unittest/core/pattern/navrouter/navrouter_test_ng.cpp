@@ -1908,7 +1908,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0038, TestSize.Level1)
      * @tc.steps: step2. change status_ and iconStatus_.
      * @tc.expected: check whether the properties is correct.
      */
-    std::cout<<"trigger change status"<< std::endl;
     barItemPattern->status_ = NavToolbarItemStatus::ACTIVE;
     barItemPattern->iconStatus_ = ToolbarIconStatus::INITIAL;
     barItemPattern->UpdateBarItemActiveStatusResource();
