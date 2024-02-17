@@ -47,6 +47,9 @@ enum class PointerAction : int32_t {
     SWIPE_BEGIN = 17,
     SWIPE_UPDATE = 18,
     SWIPE_END = 19,
+    POINTER_ACTION_ROTATE_BEGIN = 20,
+    POINTER_ACTION_ROTATE_UPDATE = 21,
+    POINTER_ACTION_ROTATE_END = 22,
 };
 
 struct PointerEvent final {

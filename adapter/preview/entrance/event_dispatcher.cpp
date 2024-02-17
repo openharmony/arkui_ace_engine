@@ -307,7 +307,10 @@ static void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     event.horizontalAxis = GetAxisValue(pointerEvent, MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = GetAxisValue(pointerEvent, MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
     event.pinchAxisScale = GetAxisValue(pointerEvent, MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
+    event.rotateAxisAngle = GetAxisValue(pointerEvent, MMI::PointerEvent::AxisType::AXIS_TYPE_ROTATE);
     GetAxisEventAction(pointerEvent->pointerAction_, event);
+    event.isRotationEvent = (pointerEvent->pointerAction_ >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN) &&
+                            (pointerEvent->pointerAction_ <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END);
     event.sourceType = SourceType::MOUSE;
     event.sourceTool = SourceTool::MOUSE;
     event.pointerEvent = pointerEvent;

@@ -32,6 +32,8 @@ constexpr int32_t MAX_ROTATION_FINGERS = 5;
 constexpr int32_t DEFAULT_ROTATION_FINGERS = 2;
 constexpr double ONE_CIRCLE = 360.0;
 constexpr double QUARTER_CIRCLE = 90.0;
+constexpr double RANGE_MIN = -180.0;
+constexpr double RANGE_MAX = 180.0;
 
 } // namespace
 
@@ -81,6 +83,18 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 }
 
+void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
+{
+    if (!event.isRotationEvent) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives axis start event, begin to detect rotation event");
+    if (refereeState_ == RefereeState::READY) {
+        initialAngle_ = event.rotateAxisAngle;
+        refereeState_ = RefereeState::DETECTING;
+    }
+}
+
 void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     if (!IsActiveFinger(event.id)) {
@@ -102,6 +116,18 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         SendCallbackMsg(onActionEnd_);
     }
     activeFingers_.remove(event.id);
+}
+
+void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
+{
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives axis end event");
+    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+    if (refereeState_ == RefereeState::SUCCEED) {
+        SendCallbackMsg(onActionEnd_);
+    }
 }
 
 void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
@@ -153,12 +179,53 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
 }
 
+void RotationRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
+{
+    if (!event.isRotationEvent) {
+        return;
+    }
+    touchPoints_[event.id].x = event.x;
+    touchPoints_[event.id].y = event.y;
+    touchPoints_[event.id].sourceType = event.sourceType;
+    touchPoints_[event.id].sourceTool = event.sourceTool;
+    currentAngle_ = event.rotateAxisAngle;
+    time_ = event.time;
+    if (refereeState_ == RefereeState::DETECTING) {
+        double diffAngle = fabs((currentAngle_ - initialAngle_));
+        if (GreatNotEqual(diffAngle, angle_)) {
+            resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
+            auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
+            if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+                Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+                return;
+            }
+            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+        }
+    } else if (refereeState_ == RefereeState::SUCCEED) {
+        resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
+        SendCallbackMsg(onActionUpdate_);
+    }
+}
+
 void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     if (!IsActiveFinger(event.id)) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives touch cancel event");
+    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+
+    if (refereeState_ == RefereeState::SUCCEED) {
+        SendCancelMsg();
+    }
+}
+
+void RotationRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
+{
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives axis cancel event");
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -185,16 +252,13 @@ double RotationRecognizer::ComputeAngle()
 // Map the value range to -180 to 180
 double RotationRecognizer::ChangeValueRange(double value)
 {
-    double result = 0.0;
-    if (LessOrEqual(value, -180.0)) {
-        result = value + 360.0;
-    } else if (GreatNotEqual(value, 180.0)) {
-        result = value - 360.0;
-    } else {
-        result = value;
+    while (LessOrEqual(value, RANGE_MIN)) {
+        value += ONE_CIRCLE;
     }
-
-    return result;
+    while (GreatNotEqual(value, RANGE_MAX)) {
+        value -= ONE_CIRCLE;
+    }
+    return value;
 }
 
 void RotationRecognizer::OnResetStatus()

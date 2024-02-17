@@ -96,11 +96,14 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    if (event.isRotationEvent) {
+        return;
+    }
     if (IsRefereeFinished()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch down event, begin to detect pinch event");
-    if (refereeState_ == RefereeState::READY) {
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives axis start event, begin to detect pinch event");
+    if (refereeState_ == RefereeState::READY && (NearEqual(event.pinchAxisScale, 1.0) || IsCtrlBeingPressed())) {
         scale_ = 1.0f;
         pinchCenter_ = Offset(event.x, event.y);
         refereeState_ = RefereeState::DETECTING;
@@ -195,6 +198,9 @@ void PinchRecognizer::OnFlushTouchEventsEnd()
 
 void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
+    if (event.isRotationEvent) {
+        return;
+    }
     if (isPinchEnd_) {
         return;
     }
@@ -210,7 +216,10 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
             return;
         }
     }
-
+    touchPoints_[event.id].x = event.x;
+    touchPoints_[event.id].y = event.y;
+    touchPoints_[event.id].sourceType = event.sourceType;
+    touchPoints_[event.id].sourceTool = event.sourceTool;
     time_ = event.time;
     if (refereeState_ == RefereeState::DETECTING || refereeState_ == RefereeState::SUCCEED) {
         if (event.pinchAxisScale != 0.0) {
