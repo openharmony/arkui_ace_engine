@@ -69,9 +69,10 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 
         // check if owner object is set
         JSView* ownerView = ownerObj->Unwrap<JSView>();
-        auto instance = new JSCustomDialogController(ownerView);
+        auto instance = AceType::MakeRefPtr<JSCustomDialogController>(ownerView);
         if (ownerView == nullptr) {
-            info.SetReturnValue(instance);
+            instance->IncRefCount();
+            info.SetReturnValue(AceType::RawPtr(instance));
             instance = nullptr;
             return;
         }
@@ -83,7 +84,8 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
                 AceType::MakeRefPtr<JsWeakFunction>(ownerObj, JSRef<JSFunc>::Cast(builderCallback));
         } else {
             instance->jsBuilderFunction_ = nullptr;
-            info.SetReturnValue(instance);
+            instance->IncRefCount();
+            info.SetReturnValue(AceType::RawPtr(instance));
             instance = nullptr;
             return;
         }
@@ -209,7 +211,8 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         if (isModalValue->IsBoolean()) {
             instance->dialogProperties_.isModal = isModalValue->ToBoolean();
         }
-        info.SetReturnValue(instance);
+        instance->IncRefCount();
+        info.SetReturnValue(AceType::RawPtr(instance));
     }
 }
 
@@ -217,7 +220,7 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
 {
     if (controller != nullptr) {
         controller->ownerView_ = nullptr;
-        delete controller;
+        controller->DecRefCount();
     }
 }
 
@@ -314,8 +317,8 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         }
     }
     dialogProperties_.isSysBlurStyle = false;
-    CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, dialogs_, pending_, isShown_,
-        std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_);
+    CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, WeakClaim(this), dialogs_, pending_,
+        isShown_, std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_);
     return;
 }
 
@@ -345,8 +348,8 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         }
     });
 
-    CustomDialogControllerModel::GetInstance()->SetCloseDialog(dialogProperties_, dialogs_, pending_, isShown_,
-        std::move(cancelTask), dialogComponent_, customDialog_, dialogOperation_);
+    CustomDialogControllerModel::GetInstance()->SetCloseDialog(dialogProperties_, WeakClaim(this), dialogs_, pending_,
+        isShown_, std::move(cancelTask), dialogComponent_, customDialog_, dialogOperation_);
 }
 
 bool JSCustomDialogController::ParseAnimation(

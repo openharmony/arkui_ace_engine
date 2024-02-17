@@ -21,9 +21,9 @@
 
 namespace OHOS::Ace::NG {
 void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProperties,
-    std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
-    std::function<void()>&& buildFunc, RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
-    std::list<DialogOperation>& dialogOperation)
+    const WeakPtr<AceType>& controller, std::vector<WeakPtr<AceType>>& dialogs,
+    bool& pending, bool& isShown, std::function<void()>&& cancelTask, std::function<void()>&& buildFunc,
+    RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation)
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
@@ -48,12 +48,14 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
 
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
-    auto task = [currentId, dialogProperties, &dialogs, func = std::move(buildFunc),
+    auto task = [currentId, controller, &dialogProperties, &dialogs, func = std::move(buildFunc),
                     weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
         ContainerScope scope(currentId);
         RefPtr<NG::FrameNode> dialog;
         auto overlayManager = weakOverlayManager.Upgrade();
         CHECK_NULL_VOID(overlayManager);
+        auto controllerPtr = controller.Upgrade();
+        CHECK_NULL_VOID(controllerPtr);
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
             if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog) {
@@ -75,8 +77,9 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
 }
 
 void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogProperties,
-    std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
-    RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation)
+    const WeakPtr<AceType>& controller, std::vector<WeakPtr<AceType>>& dialogs,
+    bool& pending, bool& isShown, std::function<void()>&& cancelTask, RefPtr<AceType>& dialogComponent,
+    RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation)
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
@@ -94,13 +97,14 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
     CHECK_NULL_VOID(overlayManager);
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
-    auto task = [&dialogs, dialogProperties,
-                    weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
+    auto task = [controller, &dialogs, &dialogProperties,
+                    weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
         auto overlayManager = weakOverlayManager.Upgrade();
         CHECK_NULL_VOID(overlayManager);
+        auto controllerPtr = controller.Upgrade();
+        CHECK_NULL_VOID(controllerPtr);
         RefPtr<NG::FrameNode> dialog;
         while (!dialogs.empty()) {
-            CHECK_NULL_VOID(&dialogs.back());
             dialog = AceType::DynamicCast<NG::FrameNode>(dialogs.back().Upgrade());
             if (dialog && !dialog->IsRemoving()) {
                 // get the dialog not removed currently
