@@ -21,11 +21,12 @@ ace_unittest("grid_test_ng") {
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
     "grid_attr_test_ng.cpp",
     "grid_common_test_ng.cpp",
-    "grid_irregular_layout_test.cpp",
     "grid_layout_test_ng.cpp",
     "grid_scroller_test_ng.cpp",
     "grid_test_ng.cpp",
-    "irregular_matrics.cpp",
+    "irregular/grid_irregular_filler_test.cpp",
+    "irregular/grid_irregular_layout_test.cpp",
+    "irregular/irregular_matrics.cpp",
     "layout_info_test.cpp",
   ]
 }

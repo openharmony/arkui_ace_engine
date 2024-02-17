@@ -154,14 +154,15 @@ bool GridIrregularFiller::FindNextItem(int32_t target)
     }
     // to handle empty tiles in the middle of matrix, check next row
     auto nextRow = mat.find(posY_ + 1);
-    if (nextRow != mat.end()) {
+    while (nextRow != mat.end()) {
         for (const auto [col, item] : nextRow->second) {
             if (item == target) {
-                ++posY_;
+                posY_ = nextRow->first;
                 posX_ = col;
                 return true;
             }
         }
+        ++nextRow;
     }
     return false;
 }

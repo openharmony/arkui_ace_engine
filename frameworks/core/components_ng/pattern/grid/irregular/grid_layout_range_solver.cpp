@@ -119,11 +119,16 @@ std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int3
 std::pair<int32_t, int32_t> GridLayoutRangeSolver::SolveForwardForEndIdx(float mainGap, float targetLen, int32_t line)
 {
     float len = 0.0f;
-    while (len < targetLen && line <= info_->lineHeightMap_.rbegin()->first) {
-        len += info_->lineHeightMap_.at(line++) + mainGap;
+    auto it = info_->lineHeightMap_.find(line);
+    if (it == info_->lineHeightMap_.end()) {
+        return { -1, -1 };
     }
-    --line;
-    return { line, info_->FindEndIdx(line).itemIdx };
+
+    for (; len < targetLen && it != info_->lineHeightMap_.end(); ++it) {
+        len += it->second + mainGap;
+    }
+    --it;
+    return { it->first, info_->FindEndIdx(it->first).itemIdx };
 }
 
 Result GridLayoutRangeSolver::SolveBackward(float mainGap, float targetLen, int32_t idx)

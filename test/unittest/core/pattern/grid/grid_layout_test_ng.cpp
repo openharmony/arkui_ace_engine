@@ -14,7 +14,6 @@
  */
 
 #include "grid_test_ng.h"
-#include "irregular_matrices.h"
 
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"

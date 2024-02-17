@@ -15,7 +15,7 @@
 #include "gtest/gtest.h"
 
 #define private public
-#include "irregular_matrices.h"
+#include "test/unittest/core/pattern/grid/irregular/irregular_matrices.h"
 
 using namespace testing;
 using namespace testing::ext;
