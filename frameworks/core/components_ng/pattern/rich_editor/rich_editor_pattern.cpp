@@ -5233,8 +5233,9 @@ void RichEditorPattern::AdjustPlaceholderSelection(int32_t& start, int32_t& end,
 {
     CHECK_NULL_VOID(!spans_.empty());
     float selectLineHeight = 0.0f;
-    auto startPositionOffset = CalcCursorOffsetByPosition(start, selectLineHeight);
-    if (touchPos.GetX() > startPositionOffset.GetX()) {
+    auto clickPositionOffset = paragraphs_.ComputeCursorInfoByClick(start, selectLineHeight,
+        OffsetF(static_cast<float>(touchPos.GetX()), static_cast<float>(touchPos.GetY())));
+    if (touchPos.GetX() > clickPositionOffset.GetX()) {
         return;
     }
     auto it = std::find_if(spans_.begin(), spans_.end(), [start](const RefPtr<SpanItem>& spanItem) {
