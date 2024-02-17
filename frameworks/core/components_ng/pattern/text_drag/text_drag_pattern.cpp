@@ -47,8 +47,6 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
     bool hasResult = false;
     RectF result;
     for (const auto& box : boxes) {
-        if (box.Bottom() + textStartY >= contentRect.Bottom()) {
-            return box;
         if (box.Bottom() + textStartY >= contentRect.Bottom() && !hasResult) {
             result = box;
             hasResult = true;
