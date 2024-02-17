@@ -28,7 +28,7 @@ public:
     void SetFontColor(const Color& textColor) override;
     void SetType(const int value) override;
     void SetStateEffect(const bool stateEffect) override;
-    void SetLableStyle(ButtonParameters& buttonParameters) override;
+    void SetLabelStyle(ButtonParameters& buttonParameters) override;
     void CreateWithLabel(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren) override;
     void Create(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren) override;
     void CreateWithChild(const CreateWithPara& para) override;
@@ -49,7 +49,7 @@ public:
     static void SetFontColor(FrameNode* frameNode, const Color& textColor);
     static void SetType(FrameNode* frameNode, const int value);
     static void SetStateEffect(FrameNode* frameNode, const bool stateEffect);
-    static void SetLableStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters);
+    static void SetLabelStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters);
     static void BackgroundColor(FrameNode* frameNode, const Color& color, const bool& colorFlag);
     static void SetBorderRadius(FrameNode* frameNode, const Dimension& radius);
     static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,

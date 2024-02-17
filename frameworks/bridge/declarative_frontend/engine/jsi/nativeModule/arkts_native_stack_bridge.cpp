@@ -14,8 +14,6 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h"
 
-#include "core/interfaces/native/node/api.h"
-
 namespace OHOS::Ace::NG {
 constexpr int NUM_4 = 4;
 
@@ -25,12 +23,12 @@ ArkUINativeModuleValue StackBridge::SetAlignContent(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t align = NUM_4;
     if (secondArg->IsNumber()) {
         align = secondArg->Int32Value(vm);
     }
-    GetArkUIInternalNodeAPI()->GetStackModifier().SetAlignContent(nativeNode, align);
+    GetArkUINodeModifiers()->getStackModifier()->setAlignContent(nativeNode, align);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -39,8 +37,8 @@ ArkUINativeModuleValue StackBridge::ResetAlignContent(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetStackModifier().ResetAlignContent(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getStackModifier()->resetAlignContent(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

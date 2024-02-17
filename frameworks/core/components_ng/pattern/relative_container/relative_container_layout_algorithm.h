@@ -92,7 +92,8 @@ private:
     float GetHorizontalAnchorValueByAlignRule(AlignRule& alignRule);
     float GetVerticalAnchorValueByAlignRule(AlignRule& alignRule);
     std::pair<float, float> CalcOffsetInChainGetStart(const float& anchorDistance, const float& contentSize,
-        const ChainParam& chainParam, LineDirection direction);
+        int32_t itemCount, const ChainParam& chainParam, LineDirection direction);
+    void RecordOffsetInChain(float offset, float spaceSize, const std::string& chainName, LineDirection direction);
     bool CalcOffsetInChain(const std::string& chainName, LineDirection direction);
     void PreTopologicalLoopDetectionGetAnchorSet(
         const std::string& nodeName, const AlignRulesItem& alignRulesItem, std::set<std::string>& anchorSet);

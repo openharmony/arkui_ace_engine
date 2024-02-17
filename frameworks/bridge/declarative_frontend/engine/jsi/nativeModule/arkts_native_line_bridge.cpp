@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -23,18 +21,18 @@ ArkUINativeModuleValue LineBridge::SetStartPoint(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     if (!jsValue->IsArray(vm)) {
-        GetArkUIInternalNodeAPI()->GetLineModifier().ResetStartPoint(nativeNode);
+        GetArkUINodeModifiers()->getLineModifier()->resetStartPoint(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
     auto arrayVal = panda::Local<panda::ArrayRef>(jsValue);
     auto length = arrayVal->Length(vm);
     if (length <= 0) {
-        GetArkUIInternalNodeAPI()->GetLineModifier().ResetStartPoint(nativeNode);
+        GetArkUINodeModifiers()->getLineModifier()->resetStartPoint(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -50,7 +48,7 @@ ArkUINativeModuleValue LineBridge::SetStartPoint(ArkUIRuntimeCallInfo* runtimeCa
         end = CalcDimension(0, DimensionUnit::VP);
     }
 
-    std::vector<double> pointValues;
+    std::vector<ArkUI_Float32> pointValues;
     std::vector<int32_t> pointUnits;
     std::vector<const char*> pointStr;
     pointUnits.push_back(static_cast<int>(star.Unit()));
@@ -71,8 +69,8 @@ ArkUINativeModuleValue LineBridge::SetStartPoint(ArkUIRuntimeCallInfo* runtimeCa
         pointStr.push_back(calcStr.c_str());
     }
 
-    GetArkUIInternalNodeAPI()->GetLineModifier().
-        SetStartPoint(nativeNode, pointValues.data(), pointUnits.data(), pointStr.data());
+    GetArkUINodeModifiers()->getLineModifier()->setStartPoint(nativeNode, pointValues.data(),
+        pointUnits.data(), pointStr.data());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -81,8 +79,8 @@ ArkUINativeModuleValue LineBridge::ResetStartPoint(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetLineModifier().ResetStartPoint(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getLineModifier()->resetStartPoint(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -91,18 +89,18 @@ ArkUINativeModuleValue LineBridge::SetEndPoint(ArkUIRuntimeCallInfo* runtimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     if (!jsValue->IsArray(vm)) {
-        GetArkUIInternalNodeAPI()->GetLineModifier().ResetEndPoint(nativeNode);
+        GetArkUINodeModifiers()->getLineModifier()->resetEndPoint(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
     auto arrayVal = panda::Local<panda::ArrayRef>(jsValue);
     auto length = arrayVal->Length(vm);
     if (length <= 0) {
-        GetArkUIInternalNodeAPI()->GetLineModifier().ResetEndPoint(nativeNode);
+        GetArkUINodeModifiers()->getLineModifier()->resetEndPoint(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -118,7 +116,7 @@ ArkUINativeModuleValue LineBridge::SetEndPoint(ArkUIRuntimeCallInfo* runtimeCall
         end = CalcDimension(0, DimensionUnit::VP);
     }
 
-    std::vector<double> pointValues;
+    std::vector<ArkUI_Float32> pointValues;
     std::vector<int32_t> pointUnits;
     std::vector<const char*> pointStr;
     pointUnits.push_back(static_cast<int>(star.Unit()));
@@ -139,8 +137,8 @@ ArkUINativeModuleValue LineBridge::SetEndPoint(ArkUIRuntimeCallInfo* runtimeCall
         pointStr.push_back(calcStr.c_str());
     }
 
-    GetArkUIInternalNodeAPI()->GetLineModifier().
-        SetEndPoint(nativeNode, pointValues.data(), pointUnits.data(), pointStr.data());
+    GetArkUINodeModifiers()->getLineModifier()->setEndPoint(nativeNode,
+        pointValues.data(), pointUnits.data(), pointStr.data());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -149,8 +147,8 @@ ArkUINativeModuleValue LineBridge::ResetEndPoint(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetLineModifier().ResetEndPoint(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getLineModifier()->resetEndPoint(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

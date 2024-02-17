@@ -14,8 +14,6 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "core/interfaces/native/node/api.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue PanelBridge::SetPanelBackgroundMask(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -24,13 +22,13 @@ ArkUINativeModuleValue PanelBridge::SetPanelBackgroundMask(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelBackgroundMask(nativeNode);
+        GetArkUINodeModifiers()->getPanelModifier()->resetPanelBackgroundMask(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelBackgroundMask(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getPanelModifier()->setPanelBackgroundMask(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -40,8 +38,8 @@ ArkUINativeModuleValue PanelBridge::ResetPanelBackgroundMask(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelBackgroundMask(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPanelModifier()->resetPanelBackgroundMask(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -51,12 +49,12 @@ ArkUINativeModuleValue PanelBridge::SetPanelMode(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (modeArg->IsNumber()) {
         int32_t mode = modeArg->Int32Value(vm);
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelMode(nativeNode, mode);
+        GetArkUINodeModifiers()->getPanelModifier()->setPanelMode(nativeNode, mode);
     } else {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelMode(nativeNode);
+        GetArkUINodeModifiers()->getPanelModifier()->resetPanelMode(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -66,8 +64,8 @@ ArkUINativeModuleValue PanelBridge::ResetPanelMode(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelMode(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPanelModifier()->resetPanelMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -77,12 +75,12 @@ ArkUINativeModuleValue PanelBridge::SetPanelType(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (typeArg->IsNumber()) {
         int32_t type = typeArg->Int32Value(vm);
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelType(nativeNode, type);
+        GetArkUINodeModifiers()->getPanelModifier()->setPanelType(nativeNode, type);
     } else {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelType(nativeNode);
+        GetArkUINodeModifiers()->getPanelModifier()->resetPanelType(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -92,8 +90,8 @@ ArkUINativeModuleValue PanelBridge::ResetPanelType(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelType(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPanelModifier()->resetPanelType(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -102,8 +100,8 @@ ArkUINativeModuleValue PanelBridge::ResetPanelFullHeight(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelFullHeight(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPanelModifier()->resetPanelFullHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -112,17 +110,17 @@ ArkUINativeModuleValue PanelBridge::SetPanelFullHeight(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension height;
 
     if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height, true)) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelFullHeight(nativeNode);
+        GetArkUINodeModifiers()->getPanelModifier()->resetPanelFullHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
             height.SetValue(0.0);
         }
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelFullHeight(
+        GetArkUINodeModifiers()->getPanelModifier()->setPanelFullHeight(
             nativeNode, height.Value(), static_cast<int>(height.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -133,8 +131,8 @@ ArkUINativeModuleValue PanelBridge::ResetPanelHalfHeight(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelHalfHeight(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPanelModifier()->resetPanelHalfHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -143,17 +141,17 @@ ArkUINativeModuleValue PanelBridge::SetPanelHalfHeight(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension height;
 
     if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height, true)) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelHalfHeight(nativeNode);
+        GetArkUINodeModifiers()->getPanelModifier()->resetPanelHalfHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
             height.SetValue(0.0);
         }
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelHalfHeight(
+        GetArkUINodeModifiers()->getPanelModifier()->setPanelHalfHeight(
             nativeNode, height.Value(), static_cast<int>(height.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -164,8 +162,8 @@ ArkUINativeModuleValue PanelBridge::ResetPanelMiniHeight(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelMiniHeight(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPanelModifier()->resetPanelMiniHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -174,17 +172,17 @@ ArkUINativeModuleValue PanelBridge::SetPanelMiniHeight(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension height;
 
     if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height, true)) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelMiniHeight(nativeNode);
+        GetArkUINodeModifiers()->getPanelModifier()->resetPanelMiniHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
             height.SetValue(0.0);
         }
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelMiniHeight(
+        GetArkUINodeModifiers()->getPanelModifier()->setPanelMiniHeight(
             nativeNode, height.Value(), static_cast<int>(height.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -195,22 +193,22 @@ ArkUINativeModuleValue PanelBridge::SetPanelCustomHeight(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension customHeight;
 
     if (jsValue->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelCustomHeight(nativeNode);
+        GetArkUINodeModifiers()->getPanelModifier()->resetPanelCustomHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     if (jsValue->IsString() && jsValue->ToString(vm)->ToString().find("wrapContent") != std::string::npos) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelCustomHeightByString(
+        GetArkUINodeModifiers()->getPanelModifier()->setPanelCustomHeightByString(
             nativeNode, jsValue->ToString(vm)->ToString().c_str());
         return panda::JSValueRef::Undefined(vm);
     } else if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, customHeight)) {
         customHeight = Dimension(0.0);
     }
-    GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelCustomHeight(
+    GetArkUINodeModifiers()->getPanelModifier()->setPanelCustomHeight(
         nativeNode, customHeight.Value(), static_cast<int>(customHeight.Unit()));
 
     return panda::JSValueRef::Undefined(vm);
@@ -221,8 +219,8 @@ ArkUINativeModuleValue PanelBridge::ResetPanelCustomHeight(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelCustomHeight(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPanelModifier()->resetPanelCustomHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -232,16 +230,16 @@ ArkUINativeModuleValue PanelBridge::SetShowCloseIcon(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> showCloseArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (showCloseArg->IsNull()) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetShowCloseIcon(nativeNode);
+        GetArkUINodeModifiers()->getPanelModifier()->resetShowCloseIcon(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     bool boolValue = false;
     if (showCloseArg->IsBoolean()) {
         boolValue = showCloseArg->ToBoolean(vm)->Value();
     }
-    GetArkUIInternalNodeAPI()->GetPanelModifier().SetShowCloseIcon(nativeNode, boolValue);
+    GetArkUINodeModifiers()->getPanelModifier()->setShowCloseIcon(nativeNode, boolValue);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -250,8 +248,8 @@ ArkUINativeModuleValue PanelBridge::ResetShowCloseIcon(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPanelModifier().ResetShowCloseIcon(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPanelModifier()->resetShowCloseIcon(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -261,16 +259,16 @@ ArkUINativeModuleValue PanelBridge::SetDragBar(ArkUIRuntimeCallInfo* runtimeCall
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> dragBarArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (dragBarArg->IsNull()) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetDragBar(nativeNode);
+        GetArkUINodeModifiers()->getPanelModifier()->resetDragBar(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     bool boolValue = true;
     if (dragBarArg->IsBoolean()) {
         boolValue = dragBarArg->ToBoolean(vm)->Value();
     }
-    GetArkUIInternalNodeAPI()->GetPanelModifier().SetDragBar(nativeNode, boolValue);
+    GetArkUINodeModifiers()->getPanelModifier()->setDragBar(nativeNode, boolValue);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -279,8 +277,8 @@ ArkUINativeModuleValue PanelBridge::ResetDragBar(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPanelModifier().ResetDragBar(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPanelModifier()->resetDragBar(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -290,17 +288,17 @@ ArkUINativeModuleValue PanelBridge::SetShow(ArkUIRuntimeCallInfo* runtimeCallInf
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> showArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) &&
         (showArg->IsUndefined() || showArg->IsNull())) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetShow(nativeNode, true);
+        GetArkUINodeModifiers()->getPanelModifier()->setShow(nativeNode, true);
         return panda::JSValueRef::Undefined(vm);
     } else {
         bool boolValue = true;
         if (showArg->IsBoolean()) {
             boolValue = showArg->ToBoolean(vm)->Value();
         }
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetShow(nativeNode, boolValue);
+        GetArkUINodeModifiers()->getPanelModifier()->setShow(nativeNode, boolValue);
         return panda::JSValueRef::Undefined(vm);
     }
 }
@@ -310,8 +308,8 @@ ArkUINativeModuleValue PanelBridge::ResetShow(ArkUIRuntimeCallInfo* runtimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPanelModifier().ResetShow(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPanelModifier()->resetShow(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

@@ -15,10 +15,10 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COMMON_SHAPE_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COMMON_SHAPE_MODIFIER_H
 
-#include "core/interfaces/native/node/api.h"
+#include "core/interfaces/native/node/node_api.h"
 
-namespace OHOS::Ace::NG {
-ArkUICommonShapeModifierAPI GetCommonShapeModifier();
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUICommonShapeModifier* GetCommonShapeModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COMMON_SHAPE_MODIFIER_H

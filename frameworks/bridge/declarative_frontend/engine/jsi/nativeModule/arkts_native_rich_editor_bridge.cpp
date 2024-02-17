@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "core/components/common/layout/constants.h"
 
@@ -25,13 +23,13 @@ ArkUINativeModuleValue RichEditorBridge::SetCopyOptions(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     uint32_t CopyOptionsValue = static_cast<uint32_t>(CopyOptions::Distributed);
     if (secondArg->IsNumber()) {
         CopyOptionsValue = secondArg->Uint32Value(vm);
-        GetArkUIInternalNodeAPI()->GetRichEditorModifier().SetRichEditorCopyOptions(nativeNode, CopyOptionsValue);
+        GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorCopyOptions(nativeNode, CopyOptionsValue);
     } else {
-        GetArkUIInternalNodeAPI()->GetRichEditorModifier().ResetRichEditorCopyOptions(nativeNode);
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorCopyOptions(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -41,8 +39,8 @@ ArkUINativeModuleValue RichEditorBridge::ResetCopyOptions(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRichEditorModifier().ResetRichEditorCopyOptions(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorCopyOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

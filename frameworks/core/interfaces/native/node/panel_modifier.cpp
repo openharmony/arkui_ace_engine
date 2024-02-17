@@ -25,7 +25,7 @@ constexpr uint32_t DEFAULT_PANEL_BACKGROUND_COLOR = 0x08182431;
 constexpr int32_t DEFAULT_PANEL_TYPE = 1;
 constexpr double DEFAULT_CUSTOM_HEIGHT = 0;
 
-void SetPanelMode(NodeHandle node, int32_t value)
+void SetPanelMode(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -33,7 +33,7 @@ void SetPanelMode(NodeHandle node, int32_t value)
     SlidingPanelModelNG::SetPanelMode(frameNode, mode);
 }
 
-void ResetPanelMode(NodeHandle node)
+void ResetPanelMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -41,61 +41,61 @@ void ResetPanelMode(NodeHandle node)
     SlidingPanelModelNG::SetPanelMode(frameNode, mode);
 }
 
-void SetPanelFullHeight(NodeHandle node, double value, int unit)
+void SetPanelFullHeight(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetPanelFullHeight(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
 }
-void ResetPanelFullHeight(NodeHandle node)
+void ResetPanelFullHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::ResetPanelFullHeight(frameNode);
 }
 
-void SetPanelHalfHeight(NodeHandle node, double value, int unit)
+void SetPanelHalfHeight(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetPanelHalfHeight(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
 }
-void ResetPanelHalfHeight(NodeHandle node)
+void ResetPanelHalfHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::ResetPanelHalfHeight(frameNode);
 }
 
-void SetPanelMiniHeight(NodeHandle node, double value, int unit)
+void SetPanelMiniHeight(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetPanelMiniHeight(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
 }
 
-void ResetPanelMiniHeight(NodeHandle node)
+void ResetPanelMiniHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetPanelMiniHeight(frameNode, Dimension(DEFAULT_HEIGHT, DimensionUnit::VP));
 }
 
-void SetPanelBackgroundMask(NodeHandle node, uint32_t color)
+void SetPanelBackgroundMask(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetPanelBackgroundMask(frameNode, Color(color));
 }
 
-void ResetPanelBackgroundMask(NodeHandle node)
+void ResetPanelBackgroundMask(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetPanelBackgroundMask(frameNode, Color(DEFAULT_PANEL_BACKGROUND_COLOR));
 }
 
-void SetPanelType(NodeHandle node, int32_t value)
+void SetPanelType(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -103,7 +103,7 @@ void SetPanelType(NodeHandle node, int32_t value)
     SlidingPanelModelNG::SetPanelType(frameNode, type);
 }
 
-void ResetPanelType(NodeHandle node)
+void ResetPanelType(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -111,7 +111,7 @@ void ResetPanelType(NodeHandle node)
     SlidingPanelModelNG::SetPanelType(frameNode, type);
 }
 
-void SetPanelCustomHeight(NodeHandle node, double value, int unit)
+void SetPanelCustomHeight(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -119,70 +119,72 @@ void SetPanelCustomHeight(NodeHandle node, double value, int unit)
         frameNode, CalcDimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
 }
 
-void SetPanelCustomHeightByString(NodeHandle node, const char* value)
+void SetPanelCustomHeightByString(ArkUINodeHandle node, const char* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetPanelCustomHeight(frameNode, CalcDimension(value));
 }
 
-void ResetPanelCustomHeight(NodeHandle node)
+void ResetPanelCustomHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetPanelCustomHeight(frameNode, CalcDimension(DEFAULT_CUSTOM_HEIGHT));
 }
 
-void SetShowCloseIcon(NodeHandle node, bool value)
+void SetShowCloseIcon(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetShowCloseIcon(frameNode, value);
 }
 
-void ResetShowCloseIcon(NodeHandle node)
+void ResetShowCloseIcon(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetShowCloseIcon(frameNode, false);
 }
 
-void SetDragBar(NodeHandle node, bool value)
+void SetDragBar(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetHasDragBar(frameNode, value);
 }
 
-void ResetDragBar(NodeHandle node)
+void ResetDragBar(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetHasDragBar(frameNode, true);
 }
 
-void SetShow(NodeHandle node, bool value)
+void SetShow(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetIsShow(frameNode, value);
 }
 
-void ResetShow(NodeHandle node)
+void ResetShow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SlidingPanelModelNG::SetIsShow(frameNode, true);
 }
 
-ArkUIPanelModifierAPI GetPanelModifier()
+namespace NodeModifier {
+const ArkUIPanelModifier* GetPanelModifier()
 {
-    static const ArkUIPanelModifierAPI modifier = { SetPanelMode, ResetPanelMode, SetPanelFullHeight,
+    static const ArkUIPanelModifier modifier = { SetPanelMode, ResetPanelMode, SetPanelFullHeight,
         ResetPanelFullHeight, SetPanelHalfHeight, ResetPanelHalfHeight, SetPanelMiniHeight, ResetPanelMiniHeight,
         SetPanelBackgroundMask, ResetPanelBackgroundMask, SetPanelType, ResetPanelType, SetPanelCustomHeight,
         SetPanelCustomHeightByString, ResetPanelCustomHeight, SetShowCloseIcon, ResetShowCloseIcon, SetDragBar,
         ResetDragBar, SetShow, ResetShow };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

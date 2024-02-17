@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -120,9 +121,11 @@ void NavBarTestNg::InitializationParameters(TestParameters& testParameters)
     ASSERT_NE(testParameters.pipeline, nullptr);
     testParameters.pipeline->SetThemeManager(themeManager);
     testParameters.theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    std::cout << "navBarTest 3" << std::endl;
     ASSERT_NE(testParameters.theme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(testParameters.theme));
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    std::cout << "navBarTest 4" << std::endl;
     ASSERT_NE(selectTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(SelectTheme::TypeId())).WillRepeatedly(Return(selectTheme));
 
@@ -132,8 +135,9 @@ void NavBarTestNg::InitializationParameters(TestParameters& testParameters)
     testParameters.navBarLayoutProperty = navBarNode_->GetLayoutProperty<NavBarLayoutProperty>();
     ASSERT_NE(testParameters.navBarLayoutProperty, nullptr);
     navBarNode_->SetTitleBarNode(titleBarNode_);
-    auto title = AceType::MakeRefPtr<FrameNode>(
-        NAV_BAR_NODE_TITLE, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto title = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
     ASSERT_NE(title, nullptr);
     titleBarNode_->SetTitle(title);
     auto menu = AceType::MakeRefPtr<FrameNode>(
@@ -639,6 +643,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
     ASSERT_NE(menuNode, nullptr);
     titleBarNode_->SetMenu(menuNode);
     navBarNode_->SetMenu(menuNode);
+    navBarNode_->UpdatePrevMenuIsCustom(true);
     auto buttonNode = AceType::MakeRefPtr<FrameNode>(FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(buttonNode, nullptr);
     buttonNode->MountToParent(menuNode);
@@ -653,7 +658,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call OnWindowSizeChanged func when the width of navBar is 0
-     * @tc.expected:GetTheme function is not called
+     * @tc.expected:GetTheme function is called once
      */
     auto size = SizeF(0, 0);
     auto navGeometryNode = navBarNode_->GetGeometryNode();
@@ -801,6 +806,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern011, TestSize.Level1)
     ASSERT_NE(lastMenuItemNode, nullptr);
     auto inputEventHub = lastMenuItemNode->GetOrCreateInputEventHub();
     ASSERT_NE(inputEventHub, nullptr);
+    ASSERT_NE(inputEventHub->hoverEventActuator_, nullptr);
     ASSERT_FALSE(inputEventHub->hoverEventActuator_->inputEvents_.empty());
     for (const auto& hoverCallback : inputEventHub->hoverEventActuator_->inputEvents_) {
         ASSERT_NE(hoverCallback, nullptr);

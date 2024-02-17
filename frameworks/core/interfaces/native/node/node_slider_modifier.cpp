@@ -18,7 +18,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
@@ -46,6 +45,7 @@ const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
 
+namespace SliderModifier {
 void SetShowTips(ArkUINodeHandle node, ArkUI_Bool isShow, const char *value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -531,22 +531,71 @@ ArkUI_Int32 GetSliderStyle(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return SLIDER_MODE_MAP[SliderModelNG::GetSliderMode(frameNode)];
 }
+} // namespace SliderModifier
 
 namespace NodeModifier {
-const ArkUISliderModifier *GetSliderModifier()
+const ArkUISliderModifier* GetSliderModifier()
 {
-    static const ArkUISliderModifier modifier = { SetShowTips, ResetShowTips, SetSliderStepSize,
-        ResetSliderStepSize, SetBlockSize, ResetBlockSize, SetTrackBorderRadius, ResetTrackBorderRadius,
-        SetStepColor, ResetStepColor, SetBlockBorderColor, ResetBlockBorderColor,
-        SetBlockBorderWidth, ResetBlockBorderWidth, SetBlockColor, ResetBlockColor, SetTrackBackgroundColor,
-        ResetTrackBackgroundColor, SetSelectColor, ResetSelectColor, SetShowSteps, ResetShowSteps,
-        SetThickness, ResetThickness, SetSliderValue, SetMinLabel, SetMaxLabel, SetDirection,
-        SetStep, SetReverse, SetSliderStyle, ResetSliderValue, ResetMinLabel, ResetMaxLabel, ResetDirection,
-        ResetStep, ResetReverse, ResetSliderStyle, SetSliderBlockImage, ResetSliderBlockImage, SetSliderBlockPath,
-        SetSliderBlockShape,  ResetSliderBlockShape, SetSliderBlockType, ResetSliderBlockType, GetBlockColor,
-        GetTrackBackgroundColor, GetSelectColor, GetShowSteps, GetBlockType, GetSliderValue, GetMinLabel,
-        GetMaxLabel, GetDirection, GetStep, GetReverse, GetSliderStyle };
-                                    
+    static const ArkUISliderModifier modifier = {
+        SliderModifier::SetShowTips,
+        SliderModifier::ResetShowTips,
+        SliderModifier::SetSliderStepSize,
+        SliderModifier::ResetSliderStepSize,
+        SliderModifier::SetBlockSize,
+        SliderModifier::ResetBlockSize,
+        SliderModifier::SetTrackBorderRadius,
+        SliderModifier::ResetTrackBorderRadius,
+        SliderModifier::SetStepColor,
+        SliderModifier::ResetStepColor,
+        SliderModifier::SetBlockBorderColor,
+        SliderModifier::ResetBlockBorderColor,
+        SliderModifier::SetBlockBorderWidth,
+        SliderModifier::ResetBlockBorderWidth,
+        SliderModifier::SetBlockColor,
+        SliderModifier::ResetBlockColor,
+        SliderModifier::SetTrackBackgroundColor,
+        SliderModifier::ResetTrackBackgroundColor,
+        SliderModifier::SetSelectColor,
+        SliderModifier::ResetSelectColor,
+        SliderModifier::SetShowSteps,
+        SliderModifier::ResetShowSteps,
+        SliderModifier::SetThickness,
+        SliderModifier::ResetThickness,
+        SliderModifier::SetSliderValue,
+        SliderModifier::SetMinLabel,
+        SliderModifier::SetMaxLabel,
+        SliderModifier::SetDirection,
+        SliderModifier::SetStep,
+        SliderModifier::SetReverse,
+        SliderModifier::SetSliderStyle,
+        SliderModifier::ResetSliderValue,
+        SliderModifier::ResetMinLabel,
+        SliderModifier::ResetMaxLabel,
+        SliderModifier::ResetDirection,
+        SliderModifier::ResetStep,
+        SliderModifier::ResetReverse,
+        SliderModifier::ResetSliderStyle,
+        SliderModifier::SetSliderBlockImage,
+        SliderModifier::ResetSliderBlockImage,
+        SliderModifier::SetSliderBlockPath,
+        SliderModifier::SetSliderBlockShape,
+        SliderModifier::ResetSliderBlockShape,
+        SliderModifier::SetSliderBlockType,
+        SliderModifier::ResetSliderBlockType,
+        SliderModifier::GetBlockColor,
+        SliderModifier::GetTrackBackgroundColor,
+        SliderModifier::GetSelectColor,
+        SliderModifier::GetShowSteps,
+        SliderModifier::GetBlockType,
+        SliderModifier::GetSliderValue,
+        SliderModifier::GetMinLabel,
+        SliderModifier::GetMaxLabel,
+        SliderModifier::GetDirection,
+        SliderModifier::GetStep,
+        SliderModifier::GetReverse,
+        SliderModifier::GetSliderStyle
+    };
+
     return &modifier;
 }
 

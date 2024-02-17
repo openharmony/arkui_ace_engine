@@ -22,14 +22,14 @@
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 namespace OHOS::Ace::NG {
-void SetPatternLockActiveColor(NodeHandle node, uint32_t value)
+void SetPatternLockActiveColor(ArkUINodeHandle node, uint32_t value)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     PatternLockModelNG::SetActiveColor(frameNode, Color(value));
 }
 
-void ResetPatternLockActiveColor(NodeHandle node)
+void ResetPatternLockActiveColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -39,7 +39,7 @@ void ResetPatternLockActiveColor(NodeHandle node)
     PatternLockModelNG::SetActiveColor(frameNode, activeColor);
 }
 
-void ResetPatternLockCircleRadius(NodeHandle node)
+void ResetPatternLockCircleRadius(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -49,21 +49,21 @@ void ResetPatternLockCircleRadius(NodeHandle node)
     PatternLockModelNG::SetCircleRadius(frameNode, Dimension(radius.Value(), radius.Unit()));
 }
 
-void SetPatternLockCircleRadius(NodeHandle node, double number, int8_t unit)
+void SetPatternLockCircleRadius(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     PatternLockModelNG::SetCircleRadius(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
-void SetPatternLockSelectedColor(NodeHandle node, uint32_t value)
+void SetPatternLockSelectedColor(ArkUINodeHandle node, uint32_t value)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     PatternLockModelNG::SetSelectedColor(frameNode, Color(value));
 }
 
-void ResetPatternLockSelectedColor(NodeHandle node)
+void ResetPatternLockSelectedColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -73,14 +73,14 @@ void ResetPatternLockSelectedColor(NodeHandle node)
     PatternLockModelNG::SetSelectedColor(frameNode, selectedColor);
 }
 
-void SetPatternLockSideLength(NodeHandle node, double number, int8_t unit)
+void SetPatternLockSideLength(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     PatternLockModelNG::SetSideLength(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
-void ResetPatternLockSideLength(NodeHandle node)
+void ResetPatternLockSideLength(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -90,28 +90,28 @@ void ResetPatternLockSideLength(NodeHandle node)
     PatternLockModelNG::SetSideLength(frameNode, Dimension(sideLength.Value(), sideLength.Unit()));
 }
 
-void SetPatternLockAutoReset(NodeHandle node, uint32_t value)
+void SetPatternLockAutoReset(ArkUINodeHandle node, uint32_t value)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     PatternLockModelNG::SetAutoReset(frameNode, static_cast<bool>(value));
 }
 
-void ResetPatternLockAutoReset(NodeHandle node)
+void ResetPatternLockAutoReset(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     PatternLockModelNG::SetAutoReset(frameNode, true);
 }
 
-void SetPatternLockPathStrokeWidth(NodeHandle node, double number, int8_t unit)
+void SetPatternLockPathStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     PatternLockModelNG::SetStrokeWidth(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
-void ResetPatternLockPathStrokeWidth(NodeHandle node)
+void ResetPatternLockPathStrokeWidth(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -121,14 +121,14 @@ void ResetPatternLockPathStrokeWidth(NodeHandle node)
     PatternLockModelNG::SetStrokeWidth(frameNode, lineWidth);
 }
 
-void SetPatternLockRegularColor(NodeHandle node, uint32_t color)
+void SetPatternLockRegularColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     PatternLockModelNG::SetRegularColor(frameNode, Color(color));
 }
 
-void ResetPatternLockRegularColor(NodeHandle node)
+void ResetPatternLockRegularColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -138,14 +138,14 @@ void ResetPatternLockRegularColor(NodeHandle node)
     PatternLockModelNG::SetRegularColor(frameNode, regularColor);
 }
 
-void SetPatternLockPathColor(NodeHandle node, uint32_t color)
+void SetPatternLockPathColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     PatternLockModelNG::SetPathColor(frameNode, Color(color));
 }
 
-void ResetPatternLockPathColor(NodeHandle node)
+void ResetPatternLockPathColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -155,9 +155,10 @@ void ResetPatternLockPathColor(NodeHandle node)
     PatternLockModelNG::SetPathColor(frameNode, pathColor);
 }
 
-ArkUIPatternLockModifierAPI GetPatternLockModifier()
+namespace NodeModifier {
+const ArkUIPatternLockModifier* GetPatternLockModifier()
 {
-    static const ArkUIPatternLockModifierAPI modifier = {
+    static const ArkUIPatternLockModifier modifier = {
         SetPatternLockActiveColor, ResetPatternLockActiveColor, SetPatternLockCircleRadius,
         ResetPatternLockCircleRadius, SetPatternLockSelectedColor, ResetPatternLockSelectedColor,
         SetPatternLockSideLength, ResetPatternLockSideLength, SetPatternLockAutoReset,
@@ -165,6 +166,7 @@ ArkUIPatternLockModifierAPI GetPatternLockModifier()
         SetPatternLockRegularColor, ResetPatternLockRegularColor, SetPatternLockPathColor,
         ResetPatternLockPathColor
     };
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

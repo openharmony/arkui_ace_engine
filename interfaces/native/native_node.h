@@ -1856,8 +1856,7 @@ typedef enum {
      * .string：无障碍文本。
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：为1时表示该组件及其所有子组件为一整个可以选中的组件
-     * 无障碍服务将不再关注其子组件内容。参数类型为1或者0。
+     * .string：无障碍文本。
      * 
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
@@ -4075,25 +4074,62 @@ typedef enum {
      * .string? 可选值，根据形状参数而定。\n
      * ARKUI_SLIDER_BLOCK_STYLE_IMAGE: 滑块图片资源。如/pages/common/icon.png。\n
      * ARKUI_SLIDER_BLOCK_STYLE_SHAPE: 滑块使用的自定义形状。\n
-     * "rect(10,10,10,10)"括号内分别为width、height、radiusWidth与radiusHeight"; \n
-     * "circle(10,10)"括号内分别为width、height; \n
-     * "ellipse(10,10)"括号内分别为width、height; \n
-     * "path(10,10,M0 0 L600 0)"括号内分别为width、height、commands; \n
+     * 共有5种类型： \n
+     * 1.rect类型： \n
+     * .value[1].i32：裁剪类型，参数类型{@link ArkUI_ShapeType}，ARKUI_SHAPE_TYPE_RECT； \n
+     * .value[2].f32：矩形宽度； \n
+     * .value[3].f32：矩形高度； \n
+     * .value[4].f32：矩形圆角宽度； \n
+     * .value[5].f32：矩形圆角高度； \n
+     * 2.circle类型： \n
+     * .value[1].i32：裁剪类型，参数类型{@link ArkUI_ShapeType}，ARKUI_SHAPE_TYPE_CIRCLE； \n
+     * .value[2].f32：圆形宽度； \n
+     * .value[3].f32：圆形高度； \n
+     * 3.ellipse类型： \n
+     * .value[1].i32：裁剪类型，参数类型{@link ArkUI_ShapeType}，ARKUI_SHAPE_TYPE_ELLIPSE； \n
+     * .value[2].f32：椭圆形宽度； \n
+     * .value[3].f32：椭圆形高度； \n
+     * 4.path类型： \n
+     * .value[1].i32：裁剪类型，参数类型{@link ArkUI_ShapeType}，ARKUI_SHAPE_TYPE_PATH； \n
+     * .value[2].f32：路径宽度； \n
+     * .value[3].f32：路径高度； \n
+     * .string：路径绘制的命令字符串； \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
      * .value[0].i32：形状参数。参数类型{@link ArkUI_SliderBlockStyle}。\n
      * .string? 可选值，根据形状参数而定。\n
      * ARKUI_SLIDER_BLOCK_STYLE_IMAGE: 滑块图片资源。如/pages/common/icon.png。\n
      * ARKUI_SLIDER_BLOCK_STYLE_SHAPE: 滑块使用的自定义形状。\n
-     * "rect(10,10,10,10)"括号内分别为width、height、radiusWidth与radiusHeight"; \n
-     * "circle(10,10)"括号内分别为width、height; \n
-     * "ellipse(10,10)"括号内分别为width、height; \n
-     * "path(10,10,M0 0 L600 0)"括号内分别为width、height、commands; \n
+      * 共有5种类型： \n
+     * 1.rect类型： \n
+     * .value[1].i32：裁剪类型，参数类型{@link ArkUI_ShapeType}，ARKUI_SHAPE_TYPE_RECT； \n
+     * .value[2].f32：矩形宽度； \n
+     * .value[3].f32：矩形高度； \n
+     * .value[4].f32：矩形圆角宽度； \n
+     * .value[5].f32：矩形圆角高度； \n
+     * 2.circle类型： \n
+     * .value[1].i32：裁剪类型，参数类型{@link ArkUI_ShapeType}，ARKUI_SHAPE_TYPE_CIRCLE； \n
+     * .value[2].f32：圆形宽度； \n
+     * .value[3].f32：圆形高度； \n
+     * 3.ellipse类型： \n
+     * .value[1].i32：裁剪类型，参数类型{@link ArkUI_ShapeType}，ARKUI_SHAPE_TYPE_ELLIPSE； \n
+     * .value[2].f32：椭圆形宽度； \n
+     * .value[3].f32：椭圆形高度； \n
+     * 4.path类型： \n
+     * .value[1].i32：裁剪类型，参数类型{@link ArkUI_ShapeType}，ARKUI_SHAPE_TYPE_PATH； \n
+     * .value[2].f32：路径宽度； \n
+     * .value[3].f32：路径高度； \n
+     * .string：路径绘制的命令字符串； \n
      *  
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
      * ArkUI_NumberValue value[] = {{.i32 = ARKUI_SLIDER_BLOCK_STYLE_DEFAULT}};
+     * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
+     * nativeNodeApi->setAttribute(nodeHandle, NODE_SLIDER_BLOCK_STYLE, &item);
+     *
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_SLIDER_BLOCK_STYLE_SHAPE},
+     * {.i32 = ARKUI_CLIP_TYPE_RECT}, 100, 100, 15, 15 };
      * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SLIDER_BLOCK_STYLE, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SLIDER_BLOCK_STYLE);

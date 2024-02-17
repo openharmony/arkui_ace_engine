@@ -14,7 +14,6 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.h"
 #include "base/geometry/dimension.h"
-#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue RowBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -23,19 +22,19 @@ ArkUINativeModuleValue RowBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtimeCal
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> alignItemsArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     if (alignItemsArg->IsNumber()) {
         int32_t alignItems = alignItemsArg->Int32Value(vm);
         if ((alignItems == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
             (alignItems == static_cast<int32_t>(FlexAlign::FLEX_END)) ||
             (alignItems == static_cast<int32_t>(FlexAlign::CENTER)) ||
             (alignItems == static_cast<int32_t>(FlexAlign::STRETCH))) {
-            GetArkUIInternalNodeAPI()->GetRowModifier().SetRowAlignItems(nativeNode, alignItems);
+            GetArkUINodeModifiers()->getRowModifier()->setRowAlignItems(nativeNode, alignItems);
         } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            GetArkUIInternalNodeAPI()->GetRowModifier().ResetRowAlignItems(nativeNode);
+            GetArkUINodeModifiers()->getRowModifier()->resetRowAlignItems(nativeNode);
         }
     } else {
-        GetArkUIInternalNodeAPI()->GetRowModifier().ResetRowAlignItems(nativeNode);
+        GetArkUINodeModifiers()->getRowModifier()->resetRowAlignItems(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -45,8 +44,8 @@ ArkUINativeModuleValue RowBridge::ResetAlignItems(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRowModifier().ResetRowAlignItems(nativeNode);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRowModifier()->resetRowAlignItems(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -56,7 +55,7 @@ ArkUINativeModuleValue RowBridge::SetJustifyContent(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> justifyContentArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     if (justifyContentArg->IsNumber()) {
         int32_t justifyContent = justifyContentArg->Int32Value(vm);
         if ((justifyContent == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
@@ -65,12 +64,12 @@ ArkUINativeModuleValue RowBridge::SetJustifyContent(ArkUIRuntimeCallInfo* runtim
             (justifyContent == static_cast<int32_t>(FlexAlign::SPACE_BETWEEN)) ||
             (justifyContent == static_cast<int32_t>(FlexAlign::SPACE_AROUND)) ||
             (justifyContent == static_cast<int32_t>(FlexAlign::SPACE_EVENLY))) {
-            GetArkUIInternalNodeAPI()->GetRowModifier().SetRowJustifyContent(nativeNode, justifyContent);
+            GetArkUINodeModifiers()->getRowModifier()->setRowJustifyContent(nativeNode, justifyContent);
         } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            GetArkUIInternalNodeAPI()->GetRowModifier().ResetRowJustifyContent(nativeNode);
+            GetArkUINodeModifiers()->getRowModifier()->resetRowJustifyContent(nativeNode);
         }
     } else {
-        GetArkUIInternalNodeAPI()->GetRowModifier().ResetRowJustifyContent(nativeNode);
+        GetArkUINodeModifiers()->getRowModifier()->resetRowJustifyContent(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -80,8 +79,8 @@ ArkUINativeModuleValue RowBridge::ResetJustifyContent(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetRowModifier().ResetRowJustifyContent(nativeNode);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRowModifier()->resetRowJustifyContent(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

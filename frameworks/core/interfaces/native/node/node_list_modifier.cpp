@@ -29,22 +29,13 @@ constexpr int32_t DEFAULT_STICKY_STYLE = 0;
 constexpr int32_t DEFAULT_DIRECTION = 0;
 constexpr int32_t DEFAULT_SCROLL_BAR = 1;
 constexpr int32_t DEFAULT_DIVIDER_VALUES_COUNT = 3;
+constexpr float DEFAULT_OFFSET = 0.0f;
 
 constexpr int32_t DEFAULT_EDGE_EFFECT = 0;
 
 constexpr int32_t CALL_STROKE_WIDTH = 0;
 constexpr int32_t CALL_START_MARGIN = 1;
 constexpr int32_t CALL_END_MARGIN = 2;
-
-template<typename T>
-static OHOS::Ace::RefPtr<T> GetTheme()
-{
-    auto pipelineContext = OHOS::Ace::PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    return themeManager->GetTheme<T>();
-}
 
 void SetListLanes(ArkUINodeHandle node, ArkUI_Int32 lanesNum, const struct ArkUIDimensionType* minLengthType,
     const struct ArkUIDimensionType* maxLengthType, const struct ArkUIDimensionType* gutterType)
@@ -317,6 +308,34 @@ void ResetScrollSnapAlign(ArkUINodeHandle node)
     ListModelNG::SetScrollSnapAlign(frameNode, V2::ScrollSnapAlign::NONE);
 }
 
+void SetContentStartOffset(ArkUINodeHandle node, ArkUI_Float32 startOffset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetContentStartOffset(frameNode, startOffset);
+}
+
+void ResetContentStartOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetContentStartOffset(frameNode, DEFAULT_OFFSET);
+}
+
+void SetContentEndOffset(ArkUINodeHandle node, ArkUI_Float32 endOffset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetContentEndOffset(frameNode, endOffset);
+}
+
+void ResetContentEndOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetContentEndOffset(frameNode, DEFAULT_OFFSET);
+}
+
 void ListSetDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
     const int32_t* units, ArkUI_Int32 length)
 {
@@ -399,8 +418,9 @@ const ArkUIListModifier* GetListModifier()
         SetListFriction, ResetListFriction, SetListNestedScroll,
         ResetListNestedScroll, SetListScrollBar, ResetListScrollBar,
         SetListScrollBarWidth, ResetListScrollBarWidth, SetListScrollBarColor,
-        ResetListScrollBarColor, SetAlignListItem, ResetAlignListItem, SetScrollSnapAlign,
-        ResetScrollSnapAlign, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
+        ResetListScrollBarColor, SetAlignListItem, ResetAlignListItem, SetScrollSnapAlign, ResetScrollSnapAlign,
+        SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset, ResetContentEndOffset,
+        ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
         SetListSpace, ResetListSpace
     };
     return &modifier;

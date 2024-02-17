@@ -21,8 +21,8 @@
 namespace OHOS::Ace::NG {
 class GaugeBridge {
 public:
-    static ArkUINativeModuleValue SetGaugeVaule(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResetGaugeVaule(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetGaugeValue(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetGaugeValue(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetGaugeStartAngle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetGaugeStartAngle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetGaugeEndAngle(ArkUIRuntimeCallInfo* runtimeCallInfo);

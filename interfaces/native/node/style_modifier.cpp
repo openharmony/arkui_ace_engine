@@ -1705,7 +1705,7 @@ int32_t SetBlendMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBlendMode(node->uiNodeHandle, item->value[0].i32);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBlendMode(node->uiNodeHandle, item->value[0].i32, 0);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4042,7 +4042,7 @@ void SetTimePickerUseMilitaryTime(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    fullImpl->getNodeModifiers()->getTimepickerModifier()->SetTimepickerUseMilitaryTime(
+    fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerUseMilitaryTime(
         node->uiNodeHandle, StringToBoolInt(value));
 }
 
@@ -4053,7 +4053,7 @@ int32_t SetTimePickerUseMilitaryTime(ArkUI_NodeHandle node, const ArkUI_Attribut
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTimepickerModifier()->SetTimepickerUseMilitaryTime(
+    fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerUseMilitaryTime(
         node->uiNodeHandle, item->value[NUM_0].i32);
 
     return ERROR_CODE_NO_ERROR;
@@ -4063,7 +4063,7 @@ void ResetTimePickerUseMilitaryTime(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
 
-    fullImpl->getNodeModifiers()->getTimepickerModifier()->ResetTimepickerUseMilitaryTime(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getTimepickerModifier()->resetTimepickerUseMilitaryTime(node->uiNodeHandle);
 }
 
 void SetTimePickerDisappearTextStyle(ArkUI_NodeHandle node, const char* value)
@@ -4440,7 +4440,7 @@ void ResetTextPickerSelectedIndex(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
 
-    fullImpl->getNodeModifiers()->getTextPickerModifier()->resetTextPickerSelected(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->resetTextPickerSelectedIndex(node->uiNodeHandle);
 }
 
 int32_t SetBackgroundImageSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)

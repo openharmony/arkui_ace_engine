@@ -285,4 +285,4 @@ void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
     impl->getBasicAPI()->markDirty(nodePtr->uiNodeHandle, flag);
 }
 
-} // namespace OHOS::Ace::NodeModel
+} // namespace OHOS::Ace::NodeModelNodeModifier

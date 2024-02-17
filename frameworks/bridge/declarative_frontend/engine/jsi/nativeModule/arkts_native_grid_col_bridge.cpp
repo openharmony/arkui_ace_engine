@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
-#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t MAX_NUMBER_BREAKPOINT = 6;
@@ -30,7 +29,7 @@ ArkUINativeModuleValue GridColBridge::SetGridColOffset(ArkUIRuntimeCallInfo *run
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> xs = runtimeCallInfo->GetCallArgRef(XS + 1);
     Local<JSValueRef> sm = runtimeCallInfo->GetCallArgRef(SM + 1);
     Local<JSValueRef> md = runtimeCallInfo->GetCallArgRef(MD + 1);
@@ -68,7 +67,7 @@ ArkUINativeModuleValue GridColBridge::SetGridColOffset(ArkUIRuntimeCallInfo *run
     } else {
         containerSizeArray[XXL] = -1;
     }
-    GetArkUIInternalNodeAPI()->GetGridColModifier().SetGridColOffset(nativeNode, containerSizeArray,
+    GetArkUINodeModifiers()->getGridColModifier()->setGridColOffset(nativeNode, containerSizeArray,
         MAX_NUMBER_BREAKPOINT);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -78,8 +77,8 @@ ArkUINativeModuleValue GridColBridge::ResetGridColOffset(ArkUIRuntimeCallInfo *r
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetGridColModifier().ResetGridColOffset(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridColModifier()->resetGridColOffset(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -88,7 +87,7 @@ ArkUINativeModuleValue GridColBridge::SetSpan(ArkUIRuntimeCallInfo *runtimeCallI
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> xs = runtimeCallInfo->GetCallArgRef(XS + 1);
     Local<JSValueRef> sm = runtimeCallInfo->GetCallArgRef(SM + 1);
     Local<JSValueRef> md = runtimeCallInfo->GetCallArgRef(MD + 1);
@@ -126,7 +125,7 @@ ArkUINativeModuleValue GridColBridge::SetSpan(ArkUIRuntimeCallInfo *runtimeCallI
     } else {
         containerSizeArray[XXL] = -1;
     }
-    GetArkUIInternalNodeAPI()->GetGridColModifier().SetSpan(nativeNode, containerSizeArray, MAX_NUMBER_BREAKPOINT);
+    GetArkUINodeModifiers()->getGridColModifier()->setSpan(nativeNode, containerSizeArray, MAX_NUMBER_BREAKPOINT);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -135,8 +134,8 @@ ArkUINativeModuleValue GridColBridge::ResetSpan(ArkUIRuntimeCallInfo *runtimeCal
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetGridColModifier().ResetSpan(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridColModifier()->resetSpan(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -145,7 +144,7 @@ ArkUINativeModuleValue GridColBridge::SetOrder(ArkUIRuntimeCallInfo *runtimeCall
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> xs = runtimeCallInfo->GetCallArgRef(XS + 1);
     Local<JSValueRef> sm = runtimeCallInfo->GetCallArgRef(SM + 1);
     Local<JSValueRef> md = runtimeCallInfo->GetCallArgRef(MD + 1);
@@ -183,7 +182,7 @@ ArkUINativeModuleValue GridColBridge::SetOrder(ArkUIRuntimeCallInfo *runtimeCall
     } else {
         containerSizeArray[XXL] = -1;
     }
-    GetArkUIInternalNodeAPI()->GetGridColModifier().SetOrder(nativeNode, containerSizeArray, MAX_NUMBER_BREAKPOINT);
+    GetArkUINodeModifiers()->getGridColModifier()->setOrder(nativeNode, containerSizeArray, MAX_NUMBER_BREAKPOINT);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -192,8 +191,8 @@ ArkUINativeModuleValue GridColBridge::ResetOrder(ArkUIRuntimeCallInfo *runtimeCa
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetGridColModifier().ResetOrder(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridColModifier()->resetOrder(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

@@ -16,6 +16,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/pipeline/base/element_register.h"
@@ -30,49 +31,50 @@ constexpr double DEFAULT_STROKE_WIDTH = 1.0f;
 constexpr int DEFAULT_STROKE_DASH_OFFSET = 0;
 constexpr int DEFAULT_STROKE_LINE_CAPS = 0;
 constexpr int DEFAULT_STROKE_LINE_JOIN = 0;
-void SetStrokeMiterLimit(NodeHandle node, const double miterLimit)
+
+void SetStrokeMiterLimit(ArkUINodeHandle node, ArkUI_Float32 miterLimit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeMiterLimit(frameNode, miterLimit);
 }
 
-void ResetStrokeMiterLimit(NodeHandle node)
+void ResetStrokeMiterLimit(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeMiterLimit(frameNode, DEFAULT_MITER_LIMIT);
 }
 
-void SetFillOpacity(NodeHandle node, const double fillOpacity)
+void SetFillOpacity(ArkUINodeHandle node, ArkUI_Float32 fillOpacity)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetFillOpacity(frameNode, fillOpacity);
 }
 
-void ResetFillOpacity(NodeHandle node)
+void ResetFillOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetFillOpacity(frameNode, DEFAULT_FILL_OPACITY);
 }
 
-void SetStrokeOpacity(NodeHandle node, const double strokeOpacity)
+void SetStrokeOpacity(ArkUINodeHandle node, ArkUI_Float32 strokeOpacity)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeOpacity(frameNode, strokeOpacity);
 }
 
-void ResetStrokeOpacity(NodeHandle node)
+void ResetStrokeOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeOpacity(frameNode, DEFAULT_STROKE_OPACITY);
 }
 
-void SetStrokeWidth(NodeHandle node, double value, int unit)
+void SetStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -80,56 +82,56 @@ void SetStrokeWidth(NodeHandle node, double value, int unit)
     ShapeModelNG::SetStrokeWidth(frameNode, Dimension(value, unitEnum));
 }
 
-void ResetStrokeWidth(NodeHandle node)
+void ResetStrokeWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeWidth(frameNode, Dimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP));
 }
 
-void SetAntiAlias(NodeHandle node, const bool antiAlias)
+void SetAntiAlias(ArkUINodeHandle node, ArkUI_Bool antiAlias)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetAntiAlias(frameNode, antiAlias);
 }
 
-void ResetAntiAlias(NodeHandle node)
+void ResetAntiAlias(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetAntiAlias(frameNode, true);
 }
 
-void SetStroke(NodeHandle node, const uint32_t stroke)
+void SetStroke(ArkUINodeHandle node, uint32_t stroke)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStroke(frameNode, Color(stroke));
 }
 
-void ResetStroke(NodeHandle node)
+void ResetStroke(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStroke(frameNode, Color::TRANSPARENT);
 }
 
-void SetFill(NodeHandle node, const uint32_t fill)
+void SetFill(ArkUINodeHandle node, uint32_t fill)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetFill(frameNode, Color(fill));
 }
 
-void ResetFill(NodeHandle node)
+void ResetFill(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetFill(frameNode, Color::BLACK);
 }
 
-void SetStrokeDashOffset(NodeHandle node, double value, int unit)
+void SetStrokeDashOffset(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -137,42 +139,42 @@ void SetStrokeDashOffset(NodeHandle node, double value, int unit)
     ShapeModelNG::SetStrokeDashOffset(frameNode, Dimension(value, unitEnum));
 }
 
-void ResetStrokeDashOffset(NodeHandle node)
+void ResetStrokeDashOffset(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeDashOffset(frameNode, Dimension(DEFAULT_STROKE_DASH_OFFSET));
 }
 
-void SetStrokeLineCap(NodeHandle node, const int strokeLineCap)
+void SetStrokeLineCap(ArkUINodeHandle node, int strokeLineCap)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeLineCap(frameNode, strokeLineCap);
 }
 
-void ResetStrokeLineCap(NodeHandle node)
+void ResetStrokeLineCap(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeLineCap(frameNode, DEFAULT_STROKE_LINE_CAPS);
 }
 
-void SetStrokeLineJoin(NodeHandle node, const int lineJoinStyle)
+void SetStrokeLineJoin(ArkUINodeHandle node, int lineJoinStyle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeLineJoin(frameNode, lineJoinStyle);
 }
 
-void ResetStrokeLineJoin(NodeHandle node)
+void ResetStrokeLineJoin(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeModelNG::SetStrokeLineJoin(frameNode, DEFAULT_STROKE_LINE_JOIN);
 }
 
-void SetStrokeDashArray(NodeHandle node,  double* dashArrayArray, int32_t* dimUnits, int32_t size)
+void SetStrokeDashArray(ArkUINodeHandle node, const ArkUI_Float32* dashArrayArray, int32_t* dimUnits, int32_t size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -183,7 +185,7 @@ void SetStrokeDashArray(NodeHandle node,  double* dashArrayArray, int32_t* dimUn
     ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
 }
 
-void ResetStrokeDashArray(NodeHandle node)
+void ResetStrokeDashArray(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -191,7 +193,7 @@ void ResetStrokeDashArray(NodeHandle node)
     ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
 }
 
-void SetShapeWidth(NodeHandle node, const double value, const int32_t unit)
+void SetShapeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -200,14 +202,14 @@ void SetShapeWidth(NodeHandle node, const double value, const int32_t unit)
     ShapeAbstractModelNG::SetWidth(frameNode, width);
 }
 
-void ResetShapeWidth(NodeHandle node)
+void ResetShapeWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeAbstractModelNG::ResetWidth(frameNode);
 }
 
-void SetShapeHeight(NodeHandle node, const double value, const int32_t unit)
+void SetShapeHeight(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -216,14 +218,14 @@ void SetShapeHeight(NodeHandle node, const double value, const int32_t unit)
     ShapeAbstractModelNG::SetHeight(frameNode, height);
 }
 
-void ResetShapeHeight(NodeHandle node)
+void ResetShapeHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ShapeAbstractModelNG::ResetHeight(frameNode);
 }
 
-void SetShapeForegroundColor(NodeHandle node, bool isColor, uint32_t color)
+void SetShapeForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -237,20 +239,22 @@ void SetShapeForegroundColor(NodeHandle node, bool isColor, uint32_t color)
     }
 }
 
-void ResetShapeForegroundColor(NodeHandle node)
+void ResetShapeForegroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 }
 
-ArkUICommonShapeModifierAPI GetCommonShapeModifier()
+namespace NodeModifier {
+const ArkUICommonShapeModifier* GetCommonShapeModifier()
 {
-    static const ArkUICommonShapeModifierAPI modifier = { SetStrokeDashArray, ResetStrokeDashArray, SetStrokeMiterLimit,
+    static const ArkUICommonShapeModifier modifier = { SetStrokeDashArray, ResetStrokeDashArray, SetStrokeMiterLimit,
         ResetStrokeMiterLimit, SetFillOpacity, ResetFillOpacity, SetStrokeOpacity, ResetStrokeOpacity, SetStrokeWidth,
         ResetStrokeWidth, SetAntiAlias, ResetAntiAlias, SetStroke, ResetStroke, SetFill, ResetFill, SetStrokeDashOffset,
         ResetStrokeDashOffset, SetStrokeLineCap, ResetStrokeLineCap, SetStrokeLineJoin, ResetStrokeLineJoin,
         SetShapeWidth, ResetShapeWidth, SetShapeHeight, ResetShapeHeight, SetShapeForegroundColor,
         ResetShapeForegroundColor };
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

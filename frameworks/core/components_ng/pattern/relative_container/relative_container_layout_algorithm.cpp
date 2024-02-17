@@ -71,7 +71,7 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
     horizontalChainNodeMap_.clear();
     verticalChainNodeMap_.clear();
     auto layoutConstraint = relativeContainerLayoutProperty->GetLayoutConstraint();
-    auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
+    auto idealSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     containerSizeWithoutPaddingBorder_ = idealSize.ConvertToSizeT();
     layoutWrapper->GetGeometryNode()->SetFrameSize(containerSizeWithoutPaddingBorder_);
     if (relativeContainerLayoutProperty->GetPaddingProperty() ||
@@ -355,10 +355,8 @@ void RelativeContainerLayoutAlgorithm::CheckNodeInHorizontalChain(std::string& c
             nextNodeAlignRules[AlignDirection::LEFT].horizontal != HorizontalAlign::END) {
             break;
         }
+        chainNodes.emplace_back(nextNode);
 
-        if (nextNodeWrapper->GetLayoutProperty()->GetVisibility() != VisibleType::GONE) {
-            chainNodes.emplace_back(nextNode);
-        }
         currentNode = nextNode;
         currentAlignRules = nextNodeAlignRules;
         nextNode = nextNodeAlignRules[AlignDirection::RIGHT].anchor;
@@ -372,7 +370,10 @@ void RelativeContainerLayoutAlgorithm::CheckHorizontalChain(const RefPtr<LayoutW
     const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
     AlignRulesItem currentAlignRules = flexItem->GetAlignRulesValue();
     ChainInfo chainInfo = flexItem->GetHorizontalChainStyleValue();
+    CHECK_NULL_VOID(chainInfo.direction.has_value());
+    CHECK_NULL_VOID(chainInfo.style.has_value());
     BiasPair bias(0.5f, 0.5f);
+
     if (flexItem->HasBias()) {
         bias = flexItem->GetBiasValue();
     }
@@ -401,12 +402,15 @@ void RelativeContainerLayoutAlgorithm::CheckHorizontalChain(const RefPtr<LayoutW
         return;
     }
 
+    if (IsAnchorContainer(leftAnchor.anchor) || IsAnchorContainer(rightAnchor.anchor)) {
+        isHorizontalRelyOnContainer_ = true;
+    }
     ChainParam chainParam;
     chainParam.ids = chainNodes;
     chainParam.anchorHead = leftAnchor;
     chainParam.anchorTail = rightAnchor;
     chainParam.isCalculated = false;
-    chainParam.chainStyle = chainInfo.style;
+    chainParam.chainStyle = chainInfo.style.value();
     chainParam.bias = bias;
     for (const auto& id : chainParam.ids) {
         chainParam.itemSize[id] = std::nullopt;
@@ -436,10 +440,8 @@ void RelativeContainerLayoutAlgorithm::CheckNodeInVerticalChain(std::string& cur
             nextNodeAlignRules[AlignDirection::TOP].vertical != VerticalAlign::BOTTOM) {
             break;
         }
+        chainNodes.emplace_back(nextNode);
 
-        if (nextNodeWrapper->GetLayoutProperty()->GetVisibility() != VisibleType::GONE) {
-            chainNodes.emplace_back(nextNode);
-        }
         currentNode = nextNode;
         currentAlignRules = nextNodeAlignRules;
         nextNode = nextNodeAlignRules[AlignDirection::BOTTOM].anchor;
@@ -454,6 +456,8 @@ void RelativeContainerLayoutAlgorithm::CheckVerticalChain(const RefPtr<LayoutWra
     AlignRulesItem currentAlignRules = flexItem->GetAlignRulesValue();
     ChainInfo chainInfo = flexItem->GetVerticalChainStyleValue();
     BiasPair bias(0.5f, 0.5f);
+    CHECK_NULL_VOID(chainInfo.direction.has_value());
+    CHECK_NULL_VOID(chainInfo.style.has_value());
     if (flexItem->HasBias()) {
         bias = flexItem->GetBiasValue();
     }
@@ -482,12 +486,15 @@ void RelativeContainerLayoutAlgorithm::CheckVerticalChain(const RefPtr<LayoutWra
         return;
     }
 
+    if (IsAnchorContainer(topAnchor.anchor) || IsAnchorContainer(bottomAnchor.anchor)) {
+        isVerticalRelyOnContainer_ = true;
+    }
     ChainParam chainParam;
     chainParam.ids = chainNodes;
     chainParam.anchorHead = topAnchor;
     chainParam.anchorTail = bottomAnchor;
     chainParam.isCalculated = false;
-    chainParam.chainStyle = chainInfo.style;
+    chainParam.chainStyle = chainInfo.style.value();
     chainParam.bias = bias;
     for (const auto& id : chainParam.ids) {
         chainParam.itemSize[id] = std::nullopt;
@@ -656,7 +663,7 @@ float RelativeContainerLayoutAlgorithm::GetVerticalAnchorValueByAlignRule(AlignR
 }
 
 std::pair<float, float> RelativeContainerLayoutAlgorithm::CalcOffsetInChainGetStart(const float& anchorDistance,
-    const float& contentSize, const ChainParam& chainParam, LineDirection direction)
+    const float& contentSize, int32_t itemCount, const ChainParam& chainParam, LineDirection direction)
 {
     float spaceSize = 0.0f;
     float start = 0.0f;
@@ -664,11 +671,12 @@ std::pair<float, float> RelativeContainerLayoutAlgorithm::CalcOffsetInChainGetSt
     if (GreatOrEqual(anchorDistance, contentSize)) {
         switch (chainParam.chainStyle) {
             case ChainStyle::SPREAD:
-                spaceSize = (anchorDistance - contentSize) / (chainParam.ids.size() + 1);
+                spaceSize = (anchorDistance - contentSize) / (itemCount + 1);
                 start = spaceSize;
                 break;
             case ChainStyle::SPREAD_INSIDE:
-                spaceSize = (anchorDistance - contentSize) / (chainParam.ids.size() - 1);
+                spaceSize = anchorDistance - contentSize;
+                spaceSize = GreatNotEqual(itemCount, 1) ? spaceSize / (itemCount - 1) : spaceSize;
                 break;
             case ChainStyle::PACKED:
                 spaceSize = 0.0f;
@@ -693,6 +701,33 @@ std::pair<float, float> RelativeContainerLayoutAlgorithm::CalcOffsetInChainGetSt
     return { spaceSize, start };
 }
 
+void RelativeContainerLayoutAlgorithm::RecordOffsetInChain(float offset, float spaceSize,
+    const std::string& chainName, LineDirection direction)
+{
+    std::unordered_map<std::string, ChainParam>& chains =
+        (direction == LineDirection::HORIZONTAL) ? horizontalChains_ : verticalChains_;
+
+    if (direction == LineDirection::HORIZONTAL) {
+        for (const auto& nodeName : chains[chainName].ids) {
+            auto childWrapper = idNodeMap_[nodeName];
+            if (childWrapper->GetLayoutProperty()->GetVisibility() == VisibleType::GONE) {
+                continue;
+            }
+            recordOffsetMap_[nodeName] = OffsetF(offset, recordOffsetMap_[nodeName].GetY());
+            offset += chains[chainName].itemSize[nodeName].value() + spaceSize;
+        }
+    } else {
+        for (const auto& nodeName : chains[chainName].ids) {
+            auto childWrapper = idNodeMap_[nodeName];
+            if (childWrapper->GetLayoutProperty()->GetVisibility() == VisibleType::GONE) {
+                continue;
+            }
+            recordOffsetMap_[nodeName] = OffsetF(recordOffsetMap_[nodeName].GetX(), offset);
+            offset += chains[chainName].itemSize[nodeName].value() + spaceSize;
+        }
+    }
+}
+
 bool RelativeContainerLayoutAlgorithm::CalcOffsetInChain(const std::string& chainName, LineDirection direction)
 {
     float contentSize = 0.0f;
@@ -705,7 +740,13 @@ bool RelativeContainerLayoutAlgorithm::CalcOffsetInChain(const std::string& chai
     if (chains[chainName].isCalculated) {
         return true;
     }
+    auto itemCount = chains[chainName].ids.size();
     for (const auto& itemSize : chains[chainName].itemSize) {
+        auto childWrapper = idNodeMap_[itemSize.first];
+        if (childWrapper->GetLayoutProperty()->GetVisibility() == VisibleType::GONE) {
+            itemCount--;
+            continue;
+        }
         if (!itemSize.second.has_value()) {
             return false;
         }
@@ -721,21 +762,10 @@ bool RelativeContainerLayoutAlgorithm::CalcOffsetInChain(const std::string& chai
     }
     anchorDistance = end - start;
     std::pair<float, float> spaceSizeAndStart =
-        CalcOffsetInChainGetStart(anchorDistance, contentSize, chains[chainName], direction);
+        CalcOffsetInChainGetStart(anchorDistance, contentSize, itemCount, chains[chainName], direction);
     spaceSize = spaceSizeAndStart.first;
     start += spaceSizeAndStart.second;
-    float offset = start;
-    if (direction == LineDirection::HORIZONTAL) {
-        for (const auto& nodeName : chains[chainName].ids) {
-            recordOffsetMap_[nodeName] = OffsetF(offset, recordOffsetMap_[nodeName].GetY());
-            offset += chains[chainName].itemSize[nodeName].value() + spaceSize;
-        }
-    } else {
-        for (const auto& nodeName : chains[chainName].ids) {
-            recordOffsetMap_[nodeName] = OffsetF(recordOffsetMap_[nodeName].GetX(), offset);
-            offset += chains[chainName].itemSize[nodeName].value() + spaceSize;
-        }
-    }
+    RecordOffsetInChain(start, spaceSize, chainName, direction);
     chains[chainName].isCalculated = true;
     return true;
 }

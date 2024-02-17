@@ -44,6 +44,7 @@ const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::ST
     OHOS::Ace::TextAlign::END, OHOS::Ace::TextAlign::JUSTIFY, OHOS::Ace::TextAlign::LEFT, OHOS::Ace::TextAlign::RIGHT };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 
 std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = {
     { TextHeightAdaptivePolicy::MAX_LINES_FIRST, 0 },
@@ -62,7 +63,7 @@ FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeig
 std::string g_strValue;
 
 namespace {
-void SetTextContext(ArkUINodeHandle node, const char* value)
+void SetTextContent(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -70,7 +71,7 @@ void SetTextContext(ArkUINodeHandle node, const char* value)
     TextModelNG::InitText(frameNode, content);
 }
 
-void SetFontWeightStr(ArkUINodeHandle node, const char* weight)
+void SetFontWeightStr(ArkUINodeHandle node, ArkUI_CharPtr weight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -478,6 +479,23 @@ void ResetTextFont(ArkUINodeHandle node)
     TextModelNG::SetFont(frameNode, font);
 }
 
+void SetWordBreak(ArkUINodeHandle node, ArkUI_Uint32 wordBreak)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (wordBreak < 0 || wordBreak >= WORD_BREAK_TYPES.size()) {
+        wordBreak = 2; // 2 is the default value of WordBreak::BREAK_WORD
+    }
+    TextModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[wordBreak]);
+}
+
+void ResetWordBreak(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[2]); // 2 is the default value of WordBreak::BREAK_WORD
+}
+
 ArkUI_CharPtr GetFontFamily(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -575,23 +593,68 @@ ArkUI_Int32 GetItalicFontStyle(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(TextModelNG::GetItalicFontStyle(frameNode));
 }
-
 } // namespace
 
 namespace NodeModifier {
 const ArkUITextModifier* GetTextModifier()
 {
-    static const ArkUITextModifier modifier = { SetTextContext, SetFontWeight, ResetFontWeight, SetFontStyle,
-        ResetFontStyle, SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetFontSize, ResetFontSize,
-        SetTextLineHeight, ResetTextLineHeight, SetTextTextOverflow, ResetTextTextOverflow, SetTextDecoration,
-        ResetTextDecoration, SetTextTextCase, ResetTextTextCase, SetTextMaxLines, ResetTextMaxLines, SetTextMinFontSize,
-        ResetTextMinFontSize, SetTextDraggable, ResetTextDraggable, SetTextMaxFontSize, ResetTextMaxFontSize,
-        SetTextFontFamily, ResetTextFontFamily, SetTextCopyOption, ResetTextCopyOption, SetTextTextShadow,
-        ResetTextTextShadow, SetTextHeightAdaptivePolicy, ResetTextHeightAdaptivePolicy, SetTextTextIndent,
-        ResetTextTextIndent, SetTextBaselineOffset, ResetTextBaselineOffset, SetTextLetterSpacing,
-        ResetTextLetterSpacing, SetTextFont, ResetTextFont, SetFontWeightStr, GetFontFamily, GetCopyOption,
-        GetHeightAdaptivePolicy, GetTextMinFontSize, GetTextMaxFontSize, GetFont, GetFontSize,
-        GetFontWeight, GetItalicFontStyle };
+    static const ArkUITextModifier modifier = {
+        SetTextContent,
+        SetFontWeight,
+        ResetFontWeight,
+        SetFontStyle,
+        ResetFontStyle,
+        SetTextAlign,
+        ResetTextAlign,
+        SetFontColor,
+        ResetFontColor,
+        SetFontSize,
+        ResetFontSize,
+        SetTextLineHeight,
+        ResetTextLineHeight,
+        SetTextTextOverflow,
+        ResetTextTextOverflow,
+        SetTextDecoration,
+        ResetTextDecoration,
+        SetTextTextCase,
+        ResetTextTextCase,
+        SetTextMaxLines,
+        ResetTextMaxLines,
+        SetTextMinFontSize,
+        ResetTextMinFontSize,
+        SetTextDraggable,
+        ResetTextDraggable,
+        SetTextMaxFontSize,
+        ResetTextMaxFontSize,
+        SetTextFontFamily,
+        ResetTextFontFamily,
+        SetTextCopyOption,
+        ResetTextCopyOption,
+        SetTextTextShadow,
+        ResetTextTextShadow,
+        SetTextHeightAdaptivePolicy,
+        ResetTextHeightAdaptivePolicy,
+        SetTextTextIndent,
+        ResetTextTextIndent,
+        SetTextBaselineOffset,
+        ResetTextBaselineOffset,
+        SetTextLetterSpacing,
+        ResetTextLetterSpacing,
+        SetTextFont,
+        ResetTextFont,
+        SetFontWeightStr,
+        SetWordBreak,
+        ResetWordBreak,
+        GetFontFamily,
+        GetCopyOption,
+        GetHeightAdaptivePolicy,
+        GetTextMinFontSize,
+        GetTextMaxFontSize,
+        GetFont,
+        GetFontSize,
+        GetFontWeight,
+        GetItalicFontStyle,
+    };
 
     return &modifier;
 }

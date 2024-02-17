@@ -27,19 +27,15 @@ template("ace_core_interfaces_native_node") {
     # add common source file needed by all product platform here
     sources = [
       "node/alphabet_indexer_modifier.cpp",
-      "node/api_impl.cpp",
       "node/blank_modifier.cpp",
       "node/button_modifier.cpp",
       "node/calendar_picker_modifier.cpp",
-      "node/checkbox_modifier.cpp",
       "node/checkboxgroup_modifier.cpp",
       "node/column_modifier.cpp",
       "node/column_split_modifier.cpp",
-      "node/common_modifier.cpp",
       "node/common_shape_modifier.cpp",
       "node/counter_modifier.cpp",
       "node/data_panel_modifier.cpp",
-      "node/date_picker_modifier.cpp",
       "node/divider_modifier.cpp",
       "node/gauge_modifier.cpp",
       "node/grid_col_modifier.cpp",
@@ -48,13 +44,8 @@ template("ace_core_interfaces_native_node") {
       "node/grid_row_modifier.cpp",
       "node/hyperlink_modifier.cpp",
       "node/image_animator_modifier.cpp",
-      "node/image_modifier.cpp",
-      "node/image_span_modifier.cpp",
       "node/line_modifier.cpp",
-      "node/list_item_group_modifier.cpp",
       "node/list_item_modifier.cpp",
-      "node/list_modifier.cpp",
-      "node/loading_progress_modifier.cpp",
       "node/marquee_modifier.cpp",
       "node/menu_item_modifier.cpp",
       "node/menu_modifier.cpp",
@@ -99,25 +90,14 @@ template("ace_core_interfaces_native_node") {
       "node/rich_editor_modifier.cpp",
       "node/row_modifier.cpp",
       "node/row_split_modifier.cpp",
-      "node/scroll_modifier.cpp",
       "node/search_modifier.cpp",
       "node/select_modifier.cpp",
       "node/shape_modifier.cpp",
       "node/side_bar_container_modifier.cpp",
-      "node/slider_modifier.cpp",
-      "node/span_modifier.cpp",
-      "node/stack_modifier.cpp",
       "node/stepper_item_modifier.cpp",
-      "node/swiper_modifier.cpp",
       "node/tabs_modifier.cpp",
-      "node/text_area_modifier.cpp",
       "node/text_clock_modifier.cpp",
-      "node/text_input_modifier.cpp",
-      "node/text_modifier.cpp",
       "node/text_timer_modifier.cpp",
-      "node/textpicker_modifier.cpp",
-      "node/timepicker_modifier.cpp",
-      "node/toggle_modifier.cpp",
       "node/video_modifier.cpp",
       "node/view_model.cpp",
       "node/water_flow_modifier.cpp",
@@ -127,10 +107,7 @@ template("ace_core_interfaces_native_node") {
 
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
-      sources += [
-        "node/node_xcomponent_modifier.cpp",
-        "node/xcomponent_modifier.cpp",
-      ]
+      sources += [ "node/node_xcomponent_modifier.cpp" ]
     }
 
     if (defined(config.form_components_support) &&

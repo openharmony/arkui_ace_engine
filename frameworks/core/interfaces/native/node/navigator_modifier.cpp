@@ -20,7 +20,7 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-void SetTarget(NodeHandle node, const char* value)
+void SetTarget(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -28,14 +28,14 @@ void SetTarget(NodeHandle node, const char* value)
     NavigatorModelNG::SetUri(frameNode, uri);
 }
 
-void ResetTarget(NodeHandle node)
+void ResetTarget(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavigatorModelNG::SetUri(frameNode, "");
 }
 
-void SetType(NodeHandle node, int32_t value)
+void SetType(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -43,28 +43,28 @@ void SetType(NodeHandle node, int32_t value)
     NavigatorModelNG::SetType(frameNode, barMode);
 }
 
-void ResetType(NodeHandle node)
+void ResetType(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavigatorModelNG::SetType(frameNode, OHOS::Ace::NavigatorType::PUSH);
 }
 
-void SetActive(NodeHandle node, bool active)
+void SetActive(ArkUINodeHandle node, ArkUI_Bool active)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavigatorModelNG::SetActive(frameNode, active);
 }
 
-void ResetActive(NodeHandle node)
+void ResetActive(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavigatorModelNG::SetActive(frameNode, false);
 }
 
-void SetParams(NodeHandle node, const char* value)
+void SetParams(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -72,18 +72,20 @@ void SetParams(NodeHandle node, const char* value)
     NavigatorModelNG::SetParams(frameNode, args);
 }
 
-void ResetParams(NodeHandle node)
+void ResetParams(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavigatorModelNG::SetParams(frameNode, "");
 }
 
-ArkUINavigatorModifierAPI GetNavigatorModifier()
+namespace NodeModifier {
+const ArkUINavigatorModifier* GetNavigatorModifier()
 {
-    static const ArkUINavigatorModifierAPI modifier = {SetTarget, ResetTarget, SetType, ResetType, SetActive,
+    static const ArkUINavigatorModifier modifier = {SetTarget, ResetTarget, SetType, ResetType, SetActive,
         ResetActive, SetParams, ResetParams };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

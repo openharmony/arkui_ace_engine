@@ -17,7 +17,6 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
-#include "core/interfaces/native/node/api.h"
 #include "core/components/common/properties/text_style.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
@@ -52,9 +51,9 @@ ArkUINativeModuleValue ButtonBridge::SetType(ArkUIRuntimeCallInfo* runtimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int type = secondArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonType(nativeNode, type);
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonType(nativeNode, type);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -63,8 +62,8 @@ ArkUINativeModuleValue ButtonBridge::ResetType(ArkUIRuntimeCallInfo* runtimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonType(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonType(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -74,12 +73,12 @@ ArkUINativeModuleValue ButtonBridge::SetStateEffect(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsBoolean()) {
         bool stateEffect = secondArg->ToBoolean(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonStateEffect(nativeNode, stateEffect);
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonStateEffect(nativeNode, stateEffect);
     } else {
-        GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonStateEffect(nativeNode);
+        GetArkUINodeModifiers()->getButtonModifier()->resetButtonStateEffect(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -89,8 +88,8 @@ ArkUINativeModuleValue ButtonBridge::ResetStateEffect(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonStateEffect(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonStateEffect(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -100,12 +99,12 @@ ArkUINativeModuleValue ButtonBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonFontColor(nativeNode);
+        GetArkUINodeModifiers()->getButtonModifier()->resetButtonFontColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonFontColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonFontColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -115,8 +114,8 @@ ArkUINativeModuleValue ButtonBridge::ResetFontColor(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonFontColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonFontColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -125,7 +124,7 @@ ArkUINativeModuleValue ButtonBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     Ace::CalcDimension fontSize;
     if (ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, fontSize) && fontSize.Unit() != DimensionUnit::PERCENT &&
@@ -139,7 +138,7 @@ ArkUINativeModuleValue ButtonBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeCa
         fontSize = buttonTheme->GetTextStyle().GetFontSize();
     }
     int fontSizeUnit = static_cast<int>(fontSize.Unit());
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonFontSize(nativeNode, fontSize.Value(), fontSizeUnit);
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonFontSize(nativeNode, fontSize.Value(), fontSizeUnit);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -148,8 +147,8 @@ ArkUINativeModuleValue ButtonBridge::ResetFontSize(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonFontSize(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonFontSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -159,7 +158,7 @@ ArkUINativeModuleValue ButtonBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string fontWeight = DEFAULT_FONT_WEIGHT;
     if (!fontWeightArg->IsNull()) {
         if (fontWeightArg->IsNumber()) {
@@ -169,7 +168,7 @@ ArkUINativeModuleValue ButtonBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtime
             fontWeight = fontWeightArg->ToString(vm)->ToString();
         }
     }
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonFontWeight(nativeNode, fontWeight.c_str());
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonFontWeight(nativeNode, fontWeight.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -178,8 +177,8 @@ ArkUINativeModuleValue ButtonBridge::ResetFontWeight(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonFontWeight(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonFontWeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -189,9 +188,9 @@ ArkUINativeModuleValue ButtonBridge::SetFontStyle(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int fontStyle = secondArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonFontStyle(nativeNode, fontStyle);
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonFontStyle(nativeNode, fontStyle);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -200,8 +199,8 @@ ArkUINativeModuleValue ButtonBridge::ResetFontStyle(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonFontStyle(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonFontStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -211,14 +210,14 @@ ArkUINativeModuleValue ButtonBridge::SetFontFamily(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string fontFamily;
     if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, secondArg, fontFamily)) {
-        GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonFontFamily(nativeNode);
+        GetArkUINodeModifiers()->getButtonModifier()->resetButtonFontFamily(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonFontFamily(nativeNode, fontFamily.c_str());
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonFontFamily(nativeNode, fontFamily.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -227,8 +226,8 @@ ArkUINativeModuleValue ButtonBridge::ResetFontFamily(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonFontFamily(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonFontFamily(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -238,12 +237,12 @@ ArkUINativeModuleValue ButtonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonBackgroundColor(nativeNode);
+        GetArkUINodeModifiers()->getButtonModifier()->resetButtonBackgroundColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonBackgroundColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -253,8 +252,8 @@ ArkUINativeModuleValue ButtonBridge::ResetBackgroundColor(ArkUIRuntimeCallInfo *
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonBackgroundColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -310,12 +309,12 @@ void ButtonBridge::PutButtonValuesParameters(
     PushValuesVector(fontStyleOptional, valuesVector);
 }
 
-void ButtonBridge::PushDimensionVector(const std::optional<Dimension>& valueDimen, std::vector<double>& dimensions)
+void ButtonBridge::PushDimensionVector(const std::optional<Dimension>& valueDim, std::vector<ArkUI_Float32>& dimensions)
 {
-    dimensions.push_back(static_cast<double>(valueDimen.has_value()));
-    if (valueDimen.has_value()) {
-        dimensions.push_back(static_cast<double>(valueDimen.value().Value()));
-        dimensions.push_back(static_cast<double>(valueDimen.value().Unit()));
+    dimensions.push_back(static_cast<ArkUI_Float32>(valueDim.has_value()));
+    if (valueDim.has_value()) {
+        dimensions.push_back(static_cast<ArkUI_Float32>(valueDim.value().Value()));
+        dimensions.push_back(static_cast<ArkUI_Float32>(valueDim.value().Unit()));
     } else {
         dimensions.push_back(0);
         dimensions.push_back(0);
@@ -323,19 +322,19 @@ void ButtonBridge::PushDimensionVector(const std::optional<Dimension>& valueDime
 }
 
 void ButtonBridge::PushButtonDimension(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<double>& fontSizesVector, int32_t argIndex)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& fontSizesVector, int32_t argIndex)
 {
     Local<JSValueRef> arg = runtimeCallInfo->GetCallArgRef(argIndex);
-    std::optional<CalcDimension> dimemstionOptinal = std::nullopt;
+    std::optional<CalcDimension> dimensionOptional = std::nullopt;
     CalcDimension parsedDimension;
     if (ArkTSUtils::ParseJsDimensionFp(vm, arg, parsedDimension, false)) {
-        dimemstionOptinal = parsedDimension;
+        dimensionOptional = parsedDimension;
     }
-    PushDimensionVector(dimemstionOptinal, fontSizesVector);
+    PushDimensionVector(dimensionOptional, fontSizesVector);
 }
 
 void ButtonBridge::PutButtonDimensionParameters(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<double>& fontSizesVector)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& fontSizesVector)
 {
     std::vector<int32_t> indexVector = { MIN_FONT_SIZE_ARG_3, MAX_FONT_SIZE_ARG_4, FONT_SIZE_ARG_6 };
     for (size_t index = 0; index < indexVector.size(); index++) {
@@ -378,18 +377,17 @@ ArkUINativeModuleValue ButtonBridge::SetLabelStyle(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::vector<int32_t> valuesVector;
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    std::vector<ArkUI_Int32> valuesVector;
     PutButtonValuesParameters(runtimeCallInfo, vm, valuesVector);
-    std::vector<double> fontSizesVector;
+    std::vector<ArkUI_Float32> fontSizesVector;
     PutButtonDimensionParameters(runtimeCallInfo, vm, fontSizesVector);
-    std::vector<const char*> stringParameters;
+    std::vector<ArkUI_CharPtr> stringParameters;
     PutButtonStringParameters(runtimeCallInfo, vm, stringParameters);
-    std::vector<size_t> dataCountVector;
+    std::vector<ArkUI_Uint32> dataCountVector;
     dataCountVector.push_back(stringParameters.size());
     dataCountVector.push_back(valuesVector.size());
-    dataCountVector.push_back(fontSizesVector.size());
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonLabelStyle(
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonLabelStyle(
         nativeNode, stringParameters.data(), valuesVector.data(), fontSizesVector.data(), dataCountVector.data());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -399,25 +397,25 @@ ArkUINativeModuleValue ButtonBridge::ResetLabelStyle(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonLabelStyle(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonLabelStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
-void ParseBorderRadius(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimention)
+void ParseBorderRadius(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimension)
 {
-    CalcDimension valueDimen;
-    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDimen, false)) {
-        optionalDimention = valueDimen;
+    CalcDimension valueDim;
+    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDim, false)) {
+        optionalDimension = valueDim;
     }
 }
 
-void PushBorderRadiusVector(const std::optional<CalcDimension>& valueDimen, std::vector<double> &options)
+void PushBorderRadiusVector(const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options)
 {
-    options.push_back(static_cast<double>(valueDimen.has_value()));
-    if (valueDimen.has_value()) {
-        options.push_back(static_cast<double>(valueDimen.value().Value()));
-        options.push_back(static_cast<double>(valueDimen.value().Unit()));
+    options.push_back(static_cast<ArkUI_Float32>(valueDim.has_value()));
+    if (valueDim.has_value()) {
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Value()));
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Unit()));
     } else {
         options.push_back(0);
         options.push_back(0);
@@ -429,7 +427,7 @@ ArkUINativeModuleValue ButtonBridge::SetButtonBorderRadius(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);     // topLeft value
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);    // topRight value
     Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);  // bottomLeft value
@@ -437,7 +435,7 @@ ArkUINativeModuleValue ButtonBridge::SetButtonBorderRadius(ArkUIRuntimeCallInfo*
 
     if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
         bottomRightArgs->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonBorderRadius(nativeNode);
+        GetArkUINodeModifiers()->getButtonModifier()->resetButtonBorderRadius(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -451,13 +449,13 @@ ArkUINativeModuleValue ButtonBridge::SetButtonBorderRadius(ArkUIRuntimeCallInfo*
     ParseBorderRadius(vm, bottomLeftArgs, radiusBottomLeft);
     ParseBorderRadius(vm, bottomRightArgs, radiusBottomRight);
 
-    std::vector<double> options;
+    std::vector<ArkUI_Float32> options;
     PushBorderRadiusVector(radiusTopLeft, options);
     PushBorderRadiusVector(radiusTopRight, options);
     PushBorderRadiusVector(radiusBottomLeft, options);
     PushBorderRadiusVector(radiusBottomRight, options);
 
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonBorderRadius(nativeNode, options.data(), options.size());
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonBorderRadius(nativeNode, options.data(), options.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -466,8 +464,8 @@ ArkUINativeModuleValue ButtonBridge::ResetButtonBorderRadius(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonBorderRadius(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonBorderRadius(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -477,7 +475,7 @@ ArkUINativeModuleValue ButtonBridge::SetButtonBorder(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(9);      // 9:topLeft value
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(10);    // 10:topRight value
@@ -485,7 +483,7 @@ ArkUINativeModuleValue ButtonBridge::SetButtonBorder(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(12); // 12:bottomRight value
     if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
         bottomRightArgs->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonBorderRadius(nativeNode);
+        GetArkUINodeModifiers()->getButtonModifier()->resetButtonBorderRadius(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -499,13 +497,13 @@ ArkUINativeModuleValue ButtonBridge::SetButtonBorder(ArkUIRuntimeCallInfo* runti
     ParseBorderRadius(vm, bottomLeftArgs, radiusBottomLeft);
     ParseBorderRadius(vm, bottomRightArgs, radiusBottomRight);
 
-    std::vector<double> options;
+    std::vector<ArkUI_Float32> options;
     PushBorderRadiusVector(radiusTopLeft, options);
     PushBorderRadiusVector(radiusTopRight, options);
     PushBorderRadiusVector(radiusBottomLeft, options);
     PushBorderRadiusVector(radiusBottomRight, options);
 
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonBorderRadius(nativeNode, options.data(), options.size());
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonBorderRadius(nativeNode, options.data(), options.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -514,8 +512,8 @@ ArkUINativeModuleValue ButtonBridge::ResetButtonBorder(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBorder(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetBorder(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -524,7 +522,7 @@ ArkUINativeModuleValue ButtonBridge::SetButtonSize(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> widthArgs = runtimeCallInfo->GetCallArgRef(1); // 1:width value
     Local<JSValueRef> heightArgs = runtimeCallInfo->GetCallArgRef(2); // 2:height value
     CalcDimension width;
@@ -543,7 +541,7 @@ ArkUINativeModuleValue ButtonBridge::SetButtonSize(ArkUIRuntimeCallInfo* runtime
         ArkTSUtils::ParseJsDimensionVp(vm, heightArgs, height);
         heightStr = std::to_string(height.Value());
     }
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonSize(nativeNode, widthStr.c_str(),
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonSize(nativeNode, widthStr.c_str(),
         static_cast<int32_t>(width.Unit()), heightStr.c_str(), static_cast<int32_t>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -553,8 +551,8 @@ ArkUINativeModuleValue ButtonBridge::ResetButtonSize(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonSize(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

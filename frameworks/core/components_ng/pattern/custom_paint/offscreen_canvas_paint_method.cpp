@@ -102,6 +102,7 @@ void OffscreenCanvasPaintMethod::InitBitmap(int32_t width, int32_t height)
     RSBitmapFormat bitmapFormat = { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_UNPREMUL };
     bitmap_.Build(width, height, bitmapFormat);
     bitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    bitmapSize_ = bitmap_.ComputeByteSize();
     rsCanvas_ = std::make_unique<RSCanvas>();
     rsCanvas_->Bind(bitmap_);
 #endif

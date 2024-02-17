@@ -16,10 +16,10 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_CHECKBOXGROUP_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_CHECKBOXGROUP_MODIFIER_H
 
-#include "core/interfaces/native/node/api.h"
+#include "core/interfaces/native/node/node_api.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
-namespace OHOS::Ace::NG {
-ArkUICheckboxGroupModifierAPI GetCheckboxGroupModifier();
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_CHECKBOXGROUP_MODIFIER_H

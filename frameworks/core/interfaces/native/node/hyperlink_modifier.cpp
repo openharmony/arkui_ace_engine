@@ -17,16 +17,18 @@
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/theme_manager.h"
 
 namespace OHOS::Ace::NG {
-void SetHyperlinkColor(NodeHandle node, uint32_t color)
+void SetHyperlinkColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     HyperlinkModelNG::SetColor(frameNode, Color(color));
 }
 
-void ResetHyperlinkColor(NodeHandle node)
+void ResetHyperlinkColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -39,25 +41,27 @@ void ResetHyperlinkColor(NodeHandle node)
     HyperlinkModelNG::SetColor(frameNode, Color(hyperlinkTheme->GetTextColor()));
 }
 
-void SetHyperlinkDraggable(NodeHandle node, bool draggable)
+void SetHyperlinkDraggable(ArkUINodeHandle node, ArkUI_Bool draggable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     HyperlinkModelNG::SetDraggable(frameNode, draggable);
 }
 
-void ResetHyperlinkDraggable(NodeHandle node)
+void ResetHyperlinkDraggable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     HyperlinkModelNG::SetDraggable(frameNode, false);
 }
 
-ArkUIHyperlinkModifierAPI GetHyperlinkModifier()
+namespace NodeModifier {
+const ArkUIHyperlinkModifier* GetHyperlinkModifier()
 {
-    static const ArkUIHyperlinkModifierAPI modifier = { SetHyperlinkColor, ResetHyperlinkColor, SetHyperlinkDraggable,
+    static const ArkUIHyperlinkModifier modifier = { SetHyperlinkColor, ResetHyperlinkColor, SetHyperlinkDraggable,
         ResetHyperlinkDraggable };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

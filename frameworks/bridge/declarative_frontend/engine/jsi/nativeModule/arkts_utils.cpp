@@ -1058,7 +1058,8 @@ void ArkTSUtils::ParsePadding(
 }
 
 bool ArkTSUtils::ParseResponseRegion(
-    const EcmaVM* vm, const Local<JSValueRef>& jsValue, double* regionValues, int32_t* regionUnits, uint32_t length)
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, ArkUI_Float32* regionValues,
+    int32_t* regionUnits, uint32_t length)
 {
     if (jsValue->IsUndefined() || !jsValue->IsArray(vm)) {
         return false;
@@ -1094,13 +1095,13 @@ bool ArkTSUtils::ParseResponseRegion(
         if (!ArkTSUtils::ParseJsDimensionNG(vm, height, heightDimen, DimensionUnit::VP)) {
             heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
         }
-        regionValues[i] = xDimen.Value();
+        regionValues[i] = static_cast<ArkUI_Float32>(xDimen.Value());
         regionUnits[i] = static_cast<int32_t>(xDimen.Unit());
-        regionValues[i + 1] = yDimen.Value();
+        regionValues[i + 1] = static_cast<ArkUI_Float32>(yDimen.Value());
         regionUnits[i + 1] = static_cast<int32_t>(yDimen.Unit());
-        regionValues[i + 2] = widthDimen.Value(); // 2: width value
+        regionValues[i + 2] = static_cast<ArkUI_Float32>(widthDimen.Value()); // 2: width value
         regionUnits[i + 2] = static_cast<int32_t>(widthDimen.Unit()); // 2: width Unit
-        regionValues[i + 3] = heightDimen.Value(); // 3: height value
+        regionValues[i + 3] = static_cast<ArkUI_Float32>(heightDimen.Value()); // 3: height value
         regionUnits[i + 3] = static_cast<int32_t>(heightDimen.Unit()); // 3: height Unit
     }
     return true;

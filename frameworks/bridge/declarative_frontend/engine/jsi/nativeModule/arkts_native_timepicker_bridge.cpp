@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -35,9 +33,9 @@ ArkUINativeModuleValue TimepickerBridge::SetTimepickerBackgroundColor(ArkUIRunti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     uint32_t color = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetTimepickerModifier().SetTimepickerBackgroundColor(nativeNode, color);
+    GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerBackgroundColor(nativeNode, color);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -46,8 +44,8 @@ ArkUINativeModuleValue TimepickerBridge::ResetTimepickerBackgroundColor(ArkUIRun
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerBackgroundColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -61,7 +59,7 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         color.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
@@ -95,7 +93,7 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     std::string fontSizeStr = size.ToString();
     std::string fontInfo = StringUtils::FormatString(
         FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
-    GetArkUIInternalNodeAPI()->GetTimepickerModifier().SetTimepickerTextStyle(
+    GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerTextStyle(
         nativeNode, color.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -110,7 +108,7 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         color.SetValue(DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR);
@@ -144,7 +142,7 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     std::string fontSizeStr = size.ToString();
     std::string fontInfo = StringUtils::FormatString(
         FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
-    GetArkUIInternalNodeAPI()->GetTimepickerModifier().SetTimepickerSelectedTextStyle(
+    GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerSelectedTextStyle(
         nativeNode, color.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -159,7 +157,7 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         color.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
@@ -193,7 +191,7 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     std::string fontSizeStr = size.ToString();
     std::string fontInfo = StringUtils::FormatString(
         FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
-    GetArkUIInternalNodeAPI()->GetTimepickerModifier().SetTimepickerDisappearTextStyle(
+    GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerDisappearTextStyle(
         nativeNode, color.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -203,8 +201,8 @@ ArkUINativeModuleValue TimepickerBridge::ResetTextStyle(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerTextStyle(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerTextStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -213,8 +211,8 @@ ArkUINativeModuleValue TimepickerBridge::ResetSelectedTextStyle(ArkUIRuntimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerSelectedTextStyle(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerSelectedTextStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -223,8 +221,8 @@ ArkUINativeModuleValue TimepickerBridge::ResetDisappearTextStyle(ArkUIRuntimeCal
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerDisappearTextStyle(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerDisappearTextStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -234,12 +232,12 @@ ArkUINativeModuleValue TimepickerBridge::SetTimepickerUseMilitaryTime(ArkUIRunti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> useMilitaryArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (useMilitaryArg->IsBoolean()) {
         bool value = useMilitaryArg->ToBoolean(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetTimepickerModifier().SetTimepickerUseMilitaryTime(nativeNode, value);
+        GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerUseMilitaryTime(nativeNode, value);
     } else {
-        GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerUseMilitaryTime(nativeNode);
+        GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerUseMilitaryTime(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -249,8 +247,8 @@ ArkUINativeModuleValue TimepickerBridge::ResetTimepickerUseMilitaryTime(ArkUIRun
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerUseMilitaryTime(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerUseMilitaryTime(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

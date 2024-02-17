@@ -30,28 +30,28 @@ const std::string DEFAULT_FONT_WEIGHT = "normal";
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
-void SetMenuItemSelected(NodeHandle node, bool value)
+void SetMenuItemSelected(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetSelected(frameNode, value);
 }
 
-void ResetMenuItemSelected(NodeHandle node)
+void ResetMenuItemSelected(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetSelected(frameNode, false);
 }
 
-void SetLabelFontColor(NodeHandle node, const uint32_t color)
+void SetLabelFontColor(ArkUINodeHandle node, const uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetLabelFontColor(frameNode, Color(color));
 }
 
-void ResetLabelFontColor(NodeHandle node)
+void ResetLabelFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -59,14 +59,14 @@ void ResetLabelFontColor(NodeHandle node)
     MenuItemModelNG::SetLabelFontColor(frameNode, color);
 }
 
-void SetContentFontColor(NodeHandle node, const uint32_t color)
+void SetContentFontColor(ArkUINodeHandle node, const uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetFontColor(frameNode, Color(color));
 }
 
-void ResetContentFontColor(NodeHandle node)
+void ResetContentFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -74,7 +74,7 @@ void ResetContentFontColor(NodeHandle node)
     MenuItemModelNG::SetFontColor(frameNode, color);
 }
 
-void SetLabelFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
+void SetLabelFont(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -110,7 +110,7 @@ void SetLabelFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     }
 }
 
-void ResetLabelFont(NodeHandle node)
+void ResetLabelFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -122,7 +122,7 @@ void ResetLabelFont(NodeHandle node)
     MenuItemModelNG::SetLabelFontStyle(frameNode, DEFAULT_FONT_STYLE);
 }
 
-void SetContentFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
+void SetContentFont(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -159,7 +159,7 @@ void SetContentFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     }
 }
 
-void ResetContentFont(NodeHandle node)
+void ResetContentFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -171,21 +171,21 @@ void ResetContentFont(NodeHandle node)
     MenuItemModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
 }
 
-void SetSelectIcon(NodeHandle node, bool showIcon)
+void SetSelectIcon(ArkUINodeHandle node, ArkUI_Bool showIcon)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetSelectIcon(frameNode, showIcon);
 }
 
-void ResetSelectIcon(NodeHandle node)
+void ResetSelectIcon(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetSelectIcon(frameNode, false);
 }
 
-void SetSelectIconSrc(NodeHandle node, const char* iconSrc)
+void SetSelectIconSrc(ArkUINodeHandle node, const char* iconSrc)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -196,7 +196,7 @@ void SetSelectIconSrc(NodeHandle node, const char* iconSrc)
     MenuItemModelNG::SetSelectIconSrc(frameNode, iconPathStr);
 }
 
-void ResetSelectIconSrc(NodeHandle node)
+void ResetSelectIconSrc(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -204,12 +204,14 @@ void ResetSelectIconSrc(NodeHandle node)
     MenuItemModelNG::SetSelectIconSrc(frameNode, iconPathStr);
 }
 
-ArkUIMenuItemModifierAPI GetMenuItemModifier()
+namespace NodeModifier {
+const ArkUIMenuItemModifier* GetMenuItemModifier()
 {
-    static const ArkUIMenuItemModifierAPI modifier = { SetMenuItemSelected, ResetMenuItemSelected, SetLabelFontColor,
+    static const ArkUIMenuItemModifier modifier = { SetMenuItemSelected, ResetMenuItemSelected, SetLabelFontColor,
         ResetLabelFontColor, SetContentFontColor, ResetContentFontColor, SetLabelFont, ResetLabelFont, SetContentFont,
         ResetContentFont, SetSelectIcon, ResetSelectIcon, SetSelectIconSrc, ResetSelectIconSrc};
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

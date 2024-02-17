@@ -14,8 +14,6 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_container_bridge.h"
 
-#include "core/interfaces/native/node/api.h"
-
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue NodeContainerBridge::Rebuild(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -23,7 +21,7 @@ ArkUINativeModuleValue NodeContainerBridge::Rebuild(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     int32_t nodeId = firstArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetNodeContainerModifier().Rebuild(nodeId);
+    GetArkUINodeModifiers()->getNodeContainerModifier()->rebuild(nodeId);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

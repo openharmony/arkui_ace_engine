@@ -290,7 +290,7 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
     }
 
     CompleteParameters(buttonParameters);
-    ButtonModel::GetInstance()->SetLableStyle(buttonParameters);
+    ButtonModel::GetInstance()->SetLabelStyle(buttonParameters);
 }
 
 void JSButton::JsRemoteMessage(const JSCallbackInfo& info)

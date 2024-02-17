@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void SetPoints(NodeHandle node, const double* pointX, const double* pointY, int32_t length)
+void SetPoints(ArkUINodeHandle node, const ArkUI_Float32* pointX, const ArkUI_Float32* pointY, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -39,7 +39,7 @@ void SetPoints(NodeHandle node, const double* pointX, const double* pointY, int3
     PolygonModelNG::SetPoints(frameNode, shapePoints);
 }
 
-void ResetPoints(NodeHandle node)
+void ResetPoints(ArkUINodeHandle node)
 {
     ShapePoints points;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -47,10 +47,12 @@ void ResetPoints(NodeHandle node)
     PolygonModelNG::SetPoints(frameNode, points);
 }
 
-ArkUIPolylineModifierAPI GetPolylineModifier()
+namespace NodeModifier {
+const ArkUIPolylineModifier* GetPolylineModifier()
 {
-    static const ArkUIPolylineModifierAPI modifier = {SetPoints, ResetPoints};
+    static const ArkUIPolylineModifier modifier = {SetPoints, ResetPoints};
 
-    return modifier;
+    return &modifier;
+}
 }
 }

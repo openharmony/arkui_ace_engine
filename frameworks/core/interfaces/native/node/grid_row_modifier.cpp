@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 
 namespace OHOS::Ace::NG {
-void SetAlignItems(NodeHandle node, int32_t alignItems)
+void SetAlignItems(ArkUINodeHandle node, int32_t alignItems)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -30,7 +30,7 @@ void SetAlignItems(NodeHandle node, int32_t alignItems)
     GridRowModelNG::SetAlignItems(frameNode, alignItemsValue);
 }
 
-void ResetAlignItems(NodeHandle node)
+void ResetAlignItems(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -38,9 +38,11 @@ void ResetAlignItems(NodeHandle node)
     GridRowModelNG::SetAlignItems(frameNode, resetValue);
 }
 
-ArkUIGridRowModifierAPI GetGridRowModifier()
+namespace NodeModifier {
+const ArkUIGridRowModifier* GetGridRowModifier()
 {
-    static const ArkUIGridRowModifierAPI modifier = {SetAlignItems, ResetAlignItems};
-    return modifier;
+    static const ArkUIGridRowModifier modifier = {SetAlignItems, ResetAlignItems};
+    return &modifier;
+}
 }
 }
