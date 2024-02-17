@@ -239,6 +239,10 @@ struct TouchEvent final {
     }
 };
 
+namespace Platform {
+Offset GetTouchEventOriginOffset(const TouchEvent& event);
+} // namespace Platform
+
 struct TouchRestrict final {
     static constexpr uint32_t NONE = 0x00000000;
     static constexpr uint32_t CLICK = 0x00000001;
