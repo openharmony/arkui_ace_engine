@@ -127,9 +127,6 @@ shared_ptr<JsValue> Skew(const shared_ptr<JsRuntime>& runtime, const shared_ptr<
     if (argc != ARGS_COUNT_TWO) {
         return runtime->NewNull();
     }
-    if (!argv[0]->IsNumber(runtime) || !argv[1]->IsNumber(runtime)) {
-        return runtime->NewNull();
-    }
 
     auto matrixArray = thisObj->GetProperty(runtime, MATRIX_4X4);
     auto matrix = ConvertToMatrix(runtime, matrixArray);
