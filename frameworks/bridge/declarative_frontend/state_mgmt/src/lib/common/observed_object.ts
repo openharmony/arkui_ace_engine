@@ -62,6 +62,7 @@ function Observed(constructor_: any, _?: any): any {
     constructor(...args: any) {
       super(...args);
       stateMgmtConsole.debug(`@Observed '${constructor_.name}' modified constructor.`);
+      ConfigureStateMgmt.instance.intentUsingV2(`@Observed`, constructor_.name);
       let isProxied = Reflect.has(this, __IS_OBSERVED_PROXIED);
       Object.defineProperty(this, __IS_OBSERVED_PROXIED, {
         value: true,
