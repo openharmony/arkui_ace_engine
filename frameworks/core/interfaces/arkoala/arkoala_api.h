@@ -1243,6 +1243,7 @@ struct ArkUIDividerModifier {
 
 struct ArkUIFlexModifier {
     void (*setFlexOptions)(ArkUINodeHandle node, ArkUI_Int32* options, ArkUI_Int32 length);
+    void (*resetFlexOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUIListModifier {

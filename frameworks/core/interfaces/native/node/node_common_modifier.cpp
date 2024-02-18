@@ -3333,58 +3333,6 @@ void SetTranslateTransition(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_In
     ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
 }
 
-void SetBlendMode(ArkUINodeHandle node, ArkUI_Int32 blendModeValue, ArkUI_Int32 blendApplyTypeValue)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    OHOS::Ace::BlendMode blendMode = static_cast<OHOS::Ace::BlendMode>(blendModeValue);
-    OHOS::Ace::BlendApplyType blendApplyType = static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue);
-    ViewAbstractModelNG::SetBlendMode(frameNode, blendMode);
-    ViewAbstractModelNG::SetBlendApplyType(frameNode, blendApplyType);
-}
-
-void ResetBlendMode(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelNG::SetBlendMode(frameNode, OHOS::Ace::BlendMode::NONE);
-    ViewAbstractModelNG::SetBlendApplyType(frameNode, OHOS::Ace::BlendApplyType::FAST);
-}
-
-void SetMonopolizeEvents(ArkUINodeHandle node, ArkUI_Bool value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelNG::SetMonopolizeEvents(frameNode, value);
-}
-
-void ResetMonopolizeEvents(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelNG::SetMonopolizeEvents(frameNode, false);
-}
-
-void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetMinWidth(frameNode, CalcLength(values[NUM_0], DimensionUnit::VP));
-    ViewAbstract::SetMaxWidth(frameNode, CalcLength(values[NUM_1], DimensionUnit::VP));
-    ViewAbstract::SetMinHeight(frameNode, CalcLength(values[NUM_2], DimensionUnit::VP));
-    ViewAbstract::SetMaxHeight(frameNode, CalcLength(values[NUM_3], DimensionUnit::VP));
-}
-
-void ResetConstraintSize(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetMaxSize(frameNode, true);
-    ViewAbstract::ResetMinSize(frameNode, true);
-    ViewAbstract::ResetMaxSize(frameNode, false);
-    ViewAbstract::ResetMinSize(frameNode, false);
-}
-
 void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
     ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_Int32 length)
 {
@@ -3720,6 +3668,74 @@ ArkUI_Bool GetNeedFocus(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);
     return static_cast<ArkUI_Bool>(ViewAbstract::GetNeedFocus(frameNode));
+}
+
+void SetBlendMode(ArkUINodeHandle node, int32_t blendMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBlendMode(frameNode, static_cast<BlendMode>(blendMode));
+}
+
+void ResetBlendMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBlendMode(frameNode, BlendMode::NONE);
+}
+
+void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float64* values, const ArkUI_Int32* units)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetMinWidth(frameNode, CalcLength(values[NUM_0], DimensionUnit::VP));
+    ViewAbstract::SetMaxWidth(frameNode, CalcLength(values[NUM_1], DimensionUnit::VP));
+    ViewAbstract::SetMinHeight(frameNode, CalcLength(values[NUM_2], DimensionUnit::VP));
+    ViewAbstract::SetMaxHeight(frameNode, CalcLength(values[NUM_3], DimensionUnit::VP));
+}
+
+void ResetConstraintSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMaxSize(frameNode, true);
+    ViewAbstract::ResetMinSize(frameNode, true);
+    ViewAbstract::ResetMaxSize(frameNode, false);
+    ViewAbstract::ResetMinSize(frameNode, false);
+}
+
+ArkUI_Float32 GetOpacity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    return ViewAbstract::GetOpacity(frameNode);
+}
+
+const ArkUI_Float32* GetBorderWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto width = ViewAbstract::GetBorderWidth(frameNode)
+    const ArkUI_Float32* borderWidth = {width.topDimen, width.rightDimen, width.bottomDimen, width.leftDimen};
+    return borderWidth;
+}
+
+const ArkUI_Float32* GetBorderRadius(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto radius = ViewAbstract::GetBorderRadius(frameNode);
+    const ArkUI_Float32* borderRadius = {radius.radiusTopLeft, radius.radiusTopRight, radius.radiusBottomRight, radius.radiusBottomLeft};
+    return borderRadius;
+}
+
+const ArkUI_Float32* GetBorderColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto colors = ViewAbstract::GetBorderColor(frameNode);
+    const ArkUI_Uint32* borderColors = {colors.topColor, colors.rightColor, colors.bottomColor, colors.leftColor};
+    return borderColors;
 }
 } // namespace
 
