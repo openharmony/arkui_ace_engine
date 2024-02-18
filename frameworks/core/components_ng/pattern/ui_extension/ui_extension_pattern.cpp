@@ -303,6 +303,13 @@ void UIExtensionPattern::OnWindowHide()
     }
 }
 
+void UIExtensionPattern::OnSizeChanged(WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->OnSizeChanged(type, rsTransaction);
+}
+
 void UIExtensionPattern::NotifyForeground()
 {
     if (state_ != AbilityState::FOREGROUND) {

@@ -1066,6 +1066,8 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 
     FlushWindowSizeChangeCallback(width, height, type);
 
+    UpdateSizeChangeReason(type, rsTransaction);
+
 #ifdef ENABLE_ROSEN_BACKEND
     StartWindowSizeChangeAnimate(width, height, type, rsTransaction);
 #else
@@ -1308,6 +1310,15 @@ void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, u
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(uiExtensionManager_);
     uiExtensionManager_->TransferOriginAvoidArea(avoidArea, type);
+#endif
+}
+
+void PipelineContext::UpdateSizeChangeReason(
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    CHECK_NULL_VOID(uiExtensionManager_);
+    uiExtensionManager_->OnSizeChanged(type, rsTransaction);
 #endif
 }
 
