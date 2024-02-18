@@ -85,6 +85,7 @@ ohos_unittest("form_render_test") {
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/common/mock_frame_report.cpp",
     "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
+    "$ace_root/test/mock/core/event/mock_touch_event.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
