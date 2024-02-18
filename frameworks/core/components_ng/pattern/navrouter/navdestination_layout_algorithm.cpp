@@ -19,12 +19,14 @@
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGroupNode>& hostNode,
     const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty, const SizeF& size)
 {
+    auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, 0.0f);
     auto index = hostNode->GetChildIndexById(titleBarNode->GetId());
@@ -32,7 +34,7 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationG
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto constraint = navDestinationLayoutProperty->CreateChildConstraint();
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false) ||
-        (!titleBarNode->GetSubtitle() && !titleBarNode->GetTitle())) {
+        (!titleBarNode->GetSubtitle() && !titleBarNode->GetTitle() && !navDestinationPattern->GetBackButtonState())) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         titleBarWrapper->Measure(constraint);
         return 0.0f;
