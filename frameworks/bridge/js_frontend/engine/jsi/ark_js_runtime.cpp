@@ -169,6 +169,7 @@ bool ArkJSRuntime::StartDebugger()
         };
 
         HdcRegister::Get().StartHdcRegister(instanceId_, callback);
+        ConnectServerManager::Get().SetDebugMode();
 #endif
         JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugApp ? isDebugMode_ : false };
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
