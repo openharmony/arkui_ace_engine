@@ -37,7 +37,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     // independent reset / jump procedure
 
     // independent offset (scrolling) procedure
-    bool forward = info_.currentOffset_ - info_.prevOffset_ <= 0.0f;
+    bool forward = LessOrEqual(info_.currentOffset_ - info_.prevOffset_, 0.0f);
     if (forward) {
         Fill();
     }
@@ -83,43 +83,43 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
     auto rowsTemplate = props->GetRowsTemplate().value_or("1fr");
     auto columnsTemplate = props->GetColumnsTemplate().value_or("1fr");
     axis_ = props->GetAxis();
-    auto scale = props->GetLayoutConstraint()->scaleProperty;
-    auto rowsGap = ConvertToPx(props->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
-    auto columnsGap =
-        ConvertToPx(props->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
-    mainGap_ = axis_ == Axis::HORIZONTAL ? columnsGap : rowsGap;
-    crossGap_ = axis_ == Axis::VERTICAL ? columnsGap : rowsGap;
+    // auto scale = props->GetLayoutConstraint()->scaleProperty;
+    // auto rowsGap = ConvertToPx(props->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
+    // auto columnsGap =
+    //     ConvertToPx(props->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
+    // mainGap_ = axis_ == Axis::HORIZONTAL ? columnsGap : rowsGap;
+    // crossGap_ = axis_ == Axis::VERTICAL ? columnsGap : rowsGap;
 
     // parse crossSize for different segments
-    
-//     auto crossSize = frameSize.CrossSize(axis_);
-//     std::vector<double> crossLens;
-//     std::pair<std::vector<double>, bool> cross;
-//     if (axis_ == Axis::VERTICAL) {
-//         cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
-//     } else {
-//         cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
-//     }
-//     crossLens = cross.first;
-//     if (crossLens.empty()) {
-//         crossLens.push_back(crossSize);
-//     }
-//     if (cross.second) {
-//         crossGap_ = 0;
-//     }
 
-//     // cross count changed by auto-fill and cross size change
-//     if (!info_.items_[0].empty() && crossLens.size() != info_.items_[0].size()) {
-//         info_.Reset();
-//     }
+    //     auto crossSize = frameSize.CrossSize(axis_);
+    //     std::vector<double> crossLens;
+    //     std::pair<std::vector<double>, bool> cross;
+    //     if (axis_ == Axis::VERTICAL) {
+    //         cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
+    //     } else {
+    //         cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
+    //     }
+    //     crossLens = cross.first;
+    //     if (crossLens.empty()) {
+    //         crossLens.push_back(crossSize);
+    //     }
+    //     if (cross.second) {
+    //         crossGap_ = 0;
+    //     }
 
-//     int32_t index = 0;
-//     // for (const auto& len : crossLens) {
-//     //     itemsCrossSize_.try_emplace(index, len);
-//     //     itemsCrossPosition_.try_emplace(index, ComputeCrossPosition(index));
-//     //     info_.items_[0].try_emplace(index, std::map<int32_t, std::pair<float, float>>());
-//     //     ++index;
-//     // }
+    //     // cross count changed by auto-fill and cross size change
+    //     if (!info_.items_[0].empty() && crossLens.size() != info_.items_[0].size()) {
+    //         info_.Reset();
+    //     }
+
+    //     int32_t index = 0;
+    //     // for (const auto& len : crossLens) {
+    //     //     itemsCrossSize_.try_emplace(index, len);
+    //     //     itemsCrossPosition_.try_emplace(index, ComputeCrossPosition(index));
+    //     //     info_.items_[0].try_emplace(index, std::map<int32_t, std::pair<float, float>>());
+    //     //     ++index;
+    //     // }
 }
 
 void WaterFlowSegmentedLayout::Fill()
@@ -128,7 +128,7 @@ void WaterFlowSegmentedLayout::Fill()
 
     int32_t idx = ++info_.endIndex_;
     int32_t segment = info_.GetSegment(idx);
-    auto position = WaterFlowLayoutUtils::GetItemPosition(info_, idx, mainGap_);
+    auto position = WaterFlowLayoutUtils::GetItemPosition(info_, idx, mainGaps_[segment]);
     while (LessNotEqual(position.startMainPos + info_.currentOffset_, mainSize_)) {
         auto itemWrapper = wrapper_->GetOrCreateChildByIndex(idx);
         if (!itemWrapper) {
@@ -141,9 +141,13 @@ void WaterFlowSegmentedLayout::Fill()
         info_.items_[segment][position.crossIndex][idx] = { position.startMainPos, itemHeight };
         info_.AddItemToCache(idx, position.startMainPos, itemHeight);
 
+        if (idx == info_.segmentTails_[segment]) {
+            info_.SetNextSegmentStartPos(margins_, idx);
+        }
+
         // prepare next item
         segment = info_.GetSegment(++idx);
-        position = WaterFlowLayoutUtils::GetItemPosition(info_, idx, mainGap_);
+        position = WaterFlowLayoutUtils::GetItemPosition(info_, idx, mainGaps_[segment]);
     }
 }
 

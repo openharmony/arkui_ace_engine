@@ -19,6 +19,7 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WaterFlowSegmentedLayout : public LayoutAlgorithm {
@@ -69,10 +70,11 @@ private:
 
     std::vector<std::vector<float>> itemsCrossSize_;
     std::vector<std::vector<float>> itemsCrossPosition_;
+    std::vector<PaddingPropertyF> margins_; // margin of each segment
     Axis axis_ = Axis::VERTICAL;
 
-    float mainGap_ = 0.0f;
-    float crossGap_ = 0.0f;
+    std::vector<float> mainGaps_;
+    std::vector<float> crossGaps_;
     float mainSize_ = 0.0f;
     WaterFlowLayoutInfo info_;
 };

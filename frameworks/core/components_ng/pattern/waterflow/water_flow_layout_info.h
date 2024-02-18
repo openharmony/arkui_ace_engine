@@ -23,6 +23,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 struct FlowItemIndex {
@@ -84,6 +85,14 @@ public:
      */
     int32_t FastSolveEndIndex(float mainSize) const;
 
+    /**
+     * @brief Calculate and set the start position of next segment after filling the tail item of the current segment.
+     * 
+     * @param margins margin of each segment.
+     * @param itemIdx index of the current flow item.
+     */
+    void SetNextSegmentStartPos(const std::vector<PaddingPropertyF>& margins, int32_t itemIdx);
+
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
@@ -94,7 +103,7 @@ public:
     float restoreOffset_ = 0.0f;
 
     bool itemStart_ = false;
-    bool itemEnd_ = false; // last item is partially in viewport
+    bool itemEnd_ = false;   // last item is partially in viewport
     bool offsetEnd_ = false; // last item's bottom is in viewport
 
     int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
@@ -102,7 +111,7 @@ public:
     ScrollAlign align_ = ScrollAlign::START;
 
     int32_t startIndex_ = 0;
-    int32_t endIndex_ = 0;
+    int32_t endIndex_ = -1;
     int32_t footerIndex_ = -1;
     int32_t childrenCount_ = 0;
 
@@ -116,6 +125,7 @@ public:
     using ItemMap = std::map<int32_t, std::map<int32_t, ItemInfo>>;
 
     std::vector<ItemMap> items_ { ItemMap() };
+
     // quick access to item info, ignores crossIndex and segments
     std::map<int32_t, ItemInfo> itemInfos_;
 
@@ -126,7 +136,12 @@ public:
      */
     std::vector<std::pair<float, int32_t>> endPosArray_;
 
+    // Stores the tail item index of each segment.
     std::vector<int32_t> segmentTails_;
+
+    // Stores the start position of each segment.
+    std::vector<float> segmentStartPos_ = { 0.0f };
+
     // K: item index; V: corresponding segment index
     mutable std::unordered_map<int32_t, int32_t> segmentCache_;
 

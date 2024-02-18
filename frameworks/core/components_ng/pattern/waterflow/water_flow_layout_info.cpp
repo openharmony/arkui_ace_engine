@@ -98,9 +98,11 @@ float WaterFlowLayoutInfo::GetContentHeight() const
 
 float WaterFlowLayoutInfo::GetMainHeight(int32_t crossIndex, int32_t itemIndex) const
 {
-    float result = 0.0f;
-    auto cross = items_[GetSegment(itemIndex)].find(crossIndex);
-    if (cross == items_[GetSegment(itemIndex)].end()) {
+    auto seg = GetSegment(itemIndex);
+    float result = segmentStartPos_[seg];
+
+    auto cross = items_[seg].find(crossIndex);
+    if (cross == items_[seg].end()) {
         return result;
     }
     auto item = cross->second.find(itemIndex);
@@ -187,7 +189,7 @@ void WaterFlowLayoutInfo::Reset()
     jumpIndex_ = EMPTY_JUMP_INDEX;
 
     startIndex_ = 0;
-    endIndex_ = 0;
+    endIndex_ = -1;
     targetIndex_.reset();
     for (auto& map : items_) {
         map.clear();
@@ -267,7 +269,7 @@ int32_t WaterFlowLayoutInfo::GetSegment(int32_t itemIdx) const
 
     auto it = std::lower_bound(segmentTails_.begin(), segmentTails_.end(), itemIdx);
     if (it == segmentTails_.end()) {
-        return *segmentTails_.rbegin();
+        return segmentTails_.size() - 1;
     }
     int32_t idx = it - segmentTails_.begin();
     segmentCache_[itemIdx] = idx;
@@ -299,7 +301,24 @@ void WaterFlowLayoutInfo::AddItemToCache(int32_t idx, float startPos, float heig
 {
     itemInfos_[idx] = { startPos, height };
     if (endPosArray_.empty() || LessNotEqual(endPosArray_.back().first, startPos + height)) {
-        endPosArray_.emplace_back( startPos + height, idx );
+        endPosArray_.emplace_back(startPos + height, idx);
+    }
+}
+
+void WaterFlowLayoutInfo::SetNextSegmentStartPos(
+    const std::vector<PaddingPropertyF>& margins, int32_t itemIdx)
+{
+    int32_t segment = GetSegment(itemIdx);
+    if (segmentStartPos_.size() > segment + 1) {
+        return;
+    }
+
+    float nextStartPos = endPosArray_.back().first;
+    while (segment < segmentTails_.size() - 1 && itemIdx == segmentTails_[segment]) {
+        // use while loop to skip empty segments
+        nextStartPos += margins[segment].bottom.value_or(0.0f) + margins[segment + 1].top.value_or(0.0f);
+        segmentStartPos_.push_back(nextStartPos);
+        ++segment;
     }
 }
 } // namespace OHOS::Ace::NG

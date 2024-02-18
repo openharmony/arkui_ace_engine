@@ -49,9 +49,10 @@ FlowItemPosition WaterFlowLayoutUtils::GetItemPosition(const WaterFlowLayoutInfo
     if (crossIndex != -1) {
         return { crossIndex, info.GetStartMainPos(crossIndex, index) };
     }
-    auto itemIndex = info.GetCrossIndexForNextItem(info.GetSegment(index));
+    int32_t segment = info.GetSegment(index);
+    auto itemIndex = info.GetCrossIndexForNextItem(segment);
     if (itemIndex.lastItemIndex < 0) {
-        return { itemIndex.crossIndex, 0.0f };
+        return { itemIndex.crossIndex, info.segmentStartPos_[segment] };
     }
     auto mainHeight = info.GetMainHeight(itemIndex.crossIndex, itemIndex.lastItemIndex);
     return { itemIndex.crossIndex, mainHeight + mainGap };
