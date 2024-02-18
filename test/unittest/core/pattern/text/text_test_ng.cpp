@@ -5414,8 +5414,8 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleSpanSingleClickEvent
- * @tc.desc: test test_pattern.h HandleSpanSingleClickEvent function with valid textSelector
+ * @tc.name: HandleClickAISpanEvent
+ * @tc.desc: test test_pattern.h HandleClickAISpanEvent function with valid textSelector
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, HandleClickAISpanEvent, TestSize.Level1)
@@ -5495,6 +5495,10 @@ HWTEST_F(TextTestNg, ShowUIExtensionMenu, TestSize.Level1)
     aiSpan.content = SPAN_PHONE;
     aiSpan.type = TextDataDetectType::PHONE_NUMBER;
 
+    /**
+     * @tc.steps: step2. call ShowUIExtensionMenu function
+     * @tc.expected: ShowUIExtensionMenu result is true.
+     */
     EXPECT_TRUE(pattern->ShowUIExtensionMenu(aiSpan, nullptr, nullptr));
 }
 
