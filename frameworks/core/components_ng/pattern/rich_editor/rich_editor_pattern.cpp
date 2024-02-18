@@ -4341,6 +4341,10 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
 
 void RichEditorPattern::CreateHandles()
 {
+    if (IsDragging()) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "do not show handles when dragging");
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     float startSelectHeight = 0.0f;
