@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/image/image_source_info.h"
@@ -2919,4 +2920,70 @@ bool ViewAbstract::GetNeedFocus(FrameNode* frameNode)
     return focusHub->IsCurrentFocus();
 }
 
+double ViewAbstract::GetOpacity(FrameNode* frameNode)
+{
+    double opacity = 1.0f;
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetOpacityValue(opacity);
+}
+
+BorderWidthProperty ViewAbstract::GetBorderWidth(FrameNode* frameNode)
+{ 
+    Dimension defaultDimension(0);
+    BorderWidthProperty borderWidths = {defaultDimension, defaultDimension, defaultDimension, defaultDimension};
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBorderWidthValue(borderWidths);
+}
+
+BorderRadiusProperty ViewAbstract::GetBorderRadius(FrameNode* frameNode)
+{ 
+    Dimension defaultDimension(0);
+    BorderRadiusProperty borderRadius = {defaultDimension, defaultDimension, defaultDimension, defaultDimension};
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBorderRadiusValue(borderRadius);
+}
+
+BorderColorProperty ViewAbstract::GetBorderColor(FrameNode* frameNode)
+{ 
+    Color defaultColor(0xff000000);
+    BorderColorProperty borderColors = {defaultColor, defaultColor, defaultColor, defaultColor};
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBorderColorValue(borderColors);
+}
+
+BorderStyleProperty ViewAbstract::GetBorderStyle(FrameNode* frameNode)
+{ 
+    BorderStyle defaultStyle = BorderStyle::SOLID;
+    BorderStyleProperty borderStyles = {defaultStyle, defaultStyle, defaultStyle, defaultStyle};
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBorderStyleValue(borderStyles);
+}
+
+int ViewAbstract::GetZIndex(FrameNode* frameNode)
+{ 
+    int zindex = 0;
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetZIndexValue(zindex);
+}
+
+VisibleType ViewAbstract::GetVisibility(FrameNode* frameNode)
+{ 
+    VisibleType visibility = VisibleType::VISIBLE;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        LayoutProperty, Visibility, visibility, frameNode, visibility);
+    return visibility;
+}
+
+bool ViewAbstract::GetClip(FrameNode* frameNode)
+{ 
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetClipEdge().has_value();
+}
+
+std::optional<RefPtr<BasicShape>> ViewAbstract::GetClipShape(FrameNode* frameNode)
+{
+    const RefPtr<BasicShape> &basicShape = nullptr; 
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetClipShape();
+}
 } // namespace OHOS::Ace::NG

@@ -498,7 +498,15 @@ public:
     static NG::OverlayOptions GetOverlay(FrameNode* frameNode);
     static void SetNeedFocus(FrameNode* frameNode, bool value);
     static bool GetNeedFocus(FrameNode* frameNode);
-
+    static double GetOpacity(FrameNode* frameNode);
+    static BorderWidthProperty GetBorderWidth(FrameNode* frameNode);
+    static BorderRadiusProperty GetBorderRadius(FrameNode* frameNode);
+    static BorderColorProperty GetBorderColor(FrameNode* frameNode);
+    static BorderStyleProperty GetBorderStyle(FrameNode* frameNode);
+    static int GetZIndex(FrameNode* frameNode);
+    static VisibleType GetVisibility(FrameNode* frameNode);
+    static bool GetClip(FrameNode* frameNode);
+    static std::optional<RefPtr<BasicShape>> GetClipShape(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager();
 };
