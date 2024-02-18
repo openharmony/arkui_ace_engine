@@ -244,6 +244,8 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     auto navBarMaxNum = navBarPattern->GetMaxMenuNum();
     auto mostMenuItemCount =
         navBarMaxNum < 0 ? theme->GetMostMenuItemCountInBar() : static_cast<uint32_t>(navBarMaxNum);
+    mostMenuItemCount = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE ? MAX_MENU_NUM_LARGE
+                                                                                                  : mostMenuItemCount;
     navBarPattern->SetMaxMenuNum(mostMenuItemCount);
     bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
 
