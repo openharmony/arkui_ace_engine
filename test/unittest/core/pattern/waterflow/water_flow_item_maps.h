@@ -16,11 +16,11 @@
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 
 namespace OHOS::Ace::NG {
-decltype(WaterFlowLayoutInfo::items_) ITEM_MAP_1 = {
+const decltype(WaterFlowLayoutInfo::items_) ITEM_MAP_1 = {
     {
         // segment 0
-        { 0, { { 0, { 0.0f, 50.0f } }, { 4, { 55.0f, 20.0f } } } }, // Column 0
-        { 1, { { 1, { 0.0f, 30.0f } } } },                          // Column 1
+        { 0, { { 0, { 0.0f, 50.0f } } } },                          // Column 0
+        { 1, { { 1, { 0.0f, 30.0f } }, { 4, { 35.0f, 20.0f } } } }, // Column 1
         { 2, { { 2, { 0.0f, 40.0f } } } },                          // Column 2
         { 3, { { 3, { 0.0f, 60.0f } } } },                          // Column 3
     },
@@ -28,29 +28,31 @@ decltype(WaterFlowLayoutInfo::items_) ITEM_MAP_1 = {
     {},
     // segment 2
     {
-        { 0, { { 5, { 80.0f, 50.0f } } } },                                                    // Column 0
-        { 1, { { 6, { 80.0f, 30.0f } }, { 8, { 111.0f, 2.0f } }, { 9, { 114.0f, 20.0f } } } }, // Column 1
-        { 2, { { 7, { 80.0f, 40.0f } } } },                                                    // Column 2
+        { 0, { { 5, { 65.0f, 50.0f } } } },                                                  // Column 0
+        { 1, { { 6, { 65.0f, 30.0f } }, { 8, { 96.0f, 2.0f } }, { 9, { 99.0f, 20.0f } } } }, // Column 1
+        { 2, { { 7, { 65.0f, 40.0f } } } },                                                  // Column 2
     }
 };
 
-std::map<int32_t, WaterFlowLayoutInfo::ItemInfo> ITEM_INFO_1 = {
+const std::map<int32_t, WaterFlowLayoutInfo::ItemInfo> ITEM_INFO_1 = {
     { 0, { 0.0f, 50.0f } },
     { 1, { 0.0f, 30.0f } },
     { 2, { 0.0f, 40.0f } },
     { 3, { 0.0f, 60.0f } },
-    { 4, { 55.0f, 20.0f } },
-    { 5, { 80.0f, 50.0f } },
-    { 6, { 80.0f, 30.0f } },
-    { 7, { 80.0f, 40.0f } },
-    { 8, { 111.0f, 2.0f } },    
-    { 9, { 114.0f, 20.0f } },
+    { 4, { 35.0f, 20.0f } },
+    { 5, { 65.0f, 50.0f } },
+    { 6, { 65.0f, 30.0f } },
+    { 7, { 65.0f, 40.0f } },
+    { 8, { 96.0f, 2.0f } },
+    { 9, { 99.0f, 20.0f } },
 };
 
-std::vector<std::pair<float, int32_t>> REVERSE_POS_MAP_1 = {
+const std::vector<std::pair<float, int32_t>> END_POS_ARRAY_1 = {
     { 50.0f, 0 },
     { 60.0f, 3 },
-    { 75.0f, 4 },
-    { 130.0f, 5 },
+    { 115.0f, 5 },
+    { 119.0f, 9 },
 };
+
+const std::vector<int32_t> SEGMENT_TAILS_1 = { 4, 4, 9 };
 } // namespace OHOS::Ace::NG

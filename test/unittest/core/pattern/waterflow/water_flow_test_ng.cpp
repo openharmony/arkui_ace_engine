@@ -30,6 +30,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
@@ -71,31 +72,6 @@ constexpr int32_t VIEW_LINE_NUMBER = 8;
 constexpr float ITEM_HEIGHT = WATERFLOW_HEIGHT / VIEW_LINE_NUMBER;
 constexpr float BIG_ITEM_HEIGHT = ITEM_HEIGHT * 2;
 } // namespace
-
-class WaterFlowTestNg : public TestNG {
-protected:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
-    void SetUp() override;
-    void TearDown() override;
-    void GetInstance();
-
-    void Create(const std::function<void(WaterFlowModelNG)>& callback = nullptr);
-    void CreateWithItem(const std::function<void(WaterFlowModelNG)>& callback = nullptr);
-    static void CreateItem(int32_t number = 10);
-    void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
-    void MouseSelect(Offset start, Offset end);
-    void MouseSelectRelease();
-    static std::function<void()> GetDefaultHeaderBuilder();
-
-    AssertionResult IsEqualTotalOffset(float expectOffset);
-
-    RefPtr<FrameNode> frameNode_;
-    RefPtr<WaterFlowPattern> pattern_;
-    RefPtr<WaterFlowEventHub> eventHub_;
-    RefPtr<WaterFlowLayoutProperty> layoutProperty_;
-    RefPtr<WaterFlowAccessibilityProperty> accessibilityProperty_;
-};
 
 void WaterFlowTestNg::SetUpTestSuite()
 {
@@ -174,6 +150,15 @@ void WaterFlowTestNg::CreateItem(int32_t number)
         }
         ViewStackProcessor::GetInstance()->Pop();
     }
+}
+
+void WaterFlowTestNg::CreateItemWithHeight(float height)
+{
+    WaterFlowItemModelNG waterFlowItemModel;
+    waterFlowItemModel.Create();
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(Dimension(height)));
+    ViewStackProcessor::GetInstance()->Pop();
 }
 
 void WaterFlowTestNg::UpdateCurrentOffset(float offset, int32_t source)
@@ -1472,7 +1457,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest004, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_.endIndex_, resetFrom);
 
     pattern_->layoutInfo_.Reset(resetFrom - 1);
-    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, -1);
 }
 
 /**
