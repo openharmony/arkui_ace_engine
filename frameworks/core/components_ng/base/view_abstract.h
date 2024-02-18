@@ -108,7 +108,7 @@ public:
 
     static void SetAspectRatio(float ratio);
     static void ResetAspectRatio();
-    static void SetLayoutWeight(int32_t value);
+    static void SetLayoutWeight(float value);
     static void SetPixelRound(uint8_t value);
     static void SetLayoutDirection(TextDirection value);
 
