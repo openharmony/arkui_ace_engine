@@ -60,23 +60,22 @@ bool DataDetectorAdapter::ShowUIExtensionMenu(
     want.SetElementName(uiExtensionBundleName_, uiExtensionAbilityName_);
     SetWantParamaters(aiSpan, want);
 
-    uiExtNode_ = NG::UIExtensionModelNG::Create(want, callbacks);
-    CHECK_NULL_RETURN(uiExtNode_, false);
-    auto onReceive = GetOnReceive(uiExtNode_, aiRect, targetNode);
-    auto pattern = uiExtNode_->GetPattern<NG::UIExtensionPattern>();
+    auto uiExtNode = NG::UIExtensionModelNG::Create(want, callbacks);
+    CHECK_NULL_RETURN(uiExtNode, false);
+    auto onReceive = GetOnReceive(uiExtNode, aiRect, targetNode);
+    auto pattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, false);
     pattern->SetOnReceiveCallback(std::move(onReceive));
-    uiExtNode_->MarkModifyDone();
+    uiExtNode->MarkModifyDone();
     return true;
 }
 
 std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
     const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
 {
-    return [uiExtNodeWeak = AceType::WeakClaim(AceType::RawPtr(uiExtNode)), aiRect, onClickMenu = onClickMenu_,
+    return [uiExtNode, aiRect, onClickMenu = onClickMenu_,
                targetNodeWeak = AceType::WeakClaim(AceType::RawPtr(targetNode))](const AAFwk::WantParams& wantParams) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability onReceive");
-        auto uiExtNode = uiExtNodeWeak.Upgrade();
         CHECK_NULL_VOID(uiExtNode);
         auto targetNode = targetNodeWeak.Upgrade();
         CHECK_NULL_VOID(targetNode);
@@ -113,7 +112,14 @@ void DataDetectorAdapter::ResponseBestMatchItem(const AISpan& aiSpan)
     want.SetElementName(uiExtensionBundleName_, uiExtensionAbilityName_);
     SetWantParamaters(aiSpan, want);
     want.SetParam(std::string("clickType"), std::string("leftMouse"));
-    uiExtNode_ = NG::UIExtensionModelNG::Create(want, callbacks);
+    auto uiExtNode = NG::UIExtensionModelNG::Create(want, callbacks);
+    CHECK_NULL_VOID(uiExtNode);
+
+    // Extend the lifecycle of the uiExtNode with callback
+    auto onReceive = [uiExtNode] (const AAFwk::WantParams& wantParams) {};
+    auto pattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnReceiveCallback(std::move(onReceive));
 }
 
 void DataDetectorAdapter::SetWantParamaters(const AISpan& aiSpan, AAFwk::Want& want)
