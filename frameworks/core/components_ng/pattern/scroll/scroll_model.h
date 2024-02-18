@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,8 @@ public:
     virtual void SetOnScrollBegin(OnScrollBeginEvent&& event) = 0;
     virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event) = 0;
     virtual void SetOnScroll(NG::ScrollEvent&& event) = 0;
+    virtual void SetOnWillScroll(NG::ScrollEventWithState&& event) {};
+    virtual void SetOnDidScroll(NG::ScrollEventWithState&& event) {};
     virtual void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) = 0;
     virtual void SetOnScrollEnd(NG::ScrollEndEvent&& event) = 0;
     virtual void SetOnScrollStart(OnScrollStartEvent&& event) = 0;
