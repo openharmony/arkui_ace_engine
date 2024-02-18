@@ -4058,7 +4058,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             pattern->HandleOnCameraInput();
         };
 
-        if (pattern->GetTextDetectEnable()) {
+        if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
             selectInfo.onClose = [weak](bool closedByGlobalEvent) {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
