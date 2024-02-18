@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_SWIPER_CONTROLLER_H
 
 #include <functional>
+#include <set>
 
 #include "base/memory/ace_type.h"
 
@@ -26,6 +27,8 @@ using CommonFunc = std::function<void()>;
 using SwipeToImpl = std::function<void(const int32_t, bool)>;
 using SwipeToWithoutAnimationImpl = std::function<void(const int32_t)>;
 using TurnPageRateFunc = std::function<void(const int32_t, float)>;
+using PreloadItemsFunc = std::function<void(const std::set<int32_t>)>;
+using PreloadItemsFinishFunc = std::function<void(const int32_t)>;
 
 class SwiperController : public virtual AceType {
     DECLARE_ACE_TYPE(SwiperController, AceType);
@@ -186,6 +189,28 @@ public:
         return surfaceChangeCallback_;
     }
 
+    void SetPreloadFinishCallback(const PreloadItemsFinishFunc& preloadFinishCallback)
+    {
+        preloadFinishCallback_ = preloadFinishCallback;
+    }
+
+    const PreloadItemsFinishFunc& GetPreloadFinishCallback() const
+    {
+        return preloadFinishCallback_;
+    }
+
+    void SetPreloadItemsImpl(const PreloadItemsFunc& preloadItemsImpl)
+    {
+        preloadItemsImpl_ = preloadItemsImpl;
+    }
+
+    void PreloadItems(const std::set<int32_t>& indexSet) const
+    {
+        if (preloadItemsImpl_) {
+            preloadItemsImpl_(indexSet);
+        }
+    }
+
 private:
     SwipeToImpl swipeToImpl_;
     SwipeToWithoutAnimationImpl swipeToWithoutAnimationImpl_;
@@ -201,6 +226,8 @@ private:
     TurnPageRateFunc turnPageRateCallback_;
     CommonFunc updateCubicCurveCallback_;
     CommonFunc surfaceChangeCallback_;
+    PreloadItemsFinishFunc preloadFinishCallback_;
+    PreloadItemsFunc preloadItemsImpl_;
 };
 
 } // namespace OHOS::Ace
