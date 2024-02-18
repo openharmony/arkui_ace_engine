@@ -2698,6 +2698,7 @@ void OverlayManager::PlaySheetTransition(
     option.SetFillMode(FillMode::FORWARDS);
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
+    context->UpdateRenderGroup(true, true, true);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
@@ -2721,6 +2722,13 @@ void OverlayManager::PlaySheetTransition(
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
+        option.SetOnFinishEvent([sheetWK = WeakClaim(RawPtr(sheetNode))] {
+            auto sheetNode = sheetWK.Upgrade();
+            CHECK_NULL_VOID(sheetNode);
+            auto context = sheetNode->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            context->UpdateRenderGroup(false, true, true);
+        });
         sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         AnimationUtils::Animate(
             option,
