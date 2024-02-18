@@ -57,6 +57,8 @@ void ResetRectRadiusHeight(NodeHandle node)
 void SetRectRadiusWithArray(NodeHandle node, double* radiusValues, int32_t* radiusUnits, uint32_t* radiusValidPairs,
     size_t radiusValidPairsSize)
 {
+    NG::ResetRectRadiusHeight(node);
+    NG::ResetRectRadiusWidth(node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(radiusValues);
