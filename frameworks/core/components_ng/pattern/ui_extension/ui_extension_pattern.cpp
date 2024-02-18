@@ -62,10 +62,6 @@ UIExtensionPattern::~UIExtensionPattern()
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension with id = %{public}d is destroyed.", uiExtensionId_);
     NotifyDestroy();
-    // Release the session.
-    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
-        sessionWrapper_->DestroySession();
-    }
     FireModalOnDestroy();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -119,7 +115,6 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         host->RemoveChild(contentNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         NotifyDestroy();
-        sessionWrapper_->DestroySession();
     }
     sessionWrapper_->CreateSession(want, isAsyncModalBinding_);
     NotifyForeground();
@@ -192,10 +187,6 @@ void UIExtensionPattern::OnDisconnect()
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "The session is disconnected and state = %{public}d, id = %{public}d.", state_, uiExtensionId_);
     FireOnReleaseCallback(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
-    // Release the session.
-    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
-        sessionWrapper_->DestroySession();
-    }
 }
 
 void UIExtensionPattern::OnExtensionDied()
@@ -208,10 +199,6 @@ void UIExtensionPattern::OnExtensionDied()
     host->RemoveChild(contentNode_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FireOnReleaseCallback(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
-    // Release the session.
-    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
-        sessionWrapper_->DestroySession();
-    }
 }
 
 void UIExtensionPattern::OnAreaChangedInner()
@@ -283,7 +270,7 @@ void UIExtensionPattern::OnWindowHide()
 
 void UIExtensionPattern::NotifyForeground()
 {
-    if (state_ != AbilityState::FOREGROUND) {
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid() && state_ != AbilityState::FOREGROUND) {
         state_ = AbilityState::FOREGROUND;
         sessionWrapper_->NotifyForeground();
     }
@@ -291,7 +278,7 @@ void UIExtensionPattern::NotifyForeground()
 
 void UIExtensionPattern::NotifyBackground()
 {
-    if (state_ == AbilityState::FOREGROUND) {
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid() && state_ == AbilityState::FOREGROUND) {
         state_ = AbilityState::BACKGROUND;
         sessionWrapper_->NotifyBackground();
     }
@@ -299,9 +286,11 @@ void UIExtensionPattern::NotifyBackground()
 
 void UIExtensionPattern::NotifyDestroy()
 {
-    if (state_ != AbilityState::DESTRUCTION && state_ != AbilityState::NONE) {
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid() && state_ != AbilityState::DESTRUCTION &&
+        state_ != AbilityState::NONE) {
         state_ = AbilityState::DESTRUCTION;
         sessionWrapper_->NotifyDestroy();
+        sessionWrapper_->DestroySession();
     }
 }
 
@@ -665,7 +654,11 @@ void UIExtensionPattern::FireOnReleaseCallback(int32_t releaseCode)
     if (onReleaseCallback_) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "The onRelease is called and state = %{public}d, id = %{public}d.", state_, uiExtensionId_);
-        onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
+        onReleaseCallback_(releaseCode);
+    }
+    // Release the session.
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
     }
 }
 
