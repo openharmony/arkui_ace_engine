@@ -29,6 +29,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "interfaces/inner_api/ace/constants.h"
+#include "bridge/js_frontend/frontend_delegate.h"
 
 namespace OHOS::Ace::NG {
 
@@ -119,8 +120,11 @@ public:
     void BackWithTarget(const RouterPageInfo& target);
     void Clear();
     int32_t GetStackSize() const;
+    void BackToIndex(int32_t index, const std::string& params);
 
     void GetState(int32_t& index, std::string& name, std::string& path);
+    void GetStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params);
+    void GetStateByUrl(std::string& url, std::vector<Framework::StateInfo>& stateArray);
 
     std::string GetParams() const;
 

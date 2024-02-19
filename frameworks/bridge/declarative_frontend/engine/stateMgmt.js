@@ -1,4 +1,77 @@
 /*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class ConfigureStateMgmt {
+    constructor() {
+        this.v2InUse_ = false;
+        this.v3InUse_ = false;
+    }
+    static get instance() {
+        return ConfigureStateMgmt.instance__
+            ? ConfigureStateMgmt.instance__
+            : (ConfigureStateMgmt.instance__ = new ConfigureStateMgmt());
+    }
+    /**
+     * framework code call this function when it sees use of a stateMgmt V3 feature
+     *
+     * @param feature specify feature separately from context of use, so that in future decision can be made
+     *                for individual features, not use permit either use of V2 or V3.
+     * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
+     * @returns true if use is permitted
+     * @throws Error exception if use is not permitted.
+     */
+    intentUsingV3(feature, contextOfUse = "") {
+        this.v3InUse_ = true;
+        const ret = !this.v2InUse_ && this.v3InUse_;
+        if (!ret) {
+            stateMgmtConsole.featureCombinationError(`Found ${feature} ${contextOfUse} - ${ConfigureStateMgmt.HOW_TO_SAY}`);
+        }
+        
+        return ret;
+    }
+    /**
+     * framework code call this function when it sees use of a stateMgmt V2 feature
+     *
+     * @param feature specify feature separately from context of use, so that in future decision can be made
+     *                for individual features, not use permit either use of V2 or V3.
+     * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
+     * @returns true if use is permitted
+     * @throws Error exception if use is not permitted.
+     */
+    intentUsingV2(feature, contextOfUse = "") {
+        this.v2InUse_ = true;
+        const ret = this.v2InUse_ && !this.v3InUse_;
+        if (!ret) {
+            stateMgmtConsole.featureCombinationError(`Found ${feature} ${contextOfUse} - ${ConfigureStateMgmt.HOW_TO_SAY}`);
+        }
+        
+        return ret;
+    }
+    /**
+     * Return true if object deep observation mechanisms need to be enabled
+     * that is when seen V3 @observe, @track, or @monitor decorator used in at least one class
+     * (we could but we do not check for class object instance creation for performance reasons)
+     * @returns
+     */
+    needsV3Observe() {
+        return this.v3InUse_;
+    }
+} // ConfigureStateMgmt
+ConfigureStateMgmt.HOW_TO_SAY = `Older state management features such as @State, @Link, @ObjectLink, @Observed, or @Track,
+    can not be used on the same ArkUI page as state management v3 features such as @observe, @track, @state, or @param
+    Please correct your application to use either!";`;
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1835,10 +1908,15 @@ class stateMgmtConsole {
     }
     static propertyAccess(...args) {
         // enable for fine grain debugging variable observation
-        // aceConsole debug (...args)
+        //aceConsole.error (...args)
     }
     static applicationError(...args) {
         aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
+    }
+    static featureCombinationError(msg) {
+        aceConsole.error(msg);
+        // state mgmt can not continue to run, terminate the app
+        // throw new Error(msg);
     }
 }
 class stateMgmtTrace {
@@ -1937,6 +2015,7 @@ function Observed(constructor_, _) {
         constructor(...args) {
             super(...args);
             
+            ConfigureStateMgmt.instance.intentUsingV2(`@Observed`, constructor_.name);
             let isProxied = Reflect.has(this, __IS_OBSERVED_PROXIED);
             Object.defineProperty(this, __IS_OBSERVED_PROXIED, {
                 value: true,
@@ -3419,6 +3498,7 @@ class View extends NativeViewFullUpdate {
 // indicates to framework to track individual object property value changes
 function Track(target, property) {
     var _a;
+    ConfigureStateMgmt.instance.intentUsingV2(`@Track`, property);
     Reflect.set(target, `${TrackedObject.___TRACKED_PREFIX}${property}`, true);
     Reflect.set(target, TrackedObject.___IS_TRACKED_OPTIMISED, true);
     
@@ -3515,6 +3595,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         // note value may change for union type variables when switching an object from one class to another.
         this.shouldInstallTrackedObjectReadCb = false;
         this.dependentElmtIdsByProperty_ = new PropertyDependencies();
+        ConfigureStateMgmt.instance.intentUsingV2(`V2 Decorated variable`, this.debugInfo());
         Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false });
         Object.defineProperty(this, 'subscriberRefs_', { writable: true, enumerable: false, value: new Set() });
         if (subscriber) {
@@ -3610,7 +3691,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         return `${this.info()}_prop_fake_state_source___`;
     }
     isPropSourceObservedPropertyFakeName() {
-        return this.info().endsWith("_prop_fake_state_source___")
+        return this.info() && this.info().endsWith("_prop_fake_state_source___")
             ? this.info().substring(0, this.info().length - "_prop_fake_state_source___".length)
             : false;
     }
@@ -5165,7 +5246,7 @@ class ViewPU extends NativeViewPartialUpdate {
     debugInfoStateVars() {
         let result = `|--${this.constructor.name}[${this.id__()}]`;
         Object.getOwnPropertyNames(this)
-            .filter((varName) => varName.startsWith("__"))
+            .filter((varName) => varName.startsWith("__") && !varName.startsWith(ObserveV3.OB_PREFIX))
             .forEach((varName) => {
             const prop = Reflect.get(this, varName);
             if ("debugInfoDecorator" in prop) {
@@ -5443,6 +5524,33 @@ class ViewPU extends NativeViewPartialUpdate {
         }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
         
     }
+    /**
+     *  inform that UINode with given elmtId needs rerender
+     *  does NOT exec @Watch function.
+     *  only used on V3 code path from ObserveV3.fireChange.
+     */
+    uiNodeNeedUpdateV3(elmtId) {
+        if (this.isFirstRender()) {
+            return;
+        }
+        
+        // FIXME Its slow to make native calls: what is this for, is this really needed ?
+        // this.syncInstanceId();
+        if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
+            // mark ComposedElement dirty when first elmtIds are added
+            // do not need to do this every time
+            this.markNeedUpdate();
+        }
+        if (this.hasRecycleManager()) {
+            this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+        }
+        else {
+            this.dirtDescendantElementIds_.add(elmtId);
+        }
+        
+        // FIXME dito: this.restoreInstanceId();
+        
+    }
     performDelayedUpdate() {
         if (!this.ownObservedPropertiesStore_.size) {
             return;
@@ -5633,11 +5741,6 @@ class ViewPU extends NativeViewPartialUpdate {
             throw error;
         }
     }
-    // executed on first render only
-    // added July 2023, replaces observeComponentCreation
-    // classObject is the ES6 class object , mandatory to specify even the class lacks the pop function.
-    // - prototype : Object is present for every ES6 class
-    // - pop : () => void, static function present for JSXXX classes such as Column, TapGesture, etc.
     observeComponentCreation2(compilerAssignedUpdateFunc, classObject) {
         if (this.isDeleting_) {
             stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
@@ -5650,9 +5753,17 @@ class ViewPU extends NativeViewPartialUpdate {
             
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             this.currentlyRenderedElmtIdStack_.push(elmtId);
+            if (ConfigureStateMgmt.instance.needsV3Observe()) {
+                // FIXME - we probably need the same stack-based solution for startBind as for old system
+                ObserveV3.getObserve().startBind(this, elmtId);
+            }
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
                 _popFunc();
+            }
+            if (ConfigureStateMgmt.instance.needsV3Observe()) {
+                // FIXME dito
+                ObserveV3.getObserve().startBind(null, -1);
             }
             this.currentlyRenderedElmtIdStack_.pop();
             ViewStackProcessor.StopGetAccessRecording();
@@ -6126,7 +6237,34 @@ class ViewPU extends NativeViewPartialUpdate {
         return Array.from(ViewPU.inactiveComponents_)
             .map((component) => `- ${component}`).join('\n');
     }
-}
+    /**
+     *
+     * @param paramVariableName @param is read only, therefore, update form parent needs to be done without
+     *        causing property setter() to be called
+     * @param newValue
+     */
+    updateParam(paramVariableName, newValue) {
+        ObserveV3.getObserve().setReadOnlyAttr(this, paramVariableName, newValue);
+    }
+    /**
+     * sub-class must call this function at the end of its constructor
+     * especially after init variables from parent ViewPU has been done
+     */
+    finalizeConstruction() {
+        if (ConfigureStateMgmt.instance.needsV3Observe()) {
+            ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
+        }
+    }
+    /**
+     * v3: find a @provide'ed variable in the nearest ancestor ViewPU.
+     * @param provideName
+     * @returns
+     */
+    findProvideV3(provideName) {
+        // FIXME unimplemented
+        return [undefined, provideName, true];
+    }
+} // class ViewPU
 // Array.sort() converts array items to string to compare them!
 ViewPU.compareNumber = (a, b) => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
@@ -6181,7 +6319,7 @@ class UpdateFuncsByElmtId {
         const updateFuncEntry = this.map_.get(elmtId);
         return updateFuncEntry ? `'${updateFuncEntry.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
     }
-}
+} // class UpdateFuncByElmtId
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -6352,6 +6490,576 @@ function makeBuilderParameterProxy(builderName, source) {
         } // get
     }); // new Proxy
 }
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * @monitor function decorator implementation and supporting classes MonitorV3 and AsyncMonitorV3
+ */
+/**
+ * @observe class and @track class property decorators
+ * ObserveV3 core helper class to keep track of all the object -> UINode/elmtId
+ * and Monitor/watchId dependencies.
+ */
+class ObserveV3 {
+    constructor() {
+        // see MonitorV3.observeObjectAccess: bindCmp is the MonitorV3
+        // see modified observeComponentCreation, bindCmp is the ViewPU
+        this.bindCmp_ = null;
+        // bindId: UINode elmtId or watchId, depending on what is being observed
+        this.bindId_ = -1;
+        // Map bindId to ViewPU/MonitorV3
+        // FIXME use Map<number, ViewPU | MonitorV3>
+        this.id2cmp_ = {};
+        // Map bindId -> Set 0f view model object
+        // reverse dependency map for quickly removing all dependencies of a bindId
+        // FIXME: string typing: Map<number, Set<Object>>
+        this.id2targets_ = {};
+        // queued up Set of bindId
+        // elmtIds of UINodes need re-render
+        // @monitor functions that need to execute
+        this.elmtIdsChanged_ = new Set();
+        this.monitorIdsChanged_ = new Set();
+        // avoid recursive execution of updateDirty
+        // by state changes => fireChange while
+        // UINode rerender or @monitor function execution
+        this.startDirty_ = false;
+        // flag to indicate change observation is disabled
+        this.disabled_ = false;
+    }
+    static getObserve() {
+        if (!this.obsInstance_) {
+            this.obsInstance_ = new ObserveV3();
+        }
+        return this.obsInstance_;
+    }
+    // At the start of observeComponentCreation or
+    // MonitorV3.observeObjectAccess
+    startBind(cmp, id) {
+        this.bindCmp_ = cmp;
+        this.bindId_ = id;
+        if (cmp != null) {
+            this.clearBinding(id);
+            this.id2cmp_[id] = cmp;
+        }
+    }
+    // clear any previously created dependency view model object to elmtId
+    // find these view model objects with the reverse map id2targets_
+    clearBinding(id) {
+        var _a;
+        (_a = this.id2targets_[id]) === null || _a === void 0 ? void 0 : _a.forEach((target) => {
+            for (let key in target[ObserveV3.SYMBOL_REFS]) {
+                if (id in target[ObserveV3.SYMBOL_REFS][key]) {
+                    delete target[ObserveV3.SYMBOL_REFS][key][id];
+                }
+            }
+        });
+        delete this.id2targets_[id];
+        delete this.id2cmp_[id];
+    }
+    // add dependency view model object 'target' property 'attrName'
+    // to current this.bindId
+    addRef(target, attrName) {
+        if (this.bindCmp_ === null) {
+            return;
+        }
+        if (!target[ObserveV3.SYMBOL_REFS]) {
+            target[ObserveV3.SYMBOL_REFS] = {};
+        }
+        if (!target[ObserveV3.SYMBOL_REFS][attrName]) {
+            target[ObserveV3.SYMBOL_REFS][attrName] = {};
+        }
+        let obj = target[ObserveV3.SYMBOL_REFS][attrName];
+        obj[this.bindId_] = 1;
+        if (!this.id2targets_[this.bindId_]) {
+            this.id2targets_[this.bindId_] = new Set();
+        }
+        this.id2targets_[this.bindId_].add(target);
+    }
+    /**
+     * setReadOnlyAttr - helper function used to update an immutable attribute
+     * such update as a @param variable from parent @Component
+     * @param target  - the object, usually the ViewPU
+     * @param attrName - @param variable name
+     * @param newValue - update to new value
+     */
+    setReadOnlyAttr(target, attrName, newValue) {
+        const storeProp = ObserveV3.OB_PREFIX + attrName;
+        if (storeProp in target) {
+            // @observed class and @track attrName
+            if (newValue === target[storeProp]) {
+                
+                return;
+            }
+            
+            target[storeProp] = newValue;
+            ObserveV3.getObserve().fireChange(target, attrName);
+        }
+        else {
+            
+            // untracked attrName
+            target[attrName] = newValue;
+        }
+    }
+    /**
+     *
+     * @param target set tracked attribute to new value without notifying the change
+     *               !! use with caution !!
+     * @param attrName
+     * @param newValue
+     */
+    setUnmonitored(target, attrName, newValue) {
+        const storeProp = ObserveV3.OB_PREFIX + attrName;
+        if (storeProp in target) {
+            // @track attrName
+            
+            target[storeProp] = newValue;
+        }
+        else {
+            
+            // untracked attrName
+            target[attrName] = newValue;
+        }
+    }
+    /**
+     * Execute given task while state change observation is disabled
+     * A state mutation caused by the task will NOT trigger UI rerender
+     * and @monitor function execution.
+     *
+     * !!! Use with Caution !!!
+     *
+     * @param task
+     * @returns
+     */
+    executeUnobserved(task) {
+        
+        this.disabled_ = true;
+        let ret;
+        try {
+            ret = task();
+        }
+        catch (e) {
+            stateMgmtConsole.applicationError(`executeUnobserved - task execution caused error ${e} !`);
+        }
+        this.disabled_ = false;
+        
+        return ret;
+    }
+    // mark view model object 'target' property 'attrName' as changed
+    // notify affected watchIds and elmtIds
+    fireChange(target, attrName) {
+        if (!target[ObserveV3.SYMBOL_REFS] || this.disabled_) {
+            return;
+        }
+        let obj = target[ObserveV3.SYMBOL_REFS][attrName];
+        if (!obj) {
+            return;
+        }
+        
+        // FIXME seem to cause the crash, investigate
+        //  obj.forEach((id : number) => {
+        for (let idA in obj) {
+            const id = parseInt(idA);
+            // Cannot fireChange the object that is being created.
+            if (id === this.bindId_) {
+                return;
+            }
+            // if this is the first id to be added to elmtIdsChanged_ and monitorIdsChanged_, 
+            // schedule an 'updateDirty' task
+            // that will run after the current call stack has unwound.
+            // purpose of check for startDirty_ is to avoid going into recursion. This could happen if
+            // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
+            if ((0 === this.elmtIdsChanged_.size) && (0 === this.monitorIdsChanged_.size)
+                && !this.startDirty_) {
+                Promise.resolve(true).then(this.updateDirty.bind(this));
+            }
+            // add bindId to Set of pending changes.
+            (id < MonitorV3.MIN_WATCH_ID)
+                ? this.elmtIdsChanged_.add(id)
+                : this.monitorIdsChanged_.add(id);
+        } // for
+    }
+    updateDirty() {
+        this.startDirty_ = true;
+        this.updateDirty2();
+        this.startDirty_ = false;
+    }
+    updateDirty2() {
+        // process monitors first, because these might add more elmtIds of UINodes to rerender
+        this.updateDirtyMonitors(1);
+        this.notifyDirtyElmtIdsToOwningViews();
+    }
+    updateDirtyMonitors(recursionDepth) {
+        if (recursionDepth > 20) {
+            // limit recursion depth to avoid infinite loops
+            stateMgmtConsole.applicationError(`20 loops in @monitor function execution detected. Stopping processing. Application error!`);
+            this.monitorIdsChanged_ = new Set();
+            return;
+        }
+        
+        const monitors = this.monitorIdsChanged_; // move Set
+        // exec @monitor functions might add new watchIds
+        this.monitorIdsChanged_ = new Set();
+        let monitor;
+        monitors.forEach((watchId) => {
+            if ((monitor = this.id2cmp_[watchId]) && (monitor instanceof MonitorV3)) {
+                monitor.fireChange();
+            }
+        });
+        if (this.monitorIdsChanged_.size) {
+            this.updateDirtyMonitors(recursionDepth + 1);
+        }
+    }
+    notifyDirtyElmtIdsToOwningViews() {
+        let view;
+        
+        this.elmtIdsChanged_.forEach((elmtId) => {
+            if ((view = this.id2cmp_[elmtId]) && (view instanceof ViewPU)) {
+                // FIXME uiNodeNeedUpdateV3 just copies elmtIfs to another set
+                // waits for FlushBuild to call rerender call updateDirtyElements
+                // to actually render the UINodes. Could we call ViewPU.UpdateElement 
+                // right away?        
+                view.uiNodeNeedUpdateV3(elmtId);
+            }
+        });
+        this.elmtIdsChanged_.clear();
+    }
+    constructMonitor(target, name) {
+        let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + name);
+        if (target && target[watchProp]) {
+            Object.entries(target[watchProp]).forEach(([key, val]) => {
+                ObserveV3.getObserve().addWatch(target, key, val);
+            });
+        }
+    }
+    addWatch(target, props, func) {
+        return new MonitorV3(target, props, func).InitRun();
+    }
+    clearWatch(id) {
+        this.clearBinding(id);
+    }
+    static autoProxyObject(target, key) {
+        let val = target[key];
+        // Not an object, not a collection, no proxy required
+        if (!val || typeof (val) !== "object" || !(Array.isArray(val) ||
+            val instanceof Set || val instanceof Map || val instanceof Date)) {
+            return val;
+        }
+        // Only collections require proxy observation, and if it has been observed, it does not need to be observed again.
+        if (!val[ObserveV3.SYMBOL_PROXY_GET_TARGET]) {
+            target[key] = new Proxy(val, this.arraySetMapProxy);
+            val = target[key];
+        }
+        // If the return value is an array, a length observation should be added to the array.
+        if (Array.isArray(val)) {
+            ObserveV3.getObserve().addRef(val, this.OB_LENGTH);
+        }
+        return val;
+    }
+}
+ObserveV3.SYMBOL_REFS = Symbol('__use_refs__');
+ObserveV3.SYMBOL_PROXY_GET_TARGET = Symbol("__proxy_get_target");
+ObserveV3.OB_PREFIX = "__ob_"; // OB_PREFIX + attrName => backing store attribute name
+ObserveV3.OB_PREFIX_LEN = 5;
+// used by array Handler to create dependency on artificial "length"
+// property of array, mark it as changed when array has changed.
+ObserveV3.OB_LENGTH = "length";
+ObserveV3.OB_DATE = "__date__";
+ObserveV3.arrayLengthChangingFunctions = new Set(["push", "pop", "shift", "splice", "unshift"]);
+ObserveV3.arrayMutatingFunctions = new Set(["copyWithin", "fill", "reverse", "sort"]);
+ObserveV3.dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes",
+    "setSeconds", "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours",
+    "setUTCMinutes", "setUTCSeconds", "setUTCMilliseconds"]);
+ObserveV3.arraySetMapProxy = {
+    get(target, key, receiver) {
+        if (typeof key === "symbol") {
+            return key === ObserveV3.SYMBOL_PROXY_GET_TARGET ? target : target[key];
+        }
+        let ret = ObserveV3.autoProxyObject(target, key);
+        if (typeof (ret) !== "function") {
+            ObserveV3.getObserve().addRef(target, key);
+            return ret;
+        }
+        if (Array.isArray(target)) {
+            if (ObserveV3.arrayMutatingFunctions.has(key)) {
+                return function (...args) {
+                    ret.call(target, ...args);
+                    ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH);
+                    // returning the 'receiver(proxied object)' ensures that when chain calls also 2nd function call
+                    // operates on the proxied object.
+                    return receiver;
+                };
+            }
+            else if (ObserveV3.arrayLengthChangingFunctions.has(key)) {
+                return function (...args) {
+                    const result = ret.call(target, ...args);
+                    ObserveV3.getObserve().fireChange(target, ObserveV3.OB_LENGTH);
+                    return result;
+                };
+            }
+            else {
+                return ret.bind(receiver);
+            }
+        }
+        if (target instanceof Date) {
+            if (ObserveV3.dateSetFunctions.has(key)) {
+                return function (...args) {
+                    // execute original function with given arguments
+                    let result = ret.call(this, ...args);
+                    ObserveV3.getObserve().fireChange(target, ObserveV3.OB_DATE);
+                    return result;
+                    // bind "this" to target inside the function
+                }.bind(target);
+            }
+            else {
+                ObserveV3.getObserve().addRef(target, ObserveV3.OB_DATE);
+            }
+            return ret.bind(target);
+        }
+        if (target instanceof Set || target instanceof Map) {
+            if (key === "has") {
+                return prop => {
+                    ObserveV3.getObserve().addRef(target, prop);
+                    return target.has(prop);
+                };
+            }
+            if (key === "delete") {
+                return prop => {
+                    ObserveV3.getObserve().fireChange(target, prop);
+                    if (target.has(prop)) {
+                        ObserveV3.getObserve().fireChange(target, this.OB_LENGTH);
+                    }
+                    return target.delete(prop);
+                };
+            }
+            if (key === "clear") {
+                return () => {
+                    target.forEach((_, prop) => {
+                        ObserveV3.getObserve().fireChange(target, prop.toString());
+                    });
+                    if (target.size > 0) {
+                        ObserveV3.getObserve().fireChange(target, this.OB_LENGTH);
+                    }
+                    target.clear();
+                };
+            }
+            if (key === "keys" || key === "values" || key === "entries") {
+                return () => {
+                    ObserveV3.getObserve().addRef(target, this.OB_LENGTH);
+                    return target[key]();
+                };
+            }
+        }
+        if (target instanceof Set) {
+            return key === "add" ? val => {
+                ObserveV3.getObserve().fireChange(target, val.toString());
+                if (!target.has(val)) {
+                    ObserveV3.getObserve().fireChange(target, this.OB_LENGTH);
+                }
+                return target.add(val);
+            } : ret;
+        }
+        if (target instanceof Map) {
+            if (key === "get") { // for Map
+                return (prop) => {
+                    ObserveV3.getObserve().addRef(target, prop);
+                    if (!target.has(prop)) {
+                        ObserveV3.getObserve().fireChange(target, this.OB_LENGTH);
+                    }
+                    return target.get(prop);
+                };
+            }
+            if (key === "set") { // for Map
+                return (prop, val) => {
+                    ObserveV3.getObserve().fireChange(target, prop);
+                    if (!target.has(prop)) {
+                        ObserveV3.getObserve().fireChange(target, this.OB_LENGTH);
+                    }
+                    return target.set(prop, val);
+                };
+            }
+        }
+        return ret;
+    },
+    set(target, key, value) {
+        if (typeof key === 'symbol') {
+            if (key !== ObserveV3.SYMBOL_PROXY_GET_TARGET) {
+                target[key] = value;
+            }
+            return true;
+        }
+        if (target[key] === value) {
+            return true;
+        }
+        target[key] = value;
+        ObserveV3.getObserve().fireChange(target, key.toString());
+        return true;
+    }
+};
+/**
+ * @track class property decorator
+ *
+ * @param target  class prototype object
+ * @param propertyKey  class property name
+ *
+ * turns given property into getter and setter functions
+ * adds property target[storeProp] as the backing store
+ *
+ * part of SDK
+ * @from 12
+ */
+const track = (target, propertyKey) => {
+    ConfigureStateMgmt.instance.intentUsingV3(`@track`, propertyKey);
+    return trackInternal(target, propertyKey);
+};
+const trackInternal = (target, propertyKey) => {
+    if (typeof target === "function" && !Reflect.has(target, propertyKey)) {
+        // dynamic track，and it not a static attribute
+        target = target.prototype;
+    }
+    let storeProp = ObserveV3.OB_PREFIX + propertyKey;
+    target[storeProp] = target[propertyKey];
+    Reflect.defineProperty(target, propertyKey, {
+        get() {
+            ObserveV3.getObserve().addRef(this, propertyKey);
+            return ObserveV3.autoProxyObject(this, ObserveV3.OB_PREFIX + propertyKey);
+        },
+        set(val) {
+            // If the object has not been observed, you can directly assign a value to it. This improves performance.
+            if (val !== this[storeProp]) {
+                this[storeProp] = val;
+                if (this[ObserveV3.SYMBOL_REFS]) { // This condition can improve performance.
+                    ObserveV3.getObserve().fireChange(this, propertyKey);
+                }
+            }
+        },
+        enumerable: true
+    });
+}; // track
+function observed(BaseClass) {
+    ConfigureStateMgmt.instance.intentUsingV3(`@observed`, BaseClass.name);
+    return class extends BaseClass {
+        constructor(...args) {
+            super(...args);
+            // After a "new" object, no matter how many times the watched value is assigned,
+            // only the last initial value is recognized. Therefore, you need to add "Monitor" asynchronously.
+            // Promise.resolve(true).then(() => constructMonitor(this, BaseClass.name)) // Low performance
+            AsyncAddMonitorV3.addWatch(this, BaseClass.name);
+        }
+    };
+}
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * @monitor function decorator implementation and supporting classes MonitorV3 and AsyncMonitorV3
+ */
+/**
+ * MonitorV3
+ * one MonitorV3 object per @monitor function
+ * watchId - similar to elmtId, identify one MonitorV3 in Observe.idToCmp Map
+ * observeObjectAccess = get each object on the 'path' to create dependency and add them with Observe.addRef
+ * fireChange - exec @monitor function and re-new dependencies with observeObjectAccess
+ */
+class MonitorV3 {
+    constructor(target, props, func) {
+        ConfigureStateMgmt.instance.intentUsingV3(`@monitor`, props);
+        this.target_ = target;
+        this.func_ = func;
+        this.watchId_ = ++MonitorV3.nextWatchId_;
+        this.props_ = props.split(".");
+    }
+    InitRun() {
+        this.value_ = this.observeObjectAccess(true);
+        return this.watchId_;
+    }
+    // 监视到该Watch改变了数据
+    fireChange() {
+        let newVal = this.observeObjectAccess();
+        if (this.value_ !== newVal) {
+            
+            this.func_.call(this.target_, newVal, this.value_);
+            this.value_ = newVal;
+        }
+    }
+    // register current watchId while exec. analysisPath
+    observeObjectAccess(isInit = false) {
+        ObserveV3.getObserve().startBind(this, this.watchId_);
+        let ret = this.analysisPath(isInit);
+        ObserveV3.getObserve().startBind(null, 0);
+        return ret;
+    }
+    // traverse objects on the given monitor path and add dependency for
+    // watchId to each of the,
+    // this needs to be done at @monitor init and repeated every time
+    // one of the objects has changes
+    analysisPath(isInit) {
+        let obj = this.target_;
+        for (const prop of this.props_) {
+            if (Reflect.has(obj, prop)) {
+                obj = obj[prop];
+            }
+            else {
+                // FIXME change to stateMgmtConsole.applicationError
+                isInit && console.log(`@monitor("${this.props_.join(".")}"): path does not exist, make sure it exist. Application error, ignoring @MonitorV3!`);
+                return undefined;
+            }
+        }
+        return obj;
+    }
+}
+//0x1.0000.0000.0000,
+// start with high number to avoid same id as elmtId for components.
+MonitorV3.MIN_WATCH_ID = 0x1000000000000;
+MonitorV3.nextWatchId_ = MonitorV3.MIN_WATCH_ID;
+MonitorV3.WATCH_PREFIX = "__wa_";
+/**
+ * @monitor("varibale.path.expression") function decorator
+ */
+/* const monitor = function (key) {
+  return function (target, _, descriptor) {
+    let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + target.constructor.name)
+    target[watchProp] ? target[watchProp][key] = descriptor.value : target[watchProp] = { [key]: descriptor.value }
+  }
+}
+*/
+// Performance Improvement
+class AsyncAddMonitorV3 {
+    static addWatch(target, name) {
+        if (AsyncAddMonitorV3.watches.length === 0) {
+            Promise.resolve(true).then(AsyncAddMonitorV3.run);
+        }
+        AsyncAddMonitorV3.watches.push([target, name]);
+    }
+    static run() {
+        for (let item of AsyncAddMonitorV3.watches) {
+            ObserveV3.getObserve().constructMonitor(item[0], item[1]);
+        }
+    }
+}
+AsyncAddMonitorV3.watches = [];
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

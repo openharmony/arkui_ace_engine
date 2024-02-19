@@ -43,6 +43,10 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
+    auto columnNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(columnNode);
+    auto blendNode = DynamicCast<FrameNode>(columnNode->GetParent());
+    CHECK_NULL_VOID(blendNode);
     SizeF frameSize = { -1.0f, -1.0f };
 
     uint32_t showCount_ = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
@@ -52,7 +56,7 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - HIDENODE) +
                                      pickerTheme->GetDividerSpacing().ConvertToPx());
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    auto layoutConstraint = blendNode->GetLayoutProperty()->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
     auto width = layoutConstraint->parentIdealSize.Width();
     float pickerWidth = 0.0f;
@@ -66,25 +70,21 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(std::min(height, layoutConstraint->maxSize.Height()));
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
-    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutChildConstraint = blendNode->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutChildConstraint);
     }
     MeasureText(layoutWrapper, frameSize);
-    auto columnNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(columnNode);
-    auto stackNode = DynamicCast<FrameNode>(columnNode->GetParent());
-    CHECK_NULL_VOID(stackNode);
     auto gradientPercent = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()) / frameSize.Height();
-    InitGradient(gradientPercent, stackNode, columnNode);
+    InitGradient(gradientPercent, blendNode, columnNode);
 }
 
-void TimePickerColumnLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> stackNode,
+void TimePickerColumnLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> blendNode,
     const RefPtr<FrameNode> columnNode)
 {
-    auto stackRenderContext = stackNode->GetRenderContext();
+    auto blendRenderContext = blendNode->GetRenderContext();
     auto columnRenderContext = columnNode->GetRenderContext();
-    CHECK_NULL_VOID(stackRenderContext);
+    CHECK_NULL_VOID(blendRenderContext);
     CHECK_NULL_VOID(columnRenderContext);
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
@@ -95,9 +95,9 @@ void TimePickerColumnLayoutAlgorithm::InitGradient(const float& gradientPercent,
 
     columnRenderContext->UpdateBackBlendMode(BlendMode::SRC_IN);
     columnRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
-    stackRenderContext->UpdateLinearGradient(gradient);
-    stackRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
-    stackRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
+    blendRenderContext->UpdateLinearGradient(gradient);
+    blendRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
+    blendRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 
 void TimePickerColumnLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size)

@@ -681,8 +681,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         CHECK_NULL_VOID(pattern);
         pattern->SetTextFieldNode(frameNode);
         frameNode->MountToParent(parentNode);
+        frameNode->MarkModifyDone();
     }
-    frameNode->MarkModifyDone();
 }
 
 void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode)
@@ -913,6 +913,7 @@ void SearchModelNG::ResetMaxLength()
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->ResetMaxLength();
+    textFieldChild->MarkModifyDone();
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

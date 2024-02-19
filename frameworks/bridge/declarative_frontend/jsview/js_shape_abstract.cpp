@@ -57,12 +57,13 @@ constexpr double STROKE_MITERLIMIT_DEFAULT = 4.0f;
 
 void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
 {
+    std::vector<Dimension> dashArray;
     if (info.Length() < 1 || !info[0]->IsArray()) {
+        ShapeAbstractModel::GetInstance()->SetStrokeDashArray(dashArray);
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
     auto length = static_cast<int32_t>(array->Length());
-    std::vector<Dimension> dashArray;
     for (int32_t i = 0; i < length; i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
         CalcDimension dim;

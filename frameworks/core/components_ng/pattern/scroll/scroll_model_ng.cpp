@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,6 +153,24 @@ void ScrollModelNG::SetOnScroll(NG::ScrollEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     SetOnScroll(AceType::RawPtr(frameNode), std::move(event));
+}
+
+void ScrollModelNG::SetOnWillScroll(NG::ScrollEventWithState&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillScrollEvent(std::move(event));
+}
+
+void ScrollModelNG::SetOnDidScroll(NG::ScrollEventWithState&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidScrollEvent(std::move(event));
 }
 
 void ScrollModelNG::SetOnScrollEdge(NG::ScrollEdgeEvent&& event)

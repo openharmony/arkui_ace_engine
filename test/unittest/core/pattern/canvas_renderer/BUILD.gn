@@ -51,6 +51,7 @@ ohos_unittest("canvas_renderer_test_ng") {
     "$ace_root/test/mock/core/common/mock_interaction.cpp",
     "$ace_root/test/mock/core/common/mock_resource_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
+    "$ace_root/test/mock/core/event/mock_touch_event.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
   ]
 
