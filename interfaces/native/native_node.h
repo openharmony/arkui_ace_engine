@@ -2213,7 +2213,7 @@ typedef enum {
      * ArkUI_NumberValue value[] = { {.i32 = ARKUI_COPY_OPTIONS_NONE} };
      * ArkUI_AttributeItem item = { value, 1 };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_COPY_OPTION, &item);
-     * auto item = nativeNodeApi=>getAttribute(nodeHandle, NODE_TEXT_COPY_OPTION);
+     * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_TEXT_COPY_OPTION);
      * auto nodeTextCopyOption = item->value[0].i32;
      * @endcode
      *
@@ -2337,7 +2337,7 @@ typedef enum {
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { 16, { .i32 = ARKUI_FONT_STYLE_NORMAL },
+     * ArkUI_NumberValue value[] = { 16, { .i32 = ARKUI_FONT_WEIGHT_NORMAL },
      * { .i32 = ARKUI_FONT_STYLE_NORMAL } };
      * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_FONT, &item);
@@ -3301,7 +3301,7 @@ typedef enum {
      * @brief CheckBox多选框内部图标样式，支持属性设置，属性重置和属性获取。
      *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[0].i32：边框颜色, 类型为0xargb，如0xFF1122FF；\n
+     * .value[0].u32：边框颜色, 类型为0xargb，如0xFF1122FF；\n
      * .value[1]?.f32：可选，内部图标大小，单位vp；\n
      * .value[2]?.f32：可选，内部图标粗细，单位vp，默认值2。\n
      * \n
@@ -3313,11 +3313,11 @@ typedef enum {
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { { .i32 = 0xFF1122FF }, 20.0f, 2.0f };
+     * ArkUI_NumberValue value[] = { { .u32 = 0xFF1122FF }, 20.0f, 2.0f };
      * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_CHECKBOX_MARK, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_CHECKBOX_MARK);
-     * auto value = item->value[0].i32;
+     * auto value = item->value[0].u32;
      * @endcode
      *
      */
@@ -4047,11 +4047,9 @@ typedef enum {
      *
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
      * .value[0].i32：是否显示气泡，1表示显示，0表示不显示，默认值为0。\n
-     * .string? 可选值，气泡提示的文本内容，默认显示当前百分比字符串。\n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
      * .value[0].i32：是否显示气泡，1表示显示，0表示不显示，默认值为0。\n
-     * .string? 可选值，气泡提示的文本内容，默认显示当前百分比字符串。\n
      * 
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
