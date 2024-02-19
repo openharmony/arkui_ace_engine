@@ -1941,6 +1941,11 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             rootNode_->DumpTree(0);
             DumpLog::GetInstance().OutPutBySize();
         }
+    } else if (params[0] == "-navigation") {
+        auto navigationDumpMgr = GetNavigationDumpManager();
+        if (navigationDumpMgr) {
+            navigationDumpMgr->OnDumpInfo();
+        }
     } else if (params[0] == "-focus") {
         if (rootNode_->GetFocusHub()) {
             rootNode_->GetFocusHub()->DumpFocusTree(0);
