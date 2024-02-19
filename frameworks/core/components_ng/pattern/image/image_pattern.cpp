@@ -236,6 +236,7 @@ void ImagePattern::OnImageLoadSuccess()
 
 void ImagePattern::OnImageDataReady()
 {
+    CHECK_NULL_VOID(loadingCtx_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
