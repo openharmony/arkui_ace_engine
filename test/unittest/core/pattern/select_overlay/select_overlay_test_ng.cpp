@@ -2598,7 +2598,7 @@ HWTEST_F(SelectOverlayTestNg, CheckInShowArea001, TestSize.Level1)
 
 /**
  * @tc.name: ComputeSelectMenuPosition001
- * @tc.desc: Test ComputeSelectMenuPosition in Select Overlay algorithm.
+ * @tc.desc: Test ComputeSelectMenuPosition in Select Overlay algorithm.0
  * @tc.type: FUNC
  */
 HWTEST_F(SelectOverlayTestNg, ComputeSelectMenuPosition001, TestSize.Level1)
