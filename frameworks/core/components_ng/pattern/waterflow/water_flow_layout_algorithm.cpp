@@ -317,7 +317,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
 {
     auto maxItemHeight = layoutInfo_.GetMaxMainHeight();
     if (layoutInfo_.footerIndex_ >= 0) {
-        footerMainSize_ = MeasuerFooter(layoutWrapper);
+        footerMainSize_ = MeasureFooter(layoutWrapper);
         maxItemHeight += footerMainSize_;
     }
     layoutInfo_.maxHeight_ = maxItemHeight;
@@ -352,7 +352,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
     }
 }
 
-float WaterFlowLayoutAlgorithm::MeasuerFooter(LayoutWrapper* layoutWrapper)
+float WaterFlowLayoutAlgorithm::MeasureFooter(LayoutWrapper* layoutWrapper)
 {
     auto footer = layoutWrapper->GetOrCreateChildByIndex(layoutInfo_.footerIndex_);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();

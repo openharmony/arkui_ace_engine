@@ -39,8 +39,23 @@ public:
         return std::move(info_);
     }
 
+    void SetCanOverScroll(bool value) override {
+        overScroll_ = value;
+    }
+
 private:
+    /**
+     * @brief Initialize member variables from LayoutProperty.
+     * 
+     * @param frameSize 
+     */
     void Init(const SizeF& frameSize);
+
+    /**
+     * @brief init regular WaterFlow with a single segment.
+     * 
+     * @param frameSize
+     */
     void RegularInit(const SizeF& frameSize);
     void InitFooter(float crossSize);
 
@@ -58,14 +73,23 @@ private:
      */
     void PostMeasureSelf(SizeF size);
 
-    void SolveLayoutRange();
+    void MeasureOnOffset();
 
     /**
      * @brief Fills the viewport with new items when scrolling downwards.
-     * WaterFlow only supports forward layout because the position of a new item always depends on previous items.
+     * WaterFlow's item map only supports forward layout because the position of a new item always depends on previous items.
      * 
      */
     void Fill();
+    
+    /**
+     * @brief Helper to measure FlowItems.
+     * Assumes the Item map is already filled and only call Measure on children in range [start, end).
+     * 
+     * @param startIdx 
+     * @param endIdx (exclusive)
+     */
+    void MeasureItems(int32_t startIdx, int32_t endIdx);
 
     void LayoutSegment(int32_t segment, const OffsetF& padding, bool isReverse);
 
@@ -80,6 +104,9 @@ private:
     std::vector<float> crossGaps_;
     float mainSize_ = 0.0f;
     WaterFlowLayoutInfo info_;
+
+    // true if WaterFlow can be overScrolled
+    bool overScroll_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowSegmentedLayout);
 };

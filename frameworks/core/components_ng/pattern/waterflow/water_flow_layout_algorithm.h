@@ -26,6 +26,7 @@ class WaterFlowLayoutBase : public LayoutAlgorithm {
 
 public:
     virtual WaterFlowLayoutInfo GetLayoutInfo() = 0;
+    virtual void SetCanOverScroll(bool canOverScroll) = 0;
 };
 
 class ACE_EXPORT WaterFlowLayoutAlgorithm : public WaterFlowLayoutBase {
@@ -43,7 +44,7 @@ public:
     {
         return std::move(layoutInfo_);
     }
-    void SetCanOverScroll(bool canOverScroll)
+    void SetCanOverScroll(bool canOverScroll) override
     {
         canOverScroll_ = canOverScroll;
     }
@@ -60,7 +61,7 @@ private:
     {
         return index + layoutInfo_.footerIndex_ + 1;
     }
-    float MeasuerFooter(LayoutWrapper* layoutWrapper);
+    float MeasureFooter(LayoutWrapper* layoutWrapper);
     void LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse);
     void JumpToTargetAlign(const std::pair<float, float>& item);
 

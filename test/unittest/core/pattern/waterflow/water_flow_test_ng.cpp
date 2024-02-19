@@ -950,7 +950,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowFooterTest001, TestSize.Level1)
      * @tc.steps: step1. Run footer func.
      * @tc.expected: The return_value is correct.
      */
-    auto footerRect = GetChildRect(frameNode_, 0);
+    auto footerRect = GetChildRect(frameNode_, pattern_->layoutInfo_.footerIndex_);
     EXPECT_FLOAT_EQ(footerRect.GetY(), 200.f);
 }
 

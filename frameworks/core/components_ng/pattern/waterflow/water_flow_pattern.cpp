@@ -19,6 +19,7 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/pattern/waterflow/water_flow_segmented_layout.h"
 
 namespace OHOS::Ace::NG {
 SizeF WaterFlowPattern::GetContentSize() const
@@ -72,10 +73,6 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         }
         if (GreatNotEqual(delta, 0.0f)) {
             delta = std::min(delta, -layoutInfo_.currentOffset_);
-        } else if (layoutInfo_.itemEnd_ && !layoutInfo_.endPosArray_.empty()) {
-            float distanceToEnd =
-                layoutInfo_.endPosArray_.back().first - (GetMainContentSize() - layoutInfo_.currentOffset_);
-            delta = std::max(delta, distanceToEnd);
         }
     }
     FireOnWillScroll(-delta);
@@ -163,7 +160,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     if (targetIndex_.has_value()) {
         layoutInfo_.targetIndex_ = targetIndex_;
     }
-    auto algorithm = AceType::MakeRefPtr<WaterFlowLayoutAlgorithm>(layoutInfo_);
+    auto algorithm = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(layoutInfo_);
     algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     return algorithm;
 }

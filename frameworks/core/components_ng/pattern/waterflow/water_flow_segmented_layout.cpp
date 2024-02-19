@@ -16,11 +16,11 @@
 #include "core/components_ng/pattern/waterflow/water_flow_segmented_layout.h"
 
 #include "base/geometry/ng/offset_t.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_utils.h"
 #include "core/components_ng/property/templates_parser.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
@@ -30,25 +30,10 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     axis_ = props->GetAxis();
     auto [idealSize, matchChildren] = PreMeasureSelf();
 
-    info_.childrenCount_ = wrapper_->GetTotalChildCount();
-
     Init(idealSize);
     mainSize_ = GetMainAxisSize(idealSize, axis_);
 
-    // independent reset / jump procedure
-
-    // independent offset (scrolling) procedure
-    bool forward = LessOrEqual(info_.currentOffset_ - info_.prevOffset_, 0.0f);
-    if (forward) {
-        Fill();
-    }
-
-    info_.startIndex_ = info_.FastSolveStartIndex();
-    info_.endIndex_ = info_.FastSolveEndIndex(mainSize_);
-
-    info_.itemStart_ = GreatOrEqual(info_.currentOffset_, 0.0f);
-    info_.itemEnd_ = info_.endIndex_ == info_.childrenCount_ - 1;
-    info_.offsetEnd_ = info_.itemEnd_ && mainSize_ - info_.currentOffset_ >= info_.endPosArray_.back().first;
+    MeasureOnOffset();
 
     if (matchChildren) {
         PostMeasureSelf(idealSize);
@@ -79,10 +64,10 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 
 void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 {
+    info_.childrenCount_ = wrapper_->GetTotalChildCount();
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     itemsCrossSize_.clear();
     axis_ = props->GetAxis();
-    info_.childrenCount_ = wrapper_->GetTotalChildCount();
     RegularInit(frameSize);
     if (info_.footerIndex_ >= 0) {
         InitFooter(frameSize.CrossSize(axis_));
@@ -151,6 +136,7 @@ void WaterFlowSegmentedLayout::InitFooter(float crossSize)
         auto waterFlow = wrapper_->GetHostNode();
         waterFlow->RemoveChildAtIndex(info_.footerIndex_);
         footer->GetHostNode()->MountToParent(waterFlow);
+        footer->SetActive(false);
         info_.footerIndex_ = info_.childrenCount_ - 1;
     }
 
@@ -162,6 +148,22 @@ void WaterFlowSegmentedLayout::InitFooter(float crossSize)
     info_.items_.emplace_back();
     info_.items_.back().try_emplace(0);
     info_.segmentTails_.push_back(info_.childrenCount_ - 1);
+}
+
+void WaterFlowSegmentedLayout::MeasureOnOffset()
+{
+    bool forward = LessOrEqual(info_.currentOffset_ - info_.prevOffset_, 0.0f);
+    if (forward) {
+        Fill();
+    }
+
+    int32_t oldStart = info_.startIndex_;
+    info_.Sync(mainSize_, margins_.back().bottom.value_or(0.0f), overScroll_);
+
+    if (!forward) {
+        // measure appearing items when scrolling upwards
+        MeasureItems(info_.startIndex_, oldStart);
+    }
 }
 
 void WaterFlowSegmentedLayout::Fill()
@@ -193,6 +195,18 @@ void WaterFlowSegmentedLayout::Fill()
     }
 }
 
+void WaterFlowSegmentedLayout::MeasureItems(int32_t startIdx, int32_t endIdx)
+{
+    auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
+    for (int32_t i = startIdx; i < endIdx; ++i) {
+        int32_t segment = info_.GetSegment(i);
+        auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[segment]);
+        auto itemWrapper = wrapper_->GetOrCreateChildByIndex(i);
+        itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
+            { itemsCrossSize_[segment][position.crossIndex], mainSize_, axis_ }, props, itemWrapper));
+    }
+}
+
 std::pair<SizeF, bool> WaterFlowSegmentedLayout::PreMeasureSelf()
 {
     auto props = wrapper_->GetLayoutProperty();
@@ -208,7 +222,7 @@ std::pair<SizeF, bool> WaterFlowSegmentedLayout::PreMeasureSelf()
 
 void WaterFlowSegmentedLayout::PostMeasureSelf(SizeF size)
 {
-    mainSize_ = info_.GetMaxMainHeight();
+    mainSize_ = info_.maxHeight_;
     size.SetMainSize(mainSize_, axis_);
     auto props = wrapper_->GetLayoutProperty();
     AddPaddingToSize(props->CreatePaddingAndBorder(), size);

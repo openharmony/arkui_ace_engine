@@ -93,6 +93,15 @@ public:
      */
     void SetNextSegmentStartPos(const std::vector<PaddingPropertyF>& margins, int32_t itemIdx);
 
+    /**
+     * @brief Update member variables after measure.
+     * 
+     * @param mainSize waterFlow length on the main axis.
+     * @param bottomMargin of the last FlowItem segment.
+     * @param overScroll whether overScroll is allowed. Might adjust offset if not.
+     */
+    void Sync(float mainSize, float bottomMargin, bool overScroll);
+
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;

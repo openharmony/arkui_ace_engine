@@ -74,6 +74,9 @@ int32_t WaterFlowLayoutInfo::GetEndIndexByOffset(float offset) const
 
 float WaterFlowLayoutInfo::GetMaxMainHeight() const
 {
+    if (items_.empty()) {
+        return 0.0f;
+    }
     float result = 0.0f;
     for (const auto& crossItems : *items_.rbegin()) {
         if (crossItems.second.empty()) {
@@ -288,11 +291,15 @@ int32_t WaterFlowLayoutInfo::FastSolveStartIndex() const
 
 int32_t WaterFlowLayoutInfo::FastSolveEndIndex(float mainSize) const
 {
+    if (itemInfos_.empty()) {
+        return -1;
+    }
+
     auto it = std::lower_bound(itemInfos_.begin(), itemInfos_.end(), mainSize - currentOffset_,
         [](const std::pair<int32_t, ItemInfo>& info, float value) { return info.second.first < value; });
 
     if (it == itemInfos_.end()) {
-        return childrenCount_ - 1;
+        return itemInfos_.rbegin()->first;
     }
     return it->first - 1;
 }
@@ -320,5 +327,21 @@ void WaterFlowLayoutInfo::SetNextSegmentStartPos(
         segmentStartPos_.push_back(nextStartPos);
         ++segment;
     }
+}
+
+void WaterFlowLayoutInfo::Sync(float mainSize, float bottomMargin, bool overScroll)
+{
+    endIndex_ = FastSolveEndIndex(mainSize);
+
+    maxHeight_ = GetMaxMainHeight() + bottomMargin;
+
+    itemStart_ = GreatOrEqual(currentOffset_, 0.0f);
+    itemEnd_ = endIndex_ >= 0 && endIndex_ == childrenCount_ - 1;
+    offsetEnd_ = itemEnd_ && GreatOrEqual(mainSize - currentOffset_, maxHeight_);
+    if (offsetEnd_ && !overScroll) {
+        currentOffset_ = -maxHeight_ + mainSize;
+    }
+
+    startIndex_ = FastSolveStartIndex();
 }
 } // namespace OHOS::Ace::NG
