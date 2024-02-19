@@ -4219,24 +4219,13 @@ typedef enum {
     NODE_SLIDER_SELECTED_COLOR,
 
     /**
-     * @brief Defines whether to display a tooltip when the user drags the slider.
-     * This attribute can be set, reset, and obtained as required through APIs.
+     * @brief Slider设置当前是否显示步长刻度值，支持属性设置，属性重置和属性获取。
      *
-<<<<<<< HEAD
      * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
      * .value[0].i32：是否显示气泡，1表示显示，0表示不显示，默认值为0。\n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
      * .value[0].i32：是否显示气泡，1表示显示，0表示不显示，默认值为0。\n
-=======
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: whether to display a tooltip when the user drags the slider.
-     * The value <b>1</b> means to display a tooltip, and <b>0</b> means the opposite. The default value is <b>0</b>.\n \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: whether to display a tooltip when the user drags the slider.
-     * The value <b>1</b> means to display a tooltip, and <b>0</b> means the opposite. The default value is <b>0</b>.\n \n
->>>>>>> master
      * 
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
