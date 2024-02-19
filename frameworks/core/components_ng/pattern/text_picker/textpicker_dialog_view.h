@@ -58,6 +58,7 @@ public:
 
 private:
     static RefPtr<FrameNode> CreateStackNode(RefPtr<PickerTheme> pickerTheme);
+    static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
     static RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind,
         uint32_t showCount, RefPtr<PickerTheme> pickerTheme);
