@@ -60,9 +60,11 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
     std::vector<double> crossLens;
     std::pair<std::vector<double>, bool> cross;
     if (axis_ == Axis::VERTICAL) {
-        cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
+        cross =
+            ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
     } else {
-        cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
+        cross =
+            ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
     }
     crossLens = cross.first;
     if (crossLens.empty()) {
@@ -154,7 +156,7 @@ void WaterFlowLayoutAlgorithm::MeasureForAnimation(LayoutWrapper* layoutWrapper)
         if (!itemWrapper) {
             layoutInfo_.targetIndex_.reset();
             break;
-        }   
+        }
         itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
             { itemsCrossSize_.at(position.crossIndex), mainSize_, axis_ }, layoutProperty, itemWrapper));
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();

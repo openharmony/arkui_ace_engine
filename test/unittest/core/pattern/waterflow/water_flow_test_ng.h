@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_WATER_FLOW_TEST_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_WATER_FLOW_TEST_NG_H
+
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -32,11 +35,6 @@
 #undef private
 #undef protected
 
-namespace {
-using namespace testing;
-using namespace testing::ext;
-} // namespace
-
 namespace OHOS::Ace::NG {
 class WaterFlowTestNg : public TestNG {
 protected:
@@ -46,9 +44,9 @@ protected:
     void TearDown() override;
     void GetInstance();
 
-    void Create(const std::function<void(WaterFlowModelNG)>& callback = nullptr);
+    void Create(const std::function<void(WaterFlowModelNG)>& callback = nullptr, bool flushLayout = true);
     void CreateWithItem(const std::function<void(WaterFlowModelNG)>& callback = nullptr);
-    static void CreateItem(int32_t number = 10);    
+    static void CreateItem(int32_t number = 10);
     static void CreateItemWithHeight(float height);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void MouseSelect(Offset start, Offset end);
@@ -64,3 +62,4 @@ protected:
     RefPtr<WaterFlowAccessibilityProperty> accessibilityProperty_;
 };
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_WATER_FLOW_TEST_NG_H

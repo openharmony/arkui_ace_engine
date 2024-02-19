@@ -49,9 +49,9 @@ public:
 
     /**
      * @brief Get the next available cross index to place a new item.
-     * 
+     *
      * @param segmentIdx index of the WaterFlow segment.
-     * @return FlowItemIndex 
+     * @return FlowItemIndex
      */
     FlowItemIndex GetCrossIndexForNextItem(int32_t segmentIdx) const;
 
@@ -68,18 +68,18 @@ public:
 
     int32_t GetSegment(int32_t itemIdx) const;
 
-    void AddItemToCache(int32_t idx, float startPos, float height);
+    void RecordItem(int32_t idx, int32_t crossIdx, float startPos, float height);
 
     /**
      * @brief FInd the first item inside viewport in log_n time using endPosReverseMap_.
-     * 
-     * @return index of the item. 
+     *
+     * @return index of the starting item.
      */
     int32_t FastSolveStartIndex() const;
 
     /**
      * @brief Find the last item inside viewport in log_n time using itemInfos_.
-     * 
+     *
      * @param mainSize main-axis length of viewport.
      * @return index of the item.
      */
@@ -87,7 +87,7 @@ public:
 
     /**
      * @brief Calculate and set the start position of next segment after filling the tail item of the current segment.
-     * 
+     *
      * @param margins margin of each segment.
      * @param itemIdx index of the current flow item.
      */
@@ -95,7 +95,7 @@ public:
 
     /**
      * @brief Update member variables after measure.
-     * 
+     *
      * @param mainSize waterFlow length on the main axis.
      * @param bottomMargin of the last FlowItem segment.
      * @param overScroll whether overScroll is allowed. Might adjust offset if not.
@@ -128,15 +128,14 @@ public:
     int32_t firstIndex_ = 0;
     std::optional<int32_t> targetIndex_;
 
-    // (mainOffset, itemMainSize)
-    using ItemInfo = std::pair<float, float>;
-    // Map structure: [crossIndex, [index, ItemInfo]],
-    using ItemMap = std::map<int32_t, std::map<int32_t, ItemInfo>>;
+    // Map structure: [crossIndex, [index, {mainOffset, itemMainSize}]],
+    using ItemMap = std::map<int32_t, std::map<int32_t, std::pair<float, float>>>;
 
     std::vector<ItemMap> items_ { ItemMap() };
 
-    // quick access to item info, ignores crossIndex and segments
-    std::map<int32_t, ItemInfo> itemInfos_;
+    struct ItemInfo;
+    // quick access to FlowItem by index
+    std::vector<ItemInfo> itemInfos_;
 
     /**
      * @brief pair = { item bottom position, item index }.
@@ -170,5 +169,18 @@ public:
         }
     }
 };
+
+struct WaterFlowLayoutInfo::ItemInfo {
+    ItemInfo(int32_t cross, float offset, float size) : crossIdx(cross), mainOffset(offset), mainSize(size) {}
+    bool operator==(const ItemInfo& other) const
+    {
+        return crossIdx == other.crossIdx && mainOffset == other.mainOffset && mainSize == other.mainSize;
+    }
+
+    int32_t crossIdx;
+    float mainOffset;
+    float mainSize;
+};
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_INFO_H

@@ -109,7 +109,7 @@ void WaterFlowTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<WaterFlowAccessibilityProperty>();
 }
 
-void WaterFlowTestNg::Create(const std::function<void(WaterFlowModelNG)>& callback)
+void WaterFlowTestNg::Create(const std::function<void(WaterFlowModelNG)>& callback, bool flushLayout)
 {
     WaterFlowModelNG model;
     RefPtr<ScrollControllerBase> positionController = model.CreateScrollController();
@@ -122,7 +122,9 @@ void WaterFlowTestNg::Create(const std::function<void(WaterFlowModelNG)>& callba
         callback(model);
     }
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    if (flushLayout) {
+        FlushLayoutTask(frameNode_);
+    }
 }
 
 void WaterFlowTestNg::CreateWithItem(const std::function<void(WaterFlowModelNG)>& callback)

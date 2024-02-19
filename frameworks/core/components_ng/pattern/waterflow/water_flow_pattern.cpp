@@ -160,7 +160,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     if (targetIndex_.has_value()) {
         layoutInfo_.targetIndex_ = targetIndex_;
     }
-    auto algorithm = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(layoutInfo_);
+    auto algorithm = AceType::MakeRefPtr<WaterFlowLayoutAlgorithm>(layoutInfo_);
     algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     return algorithm;
 }

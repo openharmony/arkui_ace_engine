@@ -19,7 +19,6 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
@@ -39,21 +38,22 @@ public:
         return std::move(info_);
     }
 
-    void SetCanOverScroll(bool value) override {
+    void SetCanOverScroll(bool value) override
+    {
         overScroll_ = value;
     }
 
 private:
     /**
      * @brief Initialize member variables from LayoutProperty.
-     * 
-     * @param frameSize 
+     *
+     * @param frameSize of WaterFlow component.
      */
     void Init(const SizeF& frameSize);
 
     /**
      * @brief init regular WaterFlow with a single segment.
-     * 
+     *
      * @param frameSize
      */
     void RegularInit(const SizeF& frameSize);
@@ -77,21 +77,29 @@ private:
 
     /**
      * @brief Fills the viewport with new items when scrolling downwards.
-     * WaterFlow's item map only supports forward layout because the position of a new item always depends on previous items.
-     * 
+     *
+     * WaterFlow's item map only supports orderly forward layout,
+     * because the position of a new item always depends on previous items.
      */
     void Fill();
-    
+
     /**
      * @brief Helper to measure FlowItems.
      * Assumes the Item map is already filled and only call Measure on children in range [start, end).
-     * 
-     * @param startIdx 
+     *
+     * @param startIdx FlowItem index.
      * @param endIdx (exclusive)
      */
     void MeasureItems(int32_t startIdx, int32_t endIdx);
 
-    void LayoutSegment(int32_t segment, const OffsetF& padding, bool isReverse);
+    /**
+     * @brief Layout a FlowItem at [idx].
+     * 
+     * @param idx FlowItem index.
+     * @param padding top-left padding of WaterFlow component.
+     * @param isReverse need to layout in reverse.
+     */
+    void LayoutItem(int32_t idx, const OffsetF& padding, bool isReverse);
 
     LayoutWrapper* wrapper_ {};
 

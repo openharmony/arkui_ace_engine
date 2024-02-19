@@ -347,6 +347,7 @@ void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
         task();
     }
 }
+
 void PipelineContext::FlushSyncGeometryNodeTasks() {}
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}

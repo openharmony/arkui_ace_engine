@@ -49,16 +49,12 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 
     wrapper_->RemoveAllChildInRenderTree();
 
-    auto size = wrapper_->GetGeometryNode()->GetFrameSize();
     auto padding = wrapper_->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
     auto initialOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
-    info_.UpdateStartIndex();
-    int32_t firstSegment = info_.GetSegment(info_.startIndex_);
-    int32_t lastSegment = info_.GetSegment(info_.endIndex_);
-    for (int32_t seg = firstSegment; seg <= lastSegment; ++seg) {
-        LayoutSegment(seg, initialOffset, props->IsReverse());
+    bool isReverse = props->IsReverse();
+    for (int32_t i = info_.startIndex_; i <= info_.endIndex_; ++i) {
+        LayoutItem(i, initialOffset, isReverse);
     }
 }
 
@@ -66,15 +62,11 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 {
     info_.childrenCount_ = wrapper_->GetTotalChildCount();
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
-    itemsCrossSize_.clear();
     axis_ = props->GetAxis();
     RegularInit(frameSize);
     if (info_.footerIndex_ >= 0) {
         InitFooter(frameSize.CrossSize(axis_));
     }
-    // if (!segment) {
-
-    // }
 }
 
 void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
@@ -106,11 +98,6 @@ void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
         crossGaps_ = { 0 };
     }
 
-    // cross count changed by auto-fill and cross size change
-    if (!info_.items_[0].empty() && crossLens.size() != info_.items_[0].size()) {
-        info_.Reset();
-    }
-
     itemsCrossPosition_.resize(1);
     itemsCrossSize_.resize(1);
     margins_.resize(1);
@@ -138,6 +125,9 @@ void WaterFlowSegmentedLayout::InitFooter(float crossSize)
         footer->GetHostNode()->MountToParent(waterFlow);
         footer->SetActive(false);
         info_.footerIndex_ = info_.childrenCount_ - 1;
+
+        info_.items_.emplace_back();
+        info_.items_.back().try_emplace(0);
     }
 
     crossGaps_.push_back(0.0f);
@@ -145,8 +135,7 @@ void WaterFlowSegmentedLayout::InitFooter(float crossSize)
     margins_.emplace_back();
     itemsCrossPosition_.push_back({ 0.0f });
     itemsCrossSize_.push_back({ crossSize });
-    info_.items_.emplace_back();
-    info_.items_.back().try_emplace(0);
+
     info_.segmentTails_.push_back(info_.childrenCount_ - 1);
 }
 
@@ -182,8 +171,7 @@ void WaterFlowSegmentedLayout::Fill()
             { itemsCrossSize_[segment][position.crossIndex], mainSize_, axis_ }, props, itemWrapper));
 
         auto itemHeight = GetMainAxisSize(itemWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
-        info_.items_[segment][position.crossIndex][idx] = { position.startMainPos, itemHeight };
-        info_.AddItemToCache(idx, position.startMainPos, itemHeight);
+        info_.RecordItem(idx, position.crossIndex, position.startMainPos, itemHeight);
 
         if (idx == info_.segmentTails_[segment]) {
             info_.SetNextSegmentStartPos(margins_, idx);
@@ -229,31 +217,23 @@ void WaterFlowSegmentedLayout::PostMeasureSelf(SizeF size)
     wrapper_->GetGeometryNode()->SetFrameSize(size);
 }
 
-void WaterFlowSegmentedLayout::LayoutSegment(int32_t segment, const OffsetF& padding, bool isReverse)
+void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, const OffsetF& padding, bool isReverse)
 {
-    for (const auto& mainPositions : info_.items_[segment]) {
-        for (const auto& item : mainPositions.second) {
-            if (item.first < info_.startIndex_ || item.first > info_.endIndex_) {
-                continue;
-            }
+    const auto& item = info_.itemInfos_[idx];
+    auto crossOffset = itemsCrossPosition_[info_.GetSegment(idx)][item.crossIdx];
+    auto mainOffset = item.mainOffset + info_.currentOffset_;
+    if (isReverse) {
+        mainOffset = mainSize_ - item.mainSize - mainOffset;
+    }
 
-            auto crossOffset = itemsCrossPosition_[segment][mainPositions.first];
-            auto mainOffset = item.second.first + info_.currentOffset_;
-            if (isReverse) {
-                mainOffset = mainSize_ - item.second.second - mainOffset;
-            }
+    OffsetF offset = (axis_ == Axis::VERTICAL) ? OffsetF(crossOffset, mainOffset) : OffsetF(mainOffset, crossOffset);
+    auto wrapper = wrapper_->GetOrCreateChildByIndex(idx);
+    wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + padding);
+    wrapper->Layout();
 
-            OffsetF offset =
-                (axis_ == Axis::VERTICAL) ? OffsetF(crossOffset, mainOffset) : OffsetF(mainOffset, crossOffset);
-            auto wrapper = wrapper_->GetOrCreateChildByIndex(item.first);
-            wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + padding);
-            wrapper->Layout();
-
-            // recode restore info
-            if (item.first == info_.startIndex_) {
-                info_.storedOffset_ = mainOffset;
-            }
-        }
+    // recode restore info
+    if (idx == info_.startIndex_) {
+        info_.storedOffset_ = mainOffset;
     }
 }
 } // namespace OHOS::Ace::NG

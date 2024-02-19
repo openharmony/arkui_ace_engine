@@ -296,24 +296,27 @@ int32_t WaterFlowLayoutInfo::FastSolveEndIndex(float mainSize) const
     }
 
     auto it = std::lower_bound(itemInfos_.begin(), itemInfos_.end(), mainSize - currentOffset_,
-        [](const std::pair<int32_t, ItemInfo>& info, float value) { return info.second.first < value; });
+        [](const ItemInfo& info, float value) { return info.mainOffset < value; });
 
     if (it == itemInfos_.end()) {
-        return itemInfos_.rbegin()->first;
+        return itemInfos_.size() - 1;
     }
-    return it->first - 1;
+    return std::distance(itemInfos_.begin(), it) - 1;
 }
 
-void WaterFlowLayoutInfo::AddItemToCache(int32_t idx, float startPos, float height)
+void WaterFlowLayoutInfo::RecordItem(int32_t idx, int32_t crossIdx, float startPos, float height)
 {
-    itemInfos_[idx] = { startPos, height };
+    if (itemInfos_.size() != idx) {
+        return;
+    }
+    items_[GetSegment(idx)][crossIdx][idx] = { startPos, height };
+    itemInfos_.emplace_back(crossIdx, startPos, height);
     if (endPosArray_.empty() || LessNotEqual(endPosArray_.back().first, startPos + height)) {
         endPosArray_.emplace_back(startPos + height, idx);
     }
 }
 
-void WaterFlowLayoutInfo::SetNextSegmentStartPos(
-    const std::vector<PaddingPropertyF>& margins, int32_t itemIdx)
+void WaterFlowLayoutInfo::SetNextSegmentStartPos(const std::vector<PaddingPropertyF>& margins, int32_t itemIdx)
 {
     int32_t segment = GetSegment(itemIdx);
     if (segmentStartPos_.size() > segment + 1) {
@@ -338,8 +341,9 @@ void WaterFlowLayoutInfo::Sync(float mainSize, float bottomMargin, bool overScro
     itemStart_ = GreatOrEqual(currentOffset_, 0.0f);
     itemEnd_ = endIndex_ >= 0 && endIndex_ == childrenCount_ - 1;
     offsetEnd_ = itemEnd_ && GreatOrEqual(mainSize - currentOffset_, maxHeight_);
+    // adjust offset when it can't overScroll
     if (offsetEnd_ && !overScroll) {
-        currentOffset_ = -maxHeight_ + mainSize;
+        currentOffset_ = std::min(-maxHeight_ + mainSize, 0.0f);
     }
 
     startIndex_ = FastSolveStartIndex();
