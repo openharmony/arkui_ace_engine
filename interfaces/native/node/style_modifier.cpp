@@ -322,12 +322,12 @@ int32_t CheckAttributeItemArray(const ArkUI_AttributeItem* item, int32_t require
     return item->size;
 }
 
-bool CheckAttributeIsBool(const ArkUI_AttributeItem* item)
+bool CheckAttributeIsBool(int32_t value)
 {
-    if (item->size == 0 || item->value[0].i32 != DEFAULT_FALSE || item->value[0].i32 != DEFAULT_TRUE) {
-        return false;
+    if (value == DEFAULT_FALSE || value == DEFAULT_TRUE) {
+        return true;
     }
-    return true;
+    return false;
 }
 
 bool CheckAttributeIsAlignment(int32_t value)
@@ -1290,7 +1290,7 @@ void ResetCustomShadow(ArkUI_NodeHandle node)
 
 int32_t SetFocusable(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!CheckAttributeIsBool(item)) {
+    if (item->size == 0 && !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1314,7 +1314,7 @@ void ResetFocusable(ArkUI_NodeHandle node)
 
 int32_t SetAccessibilityGroup(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!CheckAttributeIsBool(item)) {
+    if (item->size == 0 && !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1413,7 +1413,7 @@ void ResetAccessibilityDescription(ArkUI_NodeHandle node)
 
 int32_t SetDefaultFocus(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!CheckAttributeIsBool(item)) {
+    if (item->size == 0 && !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1963,7 +1963,7 @@ void ResetForegroundColor(ArkUI_NodeHandle node)
 
 int32_t SetNeedFocus(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (CheckAttributeIsBool(item)) {
+    if (item->size == 0 && !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->setNeedFocus(
@@ -5314,7 +5314,7 @@ void ResetAlt(ArkUI_NodeHandle node)
 
 int32_t SetCheckboxSelect(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!CheckAttributeIsBool(item)) {
+    if (item->size == 0 && !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setSelect(node->uiNodeHandle, item->value[0].i32);
@@ -5515,7 +5515,7 @@ void ResetSliderSelectedColor(ArkUI_NodeHandle node)
 
 int32_t SetSliderShowSteps(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!CheckAttributeIsBool(item)) {
+    if (item->size == 0 && !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getSliderModifier()->setShowSteps(node->uiNodeHandle, item->value[0].i32);
@@ -5707,7 +5707,7 @@ void ResetSliderDirection(ArkUI_NodeHandle node)
 
 int32_t SetSliderReverse(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!CheckAttributeIsBool(item)) {
+    if (item->size == 0 && !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getSliderModifier()->setReverse(node->uiNodeHandle, item->value[0].i32);
@@ -5749,11 +5749,11 @@ void ResetSliderStyle(ArkUI_NodeHandle node)
 
 int32_t SetRefreshRefreshing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (CheckAttributeIsBool(item)) {
+    if (item->size == 0 && !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getRefreshModifier()->setRefreshing(
-        node->uiNodeHandle, item->value[0].u32);
+        node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
 }
 
