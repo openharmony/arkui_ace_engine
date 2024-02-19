@@ -87,9 +87,9 @@ void GaugeModifier::PaintCircularAndIndicator(RSCanvas& canvas)
     auto offset = geometryNode->GetContentOffset();
     auto contentSize = geometryNode->GetContentSize();
     RenderRingInfo data;
-    data.radius = std::min(contentSize.Width(), contentSize.Height()) / MIN_CIRCLE;
-    data.center = Offset(contentSize.Width() / MIN_CIRCLE + offset.GetX(),
-        contentSize.Height() / MIN_CIRCLE + offset.GetY());
+    data.radius = std::min(contentSize.Width(), contentSize.Height()) * PERCENT_HALF;
+    data.center = Offset(contentSize.Width() * PERCENT_HALF + offset.GetX(),
+        contentSize.Height() * PERCENT_HALF + offset.GetY());
     float startAngle = DEFAULT_START_DEGREE;
     float endAngle = DEFAULT_END_DEGREE;
     if (paintProperty->GetStartAngle().has_value()
@@ -114,7 +114,7 @@ void GaugeModifier::PaintCircularAndIndicator(RSCanvas& canvas)
         && paintProperty->GetStrokeWidth()->Value() > 0) {
         data.thickness =
             std::min(static_cast<float>(paintProperty->GetStrokeWidth()->ConvertToPx()),
-            contentSize.Width() / MIN_CIRCLE);
+            contentSize.Width() * PERCENT_HALF);
     }
     PaintDraw(canvas, paintProperty, startDegree, endAngle, data);
 }
@@ -186,10 +186,10 @@ void GaugeModifier::DrawGauge(RSCanvas& canvas, RenderRingInfo data)
 #else
     RSRecordingPath path;
 #endif
-    RSRect rRect(data.center.GetX() - data.radius + thickness / MIN_CIRCLE,
-        data.center.GetY() - data.radius + thickness / MIN_CIRCLE,
-        data.center.GetX() + data.radius - thickness / MIN_CIRCLE,
-        data.center.GetY() + data.radius - thickness / MIN_CIRCLE);
+    RSRect rRect(data.center.GetX() - data.radius + thickness * PERCENT_HALF,
+        data.center.GetY() - data.radius + thickness * PERCENT_HALF,
+        data.center.GetX() + data.radius - thickness * PERCENT_HALF,
+        data.center.GetY() + data.radius - thickness * PERCENT_HALF);
     path.AddArc(rRect, data.startDegree - QUARTER_CIRCLE, data.sweepDegree);
     canvas.DrawPath(path);
     canvas.DetachPen();
@@ -252,7 +252,7 @@ void GaugeModifier::NewPaintCircularAndIndicator(RSCanvas& canvas)
     auto paddingSize = geometryNode->GetPaddingSize();
     auto left = geometryNode->GetPadding()->left.value_or(0.0f);
     auto top = geometryNode->GetPadding()->top.value_or(0.0f);
-    auto radius = std::min(paddingSize.Width(), paddingSize.Height()) / MIN_CIRCLE;
+    auto radius = std::min(paddingSize.Width(), paddingSize.Height()) * PERCENT_HALF;
     RenderRingInfo data;
     data.contentSize = paddingSize;
     data.radius = radius;
@@ -712,7 +712,7 @@ void GaugeModifier::NewDrawIndicator(
 
     float pathStartVertexX = data.center.GetX();
     float pathStartVertexY = data.center.GetY() - data.radius + indicatorToTop.ConvertToPx() -
-                             INDICATOR_BORDER_WIDTH_RATIO * data.radius / MIN_CIRCLE;
+                             INDICATOR_BORDER_WIDTH_RATIO * data.radius * PERCENT_HALF;
     RSPath path;
     CreateDefaultTrianglePath(pathStartVertexX, pathStartVertexY, data.radius, path);
     canvas.Save();
@@ -784,22 +784,22 @@ void GaugeModifier::CreateDefaultTrianglePath(
 {
     auto width = radius * RADIUS_TO_DIAMETER * INDICATOR_WIDTH_RATIO;
     auto height = radius * RADIUS_TO_DIAMETER * INDICATOR_HEIGHT_RATIO;
-    auto hypotenuse = std::sqrt(((width / MIN_CIRCLE) * (width / MIN_CIRCLE)) + (height * height));
+    auto hypotenuse = std::sqrt(((width * PERCENT_HALF) * (width * PERCENT_HALF)) + (height * height));
     
     auto cornerRadius = radius * RADIUS_TO_DIAMETER * INDICATOR_CORNER_RADIUS_RATIO;
-    auto bottomAngle = std::atan(height / (width / MIN_CIRCLE));
+    auto bottomAngle = std::atan(height / (width * PERCENT_HALF));
 
     if (!NearZero(hypotenuse) && hypotenuse != 0) {
-        auto tempTopHypotenuse = cornerRadius / (width / MIN_CIRCLE) * height;
-        auto tempTopWidth = tempTopHypotenuse / hypotenuse * (width / MIN_CIRCLE);
+        auto tempTopHypotenuse = cornerRadius / (width * PERCENT_HALF) * height;
+        auto tempTopWidth = tempTopHypotenuse / hypotenuse * (width * PERCENT_HALF);
         auto tempTopHeight = tempTopHypotenuse / hypotenuse * height;
-        auto tempBottomHypotenuse = cornerRadius / std::tan(bottomAngle / MIN_CIRCLE);
-        auto tempBottomWidth = tempBottomHypotenuse / hypotenuse * (width / MIN_CIRCLE);
+        auto tempBottomHypotenuse = cornerRadius / std::tan(bottomAngle * PERCENT_HALF);
+        auto tempBottomWidth = tempBottomHypotenuse / hypotenuse * (width * PERCENT_HALF);
         auto tempBottomHeight = tempBottomHypotenuse / hypotenuse * height;
 
         PointF topControlPoint = PointF(pathStartVertexX, pathStartVertexY);
-        PointF leftControlPoint = PointF(pathStartVertexX - width / MIN_CIRCLE, pathStartVertexY + height);
-        PointF rightControlPoint = PointF(pathStartVertexX + width / MIN_CIRCLE, pathStartVertexY + height);
+        PointF leftControlPoint = PointF(pathStartVertexX - width * PERCENT_HALF, pathStartVertexY + height);
+        PointF rightControlPoint = PointF(pathStartVertexX + width * PERCENT_HALF, pathStartVertexY + height);
 
         PointF trianglePoint1 = topControlPoint + OffsetF(-tempTopWidth, tempTopHeight);
         PointF trianglePoint2 = leftControlPoint + OffsetF(tempBottomWidth, -tempBottomHeight);
