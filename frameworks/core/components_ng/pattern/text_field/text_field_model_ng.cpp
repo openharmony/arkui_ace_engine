@@ -137,6 +137,20 @@ void TextFieldModelNG::SetShowUnderline(bool showUnderLine)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowUnderline, showUnderLine);
 }
 
+void TextFieldModelNG::SetUserUnderlineColor(UserUnderlineColor userColor)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetUserUnderlineColor(userColor);
+}
+
+void TextFieldModelNG::SetNormalUnderlineColor(const Color& normalColor)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNormalUnderlineColor(normalColor);
+}
+
 void TextFieldModelNG::ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& frameNode)
 {
     auto pipeline = frameNode->GetContext();
@@ -847,6 +861,20 @@ void TextFieldModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
 void TextFieldModelNG::SetShowUnderline(FrameNode* frameNode, bool showUnderLine)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowUnderline, showUnderLine, frameNode);
+}
+
+void TextFieldModelNG::SetUserUnderlineColor(FrameNode* frameNode, UserUnderlineColor userColor)
+{
+    auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetUserUnderlineColor(userColor);
+}
+
+void TextFieldModelNG::SetNormalUnderlineColor(FrameNode* frameNode, const Color& normalColor)
+{
+    auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNormalUnderlineColor(normalColor);
 }
 
 void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, TextInputAction value)

@@ -75,6 +75,8 @@ public:
     void SetMaxViewLines(uint32_t value) override;
 
     void SetShowUnderline(bool showUnderLine) override;
+    void SetNormalUnderlineColor(const Color& normalColor) override;
+    void SetUserUnderlineColor(UserUnderlineColor userColor) override;
     void SetShowCounter(bool value) override;
     void SetCounterType(int32_t value) override;
     void SetShowCounterBorder(bool value) override;
@@ -116,6 +118,8 @@ public:
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);
     static void SetEnterKeyType(FrameNode* frameNode, TextInputAction value);
     static void SetShowUnderline(FrameNode* frameNode, bool showUnderLine);
+    static void SetNormalUnderlineColor(FrameNode* frameNode, const Color& normalColor);
+    static void SetUserUnderlineColor(FrameNode* frameNode, UserUnderlineColor userColor);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& value);
