@@ -603,6 +603,7 @@ void PageRouterManager::GetStateByUrl(std::string& url, std::vector<Framework::S
             if (pos == url.length() - 3) {
                 tempUrl = url.substr(0, pos);
             }
+            tempUrl = url;
             pos = tempUrl.rfind("/");
             if (pos != std::string::npos) {
                 stateInfo.name = tempUrl.substr(pos + 1);
