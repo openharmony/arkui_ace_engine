@@ -95,10 +95,39 @@ void FolderStackPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("rotation: ").append(std::to_string(static_cast<int32_t>(rotation))));
 }
 
+void FolderStackPattern::SetLayoutBeforeAnimation(const RefPtr<FolderStackGroupNode>& hostNode)
+{
+    auto controlPartsStackNode = hostNode->GetControlPartsStackNode();
+    auto index = hostNode->GetChildIndexById(controlPartsStackNode->GetId());
+    auto controlPartsStackWrapper = hostNode->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(controlPartsStackWrapper);
+    auto controlPartsgeometryNode = controlPartsStackWrapper->GetGeometryNode();
+    auto controlPartsOffset = controlPartsgeometryNode->GetMarginFrameOffset();
+    auto controlPartsChildNodeList = controlPartsStackWrapper->GetAllChildrenWithBuild();
+    for (auto& controlPartsChildNode : controlPartsChildNodeList) {
+        auto controlPartsChildGeometryNode = controlPartsChildNode->GetGeometryNode();
+        auto controlPartsChildOffset = OffsetT<float>(controlPartsChildGeometryNode->GetMarginFrameOffset().GetX(),
+            controlPartsOffset.GetY() + controlPartsChildGeometryNode->GetMarginFrameOffset().GetY());
+        controlPartsChildGeometryNode->SetMarginFrameOffset(controlPartsChildOffset);
+        auto controlPartsChildFrameNode = controlPartsChildNode->GetHostNode();
+        if (!controlPartsChildFrameNode) {
+            continue;
+        }
+        auto renderContext = controlPartsChildFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SyncGeometryProperties(AceType::RawPtr(controlPartsChildGeometryNode));
+    }
+    auto hoverStackOffset = OffsetT<float>(0.0f, 0.0f);
+    controlPartsgeometryNode->SetMarginFrameOffset(hoverStackOffset);
+    auto ControlPartsFrameNode = AceType::DynamicCast<FrameNode>(controlPartsStackNode);
+    CHECK_NULL_VOID(ControlPartsFrameNode);
+    auto renderContext = ControlPartsFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SyncGeometryProperties(AceType::RawPtr(controlPartsgeometryNode));
+}
+
 void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     currentFoldStatus_ = foldStatus;
     if (foldStatusDelayTask_) {
         foldStatusDelayTask_.Cancel();
@@ -107,11 +136,10 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    foldStatusDelayTask_.Reset([weak = WeakClaim(this), currentFoldStatus = currentFoldStatus_]() {
+    foldStatusDelayTask_.Reset([weak = WeakClaim(this), currentFoldStatus = currentFoldStatus_,
+        lastFoldStatus = lastFoldStatus_]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -128,10 +156,18 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
         auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
         if (currentFoldStatus == displayInfo->GetFoldStatus() && isLandscape &&
             windowMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto hostNode = AceType::DynamicCast<FolderStackGroupNode>(host);
+            CHECK_NULL_VOID(hostNode);
+            if (currentFoldStatus == FoldStatus::EXPAND && lastFoldStatus == FoldStatus::HALF_FOLD) {
+                pattern->SetLayoutBeforeAnimation(hostNode);
+            }
             pattern->OnFolderStateChangeSend(currentFoldStatus);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     });
+    lastFoldStatus_ = currentFoldStatus_;
     taskExecutor->PostDelayedTask(foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME);
 }
 
