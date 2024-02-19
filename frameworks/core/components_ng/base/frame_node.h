@@ -300,8 +300,6 @@ public:
     {
         nodeName_ = nodeName;
     }
-    bool IsResponseRegion() const;
-    void MarkResponseRegion(bool isResponseRegion);
 
     void OnWindowShow() override;
 

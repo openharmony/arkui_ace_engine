@@ -715,16 +715,6 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
     pattern_->OnAttachToMainTree();
-    if (IsResponseRegion() || HasPositionProp()) {
-        auto parent = GetParent();
-        while (parent) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(parent);
-            if (frameNode) {
-                frameNode->MarkResponseRegion(true);
-            }
-            parent = parent->GetParent();
-        }
-    }
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1385,16 +1375,6 @@ void FrameNode::MarkModifyDone()
         }
     }
     eventHub_->MarkModifyDone();
-    if (IsResponseRegion() || HasPositionProp()) {
-        auto parent = GetParent();
-        while (parent) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(parent);
-            if (frameNode) {
-                frameNode->MarkResponseRegion(true);
-            }
-            parent = parent->GetParent();
-        }
-    }
     renderContext_->OnModifyDone();
 }
 
@@ -1602,26 +1582,6 @@ bool FrameNode::GetMonopolizeEvents() const
 {
     auto gestureHub = eventHub_->GetGestureEventHub();
     return gestureHub ? gestureHub->GetMonopolizeEvents() : false;
-}
-
-bool FrameNode::IsResponseRegion() const
-{
-    auto renderContext = GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto clip = renderContext->GetClipEdge().value_or(false);
-    if (clip) {
-        return false;
-    }
-    auto gestureHub = eventHub_->GetGestureEventHub();
-    return gestureHub ? gestureHub->IsResponseRegion() : false;
-}
-
-void FrameNode::MarkResponseRegion(bool isResponseRegion)
-{
-    auto gestureHub = eventHub_->GetOrCreateGestureEventHub();
-    if (gestureHub) {
-        gestureHub->MarkResponseRegion(isResponseRegion);
-    }
 }
 
 RectF FrameNode::GetPaintRectWithTransform() const
