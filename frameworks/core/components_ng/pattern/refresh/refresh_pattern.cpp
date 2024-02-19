@@ -502,6 +502,7 @@ void RefreshPattern::InitOffsetProperty()
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->AttachNodeAnimatableProperty(offsetProperty_);
+        offsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     }
 }
 
