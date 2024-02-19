@@ -50,9 +50,6 @@ public:
     bool TryRetake(const std::string& id);
 
 private:
-private:
-    void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId);
-    void CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId);
 
     // uniquely identifies branches within if elseif else construct:
     // if() { branch } else if () { branch } else { branch}
