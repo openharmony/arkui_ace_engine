@@ -208,7 +208,7 @@ private:
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;
     bool hasDeco_ = true;
-    bool isFocus_ = true;
+    bool isFocus_ = false;
     bool hideSplitButton_ = false;
 };
 } // namespace OHOS::Ace::NG
