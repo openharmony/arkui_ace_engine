@@ -53,6 +53,7 @@ bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
+bool SystemProperties::stateManagerEnable_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {

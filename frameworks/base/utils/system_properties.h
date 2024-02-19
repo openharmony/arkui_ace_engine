@@ -262,6 +262,11 @@ public:
         return layoutTraceEnable_;
     }
 
+    static bool GetStateManagerEnabled()
+    {
+        return stateManagerEnable_;
+    }
+
     static bool GetBuildTraceEnabled()
     {
         return buildTraceEnable_;
@@ -469,6 +474,7 @@ private:
     static bool navigationBlurEnabled_;
     static bool gridCacheEnabled_;
     static bool sideBarContainerBlurEnable_;
+    static bool stateManagerEnable_;
 };
 
 } // namespace OHOS::Ace

@@ -98,6 +98,11 @@ bool IsLayoutTraceEnabled()
     return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
 }
 
+bool IsStateManagerEnable()
+{
+    return (system::GetParameter("persist.ace.debug.statemgr.enabled", "false") == "true");
+}
+
 bool IsBuildTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.build.enabled", "false") == "true");
@@ -261,6 +266,7 @@ bool IsResourceDecoupling()
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
+bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
@@ -414,6 +420,7 @@ void SystemProperties::InitDeviceInfo(
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
+    stateManagerEnable_ = IsStateManagerEnable();
     buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
@@ -600,9 +607,10 @@ void SystemProperties::AddWatchSystemParameter(void *context)
 {
     WatchParameter("persist.ace.trace.layout.enabled", EnableSystemParameterCallback, context);
     WatchParameter("const.security.developermode.state", EnableSystemParameterCallback, context);
+    WatchParameter("persist.ace.debug.statemgr.enabled", EnableSystemParameterCallback, context);
 }
 
-void SystemProperties::EnableSystemParameterCallback(const char *key, const char *value, void *context)
+void SystemProperties::EnableSystemParameterCallback(const char* key, const char* value, void* context)
 {
     if (context == nullptr) {
         LOGE("context is nullprt");
@@ -612,14 +620,21 @@ void SystemProperties::EnableSystemParameterCallback(const char *key, const char
         if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
             layoutTraceEnable_ = strcmp(value, "true") == 0 && IsDeveloperModeOn();
         }
-        return ;
+        return;
     }
 
     if (strcmp(key, "const.security.developermode.state") == 0) {
         if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
             layoutTraceEnable_ = strcmp(value, "true") == 0 && IsLayoutTraceEnabled();
         }
-        return ;
+        return;
+    }
+
+    if (strcmp(key, "persist.ace.debug.statemgr.enabled") == 0) {
+        if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+            stateManagerEnable_ = strcmp(value, "true") == 0;
+        }
+        return;
     }
     LOGE("key %{public}s or value %{public}s mismatch", key, value);
 }
@@ -628,5 +643,6 @@ void SystemProperties::RemoveWatchSystemParameter(void *context)
 {
     RemoveParameterWatcher("persist.ace.trace.layout.enabled", nullptr, context);
     RemoveParameterWatcher("const.security.developermode.state", nullptr, context);
+    RemoveParameterWatcher("persist.ace.debug.statemgr.enabled", nullptr, context);
 }
 } // namespace OHOS::Ace
