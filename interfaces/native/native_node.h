@@ -2406,7 +2406,7 @@ typedef enum {
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { 16, { .i32 = ARKUI_FONT_WEIGHT_NORMAL },
+     * ArkUI_NumberValue value[] = { 16, { .i32 = ARKUI_FONT_STYLE_NORMAL },
      * { .i32 = ARKUI_FONT_STYLE_NORMAL } };
      * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_TEXT_FONT, &item);
@@ -3431,7 +3431,7 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].u32: border color, in 0xARGB format, for example, <b>0xFF1122FF</b>.\n
+     * .value[0].i32: border color, in 0xARGB format, for example, <b>0xFF1122FF</b>.\n
      * .value[1]?.f32: size of the internal mark, in vp. Optional.\n
      * .value[2]?.f32: stroke width of the internal mark, in vp. Optional. The default value is <b>2</b>. \n
      * \n
@@ -3443,11 +3443,11 @@ typedef enum {
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
      * reinterpret_cast<ArkUI_NativeNodeAPI_1*>(OH_ArkUI_GetNativeAPI(ARKUI_NATIVE_NODE, 1));
-     * ArkUI_NumberValue value[] = { { .u32 = 0xFF1122FF }, 20.0f, 2.0f };
+     * ArkUI_NumberValue value[] = { { .i32 = 0xFF1122FF }, 20.0f, 2.0f };
      * ArkUI_AttributeItem item = {value, sizeof(value)/sizeof(ArkUI_NumberValue)};
      * nativeNodeApi->setAttribute(nodeHandle, NODE_CHECKBOX_MARK, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_CHECKBOX_MARK);
-     * auto value = item->value[0].u32;
+     * auto value = item->value[0].i32;
      * @endcode
      *
      */
@@ -4219,13 +4219,18 @@ typedef enum {
     NODE_SLIDER_SELECTED_COLOR,
 
     /**
-     * @brief Slider设置当前是否显示步长刻度值，支持属性设置，属性重置和属性获取。
+     * @brief Defines whether to display a tooltip when the user drags the slider.
+     * This attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[0].i32：是否显示气泡，1表示显示，0表示不显示，默认值为0。\n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to display a tooltip when the user drags the slider.
+     * The value <b>1</b> means to display a tooltip, and <b>0</b> means the opposite. The default value is <b>0</b>.\n \n
+     * .string?: text content of the tooltip. Optional. The default value is the current percentage. \n
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：是否显示气泡，1表示显示，0表示不显示，默认值为0。\n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to display a tooltip when the user drags the slider.
+     * The value <b>1</b> means to display a tooltip, and <b>0</b> means the opposite. The default value is <b>0</b>.\n \n
+     * .string?: text content of the tooltip. Optional. The default value is the current percentage. \n
      * 
      * @code {.c}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
