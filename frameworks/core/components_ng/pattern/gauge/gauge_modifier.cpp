@@ -30,6 +30,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float ZERO_CIRCLE = 0.0f;
+constexpr float MIN_CIRCLE = 2.0f;
 constexpr float HALF_CIRCLE = 180.0f;
 constexpr float WHOLE_CIRCLE = 360.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
@@ -85,8 +87,9 @@ void GaugeModifier::PaintCircularAndIndicator(RSCanvas& canvas)
     auto offset = geometryNode->GetContentOffset();
     auto contentSize = geometryNode->GetContentSize();
     RenderRingInfo data;
-    data.radius = std::min(contentSize.Width(), contentSize.Height()) / 2.0f;
-    data.center = Offset(contentSize.Width() / 2.0f + offset.GetX(), contentSize.Height() / 2.0f + offset.GetY());
+    data.radius = std::min(contentSize.Width(), contentSize.Height()) / MIN_CIRCLE;
+    data.center = Offset(contentSize.Width() / MIN_CIRCLE + offset.GetX(),
+        contentSize.Height() / MIN_CIRCLE + offset.GetY());
     float startAngle = DEFAULT_START_DEGREE;
     float endAngle = DEFAULT_END_DEGREE;
     if (paintProperty->GetStartAngle().has_value()
@@ -99,11 +102,11 @@ void GaugeModifier::PaintCircularAndIndicator(RSCanvas& canvas)
     }
     float startDegree = startAngle;
     float sweepDegree = endAngle - startAngle;
-    if (GreatNotEqual(sweepDegree, 360.0f)  || LessNotEqual(sweepDegree, 0.0f)) {
-        sweepDegree = sweepDegree - floor(sweepDegree / 360.0f) * 360.0f;
+    if (GreatNotEqual(sweepDegree, WHOLE_CIRCLE)  || LessNotEqual(sweepDegree, ZERO_CIRCLE)) {
+        sweepDegree = sweepDegree - floor(sweepDegree / WHOLE_CIRCLE) * WHOLE_CIRCLE;
     }
     if (NearZero(sweepDegree)) {
-        sweepDegree = 360.0f;
+        sweepDegree = WHOLE_CIRCLE;
     }
     auto theme = pipelineContext->GetTheme<ProgressTheme>();
     data.thickness = theme->GetTrackThickness().ConvertToPx();
@@ -111,7 +114,7 @@ void GaugeModifier::PaintCircularAndIndicator(RSCanvas& canvas)
         && paintProperty->GetStrokeWidth()->Value() > 0) {
         data.thickness =
             std::min(static_cast<float>(paintProperty->GetStrokeWidth()->ConvertToPx()),
-            contentSize.Width() / 2.0f);
+            contentSize.Width() / MIN_CIRCLE);
     }
     PaintDraw(canvas, paintProperty, startDegree, endAngle, data);
 }
@@ -135,15 +138,15 @@ void GaugeModifier::PaintDraw(RSCanvas& canvas, RefPtr<GaugePaintProperty>& pain
         TAG_LOGW(AceLogTag::ACE_GAUGE, "Gauge get the color size is 0 or is not equal to weight size");
         return;
     }
-    float totalWeight = 0.0f;
+    float totalWeight = ZERO_CIRCLE;
     for (auto& weight : weights) {
         totalWeight += weight;
     }
     if (NearEqual(totalWeight, 0.0)) {
         return;
     }
-    float currentStart = 0.0f;
-    float highLightStart = 0.0f;
+    float currentStart = ZERO_CIRCLE;
+    float highLightStart = ZERO_CIRCLE;
     size_t highLightIndex = 0;
     auto ratio = GetValueRatio(paintProperty);
     for (int32_t index = static_cast<int32_t>(colors.size()) - 1; index >= 0; --index) {
@@ -183,10 +186,11 @@ void GaugeModifier::DrawGauge(RSCanvas& canvas, RenderRingInfo data)
 #else
     RSRecordingPath path;
 #endif
-    RSRect rRect(data.center.GetX() - data.radius + thickness / 2.0f,
-        data.center.GetY() - data.radius + thickness / 2.0f, data.center.GetX() + data.radius - thickness / 2.0f,
-        data.center.GetY() + data.radius - thickness / 2.0f);
-    path.AddArc(rRect, data.startDegree - 90.0f, data.sweepDegree);
+    RSRect rRect(data.center.GetX() - data.radius + thickness / MIN_CIRCLE,
+        data.center.GetY() - data.radius + thickness / MIN_CIRCLE,
+        data.center.GetX() + data.radius - thickness / MIN_CIRCLE,
+        data.center.GetY() + data.radius - thickness / MIN_CIRCLE);
+    path.AddArc(rRect, data.startDegree - QUARTER_CIRCLE, data.sweepDegree);
     canvas.DrawPath(path);
     canvas.DetachPen();
 }
@@ -248,7 +252,7 @@ void GaugeModifier::NewPaintCircularAndIndicator(RSCanvas& canvas)
     auto paddingSize = geometryNode->GetPaddingSize();
     auto left = geometryNode->GetPadding()->left.value_or(0.0f);
     auto top = geometryNode->GetPadding()->top.value_or(0.0f);
-    auto radius = std::min(paddingSize.Width(), paddingSize.Height()) / 2.0f;
+    auto radius = std::min(paddingSize.Width(), paddingSize.Height()) / MIN_CIRCLE;
     RenderRingInfo data;
     data.contentSize = paddingSize;
     data.radius = radius;
@@ -297,11 +301,12 @@ void GaugeModifier::PaintMonochromeCircular(
                  data.center.GetX() + data.radius - data.thickness * PERCENT_HALF,
                  data.center.GetY() + data.radius - data.thickness * PERCENT_HALF);
     RSPath path;
-    path.AddArc(rRect, data.startDegree - QUARTER_CIRCLE + offsetDegree, data.sweepDegree - 2.0f * offsetDegree);
+    path.AddArc(rRect, data.startDegree - QUARTER_CIRCLE + offsetDegree,
+        data.sweepDegree - MIN_CIRCLE * offsetDegree);
 
-    auto tempSweepDegree = GreatNotEqual(data.sweepDegree * ratio, 2.0f * offsetDegree)
-                               ? data.sweepDegree * ratio - 2.0f * offsetDegree
-                               : 0.0f;
+    auto tempSweepDegree = GreatNotEqual(data.sweepDegree * ratio, MIN_CIRCLE * offsetDegree)
+                               ? data.sweepDegree * ratio - MIN_CIRCLE * offsetDegree
+                               : ZERO_CIRCLE;
 
     PaintMonochromeCircularShadow(canvas, data, color, paintProperty, tempSweepDegree);
     pen.SetColor(backgroundColor.GetValue());
@@ -389,7 +394,7 @@ void GaugeModifier::PaintSingleSegmentGradientCircular(
                  data.center.GetY() + data.radius - data.thickness * PERCENT_HALF);
 
     RSPath path;
-    path.AddArc(rRect, offsetDegree, data.sweepDegree - 2.0f * offsetDegree);
+    path.AddArc(rRect, offsetDegree, data.sweepDegree - MIN_CIRCLE * offsetDegree);
     canvas.Rotate(data.startDegree - QUARTER_CIRCLE, data.center.GetX(), data.center.GetY());
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
@@ -434,7 +439,7 @@ void GaugeModifier::PaintSingleSegmentGradientCircularShadow(RSCanvas& canvas, R
                  data.center.GetY() + data.radius - data.thickness * PERCENT_HALF);
 
     RSPath path;
-    path.AddArc(rRect, offsetDegree, data.sweepDegree - 2.0f * offsetDegree);
+    path.AddArc(rRect, offsetDegree, data.sweepDegree - MIN_CIRCLE * offsetDegree);
 
     canvas.Save();
     canvas.Translate(shadowOptions.offsetX, shadowOptions.offsetY);
@@ -470,7 +475,7 @@ void GaugeModifier::PaintMultiSegmentGradientCircular(
         TAG_LOGW(AceLogTag::ACE_GAUGE, "Gauge get the color size is 0 or is not equal to weight size");
         return;
     }
-    float totalWeight = 0.0f;
+    float totalWeight = ZERO_CIRCLE;
     for (auto& weight : weights) {
         totalWeight += weight;
     }
@@ -509,7 +514,7 @@ void GaugeModifier::PaintMultiSegmentGradientCircularShadow(RSCanvas& canvas, Re
     if (!shadowOptions.isShadowVisible) {
         return;
     }
-    float totalWeight = 0.0f;
+    float totalWeight = ZERO_CIRCLE;
     for (auto& weight : weights) {
         totalWeight += weight;
     }
@@ -575,7 +580,7 @@ void GaugeModifier::DrawSingleSegmentGradient(RSCanvas& canvas, RenderRingInfo& 
         pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
             ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colorValues, pos, RSTileMode::CLAMP,
             drawStartDegree + offsetDegree, drawStartDegree + drawSweepDegree + offsetDegree, nullptr));
-        path.AddArc(rRect, drawStartDegree + offsetDegree, drawSweepDegree - 2.0f * offsetDegree);
+        path.AddArc(rRect, drawStartDegree + offsetDegree, drawSweepDegree - MIN_CIRCLE * offsetDegree);
     }
 
     canvas.AttachPen(pen);
@@ -619,7 +624,7 @@ void GaugeModifier::DrawHighLight(RSCanvas& canvas, RenderRingInfo& data, float 
 {
     float offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
     auto radius = data.radius - data.thickness * PERCENT_HALF;
-    auto space = data.radius * 2.0f * SEGMENTS_SPACE_PERCENT;
+    auto space = data.radius * MIN_CIRCLE * SEGMENTS_SPACE_PERCENT;
     RSPath path1;
     path1.AddCircle(data.center.GetX() + radius * std::cos((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
                     data.center.GetY() + radius * std::sin((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
@@ -664,13 +669,13 @@ void GaugeModifier::DrawHighLight(RSCanvas& canvas, RenderRingInfo& data, float 
 float GaugeModifier::GetOffsetDegree(RenderRingInfo& data, float oppositeSide)
 {
     return NearEqual(data.radius, data.thickness * PERCENT_HALF)
-               ? 0.0f
+               ? ZERO_CIRCLE
                : std::tan((oppositeSide) / (data.radius - data.thickness * PERCENT_HALF)) * HALF_CIRCLE / M_PI;
 }
 
 float GaugeModifier::GetValueRatio(RefPtr<GaugePaintProperty>& paintProperty)
 {
-    CHECK_NULL_RETURN(paintProperty, 0.0f);
+    CHECK_NULL_RETURN(paintProperty, ZERO_CIRCLE);
     float min = paintProperty->GetMinValue();
     float max = paintProperty->GetMaxValue();
     float value = paintProperty->GetValueValue();
@@ -707,7 +712,7 @@ void GaugeModifier::NewDrawIndicator(
 
     float pathStartVertexX = data.center.GetX();
     float pathStartVertexY = data.center.GetY() - data.radius + indicatorToTop.ConvertToPx() -
-                             INDICATOR_BORDER_WIDTH_RATIO * data.radius / 2.0f;
+                             INDICATOR_BORDER_WIDTH_RATIO * data.radius / MIN_CIRCLE;
     RSPath path;
     CreateDefaultTrianglePath(pathStartVertexX, pathStartVertexY, data.radius, path);
     canvas.Save();
@@ -766,11 +771,11 @@ void GaugeModifier::NewDrawImageIndicator(
 
 void GaugeModifier::CreateDefaultColor(std::vector<RSColorQuad>& colors, std::vector<float>& pos)
 {
-    float space = 0.0f;
+    float space = ZERO_CIRCLE;
     for (auto& color : GAUGE_DEFAULT_COLOR) {
         colors.emplace_back(color.GetValue());
         pos.emplace_back(space);
-        space += 0.5f;
+        space += PERCENT_HALF;
     }
 }
 
@@ -779,27 +784,27 @@ void GaugeModifier::CreateDefaultTrianglePath(
 {
     auto width = radius * RADIUS_TO_DIAMETER * INDICATOR_WIDTH_RATIO;
     auto height = radius * RADIUS_TO_DIAMETER * INDICATOR_HEIGHT_RATIO;
-    auto hypotenuse = std::sqrt(((width / 2.0f) * (width / 2.0f)) + (height * height));
+    auto hypotenuse = std::sqrt(((width / MIN_CIRCLE) * (width / MIN_CIRCLE)) + (height * height));
     
     auto cornerRadius = radius * RADIUS_TO_DIAMETER * INDICATOR_CORNER_RADIUS_RATIO;
-    auto bottomAngle = std::atan(height / (width / 2.0f));
+    auto bottomAngle = std::atan(height / (width / MIN_CIRCLE));
 
     if (!NearZero(hypotenuse) && hypotenuse != 0) {
-        auto tempTopHypotenuse = cornerRadius / (width / 2.0f) * height;
-        auto tempTopWidth = tempTopHypotenuse / hypotenuse * (width / 2.0f);
+        auto tempTopHypotenuse = cornerRadius / (width / MIN_CIRCLE) * height;
+        auto tempTopWidth = tempTopHypotenuse / hypotenuse * (width / MIN_CIRCLE);
         auto tempTopHeight = tempTopHypotenuse / hypotenuse * height;
-        auto tempBottomHypotenuse = cornerRadius / std::tan(bottomAngle / 2.0f);
-        auto tempBottomWidth = tempBottomHypotenuse / hypotenuse * (width / 2.0f);
+        auto tempBottomHypotenuse = cornerRadius / std::tan(bottomAngle / MIN_CIRCLE);
+        auto tempBottomWidth = tempBottomHypotenuse / hypotenuse * (width / MIN_CIRCLE);
         auto tempBottomHeight = tempBottomHypotenuse / hypotenuse * height;
 
         PointF topControlPoint = PointF(pathStartVertexX, pathStartVertexY);
-        PointF leftControlPoint = PointF(pathStartVertexX - width / 2.0f, pathStartVertexY + height);
-        PointF rightControlPoint = PointF(pathStartVertexX + width / 2.0f, pathStartVertexY + height);
+        PointF leftControlPoint = PointF(pathStartVertexX - width / MIN_CIRCLE, pathStartVertexY + height);
+        PointF rightControlPoint = PointF(pathStartVertexX + width / MIN_CIRCLE, pathStartVertexY + height);
 
         PointF trianglePoint1 = topControlPoint + OffsetF(-tempTopWidth, tempTopHeight);
         PointF trianglePoint2 = leftControlPoint + OffsetF(tempBottomWidth, -tempBottomHeight);
-        PointF trianglePoint3 = leftControlPoint + OffsetF(tempBottomHypotenuse, 0.0f);
-        PointF trianglePoint4 = rightControlPoint + OffsetF(-tempBottomHypotenuse, 0.0f);
+        PointF trianglePoint3 = leftControlPoint + OffsetF(tempBottomHypotenuse, ZERO_CIRCLE);
+        PointF trianglePoint4 = rightControlPoint + OffsetF(-tempBottomHypotenuse, ZERO_CIRCLE);
         PointF trianglePoint5 = rightControlPoint + OffsetF(-tempBottomWidth, -tempBottomHeight);
         PointF trianglePoint6 = topControlPoint + OffsetF(tempTopWidth, tempTopHeight);
 
