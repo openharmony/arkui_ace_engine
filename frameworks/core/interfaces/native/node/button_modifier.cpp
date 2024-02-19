@@ -187,6 +187,13 @@ void SetButtonFontWeight(ArkUINodeHandle node, ArkUI_CharPtr fontWeight)
     ButtonModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeightStr));
 }
 
+void SetButtonFontWeightEnum(ArkUINodeHandle node, int fontWeight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(fontWeight));
+}
+
 void ResetButtonFontWeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -474,7 +481,8 @@ const ArkUIButtonModifier* GetButtonModifier()
         ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize, ResetButtonFontSize,
         SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle, SetButtonFontFamily,
         ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle, SetButtonBackgroundColor,
-        ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius, SetButtonSize, ResetButtonSize };
+        ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius, SetButtonFontWeightEnum,
+        SetButtonSize, ResetButtonSize };
 
     return &modifier;
 }
