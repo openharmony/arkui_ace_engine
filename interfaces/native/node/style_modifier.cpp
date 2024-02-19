@@ -426,18 +426,10 @@ bool CheckRangFloat(float start, float end, float value)
 bool CheckAnimation(const ArkUI_AttributeItem* item, int32_t size, int32_t animationIndexBase)
 {
     CHECK_NULL_RETURN(item, false);
-    const int32_t animationDurationIndex = animationIndexBase + ANIMATION_DURATION_INDEX;
-    if (animationDurationIndex < size && (item->value[animationDurationIndex].i32 < 0)) {
-        return false;
-    }
     const int32_t animationCurveIndex = animationIndexBase + ANIMATION_CURVE_INDEX;
     if (animationCurveIndex < size &&
         (item->value[animationCurveIndex].i32 < 0 ||
             item->value[animationCurveIndex].i32 > static_cast<int32_t>(ARKUI_CURVE_FRICTION))) {
-        return false;
-    }
-    const int32_t animationIterationsIndex = animationIndexBase + ANIMATION_INTERATION_INDEX;
-    if (animationIterationsIndex < size && item->value[animationIterationsIndex].i32 < 0) {
         return false;
     }
     const int32_t playModeIndex = animationIndexBase + ANIMATION_PLAY_MODE_INDEX;
