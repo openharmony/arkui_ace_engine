@@ -83,7 +83,8 @@ constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
 const int32_t ERROR_INT_CODE = -1;
 
 constexpr int32_t BLUR_STYLE_NONE_INDEX = 7;
-
+constexpr int32_t PLAY_MODE_REVERSE_VALUE = 1;
+constexpr int32_t PLAY_MODE_ALTERNATE_VALUE = 2;
 std::string g_strValue;
 
 BorderStyle ConvertBorderStyle(int32_t value)
@@ -3093,14 +3094,23 @@ void ResetClip(ArkUINodeHandle node)
     ViewAbstract::SetClipEdge(frameNode, false);
 }
 
+int32_t GetAnimationDirection(int32_t animationPlayMode)
+{
+    if (animationPlayMode == PLAY_MODE_REVERSE_VALUE) {
+        return static_cast<int32_t>(AnimationDirection::REVERSE);
+    } else if (animationPlayMode == PLAY_MODE_ALTERNATE_VALUE) {
+        return static_cast<int32_t>(AnimationDirection::ALTERNATE);
+    }
+    return animationPlayMode;
+}
+
 void SetAnimationOption(std::shared_ptr<AnimationOption>& option, const ArkUIAnimationOptionType* animationOption)
 {
     option->SetDuration(animationOption->duration);
     option->SetCurve(Framework::CreateCurve(std::string(animationOption->curve)));
     option->SetDelay(animationOption->delay);
     option->SetIteration(animationOption->iteration);
-    auto direction = static_cast<AnimationDirection>(animationOption->palyMode);
-    option->SetAnimationDirection(direction);
+    option->SetAnimationDirection(static_cast<AnimationDirection>(GetAnimationDirection(animationOption->palyMode)));
     option->SetTempo(animationOption->tempo);
 }
 
