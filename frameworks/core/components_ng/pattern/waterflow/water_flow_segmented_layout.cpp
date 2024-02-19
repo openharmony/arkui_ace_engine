@@ -80,46 +80,78 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 {
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     itemsCrossSize_.clear();
+    axis_ = props->GetAxis();
+    info_.childrenCount_ = wrapper_->GetTotalChildCount();
+    RegularInit(frameSize);
+    InitFooter(frameSize.CrossSize(axis_));
+
+    // if (!segment) {
+
+    // }
+}
+
+void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
+{
+    auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     auto rowsTemplate = props->GetRowsTemplate().value_or("1fr");
     auto columnsTemplate = props->GetColumnsTemplate().value_or("1fr");
-    axis_ = props->GetAxis();
-    // auto scale = props->GetLayoutConstraint()->scaleProperty;
-    // auto rowsGap = ConvertToPx(props->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
-    // auto columnsGap =
-    //     ConvertToPx(props->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
-    // mainGap_ = axis_ == Axis::HORIZONTAL ? columnsGap : rowsGap;
-    // crossGap_ = axis_ == Axis::VERTICAL ? columnsGap : rowsGap;
+    auto scale = props->GetLayoutConstraint()->scaleProperty;
+    auto rowsGap = ConvertToPx(props->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
+    auto columnsGap = ConvertToPx(props->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
+    mainGaps_ = { axis_ == Axis::HORIZONTAL ? columnsGap : rowsGap };
+    crossGaps_ = { axis_ == Axis::VERTICAL ? columnsGap : rowsGap };
 
-    // parse crossSize for different segments
+    auto crossSize = frameSize.CrossSize(axis_);
+    std::vector<double> crossLens;
+    std::pair<std::vector<double>, bool> cross;
+    if (axis_ == Axis::VERTICAL) {
+        cross = ParseTemplateArgs(
+            WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGaps_[0], info_.childrenCount_);
+    } else {
+        cross = ParseTemplateArgs(
+            WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGaps_[0], info_.childrenCount_);
+    }
+    crossLens = cross.first;
+    if (crossLens.empty()) {
+        crossLens.push_back(crossSize);
+    }
+    if (cross.second) {
+        crossGaps_ = { 0 };
+    }
 
-    //     auto crossSize = frameSize.CrossSize(axis_);
-    //     std::vector<double> crossLens;
-    //     std::pair<std::vector<double>, bool> cross;
-    //     if (axis_ == Axis::VERTICAL) {
-    //         cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
-    //     } else {
-    //         cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
-    //     }
-    //     crossLens = cross.first;
-    //     if (crossLens.empty()) {
-    //         crossLens.push_back(crossSize);
-    //     }
-    //     if (cross.second) {
-    //         crossGap_ = 0;
-    //     }
+    // cross count changed by auto-fill and cross size change
+    if (!info_.items_[0].empty() && crossLens.size() != info_.items_[0].size()) {
+        info_.Reset();
+    }
 
-    //     // cross count changed by auto-fill and cross size change
-    //     if (!info_.items_[0].empty() && crossLens.size() != info_.items_[0].size()) {
-    //         info_.Reset();
-    //     }
+    itemsCrossPosition_.resize(1);
+    itemsCrossSize_.resize(1);
+    margins_.resize(1);
 
-    //     int32_t index = 0;
-    //     // for (const auto& len : crossLens) {
-    //     //     itemsCrossSize_.try_emplace(index, len);
-    //     //     itemsCrossPosition_.try_emplace(index, ComputeCrossPosition(index));
-    //     //     info_.items_[0].try_emplace(index, std::map<int32_t, std::pair<float, float>>());
-    //     //     ++index;
-    //     // }
+    int32_t index = 0;
+    float pos = 0.0f;
+    for (const auto& len : crossLens) {
+        itemsCrossSize_[0].push_back(len);
+        itemsCrossPosition_[0].push_back(pos);
+        pos += len + crossGaps_[0];
+
+        info_.items_[0].try_emplace(index, std::map<int32_t, std::pair<float, float>>());
+        ++index;
+    }
+    // childrenCount - 2 if has footer
+    info_.segmentTails_ = { info_.childrenCount_ - 1 };
+}
+
+void WaterFlowSegmentedLayout::InitFooter(float crossSize)
+{
+    crossGaps_.push_back(0.0f);
+    mainGaps_.push_back(0.0f);
+    margins_.emplace_back();
+    itemsCrossPosition_.push_back({ 0.0f });
+    itemsCrossSize_.push_back({ crossSize });
+    info_.items_.emplace_back();
+    info_.items_.back().try_emplace(0);
+    info_.segmentTails_.push_back(info_.childrenCount_ - 1);
 }
 
 void WaterFlowSegmentedLayout::Fill()

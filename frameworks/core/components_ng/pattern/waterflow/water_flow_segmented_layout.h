@@ -40,6 +40,8 @@ public:
 
 private:
     void Init(const SizeF& frameSize);
+    void RegularInit(const SizeF& frameSize);
+    void InitFooter(float width);
 
     /**
      * @brief Measure self before measuring children.
