@@ -25,9 +25,9 @@ export class Index extends ViewPU {
     super(parent, __localStorage, elmtId);
     this.__appLabel = new ObservedPropertySimplePU('', this, "appLabel");
     this.__appTitle = new ObservedPropertySimplePU('', this, "appTitle");
-    this.__textColor = new ObservedPropertySimplePU(0xff000000, this, "textColor");
+    this.__textColor = new ObservedPropertySimplePU(0x66000000, this, "textColor");
     this.__pixelMap = new ObservedPropertyObjectPU(undefined, this, "pixelMap");
-    this.__iconOpacity = new ObservedPropertySimplePU(1, this, "iconOpacity");
+    this.__iconOpacity = new ObservedPropertySimplePU(0.4, this, "iconOpacity");
     this.setInitiallyProvidedValue(params);
   }
   setInitiallyProvidedValue(params) {

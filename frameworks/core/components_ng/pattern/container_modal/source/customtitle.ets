@@ -29,9 +29,9 @@ const TITLE_ROW_HEIGHT: string = '37vp'
 struct Index {
   @State appLabel: string = '';
   @State appTitle: string = '';
-  @State appLabelColor: Color = 0xff000000;
+  @State appLabelColor: Color = 0x66000000;
   @State pixelMap：image.PixelMap = undefined;
-  @State iconOpacity: number = 1;
+  @State iconOpacity: number = 0.4;
 
   onWindowFocused() {
     this.appLabelColor = 0xff000000;
