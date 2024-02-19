@@ -162,9 +162,12 @@ public:
     void ReplaceNamedRoute(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Back(const std::string& uri, const std::string& params) override;
+    void BackToIndex(int32_t index, const std::string& params) override;
     void Clear() override;
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
+    void GetRouterStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params) override;
+    void GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray) override;
     std::string GetParams() override;
     int32_t GetIndexByUrl(const std::string& url) override;
 

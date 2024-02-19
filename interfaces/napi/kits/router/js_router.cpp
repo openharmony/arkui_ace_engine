@@ -370,6 +370,34 @@ static napi_value JSReplaceNamedRoute(napi_env env, napi_callback_info info)
     return CommonRouterWithCallbackProcess(env, info, callback, "name");
 }
 
+static napi_value JsBackToIndex(napi_env env, napi_callback_info info)
+{
+    size_t argc = 2;
+    napi_value argv[2] = { nullptr, nullptr };
+    napi_value thisVar = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
+
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
+        return nullptr;
+    }
+    std::string paramsString;
+    int32_t routeIndex = 0;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[0], &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, argv[0], &routeIndex);
+    }
+    napi_typeof(env, argv[1], &valueType);
+    if (valueType == napi_object) {
+        ParseParams(env, argv[1], paramsString);
+    }
+    delegate->BackToIndex(routeIndex, paramsString);
+    return nullptr;
+}
+
 static napi_value JSRouterBack(napi_env env, napi_callback_info info)
 {
     size_t argc = 1;
@@ -378,6 +406,11 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
 
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv, &valueType);
+    if (valueType == napi_number) {
+        return JsBackToIndex(env, info);
+    }
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
@@ -387,8 +420,6 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
     std::string paramsString = "";
     napi_value uriNApi = nullptr;
     napi_value params = nullptr;
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv, &valueType);
     if (valueType == napi_object) {
         napi_get_named_property(env, argv, "url", &uriNApi);
         napi_typeof(env, uriNApi, &valueType);
@@ -465,6 +496,104 @@ static napi_value JSRouterGetState(napi_env env, napi_callback_info info)
     napi_set_named_property(env, result, "index", resultArray[0]);
     napi_set_named_property(env, result, "name", resultArray[1]);
     napi_set_named_property(env, result, "path", resultArray[2]);
+    return result;
+}
+
+static napi_value JSGetStateByIndex(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value argv = nullptr;
+    napi_value thisVar = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
+
+    int32_t routeIndex = 0;
+    std::string routeName;
+    std::string routePath;
+    std::string routeParams;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, argv, &routeIndex);
+    }
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
+        return nullptr;
+    }
+
+    delegate->GetRouterStateByIndex(routeIndex, routeName, routePath, routeParams);
+    if (routeName.empty()) {
+        napi_value undefined;
+        napi_get_undefined(env, &undefined);
+        return undefined;
+    }
+    size_t routeNameLen = routeName.length();
+    size_t routePathLen = routePath.length();
+    size_t routeParamsLen = routeParams.length();
+
+    napi_value resultArray[4] = { 0 };
+    napi_create_int32(env, routeIndex, &resultArray[0]);
+    napi_create_string_utf8(env, routeName.c_str(), routeNameLen, &resultArray[1]);
+    napi_create_string_utf8(env, routePath.c_str(), routePathLen, &resultArray[2]);
+    napi_create_string_utf8(env, routeParams.c_str(), routeParamsLen, &resultArray[3]);
+
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    napi_set_named_property(env, result, "index", resultArray[0]);
+    napi_set_named_property(env, result, "name", resultArray[1]);
+    napi_set_named_property(env, result, "path", resultArray[2]);
+    napi_set_named_property(env, result, "params", resultArray[3]);
+    return result;
+}
+
+static napi_value JSGetStateByUrl(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value argv = nullptr;
+    napi_value thisVar = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
+
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
+        return nullptr;
+    }
+    std::string uriString;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv, &valueType);
+    if (valueType == napi_string) {
+        ParseUri(env, argv, uriString);
+    }
+    std::vector<Framework::StateInfo> stateArray;
+    delegate->GetRouterStateByUrl(uriString, stateArray);
+
+    napi_value result = nullptr;
+    napi_create_array(env, &result);
+    int32_t index = 0;
+    for (const auto& info : stateArray) {
+        napi_value pageObj = nullptr;
+        napi_create_object(env, &pageObj);
+        int32_t routeIndex = info.index;
+        std::string routeName = info.name;
+        std::string routePath = info.path;
+        std::string routeParams = info.params;
+        napi_value indexValue = nullptr;
+        napi_value nameValue = nullptr;
+        napi_value pathValue = nullptr;
+        napi_value paramsValue = nullptr;
+
+        napi_create_int32(env, routeIndex, &indexValue);
+        napi_create_string_utf8(env, routeName.c_str(), NAPI_AUTO_LENGTH, &nameValue);
+        napi_create_string_utf8(env, routePath.c_str(), NAPI_AUTO_LENGTH, &pathValue);
+        napi_create_string_utf8(env, routeParams.c_str(), NAPI_AUTO_LENGTH, &paramsValue);
+        napi_set_named_property(env, pageObj, "index", indexValue);
+        napi_set_named_property(env, pageObj, "name", nameValue);
+        napi_set_named_property(env, pageObj, "path", pathValue);
+        napi_set_named_property(env, pageObj, "params", paramsValue);
+        napi_set_element(env, result, index++, pageObj);
+    }
     return result;
 }
 
@@ -686,6 +815,8 @@ static napi_value RouterExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("clear", JSRouterClear),
         DECLARE_NAPI_FUNCTION("getLength", JSRouterGetLength),
         DECLARE_NAPI_FUNCTION("getState", JSRouterGetState),
+        DECLARE_NAPI_FUNCTION("getStateByIndex", JSGetStateByIndex),
+        DECLARE_NAPI_FUNCTION("getStateByUrl", JSGetStateByUrl),
         DECLARE_NAPI_FUNCTION("enableAlertBeforeBackPage", JSRouterEnableAlertBeforeBackPage),
         DECLARE_NAPI_FUNCTION("enableBackPageAlert", JSRouterEnableAlertBeforeBackPage),
         DECLARE_NAPI_FUNCTION("showAlertBeforeBackPage", JSRouterEnableAlertBeforeBackPage),

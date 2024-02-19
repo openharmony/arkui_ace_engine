@@ -926,6 +926,30 @@ void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string
     BackWithTarget(PageTarget(uri), params);
 }
 
+void FrontendDelegateDeclarative::BackToIndex(int32_t index, const std::string& params)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->BackToIndex(index, params);
+        OnMediaQueryUpdate();
+        return;
+    }
+    if (index > pageRouteStack_.size() || index <= 0) {
+        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return;
+    }
+    std::string url;
+    int32_t counter = 1;
+    for (const auto& iter : pageRouteStack_) {
+        if (counter == index) {
+            url = iter.url;
+            break;
+        }
+        counter++;
+    }
+    BackWithTarget(PageTarget(url), params);
+}
+
 void FrontendDelegateDeclarative::Clear()
 {
     if (Container::IsCurrentUseNewPipeline()) {
@@ -979,6 +1003,83 @@ void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, st
     if (pos != std::string::npos) {
         name = url.substr(pos + 1);
         path = url.substr(0, pos + 1);
+    }
+}
+
+void FrontendDelegateDeclarative::GetRouterStateByIndex(int32_t& index, std::string& name,
+    std::string& path, std::string& params)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->GetStateByIndex(index, name, path, params);
+        return;
+    }
+    if (index > pageRouteStack_.size() || index <= 0) {
+        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return;
+    }
+    std::string url;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (pageRouteStack_.empty()) {
+            LOGI("pageRouteStack is empty");
+            return;
+        }
+        int32_t counter = 1;
+        for (const auto& iter : pageRouteStack_) {
+            if (counter == index) {
+                url = iter.url;
+                break;
+            }
+            counter++;
+        }
+    }
+    auto pos = url.rfind(".js");
+    if (pos == url.length() - 3) {
+        url = url.substr(0, pos);
+    }
+    pos = url.rfind("/");
+    if (pos != std::string::npos) {
+        name = url.substr(pos + 1);
+        path = url.substr(0, pos + 1);
+    }
+    params = GetParams();
+}
+
+void FrontendDelegateDeclarative::GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->GetStateByUrl(url, stateArray);
+        return;
+    }
+
+    int32_t counter = 1;
+    std::string tempUrl;
+    StateInfo stateInfo;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (pageRouteStack_.empty()) {
+            LOGI("pageRouteStack is empty");
+            return;
+        }
+        for (const auto& iter : pageRouteStack_) {
+            if (iter.url == url) {
+                stateInfo.index = counter;
+                auto pos = url.rfind(".js");
+                if (pos == url.length() - 3) {
+                    tempUrl = url.substr(0, pos);
+                }
+                pos = tempUrl.rfind("/");
+                if (pos != std::string::npos) {
+                    stateInfo.name = tempUrl.substr(pos + 1);
+                    stateInfo.path = tempUrl.substr(0, pos + 1);
+                }
+                stateInfo.params = GetParams();
+                stateArray.emplace_back(stateInfo);
+            }
+            counter++;
+        }
     }
 }
 
