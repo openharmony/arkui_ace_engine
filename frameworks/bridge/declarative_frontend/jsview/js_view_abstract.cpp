@@ -1871,7 +1871,7 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
-    int32_t value = 0.0;
+    float value = 0.0;
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsLayoutWeight", info, checkList)) {
         if (!info[0]->IsUndefined()) {
@@ -1880,9 +1880,17 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsNumber()) {
-        value = info[0]->ToNumber<int32_t>();
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            value = info[0]->ToNumber<float>();
+        } else {
+            value = info[0]->ToNumber<int32_t>();
+        }
     } else {
-        value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            value = static_cast<float>(StringUtils::StringToUint(info[0]->ToString()));
+        } else {
+            value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
