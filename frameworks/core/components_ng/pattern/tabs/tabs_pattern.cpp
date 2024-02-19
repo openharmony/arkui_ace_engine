@@ -97,26 +97,23 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         }
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
+            if (Recorder::EventRecorder::Get().IsComponentRecordEnable() && weak.Upgrade()) {
+                auto inspectorId = tabsNode->GetInspectorId().value_or("");
+                auto pattern = weak.Upgrade();
+                auto tabBarText = pattern->GetTabBarTextByIndex(index);
+                Recorder::EventParamsBuilder builder;
+                builder.SetId(inspectorId)
+                    .SetType(tabsNode->GetTag())
+                    .SetIndex(index)
+                    .SetText(tabBarText)
+                    .SetDescription(tabsNode->GetAutoEventParamValue(""));
+                Recorder::EventRecorder::Get().OnChange(std::move(builder));
+                if (!inspectorId.empty()) {
+                    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, tabBarText, index);
+                }
+            }
             TabContentChangeEvent eventInfo(index);
             jsEvent(&eventInfo);
-
-            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-                return;
-            }
-            auto inspectorId = tabsNode->GetInspectorId().value_or("");
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto tabBarText = pattern->GetTabBarTextByIndex(index);
-            Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId)
-                .SetType(tabsNode->GetTag())
-                .SetIndex(index)
-                .SetText(tabBarText)
-                .SetDescription(tabsNode->GetAutoEventParamValue(""));
-            Recorder::EventRecorder::Get().OnChange(std::move(builder));
-            if (!inspectorId.empty()) {
-                Recorder::NodeDataCache::Get().PutMultiple(inspectorId, tabBarText, index);
-            }
         }
     });
 
