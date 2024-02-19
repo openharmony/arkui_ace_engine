@@ -150,7 +150,7 @@ void SliderTestNg::SetSliderContentModifier(SliderContentModifier& sliderContent
     sliderContentModifier.InitializeShapeProperty();
     sliderContentModifier.SetTrackThickness(SLIDER_CONTENT_MODIFIER_TRACK_THICKNESS);
     sliderContentModifier.SetTrackBorderRadius(SLIDER_CONTENT_MODIFIER_TRACK_BORDER_RADIUS);
-    sliderContentModifier.SetTrackBackgroundColor(TEST_COLOR);
+    sliderContentModifier.SetTrackBackgroundColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     sliderContentModifier.SetShowSteps(true);
     sliderContentModifier.SetStepSize(SLIDER_CONTENT_MODIFIER_STEP_SIZE);
     sliderContentModifier.SetStepColor(TEST_COLOR);
@@ -251,7 +251,7 @@ HWTEST_F(SliderTestNg, SliderTestNg002, TestSize.Level1)
     sliderModelNG.SetDirection(TEST_AXIS);
     sliderModelNG.SetReverse(BOOL_VAULE);
     sliderModelNG.SetBlockColor(TEST_COLOR);
-    sliderModelNG.SetTrackBackgroundColor(TEST_COLOR);
+    sliderModelNG.SetTrackBackgroundColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     sliderModelNG.SetSelectColor(TEST_COLOR);
     sliderModelNG.SetShowSteps(BOOL_VAULE);
     sliderModelNG.SetThickness(WIDTH);
@@ -273,7 +273,7 @@ HWTEST_F(SliderTestNg, SliderTestNg002, TestSize.Level1)
     EXPECT_EQ(sliderPaintProperty->GetReverse(), BOOL_VAULE);
     EXPECT_EQ(sliderPaintProperty->GetDirection(), TEST_AXIS);
     EXPECT_EQ(sliderPaintProperty->GetBlockColor(), TEST_COLOR);
-    EXPECT_EQ(sliderPaintProperty->GetTrackBackgroundColor(), TEST_COLOR);
+    EXPECT_EQ(sliderPaintProperty->GetTrackBackgroundColor(), SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderPaintProperty->GetSelectColor(), TEST_COLOR);
     EXPECT_EQ(sliderPaintProperty->GetShowSteps(), BOOL_VAULE);
 }
@@ -3174,6 +3174,62 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest019, TestSize.Level1)
     set = false;
     sliderContentModifier.StopCircleCenterAnimation();
     ASSERT_TRUE(set);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest020
+ * @tc.desc: TEST gradient track background
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderContentModifierTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    /**
+     * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
+     */
+    SetSliderContentModifier(sliderContentModifier);
+
+    Gradient gradient;
+    GradientColor gradientColor1;
+    gradientColor1.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColor1.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColor1);
+    GradientColor gradientColor2;
+    gradientColor2.SetLinearColor(LinearColor(Color::RED));
+    gradientColor2.SetDimension(Dimension(0.5));
+    gradient.AddColor(gradientColor2);
+    GradientColor gradientColor3;
+    gradientColor3.SetLinearColor(LinearColor(Color::BLUE));
+    gradientColor3.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColor3);
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    sliderContentModifier.SetTrackBackgroundColor(gradient);
+
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderContentModifier.onDraw(context);
+
+    Gradient gradient2 = sliderContentModifier.trackBackgroundColor_->Get().GetGradient();
+    std::vector<GradientColor> gradientColors2 = gradient2.GetColors();
+
+    EXPECT_EQ(gradientColors.size(), gradientColors2.size());
+    EXPECT_EQ(gradientColors[0].GetLinearColor(), gradientColors2[0].GetLinearColor());
+    EXPECT_EQ(gradientColors[1].GetLinearColor(), gradientColors2[1].GetLinearColor());
+    EXPECT_EQ(gradientColors[2].GetLinearColor(), gradientColors2[2].GetLinearColor());
+    EXPECT_EQ(gradientColors[0].GetDimension(), gradientColors2[0].GetDimension());
+    EXPECT_EQ(gradientColors[1].GetDimension(), gradientColors2[1].GetDimension());
+    EXPECT_EQ(gradientColors[2].GetDimension(), gradientColors2[2].GetDimension());
 }
 
 /**
