@@ -21,8 +21,15 @@
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT WaterFlowLayoutAlgorithm : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(WaterFlowLayoutAlgorithm, LayoutAlgorithm);
+class WaterFlowLayoutBase : public LayoutAlgorithm {
+    DECLARE_ACE_TYPE(WaterFlowLayoutBase, LayoutAlgorithm);
+
+public:
+    virtual WaterFlowLayoutInfo GetLayoutInfo() = 0;
+};
+
+class ACE_EXPORT WaterFlowLayoutAlgorithm : public WaterFlowLayoutBase {
+    DECLARE_ACE_TYPE(WaterFlowLayoutAlgorithm, WaterFlowLayoutBase);
 
 public:
     explicit WaterFlowLayoutAlgorithm(WaterFlowLayoutInfo layoutInfo) : layoutInfo_(std::move(layoutInfo)) {}
@@ -32,7 +39,7 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    WaterFlowLayoutInfo GetLayoutInfo()
+    WaterFlowLayoutInfo GetLayoutInfo() override
     {
         return std::move(layoutInfo_);
     }

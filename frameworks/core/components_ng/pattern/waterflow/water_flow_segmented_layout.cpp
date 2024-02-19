@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_utils.h"
 #include "core/components_ng/property/templates_parser.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
@@ -83,8 +84,9 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
     axis_ = props->GetAxis();
     info_.childrenCount_ = wrapper_->GetTotalChildCount();
     RegularInit(frameSize);
-    InitFooter(frameSize.CrossSize(axis_));
-
+    if (info_.footerIndex_ >= 0) {
+        InitFooter(frameSize.CrossSize(axis_));
+    }
     // if (!segment) {
 
     // }
@@ -138,12 +140,20 @@ void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
         info_.items_[0].try_emplace(index, std::map<int32_t, std::pair<float, float>>());
         ++index;
     }
-    // childrenCount - 2 if has footer
-    info_.segmentTails_ = { info_.childrenCount_ - 1 };
+    info_.segmentTails_ = { (info_.footerIndex_ >= 0) ? info_.childrenCount_ - 2 : info_.childrenCount_ - 1 };
 }
 
 void WaterFlowSegmentedLayout::InitFooter(float crossSize)
 {
+    if (info_.footerIndex_ != info_.childrenCount_ - 1) {
+        // re-insert at the end
+        auto footer = wrapper_->GetOrCreateChildByIndex(info_.footerIndex_);
+        auto waterFlow = wrapper_->GetHostNode();
+        waterFlow->RemoveChildAtIndex(info_.footerIndex_);
+        footer->GetHostNode()->MountToParent(waterFlow);
+        info_.footerIndex_ = info_.childrenCount_ - 1;
+    }
+
     crossGaps_.push_back(0.0f);
     mainGaps_.push_back(0.0f);
     margins_.emplace_back();

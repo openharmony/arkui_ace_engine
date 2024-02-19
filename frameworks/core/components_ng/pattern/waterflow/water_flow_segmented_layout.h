@@ -17,13 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_SEGMENTED_LAYOUT_H
 
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT WaterFlowSegmentedLayout : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(WaterFlowSegmentedLayout, LayoutAlgorithm);
+class WaterFlowSegmentedLayout : public WaterFlowLayoutBase {
+    DECLARE_ACE_TYPE(WaterFlowSegmentedLayout, WaterFlowLayoutBase);
 
 public:
     explicit WaterFlowSegmentedLayout(WaterFlowLayoutInfo layoutInfo) : info_(std::move(layoutInfo)) {}
@@ -33,7 +34,7 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    WaterFlowLayoutInfo GetLayoutInfo()
+    WaterFlowLayoutInfo GetLayoutInfo() override
     {
         return std::move(info_);
     }
@@ -41,7 +42,7 @@ public:
 private:
     void Init(const SizeF& frameSize);
     void RegularInit(const SizeF& frameSize);
-    void InitFooter(float width);
+    void InitFooter(float crossSize);
 
     /**
      * @brief Measure self before measuring children.
@@ -79,6 +80,8 @@ private:
     std::vector<float> crossGaps_;
     float mainSize_ = 0.0f;
     WaterFlowLayoutInfo info_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(WaterFlowSegmentedLayout);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_SEGMENTED_LAYOUT_H
