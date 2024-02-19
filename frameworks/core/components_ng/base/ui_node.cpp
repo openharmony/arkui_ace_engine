@@ -36,8 +36,8 @@ namespace OHOS::Ace::NG {
 
 thread_local int64_t UINode::currentAccessibilityId_ = 0;
 
-UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
-    : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
+UINode::UINode(const std::string& tag, int32_t nodeId, int32_t instanceId, bool isRoot)
+    : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot), instanceId_(instanceId)
 {
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
@@ -54,6 +54,9 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         distributedUI->AddNewNode(nodeId_);
     } while (false);
 #endif
+    if (instanceId_ == -1) {
+        instanceId_ = Container::CurrentId();
+    }
     nodeStatus_ = ViewStackProcessor::GetInstance()->IsBuilderNode() ? NodeStatus::BUILDER_NODE_OFF_MAINTREE
                                                                      : NodeStatus::NORMAL_NODE;
 }
@@ -506,6 +509,7 @@ void UINode::DumpTree(int32_t depth)
     if (DumpLog::GetInstance().GetDumpFile()) {
         DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
         DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
+        DumpLog::GetInstance().AddDesc("InstanceId: " + std::to_string(instanceId_));
         DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
         if (IsDisappearing()) {
             DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
