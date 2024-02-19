@@ -550,7 +550,7 @@ RefPtr<AceType> TextPickerDialogModelNG::CreateObject()
 void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerText,
     NG::TextPickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
-    TextPickerDialog& textPickerDialog)
+    TextPickerDialog& textPickerDialog, TextPickerDialogEvent& textPickerDialogEvent)
 {
     auto container = Container::Current();
     if (!container) {
@@ -570,6 +570,7 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     CHECK_NULL_VOID(theme);
 
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogEvent["acceptId"] = onAccept;
     dialogEvent["changeId"] = onChange;
@@ -579,6 +580,10 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
         }
     };
     dialogCancelEvent["cancelId"] = func;
+    dialogLifeCycleEvent["didAppearId"] = textPickerDialogEvent.onDidAppear;
+    dialogLifeCycleEvent["didDisappearId"] = textPickerDialogEvent.onDidDisappear;
+    dialogLifeCycleEvent["willAppearId"] = textPickerDialogEvent.onWillAppear;
+    dialogLifeCycleEvent["willDisappearId"] = textPickerDialogEvent.onWillDisappear;
     DialogProperties properties;
     ButtonInfo buttonInfo;
     SetDialogProperties(properties, textPickerDialog, theme);
@@ -586,10 +591,12 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTextDialog(
+                properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
         },
         TaskExecutor::TaskType::UI);
 }

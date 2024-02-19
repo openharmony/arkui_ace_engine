@@ -323,7 +323,7 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     NG::DatePickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
     std::function<void(const std::string&)>&& onDateAccept, std::function<void(const std::string&)>&& onDateChange,
-    DatePickerType pickerType)
+    DatePickerType pickerType, PickerDialogEvent& pickerDialogEvent)
 {
     auto container = Container::Current();
     if (!container) {
@@ -344,6 +344,7 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     CHECK_NULL_VOID(theme);
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
     dialogEvent["changeId"] = onChange;
     dialogEvent["acceptId"] = onAccept;
     dialogEvent["dateChangeId"] = onDateChange;
@@ -354,6 +355,10 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
         }
     };
     dialogCancelEvent["cancelId"] = func;
+    dialogLifeCycleEvent["didAppearId"] = pickerDialogEvent.onDidAppear;
+    dialogLifeCycleEvent["didDisappearId"] = pickerDialogEvent.onDidDisappear;
+    dialogLifeCycleEvent["willAppearId"] = pickerDialogEvent.onWillAppear;
+    dialogLifeCycleEvent["willDisappearId"] = pickerDialogEvent.onWillDisappear;
     ButtonInfo buttonInfo;
     DialogProperties properties;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -407,10 +412,12 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowDateDialog(properties, settingData, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowDateDialog(
+                properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
         },
         TaskExecutor::TaskType::UI);
 }

@@ -56,7 +56,7 @@ class ACE_EXPORT TimePickerDialogModelNG : public TimePickerDialogModel {
 public:
     void SetTimePickerDialogShow(PickerDialogInfo& pickerDialog, NG::TimePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange) override;
+        std::function<void(const std::string&)>&& onChange, TimePickerDialogEvent& timePickerDialogEvent) override;
 };
 } // namespace OHOS::Ace::NG
 

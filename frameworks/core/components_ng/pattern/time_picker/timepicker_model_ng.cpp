@@ -233,7 +233,8 @@ void TimePickerModelNG::SetChangeEvent(TimeChangeEvent&& onChange)
 
 void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDialog,
     NG::TimePickerSettingData& settingData, std::function<void()>&& onCancel,
-    std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange)
+    std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
+    TimePickerDialogEvent& timePickerDialogEvent)
 {
     auto container = Container::Current();
     if (!container) {
@@ -262,6 +263,11 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
         }
     };
     dialogCancelEvent["cancelId"] = func;
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
+    dialogLifeCycleEvent["didAppearId"] = timePickerDialogEvent.onDidAppear;
+    dialogLifeCycleEvent["didDisappearId"] = timePickerDialogEvent.onDidDisappear;
+    dialogLifeCycleEvent["willAppearId"] = timePickerDialogEvent.onWillAppear;
+    dialogLifeCycleEvent["willDisappearId"] = timePickerDialogEvent.onWillDisappear;
     DialogProperties properties;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
@@ -306,11 +312,12 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
+        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTimeDialog(
+                properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
         },
         TaskExecutor::TaskType::UI);
 }

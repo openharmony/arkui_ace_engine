@@ -1039,6 +1039,66 @@ void JSTextPickerDialog::JSBind(BindingTarget globalObj)
     JSClass<JSTextPickerDialog>::Bind<>(globalObj);
 }
 
+void TextPickerDialogAppearEvent(const JSCallbackInfo& info, TextPickerDialogEvent& textPickerDialogEvent)
+{
+    std::function<void()> didAppearEvent;
+    std::function<void()> willAppearEvent;
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDidAppear = paramObject->GetProperty("onDidAppear");
+    if (!onDidAppear->IsUndefined() && onDidAppear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppear));
+        didAppearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("TextPickerDialog.onDidAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+    auto onWillAppear = paramObject->GetProperty("onWillAppear");
+    if (!onWillAppear->IsUndefined() && onWillAppear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillAppear));
+        willAppearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("TextPickerDialog.onWillAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+    textPickerDialogEvent.onDidAppear = std::move(didAppearEvent);
+    textPickerDialogEvent.onWillAppear = std::move(willAppearEvent);
+}
+
+void TextPickerDialogDisappearEvent(const JSCallbackInfo& info, TextPickerDialogEvent& textPickerDialogEvent)
+{
+    std::function<void()> didDisappearEvent;
+    std::function<void()> willDisappearEvent;
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
+    if (!onDidDisappear->IsUndefined() && onDidDisappear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappear));
+        didDisappearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("TextPickerDialog.onDidDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+    auto onWillDisappear = paramObject->GetProperty("onWillDisappear");
+    if (!onWillDisappear->IsUndefined() && onWillDisappear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDisappear));
+        willDisappearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("TextPickerDialog.onWillDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+    textPickerDialogEvent.onDidDisappear = std::move(didDisappearEvent);
+    textPickerDialogEvent.onWillDisappear = std::move(willDisappearEvent);
+}
+
 void JSTextPickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -1183,8 +1243,11 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         }
     }
 
+    TextPickerDialogEvent textPickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
+    TextPickerDialogAppearEvent(info, textPickerDialogEvent);
+    TextPickerDialogDisappearEvent(info, textPickerDialogEvent);
     TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData, std::move(cancelEvent),
-        std::move(acceptEvent), std::move(changeEvent), textPickerDialog);
+        std::move(acceptEvent), std::move(changeEvent), textPickerDialog, textPickerDialogEvent);
 }
 
 void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,

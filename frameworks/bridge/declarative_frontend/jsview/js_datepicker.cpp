@@ -32,6 +32,7 @@
 #include "core/components/picker/picker_time_component.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/picker/picker_model.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -636,6 +637,66 @@ void JSDatePickerDialog::JSBind(BindingTarget globalObj)
     JSClass<JSDatePickerDialog>::Bind<>(globalObj);
 }
 
+void DatePickerDialogAppearEvent(const JSCallbackInfo& info, PickerDialogEvent& pickerDialogEvent)
+{
+    std::function<void()> didAppearEvent;
+    std::function<void()> willAppearEvent;
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDidAppear = paramObject->GetProperty("onDidAppear");
+    if (!onDidAppear->IsUndefined() && onDidAppear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppear));
+        didAppearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DatePickerDialog.onDidAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+    auto onWillAppear = paramObject->GetProperty("onWillAppear");
+    if (!onWillAppear->IsUndefined() && onWillAppear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillAppear));
+        willAppearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DatePickerDialog.onWillAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+    pickerDialogEvent.onDidAppear = std::move(didAppearEvent);
+    pickerDialogEvent.onWillAppear = std::move(willAppearEvent);
+}
+
+void DatePickerDialogDisappearEvent(const JSCallbackInfo& info, PickerDialogEvent& pickerDialogEvent)
+{
+    std::function<void()> didDisappearEvent;
+    std::function<void()> willDisappearEvent;
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
+    if (!onDidDisappear->IsUndefined() && onDidDisappear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappear));
+        didDisappearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DatePickerDialog.onDidDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+    auto onWillDisappear = paramObject->GetProperty("onWillDisappear");
+    if (!onWillDisappear->IsUndefined() && onWillDisappear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDisappear));
+        willDisappearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DatePickerDialog.onWillDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+    pickerDialogEvent.onDidDisappear = std::move(didDisappearEvent);
+    pickerDialogEvent.onWillDisappear = std::move(willDisappearEvent);
+}
+
 void JSDatePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -863,9 +924,12 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         }
     }
 
+    PickerDialogEvent pickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
+    DatePickerDialogAppearEvent(info, pickerDialogEvent);
+    DatePickerDialogDisappearEvent(info, pickerDialogEvent);
     DatePickerDialogModel::GetInstance()->SetDatePickerDialogShow(pickerDialog, settingData, std::move(cancelEvent),
         std::move(acceptEvent), std::move(changeEvent), std::move(dateAcceptEvent), std::move(dateChangeEvent),
-        pickerType);
+        pickerType, pickerDialogEvent);
 }
 
 void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
@@ -1219,6 +1283,66 @@ void JSTimePickerDialog::JSBind(BindingTarget globalObj)
     JSClass<JSTimePickerDialog>::Bind<>(globalObj);
 }
 
+void TimePickerDialogAppearEvent(const JSCallbackInfo& info, TimePickerDialogEvent& timePickerDialogEvent)
+{
+    std::function<void()> didAppearEvent;
+    std::function<void()> willAppearEvent;
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDidAppear = paramObject->GetProperty("onDidAppear");
+    if (!onDidAppear->IsUndefined() && onDidAppear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppear));
+        didAppearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DatePickerDialog.onDidAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+    auto onWillAppear = paramObject->GetProperty("onWillAppear");
+    if (!onWillAppear->IsUndefined() && onWillAppear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillAppear));
+        willAppearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DatePickerDialog.onWillAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+    timePickerDialogEvent.onDidAppear = std::move(didAppearEvent);
+    timePickerDialogEvent.onWillAppear = std::move(willAppearEvent);
+}
+
+void TimePickerDialogDisappearEvent(const JSCallbackInfo& info, TimePickerDialogEvent& timePickerDialogEvent)
+{
+    std::function<void()> didDisappearEvent;
+    std::function<void()> willDisappearEvent;
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
+    if (!onDidDisappear->IsUndefined() && onDidDisappear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappear));
+        didDisappearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DatePickerDialog.onDidDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+    auto onWillDisappear = paramObject->GetProperty("onWillDisappear");
+    if (!onWillDisappear->IsUndefined() && onWillDisappear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDisappear));
+        willDisappearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DatePickerDialog.onWillDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+    }
+    timePickerDialogEvent.onDidDisappear = std::move(didDisappearEvent);
+    timePickerDialogEvent.onWillDisappear = std::move(willDisappearEvent);
+}
+
 void JSTimePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -1334,8 +1458,11 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
         }
     }
 
-    TimePickerDialogModel::GetInstance()->SetTimePickerDialogShow(
-        pickerDialog, settingData, std::move(cancelEvent), std::move(acceptEvent), std::move(changeEvent));
+    TimePickerDialogEvent timePickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
+    TimePickerDialogAppearEvent(info, timePickerDialogEvent);
+    TimePickerDialogDisappearEvent(info, timePickerDialogEvent);
+    TimePickerDialogModel::GetInstance()->SetTimePickerDialogShow(pickerDialog, settingData, std::move(cancelEvent),
+        std::move(acceptEvent), std::move(changeEvent), timePickerDialogEvent);
 }
 
 void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
