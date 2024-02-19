@@ -5593,7 +5593,7 @@ HWTEST_F(TextTestNg, HandleDragEvent001, TestSize.Level1)
     EXPECT_TRUE(gesture->GetTextDraggable());
     gesture->SetIsTextDraggable(true);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto onDragStart = eventHub->GetOnDragStart();
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(event, "");
     EXPECT_EQ(dragDropInfo.extraInfo, "3456");
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
@@ -5670,7 +5670,7 @@ HWTEST_F(TextTestNg, HandleDragEvent002, TestSize.Level1)
      */
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto onDragStart = eventHub->GetOnDragStart();
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(dragDropInfo.extraInfo, "");
     EXPECT_TRUE(!pattern->dragResultObjects_.empty());
@@ -5727,7 +5727,7 @@ HWTEST_F(TextTestNg, GetTextResultObject001, TestSize.Level1)
     pattern->textSelector_.Update(0, 15);
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto onDragStart = eventHub->GetOnDragStart();
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(pattern->dragResultObjects_.back().valueString, SPAN_PHONE);
     EXPECT_EQ(pattern->dragResultObjects_.back().offsetInSpan[RichEditorSpanRange::RANGEEND], 2);
@@ -5796,7 +5796,7 @@ HWTEST_F(TextTestNg, GetSymbolSpanResultObject001, TestSize.Level1)
      */
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto onDragStart = eventHub->GetOnDragStart();
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
     pattern->dragResultObjects_.clear();
     pattern->textSelector_.Update(0, 5);
     auto dragDropInfo = onDragStart(dragEvent, "");
@@ -5870,7 +5870,7 @@ HWTEST_F(TextTestNg, GetImageResultObject001, TestSize.Level1)
     pattern->textSelector_.Update(0, 20);
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto onDragStart = eventHub->GetOnDragStart();
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(pattern->dragResultObjects_.size(), 2); // 2 means result list size.
     EXPECT_EQ(pattern->dragResultObjects_.front().imageStyle.verticalAlign, static_cast<int32_t>(ImageFit::FILL));
@@ -6289,7 +6289,7 @@ HWTEST_F(TextTestNg, CreateParagphDragTest001, TestSize.Level1)
     EXPECT_TRUE(gesture->GetTextDraggable());
     gesture->SetIsTextDraggable(true);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto onDragStart = eventHub->GetOnDragStart();
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(event, "");
     EXPECT_EQ(pattern->status_, Status::DRAGGING);
     frameNode->Measure(LayoutConstraintF());

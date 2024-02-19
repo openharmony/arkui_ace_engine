@@ -1398,9 +1398,7 @@ void TextPattern::InitDragEvent()
             return pattern->OnDragStart(event, extraParams);
         }
     };
-    if (!eventHub->HasOnDragStart()) {
-        eventHub->SetOnDragStart(std::move(onDragStart));
-    }
+    eventHub->SetDefaultOnDragStart(std::move(onDragStart));
     auto onDragMove = [weakPtr = WeakClaim(this)](
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();

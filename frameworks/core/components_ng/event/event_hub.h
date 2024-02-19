@@ -245,7 +245,7 @@ public:
 
     bool HasOnDragStart() const
     {
-        return static_cast<bool>(onDragStart_);
+        return static_cast<bool>(onDragStart_) || static_cast<bool>(defaultOnDragStart_);
     }
 
     void SetOnDragEnter(OnDragFunc&& onDragEnter)
@@ -489,15 +489,7 @@ public:
         return customerOnDragEnd_;
     }
 
-    void ClearCustomerOnDragFunc()
-    {
-        onDragStart_ = nullptr;
-        customerOnDragEnter_ = nullptr;
-        customerOnDragLeave_ = nullptr;
-        customerOnDragMove_ = nullptr;
-        customerOnDrop_ = nullptr;
-        customerOnDragEnd_ = nullptr;
-    }
+    void ClearCustomerOnDragFunc();
 
     void FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OHOS::Ace::DragEvent>& info,
         const std::string& extraParams = "");
@@ -513,6 +505,21 @@ public:
     void ClearOnAreaChangedInnerCallbacks()
     {
         onAreaChangedInnerCallbacks_.clear();
+    }
+
+    void SetDefaultOnDragStart(OnDragStartFunc&& defaultOnDragStart)
+    {
+        defaultOnDragStart_ = std::move(defaultOnDragStart);
+    }
+
+    const OnDragStartFunc& GetDefaultOnDragStart() const
+    {
+        return defaultOnDragStart_;
+    }
+
+    bool HasDefaultOnDragStart() const
+    {
+        return static_cast<bool>(defaultOnDragStart_);
     }
 
 protected:
@@ -537,6 +544,7 @@ private:
     OnDragFunc onDrop_;
     OnNewDragFunc onDragEnd_;
 
+    OnDragStartFunc defaultOnDragStart_;
     OnDragFunc customerOnDragEnter_;
     OnDragFunc customerOnDragLeave_;
     OnDragFunc customerOnDragMove_;

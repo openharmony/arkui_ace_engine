@@ -220,4 +220,13 @@ void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& cal
     onAreaChangedInnerCallbacks_[id] = std::move(callback);
 }
 
+void EventHub::ClearCustomerOnDragFunc()
+{
+    onDragStart_ = nullptr;
+    customerOnDragEnter_ = nullptr;
+    customerOnDragLeave_ = nullptr;
+    customerOnDragMove_ = nullptr;
+    customerOnDrop_ = nullptr;
+    customerOnDragEnd_ = nullptr;
+}
 } // namespace OHOS::Ace::NG
