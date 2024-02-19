@@ -623,24 +623,26 @@ int32_t OH_NativeXComponent_RegisterOnFrameCallback(OH_NativeXComponent* compone
 int32_t OH_NativeXComponent_UnregisterOnFrameCallback(OH_NativeXComponent* component);
 
 /**
- * @brief Attach the root <b>ArkUI_NodeHandle</b> to xcomponent's <b>OH_NativeXComponent</b>.
+ * @brief Attaches the UI component created through the native API of ArkUI to this <b>OH_NativeXComponent</b> instance.
  *
- * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
- * @param root Indicates the pointer to the root <b>ArkUI_NodeHandle</b>.
- * @return Returns the status code of the execution.
- * @since 11
- * @version 1.0
+ * @param component Indicates the pointer to the <b>OH_NativeXComponent</b> instance.
+ * @param root Indicates the pointer to the component instance created by the native API.
+ * @return Returns 0 if success.
+ * Returns 401 if a parameter exception occurs.
+ *
+ * @since 12
  */
 int32_t OH_NativeXComponent_AttachNativeRootNode(OH_NativeXComponent* component, ArkUI_NodeHandle root);
 
 /**
- * @brief detach the root <b>ArkUI_NodeHandle</b> to xcomponent's <b>OH_NativeXComponent</b>.
+ * @brief Detaches the native component of ArkUI from this <b>OH_NativeXComponent</b> instance.
  *
- * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
- * @param root Indicates the pointer to the root <b>ArkUI_NodeHandle</b>.
- * @return Returns the status code of the execution.
- * @since 11
- * @version 1.0
+ * @param component Indicates the pointer to the <b>OH_NativeXComponent</b> instance.
+ * @param root Indicates the pointer to the component instance created by the native API.
+ * @return Returns 0 if success.
+ * Returns 401 if a parameter exception occurs.
+ *
+ * @since 12
  */
 int32_t OH_NativeXComponent_DetachNativeRootNode(OH_NativeXComponent* component, ArkUI_NodeHandle root);
 
