@@ -3940,7 +3940,7 @@ bool JSViewAbstract::ParseDollarResource(const JSRef<JSVal>& jsValue, std::strin
     if (isParseType && !ConvertResourceType(results[2], resType)) {
         return false;
     }
-    resName = results[3];
+    resName = resPath;
     return true;
 }
 
