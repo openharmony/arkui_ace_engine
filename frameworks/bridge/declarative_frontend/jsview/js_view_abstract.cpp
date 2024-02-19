@@ -6799,17 +6799,15 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 }
 void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsArray()) {
-        return;
-    }
-
-    auto allowDropArray = JSRef<JSArray>::Cast(info[0]);
     std::set<std::string> allowDropSet;
     allowDropSet.clear();
-    std::string allowDrop;
-    for (size_t i = 0; i < allowDropArray->Length(); i++) {
-        allowDrop = allowDropArray->GetValueAt(i)->ToString();
-        allowDropSet.insert(allowDrop);
+    if (!info[0]->IsUndefined() && info[0]->IsArray()) {
+        auto allowDropArray = JSRef<JSArray>::Cast(info[0]);
+        std::string allowDrop;
+        for (size_t i = 0; i < allowDropArray->Length(); i++) {
+            allowDrop = allowDropArray->GetValueAt(i)->ToString();
+            allowDropSet.insert(allowDrop);
+        }
     }
     ViewAbstractModel::GetInstance()->SetAllowDrop(allowDropSet);
 }
