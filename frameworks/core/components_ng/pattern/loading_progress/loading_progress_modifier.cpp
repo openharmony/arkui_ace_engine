@@ -40,7 +40,7 @@ constexpr float HALF = 0.5f;
 constexpr float DOUBLE = 2.0f;
 constexpr int32_t SKEWY = 3;
 constexpr int32_t SCALEY = 4;
-constexpr int32_t RING_ALPHA = 200;
+constexpr float RING_ALPHA = 200 / 255.0f;
 constexpr int32_t TOTAL_POINTS_COUNT = 20;
 constexpr int32_t TAIL_ANIAMTION_DURATION = 400;
 constexpr int32_t TRANS_DURATION = 100;
@@ -67,7 +67,7 @@ constexpr float SIZE_SCALE3 = 0.93f;
 constexpr float MOVE_STEP = 0.06f;
 constexpr float TRANS_OPACITY_SPAN = 0.3f;
 constexpr float FULL_OPACITY = 255.0f;
-constexpr float FAKE_DELTA = 0.01f; 
+constexpr float FAKE_DELTA = 0.01f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
@@ -129,18 +129,8 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     canvas.Save();
     RSPen pen;
     auto ringColor = color_->Get();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
-    CHECK_NULL_VOID(progressTheme);
-    auto defaultColor = progressTheme->GetLoadingColor();
-    if (ringColor.GetValue() == defaultColor.GetValue()) {
-        pen.SetColor(
-            ToRSColor(Color::FromARGB(RING_ALPHA, ringColor.GetRed(), ringColor.GetGreen(), ringColor.GetBlue())));
-    } else {
-        pen.SetColor(ToRSColor(
-            Color::FromARGB(ringColor.GetAlpha(), ringColor.GetRed(), ringColor.GetGreen(), ringColor.GetBlue())));
-    }
+    ringColor.BlendOpacity(RING_ALPHA);
+    pen.SetColor(ToRSColor(ringColor));
     pen.SetWidth(ringParam.strokeWidth);
     pen.SetAntiAlias(true);
     canvas.AttachPen(pen);
