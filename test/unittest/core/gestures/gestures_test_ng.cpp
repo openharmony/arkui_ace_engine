@@ -12296,7 +12296,7 @@ HWTEST_F(GesturesTestNg, PinchRecognizerPtrHandleTouchMoveEventTest002, TestSize
     pinchRecognizerPtr->distance_ = -1;
     pinchRecognizerPtr->initialDev_ = 1;
     pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(pinchRecognizerPtr->disposal_, GestureDisposal::NONE);
+    EXPECT_EQ(pinchRecognizerPtr->disposal_, GestureDisposal::REJECT);
 
     axisEvent.pinchAxisScale = 1.0;
     pinchRecognizerPtr->refereeState_ = RefereeState::DETECTING;
