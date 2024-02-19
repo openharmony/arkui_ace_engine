@@ -200,6 +200,8 @@ void JSShape::SetFill(const JSCallbackInfo& info)
         Color fillColor;
         if (ParseJsColor(info[0], fillColor)) {
             ShapeModel::GetInstance()->SetFill(fillColor);
+        } else {
+            ShapeModel::GetInstance()->SetFill(Color::BLACK);
         }
     }
 }
