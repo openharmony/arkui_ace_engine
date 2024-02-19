@@ -216,6 +216,8 @@ public:
         predictLayoutParam_ = param;
     }
 
+    std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
+
 private:
     float GetEndOffset();
     float GetMainGap() const;

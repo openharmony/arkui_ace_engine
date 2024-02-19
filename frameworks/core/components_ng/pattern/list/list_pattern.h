@@ -228,6 +228,8 @@ public:
         return isNeedToUpdateListDirection_;
     }
 
+    std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
+
 private:
     bool IsNeedInitClickEventRecorder() const override
     {
