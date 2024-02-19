@@ -55,6 +55,7 @@ void JSSymbol::JSBind(BindingTarget globalObj)
     JSClass<JSSymbol>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSymbol>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSymbol>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSSymbol>::StaticMethod("clip", &JSSymbol::JsClip);
     JSClass<JSSymbol>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -116,5 +117,13 @@ void JSSymbol::SetSymbolEffect(const JSCallbackInfo& info)
     uint32_t strategy = 0;
     ParseJsInteger(info[0], strategy);
     SymbolModel::GetInstance()->SetSymbolEffect(strategy);
+}
+
+void JSSymbol::JsClip(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsClip(info);
+    if (info[0]->IsBoolean()) {
+        SymbolModel::GetInstance()->SetClipEdge();
+    }
 }
 } // namespace OHOS::Ace::Framework
