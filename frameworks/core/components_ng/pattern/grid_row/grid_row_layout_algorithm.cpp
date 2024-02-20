@@ -93,7 +93,7 @@ void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float chi
 
     auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     if (layoutConstraint->selfIdealSize.Height() &&
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         idealSize.SetHeight(selfHeight + padding.Height());
     } else {
         idealSize.SetHeight(childHeight + padding.Height());
