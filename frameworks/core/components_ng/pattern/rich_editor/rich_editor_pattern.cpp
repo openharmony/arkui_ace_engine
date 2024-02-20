@@ -209,7 +209,9 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         isRichEditorInit_ = true;
     }
     MoveCaretAfterTextChange();
-    MoveCaretToContentRect();
+    if (HasFocus()) {
+        MoveCaretToContentRect();
+    }
     if (textSelector_.IsValid() && SelectOverlayIsOn() && isShowMenu_) {
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
@@ -1667,12 +1669,14 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
     CHECK_NULL_VOID(!focusEventInitialized_);
     auto focusTask = [weak = WeakClaim(this)]() {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "rich editor in focus");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
     auto blurTask = [weak = WeakClaim(this)]() {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "rich editor in blur");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleBlurEvent();
