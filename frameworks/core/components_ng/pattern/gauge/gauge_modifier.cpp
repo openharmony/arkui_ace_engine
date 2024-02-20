@@ -48,7 +48,7 @@ void GaugeModifier::onDraw(DrawingContext& context)
     }
 }
 
-void GaugeModifier::UpdateDate()
+void GaugeModifier::UpdateValue()
 {
     auto pattern = DynamicCast<GaugePattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);

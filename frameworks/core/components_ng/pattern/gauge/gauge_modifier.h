@@ -62,7 +62,7 @@ public:
     ~GaugeModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
-    void UpdateDate();
+    void UpdateValue();
 
     float start_ = 0.0f;
     float end_ = 0.0f;
