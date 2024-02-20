@@ -787,6 +787,9 @@ RefPtr<NG::ImageData> PixelMapImageLoader::LoadDecodedImageData(
             imageSourceInfo.ToString().c_str());
         return nullptr;
     }
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "src is pixmap %{public}s", imageSourceInfo.ToString().c_str());
+    }
     return MakeRefPtr<NG::PixmapData>(imageSourceInfo.GetPixmap());
 #endif
 }

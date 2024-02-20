@@ -92,6 +92,7 @@
 #include "ui/rs_node.h"
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "screen_session_manager_client.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1187,11 +1188,25 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     int32_t deviceWidth = 0;
     int32_t deviceHeight = 0;
     float density = 1.0f;
+    float defaultDensity = 1.0f;
     int32_t devicePhysicalWidth = 0;
     int32_t devicePhysicalHeight = 0;
+
+    bool isSceneBoardWindow = window_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
+    if (isSceneBoardWindow) {
+        auto screenProperties = Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+        if (!screenProperties.empty()) {
+            auto iter = screenProperties.begin();
+            defaultDensity = iter->second.GetDefaultDensity();
+        }
+    }
+
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (defaultDisplay) {
         density = defaultDisplay->GetVirtualPixelRatio();
+        if (isSceneBoardWindow && !NearEqual(defaultDensity, 1.0f)) {
+            density = defaultDensity;
+        }
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
         devicePhysicalWidth = defaultDisplay->GetPhysicalWidth();

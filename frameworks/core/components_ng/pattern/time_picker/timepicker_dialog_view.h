@@ -49,6 +49,7 @@ public:
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
+    static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
     static void SetTextProperties(const RefPtr<PickerTheme>& pickerTheme, const PickerTextProperties& properties);
 };

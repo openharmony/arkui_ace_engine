@@ -1871,7 +1871,7 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
-    int32_t value = 0.0;
+    float value = 0.0;
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsLayoutWeight", info, checkList)) {
         if (!info[0]->IsUndefined()) {
@@ -1880,9 +1880,17 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsNumber()) {
-        value = info[0]->ToNumber<int32_t>();
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            value = info[0]->ToNumber<float>();
+        } else {
+            value = info[0]->ToNumber<int32_t>();
+        }
     } else {
-        value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            value = static_cast<float>(StringUtils::StringToUint(info[0]->ToString()));
+        } else {
+            value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
@@ -5584,7 +5592,7 @@ bool JSViewAbstract::ParseInvertProps(const JSRef<JSVal>& jsValue, InvertVariant
 {
     double invertValue = 0.0;
     if (ParseJsDouble(jsValue, invertValue)) {
-        invert = static_cast<float>(invertValue);
+        invert = static_cast<float>(std::clamp(invertValue, 0.0, 1.0));
         return true;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(jsValue->ToString());
@@ -6791,17 +6799,15 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 }
 void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsArray()) {
-        return;
-    }
-
-    auto allowDropArray = JSRef<JSArray>::Cast(info[0]);
     std::set<std::string> allowDropSet;
     allowDropSet.clear();
-    std::string allowDrop;
-    for (size_t i = 0; i < allowDropArray->Length(); i++) {
-        allowDrop = allowDropArray->GetValueAt(i)->ToString();
-        allowDropSet.insert(allowDrop);
+    if (!info[0]->IsUndefined() && info[0]->IsArray()) {
+        auto allowDropArray = JSRef<JSArray>::Cast(info[0]);
+        std::string allowDrop;
+        for (size_t i = 0; i < allowDropArray->Length(); i++) {
+            allowDrop = allowDropArray->GetValueAt(i)->ToString();
+            allowDropSet.insert(allowDrop);
+        }
     }
     ViewAbstractModel::GetInstance()->SetAllowDrop(allowDropSet);
 }

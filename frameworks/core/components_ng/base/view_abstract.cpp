@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "base/log/log_wrapper.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -44,6 +45,7 @@
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -375,7 +377,7 @@ void ViewAbstract::SetLightUpEffect(double radio)
     ACE_UPDATE_RENDER_CONTEXT(LightUpEffect, radio);
 }
 
-void ViewAbstract::SetLayoutWeight(int32_t value)
+void ViewAbstract::SetLayoutWeight(float value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -2982,8 +2984,48 @@ bool ViewAbstract::GetClip(FrameNode* frameNode)
 
 std::optional<RefPtr<BasicShape>> ViewAbstract::GetClipShape(FrameNode* frameNode)
 {
-    const RefPtr<BasicShape> &basicShape = nullptr; 
     const auto& target = frameNode->GetRenderContext();
     return target->GetClipShape();
 }
+
+Matrix4 ViewAbstract::GetTransform(FrameNode* frameNode)
+{ 
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetLocalTransformMatrix();
+}
+
+HitTestMode ViewAbstract::GetHitTestBehavior(FrameNode* frameNode)
+{ 
+    auto gestureHub = frameNode->GetHitTestMode();
+    return gestureHub;
+}
+
+OffsetT<Dimension> ViewAbstract::GetPosition(FrameNode* frameNode)
+{ 
+    Dimension PositionX(0,DimensionUnit::VP);
+    Dimension PositionY(0,DimensionUnit::VP);
+    OffsetT<Dimension> position(PositionX,PositionY);
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetPositionValue(position);
+}
+
+std::optional<Shadow> ViewAbstract::GetShadow(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBackShadow();
+}
+
+NG::Gradient ViewAbstract::GetGradient(FrameNode* frameNode)
+{
+    Gradient gradient;
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetSweepGradientValue(gradient);
+}
+
+RefPtr<BasicShape> ViewAbstract::GetMask(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetClipMask().value();
+}
+
 } // namespace OHOS::Ace::NG

@@ -49,6 +49,7 @@ constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 constexpr Dimension LUNARSWITCH_MARGIN_TO_BUTTON = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
+constexpr uint8_t PIXEL_ROUND = 18;
 } // namespace
 bool DatePickerDialogView::switchFlag_ = false;
 
@@ -276,6 +277,13 @@ RefPtr<FrameNode> DatePickerDialogView::CreateStackNode()
         V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
 }
 
+RefPtr<FrameNode> DatePickerDialogView::CreateColumnNode()
+{
+    auto columnId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, columnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+}
+
 RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode()
 {
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -390,7 +398,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, pickerPattern->GetDividerId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
     CHECK_NULL_RETURN(dividerNode, nullptr);
-    
+
     auto dividerPaintProps = dividerNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_RETURN(dividerPaintProps, nullptr);
     dividerPaintProps->UpdateDividerColor(dialogTheme->GetDividerColor());
@@ -579,36 +587,9 @@ void DatePickerDialogView::CreateNormalDateNode(const RefPtr<FrameNode>& dateNod
     datePickerPattern->SetColumn(monthColumnNode);
     datePickerPattern->SetColumn(dayColumnNode);
 
-    {
-        auto stackYearNode = CreateStackNode();
-        auto buttonYearNode = CreateButtonNode();
-        buttonYearNode->MountToParent(stackYearNode);
-        yearColumnNode->MountToParent(stackYearNode);
-        auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-        layoutProperty->UpdateLayoutWeight(1);
-        stackYearNode->MountToParent(dateNode);
-    }
-    {
-        auto stackMonthNode = CreateStackNode();
-        auto buttonMonthNode = CreateButtonNode();
-        buttonMonthNode->MountToParent(stackMonthNode);
-        monthColumnNode->MountToParent(stackMonthNode);
-        auto layoutProperty = stackMonthNode->GetLayoutProperty<LayoutProperty>();
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-        layoutProperty->UpdateLayoutWeight(1);
-        stackMonthNode->MountToParent(dateNode);
-    }
-    {
-        auto stackDayNode = CreateStackNode();
-        auto buttonDayNode = CreateButtonNode();
-        buttonDayNode->MountToParent(stackDayNode);
-        dayColumnNode->MountToParent(stackDayNode);
-        auto layoutProperty = stackDayNode->GetLayoutProperty<LayoutProperty>();
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-        layoutProperty->UpdateLayoutWeight(1);
-        stackDayNode->MountToParent(dateNode);
-    }
+    MountColumnNodeToPicker(yearColumnNode, dateNode);
+    MountColumnNodeToPicker(monthColumnNode, dateNode);
+    MountColumnNodeToPicker(dayColumnNode, dateNode);
 }
 
 void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNode, uint32_t showCount)
@@ -624,26 +605,20 @@ void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNod
     datePickerPattern->SetColumn(monthDaysColumnNode);
     datePickerPattern->SetColumn(yearColumnNode);
 
-    {
-        auto stackMonthNode = CreateStackNode();
-        auto buttonMonthNode = CreateButtonNode();
-        buttonMonthNode->MountToParent(stackMonthNode);
-        monthDaysColumnNode->MountToParent(stackMonthNode);
-        auto layoutProperty = stackMonthNode->GetLayoutProperty<LayoutProperty>();
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-        layoutProperty->UpdateLayoutWeight(1);
-        stackMonthNode->MountToParent(dateNode);
-    }
+    MountColumnNodeToPicker(monthDaysColumnNode, dateNode);
 
     {
         auto stackYearNode = CreateStackNode();
+        auto blendYearNode = CreateColumnNode();
         auto buttonYearNode = CreateButtonNode();
         buttonYearNode->MountToParent(stackYearNode);
-        yearColumnNode->MountToParent(stackYearNode);
+        yearColumnNode->MountToParent(blendYearNode);
+        blendYearNode->MountToParent(stackYearNode);
         auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateVisibility(VisibleType::GONE);
         stackYearNode->MountToParent(dateNode);
+        yearColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
 }
 
@@ -676,24 +651,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
     timePickerRowPattern->SetColumn(minuteColumnNode);
 
     if (!hasHourNode) {
-        auto stackHourNode = CreateStackNode();
-        auto buttonYearNode = CreateButtonNode();
-        buttonYearNode->MountToParent(stackHourNode);
-        hourColumnNode->MountToParent(stackHourNode);
-        auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-        layoutProperty->UpdateLayoutWeight(1);
-        stackHourNode->MountToParent(timePickerNode);
+        MountColumnNodeToPicker(hourColumnNode, timePickerNode);
     }
     if (!hasMinuteNode) {
-        auto stackMinuteNode = CreateStackNode();
-        auto buttonYearNode = CreateButtonNode();
-        buttonYearNode->MountToParent(stackMinuteNode);
-        minuteColumnNode->MountToParent(stackMinuteNode);
-        auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-        layoutProperty->UpdateLayoutWeight(1);
-        stackMinuteNode->MountToParent(timePickerNode);
+        MountColumnNodeToPicker(minuteColumnNode, timePickerNode);
     }
     if (timePickerProperty.find("selected") != timePickerProperty.end()) {
         auto selectedTime = timePickerProperty["selected"];
@@ -703,6 +664,22 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
 
     SetTimeTextProperties(timePickerNode, properties);
     return timePickerNode;
+}
+
+void DatePickerDialogView::MountColumnNodeToPicker(
+    const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& pickerNode)
+{
+    auto stackNode = CreateStackNode();
+    auto blendNode = CreateColumnNode();
+    auto buttonNode = CreateButtonNode();
+    buttonNode->MountToParent(stackNode);
+    columnNode->MountToParent(blendNode);
+    blendNode->MountToParent(stackNode);
+    auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
+    layoutProperty->UpdateAlignment(Alignment::CENTER);
+    layoutProperty->UpdateLayoutWeight(1);
+    stackNode->MountToParent(pickerNode);
+    columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(

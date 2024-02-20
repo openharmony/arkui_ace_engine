@@ -147,7 +147,9 @@ void TextPickerPattern::SetEventCallback(EventCallback&& value)
     for (const auto& child : children) {
         auto stackNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(stackNode);
-        auto childNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
         CHECK_NULL_VOID(childNode);
         auto pickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_VOID(pickerColumnPattern);
@@ -199,7 +201,10 @@ RefPtr<FrameNode> TextPickerPattern::GetColumnNode()
     auto stackNode = host->GetChildAtIndex(focusKeyID_);
     CHECK_NULL_RETURN(stackNode, nullptr);
 
-    auto columnNode = stackNode->GetLastChild();
+    auto blendNode = stackNode->GetLastChild();
+    CHECK_NULL_RETURN(blendNode, nullptr);
+
+    auto columnNode = blendNode->GetLastChild();
     CHECK_NULL_RETURN(columnNode, nullptr);
 
     return DynamicCast<FrameNode>(columnNode);
@@ -215,7 +220,9 @@ std::map<uint32_t, RefPtr<FrameNode>> TextPickerPattern::GetColumnNodes()
     for (auto iter = children.begin(); iter != children.end(); iter++) {
         CHECK_NULL_RETURN(*iter, allChildNode);
         auto stackNode = DynamicCast<FrameNode>(*iter);
-        auto currentNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_RETURN(blendNode, allChildNode);
+        auto currentNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
         allChildNode[index] = currentNode;
         index++;
     }
@@ -431,18 +438,19 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(pickerTheme);
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackChild);
-    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
+    auto blendChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
+    CHECK_NULL_VOID(blendChild);
+    auto pickerChild = DynamicCast<FrameNode>(blendChild->GetLastChild());
     CHECK_NULL_VOID(pickerChild);
     auto columnWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width();
-    auto frameWidth = host->GetGeometryNode()->GetFrameSize().Width();
+    auto frameSize = host->GetGeometryNode()->GetFrameSize();
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
     auto pickerThemeWidth = dividerSpacing * RATE;
 
-    auto centerX = (frameWidth / childSize - pickerThemeWidth) / RATE +
+    auto centerX = (frameSize.Width() / childSize - pickerThemeWidth) / RATE +
                    columnNode->GetGeometryNode()->GetFrameRect().Width() * focusKeyID_ +
                    PRESS_INTERVAL.ConvertToPx() * RATE;
-    auto centerY =
-        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
+    auto centerY = (frameSize.Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
     float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
     float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
     if (!GetIsShowInDialog()) {
@@ -506,7 +514,9 @@ void TextPickerPattern::SetChangeCallback(ColumnChangeCallback&& value)
     for (const auto& child : children) {
         auto stackNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(stackNode);
-        auto childNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
         CHECK_NULL_VOID(childNode);
         auto textPickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_VOID(textPickerColumnPattern);
@@ -748,7 +758,9 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
         CHECK_NULL_RETURN(child, "");
         auto stackNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_RETURN(stackNode, "");
-        auto currentNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_RETURN(blendNode, "");
+        auto currentNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
         CHECK_NULL_RETURN(currentNode, "");
         auto textPickerColumnPattern = currentNode->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_RETURN(textPickerColumnPattern, "");

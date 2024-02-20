@@ -35,6 +35,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t BUFFER_NODE_NUMBER = 2;
+constexpr uint8_t PIXEL_ROUND = 18;
 
 void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPickerDialog,
                          const RefPtr<DialogTheme>& theme)
@@ -49,7 +50,7 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     if (textPickerDialog.alignment.has_value()) {
         properties.alignment = textPickerDialog.alignment.value();
     }
-    
+
     if (textPickerDialog.backgroundColor.has_value()) {
         properties.backgroundColor = textPickerDialog.backgroundColor.value();
     }
@@ -99,12 +100,15 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
         auto columnNode = CreateColumnNode(columnKind, showCount);
         auto stackNode = CreateStackNode();
         auto buttonNode = CreateButtonNode();
+        auto columnBlendNode = CreateColumnNode();
         buttonNode->MountToParent(stackNode);
-        columnNode->MountToParent(stackNode);
+        columnNode->MountToParent(columnBlendNode);
+        columnBlendNode->MountToParent(stackNode);
         columnNode->MarkModifyDone();
         columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
         stackNode->MountToParent(textPickerNode);
     }
     stack->Push(textPickerNode);
@@ -198,6 +202,13 @@ RefPtr<FrameNode> TextPickerModelNG::CreateStackNode()
     auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
     return FrameNode::GetOrCreateFrameNode(
         V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+}
+
+RefPtr<FrameNode> TextPickerModelNG::CreateColumnNode()
+{
+    auto columnId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, columnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
 }
 
 RefPtr<FrameNode> TextPickerModelNG::CreateButtonNode()
@@ -362,12 +373,15 @@ void TextPickerModelNG::SetUnCascadeColumns(const std::vector<NG::TextCascadePic
             auto columnNode = CreateColumnNode(NG::TEXT, showCount_);
             auto stackNode = CreateStackNode();
             auto buttonNode = CreateButtonNode();
+            auto columnBlendNode = CreateColumnNode();
             buttonNode->MountToParent(stackNode);
-            columnNode->MountToParent(stackNode);
+            columnNode->MountToParent(columnBlendNode);
+            columnBlendNode->MountToParent(stackNode);
             columnNode->MarkModifyDone();
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
+            columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             stackNode->MountToParent(frameNode);
         }
     }
@@ -399,12 +413,15 @@ void TextPickerModelNG::SetCascadeColumns(const std::vector<NG::TextCascadePicke
             auto columnNode = CreateColumnNode(NG::TEXT, showCount_);
             auto stackNode = CreateStackNode();
             auto buttonNode = CreateButtonNode();
+            auto columnBlendNode = CreateColumnNode();
             buttonNode->MountToParent(stackNode);
-            columnNode->MountToParent(stackNode);
+            columnNode->MountToParent(columnBlendNode);
+            columnBlendNode->MountToParent(stackNode);
             columnNode->MarkModifyDone();
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
+            columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             stackNode->MountToParent(frameNode);
         }
     }

@@ -1503,4 +1503,249 @@ HWTEST_F(ListScrollerTestNg, ListPattern_UpdateScrollSnap001, TestSize.Level1)
     pattern_->UpdateScrollSnap();
     EXPECT_EQ(pattern_->predictSnapOffset_.value(), 0.0);
 }
+
+/**
+ * @tc.name: onWillScrollAndOnDidScroll001
+ * @tc.desc: Test scroll callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1)
+{
+    bool isWillTrigger = false;
+    bool isDidTrigger = false;
+    Dimension willOffset;
+    Dimension didOffset;
+    auto willTriggerEvent = [&isWillTrigger, &willOffset](Dimension offset, ScrollState state) {
+        isWillTrigger = true;
+        willOffset = offset;
+    };
+    auto didTriggerEvent = [&isDidTrigger, &didOffset](Dimension offset, ScrollState state) {
+        isDidTrigger = true;
+        didOffset = offset;
+    };
+    CreateWithItem([](ListModelNG model) {});
+    eventHub_->SetOnWillScroll(willTriggerEvent);
+    eventHub_->SetOnDidScroll(didTriggerEvent);
+
+    /**
+     * @tc.steps: Cover condition that  scrollStop_ && !GetScrollAbort()
+     */
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), ITEM_HEIGHT);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_AXIS);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), -ITEM_HEIGHT);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_BAR);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), ITEM_HEIGHT);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), -ITEM_HEIGHT);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), ITEM_HEIGHT);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), -ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: onWillScrollAndOnDidScroll002
+ * @tc.desc: Test scroll callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1)
+{
+    bool isWillTrigger = false;
+    bool isDidTrigger = false;
+    Dimension willOffset;
+    Dimension didOffset;
+    auto willTriggerEvent = [&isWillTrigger, &willOffset](Dimension offset, ScrollState state) {
+        isWillTrigger = true;
+        willOffset = offset;
+    };
+    auto didTriggerEvent = [&isDidTrigger, &didOffset](Dimension offset, ScrollState state) {
+        isDidTrigger = true;
+        didOffset = offset;
+    };
+    CreateWithItem([](ListModelNG model) {});
+    eventHub_->SetOnWillScroll(willTriggerEvent);
+    eventHub_->SetOnDidScroll(didTriggerEvent);
+    /**
+     * @tc.steps: Cover condition that onScroll && !NearZero(finalOffset)
+     */
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollEndCallback(); // set scrollStop_ to true
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), 0);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
+    pattern_->OnScrollEndCallback();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), 0);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
+    pattern_->OnScrollEndCallback();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), 0);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
+    pattern_->OnScrollEndCallback();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), 0);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
+    pattern_->OnScrollEndCallback();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), 0);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
+    pattern_->OnScrollEndCallback();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), 0);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->OnScrollEndCallback();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), 0);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
+    pattern_->OnScrollEndCallback();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), 0);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
+    pattern_->OnScrollEndCallback();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), 0);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
+    pattern_->OnScrollEndCallback();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), 0);
+
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->OnScrollEndCallback();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
+    EXPECT_EQ(didOffset.Value(), 0);
+}
 } // namespace OHOS::Ace::NG

@@ -963,13 +963,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern006, TestSize.Level1)
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_TRUE(minuteColumnPattern);
 
-    auto parentNode = minuteColumn->GetParent();
-    ASSERT_NE(parentNode, nullptr);
+    auto blendNode = minuteColumn->GetParent();
+    ASSERT_NE(blendNode, nullptr);
+    auto stackNode = blendNode->GetParent();
+    ASSERT_NE(stackNode, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    parentNode->children_.emplace_front(buttonNode);
+    stackNode->children_.emplace_front(buttonNode);
 
     minuteColumnPattern->hoverColor_ = Color::BLACK;
     minuteColumnPattern->pressColor_ = Color::BLUE;
@@ -1697,7 +1699,9 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     keyEvent.action = KeyAction::DOWN;
     auto stackChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(timePickerRowPattern->focusKeyID_));
     ASSERT_NE(stackChild, nullptr);
-    auto pickerChild = AceType::DynamicCast<FrameNode>(stackChild->GetLastChild());
+    auto blendChild = AceType::DynamicCast<FrameNode>(stackChild->GetLastChild());
+    ASSERT_NE(blendChild, nullptr);
+    auto pickerChild = AceType::DynamicCast<FrameNode>(blendChild->GetLastChild());
     ASSERT_NE(pickerChild, nullptr);
     auto pattern = pickerChild->GetPattern<TimePickerColumnPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -2204,9 +2208,12 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAlgorithmTest001, TestSize.Level1)
     ASSERT_TRUE(minuteColumn);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_TRUE(minuteColumnPattern);
+    auto columnBlend = AceType::DynamicCast<FrameNode>(minuteColumn->GetParent());
+    ASSERT_TRUE(columnBlend);
+    auto blendLayoutProperty = columnBlend->GetLayoutProperty();
+    blendLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    blendLayoutProperty->UpdateContentConstraint();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(minuteColumn, minuteColumn->GetGeometryNode(), pickerProperty);
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     /**
      * @tc.step: step2. initialize TimePickerColumnLayoutAlgorithm and call Measure
      *                  and Layout function.

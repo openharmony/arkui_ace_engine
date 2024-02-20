@@ -202,28 +202,28 @@ ArkUINativeModuleValue WaterFlowBridge::SetItemConstraintSize(ArkUIRuntimeCallIn
     std::string calcMaxWidthStr;
     std::string calcMinHeightStr;
     std::string calcMaxHeightStr;
-    if (minWidthValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, minWidthValue, minWidth)) {
+    if (minWidthValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, minWidthValue, minWidth, false)) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetItemMinWidth(nativeNode);
     } else {
         SetItemConstraintSizeSendParams(minWidth, calcMinWidthStr);
         GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMinWidth(
             nativeNode, minWidth.Value(), static_cast<int32_t>(minWidth.Unit()), calcMinWidthStr.c_str());
     }
-    if (maxWidthValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, maxWidthValue, maxWidth)) {
+    if (maxWidthValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, maxWidthValue, maxWidth, false)) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetItemMaxWidth(nativeNode);
     } else {
         SetItemConstraintSizeSendParams(maxWidth, calcMaxWidthStr);
         GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMaxWidth(
             nativeNode, maxWidth.Value(), static_cast<int32_t>(maxWidth.Unit()), calcMaxWidthStr.c_str());
     }
-    if (minHeightValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, minHeightValue, minHeight)) {
+    if (minHeightValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, minHeightValue, minHeight, false)) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetItemMinHeight(nativeNode);
     } else {
         SetItemConstraintSizeSendParams(minHeight, calcMinHeightStr);
         GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMinHeight(
             nativeNode, minHeight.Value(), static_cast<int32_t>(minHeight.Unit()), calcMinHeightStr.c_str());
     }
-    if (maxHeightValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, maxHeightValue, maxHeight)) {
+    if (maxHeightValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, maxHeightValue, maxHeight, false)) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetItemMaxHeight(nativeNode);
     } else {
         SetItemConstraintSizeSendParams(maxHeight, calcMaxHeightStr);

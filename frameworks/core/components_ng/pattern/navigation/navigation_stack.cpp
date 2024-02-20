@@ -258,6 +258,30 @@ std::vector<std::string> NavigationStack::GetAllPathName()
     return pathNames;
 }
 
+std::vector<int32_t> NavigationStack::GetRemoveArray()
+{
+    return {};
+}
+
+void NavigationStack::UpdateRemovedNavPathList()
+{
+    auto removeArray = GetRemoveArray();
+    if (navPathList_.empty() || removeArray.empty()) {
+        return;
+    }
+    int32_t index = 0;
+    int32_t removeIndex = 0;
+    for (auto it = navPathList_.begin(); it != navPathList_.end(); ++index) {
+        if (index == removeArray[removeIndex]) {
+            it = navPathList_.erase(it);
+            removeIndex++;
+        } else {
+            ++it;
+        }
+    }
+    ClearRemoveArray();
+}
+
 void NavigationStack::Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo) {}
 
 void NavigationStack::Push(const std::string& name, int32_t index) {}
@@ -269,6 +293,8 @@ void NavigationStack::Clear()
     navPathList_.clear();
     cacheNodes_.clear();
 }
+
+void NavigationStack::ClearRemoveArray() {}
 
 RefPtr<UINode> NavigationStack::CreateNodeByIndex(int32_t index)
 {

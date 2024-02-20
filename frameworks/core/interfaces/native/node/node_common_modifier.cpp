@@ -29,6 +29,7 @@
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -36,6 +37,7 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -85,7 +87,8 @@ const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 
 constexpr int32_t BLUR_STYLE_NONE_INDEX = 7;
-
+constexpr int32_t PLAY_MODE_REVERSE_VALUE = 1;
+constexpr int32_t PLAY_MODE_ALTERNATE_VALUE = 2;
 std::string g_strValue;
 
 BorderStyle ConvertBorderStyle(int32_t value)
@@ -3095,14 +3098,23 @@ void ResetClip(ArkUINodeHandle node)
     ViewAbstract::SetClipEdge(frameNode, false);
 }
 
+int32_t GetAnimationDirection(int32_t animationPlayMode)
+{
+    if (animationPlayMode == PLAY_MODE_REVERSE_VALUE) {
+        return static_cast<int32_t>(AnimationDirection::REVERSE);
+    } else if (animationPlayMode == PLAY_MODE_ALTERNATE_VALUE) {
+        return static_cast<int32_t>(AnimationDirection::ALTERNATE);
+    }
+    return animationPlayMode;
+}
+
 void SetAnimationOption(std::shared_ptr<AnimationOption>& option, const ArkUIAnimationOptionType* animationOption)
 {
     option->SetDuration(animationOption->duration);
     option->SetCurve(Framework::CreateCurve(std::string(animationOption->curve)));
     option->SetDelay(animationOption->delay);
     option->SetIteration(animationOption->iteration);
-    auto direction = static_cast<AnimationDirection>(animationOption->palyMode);
-    option->SetAnimationDirection(direction);
+    option->SetAnimationDirection(static_cast<AnimationDirection>(GetAnimationDirection(animationOption->palyMode)));
     option->SetTempo(animationOption->tempo);
 }
 
@@ -3777,6 +3789,143 @@ ArkUI_Int32 GetClip(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return static_cast<ArkUI_Int32>(ViewAbstract::GetClip(frameNode));
 }
+
+void GetClipShape(ArkUINodeHandle node, ArkUIClipShapeOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto basicShape = ViewAbstract::GetClipShape(frameNode);
+    options.width = basicShape.value()->GetWidth().Value();
+    options.height = basicShape.value()->GetHeight().Value();
+    options.type = static_cast<ArkUI_Int32>(basicShape.value()->GetBasicShapeType());
+    switch (basicShape.value()->GetBasicShapeType()) {
+        case BasicShapeType::PATH: {
+            auto path = AceType::DynamicCast<Path>(basicShape.value());
+            options.commands = path->GetValue().c_str();
+        }
+        case BasicShapeType::RECT: {
+            auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape.value());
+            //radius x
+            options.radiusWidth = shapeRect->GetTopLeftRadius().GetX().Value();
+            //radius y
+            options.radiusHeight = shapeRect->GetTopLeftRadius().GetY().Value();
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void GetTransform(ArkUINodeHandle node, ArkUI_Float64* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto transforms = ViewAbstract::GetTransform(frameNode);
+    for (int i = 0; i < NUM_16; i++) {
+        values[i] = transforms[i];
+    }
+}
+
+ArkUI_Int32 GetHitTestBehavior(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Int32>(ViewAbstract::GetHitTestBehavior(frameNode));
+}
+
+void GetPosition(ArkUINodeHandle node, ArkUIPositionOptions values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto positions = ViewAbstract::GetPosition(frameNode);
+    values.x = positions.GetX().Value();
+    values.y = positions.GetY().Value();
+}
+
+ArkUI_Int32 GetShadow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    int style = static_cast<ArkUI_Int32>(ViewAbstract::GetShadow(frameNode)->GetStyle());
+    return style;
+}
+
+void GetCustomShadow(ArkUINodeHandle node, ArkUICustomShadowOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto shadow = ViewAbstract::GetShadow(frameNode);
+    options.color = shadow->GetColor().GetValue();
+    options.shadowType = static_cast<ArkUI_Int32>(shadow->GetShadowType());
+    options.colorStrategy = static_cast<ArkUI_Int32>(shadow->GetShadowColorStrategy());
+    options.offsetX = shadow->GetOffset().GetX();
+    options.offsetY = shadow->GetOffset().GetY();
+    options.radius = shadow->GetBlurRadius();
+    options.fill = static_cast<ArkUI_Int32>(shadow->GetIsFilled());
+}
+
+void GetSweepGradient(ArkUINodeHandle node, ArkUISweepGradientOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto gradient = ViewAbstract::GetGradient(frameNode);
+    auto sweepGradient = gradient.GetSweepGradient();
+    auto colors = gradient.GetColors();
+    for (ArkUI_Uint32 i = 0; i < gradient.GetColors().size(); i++) {
+        options.colors[i] = colors[i].GetColor().GetValue();
+        options.dimensions[i] = colors[i].GetDimension().Value();
+    }
+    options.colorSize = gradient.GetColors().size();
+    options.repeating = gradient.GetRepeat();
+    options.ceneterX = sweepGradient->centerX->Value();
+    options.ceneterY = sweepGradient->centerY->Value();
+    options.startAngle = sweepGradient->startAngle->Value();
+    options.endAngle = sweepGradient->endAngle->Value();
+    options.rotation = sweepGradient->rotation->Value();
+}
+
+void GetRadialGradient(ArkUINodeHandle node, ArkUIRadialGradientOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto gradient = ViewAbstract::GetGradient(frameNode);
+    auto radialGradient = gradient.GetRadialGradient();
+    auto colors = gradient.GetColors();
+    for (ArkUI_Uint32 i = 0; i < gradient.GetColors().size(); i++) {
+        options.colors[i] = colors[i].GetColor().GetValue();
+        options.dimensions[i] = colors[i].GetDimension().Value();
+    }
+    options.colorSize = gradient.GetColors().size();
+    options.repeating = gradient.GetRepeat();
+    options.ceneterX = radialGradient->radialCenterX->Value();
+    options.ceneterY = radialGradient->radialCenterY->Value();
+    options.radius = gradient.GetInnerRadius();
+}
+
+void GetMask(ArkUINodeHandle node, ArkUIMaskOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto basicShape = ViewAbstract::GetMask(frameNode).value();
+    switch (basicShape->GetBasicShapeType()) {
+        case BasicShapeType::PATH: {
+            auto path = AceType::DynamicCast<Path>(basicShape);
+            options.commands = path->GetValue().c_str();
+            options.color = basicShape->GetColor().GetValue();
+            
+        }
+        case BasicShapeType::RECT: {
+            auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape.value());
+            //radius x
+            options.radiusWidth = shapeRect->GetTopLeftRadius().GetX().Value();
+            //radius y
+            options.radiusHeight = shapeRect->GetTopLeftRadius().GetY().Value();
+            break;
+        }
+        default:
+            break;
+    }
+}
 } // namespace
 
 namespace NodeModifier {
@@ -3826,7 +3975,8 @@ const ArkUICommonModifier* GetCommonModifier()
         SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, GetFocusable, GetDefaultFocus, GetResponseRegion,
         GetOverlay, GetAccessibilityGroup, GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel,
         SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth, GetBorderRadius, GetBorderColor, GetBorderStyle,
-        GetZIndex, GetVisibility, 
+        GetZIndex, GetVisibility, GetClip, GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow,
+        GetCustomShadow 
     };
 
     return &modifier;

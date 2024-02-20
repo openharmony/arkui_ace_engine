@@ -32,6 +32,7 @@
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/popup_param.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -108,7 +109,7 @@ public:
 
     static void SetAspectRatio(float ratio);
     static void ResetAspectRatio();
-    static void SetLayoutWeight(int32_t value);
+    static void SetLayoutWeight(float value);
     static void SetPixelRound(uint8_t value);
     static void SetLayoutDirection(TextDirection value);
 
@@ -507,6 +508,12 @@ public:
     static VisibleType GetVisibility(FrameNode* frameNode);
     static bool GetClip(FrameNode* frameNode);
     static std::optional<RefPtr<BasicShape>> GetClipShape(FrameNode* frameNode);
+    static Matrix4 GetTransform(FrameNode* frameNode);
+    static HitTestMode GetHitTestBehavior(FrameNode* frameNode);
+    static OffsetT<Dimension> GetPosition(FrameNode* frameNode);
+    static std::optional<Shadow> GetShadow(FrameNode* frameNode);
+    static NG::Gradient GetGradient(FrameNode* frameNode);
+    static std::optional<RefPtr<BasicShape>> GetMask(FrameNode* frameNode);    
 private:
     static void AddDragFrameNodeToManager();
 };

@@ -96,6 +96,22 @@ void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, To
     touchEvent.CovertId();
 }
 
+Offset GetTouchEventOriginOffset(const TouchEvent& event)
+{
+    auto pointerEvent = event.pointerEvent;
+    if (!pointerEvent) {
+        return Offset();
+    }
+    int32_t pointerID = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = pointerEvent->GetPointerItem(pointerID, item);
+    if (!ret) {
+        return Offset();
+    } else {
+        return Offset(item.GetWindowX(), item.GetWindowY());
+    }
+}
+
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerID = pointerEvent->GetPointerId();

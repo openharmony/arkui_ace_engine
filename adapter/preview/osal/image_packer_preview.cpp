@@ -13,13 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_PROGRESS_MODIFIER_H
-#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_PROGRESS_MODIFIER_H
+#include "adapter/preview/osal/image_packer_preview.h"
 
-#include "core/interfaces/native/node/node_api.h"
-
-namespace OHOS::Ace::NG::NodeModifier {
-const ArkUIProgressModifier* GetProgressModifier();
+namespace OHOS::Ace {
+RefPtr<ImagePacker> ImagePacker::Create()
+{
+    return nullptr;
 }
 
-#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COMMON_MODIFIER_H
+uint32_t ImagePackerPreview::AddImage(PixelMap& pixelMap)
+{
+    return 0;
+}
+
+uint32_t ImagePackerPreview::StartPacking(uint8_t* data, uint32_t maxSize, const PackOption& option)
+{
+    return 0;
+}
+
+uint32_t ImagePackerPreview::FinalizePacking(int64_t& packedSize)
+{
+    return 0;
+}
+} // namespace OHOS::Ace

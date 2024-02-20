@@ -57,4 +57,11 @@ void SymbolModelNG::SetSymbolEffect(const std::uint32_t effectStrategy)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectStrategy, effectStrategy);
 }
+
+void SymbolModelNG::SetClipEdge()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG

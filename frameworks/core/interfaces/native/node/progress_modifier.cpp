@@ -89,6 +89,28 @@ void ResetProgressValue(ArkUINodeHandle node)
     ProgressModelNG::SetValue(frameNode, DEFAULT_PROGRESS_VALUE);
 }
 
+
+void SetProgressTotal(ArkUINodeHandle node, ArkUI_Float32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ProgressModelNG::SetTotal(frameNode, value);
+}
+
+void SetProgressType(ArkUINodeHandle node, int type)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ProgressModelNG::SetType(frameNode, static_cast<ProgressType>(type));
+}
+
+void RestProgressType(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ProgressModelNG::SetType(frameNode, ProgressType::LINEAR);
+}
+
 void SetProgressGradientColor(ArkUINodeHandle node, const struct ArkUIGradientType* gradient, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -370,7 +392,7 @@ const ArkUIProgressModifier* GetProgressModifier()
 {
     static const ArkUIProgressModifier modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
         SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle, SetProgressBackgroundColor,
-        ResetProgressBackgroundColor };
+        ResetProgressBackgroundColor, SetProgressTotal, SetProgressType, RestProgressType };
     return &modifier;
 }
 }

@@ -353,6 +353,19 @@ void ProgressModelNG::SetValue(FrameNode* frameNode, double value)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Value, value, frameNode);
 }
 
+void ProgressModelNG::SetTotal(FrameNode* frameNode, double max)
+{
+    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, max, frameNode);
+}
+
+void ProgressModelNG::SetType(FrameNode* frameNode, NG::ProgressType type)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, type, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type, frameNode);
+}
+
 void ProgressModelNG::SetColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, value, frameNode);

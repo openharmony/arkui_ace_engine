@@ -27,8 +27,9 @@ class ACE_EXPORT ImageLayoutAlgorithm : public BoxLayoutAlgorithm {
 
 public:
     ImageLayoutAlgorithm(
-        const WeakPtr<ImageLoadingContext>& loadingCtx, const WeakPtr<ImageLoadingContext>& altLoadingCtx = nullptr)
-        : loadingCtx_(loadingCtx), altLoadingCtx_(altLoadingCtx)
+        const WeakPtr<ImageLoadingContext>& loadingCtx, const WeakPtr<ImageLoadingContext>& altLoadingCtx = nullptr,
+            bool autoResizeDefault = true)
+        : loadingCtx_(loadingCtx), altLoadingCtx_(altLoadingCtx), autoResizeDefault_(autoResizeDefault)
     {}
     ~ImageLayoutAlgorithm() override = default;
 
@@ -46,6 +47,7 @@ public:
 private:
     WeakPtr<ImageLoadingContext> loadingCtx_;
     WeakPtr<ImageLoadingContext> altLoadingCtx_;
+    bool autoResizeDefault_;
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

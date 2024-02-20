@@ -59,7 +59,7 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
                 dividerHeight = textPickerPattern->GetResizePickerItemHeight();
             }
 
-            if (contentRect.Height() >= dividerHeight) {
+            if (contentRect.Width() >= 0.0f && contentRect.Height() >= dividerHeight) {
                 picker->PaintDividerLines(canvas, contentRect, dividerHeight);
             }
 
