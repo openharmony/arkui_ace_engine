@@ -200,14 +200,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     selectOverlayProxy_ = restoreSelectOverlayProxy;
     UpdateScrollStateAfterLayout(config.frameSizeChange);
-    if (!isRichEditorInit_) {
-        auto eventHub = GetEventHub<RichEditorEventHub>();
-        CHECK_NULL_RETURN(eventHub, ret);
-        eventHub->FireOnReady();
-        ClearOperationRecords();
-        isFirstCallOnReady_ = true;
-        isRichEditorInit_ = true;
-    }
+    InitRichEditor();
     MoveCaretAfterTextChange();
     if (HasFocus()) {
         MoveCaretToContentRect();
@@ -235,6 +228,19 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     caretUpdateType_ = CaretUpdateType::NONE;
     return ret;
+}
+
+void RichEditorPattern::InitRichEditor()
+{
+    if (isRichEditorInit_) {
+       return;
+    }
+    auto eventHub = GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_RETURN(eventHub, ret);
+    eventHub->FireOnReady();
+    ClearOperationRecords();
+    isFirstCallOnReady_ = true;
+    isRichEditorInit_ = true;
 }
 
 std::function<ImageSourceInfo()> RichEditorPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
