@@ -465,7 +465,7 @@ void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& loc
 {
     auto index = ConvertTouchOffsetToPosition(localOffset);
     MoveSecondHandleToContentRect(index);
-    caretInfo_.index = index;
+    caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
     UpdateCaretOffset(TextAffinity::UPSTREAM);
 }
 
@@ -473,7 +473,7 @@ void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index)
 {
     index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     MoveSecondHandleToContentRect(index);
-    caretInfo_.index = index;
+    caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
     UpdateCaretOffset(HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
     auto caretRect = GetCaretRect();
     MoveHandleToContentRect(caretRect);
