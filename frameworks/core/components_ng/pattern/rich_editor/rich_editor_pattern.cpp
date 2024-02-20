@@ -200,11 +200,15 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     selectOverlayProxy_ = restoreSelectOverlayProxy;
     UpdateScrollStateAfterLayout(config.frameSizeChange);
-    InitRichEditor();
-    MoveCaretAfterTextChange();
-    if (HasFocus()) {
-        MoveCaretToContentRect();
+    if (!isRichEditorInit_) {
+        auto eventHub = GetEventHub<RichEditorEventHub>();
+        CHECK_NULL_RETURN(eventHub, ret);
+        eventHub->FireOnReady();
+        ClearOperationRecords();
+        isFirstCallOnReady_ = true;
+        isRichEditorInit_ = true;
     }
+    MoveCaretOnLayoutSwap();
     if (textSelector_.IsValid() && SelectOverlayIsOn() && isShowMenu_) {
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
@@ -230,17 +234,12 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     return ret;
 }
 
-void RichEditorPattern::InitRichEditor()
+void RichEditorPattern::MoveCaretOnLayoutSwap()
 {
-    if (isRichEditorInit_) {
-        return;
+    MoveCaretAfterTextChange();
+    if (HasFocus()) {
+        MoveCaretToContentRect();
     }
-    auto eventHub = GetEventHub<RichEditorEventHub>();
-    CHECK_NULL_RETURN(eventHub, ret);
-    eventHub->FireOnReady();
-    ClearOperationRecords();
-    isFirstCallOnReady_ = true;
-    isRichEditorInit_ = true;
 }
 
 std::function<ImageSourceInfo()> RichEditorPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
