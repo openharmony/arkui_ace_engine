@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,6 +113,7 @@ public:
     virtual void SetWebStandardFont(const std::string& standardFontFamily) {};
     virtual void SetDefaultFixedFontSize(int32_t defaultFixedFontSize) {};
     virtual void SetDefaultFontSize(int32_t defaultFontSize) {};
+    virtual void SetDefaultTextEncodingFormat(const std::string& textEncodingFormat) {};
     virtual void SetMinFontSize(int32_t minFontSize) {};
     virtual void SetMinLogicalFontSize(int32_t minLogicalFontSize) {};
     virtual void SetBlockNetwork(bool isNetworkBlocked) {};
