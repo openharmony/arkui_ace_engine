@@ -57,7 +57,7 @@ void GaugeModifier::UpdateValue()
     float value = paintProperty->GetValueValue();
     float max = paintProperty->GetMaxValue();
     float min = paintProperty->GetMinValue();
-    if (NearEqual(value, value_)) {
+    if (NearEqual(value, value_->Get())) {
         return;
     }
     value = std::clamp(value, min, max);
