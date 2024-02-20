@@ -455,12 +455,11 @@ bool FormManagerDelegate::ParseAction(const std::string& action, const std::stri
         bundle = wantCache_.GetElement().GetBundleName();
     }
     if (ability.empty()) {
-        if (type == "router") {
-            auto uri = eventAction->GetValue("uri");
-            if (!uri->IsValid()) {
-                return false;
-            }
-        } else {
+        if (type != "router") {
+            return false;
+        }
+        auto uri = eventAction->GetValue("uri");
+        if (!uri->IsValid()) {
             return false;
         }
     }
