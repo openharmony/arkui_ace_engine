@@ -374,7 +374,7 @@ void ViewAbstract::SetLightUpEffect(double radio)
     ACE_UPDATE_RENDER_CONTEXT(LightUpEffect, radio);
 }
 
-void ViewAbstract::SetLayoutWeight(int32_t value)
+void ViewAbstract::SetLayoutWeight(float value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;

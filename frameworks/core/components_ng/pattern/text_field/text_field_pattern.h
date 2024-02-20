@@ -1439,6 +1439,7 @@ private:
     MagnifierRect magnifierRect_;
     RefPtr<MagnifierController> magnifierController_;
     bool isKeyboardClosedByUser_ = false;
+    bool lockRecord_ = false;
 };
 } // namespace OHOS::Ace::NG
 

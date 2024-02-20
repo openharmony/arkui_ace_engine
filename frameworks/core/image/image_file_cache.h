@@ -26,12 +26,9 @@
 #include "core/components_ng/image_provider/image_data.h"
 
 namespace OHOS::Ace {
-const std::string ASTC_SUFFIX = ".astc";
-const std::string SLASH = "/";
-const std::string BACKSLASH = "\\";
 struct FileInfo {
-    FileInfo(std::string name, size_t size, time_t time, size_t cnt)
-        : fileName(std::move(name)), fileSize(size), accessTime(time), accessCount(cnt) {}
+    FileInfo(std::string name, size_t size, time_t time)
+        : fileName(std::move(name)), fileSize(size), accessTime(time) {}
 
     // file information will be sort by access time.
     bool operator<(const FileInfo& otherFile) const
@@ -41,7 +38,6 @@ struct FileInfo {
     std::string fileName;
     size_t fileSize;
     time_t accessTime;
-    size_t accessCount;
 };
 
 class ImageFileCache : public Singleton<ImageFileCache> {
@@ -70,6 +66,8 @@ private:
     void SaveCacheInner(const std::string& cacheKey, const std::string& suffix, size_t cacheSize,
         std::vector<std::string>& removeVector);
     std::string GetCacheFilePathInner(const std::string& url, const std::string& suffix);
+    bool ConvertToAstcAndWriteToFile(const void* const data, size_t size, const std::string& fileCacheKey,
+        size_t& astcSize);
 
     std::shared_mutex cacheFilePathMutex_;
     std::string cacheFilePath_;
@@ -85,7 +83,6 @@ private:
     // lru
     std::list<FileInfo> cacheFileInfo_;
     std::unordered_map<std::string, std::list<FileInfo>::iterator> fileNameToFileInfoPos_;
-    const size_t convertAstcThreshold_ = 5;
 
     bool hasSetCacheFileInfo_ = false;
 };

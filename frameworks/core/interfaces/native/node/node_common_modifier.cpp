@@ -20,6 +20,7 @@
 
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
 #include "bridge/common/utils/utils.h"
@@ -83,7 +84,8 @@ constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
 const int32_t ERROR_INT_CODE = -1;
 
 constexpr int32_t BLUR_STYLE_NONE_INDEX = 7;
-
+constexpr int32_t PLAY_MODE_REVERSE_VALUE = 1;
+constexpr int32_t PLAY_MODE_ALTERNATE_VALUE = 2;
 std::string g_strValue;
 
 BorderStyle ConvertBorderStyle(int32_t value)
@@ -3093,14 +3095,23 @@ void ResetClip(ArkUINodeHandle node)
     ViewAbstract::SetClipEdge(frameNode, false);
 }
 
+int32_t GetAnimationDirection(int32_t animationPlayMode)
+{
+    if (animationPlayMode == PLAY_MODE_REVERSE_VALUE) {
+        return static_cast<int32_t>(AnimationDirection::REVERSE);
+    } else if (animationPlayMode == PLAY_MODE_ALTERNATE_VALUE) {
+        return static_cast<int32_t>(AnimationDirection::ALTERNATE);
+    }
+    return animationPlayMode;
+}
+
 void SetAnimationOption(std::shared_ptr<AnimationOption>& option, const ArkUIAnimationOptionType* animationOption)
 {
     option->SetDuration(animationOption->duration);
     option->SetCurve(Framework::CreateCurve(std::string(animationOption->curve)));
     option->SetDelay(animationOption->delay);
     option->SetIteration(animationOption->iteration);
-    auto direction = static_cast<AnimationDirection>(animationOption->palyMode);
-    option->SetAnimationDirection(direction);
+    option->SetAnimationDirection(static_cast<AnimationDirection>(GetAnimationDirection(animationOption->palyMode)));
     option->SetTempo(animationOption->tempo);
 }
 
@@ -3403,9 +3414,9 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         shape->SetRadiusWidth(radiusWidth);
         shape->SetRadiusHeight(radiusHeight);
         shape->SetColor(Color(fill));
+        shape->SetStrokeColor(stroke);
+        shape->SetStrokeWidth(strokeWidth);
         ViewAbstract::SetMask(frameNode, shape);
-        ShapeAbstractModelNG::SetStroke(frameNode, Color(stroke));
-        ShapeAbstractModelNG::SetStrokeWidth(frameNode, strokeWidth_);
     } else if (shapeType == "circle") {
         auto shape = AceType::MakeRefPtr<Circle>();
         auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
@@ -3414,8 +3425,6 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         shape->SetHeight(height);
         shape->SetColor(Color(fill));
         ViewAbstract::SetMask(frameNode, shape);
-        ShapeAbstractModelNG::SetStroke(frameNode, Color(stroke));
-        ShapeAbstractModelNG::SetStrokeWidth(frameNode, strokeWidth_);
     } else if (shapeType == "ellipse") {
         auto shape = AceType::MakeRefPtr<Ellipse>();
         auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
@@ -3423,9 +3432,9 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         shape->SetWidth(width);
         shape->SetHeight(height);
         shape->SetColor(Color(fill));
+        shape->SetStrokeColor(stroke);
+        shape->SetStrokeWidth(strokeWidth);
         ViewAbstract::SetMask(frameNode, shape);
-        ShapeAbstractModelNG::SetStroke(frameNode, Color(stroke));
-        ShapeAbstractModelNG::SetStrokeWidth(frameNode, strokeWidth_);
     } else {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "type are invalid");
         return;
@@ -3446,9 +3455,9 @@ void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, Ar
     path->SetHeight(height);
     path->SetValue(StringUtils::TrimStr(pathCommands));
     path->SetColor(Color(fill));
+    path->SetStrokeColor(stroke);
+    path->SetStrokeWidth(strokeWidth);
     ViewAbstract::SetMask(frameNode, path);
-    ShapeAbstractModelNG::SetStroke(frameNode, Color(stroke));
-    ShapeAbstractModelNG::SetStrokeWidth(frameNode, strokeWidth_);
 }
 
 void SetProgressMask(ArkUINodeHandle node, const ArkUI_Float32* attribute, ArkUI_Uint32 color)

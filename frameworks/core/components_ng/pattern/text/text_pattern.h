@@ -251,8 +251,6 @@ public:
     std::vector<RectF> GetTextBoxes() override;
     OffsetF GetParentGlobalOffset() const override;
 
-    OffsetF GetTextPaintOffset() const;
-
     const RefPtr<FrameNode>& MoveDragNode() override
     {
         return dragNode_;

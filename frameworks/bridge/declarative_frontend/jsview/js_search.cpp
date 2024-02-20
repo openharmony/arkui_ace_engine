@@ -687,6 +687,10 @@ void JSSearch::SetType(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    if (info[0]->IsUndefined()) {
+        SearchModel::GetInstance()->SetType(TextInputType::UNSPECIFIED);
+        return;
+    }
     if (!info[0]->IsNumber()) {
         return;
     }
