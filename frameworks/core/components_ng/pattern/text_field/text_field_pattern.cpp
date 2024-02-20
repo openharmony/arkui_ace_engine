@@ -1563,8 +1563,6 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
                 pattern->contentController_->erase(dragTextStart, dragTextEnd - dragTextStart);
                 pattern->selectController_->UpdateCaretIndex(current - (dragTextEnd - dragTextStart));
                 pattern->InsertValue(str);
-            } else {
-                pattern->ShowSelectAfterDragEvent();
             }
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
