@@ -118,9 +118,10 @@ public:
     void Replace(const RouterPageInfo& target);
     void ReplaceNamedRoute(const RouterPageInfo& target);
     void BackWithTarget(const RouterPageInfo& target);
+    void BackToIndexWithTarget(int32_t index, const std::string& params);
     void Clear();
     int32_t GetStackSize() const;
-    void BackToIndex(int32_t index, const std::string& params);
+    RouterPageInfo GetPageInfoByIndex(int32_t index, const std::string& params);
 
     void GetState(int32_t& index, std::string& name, std::string& path);
     void GetStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params);
@@ -181,9 +182,11 @@ private:
     void StartPush(const RouterPageInfo& target);
     void StartReplace(const RouterPageInfo& target);
     void StartBack(const RouterPageInfo& target);
+    void StartBackToIndex(int32_t index, const std::string& params);
     bool StartPop();
     void StartRestore(const RouterPageInfo& target);
     void BackCheckAlert(const RouterPageInfo& target);
+    void BackToIndexCheckAlert(int32_t index, const std::string& params);
     void StartClean();
     void CleanPageOverlay();
 
