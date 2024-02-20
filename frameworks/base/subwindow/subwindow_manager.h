@@ -83,6 +83,8 @@ public:
     void HideDialogSubWindow(int32_t instanceId);
     void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);
     void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId = -1, int32_t instanceId = -1);
+    void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);
+    void DeletePopupHotAreas(int32_t overlayId, int32_t instanceId);
     int32_t GetDialogSubWindowId()
     {
         return dialogSubWindowId_;

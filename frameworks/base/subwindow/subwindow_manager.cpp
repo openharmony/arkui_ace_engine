@@ -400,6 +400,37 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overl
         subwindow->SetHotAreas(rects, overlayId);
     }
 }
+
+void SubwindowManager::SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+
+    if (subwindow) {
+        subwindow->SetPopupHotAreas(rects, overlayId);
+    }
+}
+
+void SubwindowManager::DeletePopupHotAreas(int32_t overlayId, int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+
+    if (subwindow) {
+        subwindow->DeletePopupHotAreas(overlayId);
+    }
+}
+
 void SubwindowManager::SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set dialog hot areas enter");
