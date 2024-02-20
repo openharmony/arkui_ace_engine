@@ -686,7 +686,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
     auto frameTag = frameNode->GetTag();
     auto hostPattern = frameNode->GetPattern<TextDragBase>();
-    if (hostPattern && (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
+    if (hostPattern && GetTextDraggable() && (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
                         frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG)) {
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
         frameNodeSize_ = SizeF(0.0f, 0.0f);
