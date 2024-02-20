@@ -378,6 +378,7 @@ public:
     void ShowNext();
     void ShowPrevious();
     void SwipeTo(int32_t index);
+    void ChangeIndex(int32_t index, bool useAnimation);
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -640,6 +641,7 @@ private:
     void HandleMouseEvent(const MouseInfo& info);
     void PlayTranslateAnimation(
         float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false, float velocity = 0.0f);
+    void OnTranslateAnimationFinish();
     void PlaySpringAnimation(double dragVelocity);
     void PlayFadeAnimation();
 
@@ -830,7 +832,10 @@ private:
     // Control translate animation for indicator.
     std::shared_ptr<AnimationUtils::Animation> indicatorAnimation_;
 
+    std::shared_ptr<AnimationUtils::Animation> translateAnimation_;
+
     bool indicatorAnimationIsRunning_ = false;
+    bool translateAnimationIsRunning_ = false;
 
     // stop indicator animation callback
     std::function<void(bool)> stopIndicatorAnimationFunc_;

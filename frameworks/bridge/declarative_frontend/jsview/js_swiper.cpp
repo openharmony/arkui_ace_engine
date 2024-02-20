@@ -1008,6 +1008,7 @@ void JSSwiperController::JSBind(BindingTarget globalObj)
     JSClass<JSSwiperController>::CustomMethod("swipeTo", &JSSwiperController::SwipeTo);
     JSClass<JSSwiperController>::CustomMethod("showNext", &JSSwiperController::ShowNext);
     JSClass<JSSwiperController>::CustomMethod("showPrevious", &JSSwiperController::ShowPrevious);
+    JSClass<JSSwiperController>::CustomMethod("changeIndex", &JSSwiperController::ChangeIndex);
     JSClass<JSSwiperController>::CustomMethod("finishAnimation", &JSSwiperController::FinishAnimation);
     JSClass<JSSwiperController>::Bind(globalObj, JSSwiperController::Constructor, JSSwiperController::Destructor);
 }
@@ -1024,6 +1025,23 @@ void JSSwiperController::Destructor(JSSwiperController* scroller)
     if (scroller != nullptr) {
         scroller->DecRefCount();
     }
+}
+
+void JSSwiperController::ChangeIndex(const JSCallbackInfo& args)
+{
+    if (!controller_) {
+        return;
+    }
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        return;
+    }
+    int32_t index = -1;
+    bool useAnimation = false;
+    if (args.Length() > 1 && args[1]->IsBoolean()) {
+        useAnimation = args[1]->ToBoolean();
+    }
+    index = args[0]->ToNumber<int32_t>();
+    controller_->ChangeIndex(index, useAnimation);
 }
 
 void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)

@@ -26,6 +26,7 @@ using CommonFunc = std::function<void()>;
 using SwipeToImpl = std::function<void(const int32_t, bool)>;
 using SwipeToWithoutAnimationImpl = std::function<void(const int32_t)>;
 using TurnPageRateFunc = std::function<void(const int32_t, float)>;
+using ChangeIndexImpl = std::function<void(const int32_t, bool)>;
 
 class SwiperController : public virtual AceType {
     DECLARE_ACE_TYPE(SwiperController, AceType);
@@ -77,6 +78,18 @@ public:
     void SetShowNextImpl(const CommonFunc& showNextImpl)
     {
         showNextImpl_ = showNextImpl;
+    }
+
+    void ChangeIndex(int32_t index, bool useAnimation)
+    {
+        if (changeIndexImpl_) {
+            changeIndexImpl_(index, useAnimation);
+        }
+    }
+
+    void SetChangeIndexImpl(const ChangeIndexImpl& changeIndexImpl)
+    {
+        changeIndexImpl_ = changeIndexImpl;
     }
 
     void FinishAnimation() const
@@ -191,6 +204,7 @@ private:
     SwipeToWithoutAnimationImpl swipeToWithoutAnimationImpl_;
     CommonFunc showPrevImpl_;
     CommonFunc showNextImpl_;
+    ChangeIndexImpl changeIndexImpl_;
     CommonFunc finishImpl_;
     CommonFunc finishCallback_;
     CommonFunc tabBarFinishCallback_;
