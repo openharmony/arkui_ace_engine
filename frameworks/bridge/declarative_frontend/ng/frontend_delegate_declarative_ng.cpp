@@ -451,7 +451,7 @@ void FrontendDelegateDeclarativeNG::Back(const std::string& uri, const std::stri
 void FrontendDelegateDeclarativeNG::BackToIndex(int32_t index, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->BackToIndex(index, params);
+    pageRouterManager_->BackToIndexWithTarget(index, params);
 }
 
 void FrontendDelegateDeclarativeNG::Clear()

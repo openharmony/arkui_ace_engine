@@ -930,7 +930,7 @@ void FrontendDelegateDeclarative::BackToIndex(int32_t index, const std::string& 
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
-        pageRouterManager_->BackToIndex(index, params);
+        pageRouterManager_->BackToIndexWithTarget(index, params);
         OnMediaQueryUpdate();
         return;
     }
