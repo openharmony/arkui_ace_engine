@@ -268,7 +268,7 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
 
 void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
-    if (configurationChange.colorModeUpdate && builder_) {
+    if ((configurationChange.colorModeUpdate || configurationChange.fontUpdate) && builder_) {
         auto map = builder_->GetCachedUINodeMap();
         for (auto &it : map) {
             auto node = DynamicCast<UINode>(it.second.second);
