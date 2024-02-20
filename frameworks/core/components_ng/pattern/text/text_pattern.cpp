@@ -62,6 +62,8 @@ constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 const std::u16string SYMBOL_TRANS = u"\uF0001";
+const std::string NEWLINE = "\n";
+const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 }; // namespace
 
 void TextPattern::OnAttachToFrameNode()
@@ -128,7 +130,10 @@ void TextPattern::ResetSelection()
 void TextPattern::InitSelection(const Offset& pos)
 {
     CHECK_NULL_VOID(paragraph_);
-    int32_t extend = paragraph_->GetGlyphIndexByCoordinate(pos);
+    int32_t extend = paragraph_->GetGlyphIndexByCoordinate(pos, true);
+    if (IsLineBreakOrEndOfParagraph(extend)) {
+        extend--;
+    }
     int32_t start = 0;
     int32_t end = 0;
     if (!paragraph_->GetWordBoundary(extend, start, end)) {
@@ -137,6 +142,14 @@ void TextPattern::InitSelection(const Offset& pos)
             extend + GetGraphemeClusterLength(GetWideText(), extend));
     }
     HandleSelectionChange(start, end);
+}
+
+bool TextPattern::IsLineBreakOrEndOfParagraph(int32_t pos) const
+{
+    CHECK_NULL_RETURN(pos < static_cast<int32_t>(GetWideText().length() + placeholderCount_), true);
+    auto data = GetWideText();
+    CHECK_NULL_RETURN(data[pos] == WIDE_NEWLINE[0], false);
+    return true;
 }
 
 void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)

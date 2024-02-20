@@ -24,6 +24,10 @@
 #include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::string NEWLINE = "\n";
+const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
+} // namespace
 void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex)
 {
     firstHandleInfo_.index = firstHandleIndex;
@@ -147,7 +151,7 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     }
 }
 
-int32_t TextSelectController::ConvertTouchOffsetToPosition(const Offset& localOffset)
+int32_t TextSelectController::ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos)
 {
     CHECK_NULL_RETURN(paragraph_, 0);
     if (contentController_->IsEmpty()) {
@@ -159,7 +163,7 @@ int32_t TextSelectController::ConvertTouchOffsetToPosition(const Offset& localOf
     CHECK_NULL_RETURN(textFiled, 0);
     auto textRect = textFiled->GetTextRect();
     auto offset = localOffset - Offset(textRect.GetX(), textRect.GetY());
-    return paragraph_->GetGlyphIndexByCoordinate(offset);
+    return paragraph_->GetGlyphIndexByCoordinate(offset, isSelectionPos);
 }
 
 void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
@@ -170,7 +174,12 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     int32_t start = range.first;
     int32_t end = range.second;
     UpdateHandleIndex(start, end);
-    auto index = ConvertTouchOffsetToPosition(localOffset);
+    int32_t index = 0;
+    if (start != end) {
+        index = std::max(start, end);
+    } else {
+        index = ConvertTouchOffsetToPosition(localOffset);
+    }
     auto textLength = static_cast<int32_t>(contentController_->GetWideText().length());
     if (index == textLength && GreatNotEqual(localOffset.GetX(), caretInfo_.rect.GetOffset().GetX())) {
         UpdateHandleIndex(GetCaretIndex());
@@ -185,11 +194,14 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
 
 std::pair<int32_t, int32_t> TextSelectController::GetSelectRangeByOffset(const Offset& localOffset)
 {
-    std::pair<int32_t, int32_t> err (-1, -1);
+    std::pair<int32_t, int32_t> err(-1, -1);
     CHECK_NULL_RETURN(paragraph_ && !contentController_->IsEmpty(), err);
     int32_t start = 0;
     int32_t end = 0;
-    auto pos = ConvertTouchOffsetToPosition(localOffset);
+    auto pos = ConvertTouchOffsetToPosition(localOffset, true);
+    if (IsLineBreakOrEndOfParagraph(pos)) {
+        pos--;
+    }
     // Ensure that the end is selected.
     if (pos >= static_cast<int32_t>(paragraph_->GetParagraphText().length())) {
         pos -= 1;
@@ -214,7 +226,15 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectRangeByOffset(const O
         TAG_LOGI(AceLogTag::ACE_TEXT,
             "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
     }
-    return {start, end};
+    return { start, end };
+}
+
+bool TextSelectController::IsLineBreakOrEndOfParagraph(int32_t pos) const
+{
+    CHECK_NULL_RETURN(pos < static_cast<int32_t>(contentController_->GetWideText().length()), true);
+    auto data = contentController_->GetWideText();
+    CHECK_NULL_RETURN(data[pos] == WIDE_NEWLINE[0], false);
+    return true;
 }
 
 int32_t TextSelectController::GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev)
