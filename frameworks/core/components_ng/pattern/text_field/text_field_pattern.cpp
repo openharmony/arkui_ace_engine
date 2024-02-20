@@ -847,6 +847,7 @@ void TextFieldPattern::HandleSelect(CaretMoveIntent direction)
             LOGW("Unsupported select operation for text field");
         }
     }
+    UpdateRecordCaretIndex(selectController_->GetCaretIndex());
 }
 
 void TextFieldPattern::InitDisableColor()
@@ -1046,10 +1047,10 @@ void TextFieldPattern::HandleOnRedoAction()
         return;
     }
     auto textEditingValue = redoOperationRecords_.back();
-    contentController_->SetTextValue(textEditingValue.text);
-    selectController_->UpdateCaretIndex(textEditingValue.caretPosition);
     redoOperationRecords_.pop_back();
     operationRecords_.push_back(textEditingValue);
+    contentController_->SetTextValue(textEditingValue.text);
+    selectController_->UpdateCaretIndex(textEditingValue.caretPosition);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -2637,6 +2638,7 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
         }
         proxy->SetHandleReverse(selectController_->HasReverse());
     }
+    UpdateRecordCaretIndex(selectController_->GetCaretIndex());
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -2986,6 +2988,7 @@ void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)
     }
     mouseStatus_ = MouseStatus::MOVE;
     selectController_->UpdateSecondHandleInfoByMouseOffset(info.GetLocalLocation()); // 更新时上报事件
+    UpdateRecordCaretIndex(selectController_->GetCaretIndex());
     showSelect_ = true;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -4282,7 +4285,9 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     CHECK_NULL_VOID(layoutProperty);
     ResetObscureTickCountDown();
     if (IsSelected()) {
+        lockRecord_ = true;
         Delete(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+        lockRecord_ = false;
         return;
     }
     if (selectController_->GetCaretIndex() <= 0) {
@@ -4308,7 +4313,9 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 {
     auto start = std::max(selectController_->GetCaretIndex() - length, 0);
     contentController_->erase(start, length);
+    lockRecord_ = true;
     selectController_->UpdateCaretIndex(start);
+    lockRecord_ = false;
     StartTwinkling();
     UpdateEditingValueToRecord();
     auto tmpHost = GetHost();
@@ -6061,7 +6068,7 @@ RefPtr<FocusHub> TextFieldPattern::GetFocusHub() const
 
 void TextFieldPattern::UpdateRecordCaretIndex(int32_t index)
 {
-    if (operationRecords_.empty()) {
+    if (lockRecord_ || operationRecords_.empty()) {
         return;
     }
     operationRecords_.back().caretPosition = index;
