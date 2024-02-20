@@ -686,6 +686,8 @@ public:
 
     void InitLastArea();
 
+    OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -755,6 +757,10 @@ private:
     const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const;
 
     void SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset);
+
+    const std::pair<uint64_t, OffsetF>& GetCachedTransformRelativeOffset() const;
+
+    void SetCachedTransformRelativeOffset(const std::pair<uint64_t, OffsetF>& timestampOffset);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -828,7 +834,8 @@ private:
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
-    std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = {0, OffsetF()};
+    std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
+    std::pair<uint64_t, OffsetF> cachedTransformRelativeOffset_ = { 0, OffsetF() };
 
     friend class RosenRenderContext;
     friend class RenderContext;
