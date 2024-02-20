@@ -58,6 +58,7 @@ public:
     bool UpdateDragItemInfo(DragItemInfo& itemInfo) override;
     void EnableAnalyzer(bool isEnableAnalyzer) override {}
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override {}
+    void SetImageAnalyzerConfig(void* config) override {}
     void SetSmoothEdge(float value)  override {}
 };
 
