@@ -70,7 +70,8 @@ public:
     {
         if (finishTransitionEvent_ && !hasFinished_) {
             hasFinished_ = true;
-            (*finishTransitionEvent_)(hasOnChanged_);
+            auto event = *finishTransitionEvent_;
+            event(hasOnChanged_);
         }
     }
 

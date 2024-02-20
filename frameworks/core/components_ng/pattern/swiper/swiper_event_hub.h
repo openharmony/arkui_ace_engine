@@ -91,7 +91,10 @@ public:
     {
         if (!changeEvents_.empty()) {
             std::for_each(
-                changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& event) { (*event)(index); });
+                changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& changeEvent) {
+                    auto event = *changeEvent;
+                    event(index);
+                });
         }
 
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
@@ -125,8 +128,9 @@ public:
     {
         if (!animationStartEvents_.empty()) {
             std::for_each(animationStartEvents_.begin(), animationStartEvents_.end(),
-                [index, targetIndex, info](const AnimationStartEventPtr& event) {
-                    (*event)(index, targetIndex, info);
+                [index, targetIndex, info](const AnimationStartEventPtr& animationStartEvent) {
+                    auto event = *animationStartEvent;
+                    event(index, targetIndex, info);
                 });
         }
     }
@@ -135,7 +139,10 @@ public:
     {
         if (!animationEndEvents_.empty()) {
             std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
-                [index, info](const AnimationEndEventPtr& event) { (*event)(index, info); });
+                [index, info](const AnimationEndEventPtr& animationEndEvent) {
+                    auto event = *animationEndEvent;
+                    event(index, info);
+                });
         }
     }
 

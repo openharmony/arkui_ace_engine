@@ -2022,7 +2022,8 @@ void TabBarPattern::TabBarClickEvent(int32_t index) const
     CHECK_NULL_VOID(tabsPattern);
     auto tabBarClickEvent = tabsPattern->GetTabBarClickEvent();
     CHECK_NULL_VOID(tabBarClickEvent);
-    (*tabBarClickEvent)(index);
+    auto event = *tabBarClickEvent;
+    event(index);
 }
 
 
