@@ -26,12 +26,15 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
+#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -239,6 +242,27 @@ void* createSliderNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createDatePickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = DatePickerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTimePickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TimePickerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTextPickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -282,9 +306,9 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr,
         nullptr,
         createListItemGroupNode,
-        nullptr, // DatePicker
-        nullptr, // TimePicker
-        nullptr, // TextPicker
+        createDatePickerNode,
+        createTimePickerNode,
+        createTextPickerNode,
         nullptr, // GridItem
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
