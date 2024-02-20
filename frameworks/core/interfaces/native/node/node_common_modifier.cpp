@@ -20,6 +20,7 @@
 
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
 #include "bridge/common/utils/utils.h"
@@ -3413,9 +3414,9 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         shape->SetRadiusWidth(radiusWidth);
         shape->SetRadiusHeight(radiusHeight);
         shape->SetColor(Color(fill));
+        shape->SetStrokeColor(stroke);
+        shape->SetStrokeWidth(strokeWidth);
         ViewAbstract::SetMask(frameNode, shape);
-        ShapeAbstractModelNG::SetStroke(frameNode, Color(stroke));
-        ShapeAbstractModelNG::SetStrokeWidth(frameNode, strokeWidth_);
     } else if (shapeType == "circle") {
         auto shape = AceType::MakeRefPtr<Circle>();
         auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
@@ -3424,8 +3425,6 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         shape->SetHeight(height);
         shape->SetColor(Color(fill));
         ViewAbstract::SetMask(frameNode, shape);
-        ShapeAbstractModelNG::SetStroke(frameNode, Color(stroke));
-        ShapeAbstractModelNG::SetStrokeWidth(frameNode, strokeWidth_);
     } else if (shapeType == "ellipse") {
         auto shape = AceType::MakeRefPtr<Ellipse>();
         auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
@@ -3433,9 +3432,9 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
         shape->SetWidth(width);
         shape->SetHeight(height);
         shape->SetColor(Color(fill));
+        shape->SetStrokeColor(stroke);
+        shape->SetStrokeWidth(strokeWidth);
         ViewAbstract::SetMask(frameNode, shape);
-        ShapeAbstractModelNG::SetStroke(frameNode, Color(stroke));
-        ShapeAbstractModelNG::SetStrokeWidth(frameNode, strokeWidth_);
     } else {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "type are invalid");
         return;
@@ -3456,9 +3455,9 @@ void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, Ar
     path->SetHeight(height);
     path->SetValue(StringUtils::TrimStr(pathCommands));
     path->SetColor(Color(fill));
+    path->SetStrokeColor(stroke);
+    path->SetStrokeWidth(strokeWidth);
     ViewAbstract::SetMask(frameNode, path);
-    ShapeAbstractModelNG::SetStroke(frameNode, Color(stroke));
-    ShapeAbstractModelNG::SetStrokeWidth(frameNode, strokeWidth_);
 }
 
 void SetProgressMask(ArkUINodeHandle node, const ArkUI_Float32* attribute, ArkUI_Uint32 color)
