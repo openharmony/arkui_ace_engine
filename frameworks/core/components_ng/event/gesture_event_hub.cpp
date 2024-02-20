@@ -714,20 +714,22 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     dragDropManager->SetDraggingPressedState(true);
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
-            dragDropInfo.pixelMap = dragPreviewPixelMap_;
-            OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
-            return;
+            if (dragPreviewPixelMap_ != nullptr) {
+                dragDropInfo.pixelMap = dragPreviewPixelMap_;
+                OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+                return;
+            }
         }
     }
-    if (info.GetSourceDevice() == SourceType::MOUSE) {
-        if (dragPreviewInfo.pixelMap != nullptr) {
-            dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
-            OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
-            return;
-        } else if (dragPreviewInfo.customNode != nullptr) {
-            dragDropInfo.customNode = dragPreviewInfo.customNode;
-        }
+
+    if (dragPreviewInfo.pixelMap != nullptr) {
+        dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
+        OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+        return;
+    } else if (dragPreviewInfo.customNode != nullptr) {
+        dragDropInfo.customNode = dragPreviewInfo.customNode;
     }
+
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
         auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
@@ -838,7 +840,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
     }
     if (!overlayManager->GetIsOnAnimation()) {
-        dragEventActuator_->SetIsNotInPreviewState(true);
+        if (dragEventActuator_ != nullptr) {
+            dragEventActuator_->SetIsNotInPreviewState(true);
+        }
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, animation is %{public}d, pixelMap scale is %{public}f",
         overlayManager->GetIsOnAnimation(), scale);
@@ -878,7 +882,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(eventManager);
     eventManager->DoMouseActionRelease();
     eventManager->SetIsDragging(true);
-    if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_->GetIsNotInPreviewState()) {
+    if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_ != nullptr &&
+        dragEventActuator_->GetIsNotInPreviewState()) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
             overlayManager->RemovePixelMap();
             pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });

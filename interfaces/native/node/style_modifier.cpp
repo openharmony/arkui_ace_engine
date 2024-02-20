@@ -1830,38 +1830,41 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    int fill = item->size > NUM_0 ? DEFAULT_FIll_COLOR : item->value[0].u32;
-    int strock = item->size > NUM_1 ? DEFAULT_FIll_COLOR : item->value[1].u32;
-    float strockWidth = item->size > NUM_2 ? NUM_0 : item->value[2].f32;
-    if (item->value[NUM_0].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_PATH) {
+    if (item->value[NUM_3].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_PATH) {
+        int fill = item->size > NUM_0 ? item->value[0].u32 : DEFAULT_FIll_COLOR;
+        int strock = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
+        float strockWidth = item->size > NUM_2 ? item->value[NUM_2].f32 : NUM_0;
         ArkUI_Float32 pathAttributes[NUM_2];
-        if (LessNotEqual(item->value[NUM_1].f32, 0.0f) || LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
+        if (LessNotEqual(item->value[NUM_4].f32, 0.0f) || LessNotEqual(item->value[NUM_5].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         } else {
-            pathAttributes[NUM_0] = item->value[NUM_1].f32;
-            pathAttributes[NUM_1] = item->value[NUM_2].f32;
+            pathAttributes[NUM_0] = item->value[NUM_4].f32;
+            pathAttributes[NUM_1] = item->value[NUM_5].f32;
         }
         fullImpl->getNodeModifiers()->getCommonModifier()->setMaskPath(
             node->uiNodeHandle, "path", fill, strock, strockWidth, pathAttributes, item->string);
     } else if (item->value[0].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS) {
         ArkUI_Float32 progressAttributes[NUM_3];
-        for (int i = NUM_1; i < NUM_3; i++) {
+        for (int i = 0; i < NUM_3; i++) {
             progressAttributes[i] = item->value[i].f32;
         }
         uint32_t color = item->value[NUM_3].u32;
         fullImpl->getNodeModifiers()->getCommonModifier()->setProgressMask(
             node->uiNodeHandle, progressAttributes, color);
     } else {
-        ArkUI_Float32 attributes[item->size - NUM_1];
-        for (int i = NUM_1; i < item->size; i++) {
-            if (LessNotEqual(item->value[i].f32, 0.0f)) {
+        int fill = item->size > NUM_0 ? item->value[0].u32 : DEFAULT_FIll_COLOR;
+        int strock = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
+        float strockWidth = item->size > NUM_2 ? item->value[NUM_2].f32 : NUM_0;
+        ArkUI_Float32 attributes[item->size - NUM_4];
+        for (int i = 0; i < item->size - NUM_4; i++) {
+            if (LessNotEqual(item->value[i + NUM_4].f32, 0.0f)) {
                 return ERROR_CODE_PARAM_INVALID;
             } else {
-                attributes[i - NUM_1] = item->value[i].f32;
+                attributes[i] = item->value[i + NUM_4].f32;
             }
         }
         fullImpl->getNodeModifiers()->getCommonModifier()->setMaskShape(node->uiNodeHandle,
-            ShapeToString(item->value[NUM_3].i32).c_str(), fill, strock, strockWidth, attributes, item->size - NUM_1);
+            ShapeToString(item->value[NUM_3].i32).c_str(), fill, strock, strockWidth, attributes, item->size - NUM_4);
     }
     return ERROR_CODE_NO_ERROR;
 }

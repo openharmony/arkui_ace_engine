@@ -94,11 +94,7 @@ bool SecurityComponentPattern::IsParentMenu(RefPtr<FrameNode>& secCompNode)
 {
     auto parent = secCompNode->GetParent();
     while (parent != nullptr) {
-        auto parentNode = AceType::DynamicCast<FrameNode>(parent);
-        if (parentNode == nullptr) {
-            break;
-        }
-        if (parentNode->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        if (parent->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
             return true;
         }
         parent = parent->GetParent();
