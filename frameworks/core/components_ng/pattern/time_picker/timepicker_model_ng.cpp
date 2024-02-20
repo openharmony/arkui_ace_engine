@@ -132,6 +132,67 @@ RefPtr<FrameNode> TimePickerModelNG::CreateButtonNode()
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
 }
 
+RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto timePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::TIME_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
+
+    uint32_t showCount = BUFFER_NODE_NUMBER;
+    auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetShowCount(showCount);
+    timePickerRowPattern->SetPickerTag(true);
+    auto hasHourNode = timePickerRowPattern->HasHourNode();
+    auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
+    auto hourId = timePickerRowPattern->GetHourId();
+    auto minuteId = timePickerRowPattern->GetMinuteId();
+
+    auto hourColumnNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, hourId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+    if (!hasHourNode) {
+        for (uint32_t index = 0; index < showCount; index++) {
+            auto textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            textNode->MountToParent(hourColumnNode);
+        }
+        hourColumnNode->MarkModifyDone();
+        timePickerRowPattern->SetColumn(hourColumnNode);
+    }
+
+    auto minuteColumnNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, minuteId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+    if (!hasMinuteNode) {
+        for (uint32_t index = 0; index < showCount; index++) {
+            auto textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            textNode->MountToParent(minuteColumnNode);
+        }
+        minuteColumnNode->MarkModifyDone();
+        timePickerRowPattern->SetColumn(minuteColumnNode);
+    }
+    if (!hasHourNode) {
+        auto stackHourNode = CreateStackNode();
+        auto buttonYearNode = CreateButtonNode();
+        buttonYearNode->MountToParent(stackHourNode);
+        hourColumnNode->MountToParent(stackHourNode);
+        auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
+        stackHourNode->MountToParent(timePickerNode);
+    }
+    if (!hasMinuteNode) {
+        auto stackMinuteNode = CreateStackNode();
+        auto buttonYearNode = CreateButtonNode();
+        buttonYearNode->MountToParent(stackMinuteNode);
+        minuteColumnNode->MountToParent(stackMinuteNode);
+        auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
+        stackMinuteNode->MountToParent(timePickerNode);
+    }
+    timePickerRowPattern->SetHasSecond(false);
+    return timePickerNode;
+}
+
 void TimePickerModelNG::SetSelectedTime(const PickerTime& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

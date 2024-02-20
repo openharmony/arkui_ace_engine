@@ -46,6 +46,7 @@ public:
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetHour24(FrameNode* frameNode, bool isUseMilitaryTime);
     static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
