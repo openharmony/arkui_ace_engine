@@ -124,6 +124,16 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
 
 } // namespace
 
+Offset GetTouchEventOriginOffset(const TouchEvent& event)
+{
+    if (event.pointerEvent) {
+        for (auto& item : event.pointerEvent->pointers) {
+            return Offset(item.x, item.y);
+        }
+    }
+    return Offset();
+}
+
 EventDispatcher::EventDispatcher() {}
 
 EventDispatcher::~EventDispatcher() = default;

@@ -346,7 +346,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     SetScrollSource(source);
     FireAndCleanScrollingListener();
-
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
     auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
@@ -354,35 +353,35 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
         if (source == SCROLL_FROM_UPDATE) {
             auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
-            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-            gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
-        } else {
-            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-            gridLayoutInfo_.currentOffset_ += offset;
+            offset *= friction;
         }
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+        gridLayoutInfo_.currentOffset_ += offset;
+
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (GreatNotEqual(gridLayoutInfo_.currentOffset_, GetMainContentSize() - itemsHeight)) {
             gridLayoutInfo_.offsetEnd_ = false;
             gridLayoutInfo_.reachEnd_ = false;
         }
+        FireOnWillScroll(-offset);
         return true;
     }
     if (gridLayoutInfo_.reachStart_) {
         if (source == SCROLL_FROM_UPDATE) {
             auto friction =
                 ScrollablePattern::CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
-            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-            gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
-        } else {
-            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-            gridLayoutInfo_.currentOffset_ += offset;
+            offset *= friction;
         }
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+        gridLayoutInfo_.currentOffset_ += offset;
+
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (LessNotEqual(gridLayoutInfo_.currentOffset_, 0.0)) {
             gridLayoutInfo_.reachStart_ = false;
         }
+        FireOnWillScroll(-offset);
         return true;
     }
     // maybe no measure after last update
@@ -390,6 +389,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
         gridLayoutInfo_.offsetUpdated_ = true;
     }
+    FireOnWillScroll(-offset);
     gridLayoutInfo_.currentOffset_ += offset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
@@ -479,6 +479,10 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     auto onScroll = gridEventHub->GetOnScroll();
     if (onScroll) {
         FireOnScroll(finalOffset, onScroll);
+    }
+    auto onDidScroll = gridEventHub->GetOnDidScroll();
+    if (onDidScroll) {
+        FireOnScroll(finalOffset, onDidScroll);
     }
 
     if (indexChanged) {

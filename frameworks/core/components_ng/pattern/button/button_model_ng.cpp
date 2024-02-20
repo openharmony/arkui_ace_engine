@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -169,6 +170,34 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
     PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
         CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
+}
+
+void ButtonModelNG::SetButtonLabel(FrameNode* frameNode, const char* label)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetChildren().empty()) {
+        auto textNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        CHECK_NULL_VOID(textNode);
+        textNode->SetInternal();
+        SetTextDefaultStyle(textNode, label);
+        frameNode->AddChild(textNode);
+    }
+    auto buttonAccessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(buttonAccessibilityProperty);
+    buttonAccessibilityProperty->SetText(label);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateLabel(label);
+    if (layoutProperty->GetPaddingProperty()) {
+        return;
+    }
+    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto padding = buttonTheme->GetPadding();
+    PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
+        CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+    layoutProperty->UpdatePadding(defaultPadding);
 }
 
 void ButtonModelNG::Create(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren) {}

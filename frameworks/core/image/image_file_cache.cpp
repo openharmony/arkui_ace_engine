@@ -18,8 +18,10 @@
 #include <fstream>
 #include <sys/stat.h>
 
+#include "base/image/image_packer.h"
+#include "base/image/image_source.h"
 #include "base/log/dump_log.h"
-#include "base/thread/background_task_executor.h"
+#include "base/utils/system_properties.h"
 #include "core/image/image_loader.h"
 #include "core/image/image_source_info.h"
 
@@ -32,18 +34,11 @@ ImageFileCache::ImageFileCache() = default;
 ImageFileCache::~ImageFileCache() = default;
 
 namespace {
-bool IsAstcFile(const char fileName[])
-{
-    auto length = strlen(fileName);
-    if (length >= ASTC_SUFFIX.length()) {
-        auto suffixPos = length - ASTC_SUFFIX.length();
-        if (std::memcmp(fileName + suffixPos, ASTC_SUFFIX.c_str(), ASTC_SUFFIX.length()) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
+const std::string ASTC_SUFFIX = ".astc";
+const std::string CONVERT_ASTC_FORMAT = "image/astc/4*4";
+const std::string SLASH = "/";
+const std::string BACKSLASH = "\\";
+static const uint32_t ASTC_MAGIC_ID = 0x5CA1AB13;
 bool EndsWith(const std::string& str, const std::string& substr)
 {
     return str.rfind(substr) == (str.length() - substr.length());
@@ -129,24 +124,9 @@ void ImageFileCache::SaveCacheInner(const std::string& cacheKey, const std::stri
     std::vector<std::string>& removeVector)
 {
     auto cacheFileName = cacheKey + suffix;
-    auto iter = fileNameToFileInfoPos_.find(cacheKey);
-    auto cacheTime = time(nullptr);
-    if (iter != fileNameToFileInfoPos_.end()) {
-        auto infoIter = iter->second;
-        cacheFileInfo_.splice(cacheFileInfo_.begin(), cacheFileInfo_, infoIter);
-        cacheFileSize_ += cacheSize - infoIter->fileSize;
-        removeVector.push_back(ConstructCacheFilePath(infoIter->fileName));
-
-        infoIter->fileName = cacheFileName;
-        infoIter->fileSize = cacheSize;
-        infoIter->accessTime = cacheTime;
-        infoIter->accessCount = suffix == ASTC_SUFFIX ? convertAstcThreshold_ : 1;
-    } else {
-        cacheFileInfo_.emplace_front(cacheFileName, cacheSize, cacheTime,
-            suffix == ASTC_SUFFIX ? convertAstcThreshold_ : 1);
-        fileNameToFileInfoPos_[cacheKey] = cacheFileInfo_.begin();
-        cacheFileSize_ += cacheSize;
-    }
+    cacheFileInfo_.emplace_front(cacheFileName, cacheSize, time(nullptr));
+    fileNameToFileInfoPos_[cacheKey] = cacheFileInfo_.begin();
+    cacheFileSize_ += cacheSize;
     // check if cache files too big.
     if (cacheFileSize_ > static_cast<int32_t>(fileLimit_)) {
         auto removeSizeTarget = static_cast<int32_t>(fileLimit_ * clearCacheFileRatio_);
@@ -186,28 +166,85 @@ void ImageFileCache::WriteCacheFile(
         }
     }
 
-    // 2. if not in dist, write file into disk.
-    std::string writeFilePath = ConstructCacheFilePath(fileCacheKey + suffix);
+    bool convertToAstc = false;
+    size_t astcSize = 0;
+    unsigned int magicVal = static_cast<const uint8_t*>(data)[0] + (static_cast<const uint8_t*>(data)[1] << 8) +
+        (static_cast<const uint8_t*>(data)[2] << 16) + (static_cast<const uint8_t*>(data)[3] << 24);
+    if (SystemProperties::IsImageFileCacheConvertAstcEnabled() && suffix == "" && magicVal != ASTC_MAGIC_ID) {
+        if (!ConvertToAstcAndWriteToFile(data, size, fileCacheKey, astcSize)) {
+            return;
+        }
+        convertToAstc = true;
+    } else {
+        // 2. if not in dist, write file into disk.
+        std::string writeFilePath = ConstructCacheFilePath(fileCacheKey + suffix);
 #ifdef WINDOWS_PLATFORM
-    std::ofstream outFile(writeFilePath, std::ios::binary);
+        std::ofstream outFile(writeFilePath, std::ios::binary);
 #else
-    std::ofstream outFile(writeFilePath, std::fstream::out);
+        std::ofstream outFile(writeFilePath, std::fstream::out);
 #endif
-    if (!outFile.is_open()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "open cache file failed, cannot write.");
-        return;
+        if (!outFile.is_open()) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "open cache file failed, cannot write.");
+            return;
+        }
+        outFile.write(reinterpret_cast<const char*>(data), size);
+        TAG_LOGI(
+            AceLogTag::ACE_IMAGE, "write image cache: %{public}s %{private}s", url.c_str(), writeFilePath.c_str());
     }
-    outFile.write(reinterpret_cast<const char*>(data), size);
-    TAG_LOGI(
-        AceLogTag::ACE_IMAGE, "write image cache: %{public}s %{private}s", url.c_str(), writeFilePath.c_str());
 
     std::vector<std::string> removeVector;
     {
         std::scoped_lock<std::mutex> lock(cacheFileInfoMutex_);
-        SaveCacheInner(fileCacheKey, suffix, size, removeVector);
+        SaveCacheInner(fileCacheKey, convertToAstc ? ASTC_SUFFIX : suffix, convertToAstc ? astcSize : size,
+            removeVector);
     }
     // 3. clear files removed from cache list.
     ClearCacheFile(removeVector);
+}
+
+bool ImageFileCache::ConvertToAstcAndWriteToFile(const void* const data, size_t size, const std::string& fileCacheKey,
+    size_t& astcSize)
+{
+    auto astcFilePath = ConstructCacheFilePath(fileCacheKey + ASTC_SUFFIX);
+
+    RefPtr<ImageSource> imageSource = ImageSource::Create(static_cast<const uint8_t*>(data), size);
+    RefPtr<ImagePacker> imagePacker = ImagePacker::Create();
+    PackOption option;
+    option.format = CONVERT_ASTC_FORMAT;
+    auto pixelMap = imageSource->CreatePixelMap({-1, -1});
+    auto maxPackSize = static_cast<uint32_t>(pixelMap->GetByteCount());
+    auto packBuffer = new (std::nothrow) uint8_t [maxPackSize];
+    if (packBuffer == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "create buffer failed. %{public}s", fileCacheKey.c_str());
+        return false;
+    }
+
+    imagePacker->StartPacking(packBuffer, maxPackSize, option);
+    imagePacker->AddImage(*pixelMap);
+    int64_t packedSize = 0;
+    if (imagePacker->FinalizePacking(packedSize)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "convert to astc failed. %{public}s", fileCacheKey.c_str());
+        delete [] packBuffer;
+        packBuffer = nullptr;
+        return false;
+    }
+
+#ifdef WINDOWS_PLATFORM
+    std::ofstream outFile(astcFilePath, std::ios::binary);
+#else
+    std::ofstream outFile(astcFilePath, std::fstream::out);
+#endif
+    if (!outFile.is_open()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "open cache file failed, cannot write. %{public}s", fileCacheKey.c_str());
+        delete [] packBuffer;
+        packBuffer = nullptr;
+        return false;
+    }
+    outFile.write(reinterpret_cast<const char*>(packBuffer), packedSize);
+    delete [] packBuffer;
+    packBuffer = nullptr;
+    astcSize = packedSize;
+    return true;
 }
 
 void ImageFileCache::ClearCacheFile(const std::vector<std::string>& removeFiles)
@@ -236,7 +273,6 @@ std::string ImageFileCache::GetCacheFilePathInner(const std::string& url, const 
         if (suffix == "" || EndsWith(infoIter->fileName, suffix)) {
             cacheFileInfo_.splice(cacheFileInfo_.begin(), cacheFileInfo_, infoIter);
             infoIter->accessTime = time(nullptr);
-            infoIter->accessCount++;
             return ConstructCacheFilePath(infoIter->fileName);
         }
     }
@@ -267,8 +303,7 @@ void ImageFileCache::SetCacheFileInfo()
                 filePtr = readdir(dir.get());
                 continue;
             }
-            cacheFileInfo_.emplace_front(filePtr->d_name, fileStatus.st_size, fileStatus.st_atime,
-                IsAstcFile(filePtr->d_name) ? convertAstcThreshold_ : 1);
+            cacheFileInfo_.emplace_front(filePtr->d_name, fileStatus.st_size, fileStatus.st_atime);
             std::string fileCacheKey = GetImageCacheKey(std::string(filePtr->d_name));
             fileNameToFileInfoPos_[fileCacheKey] = cacheFileInfo_.begin();
             cacheFileSize += static_cast<int64_t>(fileStatus.st_size);

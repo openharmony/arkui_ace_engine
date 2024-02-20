@@ -1047,4 +1047,21 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
         child->UpdateNodeStatus(nodeStatus_);
     }
 }
+
+
+// Collects  all the child elements of "children" in a recursive manner
+// Fills the "removedElmtId" list with the collected child elements
+void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId)
+{
+    for (auto const& child : children) {
+        CollectRemovedChild(child, removedElmtId);
+    }
+}
+
+void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId)
+{
+    removedElmtId.emplace_back(child->GetId());
+    // Fetch all the child elementIDs recursively
+    CollectRemovedChildren(child->GetChildren(), removedElmtId);
+}
 } // namespace OHOS::Ace::NG

@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string DIGIT_DECIMAL_WHITE_LIST = "[0-9.]";
-const std::string PHONE_WHITE_LIST = R"([\d\-\+\*\#]+)";
+const std::string PHONE_WHITE_LIST = R"([0-9 \+\-\*\#\(\)])";
 const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 // when do ai analaysis, we should list the left and right of the string

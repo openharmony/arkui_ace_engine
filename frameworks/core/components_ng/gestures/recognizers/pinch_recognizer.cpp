@@ -87,7 +87,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
 
-    if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
+    if (static_cast<int32_t>(activeFingers_.size()) >= fingers_ && refereeState_ != RefereeState::FAIL) {
         initialDev_ = ComputeAverageDeviation();
         pinchCenter_ = ComputePinchCenter();
         refereeState_ = RefereeState::DETECTING;
@@ -152,11 +152,17 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    if (!IsActiveFinger(event.id) || currentFingers_ < fingers_) {
+    if (!IsActiveFinger(event.id)) {
         return;
     }
 
-    if (static_cast<int32_t>(activeFingers_.size()) < fingers_) {
+    if (static_cast<int32_t>(activeFingers_.size()) < fingers_ || currentFingers_ < fingers_) {
+        double devX = event.x - touchPoints_[event.id].x;
+        double devY = event.y - touchPoints_[event.id].y;
+        double distance = sqrt(pow(devX, 2) + pow(devY, 2));
+        if (GreatOrEqual(distance, distance_)) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
         return;
     }
 

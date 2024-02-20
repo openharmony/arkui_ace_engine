@@ -93,6 +93,7 @@ public:
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
+    static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
     RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind, uint32_t showCount);
     void SetUnCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);

@@ -382,6 +382,7 @@ struct ArkUIPlaceholderFontType {
     ArkUI_CharPtr* fontFamilies;
     ArkUI_Uint32 length;
     ArkUI_Int32 style;
+    ArkUI_Int32 weightEnum;
 };
 
 struct ArkUIProgressStyle {
@@ -1163,6 +1164,7 @@ struct ArkUIButtonModifier {
     void (*resetButtonBackgroundColor)(ArkUINodeHandle node);
     void (*setButtonBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*resetButtonBorderRadius)(ArkUINodeHandle node);
+    void (*setButtonFontWeightEnum)(ArkUINodeHandle node, ArkUI_Int32 fontWeight);
     void (*setButtonSize)(ArkUINodeHandle node, ArkUI_CharPtr widthValue, ArkUI_Int32 widthUnit,
         ArkUI_CharPtr heightValue, ArkUI_Int32 heightUnit);
     void (*resetButtonSize)(ArkUINodeHandle node);
@@ -1658,6 +1660,9 @@ struct ArkUIProgressModifier {
     void (*resetProgressStyle)(ArkUINodeHandle node);
     void (*setProgressBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetProgressBackgroundColor)(ArkUINodeHandle node);
+    void (*setProgressTotal)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setProgressType)(ArkUINodeHandle node, ArkUI_Int32 type);
+    void (*resetProgressType)(ArkUINodeHandle node);
 };
 
 struct ArkUIPluginModifier {
@@ -1716,6 +1721,8 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaTextString)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*stopTextAreaTextEditing)(ArkUINodeHandle node);
     void (*setTextAreaFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
+    void (*setTextAreaPlaceholderFontEnum)(ArkUINodeHandle node, const struct ArkUIResourceLength* size,
+        ArkUI_Int32 weight, ArkUI_CharPtr family, ArkUI_Int32 style);
 };
 
 struct ArkUITextInputModifier {
@@ -1772,6 +1779,7 @@ struct ArkUITextInputModifier {
     void (*setTextInputPlaceholderString)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setTextInputTextString)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setTextInputFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
+    void (*stopTextInputTextEditing)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

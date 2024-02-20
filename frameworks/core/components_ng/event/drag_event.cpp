@@ -576,6 +576,7 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
+    imageNode->SetActive(true);
     imageNode->CreateLayoutTask();
     FlushSyncGeometryNodeTasks();
 }
@@ -614,6 +615,7 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     SetPreviewDefaultAnimateProperty(imageNode);
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     columnNode->MarkModifyDone();
+    columnNode->SetActive(true);
     columnNode->CreateLayoutTask();
     FlushSyncGeometryNodeTasks();
 }
@@ -673,6 +675,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     }
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
+    imageNode->SetActive(true);
     imageNode->CreateLayoutTask();
     FlushSyncGeometryNodeTasks();
     auto focusHub = frameNode->GetFocusHub();

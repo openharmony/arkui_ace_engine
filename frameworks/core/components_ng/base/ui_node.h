@@ -571,7 +571,9 @@ protected:
     // update visible change signal to children
     void UpdateChildrenVisible(bool isVisible) const;
 
-protected:
+    void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId);
+    void CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId);
+
     bool needCallChildrenUpdate_ = true;
 
 private:

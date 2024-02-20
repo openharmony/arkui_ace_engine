@@ -476,6 +476,30 @@ int32_t PageRouterManager::GetStackSize() const
     return static_cast<int32_t>(pageRouterStack_.size());
 }
 
+void PageRouterManager::BackToIndex(int32_t index, const std::string& params)
+{
+    if (index > pageRouterStack_.size() || index <= 0) {
+        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return;
+    }
+    std::string url;
+    int32_t counter = 1;
+    for (const auto& iter : pageRouterStack_) {
+        if (counter == index) {
+            auto pageNode = iter.Upgrade();
+            CHECK_NULL_VOID(pageNode);
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            CHECK_NULL_VOID(pagePattern);
+            auto PageInfo = DynamicCast<NG::EntryPageInfo>(pagePattern->GetPageInfo());
+            CHECK_NULL_VOID(PageInfo);
+            url = PageInfo->GetPageUrl();
+            BackWithTarget(NG::RouterPageInfo({ url, params }));
+            return;
+        }
+        counter++;
+    }
+}
+
 void PageRouterManager::GetState(int32_t& index, std::string& name, std::string& path)
 {
     CHECK_RUN_ON(JS);
@@ -508,6 +532,92 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
     }
     if (path.size() == 0) {
         path = "/" + url;
+    }
+}
+
+void PageRouterManager::GetStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params)
+{
+    CHECK_RUN_ON(JS);
+    if (index > pageRouterStack_.size() || index <= 0) {
+        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return;
+    }
+
+    int32_t counter = 1;
+    for (const auto& iter : pageRouterStack_) {
+        if (counter == index) {
+            auto pageNode = iter.Upgrade();
+            CHECK_NULL_VOID(pageNode);
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            CHECK_NULL_VOID(pagePattern);
+            auto PageInfo = DynamicCast<NG::EntryPageInfo>(pagePattern->GetPageInfo());
+            CHECK_NULL_VOID(PageInfo);
+            auto url = PageInfo->GetPageUrl();
+            params = PageInfo->GetPageParams();
+            auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
+            if (!pagePath.empty()) {
+                url = pagePath;
+            }
+            auto pos = url.rfind(".js");
+            if (pos == url.length() - 3) {
+                url = url.substr(0, pos);
+            }
+            pos = url.rfind("/");
+            if (pos != std::string::npos) {
+                name = url.substr(pos + 1);
+                path = url.substr(0, pos + 1);
+            }
+            if (name.size() == 0) {
+                name = "index";
+            }
+            if (path.size() == 0) {
+                path = "/" + url;
+            }
+            break;
+        }
+        counter++;
+    }
+}
+
+void PageRouterManager::GetStateByUrl(std::string& url, std::vector<Framework::StateInfo>& stateArray)
+{
+    CHECK_RUN_ON(JS);
+    int32_t counter = 1;
+    Framework::StateInfo stateInfo;
+    for (auto& iter : pageRouterStack_) {
+        auto pageNode = iter.Upgrade();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        auto PageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+        CHECK_NULL_VOID(PageInfo);
+        std::string tempUrl;
+        if (PageInfo->GetPageUrl() == url) {
+            auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
+            if (!pagePath.empty()) {
+                url = pagePath;
+            }
+            stateInfo.params = PageInfo->GetPageParams();
+            stateInfo.index = counter;
+            auto pos = url.rfind(".js");
+            if (pos == url.length() - 3) {
+                tempUrl = url.substr(0, pos);
+            }
+            tempUrl = url;
+            pos = tempUrl.rfind("/");
+            if (pos != std::string::npos) {
+                stateInfo.name = tempUrl.substr(pos + 1);
+                stateInfo.path = tempUrl.substr(0, pos + 1);
+            }
+            if (stateInfo.name.size() == 0) {
+                stateInfo.name = "index";
+            }
+            if (stateInfo.path.size() == 0) {
+                stateInfo.path = "/" + tempUrl;
+            }
+            stateArray.emplace_back(stateInfo);
+        }
+        counter++;
     }
 }
 

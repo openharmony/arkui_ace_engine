@@ -171,6 +171,49 @@ void SetTextAreaPlaceholderFont(ArkUINodeHandle node, const struct ArkUIResource
     TextFieldModelNG::SetPlaceholderFont(frameNode, font);
 }
 
+void SetTextAreaPlaceholderFontEnum(ArkUINodeHandle node, const struct ArkUIResourceLength* size, ArkUI_Int32 weight,
+    ArkUI_CharPtr family, ArkUI_Int32 style)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Font font;
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(size->unit);
+    if (size->unit >= 0) {
+        if (unitEnum == DimensionUnit::CALC) {
+            font.fontSize = CalcDimension(size->string, DimensionUnit::CALC);
+        } else {
+            font.fontSize = CalcDimension(size->value, unitEnum);
+        }
+    } else {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        font.fontSize = theme->GetFontSize();
+    }
+
+    if (weight > -1) {
+        font.fontWeight = static_cast<FontWeight>(weight);
+    } else {
+        font.fontWeight = DEFAULT_FONT_WEIGHT;
+    }
+
+    if (family != nullptr) {
+        font.fontFamilies = Framework::ConvertStrToFontFamilies(std::string(family));
+    } else {
+        std::vector<std::string> fontFamilies;
+        fontFamilies.emplace_back(std::string(DEFAULT_FONT_FAMILY));
+        font.fontFamilies = fontFamilies;
+    }
+
+    if (style >= 0) {
+        font.fontStyle = static_cast<Ace::FontStyle>(style);
+    } else {
+        font.fontStyle = DEFAULT_FONT_STYLE;
+    }
+    TextFieldModelNG::SetPlaceholderFont(frameNode, font);
+}
+
 void ResetTextAreaPlaceholderFont(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -430,6 +473,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaTextString,
         StopTextAreaTextEditing,
         SetTextAreaFontWeightStr,
+        SetTextAreaPlaceholderFontEnum,
     };
     return &modifier;
 }

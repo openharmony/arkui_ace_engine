@@ -264,6 +264,8 @@ thread_local shared_ptr<JsRuntime> localRuntime_;
 thread_local bool isUnique_ = false;
 // ArkTsCard end
 
+thread_local bool isWorker_ = false;
+
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
@@ -426,6 +428,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleWorker(void* runtime)
 
 void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
 {
+    isWorker_ = true;
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
 
     if (!sharedRuntime) {
@@ -785,6 +788,10 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
 
     // ArkTsCard
     if (isUnique_ && localRuntime_) {
+        return localRuntime_;
+    }
+
+    if (isWorker_ && localRuntime_) {
         return localRuntime_;
     }
 

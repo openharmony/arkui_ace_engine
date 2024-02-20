@@ -443,6 +443,8 @@ void SetTextInputPlaceholderFont(ArkUINodeHandle node, const struct ArkUIPlaceho
     font.fontSize = fontSize;
     if (placeholderFont->weight != nullptr && std::string(placeholderFont->weight) != "") {
         font.fontWeight = Framework::ConvertStrToFontWeight(placeholderFont->weight);
+    } else if (placeholderFont->weightEnum > -1) {
+        font.fontWeight = static_cast<FontWeight>(placeholderFont->weightEnum);
     }
     if (placeholderFont->fontFamilies != nullptr && placeholderFont->length > 0) {
         for (uint32_t i = 0; i < placeholderFont->length; i++) {
@@ -545,6 +547,13 @@ void SetTextInputTextString(ArkUINodeHandle node, ArkUI_CharPtr value)
     std::string textStr(value);
     TextFieldModelNG::SetTextFieldText(frameNode, textStr);
 }
+
+void StopTextInputTextEditing(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::StopTextFieldEditing(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -604,6 +613,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputPlaceholderString,
         SetTextInputTextString,
         SetTextInputFontWeightStr,
+        StopTextInputTextEditing,
     };
     return &modifier;
 }

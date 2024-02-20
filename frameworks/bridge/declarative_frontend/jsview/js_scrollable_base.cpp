@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
+
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
 namespace OHOS::Ace::Framework {
@@ -27,11 +29,37 @@ void JSScrollableBase::JSFlingSpeedLimit(const JSCallbackInfo& info)
     NG::ScrollableModelNG::SetMaxFlingSpeed(max * density);
 }
 
+void JSScrollableBase::JsOnWillScroll(const JSCallbackInfo& args)
+{
+    if (args.Length() > 0 && args[0]->IsFunction()) {
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                            const CalcDimension& scrollOffset, const ScrollState& scrollState) {
+            auto params = ConvertToJSValues(scrollOffset, scrollState);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        NG::ScrollableModelNG::SetOnWillScroll(std::move(onScroll));
+    }
+}
+
+void JSScrollableBase::JsOnDidScroll(const JSCallbackInfo& args)
+{
+    if (args.Length() > 0 && args[0]->IsFunction()) {
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                            const CalcDimension& scrollOffset, const ScrollState& scrollState) {
+            auto params = ConvertToJSValues(scrollOffset, scrollState);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        NG::ScrollableModelNG::SetOnDidScroll(std::move(onScroll));
+    }
+}
+
 void JSScrollableBase::JSBind(BindingTarget globalObj)
 {
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSScrollableBase>::Declare("JSContainerBase");
     JSClass<JSScrollableBase>::StaticMethod("flingSpeedLimit", &JSScrollableBase::JSFlingSpeedLimit, opt);
+    JSClass<JSScrollableBase>::StaticMethod("onWillScroll", &JSScrollableBase::JsOnWillScroll);
+    JSClass<JSScrollableBase>::StaticMethod("onDidScroll", &JSScrollableBase::JsOnDidScroll);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
 } // namespace OHOS::Ace::Framework
