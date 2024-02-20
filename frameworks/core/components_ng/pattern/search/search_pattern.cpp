@@ -177,9 +177,6 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
     cancelButtonLayoutProperty->UpdateLabel("");
     cancelButtonFrameNode->MarkModifyDone();
-
-    HandleEnabled();
-
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldValueChangeEvent();
@@ -192,6 +189,7 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+    HandleEnabled();
 }
 
 void SearchPattern::HandleBackgroundColor()
