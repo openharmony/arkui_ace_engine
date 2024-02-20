@@ -5503,7 +5503,7 @@ bool JSViewAbstract::ParseInvertProps(const JSRef<JSVal>& jsValue, InvertVariant
 {
     double invertValue = 0.0;
     if (ParseJsDouble(jsValue, invertValue)) {
-        invert = static_cast<float>(invertValue);
+        invert = static_cast<float>(std::clamp(invertValue, 0.0, 1.0));
         return true;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(jsValue->ToString());
