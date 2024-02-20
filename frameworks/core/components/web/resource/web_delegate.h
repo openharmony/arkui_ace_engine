@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -487,6 +487,7 @@ public:
     void UpdateWebStandardFont(const std::string& standardFontFamily);
     void UpdateDefaultFixedFontSize(int32_t size);
     void UpdateDefaultFontSize(int32_t defaultFontSize);
+    void UpdateDefaultTextEncodingFormat(const std::string& textEncodingFormat);
     void UpdateMinFontSize(int32_t minFontSize);
     void UpdateMinLogicalFontSize(int32_t minLogicalFontSize);
     void UpdateBlockNetwork(bool isNetworkBlocked);
@@ -758,6 +759,8 @@ private:
     void SurfaceOcclusionCallback(float visibleRatio);
     void RegisterSurfaceOcclusionChangeFun();
     void ratioStrToFloat(const std::string& str);
+    // Return canonical encoding name according to the encoding alias name.
+    std::string GetCanonicalEncodingName(const std::string& alias_name) const;
 #endif
 
     WeakPtr<WebComponent> webComponent_;

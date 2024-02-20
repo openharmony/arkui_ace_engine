@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebStandardFont, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DefaultFixedFontSize, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DefaultFontSize, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DefaultTextEncodingFormat, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontSize, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinLogicalFontSize, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockNetwork, bool);

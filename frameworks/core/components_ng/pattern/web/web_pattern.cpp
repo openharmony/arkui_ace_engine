@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,6 +154,7 @@ constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
 constexpr uint32_t DEFAULT_WEB_DRAW_HEIGHT = 4000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
+const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 8;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 // web feature params
@@ -1531,6 +1532,13 @@ void WebPattern::OnScrollBarColorUpdate(const std::string& value)
     }
 }
 
+void WebPattern::OnDefaultTextEncodingFormatUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateDefaultTextEncodingFormat(value);
+    }
+}
+
 void WebPattern::RegistVirtualKeyBoardListener()
 {
     if (!needUpdateWeb_) {
@@ -1642,6 +1650,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateWebStandardFont(GetWebStandardFontValue(DEFAULT_STANDARD_FONT_FAMILY));
         delegate_->UpdateDefaultFixedFontSize(GetDefaultFixedFontSizeValue(DEFAULT_FIXED_FONT_SIZE));
         delegate_->UpdateDefaultFontSize(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE));
+        delegate_->UpdateDefaultTextEncodingFormat(GetDefaultTextEncodingFormatValue(DEFAULT_WEB_TEXT_ENCODING_FORMAT));
         delegate_->UpdateMinFontSize(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE));
         delegate_->UpdateMinLogicalFontSize(GetMinLogicalFontSizeValue(DEFAULT_MINIMUM_LOGICAL_FONT_SIZE));
         delegate_->UpdateHorizontalScrollBarAccess(GetHorizontalScrollBarAccessEnabledValue(true));
