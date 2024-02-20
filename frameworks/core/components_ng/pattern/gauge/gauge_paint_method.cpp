@@ -50,6 +50,6 @@ void GaugePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         hostGeometryNode->GetFrameSize().Width() + std::abs(shadowOptions.offsetX) + shadowOptions.radius,
         hostGeometryNode->GetFrameSize().Height() + std::abs(shadowOptions.offsetY) + shadowOptions.radius);
     gaugeModifier_->SetBoundsRect(boundsRect);
-    gaugeModifier_->UpdateDate();
+    gaugeModifier_->UpdateValue();
 }
 } // namespace OHOS::Ace::NG
