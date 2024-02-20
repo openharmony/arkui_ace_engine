@@ -233,7 +233,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 void RichEditorPattern::InitRichEditor()
 {
     if (isRichEditorInit_) {
-       return;
+        return;
     }
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, ret);
