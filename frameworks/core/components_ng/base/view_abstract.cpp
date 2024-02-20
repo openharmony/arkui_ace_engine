@@ -957,7 +957,6 @@ void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect> &responseR
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->MarkResponseRegion(true);
     gestureHub->SetResponseRegion(responseRegion);
 }
 
@@ -965,7 +964,6 @@ void ViewAbstract::SetMouseResponseRegion(const std::vector<DimensionRect> &mous
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->MarkResponseRegion(true);
     gestureHub->SetMouseResponseRegion(mouseRegion);
 }
 
@@ -2682,7 +2680,6 @@ void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<Dim
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->MarkResponseRegion(true);
     gestureHub->SetResponseRegion(responseRegion);
 }
 
@@ -2691,7 +2688,6 @@ void ViewAbstract::SetMouseResponseRegion(FrameNode* frameNode, const std::vecto
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->MarkResponseRegion(true);
     gestureHub->SetMouseResponseRegion(mouseResponseRegion);
 }
 

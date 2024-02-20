@@ -1130,7 +1130,6 @@ void NavigationPattern::AddDividerHotZoneRect()
     DimensionRect responseRect(Dimension(dragRect_.Width(), DimensionUnit::PX),
         Dimension(dragRect_.Height(), DimensionUnit::PX), responseOffset);
     responseRegion.emplace_back(responseRect);
-    dividerGestureHub->MarkResponseRegion(true);
     dividerGestureHub->SetResponseRegion(responseRegion);
 }
 
