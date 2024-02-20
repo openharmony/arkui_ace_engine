@@ -205,7 +205,7 @@ public:
     std::vector<RectF> GetSelectedRects() const;
     RectF CalculateEmptyValueCaretRect() const;
     std::string ToString() const;
-    int32_t ConvertTouchOffsetToPosition(const Offset& localOffset);
+    int32_t ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos = false);
 
 private:
     constexpr static uint32_t SECONDS_TO_MILLISECONDS = 1000;
@@ -219,6 +219,7 @@ private:
     // ai text analysis or detect
     bool NeedAIAnalysis(int32_t& index, const CaretUpdateType targetType, const Offset& touchOffset,
         std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout);
+    bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void AdjustCursorPosition(int32_t& index, const Offset& touchOffset);
     bool AdjustWordSelection(int32_t& index, int32_t& start, int32_t& end, const Offset& touchOffset);
     bool IsClickAtBoundary(int32_t index, const Offset& touchOffset);
