@@ -111,6 +111,26 @@ public:
         return color_;
     }
 
+    void SetStrokeColor(uint32_t strockColor)
+    {
+        strockColor_ = strockColor;
+    }
+
+    uint32_t GetStrokeColor() const
+    {
+        return strockColor_;
+    }
+
+    void SetStrokeWidth(float strockWidth)
+    {
+        strockWidth_ = strockWidth;
+    }
+
+    float GetStrokeWidth() const
+    {
+        return strockWidth_;
+    }
+
     bool operator==(const BasicShape& other) const
     {
         return (basicShapeType_ == other.GetBasicShapeType() && width_ == other.GetWidth() &&
@@ -136,6 +156,8 @@ protected:
     DimensionOffset offset_;
     DimensionOffset position_;
     Color color_;
+    uint32_t strockColor_;
+    float strockWidth_;
 };
 
 // inset(<top> <right> <bottom> <left> round <top-radius> <right-radius> <bottom-radius> <left-radius>)
