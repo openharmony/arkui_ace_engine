@@ -298,14 +298,14 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
     if (image_) {
-        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_, interpolationDefault_);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_, interpolationDefault_);
     }
     CreateObscuredImage();
     if (obscuredImage_) {
-        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_, interpolationDefault_);
     }
     return nullptr;
 }
@@ -1152,6 +1152,22 @@ void ImagePattern::UpdateAnalyzerOverlayLayout()
     auto renderContext = overlayNode->GetRenderContext();
     if (renderContext) {
         renderContext->SetRenderFrameOffset({-padding.Offset().GetX(), -padding.Offset().GetY()});
+    }
+}
+
+void ImagePattern::InitDefaultValue()
+{
+    // add API version protection
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        autoResizeDefault_ = false;
+        interpolationDefault_ = ImageInterpolation::LOW;
+    }
+    auto container = Container::Current();
+    // If the default value is set to false, the ScenceBoard memory increases.
+    // Therefore the default value is different in the ScenceBoard.
+    if (container && container->IsScenceBoardWindow()) {
+        autoResizeDefault_ = true;
+        interpolationDefault_ = ImageInterpolation::NONE;
     }
 }
 } // namespace OHOS::Ace::NG
