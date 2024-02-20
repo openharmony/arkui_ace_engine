@@ -159,7 +159,8 @@ public:
             theme->inlineBorderColor_ = pattern->GetAttr<Color>(INLINE_BORDER_COLOR, Color());
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
-            theme->height_ = pattern->GetAttr<Dimension>("textinput_default_height", 48.0_vp);
+            // The default height is 48VP, of which 12VP is 12VP each for the upper and lower padding
+            theme->height_ = pattern->GetAttr<Dimension>("textinput_default_height", 24.0_vp);
         }
     };
 
