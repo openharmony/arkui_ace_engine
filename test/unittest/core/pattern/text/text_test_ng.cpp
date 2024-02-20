@@ -4985,7 +4985,6 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent001, TestSize.Level1)
     EXPECT_FALSE(pattern->hasClicked_);
 }
 
-
 /**
  * @tc.name: HandleDoubleClickEvent002
  * @tc.desc: test test_pattern.h HandleDoubleClickEvent function.
@@ -5335,7 +5334,7 @@ HWTEST_F(TextTestNg, OnTextSelectionChange002, TestSize.Level1)
      */
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     pattern->paragraph_ = paragraph;
-    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(0));
     EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(2), Return(false)));
     GestureEvent info;
