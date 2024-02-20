@@ -86,6 +86,7 @@
 #include "core/interfaces/native/node/rect_modifier.h"
 #include "core/interfaces/native/node/side_bar_container_modifier.h"
 #include "core/interfaces/native/node/stepper_item_modifier.h"
+#include "core/interfaces/native/node/node_refresh_modifier.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/interfaces/native/node/plugin_modifier.h"
@@ -195,7 +196,7 @@ const ArkUINodeModifiers impl = {
 #else
     nullptr,
 #endif
-
+    nullptr,
     nullptr, // FlexModifier
     nullptr, // ScrollBarModifier
     nullptr, // ScrollerModifier
@@ -204,7 +205,7 @@ const ArkUINodeModifiers impl = {
     nullptr, // GestureModifier
     nullptr, // BadgeModifier
     nullptr, // WebModifier
-    nullptr, // RefreshModifier
+    NodeModifier::GetRefreshModifier, // RefreshModifier
     nullptr, // MenuItemGroupModifier
     nullptr, // SearchControllerModifier
     nullptr, // SideBarModifier

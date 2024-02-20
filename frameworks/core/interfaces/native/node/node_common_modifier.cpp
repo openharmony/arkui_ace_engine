@@ -3666,24 +3666,26 @@ ArkUI_Int32 GetResponseRegion(ArkUINodeHandle node, ArkUI_Float32* values)
     //set int default
     int index = 0;
     for (auto& element : responseRegions) {
-        values[index++] = element.GetWidth().Value();
-        values[index++] = element.GetHeight().Value();
         values[index++] = element.GetOffset().GetX().Value();
-        values[index++] = element.GetOffset().GetX().Value();
+        values[index++] = element.GetOffset().GetY().Value();
+        values[index++] = element.GetWidth().Value() * PERCENT_100;
+        values[index++] = element.GetHeight().Value() * PERCENT_100;
     }
     //values size
     return index;
 }
 
-void GetOverlay(ArkUINodeHandle node, ArkUIOverlayOptions *options)
+ArkUI_CharPtr GetOverlay(ArkUINodeHandle node, ArkUIOverlayOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     NG::OverlayOptions overlayOptions = ViewAbstract::GetOverlay(frameNode);
     options->align = ParseAlignmentToIndex(overlayOptions.align);
     options->x = overlayOptions.x.Value();
     options->y = overlayOptions.y.Value();
     options->content = overlayOptions.content.c_str();
+    g_strValue = overlayOptions.content;
+    return g_strValue.c_str();
 }
 
 ArkUI_Bool GetAccessibilityGroup(ArkUINodeHandle node)

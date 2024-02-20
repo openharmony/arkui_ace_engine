@@ -232,7 +232,7 @@ void* createListItemGroupNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
-void* createSliderSliderNode(ArkUI_Int32 nodeId)
+void* createSliderNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = SliderModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
@@ -266,7 +266,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr,
         nullptr,
         nullptr,
-        createSliderSliderNode,
+        createSliderNode,
         nullptr,
         nullptr,
         nullptr,

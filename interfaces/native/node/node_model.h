@@ -31,7 +31,7 @@ struct ArkUI_Node {
     ArkUINodeHandle uiNodeHandle = nullptr;
 };
 
-constexpr int BASIC_COMPONENT_NUM = 17;
+constexpr int BASIC_COMPONENT_NUM = 18;
 
 #ifdef __cplusplus
 };
