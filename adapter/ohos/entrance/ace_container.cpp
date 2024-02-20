@@ -453,12 +453,14 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
             return overlayManager->RemoveOverlayInSubwindow();
         }
         SubwindowManager::GetInstance()->CloseMenu();
+        LOGI("Menu consumed backpressed event");
         return true;
 #endif
     }
     // remove overlay through SubwindowManager if subwindow unfocused.
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
     if (subwindow) {
+        LOGI("subwindow consumed backpressed event");
         if (subwindow->GetShown()) {
             auto overlayManager = subwindow->GetOverlayManager();
             CHECK_NULL_RETURN(overlayManager, false);

@@ -1546,11 +1546,13 @@ bool PipelineContext::OnBackPressed()
 
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
+        LOGI("fullscreen component：video or web consumed backpressed event");
         return true;
     }
 
     // if has sharedTransition, back press will stop the sharedTransition
     if (sharedTransitionManager_->OnBackPressed()) {
+        LOGI("sharedTransition consumed backpressed event");
         return true;
     }
 
@@ -1569,11 +1571,13 @@ bool PipelineContext::OnBackPressed()
         },
         TaskExecutor::TaskType::UI);
     if (hasOverlay) {
+        LOGI("popup consumed backpressed event");
         return true;
     }
 
     auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     if (textfieldManager && textfieldManager->OnBackPressed()) {
+        LOGI("textfield consumed backpressed event");
         return true;
     }
 
@@ -1603,6 +1607,7 @@ bool PipelineContext::OnBackPressed()
 
     if (result) {
         // user accept
+        LOGI("Navigation consumed backpressed event");
         return true;
     }
 
@@ -1619,6 +1624,7 @@ bool PipelineContext::OnBackPressed()
 
     if (result) {
         // user accept
+        LOGI("router consumed backpressed event");
         return true;
     }
     return false;
