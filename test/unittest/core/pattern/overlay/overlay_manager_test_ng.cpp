@@ -978,6 +978,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto targetId1 = targetNodes[0]->GetId();
     auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
     overlayManager->ShowPopup(targetId1, popups[0]);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     overlayManager->ShowPopup(targetId2, popups[1]);

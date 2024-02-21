@@ -776,6 +776,28 @@ void OverlayManager::ClearToast()
 
 void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo)
 {
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(rootNode);
+    if (frameNode && !frameNode->IsLayoutComplete()) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [targetId, popupInfo, weak = WeakClaim(this)]() {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->MountPopup(targetId, popupInfo);
+            },
+            TaskExecutor::TaskType::UI);
+    } else {
+        MountPopup(targetId, popupInfo);
+    }
+}
+
+void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo)
+{
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show popup enter");
     popupMap_[targetId] = popupInfo;
     if (!popupInfo.markNeedUpdate) {
