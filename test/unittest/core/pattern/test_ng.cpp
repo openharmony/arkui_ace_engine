@@ -54,4 +54,14 @@ uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityPr
     }
     return actions;
 }
+
+TouchEventInfo TestNG::CreateTouchEventInfo(TouchType touchType, Offset location)
+{
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(touchType);
+    touchLocationInfo.SetLocalLocation(location);
+    TouchEventInfo touchEventInfo("touch");
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    return touchEventInfo;
+}
 } // namespace OHOS::Ace::NG

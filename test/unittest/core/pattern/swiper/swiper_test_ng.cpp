@@ -56,7 +56,7 @@ void SwiperTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<SwiperAccessibilityProperty>();
 }
 
-void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& callback)
+void SwiperTestNg::Create(const std::function<void(SwiperModelNG)>& callback)
 {
     SwiperModelNG model;
     model.Create();
@@ -65,9 +65,18 @@ void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& call
     if (callback) {
         callback(model);
     }
-    CreateItem();
     GetInstance();
     FlushLayoutTask(frameNode_);
+}
+
+void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& callback)
+{
+    Create([callback](SwiperModelNG model) {
+        if (callback) {
+            callback(model);
+        }
+        CreateItem();
+    });
 }
 
 void SwiperTestNg::CreateItem(int32_t itemNumber)
