@@ -1121,6 +1121,8 @@ var FileSelectorMode;
 var ProtectedResourceType;
 (function (ProtectedResourceType) {
   ProtectedResourceType["MidiSysex"] = "TYPE_MIDI_SYSEX";
+  ProtectedResourceType["VIDEO_CAPTURE"] = "TYPE_VIDEO_CAPTURE";
+  ProtectedResourceType["AUDIO_CAPTURE"] = "TYPE_AUDIO_CAPTURE";
 })(ProtectedResourceType || (ProtectedResourceType = {}));
 
 var ProgressType;
