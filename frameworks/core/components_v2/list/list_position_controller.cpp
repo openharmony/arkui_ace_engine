@@ -29,7 +29,7 @@ void ListPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlig
 }
 
 bool ListPositionController::AnimateTo(
-    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
+    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
 {
     auto list = AceType::DynamicCast<V2::RenderList>(scroll_.Upgrade());
     if (!list) {

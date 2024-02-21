@@ -299,6 +299,7 @@ public:
         scrollAbort_ = abort;
     }
     void PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping);
+    void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
     virtual float GetTotalOffset() const
     {
         return 0.0f;
@@ -310,11 +311,12 @@ public:
     }
     virtual void OnAnimateStop() {}
     virtual void ScrollTo(float position);
-    virtual void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth);
+    virtual void AnimateTo(
+        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false);
     bool CanOverScroll(int32_t source)
     {
         return (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-                IsScrollable() && (!ScrollableIdle() || animateOverScroll_));
+                IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
     }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
@@ -450,6 +452,11 @@ public:
         needLinked_ = needLinked;
     }
 
+    void SetAnimateCanOverScroll(bool animateCanOverScroll)
+    {
+        animateCanOverScroll_ = animateCanOverScroll;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
@@ -537,6 +544,7 @@ private:
     void InitSpringOffsetProperty();
     void InitCurveOffsetProperty(float position);
     void StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
+    void PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void InitOption(AnimationOption &option, float duration, const RefPtr<Curve>& curve);
 
     void OnAttachToFrameNode() override;
@@ -637,6 +645,8 @@ private:
     RefPtr<Animator> animator_;
     bool scrollAbort_ = false;
     bool animateOverScroll_ = false;
+    bool isAnimateOverScroll_ = false;
+    bool animateCanOverScroll_ = false;
 
     NestedScrollOptions nestedScroll_ = {
         .forward = NestedScrollMode::SELF_ONLY,
