@@ -237,14 +237,16 @@ void NGGestureRecognizer::AboutToAccept()
 
     auto eventManager = GetCurrentEventManager();
     CHECK_NULL_VOID(eventManager);
-    if (fromCardOrUIExtension_) {
-        eventManager->SetInnerFlag(true);
-    }
     auto frameNode = GetAttachedNode();
     auto ctrl = eventManager->GetResponseCtrl();
     CHECK_NULL_VOID(ctrl);
     if (!ctrl->ShouldResponse(frameNode)) {
         return;
+    }
+    if (fromCardOrUIExtension_) {
+        eventManager->SetInnerFlag(true);
+    } else {
+        eventManager->SetInnerFlag(false);
     }
     ctrl->TrySetFirstResponse(frameNode);
     OnAccepted();
