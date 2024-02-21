@@ -320,6 +320,10 @@ bool FolderStackLayoutAlgorithm::IsIntoFolderStack(
     auto foldStatus = displayInfo->GetFoldStatus();
     auto rotation = displayInfo->GetRotation();
     auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
+    TAG_LOGI(AceLogTag::ACE_FOLDER_STACK,
+        "folderStack state isFullWindow:%{public}d, isFoldable:%{public}d, "
+        "foldStatus:%{public}d, isLandscape:%{public}d",
+        isFullWindow, isFoldable, foldStatus, isLandscape);
     return isFullWindow && isFoldable && foldStatus == FoldStatus::HALF_FOLD && isLandscape;
 }
 } // namespace OHOS::Ace::NG

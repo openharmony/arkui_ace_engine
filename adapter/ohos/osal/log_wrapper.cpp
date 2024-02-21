@@ -109,6 +109,7 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_OBSERVER, "AceObserver" },
     { AceLogTag::ACE_EMBEDDED_COMPONENT, "AceEmbeddedComponent" },
     { AceLogTag::ACE_TEXT_CLOCK, "AceTextClock" },
+    { AceLogTag::ACE_FOLDER_STACK, "AceFolderStack" },
 };
 
 const char* APP_DOMAIN_CONTENT = "JSApp";
