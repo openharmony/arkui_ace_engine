@@ -45,7 +45,7 @@ public:
     AppBarView() = default;
     explicit AppBarView(const RefPtr<FrameNode>& atom)
     {
-        atom_ = atom;
+        atomicService_ = atom;
     }
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
     void SetVisible(bool visible);
@@ -68,10 +68,10 @@ private:
     static RefPtr<FrameNode> BuildFaButton();
     static void SetEachIconColor(
         RefPtr<FrameNode> icon, const std::optional<Color>& color, InternalResource::ResourceId image);
-    RefPtr<FrameNode> atom_;
     RefPtr<FrameNode> GetFaButton();
     RefPtr<FrameNode> GetBackButton();
     
+    WeakPtr<FrameNode> atomicService_;
     bool isVisibleSetted = false;
     bool isRowColorSetted = false;
     bool isIconColorSetted = false;
