@@ -249,11 +249,13 @@ void ButtonPattern::HandleBackgroundColor()
     CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
     if (!renderContext->HasBackgroundColor()) {
-        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
     }
+    themeBgColor_ = buttonTheme->GetBgColor();
+    themeTextColor_ = buttonTheme->GetTextStyle().GetTextColor();
 }
 
 void ButtonPattern::HandleEnabled()
@@ -304,14 +306,17 @@ void ButtonPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(renderContext);
     auto buttonLayoutProperty = node->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
-    auto color = buttonTheme->GetBgColor();
-    renderContext->UpdateBackgroundColor(color);
+    if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
+        auto color = buttonTheme->GetBgColor();
+        renderContext->UpdateBackgroundColor(color);
+    }
     auto textNode = DynamicCast<FrameNode>(node->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto textStyle = buttonTheme->GetTextStyle();
-    textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
-    textNode->MarkDirtyNode();
+    if (textLayoutProperty->GetTextColor().value_or(themeTextColor_) == themeTextColor_) {
+        textLayoutProperty->UpdateTextColor(buttonTheme->GetTextStyle().GetTextColor());
+        textNode->MarkDirtyNode();
+    }
 }
 } // namespace OHOS::Ace::NG
