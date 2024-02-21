@@ -19,18 +19,22 @@
 #include <memory>
 #include <string>
 
-#include "third_party/cJSON/cJSON.h"
 #include "include/core/SkSamplingOptions.h"
+#include "third_party/cJSON/cJSON.h"
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #ifndef PREVIEW
 #include "image_source.h"
 #endif
+#include "include/core/SkCanvas.h"
 #include "include/core/SkImage.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
 #include "include/core/SkRect.h"
+#include "include/core/SkStream.h"
 
-// 区分此函数是在Windows环境调用还是Linux/mac环境调用
+// used to distinguish platform
 #ifdef PREVIEW
 #ifdef WINDOWS_PLATFORM
 #include <direct.h>
@@ -48,8 +52,7 @@ namespace {
 const char DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND[] = "background";
 const char DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND[] = "foreground";
 #endif
-constexpr float SIDE = 192.0;
-
+constexpr float SIDE = 192.0f;
 // define for get resource path in preview scenes
 const static char PREVIEW_LOAD_RESOURCE_ID[] = "ohos_drawable_descriptor_path";
 #ifdef PREVIEW
@@ -62,6 +65,63 @@ constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "/resources/entry/resources
 #ifdef LINUX_PLATFORM
 const static size_t MAX_PATH_LEN = 255;
 #endif
+#endif
+
+using SvgRenderFunc = void (*)(void* canvas, uint8_t* data, size_t dataLen, float width, float height);
+#if defined(WINDOWS_PLATFORM)
+#include <windows.h>
+void* FindModule()
+{
+    HMODULE result = nullptr;
+    const char libname[] = "libace_compatible.dll";
+    GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_PIN, libname, &result);
+    if (result) {
+        return result;
+    }
+    HILOG_WARN("Cannot find module libace_compatible");
+    return nullptr;
+}
+void* FindFunction(void* library, const char* name)
+{
+    return (void*)GetProcAddress(reinterpret_cast<HMODULE>(library), name);
+}
+#else
+#ifdef USE_ROSEN_DRAWING
+#include <dlfcn.h>
+void* FindModule()
+{
+    const char libname[] = "libace_compatible.z.so";
+    void* result = dlopen(libname, RTLD_LAZY | RTLD_LOCAL);
+    if (result) {
+        return result;
+    }
+    HILOG_WARN("Cannot load libace_compatible: %{public}s", dlerror());
+    return nullptr;
+}
+
+void* FindFunction(void* library, const char* name)
+{
+    return dlsym(library, name);
+}
+#endif
+#endif
+
+#ifdef USE_ROSEN_DRAWING
+void RenderSVGMask(
+    Rosen::Drawing::Canvas* canvas, std::unique_ptr<uint8_t[]>& data, size_t dataLen, float width, float height)
+{
+    void* module = FindModule();
+    if (module == nullptr) {
+        HILOG_WARN("Failed to get module");
+        return;
+    }
+    auto svgRenderer = reinterpret_cast<SvgRenderFunc>(FindFunction(module, "OHOS_ACE_DrawSVG"));
+    if (!svgRenderer) {
+        HILOG_WARN("Cannot find OHOS_ACE_DrawSVG()");
+        return;
+    }
+    (*svgRenderer)(canvas, data.get(), dataLen, width, height);
+}
 #endif
 } // namespace
 
@@ -130,6 +190,22 @@ void LayeredDrawableDescriptor::InitialResource(const std::shared_ptr<Global::Re
     }
     if (!PreGetPixelMapFromJsonBuf(resourceMgr, false)) {
         HILOG_ERROR("Create foreground Item imageSource from json buffer failed");
+    }
+}
+
+void LayeredDrawableDescriptor::InitialSVGResource(
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr)
+{
+    CHECK_NULL_VOID(resourceMgr);
+    // preprocess get default svg mask
+    const std::string defaultSVGMaskName = "ohos_icon_mask_svg";
+    resourceMgr->GetMediaDataByName(defaultSVGMaskName.c_str(), defaultSVGMaskDataLength_, defaultSVGMaskData_);
+    // preprocess get background and foreground
+    if (!PreGetPixelMapFromJsonBuf(resourceMgr, true)) {
+        HILOG_WARN("Create svg background Item imageSource from json buffer failed");
+    }
+    if (!PreGetPixelMapFromJsonBuf(resourceMgr, false)) {
+        HILOG_WARN("Create svg foreground Item imageSource from json buffer failed");
     }
 }
 
@@ -226,8 +302,7 @@ bool LayeredDrawableDescriptor::GetDefaultMask()
     Media::SourceOptions opts;
     uint32_t errorCode = 0;
     std::unique_ptr<Media::ImageSource> imageSource =
-        Media::ImageSource::CreateImageSource(
-            defaultMaskData_.get(), defaultMaskDataLength_, opts, errorCode);
+        Media::ImageSource::CreateImageSource(defaultMaskData_.get(), defaultMaskDataLength_, opts, errorCode);
     Media::DecodeOptions decodeOpts;
     decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
     if (imageSource) {
@@ -241,21 +316,21 @@ bool LayeredDrawableDescriptor::GetDefaultMask()
     return true;
 }
 
-void LayeredDrawableDescriptor::InitLayeredParam(std::pair<std::unique_ptr<uint8_t[]>, size_t> &foregroundInfo,
-    std::pair<std::unique_ptr<uint8_t[]>, size_t> &backgroundInfo)
+void LayeredDrawableDescriptor::InitLayeredParam(std::pair<std::unique_ptr<uint8_t[]>, size_t>& foregroundInfo,
+    std::pair<std::unique_ptr<uint8_t[]>, size_t>& backgroundInfo)
 {
     Media::SourceOptions opts;
     uint32_t errorCode = 0;
-    auto foreground = Media::ImageSource::CreateImageSource(foregroundInfo.first.get(), foregroundInfo.second, opts,
-        errorCode);
+    auto foreground =
+        Media::ImageSource::CreateImageSource(foregroundInfo.first.get(), foregroundInfo.second, opts, errorCode);
     if (errorCode == 0) {
         Media::DecodeOptions decodeOpts;
         decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
         auto pixelMapPtr = foreground->CreatePixelMap(decodeOpts, errorCode);
         foreground_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
     }
-    auto background = Media::ImageSource::CreateImageSource(backgroundInfo.first.get(), backgroundInfo.second, opts,
-        errorCode);
+    auto background =
+        Media::ImageSource::CreateImageSource(backgroundInfo.first.get(), backgroundInfo.second, opts, errorCode);
     if (errorCode == 0) {
         Media::DecodeOptions decodeOpts;
         decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
@@ -272,8 +347,7 @@ bool LayeredDrawableDescriptor::GetMaskByPath()
     }
     Media::SourceOptions opts;
     uint32_t errorCode = 0;
-    std::unique_ptr<Media::ImageSource> imageSource =
-        Media::ImageSource::CreateImageSource(maskPath_, opts, errorCode);
+    std::unique_ptr<Media::ImageSource> imageSource = Media::ImageSource::CreateImageSource(maskPath_, opts, errorCode);
     Media::DecodeOptions decodeOpts;
     decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
     if (imageSource) {
@@ -448,7 +522,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     if (foreground_.has_value() || GetPixelMapFromJsonBuf(false)) {
         foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
     } else {
-        HILOG_INFO("Get pixelMap of foreground failed.");
+        HILOG_WARN("Get pixelMap of foreground failed.");
         return false;
     }
 
@@ -456,15 +530,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     if (background_.has_value() || GetPixelMapFromJsonBuf(true)) {
         background = ImageConverter::PixelMapToBitmap(background_.value());
     } else {
-        HILOG_ERROR("Get pixelMap of background failed.");
-        return false;
-    }
-
-    std::shared_ptr<Rosen::Drawing::Bitmap> mask;
-    if (mask_.has_value() || GetMaskByPath() || GetDefaultMask()) {
-        mask = ImageConverter::PixelMapToBitmap(mask_.value());
-    } else {
-        HILOG_ERROR("Get pixelMap of mask failed.");
+        HILOG_WARN("Get pixelMap of background failed.");
         return false;
     }
 
@@ -482,10 +548,20 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     bitmapCanvas.AttachBrush(brush);
     DrawOntoCanvas(background, SIDE, SIDE, bitmapCanvas);
     bitmapCanvas.DetachBrush();
+
     brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
     bitmapCanvas.AttachBrush(brush);
-    DrawOntoCanvas(mask, SIDE, SIDE, bitmapCanvas);
+    Rosen::Drawing::Bitmap maskBitmap;
+    auto maskBitmapPtr = std::make_shared<Rosen::Drawing::Bitmap>(maskBitmap);
+    auto maskImageInfo = Rosen::Drawing::ImageInfo::MakeN32Premul(SIDE, SIDE);
+    maskBitmap.Build(maskImageInfo);
+    Rosen::Drawing::Canvas maskBitmapCanvas;
+    maskBitmapCanvas.Bind(maskBitmap);
+    maskBitmapCanvas.Clear(SK_ColorTRANSPARENT);
+    RenderSVGMask(&maskBitmapCanvas, defaultSVGMaskData_, defaultSVGMaskDataLength_, SIDE, SIDE);
+    DrawOntoCanvas(maskBitmapPtr, SIDE, SIDE, bitmapCanvas);
     bitmapCanvas.DetachBrush();
+
     brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_ATOP);
     bitmapCanvas.AttachBrush(brush);
     DrawOntoCanvas(foreground, SIDE, SIDE, bitmapCanvas);
