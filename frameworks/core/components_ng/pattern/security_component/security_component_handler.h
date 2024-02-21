@@ -40,7 +40,6 @@ public:
     static SecurityComponentProbe probe;
     static int32_t ReportSecurityComponentClickEventInner(int32_t& scId,
         RefPtr<FrameNode>& node, Security::SecurityComponent::SecCompClickEvent& event);
-    static void TryLoadSecurityComponentIfNotExist();
 
 private:
     static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
@@ -65,8 +64,6 @@ private:
     static double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
-
-    static bool isPreRegister_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H
