@@ -1066,6 +1066,9 @@ void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>
 {
     removedElmtId.emplace_back(child->GetId());
     // Fetch all the child elementIDs recursively
-    CollectRemovedChildren(child->GetChildren(), removedElmtId);
+    if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
+        // add CustomNode but do not recurse into its children
+        CollectRemovedChildren(child->GetChildren(), removedElmtId);
+    }
 }
 } // namespace OHOS::Ace::NG
