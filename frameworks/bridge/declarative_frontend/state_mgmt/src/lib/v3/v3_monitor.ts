@@ -30,13 +30,13 @@ class MonitorV3 {
   //0x1.0000.0000.0000,
   // start with high number to avoid same id as elmtId for components.
   public static readonly MIN_WATCH_ID = 0x1000000000000;
-  private static nextWatchId_ = MonitorV3.MIN_WATCH_ID;
+  public static nextWatchId_ = MonitorV3.MIN_WATCH_ID;
 
   private value_: any; // 上次的值
-  private props_: string[]; // 监听的属性，objA.objB.propC 已经分解成数组[objA objB propC]
-  private target_: object; // 执行对象
-  private func_: (val: any) => void; // 属性变化的回调方法
-  private watchId_: number; // 监听唯一标识
+  private props_: string[]; 
+  private target_: Object; 
+  private func_: (val: any) => void; 
+  private watchId_: number; 
 
   public static readonly WATCH_PREFIX = "__wa_";
 
@@ -48,16 +48,19 @@ class MonitorV3 {
     this.props_ = props.split(".");
   }
 
+  public getTarget() : Object {
+    return this.target_;
+  }
+
   public InitRun(): number {
     this.value_ = this.observeObjectAccess(true);
     return this.watchId_;
   }
 
-  // 监视到该Watch改变了数据
   public fireChange(): void {
     let newVal = this.observeObjectAccess();
     if (this.value_ !== newVal) {
-      stateMgmtConsole.debug(`@monitor(${this.props_.toString()}) function exec ...`);
+      stateMgmtConsole.debug(`@monitor('${this.props_.join(".")}') function exec ...`);
       this.func_.call(this.target_, newVal, this.value_)
       this.value_ = newVal
     }
@@ -81,9 +84,8 @@ class MonitorV3 {
       if (typeof obj=="object" && Reflect.has(obj, prop)) {
         obj = obj[prop]
       } else {
-        // FIXME change to stateMgmtConsole.applicationError
         isInit && stateMgmtConsole.warn(`@monitor("${this.props_.join(".")}"): path currently does not exist (can be ok when monitoring union type values)`)
-        return undefined
+        return undefined;
       }
     }
     return obj
@@ -96,8 +98,10 @@ class MonitorV3 {
 
  const monitor = function (key) {
   return function (target, _, descriptor) {
+    stateMgmtConsole.debug(`@monitor('${key}')`);
     let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + target.constructor.name)
-    target[watchProp] ? target[watchProp][key] = descriptor.value : target[watchProp] = { [key]: descriptor.value }
+    target[watchProp] ? target[watchProp][key] = descriptor.value 
+                      : target[watchProp] = { [key]: descriptor.value }
   }
 }
 

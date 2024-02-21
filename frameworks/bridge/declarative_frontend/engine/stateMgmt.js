@@ -2016,23 +2016,23 @@ Environment.instance_ = undefined;
 */
 class stateMgmtConsole {
     static log(...args) {
-        aceConsole.log(...args);
+        aceConsole.error(...args);
     }
     static debug(...args) {
-        aceConsole.debug(...args);
+        aceConsole.error(...args);
     }
     static info(...args) {
-        aceConsole.info(...args);
+        aceConsole.error(...args);
     }
     static warn(...args) {
-        aceConsole.warn(...args);
+        aceConsole.error(...args);
     }
     static error(...args) {
         aceConsole.error(...args);
     }
     static propertyAccess(...args) {
         // enable for fine grain debugging variable observation
-        // aceConsole.debug (...args)
+        aceConsole.error(...args);
     }
     static applicationError(...args) {
         aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
@@ -5277,6 +5277,11 @@ class ViewPU extends NativeViewPartialUpdate {
         // flag if active of inActive
         // inActive means updates are delayed
         this.isActive_ = true;
+        /*
+        private elmtIdsDelayedUpdate: Set<number> = new Set()
+        private monitorIdsDelayedUpdate: Set<number> = new Set()
+        private computedIdsDelayedUpdate: Set<number> = new Set()
+        */
         this.runReuse_ = false;
         this.hasBeenRecycled_ = false;
         // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
@@ -5496,6 +5501,9 @@ class ViewPU extends NativeViewPartialUpdate {
             }
         });
         return result;
+    }
+    isViewActive() {
+        return this.isActive_;
     }
     /**
    * ArkUI engine will call this function when the corresponding CustomNode's active status change.
@@ -5764,6 +5772,8 @@ class ViewPU extends NativeViewPartialUpdate {
      *  inform that UINode with given elmtId needs rerender
      *  does NOT exec @Watch function.
      *  only used on V3 code path from ObserveV3.fireChange.
+     *
+     * FIXME will still use in the future?
      */
     uiNodeNeedUpdateV3(elmtId) {
         if (this.isFirstRender()) {
@@ -5784,9 +5794,39 @@ class ViewPU extends NativeViewPartialUpdate {
             this.dirtDescendantElementIds_.add(elmtId);
         }
         
-        // FIXME dito: this.restoreInstanceId();
         
     }
+    /*
+    private performDelayedUpdateV3(): void {
+      FIXME Component freeze
+      if(this.computedIdsDelayedUpdate.size) {
+        // exec computed functions
+        ObserveV3.getObserve().updateDirtyComputedProps(this.computedIdsDelayedUpdate);
+      }
+      if(this.monitorIdsDelayedUpdate.size) {
+        // exec  monitor functions
+        ObserveV3.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
+      }
+      if(this.elmtIdsDelayedUpdate.size) {
+        // update re-render of updated element ids once the view gets active
+        if(this.dirtDescendantElementIds_.size === 0) {
+          this.dirtDescendantElementIds_ = new Set(this.elmtIdsDelayedUpdate);
+        }
+        else {
+          this.elmtIdsDelayedUpdate.forEach((element) => {
+            this.dirtDescendantElementIds_.add(element);
+          });
+        }
+      }
+      this.markNeedUpdate();
+      this.elmtIdsDelayedUpdate.clear();
+      this.monitorIdsDelayedUpdate.clear();
+      this.computedIdsDelayedUpdate.clear();
+    }
+  
+     other revision: 864b565fa4 (@computed properties part 2, works with @monitor, component freeze not tested)
+  }
+     */
     performDelayedUpdate() {
         if (!this.ownObservedPropertiesStore_.size) {
             return;
@@ -5821,7 +5861,7 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     /**
      * Function to be called from the constructor of the sub component
-     * to register a @Watch varibale
+     * to register a @Watch variable
      * @param propStr name of the variable. Note from @Provide and @Consume this is
      *      the variable name and not the alias!
      * @param callback application defined member function of sub-class
@@ -5918,7 +5958,7 @@ class ViewPU extends NativeViewPartialUpdate {
             }
         } while (this.dirtDescendantElementIds_.size);
         
-        this.dumpStateVars();
+        //this.dumpStateVars();
         
     }
     // request list of all (global) elmtIds of deleted UINodes and unregister from the all ViewPUs
@@ -6517,9 +6557,9 @@ class ViewPU extends NativeViewPartialUpdate {
      * especially after init variables from parent ViewPU has been done
      */
     finalizeConstruction() {
-        if (ConfigureStateMgmt.instance.needsV3Observe()) {
-            ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
-        }
+        // FIXME, can we skip for apps that do not use V3 at all?
+        ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
+        ObserveV3.getObserve().constructComputed(this, this.constructor.name);
         // Always use ID_REFS in ViewPU
         this[ObserveV3.ID_REFS] = {};
     }
@@ -6531,6 +6571,20 @@ class ViewPU extends NativeViewPartialUpdate {
     findProvideV3(provideName) {
         // FIXME unimplemented
         return [undefined, provideName, true];
+    }
+    // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
+    // monitor firechange will be triggered for all these watchIds once this view gets active
+    addDelayedMonitorIds(watchId) {
+        /* FIXME @Component freeze
+        
+        this.monitorIdsDelayedUpdate.add(watchId);
+        */
+    }
+    addDelayedComputedIds(watchId) {
+        /* FIXME @Component freeze
+        
+        this.computedIdsDelayedUpdate.add(watchId);
+        */
     }
 } // class ViewPU
 // Array.sort() converts array items to string to compare them!
@@ -6798,6 +6852,7 @@ class ObserveV3 {
         // elmtIds of UINodes need re-render
         // @monitor functions that need to execute
         this.elmtIdsChanged_ = new Set();
+        this.computedPropIdsChanged_ = new Set();
         this.monitorIdsChanged_ = new Set();
         // avoid recursive execution of updateDirty
         // by state changes => fireChange while
@@ -6805,6 +6860,8 @@ class ObserveV3 {
         this.startDirty_ = false;
         // flag to indicate change observation is disabled
         this.disabled_ = false;
+        // flag to indicate ComputedV3 calculation is ongoing
+        this.calculatingComputedProp_ = false;
     }
     static getObserve() {
         if (!this.obsInstance_) {
@@ -6842,6 +6899,7 @@ class ObserveV3 {
                 for (let key in symRefs) {
                     (_b = symRefs[key]) === null || _b === void 0 ? void 0 : _b.delete(id);
                 }
+                ;
             }
         });
         delete this.id2targets_[id];
@@ -6860,10 +6918,14 @@ class ObserveV3 {
             stateMgmtConsole.applicationError(error);
             throw new TypeError(error);
         }
+        
         const id = this.bindId_;
+        // Map: attribute/symbol -> dependent id
         const symRefs = (_a = target[_e = ObserveV3.SYMBOL_REFS]) !== null && _a !== void 0 ? _a : (target[_e] = {});
         (_b = symRefs[attrName]) !== null && _b !== void 0 ? _b : (symRefs[attrName] = new Set());
         symRefs[attrName].add(id);
+        // Map id -> attribute/symbol
+        // optimization for faster clearBinding
         const idRefs = target[ObserveV3.ID_REFS];
         if (idRefs) {
             (_c = idRefs[id]) !== null && _c !== void 0 ? _c : (idRefs[id] = new Set());
@@ -6944,31 +7006,44 @@ class ObserveV3 {
     // mark view model object 'target' property 'attrName' as changed
     // notify affected watchIds and elmtIds
     fireChange(target, attrName) {
-        var _a, _b;
-        if (this.disabled_) {
+        if (!target[ObserveV3.SYMBOL_REFS] || this.disabled_) {
+            return;
+        }
+        if (this.calculatingComputedProp_) {
+            const error = `Usage of ILLEGAL @computed function detected for ${this.bindCmp_.getProp()}! The @computed function MUST NOT change the state of any observed state variable!`;
+            stateMgmtConsole.applicationError(error);
+            throw new Error(error);
+        }
+        let changedIdSet = target[ObserveV3.SYMBOL_REFS][attrName];
+        if (!changedIdSet || !(changedIdSet instanceof Set)) {
             return;
         }
         
-        (_b = (_a = target[ObserveV3.SYMBOL_REFS]) === null || _a === void 0 ? void 0 : _a[attrName]) === null || _b === void 0 ? void 0 : _b.forEach((id) => {
+        for (const id of changedIdSet) {
             // Cannot fireChange the object that is being created.
             if (id === this.bindId_) {
-                return;
+                continue;
             }
-            // if this is the first id to be added to elmtIdsChanged_ and monitorIdsChanged_, 
+            // if this is the first id to be added to any Set of changed ids, 
             // schedule an 'updateDirty' task
             // that will run after the current call stack has unwound.
             // purpose of check for startDirty_ is to avoid going into recursion. This could happen if
             // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
-            const c1 = (0 === this.elmtIdsChanged_.size);
-            const c2 = (0 === this.monitorIdsChanged_.size);
-            if (c1 && c2 && !this.startDirty_) {
+            if ((this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size == 0)
+                && /* update not already in progress */ !this.startDirty_) {
                 Promise.resolve().then(this.updateDirty.bind(this));
             }
-            // add bindId to Set of pending changes.
-            (id < MonitorV3.MIN_WATCH_ID)
-                ? this.elmtIdsChanged_.add(id)
-                : this.monitorIdsChanged_.add(id);
-        });
+            // add bindId to the correct Set of pending changes.
+            if (id < ComputedV3.MIN_COMPUTED_ID) {
+                this.elmtIdsChanged_.add(id);
+            }
+            else if (id < MonitorV3.MIN_WATCH_ID) {
+                this.computedPropIdsChanged_.add(id);
+            }
+            else {
+                this.monitorIdsChanged_.add(id);
+            }
+        } // for
     }
     updateDirty() {
         this.startDirty_ = true;
@@ -6976,6 +7051,7 @@ class ObserveV3 {
         this.startDirty_ = false;
     }
     updateDirty2() {
+<<<<<<< HEAD
         // process monitors first, because these might add more elmtIds of UINodes to rerender
         this.updateDirtyMonitors(1);
         this.updateUINodes();
@@ -6989,16 +7065,57 @@ class ObserveV3 {
             this.monitorIdsChanged_.clear(); // Clear the contents
             return;
         }
+=======
+>>>>>>> a6aae1154b (ObservedV3.updateDirty2 main loop refined)
         
-        const monitors = this.monitorIdsChanged_; // move Set
-        // exec @monitor functions might add new watchIds
-        this.monitorIdsChanged_ = new Set();
-        let monitor;
-        monitors.forEach((watchId) => {
-            if ((monitor = this.id2cmp_[watchId]) && (monitor instanceof MonitorV3)) {
-                monitor.fireChange();
+        // obtain and unregister the removed elmtIds 
+        UINodeRegisterProxy.obtainDeletedElmtIds();
+        UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+        // priority order of processing:
+        // 1- update computed propers until no more need computed props update 
+        // 2- update monitors until no more monitors and no more computed props
+        // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
+        // FIXME prevent infinite loops
+        do {
+            do {
+                while (this.computedPropIdsChanged_.size) {
+                    //  sort the ids and update in ascending order
+                    // If a @computed property depends on other @computed properties, their
+                    // ids will be smaller as they are defined first.
+                    const computedProps = Array.from(this.computedPropIdsChanged_).sort((id1, id2) => id1 - id2);
+                    this.computedPropIdsChanged_ = new Set();
+                    this.updateDirtyComputedProps(computedProps);
+                }
+                if (this.monitorIdsChanged_.size) {
+                    const monitors = this.monitorIdsChanged_;
+                    this.monitorIdsChanged_ = new Set();
+                    this.updateDirtyMonitors(monitors);
+                }
+            } while (this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
+            if (this.elmtIdsChanged_.size) {
+                const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
+                this.elmtIdsChanged_ = new Set();
+                this.updateUINodes(elmtIds);
+            }
+        } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
+    }
+    updateDirtyComputedProps(computed) {
+        
+        
+        computed.forEach((id) => {
+            let comp = this.id2cmp_[id];
+            if (comp instanceof ComputedV3) {
+                const target = comp.getTarget();
+                if (target instanceof ViewPU && !target.isViewActive()) {
+                    // FIXME @Component freeze enable
+                    // view.addDelayedComputedIds(id);
+                }
+                else {
+                    comp.fireChange();
+                }
             }
         });
+<<<<<<< HEAD
         if (this.monitorIdsChanged_.size) {
             this.updateDirtyMonitors(recursionDepth + 1);
         }
@@ -7025,12 +7142,63 @@ class ObserveV3 {
             
         } // while
         aceTrace.end();
+=======
+        
+    }
+    updateDirtyMonitors(monitors) {
+        
+        
+        let monitor;
+        let monitorTarget;
+        monitors.forEach((watchId) => {
+            monitor = this.id2cmp_[watchId];
+            if (monitor instanceof MonitorV3) {
+                if (((monitorTarget = monitor.getTarget()) instanceof ViewPU) && !monitorTarget.isViewActive()) {
+                    // FIXME @Component freeze enable
+                    // monitor fireChange delayed if target is a View that is not active
+                    // monitorTarget.addDelayedMonitorIds(watchId);
+                }
+                else {
+                    monitor.fireChange();
+                }
+            }
+        });
+        
+    }
+    updateUINodes(elmtIds) {
+        
+        
+        elmtIds.forEach((elmtId) => {
+            const view = this.id2cmp_[elmtId];
+            if (view && view instanceof ViewPU) {
+                if (view.isViewActive()) {
+                    // FIXME need to call syncInstanceId before update?
+                    view.UpdateElement(elmtId);
+                }
+                else {
+                    // FIXME @Component freeze
+                    //....
+                }
+            }
+        });
+        
+>>>>>>> a6aae1154b (ObservedV3.updateDirty2 main loop refined)
     }
     constructMonitor(target, name) {
         let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + name);
-        if (target && target[watchProp]) {
+        if (target && (typeof target == "object") && target[watchProp]) {
             Object.entries(target[watchProp]).forEach(([key, val]) => {
-                ObserveV3.getObserve().addWatch(target, key, val);
+                this.addWatch(target, key, val);
+            });
+        }
+    }
+    constructComputed(target, name) {
+        let watchProp = Symbol.for(ComputedV3.COMPUTED_PREFIX + name);
+        if (target && (typeof target == "object") && target[watchProp]) {
+            Object.entries(target[watchProp]).forEach(([propertyName, computeFunc]) => {
+                var _a;
+                
+                new ComputedV3(target, propertyName, computeFunc).InitRun();
             });
         }
     }
@@ -7043,8 +7211,8 @@ class ObserveV3 {
     static autoProxyObject(target, key) {
         let val = target[key];
         // Not an object, not a collection, no proxy required
-        if (!val || typeof (val) !== "object" || !(Array.isArray(val) ||
-            val instanceof Set || val instanceof Map || val instanceof Date)) {
+        if (!val || typeof (val) !== "object"
+            || !(Array.isArray(val) || val instanceof Set || val instanceof Map || val instanceof Date)) {
             return val;
         }
         // Only collections require proxy observation, and if it has been observed, it does not need to be observed again.
@@ -7052,8 +7220,8 @@ class ObserveV3 {
             target[key] = new Proxy(val, ObserveV3.arraySetMapProxy);
             val = target[key];
         }
-        // If the return value is an array, a length observation should be added to the array.
-        if (Array.isArray(val)) {
+        // If the return value is an Array, Set, Map 
+        if (!(val instanceof Date)) {
             ObserveV3.getObserve().addRef(val, ObserveV3.OB_LENGTH);
         }
         return val;
@@ -7325,6 +7493,7 @@ function ObservedV2(BaseClass) {
             // only the last initial value is recognized. Therefore, you need to add "Monitor" asynchronously.
             // Promise.resolve(true).then(() => constructMonitor(this, BaseClass.name)) // Low performance
             AsyncAddMonitorV3.addWatch(this, BaseClass.name);
+            AsyncAddComputedV3.addComputed(this, BaseClass.name);
         }
     };
 }
@@ -7360,11 +7529,13 @@ class MonitorV3 {
         this.watchId_ = ++MonitorV3.nextWatchId_;
         this.props_ = props.split(".");
     }
+    getTarget() {
+        return this.target_;
+    }
     InitRun() {
         this.value_ = this.observeObjectAccess(true);
         return this.watchId_;
     }
-    // 监视到该Watch改变了数据
     fireChange() {
         let newVal = this.observeObjectAccess();
         if (this.value_ !== newVal) {
@@ -7391,7 +7562,6 @@ class MonitorV3 {
                 obj = obj[prop];
             }
             else {
-                // FIXME change to stateMgmtConsole.applicationError
                 isInit && stateMgmtConsole.warn(`@monitor("${this.props_.join(".")}"): path currently does not exist (can be ok when monitoring union type values)`);
                 return undefined;
             }
@@ -7409,8 +7579,10 @@ MonitorV3.WATCH_PREFIX = "__wa_";
  */
 const monitor = function (key) {
     return function (target, _, descriptor) {
+        
         let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + target.constructor.name);
-        target[watchProp] ? target[watchProp][key] = descriptor.value : target[watchProp] = { [key]: descriptor.value };
+        target[watchProp] ? target[watchProp][key] = descriptor.value
+            : target[watchProp] = { [key]: descriptor.value };
     };
 };
 // Performance Improvement
@@ -7429,6 +7601,114 @@ class AsyncAddMonitorV3 {
     }
 }
 AsyncAddMonitorV3.watches = [];
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * ComputedV3
+ * one ComputedV3 object per @computed variable
+ * computedId_ - similar to elmtId, identify one ComputedV3 in Observe.idToCmp Map
+ * observeObjectAccess = calculate the compute function and create dependencies to
+ * source variables
+ * fireChange - execute compute function and re-new dependencies with observeObjectAccess
+ */
+class ComputedV3 {
+    constructor(target, prop, func) {
+        ConfigureStateMgmt.instance.intentUsingV3(`@computed`, prop);
+        this.target_ = target;
+        this.propertyComputeFunc_ = func;
+        this.computedId_ = ++ComputedV3.nextCompId_;
+        this.prop_ = prop;
+    }
+    InitRun() {
+        let cachedProp = ComputedV3.COMPUTED_CACHED_PREFIX + this.prop_;
+        let propertyKey = this.prop_;
+        Reflect.defineProperty(this.target_, propertyKey, {
+            get() {
+                ObserveV3.getObserve().addRef(this, propertyKey);
+                return ObserveV3.autoProxyObject(this, cachedProp);
+            },
+            enumerable: true
+        });
+        this.target_[cachedProp] = this.observeObjectAccess();
+        return this.computedId_;
+    }
+    fireChange() {
+        let newVal = this.observeObjectAccess();
+        let cachedProp = ComputedV3.COMPUTED_CACHED_PREFIX + this.prop_;
+        if (this.target_[cachedProp] !== newVal) {
+            this.target_[cachedProp] = newVal;
+            ObserveV3.getObserve().fireChange(this.target_, this.prop_);
+        }
+    }
+    getTarget() {
+        return this.target_;
+    }
+    getProp() {
+        return this.prop_;
+    }
+    // register current watchId while executing compute function
+    observeObjectAccess() {
+        ObserveV3.getObserve().startBind(this, this.computedId_);
+        let ret = this.propertyComputeFunc_.call(this.target_);
+        ObserveV3.getObserve().startBind(null, 0);
+        return ret;
+    }
+}
+// start with high number to avoid same id as elmtId for components.
+ComputedV3.MIN_COMPUTED_ID = 0x1000000000;
+ComputedV3.nextCompId_ = ComputedV3.MIN_COMPUTED_ID;
+ComputedV3.COMPUTED_PREFIX = "__comp_";
+ComputedV3.COMPUTED_CACHED_PREFIX = "__cached_";
+class AsyncAddComputedV3 {
+    static addComputed(target, name) {
+        if (AsyncAddComputedV3.computedVars.length === 0) {
+            Promise.resolve(true).then(AsyncAddComputedV3.run);
+        }
+        AsyncAddComputedV3.computedVars.push({ target: target, name: name });
+    }
+    static run() {
+        AsyncAddComputedV3.computedVars.forEach((computedVar) => ObserveV3.getObserve().constructComputed(computedVar.target, computedVar.name));
+        // according to stackoverflow this is the fastest way to clear an Array
+        // ref https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript
+        AsyncAddComputedV3.computedVars.length = 0;
+    }
+}
+AsyncAddComputedV3.computedVars = new Array();
+/**
+ * @computed variable decorator
+ */
+/**
+   * @computed class property decorator
+   *
+   * must be a 'computed' class property, e.g. @computed get varName() { return this.state1 + this.state2 }
+   * value assignment / set not allowed = has no setter.
+   *
+   * @param target  class prototype object
+   * @param propertyKey  class property name
+   *
+   * part of SDK
+   * @from 12
+   *
+   */
+const computed = (target, propertyKey, descriptor) => {
+    
+    let watchProp = Symbol.for(ComputedV3.COMPUTED_PREFIX + target.constructor.name);
+    const computeFunction = descriptor.get;
+    target[watchProp] ? target[watchProp][propertyKey] = computeFunction
+        : target[watchProp] = { [propertyKey]: computeFunction };
+};
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
