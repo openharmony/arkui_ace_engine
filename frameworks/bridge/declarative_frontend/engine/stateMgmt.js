@@ -5678,7 +5678,6 @@ class ViewPU extends NativeViewPartialUpdate {
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
             const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
-            this.dirtDescendantElementIds_ = new Set();
             dirtElmtIdsFromRootNode.forEach(elmtId => {
                 if (this.hasRecycleManager()) {
                     this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
@@ -5686,6 +5685,7 @@ class ViewPU extends NativeViewPartialUpdate {
                 else {
                     this.UpdateElement(elmtId);
                 }
+                this.dirtDescendantElementIds_.delete(elmtId);
             });
             if (this.dirtDescendantElementIds_.size) {
                 stateMgmtConsole.applicationError(`${this.debugInfo__()}: New UINode objects added to update queue while re-render! - Likely caused by @Component state change during build phase, not allowed. Application error!`);
