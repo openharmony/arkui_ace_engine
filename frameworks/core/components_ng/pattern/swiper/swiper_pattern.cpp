@@ -1123,8 +1123,8 @@ void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode)
 {
     if (swiperController_ && swiperController_->GetPreloadFinishCallback()) {
         auto preloadFinishCallback = swiperController_->GetPreloadFinishCallback();
-        preloadFinishCallback(errorCode);
         swiperController_->SetPreloadFinishCallback(nullptr);
+        preloadFinishCallback(errorCode);
     }
 }
 
