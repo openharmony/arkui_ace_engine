@@ -208,8 +208,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         isFirstCallOnReady_ = true;
         isRichEditorInit_ = true;
     }
-    MoveCaretAfterTextChange();
-    MoveCaretToContentRect();
+    MoveCaretOnLayoutSwap();
     if (textSelector_.IsValid() && SelectOverlayIsOn() && isShowMenu_) {
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
@@ -241,7 +240,6 @@ void RichEditorPattern::MoveCaretOnLayoutSwap()
     if (HasFocus()) {
         MoveCaretToContentRect();
     }
-
 }
 
 std::function<ImageSourceInfo()> RichEditorPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
