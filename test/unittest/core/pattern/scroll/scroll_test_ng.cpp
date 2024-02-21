@@ -3450,6 +3450,30 @@ HWTEST_F(ScrollTestNg, AnimateTo001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AnimateTo002
+ * @tc.desc: Test the canOverScroll of AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, AnimateTo002, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) {});
+    auto smooth = false;
+    auto canOverScroll = false;
+    pattern_->isAnimationStop_ = false;
+
+    pattern_->AnimateTo(-100, 1.f, Curves::LINEAR, smooth, canOverScroll);
+    EXPECT_EQ(pattern_->animateCanOverScroll_, false);
+    EXPECT_FALSE(pattern_->isAnimationStop_);
+
+    pattern_->StopAnimate();
+    canOverScroll = true;
+    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
+    pattern_->AnimateTo(-100, 1.f, Curves::LINEAR, smooth, canOverScroll);
+    EXPECT_EQ(pattern_->animateCanOverScroll_, false);
+    EXPECT_NE(pattern_->curveAnimation_, nullptr);
+}
+
+/**
  * @tc.name: PlaySpringAnimation001
  * @tc.desc: Test PlaySpringAnimation
  * @tc.type: FUNC
