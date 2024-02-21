@@ -99,6 +99,7 @@ public:
     void OnDetachFromParent() override;
     int32_t CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo);
     void ClearPreBuildNodeList() override;
+    std::vector<std::string> DumpStackInfo() const override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;

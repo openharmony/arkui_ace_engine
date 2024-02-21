@@ -152,7 +152,9 @@ public:
     virtual void OnDetachFromParent() {}
     virtual void ClearPreBuildNodeList() {}
 
-private:
+    virtual std::vector<std::string> DumpStackInfo() const;
+
+protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
