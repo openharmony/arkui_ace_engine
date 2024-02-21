@@ -1882,18 +1882,22 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
     }
     touchEventInfoList_.clear();
 
-    std::list<OHOS::NWeb::TouchPointInfo> touchPointInfoList {};
+    touchInfos.sort([](const TouchInfo &point1, const TouchInfo &point2) {
+        return point1.id < point2.id;
+    });
+
+    std::vector<std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo>> touch_point_infos;
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
         }
-        touchPointInfoList.emplace_back(OHOS::NWeb::TouchPointInfo{touchPoint.id, touchPoint.x, touchPoint.y});
+        std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo> touch_point_info =
+            std::make_shared<NWebTouchPointInfoImpl>(touchPoint.id, touchPoint.x, touchPoint.y);
+        touch_point_infos.emplace_back(touch_point_info);
     }
-    touchPointInfoList.sort([](const OHOS::NWeb::TouchPointInfo& point1, const OHOS::NWeb::TouchPointInfo& point2) {
-        return point1.id_ < point2.id_;
-    });
-    delegate_->HandleTouchMove(touchPointInfoList, fromOverlay);
+
+    delegate_->HandleTouchMove(touch_point_infos, fromOverlay);
 }
 
 void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
@@ -2298,9 +2302,9 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     CHECK_NULL_VOID(host);
     auto id = host->GetId();
     std::vector<SelectParam> selectParam;
-    for (auto& item : params->menuItems) {
+    for (auto& item : params->GetMenuItems()) {
         selectParam.push_back({
-            item.label, ""
+            item->GetLabel(), ""
         });
     }
     auto menu = MenuView::Create(selectParam, id, host->GetTag());
@@ -2331,13 +2335,13 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
         callback->Cancel();
         pattern->SetSelectPopupMenuShowing(false);
     });
-    auto offset = GetSelectPopupPostion(params->bounds);
+    auto offset = GetSelectPopupPostion(params->GetSelectMenuBound());
     selectPopupMenuShowing_ = true;
     overlayManager->ShowMenu(id, offset, menu);
 }
 
 void WebPattern::OnDateTimeChooserPopup(const NWeb::DateTimeChooser& chooser,
-    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
     bool result = false;
@@ -2367,7 +2371,7 @@ DialogProperties WebPattern::GetDialogProperties(const RefPtr<DialogTheme>& them
 }
 
 bool WebPattern::ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
-    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
     auto container = Container::Current();
@@ -2419,7 +2423,7 @@ bool WebPattern::ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
 }
 
 bool WebPattern::ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
-    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
     auto container = Container::Current();
@@ -2466,7 +2470,7 @@ bool WebPattern::ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
 }
 
 bool WebPattern::ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
-    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
     auto container = Container::Current();
@@ -2486,9 +2490,9 @@ bool WebPattern::ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& choos
     }
     std::map<std::string, OHOS::NWeb::DateTime> suggestionMap;
     for (size_t i = 0; i < suggestions.size(); i++) {
-        settingData.rangeVector.push_back({ "", suggestions[i].localizedValue });
-        settingData.values.push_back(suggestions[i].localizedValue);
-        suggestionMap.emplace(std::make_pair(suggestions[i].localizedValue, suggestions[i].value));
+        settingData.rangeVector.push_back({ "", suggestions[i]->GetLocalizedValue() });
+        settingData.values.push_back(suggestions[i]->GetLocalizedValue());
+        suggestionMap.emplace(std::make_pair(suggestions[i]->GetLocalizedValue(), suggestions[i]->GetValue()));
     }
     settingData.columnKind = NG::TEXT;
     settingData.selected = chooser.suggestionIndex;
@@ -2543,7 +2547,7 @@ void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
                 continue;
             }
             hub->SetOnSelect(std::move(selectCallback));
-            optionPattern->SetFontSize(Dimension(params->itemFontSize * pipeline->GetDipScale()));
+            optionPattern->SetFontSize(Dimension(params->GetItemFontSize() * pipeline->GetDipScale()));
             optionNode->MarkModifyDone();
         }
     }
@@ -3012,8 +3016,9 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeById(int64_t access
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
-    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
-    if (!delegate_->GetAccessibilityNodeInfoById(accessibilityId, info)) {
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
+        delegate_->GetAccessibilityNodeInfoById(accessibilityId);
+    if (!info) {
         return nullptr;
     }
     SetSelfAsParentOfWebCoreNode(info);
@@ -3024,8 +3029,9 @@ RefPtr<WebAccessibilityNode> WebPattern::GetFocusedAccessibilityNode(int64_t acc
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
-    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
-    if (!delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus, info)) {
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
+        delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus);
+    if (!info) {
         return nullptr;
     }
     SetSelfAsParentOfWebCoreNode(info);
@@ -3036,8 +3042,9 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int64_t
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
-    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
-    if (!delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction, info)) {
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
+        delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
+    if (!info) {
         return nullptr;
     }
     SetSelfAsParentOfWebCoreNode(info);
@@ -3060,13 +3067,14 @@ void WebPattern::SetAccessibilityState(bool state)
     }
 }
 
-void WebPattern::SetSelfAsParentOfWebCoreNode(NWeb::NWebAccessibilityNodeInfo& info) const
+void WebPattern::SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (info.parentId == -1) { // root node of web core
-        info.parentId = host->GetAccessibilityId();
+    if (info->GetParentId() == -1) { // root node of web core
+        info->SetParentId(host->GetAccessibilityId());
     }
+    webAccessibilityNode_->SetAccessibilityNodeInfo(info);
 }
 
 void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo)

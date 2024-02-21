@@ -28,33 +28,301 @@ public:
         : FrameNode(V2::WEB_CORE_TAG, 0, MakeRefPtr<Pattern>())
     {
         webNode_ = WeakPtr(webNode);
-        accessibilityNodeInfo_.pageId = webNode->GetPageId();
-        accessibilityNodeInfo_.selected = false;
-        accessibilityNodeInfo_.focused = false;
-        accessibilityNodeInfo_.heading = false;
-        accessibilityNodeInfo_.checked = false;
-        accessibilityNodeInfo_.editable = false;
-        accessibilityNodeInfo_.enabled = false;
-        accessibilityNodeInfo_.checkable = false;
-        accessibilityNodeInfo_.clickable = false;
-        accessibilityNodeInfo_.focusable = false;
-        accessibilityNodeInfo_.scrollable = false;
-        accessibilityNodeInfo_.password = false;
-        accessibilityNodeInfo_.visible = false;
-        accessibilityNodeInfo_.hinting = false;
-        accessibilityNodeInfo_.pluralLineSupported = false;
-        accessibilityNodeInfo_.popupSupported = false;
-        accessibilityNodeInfo_.contentInvalid = false;
-        accessibilityNodeInfo_.deletable = false;
-        accessibilityNodeInfo_.accessibilityFocus = false;
+        pageId_ = webNode->GetPageId();
     }
     ~WebAccessibilityNode()
     {
         webNode_.Reset();
     }
-    NWeb::NWebAccessibilityNodeInfo& GetAccessibilityNodeInfo()
-    {
-        return accessibilityNodeInfo_;
+    void SetAccessibilityNodeInfo(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) {
+        if (info) {
+            info->SetPageId(pageId_);
+        }
+        accessibilityNodeInfo_ = info;
+    }
+    std::string GetHint() {
+        if (!accessibilityNodeInfo_) {
+            return "";
+        }
+        return accessibilityNodeInfo_->GetHint();
+    }
+    std::string GetError() {
+        if (!accessibilityNodeInfo_) {
+            return "";
+        }
+        return accessibilityNodeInfo_->GetError();
+    }
+    int32_t GetRectX() {
+        if (!accessibilityNodeInfo_) {
+            return 0;
+        }
+        return accessibilityNodeInfo_->GetRectX();
+    }
+    int32_t GetRectY() {
+        if (!accessibilityNodeInfo_) {
+            return 0;
+        }
+        return accessibilityNodeInfo_->GetRectY();
+    }
+    int32_t GetPageId() {
+        if (!accessibilityNodeInfo_) {
+            return pageId_;
+        }
+        return accessibilityNodeInfo_->GetPageId();
+    }
+    std::vector<uint32_t> GetActions() {
+        if (!accessibilityNodeInfo_) {
+            std::vector<uint32_t> empty;
+            return empty;
+        }
+        return accessibilityNodeInfo_->GetActions();
+    }
+    std::string GetContent() {
+        if (!accessibilityNodeInfo_) {
+            return "";
+        }
+        return accessibilityNodeInfo_->GetContent();
+    }
+    std::vector<int64_t> GetChildIds() {
+        if (!accessibilityNodeInfo_) {
+            std::vector<int64_t> empty;
+            return empty;
+        }
+        return accessibilityNodeInfo_->GetChildIds();
+    }
+    int64_t GetParentId() {
+        if (!accessibilityNodeInfo_) {
+            return -1;
+        }
+        return accessibilityNodeInfo_->GetParentId();
+    }
+    bool GetIsHeading() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsHeading();
+    }
+    bool GetIsChecked() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsChecked();
+    }
+    bool GetIsEnabled() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsEnabled();
+    }
+    bool GetIsFocused() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsFocused();
+    }
+    int32_t GetRectWidth() {
+        if (!accessibilityNodeInfo_) {
+            return 0;
+        }
+        return accessibilityNodeInfo_->GetRectWidth();
+    }
+    int32_t GetRectHeight() {
+        if (!accessibilityNodeInfo_) {
+            return 0;
+        }
+        return accessibilityNodeInfo_->GetRectHeight();
+    }
+    bool GetIsVisible() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsVisible();
+    }
+    bool GetIsHinting() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsHinting();
+    }
+    bool GetIsEditable() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsEditable();
+    }
+    bool GetIsSelected() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsSelected();
+    }
+    size_t GetItemCounts() {
+        if (!accessibilityNodeInfo_) {
+            return 0;
+        }
+        return accessibilityNodeInfo_->GetItemCounts();
+    }
+    int32_t GetLiveRegion() {
+        if (!accessibilityNodeInfo_) {
+            return -1;
+        }
+        return accessibilityNodeInfo_->GetLiveRegion();
+    }
+    bool GetIsPassword() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsPassword();
+    }
+    bool GetIsCheckable() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsCheckable();
+    }
+    bool GetIsClickable() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsClickable();
+    }
+    bool GetIsFocusable() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsFocusable();
+    }
+    bool GetIsScrollable() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsScrollable();
+    }
+    bool GetIsDeletable() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsDeletable();
+    }
+    int64_t GetAccessibilityId() {
+        if (!accessibilityNodeInfo_) {
+            return -1;
+        }
+        return accessibilityNodeInfo_->GetAccessibilityId();
+    }
+    bool GetIsPopupSupported() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsPopupSupported();
+    }
+    bool GetIsContentInvalid() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsContentInvalid();
+    }
+    float GetRangeInfoMin() {
+        if (!accessibilityNodeInfo_) {
+            return 0;
+        }
+        return accessibilityNodeInfo_->GetRangeInfoMin();
+    }
+    float GetRangeInfoMax() {
+        if (!accessibilityNodeInfo_) {
+            return 0;
+        }
+        return accessibilityNodeInfo_->GetRangeInfoMax();
+    }
+    float GetRangeInfoCurrent() {
+        if (!accessibilityNodeInfo_) {
+            return 0;
+        }
+        return accessibilityNodeInfo_->GetRangeInfoCurrent();
+    }
+    int32_t GetSelectionEnd() {
+        if (!accessibilityNodeInfo_) {
+            return 0;
+        }
+        return accessibilityNodeInfo_->GetSelectionEnd();
+    }
+    int32_t GetSelectionStart() {
+        if (!accessibilityNodeInfo_) {
+            return 0;
+        }
+        return accessibilityNodeInfo_->GetSelectionStart();
+    }
+    int32_t GetInputType() {
+        if (!accessibilityNodeInfo_) {
+            return -1;
+        }
+        return accessibilityNodeInfo_->GetInputType();
+    }
+    std::string GetComponentType() {
+        if (!accessibilityNodeInfo_) {
+            return "";
+        }
+        return accessibilityNodeInfo_->GetComponentType();
+    }
+    std::string GetDescriptionInfo() {
+        if (!accessibilityNodeInfo_) {
+            return "";
+        }
+        return accessibilityNodeInfo_->GetDescriptionInfo();
+    }
+    int32_t GetGridRows() {
+        if (!accessibilityNodeInfo_) {
+            return -1;
+        }
+        return accessibilityNodeInfo_->GetGridRows();
+    }
+    int32_t GetGridItemRow() {
+        if (!accessibilityNodeInfo_) {
+            return -1;
+        }
+        return accessibilityNodeInfo_->GetGridItemRow();
+    }
+    int32_t GetGridColumns() {
+        if (!accessibilityNodeInfo_) {
+            return -1;
+        }
+        return accessibilityNodeInfo_->GetGridColumns();
+    }
+    int32_t GetGridItemColumn() {
+        if (!accessibilityNodeInfo_) {
+            return -1;
+        }
+        return accessibilityNodeInfo_->GetGridItemColumn();
+    }
+    int32_t GetGridItemRowSpan() {
+        if (!accessibilityNodeInfo_) {
+            return -1;
+        }
+        return accessibilityNodeInfo_->GetGridItemRowSpan();
+    }
+    int32_t GetGridSelectedMode() {
+        if (!accessibilityNodeInfo_) {
+            return -1;
+        }
+        return accessibilityNodeInfo_->GetGridSelectedMode();
+    }
+    int32_t GetGridItemColumnSpan() {
+        if (!accessibilityNodeInfo_) {
+            return -1;
+        }
+        return accessibilityNodeInfo_->GetGridItemColumnSpan();
+    }
+    bool GetIsAccessibilityFocus() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsAccessibilityFocus();
+    }
+    bool GetIsPluralLineSupported() {
+        if (!accessibilityNodeInfo_) {
+            return false;
+        }
+        return accessibilityNodeInfo_->GetIsPluralLineSupported();
     }
     RefPtr<FrameNode> GetWebNode()
     {
@@ -62,7 +330,8 @@ public:
     }
 
 private:
-    NWeb::NWebAccessibilityNodeInfo accessibilityNodeInfo_;
+    int64_t pageId_;
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> accessibilityNodeInfo_;
     WeakPtr<FrameNode> webNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
