@@ -350,7 +350,12 @@ void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
 
 void PipelineContext::FlushSyncGeometryNodeTasks() {}
 
-void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
+void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
+{
+    if (task) {
+        task();
+    }
+}
 
 void PipelineContext::FlushPipelineImmediately() {}
 

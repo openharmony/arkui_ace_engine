@@ -886,7 +886,7 @@ float TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle(float offset,
     if (LessOrEqual(defaultTitleBarHeight_ + lastCordScrollOffset, minHeight)) {
         // The starting height of this update is smaller than the minHeight, so the navigation component only
         // handles offsets from minHeight to target height.
-        offsetHandled = coordScrollOffset_ - (defaultTitleBarHeight_ - minHeight);
+        offsetHandled = defaultTitleBarHeight_ + coordScrollOffset_ - minHeight;
     } else if (GreatOrEqual(defaultTitleBarHeight_ + lastCordScrollOffset, maxTitleBarHeight_)) {
         // The starting position height of this update is greater than the maxTitleBarHeight_, so the navigation
         // component only handles offsets from maxTitleBarHeight_ to target height.

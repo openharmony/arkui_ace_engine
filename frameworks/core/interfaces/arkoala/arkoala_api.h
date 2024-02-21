@@ -447,9 +447,9 @@ struct ArkUIPositionOptions {
 };
 
 struct ArkUICustomShadowOptions {
-    ArkUI_Float64 radius;
-    ArkUI_Float64 offsetX;
-    ArkUI_Float64 offsetY;
+    ArkUI_Float32 radius;
+    ArkUI_Float32 offsetX;
+    ArkUI_Float32 offsetY;
     ArkUI_Int32 shadowType;
     ArkUI_Uint32 color;
     ArkUI_Int32 colorStrategy;
@@ -458,23 +458,23 @@ struct ArkUICustomShadowOptions {
 
 struct ArkUISweepGradientOptions {
     ArkUI_Uint32* colors;
-    ArkUI_Float64* dimensions;
+    ArkUI_Float32* dimensions;
     ArkUI_Uint32 colorSize;
-    ArkUI_Float64 ceneterX;
-    ArkUI_Float64 ceneterY;
-    ArkUI_Float64 startAngle;
-    ArkUI_Float64 endAngle;
-    ArkUI_Float64 rotation;
+    ArkUI_Float32 ceneterX;
+    ArkUI_Float32 ceneterY;
+    ArkUI_Float32 startAngle;
+    ArkUI_Float32 endAngle;
+    ArkUI_Float32 rotation;
     ArkUI_Int32 repeating;
 };
 
 struct ArkUIRadialGradientOptions {
     ArkUI_Uint32* colors;
-    ArkUI_Float64* dimensions;
-    ArkUI_Uint32 colorSize;    
-    ArkUI_Float64 ceneterX;
-    ArkUI_Float64 ceneterY;
-    ArkUI_Float64 radius;
+    ArkUI_Float32* dimensions;
+    ArkUI_Uint32 colorSize;
+    ArkUI_Float32 ceneterX;
+    ArkUI_Float32 ceneterY;
+    ArkUI_Float32 radius;
     ArkUI_Int32 repeating;
 };
 
@@ -546,6 +546,7 @@ enum ArkUINodeType {
     ARKUI_DATE_PICKER,
     ARKUI_TIME_PICKER,
     ARKUI_TEXT_PICKER,
+    ARKUI_CALENDAR_PICKER,
     ARKUI_GRID_ITEM,
 };
 
@@ -1071,7 +1072,7 @@ struct ArkUICommonModifier {
     ArkUI_Bool (*getFocusable)(ArkUINodeHandle node);
     ArkUI_Bool (*getDefaultFocus)(ArkUINodeHandle node);
     ArkUI_Int32 (*getResponseRegion)(ArkUINodeHandle node, ArkUI_Float32* values);
-    void (*getOverlay)(ArkUINodeHandle node, ArkUIOverlayOptions* options);
+    ArkUI_CharPtr (*getOverlay)(ArkUINodeHandle node, ArkUIOverlayOptions* options);
     ArkUI_Bool (*getAccessibilityGroup)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getAccessibilityText)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getAccessibilityDescription)(ArkUINodeHandle node);
@@ -1081,19 +1082,19 @@ struct ArkUICommonModifier {
     ArkUI_Float32 (*getOpacity)(ArkUINodeHandle node);
     void (*getBorderWidth)(ArkUINodeHandle node, ArkUI_Float32* values);
     void (*getBorderRadius)(ArkUINodeHandle node, ArkUI_Float32* values);
-    void (*getBorderColor)(ArkUINodeHandle node, ArkUI_Float32* values);
+    void (*getBorderColor)(ArkUINodeHandle node, ArkUI_Uint32* values);
     void (*getBorderStyle)(ArkUINodeHandle node, ArkUI_Int32* values);
     ArkUI_Int32 (*getZIndex)(ArkUINodeHandle node);
     ArkUI_Int32 (*getVisibility)(ArkUINodeHandle node);
     ArkUI_Int32 (*getClip)(ArkUINodeHandle node);
-    void (*getClipShape)(ArkUINodeHandle node, ArkUIClipShapeOptions options);
-    void (*getTransform)(ArkUINodeHandle node, ArkUI_Float64* values);
+    void (*getClipShape)(ArkUINodeHandle node, ArkUIClipShapeOptions* options);
+    void (*getTransform)(ArkUINodeHandle node, ArkUI_Float32* values);
     ArkUI_Int32 (*getHitTestBehavior)(ArkUINodeHandle node);
-    void (*getPosition)(ArkUINodeHandle node, ArkUIPositionOptions options);
+    void (*getPosition)(ArkUINodeHandle node, ArkUIPositionOptions* options);
     ArkUI_Int32 (*getShadow)(ArkUINodeHandle node);
-    void (*getCustomShadow)(ArkUINodeHandle node, ArkUICustomShadowOptions options);
-    void (*getSweepGradient)(ArkUINodeHandle node, ArkUISweepGradientOptions options);
-    void (*getRadialGradient)(ArkUINodeHandle node, ArkUIRadialGradientOptions options);
+    void (*getCustomShadow)(ArkUINodeHandle node, ArkUICustomShadowOptions* options);
+    void (*getSweepGradient)(ArkUINodeHandle node, ArkUISweepGradientOptions* options);
+    void (*getRadialGradient)(ArkUINodeHandle node, ArkUIRadialGradientOptions* options);
     void (*getMask)(ArkUINodeHandle node, ArkUIMaskOptions* options);
     ArkUI_Int32 (*getBlendMode)(ArkUINodeHandle node);
     ArkUI_Int32 (*getDirection)(ArkUINodeHandle node);
@@ -1325,18 +1326,18 @@ struct ArkUIImageModifier {
 struct ArkUIColumnModifier {
     void (*setColumnJustifyContent)(ArkUINodeHandle node, ArkUI_Int32 flexAlign);
     void (*resetColumnJustifyContent)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getColumnJustifyContent)(ArkUINodeHandle node);
     void (*setColumnAlignItems)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetColumnAlignItems)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getColumnJustifyContent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getColumnAlignItems)(ArkUINodeHandle node);
 };
 
 struct ArkUIRowModifier {
     void (*setRowJustifyContent)(ArkUINodeHandle node, ArkUI_Int32 flexAlign);
     void (*resetRowJustifyContent)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getRowJustifyContent)(ArkUINodeHandle node);
     void (*setRowAlignItems)(ArkUINodeHandle node, ArkUI_Int32 verticalAlign);
     void (*resetRowAlignItems)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRowJustifyContent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRowAlignItems)(ArkUINodeHandle node);
 };
 
@@ -1420,15 +1421,12 @@ struct ArkUISwiperModifier {
     void (*resetSwiperPrevMargin)(ArkUINodeHandle node);
     void (*setSwiperDisplayCount)(ArkUINodeHandle node, ArkUI_CharPtr displayCountChar, ArkUI_CharPtr displayCountType);
     void (*resetSwiperDisplayCount)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getSwiperDisplayCount)(ArkUINodeHandle node);    
     void (*setSwiperDisplayArrow)(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr);
     void (*resetSwiperDisplayArrow)(ArkUINodeHandle node);
     void (*setSwiperCurve)(ArkUINodeHandle node, ArkUI_CharPtr curveChar);
     void (*resetSwiperCurve)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getSwiperCurve)(ArkUINodeHandle node);
     void (*setSwiperDisableSwipe)(ArkUINodeHandle node, ArkUI_Bool disableSwipe);
     void (*resetSwiperDisableSwipe)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getSwiperDisableSwipe)(ArkUINodeHandle node);
     void (*setSwiperEffectMode)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect);
     void (*resetSwiperEffectMode)(ArkUINodeHandle node);
     void (*setSwiperCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
@@ -1437,30 +1435,34 @@ struct ArkUISwiperModifier {
     void (*resetSwiperDisplayMode)(ArkUINodeHandle node);
     void (*setSwiperItemSpace)(ArkUINodeHandle node, ArkUI_Float32 itemSpaceValue, ArkUI_Int32 itemSpaceUnit);
     void (*resetSwiperItemSpace)(ArkUINodeHandle node);
-    ArkUI_Float32 (*getSwiperItemSpace)(ArkUINodeHandle node);
     void (*setSwiperVertical)(ArkUINodeHandle node, ArkUI_Bool isVertical);
     void (*resetSwiperVertical)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getSwiperVertical)(ArkUINodeHandle node);
     void (*setSwiperLoop)(ArkUINodeHandle node, ArkUI_Bool loop);
     void (*resetSwiperLoop)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getSwiperLoop)(ArkUINodeHandle node);
     void (*setSwiperInterval)(ArkUINodeHandle node, ArkUI_Int32 interval);
     void (*resetSwiperInterval)(ArkUINodeHandle node);
-    ArkUI_Float32 (*getSwiperInterval)(ArkUINodeHandle node);
     void (*setSwiperAutoPlay)(ArkUINodeHandle node, ArkUI_Bool autoPlay);
     void (*resetSwiperAutoPlay)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getSwiperAutoPlay)(ArkUINodeHandle node);
     void (*setSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index);
     void (*resetSwiperIndex)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getSwiperIndex)(ArkUINodeHandle node);
     void (*setSwiperIndicator)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
     void (*resetSwiperIndicator)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getSwiperShowIndicator)(ArkUINodeHandle node);
     void (*setSwiperDuration)(ArkUINodeHandle node, ArkUI_Float32 duration);
     void (*resetSwiperDuration)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getSwiperDuration)(ArkUINodeHandle node);
     void (*setSwiperEnabled)(ArkUINodeHandle node, ArkUI_Bool enabled);
     void (*resetSwiperEnabled)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperLoop)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperAutoPlay)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperIndex)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperVertical)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperDuration)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperDisplayCount)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getSwiperInterval)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperCurve)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperDisableSwipe)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getSwiperItemSpace)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperShowIndicator)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperShowDisplayArrow)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -1767,6 +1769,8 @@ struct ArkUISliderModifier {
     ArkUI_Float32 (*getStep)(ArkUINodeHandle node);
     ArkUI_Bool (*getReverse)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSliderStyle)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getBlockImageValue)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getSliderBlockShape)(ArkUINodeHandle node, ArkUI_Float32* value);
 };
 
 struct ArkUIProgressModifier {

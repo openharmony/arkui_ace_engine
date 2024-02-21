@@ -85,6 +85,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
+        if (type_ == XComponentType::NODE) {
+            return { FocusType::SCOPE, true };
+        }
         return { FocusType::NODE, false };
     }
 

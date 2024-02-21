@@ -4944,10 +4944,10 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: interval for automatic playback, in milliseconds. \n
+     * .value[0].f32: interval for automatic playback, in milliseconds. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: interval for automatic playback, in milliseconds. \n
+     * .value[0].f32: interval for automatic playback, in milliseconds. \n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
@@ -4956,7 +4956,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INTERVAL, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_INTERVAL);
-     * auto nodeSwiperInterval = item->value[0].i32;
+     * auto nodeSwiperInterval = item->value[0].f32;
      * @endcode
      *
      */
@@ -5321,7 +5321,7 @@ typedef enum {
      * .value[4]?.i32：	交叉轴中有额外的空间时，多行内容的对齐方式的枚举值； \n
      *
      * @code {.cpp}
-     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_FLEX_DIRECTION_COLUMN}, {.i32 = ARKUI_FLEX_WRAP_WRAP}, 
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_FLEX_DIRECTION_COLUMN}, {.i32 = ARKUI_FLEX_WRAP_WRAP},
      * {.i32 = ARKUI_FLEX_ALIGN_SPACE_BETWEEN}, {.i32 = ARKUI_ITEM_ALIGN_CENTER}, {.i32 = ARKUI_FLEX_ALIGN_END}};
      * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * basicNodeApi->setAttribute(nodeHandle, NODE_FLEX_OPTION, &item);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_MOCK_IMAGE_ANALYZER_ADAPTER_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_MOCK_IMAGE_ANALYZER_ADAPTER_H
 
-#include "core/interfaces/native/node/node_api.h"
+#include "core/common/ai/image_analyzer_adapter.h"
 
-namespace OHOS::Ace::NG::NodeModifier {
-
-    const ArkUIColumnModifier* GetColumnModifier();
-
-} // namespace OHOS::Ace::NG::NodeModifier
+namespace OHOS::Ace {
+class MockImageAnalyzerAdapter : public ImageAnalyzerAdapter {
+public:
+    void SetImageAnalyzerConfig(void* config) override;
+    void* GetImageAnalyzerConfig() override;
+    void* ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap) override;
+};
+}
+#endif

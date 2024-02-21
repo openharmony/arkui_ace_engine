@@ -661,6 +661,7 @@ private:
     TimeStamp lastAiPosTimeStamp_;
     bool adjusted_ = false;
     bool isShowMenu_ = true;
+    SelectionRangeInfo lastSelectionRange_{-1, -1};
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

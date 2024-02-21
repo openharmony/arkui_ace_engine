@@ -968,7 +968,6 @@ void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect> &responseR
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->MarkResponseRegion(true);
     gestureHub->SetResponseRegion(responseRegion);
 }
 
@@ -976,7 +975,6 @@ void ViewAbstract::SetMouseResponseRegion(const std::vector<DimensionRect> &mous
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->MarkResponseRegion(true);
     gestureHub->SetMouseResponseRegion(mouseRegion);
 }
 
@@ -2699,7 +2697,6 @@ void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<Dim
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->MarkResponseRegion(true);
     gestureHub->SetResponseRegion(responseRegion);
 }
 
@@ -2708,7 +2705,6 @@ void ViewAbstract::SetMouseResponseRegion(FrameNode* frameNode, const std::vecto
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->MarkResponseRegion(true);
     gestureHub->SetMouseResponseRegion(mouseResponseRegion);
 }
 
@@ -2930,54 +2926,53 @@ double ViewAbstract::GetOpacity(FrameNode* frameNode)
 }
 
 BorderWidthProperty ViewAbstract::GetBorderWidth(FrameNode* frameNode)
-{ 
+{
     Dimension defaultDimension(0);
-    BorderWidthProperty borderWidths = {defaultDimension, defaultDimension, defaultDimension, defaultDimension};
+    BorderWidthProperty borderWidths = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
     const auto& target = frameNode->GetRenderContext();
     return target->GetBorderWidthValue(borderWidths);
 }
 
 BorderRadiusProperty ViewAbstract::GetBorderRadius(FrameNode* frameNode)
-{ 
+{
     Dimension defaultDimension(0);
-    BorderRadiusProperty borderRadius = {defaultDimension, defaultDimension, defaultDimension, defaultDimension};
+    BorderRadiusProperty borderRadius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
     const auto& target = frameNode->GetRenderContext();
     return target->GetBorderRadiusValue(borderRadius);
 }
 
 BorderColorProperty ViewAbstract::GetBorderColor(FrameNode* frameNode)
-{ 
+{
     Color defaultColor(0xff000000);
-    BorderColorProperty borderColors = {defaultColor, defaultColor, defaultColor, defaultColor};
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
     const auto& target = frameNode->GetRenderContext();
     return target->GetBorderColorValue(borderColors);
 }
 
 BorderStyleProperty ViewAbstract::GetBorderStyle(FrameNode* frameNode)
-{ 
+{
     BorderStyle defaultStyle = BorderStyle::SOLID;
-    BorderStyleProperty borderStyles = {defaultStyle, defaultStyle, defaultStyle, defaultStyle};
+    BorderStyleProperty borderStyles = { defaultStyle, defaultStyle, defaultStyle, defaultStyle };
     const auto& target = frameNode->GetRenderContext();
     return target->GetBorderStyleValue(borderStyles);
 }
 
 int ViewAbstract::GetZIndex(FrameNode* frameNode)
-{ 
+{
     int zindex = 0;
     const auto& target = frameNode->GetRenderContext();
     return target->GetZIndexValue(zindex);
 }
 
 VisibleType ViewAbstract::GetVisibility(FrameNode* frameNode)
-{ 
+{
     VisibleType visibility = VisibleType::VISIBLE;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        LayoutProperty, Visibility, visibility, frameNode, visibility);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(LayoutProperty, Visibility, visibility, frameNode, visibility);
     return visibility;
 }
 
 bool ViewAbstract::GetClip(FrameNode* frameNode)
-{ 
+{
     const auto& target = frameNode->GetRenderContext();
     return target->GetClipEdge().has_value();
 }
@@ -2989,22 +2984,22 @@ std::optional<RefPtr<BasicShape>> ViewAbstract::GetClipShape(FrameNode* frameNod
 }
 
 Matrix4 ViewAbstract::GetTransform(FrameNode* frameNode)
-{ 
+{
     const auto& target = frameNode->GetRenderContext();
     return target->GetLocalTransformMatrix();
 }
 
 HitTestMode ViewAbstract::GetHitTestBehavior(FrameNode* frameNode)
-{ 
+{
     auto gestureHub = frameNode->GetHitTestMode();
     return gestureHub;
 }
 
 OffsetT<Dimension> ViewAbstract::GetPosition(FrameNode* frameNode)
-{ 
-    Dimension PositionX(0,DimensionUnit::VP);
-    Dimension PositionY(0,DimensionUnit::VP);
-    OffsetT<Dimension> position(PositionX,PositionY);
+{
+    Dimension PositionX(0, DimensionUnit::VP);
+    Dimension PositionY(0, DimensionUnit::VP);
+    OffsetT<Dimension> position(PositionX, PositionY);
     const auto& target = frameNode->GetRenderContext();
     return target->GetPositionValue(position);
 }
@@ -3022,10 +3017,35 @@ NG::Gradient ViewAbstract::GetGradient(FrameNode* frameNode)
     return target->GetSweepGradientValue(gradient);
 }
 
-RefPtr<BasicShape> ViewAbstract::GetMask(FrameNode* frameNode)
+std::optional<RefPtr<BasicShape>> ViewAbstract::GetMask(FrameNode* frameNode)
 {
     const auto& target = frameNode->GetRenderContext();
-    return target->GetClipMask().value();
+    return target->GetClipMask();
 }
 
+const std::optional<RefPtr<ProgressMaskProperty>> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetProgressMask();
+}
+
+BlendMode ViewAbstract::GetBlendMode(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBackBlendMode().value();
+}
+
+TextDirection ViewAbstract::GetDirection(FrameNode* frameNode)
+{
+    TextDirection direction = TextDirection::AUTO;
+    auto target = frameNode->GetLayoutProperty<LayoutProperty>();
+    direction = target->GetLayoutDirection();
+    return direction;
+}
+
+FlexAlign ViewAbstract::GetAlignSelf(FrameNode* frameNode)
+{
+    const auto& flexItemProperty = frameNode->GetLayoutProperty()->GetFlexItemProperty();
+    return flexItemProperty->GetAlignSelf().value_or(FlexAlign::AUTO);
+}
 } // namespace OHOS::Ace::NG

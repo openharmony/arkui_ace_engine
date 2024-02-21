@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/interfaces/native/node/node_flex_modifier.h"
+#include "core/interfaces/native/node/flex_modifier.h"
 
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -24,7 +24,6 @@
 #include "frameworks/core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
-namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -36,13 +35,11 @@ void SetFlexOptions(ArkUINodeHandle node, int* options, int length)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-
     int direction = options[NUM_0];
     int wrap = options[NUM_1];
     int justifyContent = options[NUM_2];
     int alignItems = options[NUM_3];
     int alignContent = options[NUM_4];
-
     if (wrap <= 0) {
         FlexModelNG::SetFlexRow(frameNode);
         if (direction >= 0 && direction <= DIRECTION_MAX_VALUE) {
@@ -58,15 +55,10 @@ void SetFlexOptions(ArkUINodeHandle node, int* options, int length)
         }
     } else if (wrap > 0) {
         FlexModelNG::SetFlexWrap(frameNode);
-
         if (direction >= 0 && direction <= DIRECTION_MAX_VALUE) {
             FlexModelNG::SetFlexDirection(frameNode, static_cast<OHOS::Ace::FlexDirection>(direction));
             // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
-            if (direction <= 1) {
-                direction += NUM_2 * (wrap - NUM_1);
-            } else {
-                direction -= NUM_2 * (wrap - NUM_1);
-            }
+            direction <= 1 ? direction += NUM_2 * (wrap - NUM_1) : direction -= NUM_2 * (wrap - NUM_1);
             FlexModelNG::SetFlexWrapDirection(frameNode, static_cast<WrapDirection>(direction));
         } else {
             // No direction set case: wrapVal == 2 means FlexWrap.WrapReverse.
@@ -98,7 +90,6 @@ void ResetFlexOptions(ArkUINodeHandle node)
     FlexModelNG::SetFlexAlignItems(frameNode, NUM_1);
     FlexModelNG::SetFlexAlignContent(frameNode, NUM_1);
 }
-} // namespace
 
 namespace NodeModifier {
 const ArkUIFlexModifier* GetFlexModifier()
@@ -106,5 +97,5 @@ const ArkUIFlexModifier* GetFlexModifier()
     static const ArkUIFlexModifier modifier = { SetFlexOptions, ResetFlexOptions };
     return &modifier;
 }
-} // namespace NodeModifier
-} // namespace OHOS::Ace::NG
+}
+}

@@ -847,7 +847,8 @@ void TextFieldPattern::HandleSelect(CaretMoveIntent direction)
             LOGW("Unsupported select operation for text field");
         }
     }
-    UpdateRecordCaretIndex(selectController_->GetCaretIndex());
+    UpdateRecordCaretIndex(
+        std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
 }
 
 void TextFieldPattern::InitDisableColor()
@@ -2396,7 +2397,7 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
         selectController_->UpdateCaretOffset();
     } else if (!isSingleHandle_) {
         auto rects = GetTextBoxes();
-        if (!rects.empty() && NearZero(rects[0].Width())) {
+        if (!rects.empty() && NearEqual(rects.size(), 1) && NearZero(rects[0].Width())) {
             isSingleHandle_ = true;
             selectController_->UpdateCaretIndex(selectController_->GetFirstHandleIndex());
             selectController_->UpdateCaretOffset();
@@ -2988,7 +2989,8 @@ void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)
     }
     mouseStatus_ = MouseStatus::MOVE;
     selectController_->UpdateSecondHandleInfoByMouseOffset(info.GetLocalLocation()); // 更新时上报事件
-    UpdateRecordCaretIndex(selectController_->GetCaretIndex());
+    UpdateRecordCaretIndex(
+        std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
     showSelect_ = true;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -5763,6 +5765,8 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
     PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
     visibleContentRect.SetLeft(visibleContentRect.GetX() - BOX_EPSILON);
     visibleContentRect.SetWidth(visibleContentRect.Width() + 2 * BOX_EPSILON);
+    visibleContentRect.SetTop(visibleContentRect.GetY() - BOX_EPSILON);
+    visibleContentRect.SetHeight(visibleContentRect.Height() + 2 * BOX_EPSILON);
     return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
 }
 

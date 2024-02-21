@@ -27,7 +27,9 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_layout_info.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/placement.h"
@@ -513,7 +515,12 @@ public:
     static OffsetT<Dimension> GetPosition(FrameNode* frameNode);
     static std::optional<Shadow> GetShadow(FrameNode* frameNode);
     static NG::Gradient GetGradient(FrameNode* frameNode);
-    static std::optional<RefPtr<BasicShape>> GetMask(FrameNode* frameNode);    
+    static std::optional<RefPtr<BasicShape>> GetMask(FrameNode* frameNode);
+    static const std::optional<RefPtr<ProgressMaskProperty>> GetMaskProgress(FrameNode* frameNode);
+    static BlendMode GetBlendMode(FrameNode* frameNode);
+    static TextDirection GetDirection(FrameNode* frameNode);
+    static FlexAlign GetAlignSelf(FrameNode* frameNode);
+
 private:
     static void AddDragFrameNodeToManager();
 };

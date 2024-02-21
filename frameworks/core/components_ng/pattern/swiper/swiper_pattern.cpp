@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <optional>
 
+#include "base/error/error_code.h"
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -52,6 +53,7 @@
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -1095,6 +1097,78 @@ void SwiperPattern::FinishAnimation()
     }
 }
 
+void SwiperPattern::PreloadItems(const std::set<int32_t>& indexSet)
+{
+    std::set<int32_t> validIndexSet;
+    auto childrenSize = RealTotalCount();
+    auto errorCode = ERROR_CODE_NO_ERROR;
+    for (const auto& index : indexSet) {
+        if (index < 0 || index >= childrenSize) {
+            errorCode = ERROR_CODE_PARAM_INVALID;
+            break;
+        }
+
+        validIndexSet.emplace(index);
+    }
+
+    if (errorCode != ERROR_CODE_PARAM_INVALID) {
+        DoPreloadItems(validIndexSet, errorCode);
+        return;
+    }
+
+    FirePreloadFinishEvent(errorCode);
+}
+
+void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode)
+{
+    if (swiperController_ && swiperController_->GetPreloadFinishCallback()) {
+        auto preloadFinishCallback = swiperController_->GetPreloadFinishCallback();
+        swiperController_->SetPreloadFinishCallback(nullptr);
+        preloadFinishCallback(errorCode);
+    }
+}
+
+void SwiperPattern::DoPreloadItems(const std::set<int32_t>& indexSet, int32_t errorCode)
+{
+    if (indexSet.empty()) {
+        FirePreloadFinishEvent(ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+
+    auto preloadTask = [weak = WeakClaim(this), indexSet, errorCode]() {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        auto host = swiperPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        const auto& children = host->GetChildren();
+        for (const auto& child : children) {
+            if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG && child->GetTag() != V2::JS_LAZY_FOR_EACH_ETS_TAG) {
+                continue;
+            }
+
+            auto forEachNode = AceType::DynamicCast<ForEachNode>(child);
+            auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
+            for (auto index : indexSet) {
+                if (forEachNode && forEachNode->GetChildAtIndex(index)) {
+                    forEachNode->GetChildAtIndex(index)->Build(nullptr);
+                    continue;
+                }
+
+                if (lazyForEachNode) {
+                    lazyForEachNode->GetFrameChildByIndex(index, true);
+                }
+            }
+        }
+
+        swiperPattern->FirePreloadFinishEvent(errorCode);
+    };
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(preloadTask, TaskExecutor::TaskType::UI);
+}
+
 void SwiperPattern::StopTranslateAnimation()
 {
     if (controller_ && !controller_->IsStopped()) {
@@ -1159,6 +1233,13 @@ void SwiperPattern::InitSwiperController()
         auto swiper = weak.Upgrade();
         if (swiper) {
             swiper->FinishAnimation();
+        }
+    });
+
+    swiperController_->SetPreloadItemsImpl([weak = WeakClaim(this)](const std::set<int32_t>& indexSet) {
+        auto swiper = weak.Upgrade();
+        if (swiper) {
+            swiper->PreloadItems(indexSet);
         }
     });
 }

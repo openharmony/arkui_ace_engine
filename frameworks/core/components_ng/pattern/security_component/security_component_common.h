@@ -40,6 +40,12 @@ enum class SecurityComponentLayoutDirection : int32_t {
     VERTICAL = 1,
 };
 
+enum class SecurityComponentRegisterStatus : int32_t {
+    UNREGISTERED = 0,
+    REGISTERING = 1,
+    REGISTERED = 2,
+};
+
 static int32_t BUTTON_TYPE_NULL = -1;
 } // namespace OHOS::Ace
 

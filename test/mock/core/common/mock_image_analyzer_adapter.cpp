@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,20 @@
  * limitations under the License.
  */
 
-#pragma once
+#include "test/mock/core/common/mock_image_analyzer_adapter.h"
 
-#include "core/interfaces/native/node/node_api.h"
-
-namespace OHOS::Ace::NG::NodeModifier {
-
-    const ArkUIFlexModifier* GetFlexModifier();
-
-} // namespace OHOS::Ace::NG::NodeModifier
+namespace OHOS::Ace {
+void ImageAnalyzerAdapter::SetImageAnalyzerConfig(void* config) {};
+void* ImageAnalyzerAdapter::GetImageAnalyzerConfig()
+{
+    return nullptr;
+}
+void* ImageAnalyzerAdapter::ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
+{
+    return nullptr;
+}
+ImageAnalyzerAdapter* CreateImageAnalyzerAdapter()
+{
+    return nullptr;
+}
+} // namespace OHOS::Ace

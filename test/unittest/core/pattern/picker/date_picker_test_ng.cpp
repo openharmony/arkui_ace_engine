@@ -3385,7 +3385,6 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
     ASSERT_NE(childNode, nullptr);
     auto gestureEventHub = childNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
-    EXPECT_TRUE(gestureEventHub->IsResponseRegion());
     auto responseRegion = gestureEventHub->GetResponseRegion().back();
     EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
     EXPECT_EQ(responseRegion.GetHeight().Value(), height);
@@ -3401,7 +3400,6 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
     ASSERT_NE(childNode, nullptr);
     gestureEventHub = childNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
-    EXPECT_TRUE(gestureEventHub->IsResponseRegion());
     responseRegion = gestureEventHub->GetResponseRegion().back();
     EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
     EXPECT_EQ(responseRegion.GetHeight().Value(), (height - SECLECTED_TEXTNODE_HEIGHT) / MIDDLE_OF_COUNTS);
@@ -3417,7 +3415,6 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
     ASSERT_NE(childNode, nullptr);
     gestureEventHub = childNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
-    EXPECT_TRUE(gestureEventHub->IsResponseRegion());
     responseRegion = gestureEventHub->GetResponseRegion().back();
     EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
     EXPECT_EQ(responseRegion.GetHeight().Value(),

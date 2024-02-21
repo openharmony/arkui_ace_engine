@@ -104,6 +104,7 @@ public:
     }
 
     void FinishAnimation(const JSCallbackInfo& args);
+    void PreloadItems(const JSCallbackInfo& args);
 
     void SetController(const RefPtr<SwiperController>& controller)
     {

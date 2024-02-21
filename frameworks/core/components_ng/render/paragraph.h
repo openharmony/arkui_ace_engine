@@ -105,7 +105,7 @@ public:
     virtual float GetMaxWidth() = 0;
     virtual float GetAlphabeticBaseline() = 0;
     virtual float GetCharacterWidth(int32_t index) = 0;
-    virtual int32_t GetGlyphIndexByCoordinate(const Offset& offset) = 0;
+    virtual int32_t GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos = false) = 0;
     virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
     virtual void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) = 0;
     virtual bool ComputeOffsetForCaretDownstream(

@@ -839,6 +839,10 @@ void PipelineContext::FlushFrameRate()
 
 void PipelineContext::FlushBuild()
 {
+    if (vsyncListener_ != nullptr) {
+        ACE_SCOPED_TRACE("arkoala build");
+        vsyncListener_();
+    }
     isRebuildFinished_ = false;
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
