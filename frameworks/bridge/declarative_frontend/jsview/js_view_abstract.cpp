@@ -2063,6 +2063,7 @@ void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
         if (info[0]->IsNull() || info[0]->IsUndefined()) {
             // undefined use default value.
             ViewAbstractModel::GetInstance()->ResetFlexShrink();
+            return;
         } else {
             return;
         }
