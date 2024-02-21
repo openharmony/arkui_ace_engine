@@ -93,6 +93,11 @@ bool IsSvgTraceEnabled()
     return (system::GetParameter("persist.ace.trace.svg.enabled", "0") == "1");
 }
 
+bool IsLayoutTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
+}
+
 bool IsBuildTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.build.enabled", "false") == "true");
@@ -255,6 +260,7 @@ bool IsResourceDecoupling()
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
+bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
@@ -407,6 +413,7 @@ void SystemProperties::InitDeviceInfo(
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
+    layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
     buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
@@ -517,11 +524,6 @@ bool SystemProperties::GetDebugPixelMapSaveEnabled()
     return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
 }
 
-bool SystemProperties::GetLayoutTraceEnabled()
-{
-    return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true") && IsDeveloperModeOn();
-}
-
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();
@@ -587,5 +589,39 @@ bool SystemProperties::GetGridCacheEnabled()
 bool SystemProperties::GetSideBarContainerBlurEnable()
 {
     return sideBarContainerBlurEnable_;
+}
+
+void SystemProperties::AddWatchSystemParameter(void *context)
+{
+    WatchParameter("persist.ace.trace.layout.enabled", EnableSystemParameterCallback, context);
+    WatchParameter("const.security.developermode.state", EnableSystemParameterCallback, context);
+}
+
+void SystemProperties::EnableSystemParameterCallback(const char *key, const char *value, void *context)
+{
+    if (context == nullptr) {
+        LOGE("context is nullprt");
+    }
+
+    if (strcmp(key, "persist.ace.trace.layout.enabled") == 0) {
+        if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+            layoutTraceEnable_ = strcmp(value, "true") == 0 && IsDeveloperModeOn();
+        }
+        return ;
+    }
+
+    if (strcmp(key, "const.security.developermode.state") == 0) {
+        if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+            layoutTraceEnable_ = strcmp(value, "true") == 0 && IsLayoutTraceEnabled();
+        }
+        return ;
+    }
+    LOGE("key %{public}s or value %{public}s mismatch", key, value);
+}
+
+void SystemProperties::RemoveWatchSystemParameter(void *context)
+{
+    RemoveParameterWatcher("persist.ace.trace.layout.enabled", nullptr, context);
+    RemoveParameterWatcher("const.security.developermode.state", nullptr, context);
 }
 } // namespace OHOS::Ace
