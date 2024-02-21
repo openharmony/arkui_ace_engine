@@ -387,8 +387,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         actuator->SetEventColumn(actuator);
     };
+    auto longPressCancel = [weak = WeakClaim(this)] {
+        // remove drag overlay info by Cancel event.
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Long press event has been canceled.");
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        actuator->HideEventColumn();
+        actuator->HidePixelMap();
+        actuator->HideFilter();
+        actuator->SetIsNotInPreviewState(false);
+    };
     longPressUpdate_ = longPressUpdate;
     previewLongPressRecognizer_->SetOnAction(longPressUpdate);
+    previewLongPressRecognizer_->SetOnActionCancel(longPressCancel);
     previewLongPressRecognizer_->SetGestureHub(gestureEventHub_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
