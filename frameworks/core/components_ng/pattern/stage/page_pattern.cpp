@@ -26,6 +26,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 
@@ -176,6 +177,9 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnAttachToMainTree()
 {
+    std::string url = GetPageInfo()->GetPageUrl();
+    int32_t index = EngineHelper::GetCurrentDelegate()->GetIndexByUrl(url);
+    GetPageInfo()->SetPageIndex(index);
     state_ = RouterPageState::ABOUT_TO_APPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 }
@@ -184,9 +188,6 @@ void PagePattern::OnDetachFromMainTree()
 {
     state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
-    if (disappearCallback_) {
-        disappearCallback_();
-    }
 }
 
 void PagePattern::OnShow()
