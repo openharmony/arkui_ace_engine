@@ -1475,6 +1475,9 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
             static_cast<float>(transform.quaternion.GetY()), static_cast<float>(transform.quaternion.GetZ()),
             static_cast<float>(transform.quaternion.GetW()) };
         Rosen::Vector2f scaleValue { transform.scale[0], transform.scale[1] };
+        Rosen::Vector2f pivotValue { 0.0, 0.0 };
+        AddOrChangePivotModifier(
+            rsNode_, transformMatrixModifier_->pivotXY, transformMatrixModifier_->pivotXYValue, pivotValue);
         AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
             transformMatrixModifier_->translateXYValue, xyTranslateValue);
         AddOrChangeScaleModifier(

@@ -39,14 +39,20 @@ void AddOrChangeQuaternionModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     std::shared_ptr<Rosen::RSQuaternionModifier>& modifier,
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Quaternion>>& property, const Rosen::Quaternion& value);
 
+void AddOrChangePivotModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSPivotModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value);
+
 struct TransformMatrixModifier {
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY;
     std::shared_ptr<Rosen::RSTranslateZModifier> translateZ;
     std::shared_ptr<Rosen::RSScaleModifier> scaleXY;
+    std::shared_ptr<Rosen::RSPivotModifier> pivotXY;
     std::shared_ptr<Rosen::RSQuaternionModifier> quaternion;
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> translateXYValue;
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> translateZValue;
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> scaleXYValue;
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> pivotXYValue;
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Quaternion>> quaternionValue;
 };
 
