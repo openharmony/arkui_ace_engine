@@ -65,6 +65,11 @@ public:
     bool IsResourceAdapterRecord(const std::string& bundleName, const std::string& moduleName)
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
+        auto mapIter = resourceAdapters_.find(std::make_pair(bundleName, moduleName));
+        if (mapIter != resourceAdapters_.end()) {
+            return true;
+        }
+
         auto key = MakeCacheKey(bundleName, moduleName);
         auto iter = cache_.find(key);
         return iter != cache_.end();
