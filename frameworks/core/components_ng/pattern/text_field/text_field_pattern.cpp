@@ -2397,7 +2397,7 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
         selectController_->UpdateCaretOffset();
     } else if (!isSingleHandle_) {
         auto rects = GetTextBoxes();
-        if (!rects.empty() && NearZero(rects[0].Width())) {
+        if (!rects.empty() && NearEqual(rects.size(), 1) && NearZero(rects[0].Width())) {
             isSingleHandle_ = true;
             selectController_->UpdateCaretIndex(selectController_->GetFirstHandleIndex());
             selectController_->UpdateCaretOffset();
@@ -5765,6 +5765,8 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
     PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
     visibleContentRect.SetLeft(visibleContentRect.GetX() - BOX_EPSILON);
     visibleContentRect.SetWidth(visibleContentRect.Width() + 2 * BOX_EPSILON);
+    visibleContentRect.SetTop(visibleContentRect.GetY() - BOX_EPSILON);
+    visibleContentRect.SetHeight(visibleContentRect.Height() + 2 * BOX_EPSILON);
     return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
 }
 
