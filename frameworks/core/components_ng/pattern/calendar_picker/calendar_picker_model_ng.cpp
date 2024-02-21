@@ -30,58 +30,35 @@ void CalendarPickerModelNG::Create(const CalendarSettingData& settingData)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::CALENDAR_PICKER_ETS_TAG, nodeId);
-    auto pickerNode = FrameNode::GetOrCreateFrameNode(
-        V2::CALENDAR_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CalendarPickerPattern>(); });
-    auto pickerPattern = pickerNode->GetPattern<CalendarPickerPattern>();
-    CHECK_NULL_VOID(pickerPattern);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
-    CHECK_NULL_VOID(theme);
-    pickerPattern->SetCalendarData(settingData);
-    pickerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(std::nullopt, CalcLength(theme->GetEntryHeight())));
-    BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth(theme->GetEntryBorderWidth());
-    pickerNode->GetLayoutProperty()->UpdateBorderWidth(borderWidth);
-    CHECK_NULL_VOID(pickerNode->GetRenderContext());
-    BorderColorProperty borderColor;
-    borderColor.SetColor(theme->GetEntryBorderColor());
-    pickerNode->GetRenderContext()->UpdateBorderColor(borderColor);
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetEntryBorderRadius());
-    pickerNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
-    pickerNode->GetRenderContext()->SetClipToFrame(true);
-    pickerNode->GetRenderContext()->SetClipToBounds(true);
-    pickerNode->GetRenderContext()->UpdateClipEdge(true);
-    CHECK_NULL_VOID(pickerNode->GetLayoutProperty<LinearLayoutProperty>());
-    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    LayoutPicker(pickerPattern, pickerNode, settingData, theme);
-
-    pickerNode->MarkModifyDone();
+    auto pickerNode = CalendarPickerModelNG::CreateNode(nodeId, settingData);
     stack->Push(pickerNode);
+}
+
+RefPtr<FrameNode> CalendarPickerModelNG::CreateFrameNode(int32_t nodeId)
+{
+    NG::CalendarSettingData settingData;
+    return CalendarPickerModelNG::CreateNode(nodeId, settingData);
 }
 
 void CalendarPickerModelNG::LayoutPicker(const RefPtr<CalendarPickerPattern>& pickerPattern,
     RefPtr<FrameNode>& pickerNode, const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme)
 {
     if (!pickerPattern->HasContentNode()) {
-        auto contentNode = CreateCalendarNodeChild(pickerPattern->GetContentId(), settingData, theme);
+        auto contentNode =
+            CalendarPickerModelNG::CreateCalendarNodeChild(pickerPattern->GetContentId(), settingData, theme);
         CHECK_NULL_VOID(contentNode);
         contentNode->MountToParent(pickerNode);
     }
-    auto flexNode = CreateButtonFlexChild(pickerPattern->GetButtonFlexId(), theme);
+    auto flexNode = CalendarPickerModelNG::CreateButtonFlexChild(pickerPattern->GetButtonFlexId(), theme);
     CHECK_NULL_VOID(flexNode);
     flexNode->MountToParent(pickerNode);
     if (!pickerPattern->HasAddNode()) {
-        auto addNode = CreateButtonChild(pickerPattern->GetAddId(), true, theme);
+        auto addNode = CalendarPickerModelNG::CreateButtonChild(pickerPattern->GetAddId(), true, theme);
         CHECK_NULL_VOID(addNode);
         addNode->MountToParent(flexNode, 0, true);
     }
     if (!pickerPattern->HasSubNode()) {
-        auto subNode = CreateButtonChild(pickerPattern->GetSubId(), false, theme);
+        auto subNode = CalendarPickerModelNG::CreateButtonChild(pickerPattern->GetSubId(), false, theme);
         CHECK_NULL_VOID(subNode);
         subNode->MountToParent(flexNode, 1, true);
     }
@@ -234,6 +211,42 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateDateTextNode(const std::string& t
     textLayoutProperty->UpdateFontSize(calendarTheme->GetEntryFontSize());
     textNode->MarkModifyDone();
     return textNode;
+}
+
+RefPtr<FrameNode> CalendarPickerModelNG::CreateNode(int32_t nodeId, const CalendarSettingData& settingData)
+{
+    auto pickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CalendarPickerPattern>(); });
+    auto pickerPattern = pickerNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, pickerNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, pickerNode);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_RETURN(theme, pickerNode);
+    pickerPattern->SetCalendarData(settingData);
+    pickerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(std::nullopt, CalcLength(theme->GetEntryHeight())));
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(theme->GetEntryBorderWidth());
+    pickerNode->GetLayoutProperty()->UpdateBorderWidth(borderWidth);
+    CHECK_NULL_RETURN(pickerNode->GetRenderContext(), pickerNode);
+    BorderColorProperty borderColor;
+    borderColor.SetColor(theme->GetEntryBorderColor());
+    pickerNode->GetRenderContext()->UpdateBorderColor(borderColor);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(theme->GetEntryBorderRadius());
+    pickerNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
+    pickerNode->GetRenderContext()->SetClipToFrame(true);
+    pickerNode->GetRenderContext()->SetClipToBounds(true);
+    pickerNode->GetRenderContext()->UpdateClipEdge(true);
+    CHECK_NULL_RETURN(pickerNode->GetLayoutProperty<LinearLayoutProperty>(), pickerNode);
+    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    CalendarPickerModelNG::LayoutPicker(pickerPattern, pickerNode, settingData, theme);
+
+    pickerNode->MarkModifyDone();
+    return pickerNode;
 }
 
 void CalendarPickerModelNG::SetEdgeAlign(const CalendarEdgeAlign& alignType, const DimensionOffset& offset)

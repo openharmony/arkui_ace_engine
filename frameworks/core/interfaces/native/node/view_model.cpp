@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
@@ -263,6 +264,13 @@ void* createTextPickerNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createCalendarPickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CalendarPickerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -309,6 +317,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createDatePickerNode,
         createTimePickerNode,
         createTextPickerNode,
+        createCalendarPickerNode,
         nullptr, // GridItem
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
