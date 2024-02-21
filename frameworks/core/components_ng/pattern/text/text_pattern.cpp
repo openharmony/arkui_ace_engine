@@ -2648,7 +2648,8 @@ bool TextPattern::IsSelectedBindSelectionMenu()
 void TextPattern::UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd)
 {
     UpdateSelectionType(GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT));
-    if (selectedType_ == TextSpanType::NONE && !textSelector_.StartEqualToDest()) {
+    if ((selectedType_ == TextSpanType::NONE && !textSelector_.StartEqualToDest()) ||
+        textSelector_.StartEqualToDest()) {
         selectedType_ = TextSpanType::TEXT;
     }
 }
