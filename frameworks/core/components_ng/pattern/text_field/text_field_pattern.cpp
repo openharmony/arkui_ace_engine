@@ -847,7 +847,8 @@ void TextFieldPattern::HandleSelect(CaretMoveIntent direction)
             LOGW("Unsupported select operation for text field");
         }
     }
-    UpdateRecordCaretIndex(selectController_->GetCaretIndex());
+    UpdateRecordCaretIndex(
+        std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
 }
 
 void TextFieldPattern::InitDisableColor()
@@ -2988,7 +2989,8 @@ void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)
     }
     mouseStatus_ = MouseStatus::MOVE;
     selectController_->UpdateSecondHandleInfoByMouseOffset(info.GetLocalLocation()); // 更新时上报事件
-    UpdateRecordCaretIndex(selectController_->GetCaretIndex());
+    UpdateRecordCaretIndex(
+        std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
     showSelect_ = true;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
