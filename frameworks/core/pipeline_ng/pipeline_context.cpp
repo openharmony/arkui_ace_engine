@@ -1749,6 +1749,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
                 exclusiveRecognizer->BeginReferee(scalePoint.id);
                 touchTestResults_[point.id].emplace_back(exclusiveRecognizer);
                 eventManager_->touchTestResults_ = touchTestResults_;
+                eventManager_->SetInnerFlag(true);
             }
         }
         if (IsFormRender() && touchTestResults_.find(point.id) != touchTestResults_.end()) {
@@ -1787,6 +1788,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 
     if (scalePoint.type == TouchType::MOVE) {
+        if (!eventManager_->GetInnerFlag()) {
+            auto mockPoint = point;
+            mockPoint.type = TouchType::CANCEL;
+            HandleEtsCardTouchEvent(mockPoint, etsSerializedGesture);
+            RemoveEtsCardTouchEventCallback(mockPoint.id);
+        }
         touchEvents_.emplace_back(point);
         hasIdleTasks_ = true;
         RequestFrame();
