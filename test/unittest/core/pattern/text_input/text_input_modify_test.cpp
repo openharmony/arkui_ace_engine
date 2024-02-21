@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,7 +78,6 @@ namespace {
 constexpr double ICON_SIZE = 24;
 constexpr double ICON_HOT_ZONE_SIZE = 40;
 constexpr double FONT_SIZE = 16;
-constexpr float OFFSET = 3;
 constexpr int32_t DEFAULT_NODE_ID = 1;
 constexpr int32_t MIN_PLATFORM_VERSION = 10;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
@@ -107,7 +106,7 @@ struct ExpectParagraphParams {
 };
 } // namespace
 
-class TextAreaBase : public TestNG {
+class TextInputModifyBase : public TestNG {
 protected:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -125,7 +124,7 @@ protected:
     RefPtr<TextFieldAccessibilityProperty> accessibilityProperty_;
 };
 
-void TextAreaBase::SetUpTestSuite()
+void TextInputModifyBase::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
     ExpectCallParagraphMethods(ExpectParagraphParams());
@@ -149,13 +148,13 @@ void TextAreaBase::SetUpTestSuite()
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
-void TextAreaBase::TearDownTestSuite()
+void TextInputModifyBase::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
     MockParagraph::TearDown();
 }
 
-void TextAreaBase::TearDown()
+void TextInputModifyBase::TearDown()
 {
     frameNode_ = nullptr;
     pattern_ = nullptr;
@@ -164,7 +163,7 @@ void TextAreaBase::TearDown()
     accessibilityProperty_ = nullptr;
 }
 
-void TextAreaBase::ExpectCallParagraphMethods(ExpectParagraphParams params)
+void TextInputModifyBase::ExpectCallParagraphMethods(ExpectParagraphParams params)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
@@ -180,13 +179,13 @@ void TextAreaBase::ExpectCallParagraphMethods(ExpectParagraphParams params)
     EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(params.lineCount));
 }
 
-void TextAreaBase::CreateTextField(
+void TextInputModifyBase::CreateTextField(
     const std::string& text, const std::string& placeHolder, const std::function<void(TextFieldModelNG&)>& callback)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(placeHolder, text);
+    textFieldModelNG.CreateTextInput(placeHolder, text);
     if (callback) {
         callback(textFieldModelNG);
     }
@@ -199,7 +198,7 @@ void TextAreaBase::CreateTextField(
     FlushLayoutTask(frameNode_);
 }
 
-void TextAreaBase::GetFocus()
+void TextInputModifyBase::GetFocus()
 {
     auto focushHub = pattern_->GetFocusHub();
     focushHub->currentFocus_ = true;
@@ -207,87 +206,41 @@ void TextAreaBase::GetFocus()
     FlushLayoutTask(frameNode_);
 }
 
-class TextFieldUXTest : public TextAreaBase {};
+class TextFieldUXTest : public TextInputModifyBase {};
+class TextFieldModifyTest : public TextInputModifyBase {};
 
 /**
- * @tc.name: IsTextArea001
- * @tc.desc: Test is text area or text input.
+ * @tc.name: SetTextDraggable001
+ * @tc.desc: Test the OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldUXTest, IsTextArea001, TestSize.Level1)
+HWTEST_F(TextFieldModifyTest, SetTextDraggable001, TestSize.Level1)
 {
     /**
-     * @tc.steps: Create Text filed node with default text and placeholder
+     * @tc.steps: step1. Initialize text input.
      */
-    CreateTextField(DEFAULT_TEXT);
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+        model.SetShowUnderline(true);
+    });
 
     /**
-     * @tc.expected: Current caret position is end of text
+     * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
+     * @tc.expected: Check if the text draggable.
      */
     GetFocus();
-    EXPECT_TRUE(pattern_->IsTextArea());
+    frameNode_->SetCustomerDraggable(true);
+    FlushLayoutTask(frameNode_);
+    pattern_->InitDragEvent();
+    EXPECT_NE(frameNode_->GetOrCreateGestureEventHub()->dragEventActuator_, nullptr);
 }
 
 /**
- * @tc.name: PerformAction001
- * @tc.desc: Test function PerformAction.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldUXTest, PerformAction001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: Create Text filed node with default text and placeholder
-     */
-    CreateTextField(DEFAULT_TEXT);
-
-    /**
-     * @tc.expected: Current caret position is end of text
-     */
-    GetFocus();
-
-    /**
-     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
-     * @tc.expected: text will wrap
-     */
-    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
-    paintProperty->UpdateInputStyle(InputStyle::INLINE);
-    frameNode_->MarkModifyDone();
-    pattern_->OnModifyDone();
-    auto textInputAction = pattern_->GetDefaultTextInputAction();
-    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
-    pattern_->focusIndex_ = FocuseIndex::TEXT;
-    EXPECT_TRUE(pattern_->IsTextArea());
-    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
-    pattern_->PerformAction(textInputAction, false);
-    EXPECT_EQ(pattern_->TextInputActionToString(), "EnterKeyType.Done");
-}
-
-/**
- * @tc.name: CursorInContentRegion001
- * @tc.desc: Test function CursorInContentRegion.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldUXTest, CursorInContentRegion001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: Create Text filed node with default text and placeholder
-     */
-    CreateTextField(DEFAULT_TEXT);
-
-    /**
-     * @tc.expected: Cursor realy in the content region
-     */
-    GetFocus();
-    EXPECT_EQ(pattern_->GetTextOrPlaceHolderFontSize(), FONT_SIZE);
-    EXPECT_TRUE(pattern_->CursorInContentRegion());
-}
-
-/**
- * @tc.name: OnTextAreaScroll001
+ * @tc.name: CreateNodePaintMethod001
  * @tc.desc: Test textfield to create paint.
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldUXTest, OnTextAreaScroll001, TestSize.Level1)
+HWTEST_F(TextFieldModifyTest, CreateNodePaintMethod001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize text input.
@@ -296,18 +249,201 @@ HWTEST_F(TextFieldUXTest, OnTextAreaScroll001, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. call OnTextAreaScroll
-     * tc.expected: step2. Check if the currentOffset_ is right.
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
      */
-    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
-    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto focusHub = pattern_->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = false;
+    EXPECT_TRUE(pattern_->IsNormalInlineState());
+    pattern_->UpdateScrollBarOffset();
+
+    auto paint = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
+    auto inlineScrollRect = pattern_->GetScrollBar()->GetActiveRect();
+    EXPECT_EQ(inlineScrollRect, Rect(720, 0, 0, 50));
+    EXPECT_NE(pattern_->textFieldContentModifier_, nullptr);
+}
+
+/**
+ * @tc.name: CheckBlurReason001
+ * @tc.desc: Test the OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, CheckBlurReason001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
 
     /**
-     * @tc.steps: step3.set contentRect_.GetY() = 1
+     * @tc.steps: step2. Set blurReason FRAME_DESTROY. Call function CheckBlurReason.
+     * @tc.expected: Check if return true.
      */
-    pattern_->contentRect_ = RectF(1.0f, 1.0f, 1.0f, 1.0f);
+    EXPECT_FALSE(pattern_->CheckBlurReason());
+    auto focusHub = pattern_->GetFocusHub();
+    focusHub->blurReason_ = BlurReason::FRAME_DESTROY;
+    EXPECT_TRUE(pattern_->CheckBlurReason());
+}
+
+/**
+ * @tc.name: DoCallback001
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the HandleClickEvent in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    GestureEvent gestureEvent;
+
+    /**
+     * @tc.steps: step3. mock click.
+     */
+    pattern_->HandleClickEvent(gestureEvent);
+    EXPECT_TRUE(pattern_->cursorVisible_);
+
     FlushLayoutTask(frameNode_);
-    pattern_->OnTextAreaScroll(OFFSET);
-    EXPECT_EQ(pattern_->currentOffset_, 1);
+    GetFocus();
+    pattern_->clickListener_->operator()(gestureEvent);
+    EXPECT_FALSE(pattern_->isFocusedBeforeClick_);
 }
+
+/**
+ * @tc.name: DoCallback002
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the HandleLongPress in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    GestureEvent gestureEvent;
+
+    /**
+     * @tc.steps: step3. mock LongPress.
+     */
+    pattern_->longPressEvent_->operator()(gestureEvent);
+    EXPECT_FALSE(pattern_->isUsingMouse_);
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    pattern_->HandleLongPress(gestureEvent);
+    EXPECT_TRUE(pattern_->isLongPress_);
+
+    /**
+     * @tc.steps: test the branch when SourceType = mouse.
+     */
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    gestureEvent.SetSourceDevice(SourceType::MOUSE);
+    pattern_->HandleLongPress(gestureEvent);
+    EXPECT_FALSE(pattern_->isTouchCaret_);
 }
+
+/**
+ * @tc.name: DoCallback003
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the functions in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+
+    pattern_->GetFocusHub()->onFocusInternal_.operator()();
+    RoundRect roundRect;
+    pattern_->GetFocusHub()->getInnerFocusRectFunc_.operator()(roundRect);
+    EXPECT_TRUE(pattern_->isFocusedBeforeClick_);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    pattern_->GetFocusHub()->onBlurInternal_.operator()();
+    EXPECT_FALSE(pattern_->isFocusedBeforeClick_);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    KeyEvent keyEvent;
+    pattern_->GetFocusHub()->onKeyEventsInternal_[OnKeyEventType::DEFAULT].operator()(keyEvent);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    MouseInfo mouseInfo;
+    pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
+    EXPECT_TRUE(pattern_->isUsingMouse_);
+}
+
+/**
+ * @tc.name: DoCallback004
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the HandleLongPress in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    TouchEventInfo touchEventInfo("onTouch");
+
+    /**
+     * @tc.steps: step3. mock doubleClick.
+     */
+    pattern_->touchListener_->operator()(touchEventInfo);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    pattern_->HandleTouchEvent(touchEventInfo);
+}
+
+/**
+ * @tc.name: OnVirtualKeyboardAreaChanged001
+ * @tc.desc: Test function OnVirtualKeyboardAreaChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnVirtualKeyboardAreaChanged001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set handlesSelection and call OnVirtualKeyboardAreaChanged.
+     */
+    FlushLayoutTask(frameNode_);
+    pattern_->OnVirtualKeyboardAreaChanged();
+    EXPECT_EQ(pattern_->selectController_->
+        firstHandleInfo_.rect, RectF(0.0f, 0.0f, 0.0f, 0.0f));
+}
+
+} // namespace OHOS::Ace::NG
