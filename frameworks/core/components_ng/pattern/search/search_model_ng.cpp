@@ -91,9 +91,7 @@ void SearchModelNG::SetCaretWidth(const Dimension& value)
     CHECK_NULL_VOID(textFrameNode);
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textPaintProperty);
-
     textPaintProperty->UpdateCursorWidth(value);
-    textFrameNode->MarkModifyDone();
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -105,9 +103,7 @@ void SearchModelNG::SetCaretColor(const Color& color)
     CHECK_NULL_VOID(textFrameNode);
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textPaintProperty);
-
     textPaintProperty->UpdateCursorColor(color);
-    textFrameNode->MarkModifyDone();
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -427,7 +423,6 @@ void SearchModelNG::SetTextColor(const Color& color)
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
     textFieldLayoutProperty->UpdateTextColor(color);
-    textFieldChild->MarkModifyDone();
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -631,7 +626,6 @@ void SearchModelNG::SetType(TextInputType value)
         layoutProperty->UpdateTypeChanged(true);
     }
     layoutProperty->UpdateTextInputType(value);
-    textFieldHost->MarkModifyDone();
     textFieldHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -900,7 +894,6 @@ void SearchModelNG::SetMaxLength(uint32_t value)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateMaxLength(value);
-    textFieldChild->MarkModifyDone();
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -913,7 +906,6 @@ void SearchModelNG::ResetMaxLength()
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->ResetMaxLength();
-    textFieldChild->MarkModifyDone();
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1081,7 +1073,6 @@ void SearchModelNG::SetTextColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
     textFieldLayoutProperty->UpdateTextColor(color);
-    textFieldChild->MarkModifyDone();
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1148,9 +1139,7 @@ void SearchModelNG::SetCaretWidth(FrameNode* frameNode, const Dimension& value)
     CHECK_NULL_VOID(textFrameNode);
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textPaintProperty);
-
     textPaintProperty->UpdateCursorWidth(value);
-    textFrameNode->MarkModifyDone();
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1161,9 +1150,7 @@ void SearchModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(textFrameNode);
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textPaintProperty);
-
     textPaintProperty->UpdateCursorColor(color);
-    textFrameNode->MarkModifyDone();
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
