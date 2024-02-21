@@ -16,7 +16,9 @@
 #include "core/components_ng/image_provider/adapter/skia_svg_dom.h"
 
 #include "draw/canvas.h"
+#include "include/core/SkColor.h"
 #include "skia_adapter/skia_canvas.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace::NG {
 
@@ -93,11 +95,20 @@ void SkiaSvgDom::FitViewPort(const Size& layout)
     }
 }
 
-void SkiaSvgDom::DrawImage(
+void SkiaSvgDom::OffScreenDraw(
     RSCanvas& canvas, const ImageFit& imageFit, const Size& layout)
 {
+    // Create bitmap and bitmapCanvas
+    RSBitmap bitmap;
+    auto imageInfo = RSImageInfo::MakeN32Premul(layout.Width(), layout.Height());
+    bitmap.Build(imageInfo);
+    RSCanvas bitmapCanvas;
+    bitmapCanvas.Bind(bitmap);
+    bitmapCanvas.Clear(SK_ColorTRANSPARENT);
+
+    // draw svg offScreen
     CHECK_NULL_VOID(skiaDom_);
-    auto rsCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>();
+    auto rsCanvas = bitmapCanvas.GetImpl<Rosen::Drawing::SkiaCanvas>();
     CHECK_NULL_VOID(rsCanvas);
     auto* skCanvas = rsCanvas->ExportSkCanvas();
 
@@ -107,6 +118,17 @@ void SkiaSvgDom::DrawImage(
     FitImage(skCanvas, imageFit, layout);
     Render(skCanvas);
     skCanvas->restore();
+    
+    // transform bitmap to image
+    RSImage image;
+    image.BuildFromBitmap(bitmap);
+    canvas.DrawImage(image, 0, 0, Rosen::Drawing::SamplingOptions());
+}
+
+void SkiaSvgDom::DrawImage(
+    RSCanvas& canvas, const ImageFit& imageFit, const Size& layout)
+{
+    OffScreenDraw(canvas, imageFit, layout);
 }
 
 const sk_sp<SkSVGDOM>& SkiaSvgDom::GetSkiaSvgDom() const
