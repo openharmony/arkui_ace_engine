@@ -3990,6 +3990,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    showSelect_ = true;
     auto hasDataCallback = [weak = WeakClaim(this), handleReverse, pipeline, firstHandle, secondHandle, isCopyAll,
                                responseType](bool hasData) mutable {
         auto pattern = weak.Upgrade();
