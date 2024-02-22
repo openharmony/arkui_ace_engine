@@ -24,11 +24,11 @@ namespace OHOS::Ace::Napi {
 static constexpr uint32_t LAST_DOWN = 0;
 static constexpr uint32_t LAST_UP = 1;
 static constexpr uint32_t FIRST_MOVE = 2;
-static constexpr uint32_t PERF_TOUCH_EVENT = 0,
-static constexpr uint32_t PERF_MOUSE_EVENT = 1,
-static constexpr uint32_t PERF_TOUCH_PAD = 2,
-static constexpr uint32_t PERF_JOY_STICK = 3,
-static constexpr uint32_t PERF_KEY_EVENT = 4
+static constexpr uint32_t PERF_TOUCH_EVENT = 0;
+static constexpr uint32_t PERF_MOUSE_EVENT = 1;
+static constexpr uint32_t PERF_TOUCH_PAD = 2;
+static constexpr uint32_t PERF_JOY_STICK = 3;
+static constexpr uint32_t PERF_KEY_EVENT = 4;
 constexpr int FIRST_ARG_INDEX = 0;
 constexpr int SECOND_ARG_INDEX = 1;
 constexpr int THIRD_ARG_INDEX = 2;
@@ -126,7 +126,7 @@ static void InputEvent(int type, int sourceType, int64_t time)
 {
     PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
     if (pMonitor != nullptr) {
-        pMonitor->Start(static_cast<PerfActionType>(type), static_cast<PerfSourceType>(sourceType), time);
+        pMonitor->RecordInputEvent(static_cast<PerfActionType>(type), static_cast<PerfSourceType>(sourceType), time);
     }
 }
 
@@ -197,10 +197,10 @@ static napi_value JSRecordInputEventTime(napi_env env, napi_callback_info info)
     }
 
     int64_t time = 0;
-    if (!ParseStringParam(env, argv[THIRD_ARG_INDEX], time)) {
+    if (!ParseInt64Param(env, argv[THIRD_ARG_INDEX], time)) {
         return nullptr;
     }
-    SceneStart(type, sourceType, time);
+    InputEvent(type, sourceType, time);
     return nullptr;
 }
 
@@ -229,7 +229,7 @@ static napi_value PerfMonitorInit(napi_env env, napi_value exports)
     napi_set_named_property(env, sourceType, "PERF_MOUSE_EVENT", prop);
     napi_create_uint32(env, PERF_TOUCH_PAD, &prop);
     napi_set_named_property(env, sourceType, "PERF_TOUCH_PAD", prop);
-	napi_create_uint32(env, PERF_JOY_STICK, &prop);
+	napi_create_uint32(env, "PERF_JOY_STICK", &prop);
     napi_set_named_property(env, sourceType, "PERF_JOY_STICK", prop);
     napi_create_uint32(env, PERF_KEY_EVENT, &prop);
     napi_set_named_property(env, sourceType, "PERF_KEY_EVENT", prop);
