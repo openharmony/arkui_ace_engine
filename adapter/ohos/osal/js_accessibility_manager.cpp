@@ -2056,13 +2056,11 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     }
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d aid:%{public}lld",
         eventInfo.GetEventType(), static_cast<int64_t>(eventInfo.GetAccessibilityId()));
-    auto elementInfo = eventInfo.GetElementInfo();
-    if (elementInfo != nullptr) {
-        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "The element info bundleName: %{public}s, elementId: %{public}" PRId64
-            ", componentType: %{public}s, text: %{public}s", elementInfo->GetBundleName().c_str(),
-            static_cast<int64_t>(elementInfo->GetAccessibilityId()), elementInfo->GetComponentType().c_str(),
-            elementInfo->GetContent().c_str());
-    }
+    const AccessibilityElementInfo& elementInfo = eventInfo.GetElementInfo();
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "The element info bundleName: %{public}s, elementId: %{public}" PRId64
+        ", componentType: %{public}s, text: %{public}s", elementInfo.GetBundleName().c_str(),
+        static_cast<int64_t>(elementInfo.GetAccessibilityId()), elementInfo.GetComponentType().c_str(),
+        elementInfo.GetContent().c_str());
     return client->SendEvent(eventInfo);
 }
 
