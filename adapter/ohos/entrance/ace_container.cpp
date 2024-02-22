@@ -1008,6 +1008,18 @@ UIContentErrorCode AceContainer::RunPage(
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
+
+    if (content.size() == 0) {
+        return UIContentErrorCode::NULL_URL;
+    }
+
+    auto aceContainer = DynamicCast<AceContainer>(container);
+    CHECK_NULL_RETURN(aceContainer, UIContentErrorCode::NULL_POINTER);
+    bool isFormRender = aceContainer->IsFormRender();
+    if (!isFormRender && !isNamedRouter && !CheckUrlValid(content, container->GetHapPath())) {
+        return UIContentErrorCode::INVALID_URL;
+    }
+
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
