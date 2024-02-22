@@ -27,6 +27,7 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/paragraph.h"
@@ -171,6 +172,15 @@ struct SymbolSpanOptions : SpanOptionBase {
     RefPtr<ResourceObject> resourceObject;
 };
 
+struct PlaceholderOptions {
+    std::optional<std::string> value;
+    std::optional<FontWeight> fontWeight;
+    std::optional<Dimension> fontSize;
+    std::optional<Color> fontColor;
+    std::optional<FontStyle> fontStyle;
+    std::vector<std::string> fontFamilies;
+};
+
 class ACE_EXPORT RichEditorControllerBase : public AceType {
     DECLARE_ACE_TYPE(RichEditorControllerBase, AceType);
 
@@ -211,6 +221,7 @@ public:
     virtual void BindSelectionMenu(NG::TextSpanType& editorType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) = 0;
     virtual void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
+    virtual void SetPlaceholder(PlaceholderOptions& options) = 0;
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
 private:
