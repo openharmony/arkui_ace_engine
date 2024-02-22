@@ -4187,11 +4187,13 @@ void RichEditorPattern::HandleOnPaste()
     }
     CHECK_NULL_VOID(clipboard_);
     auto pasteCallback = [weak = WeakClaim(this)](const std::string& data) {
-        if (data.empty()) {
-            return;
-        }
         auto richEditor = weak.Upgrade();
         CHECK_NULL_VOID(richEditor);
+        if (data.empty()) {
+            richEditor->ResetSelection();
+            richEditor->StartTwinkling();
+            return;
+        }
         richEditor->AddPasteStr(data);
         richEditor->ResetAfterPaste();
     };
