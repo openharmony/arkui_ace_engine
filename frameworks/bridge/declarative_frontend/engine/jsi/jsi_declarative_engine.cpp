@@ -483,7 +483,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     if (!arkRuntime->InitializeFromExistVM(vm)) {
         return;
     }
-    arkRuntime->SetNativeEngine(nativeArkEngine);
     LocalScope scope(vm);
     {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
