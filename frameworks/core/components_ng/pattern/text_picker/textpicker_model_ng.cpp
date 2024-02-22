@@ -59,15 +59,6 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-    } else {
-        if (properties.alignment == DialogAlignment::DEFAULT) {
-            if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-                properties.alignment = DialogAlignment::BOTTOM;
-                properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-            } else {
-                properties.alignment = DialogAlignment::CENTER;
-            }
-        }
     }
     if (textPickerDialog.offset.has_value()) {
         properties.offset = textPickerDialog.offset.value();
