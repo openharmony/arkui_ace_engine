@@ -135,6 +135,26 @@ public:
     {
         return popupUnselectedTextColor_;
     }
+    const Color& GetPressedBgAreaColor() const
+    {
+        return pressedBgAreaColor_;
+    }
+    const Color& GetSlipPressedBackgroundColor() const
+    {
+        return slipPressedBackgroundColor_;
+    }
+    const Color& GetPopupClickedBgAreaColor() const
+    {
+        return popupClickedBgAreaColor_;
+    }
+    const Color& GetPopupTitleBackground() const
+    {
+        return popupTitleBackground_;
+    }
+    const Color& GetPopupUnclickedBgAreaColor() const
+    {
+        return popupUnclickedBgAreaColor_;
+    }
     static constexpr double SLIP_BACKGROUND_OPACITY = 0.05;
     static constexpr double SLIP_PRESS_BACKGROUND_OPACITY = 0.1;
     static constexpr float TEXT_PADDING_LEFT = 12.0f;
@@ -164,6 +184,11 @@ protected:
     TextStyle seletctTextStyle_;
     TextStyle defaultTextStyle_;
     TextStyle popupTextStyle_;
+    Color pressedBgAreaColor_;
+    Color slipPressedBackgroundColor_;
+    Color popupClickedBgAreaColor_;
+    Color popupTitleBackground_;
+    Color popupUnclickedBgAreaColor_;
 
 private:
     static void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<IndexerTheme>& theme)
@@ -214,7 +239,7 @@ private:
             indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
         theme->seletctTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR)));
-        theme->seletctTextStyle_.SetFontWeight(FontWeight::REGULAR);
+        theme->seletctTextStyle_.SetFontWeight(FontWeight::MEDIUM);
         theme->seletctTextStyle_.SetFontStyle(FontStyle::NORMAL);
         std::vector<std::string> fontFamilies;
         std::string defaultFamily = "HarmonyOS Sans";
@@ -224,7 +249,7 @@ private:
             indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
         theme->defaultTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR)));
-        theme->defaultTextStyle_.SetFontWeight(FontWeight::REGULAR);
+        theme->defaultTextStyle_.SetFontWeight(FontWeight::MEDIUM);
         theme->defaultTextStyle_.SetFontStyle(FontStyle::NORMAL);
         theme->defaultTextStyle_.SetFontFamilies(fontFamilies);
         theme->popupTextStyle_.SetFontSize(
@@ -234,6 +259,16 @@ private:
         theme->popupTextStyle_.SetFontWeight(FontWeight::MEDIUM);
         theme->popupTextStyle_.SetFontStyle(FontStyle::NORMAL);
         theme->popupTextStyle_.SetFontFamilies(fontFamilies);
+        theme->pressedBgAreaColor_ =
+            indexerPattern->GetAttr<Color>("pressed_bg_area_color", Color(PRESSED_BG_AREA_COLOR));
+        theme->slipPressedBackgroundColor_ =
+            indexerPattern->GetAttr<Color>("slip_pressed_background_color", Color(SLIP_PRESSED_BACKGROUD_COLOR));
+        theme->popupClickedBgAreaColor_ =
+            indexerPattern->GetAttr<Color>("popup_clicked_bg_area_color", Color(POPUP_CLICKED_BG_AREA_COLOR));
+        theme->popupTitleBackground_ =
+            indexerPattern->GetAttr<Color>("popup_title_color", Color(POPUP_TITLE_BG_AREA_COLOR));
+        theme->popupUnclickedBgAreaColor_ =
+            indexerPattern->GetAttr<Color>("popup_unclicked_bg_area_color", Color(POPUP_UNCLICKED_BG_AREA_COLOR));
     }
     static constexpr uint32_t DEFAULT_TEXT_COLOR = 0x99182431;
     static constexpr uint32_t POPUP_SELECTED_TEXT_COLOR = 0xff182431;
@@ -242,20 +277,25 @@ private:
     static constexpr uint32_t POPUP_TEXT_COLOR = 0xff007dff;
     static constexpr float POPUP_TEXT_SIZE = 24.0;
     static constexpr uint32_t SELECT_BACKGROUD_COLOR = 0x33007dff;
-    static constexpr uint32_t POPUP_BACKGROUND_COLOR = 0xffffffff;
+    static constexpr uint32_t POPUP_BACKGROUND_COLOR = 0x00ffffff;
     static constexpr uint32_t POPUP_SEPARATOR_COLOR = 0x33182431;
     static constexpr float POPUP_AREA_SIZE = 56.0f;
     static constexpr float HOVER_RADIUS_SIZE = 4.0f;
     static constexpr float HOVER_BG_AREA_SIZE = 16.0f;
     static constexpr uint32_t HOVER_BG_AREA_COLOR = 0x0c182431;
-    static constexpr float HOVER_TEXT_SIZE = 12.0f;
+    static constexpr float HOVER_TEXT_SIZE = 10.0f;
     static constexpr uint32_t HOVER_TEXT_COLOR = 0xff182431;
     static constexpr float HOVER_TEXT_ALPHA = 0.6f;
-    static constexpr uint32_t SLIP_HOVER_BACKGROUD_COLOR = 0x000000;
+    static constexpr uint32_t SLIP_HOVER_BACKGROUD_COLOR = 0x0c182431;
     static constexpr uint32_t FOCUS_BG_OUTLINE_COLOR = 0xff007dff;
     static constexpr float FOCUS_BG_OUTLINE_SIZE = 2.0f;
     static constexpr float TEXT_COLOR_OPACITY = 0.6f;
     static constexpr float SELECT_BACKGROUND_OPACITY = 0.1f;
+    static constexpr uint32_t PRESSED_BG_AREA_COLOR = 0x19182431;
+    static constexpr uint32_t SLIP_PRESSED_BACKGROUD_COLOR = 0x19182431;
+    static constexpr uint32_t POPUP_CLICKED_BG_AREA_COLOR = 0x0c182431;
+    static constexpr uint32_t POPUP_TITLE_BG_AREA_COLOR = 0x00ffffff;
+    static constexpr uint32_t POPUP_UNCLICKED_BG_AREA_COLOR = 0x00000000;
 };
 } // namespace OHOS::Ace
 #endif

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H
 
+#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/pattern/indexer/indexer_model.h"
 
 namespace OHOS::Ace::NG {
@@ -52,6 +53,12 @@ public:
     void SetChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) override;
     void SetCreatChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) override;
     void SetAutoCollapse(bool state) override;
+    void SetPopupBorderRadius(const Dimension& radius) override;
+    void SetPopupItemBorderRadius(const Dimension& radius) override;
+    void SetItemBorderRadius(const Dimension& radius) override;
+    void SetIndexerBorderRadius(const Dimension& radius) override;
+    void SetPopupBackgroundBlurStyle(const BlurStyleOption& indexerBlurStyle) override;
+    void SetPopupTitleBackground(const std::optional<Color>& color) override;
 
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const FontWeight weight);

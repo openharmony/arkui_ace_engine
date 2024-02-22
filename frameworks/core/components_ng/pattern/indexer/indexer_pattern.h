@@ -39,6 +39,13 @@ enum class IndexerCollapsingMode {
     SEVEN // 7 + 1 collapsing mode
 };
 
+enum class PopupListGradientStatus {
+    NONE,
+    TOP,
+    BOTTOM,
+    BOTH
+};
+
 class IndexerPattern : public Pattern {
     DECLARE_ACE_TYPE(IndexerPattern, Pattern);
 
@@ -156,6 +163,17 @@ private:
     void FireOnSelect(int32_t selectIndex, bool fromPress);
     void SetAccessibilityAction();
     void RemoveBubble();
+    void UpdateBubbleBackgroundView();
+    CalcSize CalcBubbleListSize(int32_t popupSize, int32_t maxItemsSize);
+    GradientColor CreatePercentGradientColor(float percent, Color color);
+    double CalcBubbleListStackHeight(double bubbleSize, double bubbleHeight, double bubbleDivider,
+        int32_t popupSize, int32_t maxItemsSize);
+    void UpdateBubbleLetterStackView();
+    void DrawPopupListGradient(PopupListGradientStatus gradientStatus);
+    void UpdatePopupListGradientView(int32_t popupSize, int32_t maxItemsSize);
+    RefPtr<FrameNode> GetAutoCollapseLetterNode();
+    void UpdateBubbleDividerView();
+    void UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& listItemNode);
     
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;

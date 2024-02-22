@@ -63,6 +63,12 @@ public:
     virtual void SetChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) {};
     virtual void SetCreatChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) {};
     virtual void SetAutoCollapse(bool state) = 0;
+    virtual void SetPopupBorderRadius(const Dimension& radius) {};
+    virtual void SetPopupItemBorderRadius(const Dimension& radius) {};
+    virtual void SetItemBorderRadius(const Dimension& radius) {};
+    virtual void SetIndexerBorderRadius(const Dimension& radius) {};
+    virtual void SetPopupBackgroundBlurStyle(const BlurStyleOption& indexerBlurStyle) {};
+    virtual void SetPopupTitleBackground(const std::optional<Color>& color) {};
 
 private:
     static std::unique_ptr<IndexerModel> instance_;

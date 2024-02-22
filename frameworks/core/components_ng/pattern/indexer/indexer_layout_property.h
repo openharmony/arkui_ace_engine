@@ -56,6 +56,10 @@ public:
         value->propAutoCollapse_ = CloneAutoCollapse();
         value->propPopupHorizontalSpace_ = ClonePopupHorizontalSpace();
         value->propIsPopup_ = CloneIsPopup();
+        value->propPopupBorderRadius_ = ClonePopupBorderRadius();
+        value->propPopupItemBorderRadius_ = ClonePopupItemBorderRadius();
+        value->propItemBorderRadius_ = CloneItemBorderRadius();
+        value->propIndexerBorderRadius_ = CloneIndexerBorderRadius();
         return value;
     }
 
@@ -80,9 +84,14 @@ public:
         ResetAutoCollapse();
         ResetPopupHorizontalSpace();
         ResetIsPopup();
+        ResetPopupBorderRadius();
+        ResetPopupItemBorderRadius();
+        ResetItemBorderRadius();
+        ResetIndexerBorderRadius();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void BorderRadiusToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrayValue, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selected, int32_t, PROPERTY_UPDATE_NORMAL);
@@ -102,6 +111,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCollapse, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupHorizontalSpace, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsPopup, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupBorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupItemBorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemBorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndexerBorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
 
 private:
     static std::unique_ptr<JsonValue> ToJsonObjectValue(const TextStyle& textStyle);

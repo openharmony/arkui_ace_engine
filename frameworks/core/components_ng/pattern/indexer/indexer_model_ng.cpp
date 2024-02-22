@@ -280,6 +280,40 @@ void IndexerModelNG::SetAutoCollapse(bool autoCollapse)
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, AutoCollapse, autoCollapse);
 }
 
+void IndexerModelNG::SetPopupBorderRadius(const Dimension& radius)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupBorderRadius, radius);
+}
+
+void IndexerModelNG::SetPopupItemBorderRadius(const Dimension& radius)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupItemBorderRadius, radius);
+}
+
+void IndexerModelNG::SetItemBorderRadius(const Dimension& radius)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ItemBorderRadius, radius);
+}
+
+void IndexerModelNG::SetIndexerBorderRadius(const Dimension& radius)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, IndexerBorderRadius, radius);
+}
+
+void IndexerModelNG::SetPopupBackgroundBlurStyle(const BlurStyleOption& indexerBlurStyle)
+{
+    ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupBackgroundBlurStyle, indexerBlurStyle);
+}
+
+void IndexerModelNG::SetPopupTitleBackground(const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupTitleBackground, color.value());
+    } else {
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(IndexerPaintProperty, PopupTitleBackground, PROPERTY_UPDATE_RENDER);
+    }
+}
+
 void IndexerModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
 {
     if (fontSize.IsValid()) {
