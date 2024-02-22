@@ -219,8 +219,8 @@ static napi_value PerfMonitorInit(napi_env env, napi_value exports)
     napi_set_named_property(env, actionType, "LAST_UP", prop);
     napi_create_uint32(env, FIRST_MOVE, &prop);
     napi_set_named_property(env, actionType, "FIRST_MOVE", prop);
-	
-	napi_value sourceType = nullptr;
+
+    napi_value sourceType = nullptr;
     napi_create_object(env, &sourceType);
     prop = nullptr;
     napi_create_uint32(env, PERF_TOUCH_EVENT, &prop);
@@ -229,7 +229,7 @@ static napi_value PerfMonitorInit(napi_env env, napi_value exports)
     napi_set_named_property(env, sourceType, "PERF_MOUSE_EVENT", prop);
     napi_create_uint32(env, PERF_TOUCH_PAD, &prop);
     napi_set_named_property(env, sourceType, "PERF_TOUCH_PAD", prop);
-	napi_create_uint32(env, "PERF_JOY_STICK", &prop);
+    napi_create_uint32(env, PERF_JOY_STICK, &prop);
     napi_set_named_property(env, sourceType, "PERF_JOY_STICK", prop);
     napi_create_uint32(env, PERF_KEY_EVENT, &prop);
     napi_set_named_property(env, sourceType, "PERF_KEY_EVENT", prop);
@@ -237,9 +237,9 @@ static napi_value PerfMonitorInit(napi_env env, napi_value exports)
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("begin", JSSceneStart),
         DECLARE_NAPI_FUNCTION("end", JSSceneEnd),
-		DECLARE_NAPI_FUNCTION("recordInputEventTime", JSRecordInputEventTime),
+        DECLARE_NAPI_FUNCTION("recordInputEventTime", JSRecordInputEventTime),
         DECLARE_NAPI_PROPERTY("ActionType", actionType),
-		DECLARE_NAPI_PROPERTY("SourceType", sourceType),
+        DECLARE_NAPI_PROPERTY("SourceType", sourceType),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
