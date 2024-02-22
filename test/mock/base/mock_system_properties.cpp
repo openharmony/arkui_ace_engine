@@ -130,4 +130,9 @@ bool SystemProperties::GetSideBarContainerBlurEnable()
 {
     return sideBarContainerBlurEnable_;
 }
+
+float SystemProperties::GetDefaultResolution()
+{
+    return 1.0f;
+}
 } // namespace OHOS::Ace
