@@ -24,8 +24,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT WebAccessibilityNode : public FrameNode {
     DECLARE_ACE_TYPE(WebAccessibilityNode, FrameNode)
 public:
-    WebAccessibilityNode(const RefPtr<FrameNode>& webNode)
-        : FrameNode(V2::WEB_CORE_TAG, 0, MakeRefPtr<Pattern>())
+    WebAccessibilityNode(const RefPtr<FrameNode>& webNode) : FrameNode(V2::WEB_CORE_TAG, 0, MakeRefPtr<Pattern>())
     {
         webNode_ = WeakPtr(webNode);
         pageId_ = webNode->GetPageId();
@@ -34,303 +33,400 @@ public:
     {
         webNode_.Reset();
     }
-    void SetAccessibilityNodeInfo(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) {
+
+    void SetAccessibilityNodeInfo(const std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo>& info)
+    {
         if (info) {
             info->SetPageId(pageId_);
         }
         accessibilityNodeInfo_ = info;
     }
-    std::string GetHint() {
+
+    std::string GetHint() const
+    {
         if (!accessibilityNodeInfo_) {
             return "";
         }
         return accessibilityNodeInfo_->GetHint();
     }
-    std::string GetError() {
+
+    std::string GetError() const
+    {
         if (!accessibilityNodeInfo_) {
             return "";
         }
         return accessibilityNodeInfo_->GetError();
     }
-    int32_t GetRectX() {
+
+    int32_t GetRectX() const
+    {
         if (!accessibilityNodeInfo_) {
             return 0;
         }
         return accessibilityNodeInfo_->GetRectX();
     }
-    int32_t GetRectY() {
+
+    int32_t GetRectY() const
+    {
         if (!accessibilityNodeInfo_) {
             return 0;
         }
         return accessibilityNodeInfo_->GetRectY();
     }
-    int32_t GetPageId() {
+
+    int32_t GetPageId() const
+    {
         if (!accessibilityNodeInfo_) {
             return pageId_;
         }
         return accessibilityNodeInfo_->GetPageId();
     }
-    std::vector<uint32_t> GetActions() {
+
+    std::vector<uint32_t> GetActions() const
+    {
         if (!accessibilityNodeInfo_) {
             std::vector<uint32_t> empty;
             return empty;
         }
         return accessibilityNodeInfo_->GetActions();
     }
-    std::string GetContent() {
+
+    std::string GetContent() const
+    {
         if (!accessibilityNodeInfo_) {
             return "";
         }
         return accessibilityNodeInfo_->GetContent();
     }
-    std::vector<int64_t> GetChildIds() {
+
+    std::vector<int64_t> GetChildIds() const
+    {
         if (!accessibilityNodeInfo_) {
             std::vector<int64_t> empty;
             return empty;
         }
         return accessibilityNodeInfo_->GetChildIds();
     }
-    int64_t GetParentId() {
+
+    int64_t GetParentId() const
+    {
         if (!accessibilityNodeInfo_) {
             return -1;
         }
         return accessibilityNodeInfo_->GetParentId();
     }
-    bool GetIsHeading() {
+
+    bool GetIsHeading() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsHeading();
     }
-    bool GetIsChecked() {
+
+    bool GetIsChecked() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsChecked();
     }
-    bool GetIsEnabled() {
+
+    bool GetIsEnabled() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsEnabled();
     }
-    bool GetIsFocused() {
+
+    bool GetIsFocused() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsFocused();
     }
-    int32_t GetRectWidth() {
+
+    int32_t GetRectWidth() const
+    {
         if (!accessibilityNodeInfo_) {
             return 0;
         }
         return accessibilityNodeInfo_->GetRectWidth();
     }
-    int32_t GetRectHeight() {
+
+    int32_t GetRectHeight() const
+    {
         if (!accessibilityNodeInfo_) {
             return 0;
         }
         return accessibilityNodeInfo_->GetRectHeight();
     }
-    bool GetIsVisible() {
+
+    bool GetIsVisible() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsVisible();
     }
-    bool GetIsHinting() {
+
+    bool GetIsHinting() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsHinting();
     }
-    bool GetIsEditable() {
+
+    bool GetIsEditable() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsEditable();
     }
-    bool GetIsSelected() {
+
+    bool GetIsSelected() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsSelected();
     }
-    size_t GetItemCounts() {
+
+    size_t GetItemCounts() const
+    {
         if (!accessibilityNodeInfo_) {
             return 0;
         }
         return accessibilityNodeInfo_->GetItemCounts();
     }
-    int32_t GetLiveRegion() {
+
+    int32_t GetLiveRegion() const
+    {
         if (!accessibilityNodeInfo_) {
             return -1;
         }
         return accessibilityNodeInfo_->GetLiveRegion();
     }
-    bool GetIsPassword() {
+
+    bool GetIsPassword() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsPassword();
     }
-    bool GetIsCheckable() {
+
+    bool GetIsCheckable() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsCheckable();
     }
-    bool GetIsClickable() {
+
+    bool GetIsClickable() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsClickable();
     }
-    bool GetIsFocusable() {
+
+    bool GetIsFocusable() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsFocusable();
     }
-    bool GetIsScrollable() {
+
+    bool GetIsScrollable() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsScrollable();
     }
-    bool GetIsDeletable() {
+
+    bool GetIsDeletable() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsDeletable();
     }
-    int64_t GetAccessibilityId() {
+
+    int64_t GetAccessibilityId() const
+    {
         if (!accessibilityNodeInfo_) {
             return -1;
         }
         return accessibilityNodeInfo_->GetAccessibilityId();
     }
-    bool GetIsPopupSupported() {
+
+    bool GetIsPopupSupported() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsPopupSupported();
     }
-    bool GetIsContentInvalid() {
+
+    bool GetIsContentInvalid() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsContentInvalid();
     }
-    float GetRangeInfoMin() {
+
+    float GetRangeInfoMin() const
+    {
         if (!accessibilityNodeInfo_) {
             return 0;
         }
         return accessibilityNodeInfo_->GetRangeInfoMin();
     }
-    float GetRangeInfoMax() {
+
+    float GetRangeInfoMax() const
+    {
         if (!accessibilityNodeInfo_) {
             return 0;
         }
         return accessibilityNodeInfo_->GetRangeInfoMax();
     }
-    float GetRangeInfoCurrent() {
+
+    float GetRangeInfoCurrent() const
+    {
         if (!accessibilityNodeInfo_) {
             return 0;
         }
         return accessibilityNodeInfo_->GetRangeInfoCurrent();
     }
-    int32_t GetSelectionEnd() {
+
+    int32_t GetSelectionEnd() const
+    {
         if (!accessibilityNodeInfo_) {
             return 0;
         }
         return accessibilityNodeInfo_->GetSelectionEnd();
     }
-    int32_t GetSelectionStart() {
+
+    int32_t GetSelectionStart() const
+    {
         if (!accessibilityNodeInfo_) {
             return 0;
         }
         return accessibilityNodeInfo_->GetSelectionStart();
     }
-    int32_t GetInputType() {
+
+    int32_t GetInputType() const
+    {
         if (!accessibilityNodeInfo_) {
             return -1;
         }
         return accessibilityNodeInfo_->GetInputType();
     }
-    std::string GetComponentType() {
+
+    std::string GetComponentType() const
+    {
         if (!accessibilityNodeInfo_) {
             return "";
         }
         return accessibilityNodeInfo_->GetComponentType();
     }
-    std::string GetDescriptionInfo() {
+
+    std::string GetDescriptionInfo() const
+    {
         if (!accessibilityNodeInfo_) {
             return "";
         }
         return accessibilityNodeInfo_->GetDescriptionInfo();
     }
-    int32_t GetGridRows() {
+
+    int32_t GetGridRows() const
+    {
         if (!accessibilityNodeInfo_) {
             return -1;
         }
         return accessibilityNodeInfo_->GetGridRows();
     }
-    int32_t GetGridItemRow() {
+
+    int32_t GetGridItemRow() const
+    {
         if (!accessibilityNodeInfo_) {
             return -1;
         }
         return accessibilityNodeInfo_->GetGridItemRow();
     }
-    int32_t GetGridColumns() {
+
+    int32_t GetGridColumns() const
+    {
         if (!accessibilityNodeInfo_) {
             return -1;
         }
         return accessibilityNodeInfo_->GetGridColumns();
     }
-    int32_t GetGridItemColumn() {
+
+    int32_t GetGridItemColumn() const
+    {
         if (!accessibilityNodeInfo_) {
             return -1;
         }
         return accessibilityNodeInfo_->GetGridItemColumn();
     }
-    int32_t GetGridItemRowSpan() {
+
+    int32_t GetGridItemRowSpan() const
+    {
         if (!accessibilityNodeInfo_) {
             return -1;
         }
         return accessibilityNodeInfo_->GetGridItemRowSpan();
     }
-    int32_t GetGridSelectedMode() {
+
+    int32_t GetGridSelectedMode() const
+    {
         if (!accessibilityNodeInfo_) {
             return -1;
         }
         return accessibilityNodeInfo_->GetGridSelectedMode();
     }
-    int32_t GetGridItemColumnSpan() {
+
+    int32_t GetGridItemColumnSpan() const
+    {
         if (!accessibilityNodeInfo_) {
             return -1;
         }
         return accessibilityNodeInfo_->GetGridItemColumnSpan();
     }
-    bool GetIsAccessibilityFocus() {
+
+    bool GetIsAccessibilityFocus() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsAccessibilityFocus();
     }
-    bool GetIsPluralLineSupported() {
+
+    bool GetIsPluralLineSupported() const
+    {
         if (!accessibilityNodeInfo_) {
             return false;
         }
         return accessibilityNodeInfo_->GetIsPluralLineSupported();
     }
+
     RefPtr<FrameNode> GetWebNode()
     {
         return webNode_.Upgrade();
     }
 
 private:
-    int64_t pageId_;
+    int64_t pageId_ = -1;
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> accessibilityNodeInfo_;
     WeakPtr<FrameNode> webNode_ = nullptr;
 };
