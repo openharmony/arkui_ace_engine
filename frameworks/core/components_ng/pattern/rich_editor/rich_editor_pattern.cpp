@@ -1741,7 +1741,7 @@ void RichEditorPattern::HandleFocusEvent()
     UseHostToUpdateTextFieldManager();
     StartTwinkling();
     if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Handle Focus Event Request keyboard.");
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Handle Focus Event, Request keyboard.");
         RequestKeyboard(false, true, true);
     }
 }
