@@ -1370,24 +1370,34 @@ struct ArkUIListModifier {
     void (*resetChainAnimation)(ArkUINodeHandle node);
     void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
     void (*resetCachedCount)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getEnableScrollInteraction)(ArkUINodeHandle node);
     void (*setEnableScrollInteraction)(ArkUINodeHandle node, ArkUI_Bool enableScrollInteraction);
     void (*resetEnableScrollInteraction)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSticky)(ArkUINodeHandle node);
     void (*setSticky)(ArkUINodeHandle node, ArkUI_Int32 stickyStyle);
     void (*resetSticky)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getListEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*setListEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled);
     void (*resetListEdgeEffect)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getListDirection)(ArkUINodeHandle node);
     void (*setListDirection)(ArkUINodeHandle node, ArkUI_Int32 axis);
     void (*resetListDirection)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getListFriction)(ArkUINodeHandle node);
     void (*setListFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
     void (*resetListFriction)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getListNestedScroll)(ArkUINodeHandle node);
     void (*setListNestedScroll)(ArkUINodeHandle node, ArkUI_Int32 forward, ArkUI_Int32 backward);
     void (*resetListNestedScroll)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getListScrollBar)(ArkUINodeHandle node);
     void (*setListScrollBar)(ArkUINodeHandle node, ArkUI_Int32 barState);
     void (*resetListScrollBar)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getListScrollBarWidth)(ArkUINodeHandle node);
     void (*setListScrollBarWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetListScrollBarWidth)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getListScrollBarColor)(ArkUINodeHandle node);
     void (*setListScrollBarColor)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetListScrollBarColor)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getAlignListItem)(ArkUINodeHandle node);
     void (*setAlignListItem)(ArkUINodeHandle node, ArkUI_Int32 listItemAlign);
     void (*resetAlignListItem)(ArkUINodeHandle node);
     void (*setScrollSnapAlign)(ArkUINodeHandle node, ArkUI_Int32 scrollSnapAlign);
@@ -1402,6 +1412,7 @@ struct ArkUIListModifier {
     void (*setChainAnimationOptions)(
         ArkUINodeHandle node, const struct ArkUIChainAnimationOptionsType* chainAnimationOptions);
     void (*resetChainAnimationOptions)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getListSpace)(ArkUINodeHandle node);
     void (*setListSpace)(ArkUINodeHandle node, ArkUI_Float32 space);
     void (*resetListSpace)(ArkUINodeHandle node);
 };
@@ -1492,19 +1503,25 @@ struct ArkUINodeContainerModifier {
 };
 
 struct ArkUITimepickerModifier {
+    ArkUI_CharPtr (*getTimepickerSelected)(ArkUINodeHandle node);
     void (*setTimepickerSelected)(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute);
     void (*resetTimepickerSelected)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTimepickerBackgroundColor)(ArkUINodeHandle node);
     void (*setTimepickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    ArkUI_CharPtr (*getTimepickerDisappearTextStyle)(ArkUINodeHandle node);
     void (*setTimepickerDisappearTextStyle)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
+    ArkUI_CharPtr (*getTimepickerTextStyle)(ArkUINodeHandle node);
     void (*setTimepickerTextStyle)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
+    ArkUI_CharPtr (*getTimepickerSelectedTextStyle)(ArkUINodeHandle node);
     void (*setTimepickerSelectedTextStyle)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
     void (*resetTimepickerDisappearTextStyle)(ArkUINodeHandle node);
     void (*resetTimepickerTextStyle)(ArkUINodeHandle node);
     void (*resetTimepickerSelectedTextStyle)(ArkUINodeHandle node);
     void (*resetTimepickerBackgroundColor)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTimepickerUseMilitaryTime)(ArkUINodeHandle node);
     void (*setTimepickerUseMilitaryTime)(ArkUINodeHandle node, ArkUI_Bool isUseMilitaryTime);
     void (*resetTimepickerUseMilitaryTime)(ArkUINodeHandle node);
 };
@@ -1591,29 +1608,38 @@ struct ArkUIGridItemModifier {
 struct ArkUIScrollModifier {
     void (*setScrollNestedScroll)(ArkUINodeHandle node, ArkUI_Int32 scrollForward, ArkUI_Int32 scrollBackward);
     void (*resetScrollNestedScroll)(ArkUINodeHandle node);
+    ArkUI_Bool (*getScrollEnableScroll)(ArkUINodeHandle node);
     void (*setScrollEnableScroll)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetScrollEnableScroll)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getScrollFriction)(ArkUINodeHandle node);
     void (*setScrollFriction)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetScrollFriction)(ArkUINodeHandle node);
     void (*setScrollScrollSnap)(ArkUINodeHandle node, const ArkUI_Float32* paginationValue, ArkUI_Int32 paginationSize,
         const ArkUI_Int32* paginationParam, ArkUI_Int32 paramSize);
     void (*resetScrollScrollSnap)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getScrollScrollBar)(ArkUINodeHandle node);
     void (*setScrollScrollBar)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetScrollScrollBar)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getScrollScrollable)(ArkUINodeHandle node);
     void (*setScrollScrollable)(ArkUINodeHandle node, ArkUI_Int32 scrollDirection);
     void (*resetScrollScrollable)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getScrollScrollBarColor)(ArkUINodeHandle node);
     void (*setScrollScrollBarColor)(ArkUINodeHandle node, ArkUI_Uint32 scrollBarColor);
     void (*resetScrollScrollBarColor)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getScrollScrollBarWidth)(ArkUINodeHandle node);
     void (*setScrollScrollBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetScrollScrollBarWidth)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getScrollEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*setScrollEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled);
     void (*resetScrollEdgeEffect)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableScrollInteraction)(ArkUINodeHandle node);
     void (*setEnableScrollInteraction)(ArkUINodeHandle node, ArkUI_Bool enableScrollInteraction);
     void (*resetEnableScrollInteraction)(ArkUINodeHandle node);
     void (*setScrollTo)(ArkUINodeHandle node, const ArkUI_Float32* values);
     void (*setScrollEdge)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetScrollTo)(ArkUINodeHandle node);
     void (*resetScrollEdge)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getScrollEnablePaging)(ArkUINodeHandle node);
     void (*setScrollEnablePaging)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetScrollEnablePaging)(ArkUINodeHandle node);
     void (*getScrollNestedScroll)(ArkUINodeHandle node, ArkUI_Int32* values);
@@ -2330,11 +2356,15 @@ struct ArkUITextClockControllerModifier {
 struct ArkUITextPickerModifier {
     void (*setTextPickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setTextPickerCanLoop)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getTextPickerSelectedIndex)(ArkUINodeHandle node);
     void (*setTextPickerSelectedIndex)(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size);
+    ArkUI_CharPtr (*getTextPickerTextStyle)(ArkUINodeHandle node);
     void (*setTextPickerTextStyle)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
+    ArkUI_CharPtr (*getTextPickerSelectedTextStyle)(ArkUINodeHandle node);
     void (*setTextPickerSelectedTextStyle)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
+    ArkUI_CharPtr (*getTextPickerDisappearTextStyle)(ArkUINodeHandle node);
     void (*setTextPickerDisappearTextStyle)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
     void (*setTextPickerDefaultPickerItemHeight)(ArkUINodeHandle node, ArkUI_Float32 dVal, ArkUI_Int32 dUnit);
@@ -2383,20 +2413,28 @@ struct ArkUIMarqueeModifier {
 };
 
 struct ArkUIDatePickerModifier {
+    ArkUI_CharPtr (*getSelectedTextStyle)(ArkUINodeHandle node);
     void (*setSelectedTextStyle)(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Uint32 color, ArkUI_Int32 style);
     void (*resetSelectedTextStyle)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getDatePickerTextStyle)(ArkUINodeHandle node);
     void (*setDatePickerTextStyle)(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Uint32 color, ArkUI_Int32 style);
     void (*resetDatePickerTextStyle)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getDisappearTextStyle)(ArkUINodeHandle node);
     void (*setDisappearTextStyle)(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Uint32 color, ArkUI_Int32 style);
     void (*resetDisappearTextStyle)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getLunar)(ArkUINodeHandle node);
     void (*setLunar)(ArkUINodeHandle node, ArkUI_Bool isLunar);
     void (*resetLunar)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getStartDate)(ArkUINodeHandle node);
     void (*setStartDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
     void (*resetStartDate)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getEndDate)(ArkUINodeHandle node);
     void (*setEndDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
     void (*resetEndDate)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getSelectedDate)(ArkUINodeHandle node);
     void (*setSelectedDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
     void (*resetSelectedDate)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getDatePickerBackgroundColor)(ArkUINodeHandle node);
     void (*setDatePickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetDatePickerBackgroundColor)(ArkUINodeHandle node);
 };

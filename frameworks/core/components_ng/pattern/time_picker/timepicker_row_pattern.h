@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/i18n/localization.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
@@ -308,6 +309,11 @@ public:
     void SetBackgroundColor(const Color& color)
     {
         backgroundColor_ = color;
+    }
+
+    const Color GetBackgroundColor() const
+    {
+        return backgroundColor_;
     }
 
     bool IsAmHour(uint32_t hourOf24) const;

@@ -471,4 +471,84 @@ void TimePickerModelNG::SetHour24(FrameNode* frameNode, bool isUseMilitaryTime)
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     timePickerRowPattern->ClearOptionsHour();
 }
+
+PickerTextStyle TimePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
+{
+    PickerTextStyle pickerTextStyle;
+    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, pickerTextStyle);
+    auto style = theme->GetDisappearOptionStyle();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, DisappearFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, DisappearColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, DisappearWeight, pickerTextStyle.fontWeight, frameNode, style.GetFontWeight());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, DisappearFontFamily,
+        pickerTextStyle.fontFamily, frameNode, style.GetFontFamilies());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, DisappearFontStyle,
+        pickerTextStyle.fontStyle, frameNode, style.GetFontStyle());
+    return pickerTextStyle;
+}
+
+PickerTextStyle TimePickerModelNG::getNormalTextStyle(FrameNode* frameNode)
+{
+    PickerTextStyle pickerTextStyle;
+    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, pickerTextStyle);
+    auto style = theme->GetOptionStyle(false, false);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, Color, pickerTextStyle.textColor, frameNode, style.GetTextColor());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, Weight, pickerTextStyle.fontWeight, frameNode, style.GetFontWeight());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, FontFamily,
+        pickerTextStyle.fontFamily, frameNode, style.GetFontFamilies());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, FontStyle,
+        pickerTextStyle.fontStyle, frameNode, style.GetFontStyle());
+    return pickerTextStyle;
+}
+
+PickerTextStyle TimePickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
+{
+    PickerTextStyle pickerTextStyle;
+    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, pickerTextStyle);
+    auto style = theme->GetOptionStyle(true, false);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, SelectedColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, SelectedWeight, pickerTextStyle.fontWeight, frameNode, style.GetFontWeight());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, SelectedFontFamily,
+        pickerTextStyle.fontFamily, frameNode, style.GetFontFamilies());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, SelectedFontStyle,
+        pickerTextStyle.fontStyle, frameNode, style.GetFontStyle());
+    return pickerTextStyle;
+}
+
+PickerTime TimePickerModelNG::getTimepickerSelected(FrameNode* frameNode)
+{
+    PickerTime pickerTime;
+    CHECK_NULL_RETURN(frameNode, pickerTime);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    return timePickerRowPattern->GetSelectedTime();
+}
+
+uint32_t TimePickerModelNG::getTimepickerBackgroundColor(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, 0);
+    return timePickerRowPattern->GetBackgroundColor().GetValue();
+}
+
+int32_t TimePickerModelNG::getTimepickerUseMilitaryTime(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return frameNode->GetLayoutProperty<TimePickerLayoutProperty>()->GetIsUseMilitaryTimeValue(false);
+}
+
 } // namespace OHOS::Ace::NG

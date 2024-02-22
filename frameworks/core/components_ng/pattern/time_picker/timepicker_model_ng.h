@@ -47,6 +47,12 @@ public:
     static void SetHour24(FrameNode* frameNode, bool isUseMilitaryTime);
     static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
+    static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
+    static PickerTextStyle getDisappearTextStyle(FrameNode* frameNode);
+    static PickerTime getTimepickerSelected(FrameNode* frameNode);
+    static uint32_t getTimepickerBackgroundColor(FrameNode* frameNode);
+    static int32_t getTimepickerUseMilitaryTime(FrameNode* frameNode);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

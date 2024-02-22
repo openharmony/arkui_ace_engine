@@ -453,18 +453,17 @@ typedef enum {
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
      * .value[0].f32： 线性渐变的起始角度。0点方向顺时针旋转为正向角度，默认值：180； \n
-     * .value[1].i32：线性渐变的方向，设置angle后不生效。取值("left","top","right","bottom","left-top","left-bottom","right-top", \n
-     *                "right-bottom","none", 默认值 "bottom")； \n
-     * .value[2].u32： 为渐变的颜色重复着色，默认值 false；如 "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;;left;true" 。 \n
+     * .value[1].i32：线性渐变的方向，设置angle后不生效。数据类型{@link ArkUI_LinearGradientDirection} \n
+     * .value[2].i32： 为渐变的颜色重复着色，默认值 false。 \n
      * .object: 指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
      * colors：渐变色颜色颜色。 \n
      * stops：渐变位置。 \n
      * size：颜色个数。 \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32： 线性渐变的起始角度。0点方向顺时针旋转为正向角度，默认值：180；\n
+     * .value[0].f32： 线性渐变的起始角度。\n
      * .value[1].i32：线性渐变的方向，设置angle后不生效。\n
-     * .value[0].u32： 为渐变的颜色重复着色，默认值 false；\n
+     * .value[0].i32： 为渐变的颜色重复着色。\n
      * .object: 指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
      * colors：渐变色颜色颜色。 \n
      * stops：渐变位置。 \n
@@ -474,7 +473,7 @@ typedef enum {
      * float stops[] = { 0.0, 0.5 };
      * ArkUIColorStop colorStop = { colors, stops, 2 };
      * ArkUI_ColorStop* ptr = &colorStop;
-     * ArkUI_NumberValue value[] = {{ .f32 = 60 } ,  { .i32 = left } , { .i32 = true }};
+     * ArkUI_NumberValue value[] = {{ .f32 = 60 } ,  { .i32 = ARKUI_LINEAR_GRADIENT_DIRECTION_LEFT } , { .i32 = true }};
      * ArkUI_AttributeItem item =
      * { value, sizeof(value)/sizeof(ArkUI_NumberValue), .object = reinterpret_cast<void*>(ptr) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_LINEAR_GRADIENT, &item);
@@ -4574,7 +4573,7 @@ typedef enum {
      * .value[0].i32: scroll direction. The parameter type is {@link ArkUI_Axis}. \n
      *
      * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_AXIS_VERTICAL } };
+     * ArkUI_NumberValue value[] = { { .i32 = 0 } };
      * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_DIRECTION, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SCROLL_SCROLL_DIRECTION);
