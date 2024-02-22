@@ -2620,7 +2620,7 @@ void ResetScrollScrollBarColor(ArkUI_NodeHandle node)
 int32_t SetScrollScrollable(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || !InRegion(NUM_0, NUM_2, item->value[0].i32)) {
+    if (actualSize < 0 || !InRegion(NUM_0, NUM_3, item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -2799,7 +2799,7 @@ int32_t SetScrollEnablePaging(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getScrollModifier()->setEnableScrollInteraction(
+    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollEnablePaging(
         node->uiNodeHandle, item->value[NUM_0].i32);
     return ERROR_CODE_NO_ERROR;
 }
@@ -3877,8 +3877,7 @@ void SetListItemGroupHeader(ArkUI_NodeHandle node, const char* value)
 
 int32_t SetListItemGroupHeader(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || !item->object) {
+    if (!item->object) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -3905,8 +3904,7 @@ void SetListItemGroupFooter(ArkUI_NodeHandle node, const char* value)
 
 int32_t SetListItemGroupFooter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || !item->object) {
+    if (!item->object) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -3954,7 +3952,7 @@ int32_t SetListItemGroupDivider(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     auto fullImpl = GetFullImpl();
 
     auto color = item->value[NUM_0].u32;
-    ArkUI_Float32 values[NUM_3] = { item->value[NUM_0].f32, item->value[NUM_1].f32, item->value[NUM_2].f32 };
+    ArkUI_Float32 values[NUM_3] = { item->value[NUM_1].f32, item->value[NUM_2].f32, item->value[NUM_3].f32 };
     ArkUI_Int32 units[NUM_3] = { UNIT_VP, UNIT_VP, UNIT_VP };
 
     fullImpl->getNodeModifiers()->getListItemGroupModifier()->listItemGroupSetDivider(

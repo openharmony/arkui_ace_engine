@@ -29,7 +29,7 @@ void GridPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlig
 }
 
 bool GridPositionController::AnimateTo(
-    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
+    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
 {
     auto grid = AceType::DynamicCast<V2::RenderGridScroll>(scroll_.Upgrade());
     if (!grid) {

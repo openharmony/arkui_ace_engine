@@ -78,7 +78,8 @@ public:
         return Axis::NONE;
     }
 
-    virtual bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
+    virtual bool AnimateTo(
+        const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false)
     {
         return true;
     }

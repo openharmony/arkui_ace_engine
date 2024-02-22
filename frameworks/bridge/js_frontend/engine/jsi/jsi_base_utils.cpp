@@ -799,14 +799,14 @@ shared_ptr<JsValue> JsiBaseUtils::JsErrorLogPrint(const shared_ptr<JsRuntime>& r
     return JsLogPrint(runtime, JsLogLevel::ERROR, argv, argc);
 }
 
-std::unique_ptr<AceScopedTrace> JsiBaseUtils::aceScopedTrace_ = nullptr;
+thread_local std::stack<std::unique_ptr<AceScopedTrace>> JsiBaseUtils::aceScopedTrace_;
 
 shared_ptr<JsValue> JsiBaseUtils::JsTraceBegin(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     if (SystemProperties::GetDebugEnabled()) {
         std::string traceName = GetLogContent(runtime, argv, argc);
-        aceScopedTrace_ = std::make_unique<AceScopedTrace>(traceName.c_str());
+        aceScopedTrace_.emplace(std::make_unique<AceScopedTrace>(traceName.c_str()));
     }
     return runtime->NewUndefined();
 }
@@ -814,8 +814,8 @@ shared_ptr<JsValue> JsiBaseUtils::JsTraceBegin(const shared_ptr<JsRuntime>& runt
 shared_ptr<JsValue> JsiBaseUtils::JsTraceEnd(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    if (SystemProperties::GetDebugEnabled()) {
-        aceScopedTrace_.reset();
+    if (!aceScopedTrace_.empty() && SystemProperties::GetDebugEnabled()) {
+        aceScopedTrace_.pop();
     }
     return runtime->NewUndefined();
 }

@@ -422,4 +422,15 @@ std::optional<std::pair<std::string, RefPtr<UINode>>> NavigationStack::GetFromCa
     }
     return std::nullopt;
 }
+
+std::vector<std::string> NavigationStack::DumpStackInfo() const
+{
+    std::vector<std::string> dumpInfos;
+    for (size_t i = 0; i < navPathList_.size(); ++i) {
+        const auto& name = navPathList_[i].first;
+        std::string info = "[" + std::to_string(i) + "]{ name: \"" + name + "\" }";
+        dumpInfos.push_back(std::move(info));
+    }
+    return dumpInfos;
+}
 } // namespace OHOS::Ace::NG

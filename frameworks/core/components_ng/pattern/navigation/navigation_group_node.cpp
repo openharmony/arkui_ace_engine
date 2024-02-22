@@ -863,6 +863,7 @@ void NavigationGroupNode::OnDetachFromMainTree(bool recursive)
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (pattern) {
         pattern->DetachNavigationStackFromParent();
+        pattern->RemoveFromDumpManager();
     }
 
     GroupNode::OnDetachFromMainTree(recursive);
@@ -875,6 +876,7 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (pattern) {
         pattern->AttachNavigationStackToParent();
+        pattern->AddToDumpManager();
     }
 }
 } // namespace OHOS::Ace::NG

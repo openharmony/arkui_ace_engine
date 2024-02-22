@@ -29,7 +29,8 @@ public:
 
     void JumpTo(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
         int32_t source = 3) override;
-    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
+    bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth,
+        bool canOverScroll = false) override;
     Axis GetScrollDirection() const override;
     Offset GetCurrentOffset() const override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;

@@ -656,4 +656,20 @@ bool JSNavigationStack::GetFlagByIndex(int32_t index) const
     }
     return false;
 }
+
+std::vector<std::string> JSNavigationStack::DumpStackInfo() const
+{
+    std::vector<std::string> dumpInfos;
+    for (size_t i = 0; i < navPathList_.size(); ++i) {
+        const auto& name = navPathList_[i].first;
+        std::string info = "[" + std::to_string(i) + "]{ name: \"" + name + "\"";
+        std::string param = ConvertParamToString(GetParamByIndex(i));
+        if (param.length() > 0) {
+            info += ", param: " + param;
+        }
+        info += " }";
+        dumpInfos.push_back(std::move(info));
+    }
+    return dumpInfos;
+}
 } // namespace OHOS::Ace::Framework
