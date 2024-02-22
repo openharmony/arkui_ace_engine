@@ -133,7 +133,7 @@ HWTEST_F(GridPropertyTestNg, UpdateSpan_Test002, TestSize.Level1)
      * @tc.expected: Return result is false.
      */
     bool result = gridProperty->UpdateSpan(SPANONE, type);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -159,7 +159,7 @@ HWTEST_F(GridPropertyTestNg, UpdateOffset_Test, TestSize.Level1)
      * @tc.expected: Return result is false.
      */
     bool result = gridProperty->UpdateOffset(OFFSETONE, type);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
