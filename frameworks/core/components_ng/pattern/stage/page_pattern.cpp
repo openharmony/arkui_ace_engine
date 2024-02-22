@@ -219,6 +219,9 @@ void PagePattern::OnShow()
     if (onPageShow_) {
         onPageShow_();
     }
+    if (onHiddenChange_) {
+        onHiddenChange_(true);
+    }
     if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         std::string param;
         auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
@@ -255,6 +258,9 @@ void PagePattern::OnHide()
     }
     if (onPageHide_) {
         onPageHide_();
+    }
+    if (onHiddenChange_) {
+        onHiddenChange_(false);
     }
     if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);

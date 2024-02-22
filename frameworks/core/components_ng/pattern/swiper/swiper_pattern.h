@@ -598,6 +598,10 @@ public:
     }
     void UpdateNextValidIndex();
 
+    void FireWillHideEvent(int32_t willHideIndex) const;
+    void FireWillShowEvent(int32_t willShowIndex) const;
+    void SetOnHiddenChangeForParent();
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -872,6 +876,7 @@ private:
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
     bool needTurn_ = false;
+    bool isParentHiddenChange_ = false;
     /**
      * @brief Indicates whether the child NestableScrollContainer is currently scrolling and affecting Swiper.
      */

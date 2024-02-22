@@ -186,6 +186,11 @@ public:
         disappearCallback_ = std::move(callback);
     }
 
+    void SetOnHiddenChange(std::function<void(bool)>&& onHiddenChange)
+    {
+        onHiddenChange_ = std::move(onHiddenChange);
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
@@ -213,6 +218,7 @@ private:
     std::function<void()> disappearCallback_;
     std::function<void()> pageTransitionFunc_;
     std::function<void()> firstBuildCallback_;
+    std::function<void(bool)> onHiddenChange_;
     DynamicPageSizeCallback dynamicPageSizeCallback_;
     std::shared_ptr<std::function<void()>> pageTransitionFinish_;
     std::list<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
