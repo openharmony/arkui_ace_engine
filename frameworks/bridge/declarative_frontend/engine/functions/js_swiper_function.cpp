@@ -53,4 +53,16 @@ void JsSwiperFunction::Execute(int32_t index, const AnimationCallbackInfo& anima
     params[1] = obj;
     JsFunction::ExecuteJS(paramCount, params);
 }
+
+void JsSwiperFunction::Execute(int32_t errorCode)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    if (errorCode == ERROR_CODE_PARAM_INVALID) {
+        obj->SetProperty<int32_t>("code", errorCode);
+    }
+
+    JSRef<JSVal> params[1];
+    params[0] = obj;
+    JsFunction::ExecuteJS(1, params);
+}
 } // namespace OHOS::Ace::Framework
