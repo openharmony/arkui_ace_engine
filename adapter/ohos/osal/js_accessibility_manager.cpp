@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -964,7 +964,26 @@ int64_t GetParentId(const RefPtr<NG::UINode>& uiNode)
     return INVALID_PARENT_ID;
 }
 
-void FillEventInfo(const RefPtr<NG::FrameNode>& node, AccessibilityEventInfo& eventInfo)
+void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo,
+    const RefPtr<PipelineBase>& context, const RefPtr<JsAccessibilityManager>& jsAccessibilityManager)
+{
+    std::list<AccessibilityElementInfo> elementInfos;
+    int32_t mode = 0;
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    jsAccessibilityManager->SearchElementInfoByAccessibilityIdNG(
+        elementId, mode, elementInfos, context, NG::UI_EXTENSION_OFFSET_MAX);
+    if (elementInfos.empty()) {
+        LOGE("Element infos is empty. Find element infos failed.");
+        return;
+    }
+    elementInfo = elementInfos.front();
+}
+
+void FillEventInfo(const RefPtr<NG::FrameNode>& node,
+                   AccessibilityEventInfo& eventInfo,
+                   const RefPtr<PipelineBase>& context,
+                   int64_t elementId,
+                   const RefPtr<JsAccessibilityManager>& jsAccessibilityManager)
 {
     CHECK_NULL_VOID(node);
     if (node->GetTag() == V2::WEB_CORE_TAG) {
@@ -973,6 +992,9 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node, AccessibilityEventInfo& ev
         eventInfo.SetComponentType(webAccessibilityNode->GetComponentType());
         eventInfo.SetPageId(webAccessibilityNode->GetPageId());
         eventInfo.AddContent(webAccessibilityNode->GetContent());
+        AccessibilityElementInfo elementInfo;
+        FillElementInfo(elementId, elementInfo, context, jsAccessibilityManager);
+        eventInfo.SetElementInfo(elementInfo);
         return;
     }
     eventInfo.SetComponentType(node->GetTag());
@@ -983,6 +1005,9 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node, AccessibilityEventInfo& ev
     eventInfo.SetItemCounts(accessibilityProperty->GetCollectionItemCounts());
     eventInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
     eventInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
+    AccessibilityElementInfo elementInfo;
+    FillElementInfo(elementId, elementInfo, context, jsAccessibilityManager);
+    eventInfo.SetElementInfo(elementInfo);
 }
 
 void FillEventInfo(const RefPtr<AccessibilityNode>& node, AccessibilityEventInfo& eventInfo)
@@ -2052,6 +2077,11 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     }
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d aid:%{public}lld",
         eventInfo.GetEventType(), static_cast<int64_t>(eventInfo.GetAccessibilityId()));
+    const AccessibilityElementInfo& elementInfo = eventInfo.GetElementInfo();
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "The element info bundleName: %{public}s, elementId: %{public}" PRId64
+        ", componentType: %{public}s, text: %{public}s", elementInfo.GetBundleName().c_str(),
+        static_cast<int64_t>(elementInfo.GetAccessibilityId()), elementInfo.GetComponentType().c_str(),
+        elementInfo.GetContent().c_str());
     return client->SendEvent(eventInfo);
 }
 
@@ -2111,7 +2141,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
         auto ngPipeline = FindPipelineByElementId(accessibilityEvent.nodeId, node);
         CHECK_NULL_VOID(ngPipeline);
         CHECK_NULL_VOID(node);
-        FillEventInfo(node, eventInfo);
+        FillEventInfo(node, eventInfo, ngPipeline, accessibilityEvent.nodeId, Claim(this));
     } else {
         auto node = GetAccessibilityNodeFromPage(accessibilityEvent.nodeId);
         CHECK_NULL_VOID(node);
