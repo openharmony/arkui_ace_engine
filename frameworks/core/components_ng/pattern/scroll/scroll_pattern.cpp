@@ -984,4 +984,9 @@ float ScrollPattern::GetPagingDelta(float dragDistance, float velocity, float pa
     }
     return 0.f;
 }
+
+void ScrollPattern::TriggerModifyDone()
+{
+    OnModifyDone();
+}
 } // namespace OHOS::Ace::NG

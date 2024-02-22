@@ -57,6 +57,7 @@ RefPtr<FrameNode> ScrollModelNG::CreateFrameNode(int32_t nodeId)
     pattern->SetAlwaysEnabled(true);
     auto positionController = AceType::MakeRefPtr<NG::ScrollableController>();
     pattern->SetPositionController(positionController);
+    pattern->TriggerModifyDone();
     positionController->SetScrollPattern(pattern);
     return frameNode;
 }

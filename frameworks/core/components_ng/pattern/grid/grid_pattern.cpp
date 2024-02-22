@@ -1277,12 +1277,12 @@ void GridPattern::OnAnimateStop()
     // AccessibilityEventType::SCROLL_END
 }
 
-void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
+void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
 {
     if (!isConfigScrollable_) {
         return;
     }
-    ScrollablePattern::AnimateTo(position, duration, curve, smooth);
+    ScrollablePattern::AnimateTo(position, duration, curve, smooth, canOverScroll);
 }
 
 void GridPattern::ScrollTo(float position)

@@ -1871,7 +1871,7 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
-    int32_t value = 0.0;
+    float value = 0.0;
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsLayoutWeight", info, checkList)) {
         if (!info[0]->IsUndefined()) {
@@ -1880,9 +1880,17 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsNumber()) {
-        value = info[0]->ToNumber<int32_t>();
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            value = info[0]->ToNumber<float>();
+        } else {
+            value = info[0]->ToNumber<int32_t>();
+        }
     } else {
-        value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            value = static_cast<float>(StringUtils::StringToUint(info[0]->ToString()));
+        } else {
+            value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
@@ -5584,7 +5592,7 @@ bool JSViewAbstract::ParseInvertProps(const JSRef<JSVal>& jsValue, InvertVariant
 {
     double invertValue = 0.0;
     if (ParseJsDouble(jsValue, invertValue)) {
-        invert = static_cast<float>(invertValue);
+        invert = static_cast<float>(std::clamp(invertValue, 0.0, 1.0));
         return true;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(jsValue->ToString());
@@ -6791,17 +6799,15 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 }
 void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsArray()) {
-        return;
-    }
-
-    auto allowDropArray = JSRef<JSArray>::Cast(info[0]);
     std::set<std::string> allowDropSet;
     allowDropSet.clear();
-    std::string allowDrop;
-    for (size_t i = 0; i < allowDropArray->Length(); i++) {
-        allowDrop = allowDropArray->GetValueAt(i)->ToString();
-        allowDropSet.insert(allowDrop);
+    if (!info[0]->IsUndefined() && info[0]->IsArray()) {
+        auto allowDropArray = JSRef<JSArray>::Cast(info[0]);
+        std::string allowDrop;
+        for (size_t i = 0; i < allowDropArray->Length(); i++) {
+            allowDrop = allowDropArray->GetValueAt(i)->ToString();
+            allowDropSet.insert(allowDrop);
+        }
     }
     ViewAbstractModel::GetInstance()->SetAllowDrop(allowDropSet);
 }
@@ -7894,91 +7900,5 @@ void JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::stri
             moduleName = module->ToString();
         }
     }
-}
-
-void JSViewAbstract::ParseImageAnalyzerSubjectOptions(const JSRef<JSVal>& optionVal,
-    ImageAnalyzerConfig& analyzerConfig)
-{
-    ImageAnalyzerSubjectOptions subjectOptions;
-    auto obj = JSRef<JSObject>::Cast(optionVal);
-    JSRef<JSVal> onAnalyzedVal = obj->GetProperty("onAnalyzed");
-    if (onAnalyzedVal->IsFunction()) {
-        RefPtr<JsFunction> jsOnAnalyzedFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
-            JSRef<JSFunc>::Cast(onAnalyzedVal));
-        onSubcjectAnalyzedFunc onAnalyzedCallback =
-            [func = std::move(jsOnAnalyzedFunc)](std::string tag, std::vector<uint8_t> data) {
-            JSRef<JSVal> params[2];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
-            JSRef<JSArray> indexArray = JSRef<JSArray>::New();
-            for (uint32_t i = 0; i < data.size(); i++) {
-                indexArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(data[i])));
-            }
-            params[1] = JSRef<JSVal>::Cast(indexArray);
-            func->ExecuteJS(2, params);
-        };
-        subjectOptions.onAnalyzedCallback = std::move(onAnalyzedCallback);
-    }
-
-    JSRef<JSVal> dataVal = obj->GetProperty("analyzedData");
-    if (dataVal->IsArray()) {
-        JSRef<JSArray> dataArray  = JSRef<JSArray>::Cast(dataVal);
-        std::vector<uint8_t> analyzedData;
-        for (size_t i = 0; i < dataArray->Length(); ++i) {
-            JSRef<JSVal> value = dataArray->GetValueAt(i);
-            if (value->IsNumber()) {
-                analyzedData.emplace_back(value->ToNumber<uint8_t>());
-            }
-        }
-        subjectOptions.analyzedData = std::move(analyzedData);
-    }
-
-#if defined(PIXEL_MAP_SUPPORTED)
-    auto pixmapVal = obj->GetProperty("sourcePixelmap");
-    RefPtr<PixelMap> pixmap = CreatePixelMapFromNapiValue(pixmapVal);
-    if (pixmap != nullptr) {
-        subjectOptions.sourcePixelmap = ConvertPixmapNapi(pixmap);
-    }
-#endif
-    analyzerConfig.subjectOptions_ = std::move(subjectOptions);
-}
-
-void JSViewAbstract::ParseImageAnalyzerTextOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig)
-{
-    ImageAnalyzerTextOptions textOptions;
-    auto obj = JSRef<JSObject>::Cast(optionVal);
-    JSRef<JSVal> onAnalyzedVal = obj->GetProperty("onAnalyzed");
-    if (onAnalyzedVal->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAnalyzedVal));
-        onTextAnalyzedFunc onAnalyzedCallback = [func = std::move(jsFunc)] (
-            std::string tag, std::string data) {
-            JSRef<JSVal> params[2];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
-            params[1] = JSRef<JSVal>::Make(ToJSValue(data));
-            func->ExecuteJS(2, params);
-        };
-        textOptions.onAnalyzedCallback = std::move(onAnalyzedCallback);
-    }
-
-    JSRef<JSVal> onTextSelected = obj->GetProperty("onTextSelected");
-    if (onTextSelected->IsFunction()) {
-        RefPtr<JsFunction> jsOnTextSelectedFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
-        JSRef<JSFunc>::Cast(onTextSelected));
-        onTextSelectedFunc onTextSelectedCallback =
-            [func = std::move(jsOnTextSelectedFunc)] (std::string tag, std::string data) {
-            JSRef<JSVal> params[2];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
-            params[1] = JSRef<JSVal>::Make(ToJSValue(data));
-            func->ExecuteJS(2, params);
-        };
-        textOptions.onTextSelected = std::move(onTextSelectedCallback);
-    }
-
-    JSRef<JSVal> dataVal = obj->GetProperty("analyzedData");
-    if (dataVal->IsArray()) {
-        std::string analyzedData = dataVal->ToString();
-        textOptions.analyzedData = std::move(analyzedData);
-    }
-    analyzerConfig.textOptions = std::move(textOptions);
 }
 } // namespace OHOS::Ace::Framework

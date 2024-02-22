@@ -251,8 +251,6 @@ public:
     std::vector<RectF> GetTextBoxes() override;
     OffsetF GetParentGlobalOffset() const override;
 
-    OffsetF GetTextPaintOffset() const;
-
     const RefPtr<FrameNode>& MoveDragNode() override
     {
         return dragNode_;
@@ -506,8 +504,7 @@ protected:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     void HandleClickAISpanEvent(const PointF& info);
-    void HandleSpanSingleClickEvent(
-        GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan);
+    void HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan);
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
     bool ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
@@ -603,6 +600,8 @@ private:
     void RedisplaySelectOverlay();
     void ProcessBoundRectByTextMarquee(RectF& rect);
     ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
+
+    bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     // to check if drag is in progress
 

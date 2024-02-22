@@ -847,6 +847,8 @@ void TextFieldPattern::HandleSelect(CaretMoveIntent direction)
             LOGW("Unsupported select operation for text field");
         }
     }
+    UpdateRecordCaretIndex(
+        std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
 }
 
 void TextFieldPattern::InitDisableColor()
@@ -1046,10 +1048,10 @@ void TextFieldPattern::HandleOnRedoAction()
         return;
     }
     auto textEditingValue = redoOperationRecords_.back();
-    contentController_->SetTextValue(textEditingValue.text);
-    selectController_->UpdateCaretIndex(textEditingValue.caretPosition);
     redoOperationRecords_.pop_back();
     operationRecords_.push_back(textEditingValue);
+    contentController_->SetTextValue(textEditingValue.text);
+    selectController_->UpdateCaretIndex(textEditingValue.caretPosition);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -1563,8 +1565,6 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
                 pattern->contentController_->erase(dragTextStart, dragTextEnd - dragTextStart);
                 pattern->selectController_->UpdateCaretIndex(current - (dragTextEnd - dragTextStart));
                 pattern->InsertValue(str);
-            } else {
-                pattern->ShowSelectAfterDragEvent();
             }
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
@@ -2397,7 +2397,7 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
         selectController_->UpdateCaretOffset();
     } else if (!isSingleHandle_) {
         auto rects = GetTextBoxes();
-        if (!rects.empty() && NearZero(rects[0].Width())) {
+        if (!rects.empty() && NearEqual(rects.size(), 1) && NearZero(rects[0].Width())) {
             isSingleHandle_ = true;
             selectController_->UpdateCaretIndex(selectController_->GetFirstHandleIndex());
             selectController_->UpdateCaretOffset();
@@ -2639,6 +2639,7 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
         }
         proxy->SetHandleReverse(selectController_->HasReverse());
     }
+    UpdateRecordCaretIndex(selectController_->GetCaretIndex());
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -2988,6 +2989,8 @@ void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)
     }
     mouseStatus_ = MouseStatus::MOVE;
     selectController_->UpdateSecondHandleInfoByMouseOffset(info.GetLocalLocation()); // 更新时上报事件
+    UpdateRecordCaretIndex(
+        std::max(selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex()));
     showSelect_ = true;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -4284,7 +4287,9 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     CHECK_NULL_VOID(layoutProperty);
     ResetObscureTickCountDown();
     if (IsSelected()) {
+        lockRecord_ = true;
         Delete(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+        lockRecord_ = false;
         return;
     }
     if (selectController_->GetCaretIndex() <= 0) {
@@ -4310,7 +4315,9 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 {
     auto start = std::max(selectController_->GetCaretIndex() - length, 0);
     contentController_->erase(start, length);
+    lockRecord_ = true;
     selectController_->UpdateCaretIndex(start);
+    lockRecord_ = false;
     StartTwinkling();
     UpdateEditingValueToRecord();
     auto tmpHost = GetHost();
@@ -5758,6 +5765,8 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
     PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
     visibleContentRect.SetLeft(visibleContentRect.GetX() - BOX_EPSILON);
     visibleContentRect.SetWidth(visibleContentRect.Width() + 2 * BOX_EPSILON);
+    visibleContentRect.SetTop(visibleContentRect.GetY() - BOX_EPSILON);
+    visibleContentRect.SetHeight(visibleContentRect.Height() + 2 * BOX_EPSILON);
     return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
 }
 
@@ -6063,7 +6072,7 @@ RefPtr<FocusHub> TextFieldPattern::GetFocusHub() const
 
 void TextFieldPattern::UpdateRecordCaretIndex(int32_t index)
 {
-    if (operationRecords_.empty()) {
+    if (lockRecord_ || operationRecords_.empty()) {
         return;
     }
     operationRecords_.back().caretPosition = index;

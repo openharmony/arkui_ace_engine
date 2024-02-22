@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,7 @@
 #include "nweb_handler.h"
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
+#include "third_party/icu/icu4c/source/common/unicode/ucnv.h"
 #include "transaction/rs_interfaces.h"
 #include "web_configuration_observer.h"
 #include "web_javascript_execute_callback.h"
@@ -95,8 +96,19 @@ const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
-
+const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
+
+const std::vector<std::string> CANONICALENCODINGNAMES = {
+    "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
+    "GBK",          "IBM866",       "ISO-2022-JP",  "ISO-8859-10",
+    "ISO-8859-13",  "ISO-8859-14",  "ISO-8859-15",  "ISO-8859-16",
+    "ISO-8859-1",   "ISO-8859-2",   "ISO-8859-3",   "ISO-8859-4",
+    "ISO-8859-5",   "ISO-8859-6",   "ISO-8859-7",   "ISO-8859-8",
+    "ISO-8859-8-I", "KOI8-R",       "KOI8-U",       "macintosh",
+    "Shift_JIS",    "UTF-8",        "windows-1250", "windows-1251",
+    "windows-1252", "windows-1253", "windows-1254", "windows-1255",
+    "windows-1256", "windows-1257", "windows-1258", "windows-874" };
 
 #define VISIBLERATIO_LENGTH 4
 #define VISIBLERATIO_FLOAT_TO_INT 100
@@ -5819,5 +5831,43 @@ OHOS::NWeb::NWebPreference::CopyOptionMode WebDelegate::GetCopyOptionMode() cons
     CHECK_NULL_RETURN(setting, OHOS::NWeb::NWebPreference::CopyOptionMode::CROSS_DEVICE);
     auto copyOption = setting->GetCopyOptionMode();
     return copyOption;
+}
+
+std::string WebDelegate::GetCanonicalEncodingName(const std::string& alias_name) const
+{
+    const char* standards[3] = { "HTML", "MIME", "IANA" };
+    for (auto* standard : standards) {
+        UErrorCode errorCode = U_ZERO_ERROR;
+        const char* result =
+            ucnv_getStandardName(alias_name.c_str(), standard, &errorCode);
+        if (!U_SUCCESS(errorCode) || !result)
+            continue;
+        std::string canonicalName(result);
+        for (const auto& encodingName : CANONICALENCODINGNAMES) {
+            if (encodingName == canonicalName)
+                return canonicalName;
+        }
+    }
+    return DEFAULT_CANONICAL_ENCODING_NAME;
+}
+
+void WebDelegate::UpdateDefaultTextEncodingFormat(const std::string& textEncodingFormat)
+{
+    auto context = context_.Upgrade();
+    if (!context || textEncodingFormat.empty()) {
+        return;
+    }
+    auto canonicalEncodingName = GetCanonicalEncodingName(textEncodingFormat);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), canonicalEncodingName]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutDefaultTextEncodingFormat(canonicalEncodingName);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 } // namespace OHOS::Ace

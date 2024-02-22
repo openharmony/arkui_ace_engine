@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,6 +49,18 @@ namespace {
 const std::string RAWFILE_PREFIX = "resource://RAWFILE/";
 const std::string BUNDLE_NAME_PREFIX = "bundleName:";
 const std::string MODULE_NAME_PREFIX = "moduleName:";
+
+void EraseSpace(std::string& data)
+{
+    auto iter = data.begin();
+    while (iter != data.end()) {
+        if (isspace(*iter)) {
+            iter = data.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
 }
 
 std::unique_ptr<WebModel> WebModel::instance_ = nullptr;
@@ -1639,6 +1651,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("webStandardFont", &JSWeb::WebStandardFont);
     JSClass<JSWeb>::StaticMethod("defaultFixedFontSize", &JSWeb::DefaultFixedFontSize);
     JSClass<JSWeb>::StaticMethod("defaultFontSize", &JSWeb::DefaultFontSize);
+    JSClass<JSWeb>::StaticMethod("defaultTextEncodingFormat", &JSWeb::DefaultTextEncodingFormat);
     JSClass<JSWeb>::StaticMethod("minFontSize", &JSWeb::MinFontSize);
     JSClass<JSWeb>::StaticMethod("minLogicalFontSize", &JSWeb::MinLogicalFontSize);
     JSClass<JSWeb>::StaticMethod("blockNetwork", &JSWeb::BlockNetwork);
@@ -3431,6 +3444,20 @@ void JSWeb::DefaultFontSize(int32_t defaultFontSize)
     WebModel::GetInstance()->SetDefaultFontSize(defaultFontSize);
 }
 
+void JSWeb::DefaultTextEncodingFormat(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsString()) {
+        return;
+    }
+    std::string textEncodingFormat = args[0]->ToString();
+    EraseSpace(textEncodingFormat);
+    if (textEncodingFormat.empty()) {
+        WebModel::GetInstance()->SetDefaultTextEncodingFormat("UTF-8");
+        return;
+    }
+    WebModel::GetInstance()->SetDefaultTextEncodingFormat(textEncodingFormat);
+}
+
 void JSWeb::MinFontSize(int32_t minFontSize)
 {
     WebModel::GetInstance()->SetMinFontSize(minFontSize);
@@ -3962,6 +3989,9 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     eventObj->SetProperty("targetDisplayId", static_cast<int32_t>(info.GetTargetDisplayId()));
     eventObj->SetProperty("deviceId", static_cast<int64_t>(info.GetDeviceId()));
 
+    if (info.GetChangedTouches().empty()) {
+        return JSRef<JSVal>::Cast(obj);
+    }
     uint32_t index = 0;
     TouchLocationInfo changeTouch = info.GetChangedTouches().back();
     JSRef<JSObject> changeTouchElement = CreateTouchInfo(changeTouch, info);

@@ -290,7 +290,13 @@ std::string ImageSourceInfo::ToString() const
         return std::string("internal resource id: ") + std::to_string(static_cast<int32_t>(resourceId_));
     }
     if (pixmap_) {
-        return std::string("pixmapID: ") + pixmap_->GetId() + std::string(" -> modifyID: ") + pixmap_->GetModifyId();
+        int32_t w = pixmap_->GetWidth();
+        int32_t h = pixmap_->GetHeight();
+        int32_t totalSize = pixmap_->GetByteCount();
+        auto rowStride = pixmap_->GetRowStride();
+        return std::string("pixmapID: ") + pixmap_->GetId() + std::string(" -> modifyID: ") + pixmap_->GetModifyId() +
+               "details: _w" + std::to_string(w) + "_h" + std::to_string(h) + "_rowStride" + std::to_string(rowStride) +
+               "_byteCount" + std::to_string(totalSize);
     }
     return std::string("empty source");
 }

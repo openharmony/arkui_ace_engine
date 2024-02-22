@@ -69,7 +69,6 @@ public:
     void Create(const std::function<void(IndexerModelNG)>& callback = nullptr,
         std::vector<std::string> arrayValue = CREATE_ARRAY, int32_t selected = 0);
     float GetFirstChildOffsetY();
-    TouchEventInfo CreateTouchEventInfo(TouchType touchType, float locationY);
     AssertionResult Selected(int32_t expectSelected);
     void MoveIndex(GestureEvent gestureEvent);
     AssertionResult Touch(TouchType touchType, float locationY, int32_t expectSelected);
@@ -154,20 +153,10 @@ void IndexerTestNg::MoveIndex(GestureEvent gestureEvent)
 AssertionResult IndexerTestNg::Touch(TouchType touchType, float locationY, int32_t expectSelected)
 {
     float firstOffsetY = GetFirstChildOffsetY();
-    TouchEventInfo touchEventInfo = CreateTouchEventInfo(touchType, locationY + firstOffsetY);
+    TouchEventInfo touchEventInfo = CreateTouchEventInfo(touchType, Offset(0.f, locationY + firstOffsetY));
     auto touchFuc = pattern_->touchListener_->GetTouchEventCallback();
     touchFuc(touchEventInfo);
     return Selected(expectSelected);
-}
-
-TouchEventInfo IndexerTestNg::CreateTouchEventInfo(TouchType touchType, float locationY)
-{
-    TouchLocationInfo touchLocationInfo(1);
-    touchLocationInfo.SetTouchType(touchType);
-    touchLocationInfo.SetLocalLocation(Offset(0.f, locationY));
-    TouchEventInfo touchEventInfo("touch");
-    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-    return touchEventInfo;
 }
 
 /**
@@ -592,7 +581,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
     auto listItemNode = AceType::DynamicCast<FrameNode>(listNode->GetFirstChild());
     auto gesture = listItemNode->GetOrCreateGestureEventHub();
     auto touchCallback = gesture->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
-    TouchEventInfo touchEventInfo = CreateTouchEventInfo(TouchType::DOWN, 0.f);
+    TouchEventInfo touchEventInfo = CreateTouchEventInfo(TouchType::DOWN, Offset());
     touchCallback(touchEventInfo);
     auto textNode = AceType::DynamicCast<FrameNode>(listItemNode->GetFirstChild());
     ASSERT_NE(textNode, nullptr);
@@ -604,7 +593,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
      * @tc.steps: step1. TouchType::UP
      * @tc.expected: trigger ClearClickStatus.
      */
-    touchEventInfo = CreateTouchEventInfo(TouchType::UP, 0.f);
+    touchEventInfo = CreateTouchEventInfo(TouchType::UP, Offset());
     touchCallback(touchEventInfo);
     EXPECT_EQ(textLayoutProperty->GetTextColor().value(), Color(0x00000000));
 }
@@ -710,7 +699,7 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
      * @tc.steps: step2. Create touchEventInfo, set TouchType::DOWN.
      * @tc.expected: isTouch_ is true.
      */
-    TouchEventInfo touchEventInfo = CreateTouchEventInfo(TouchType::DOWN, 0.f);
+    TouchEventInfo touchEventInfo = CreateTouchEventInfo(TouchType::DOWN, Offset());
     onPopupTouchDown(touchEventInfo); // trigger OnPopupTouchDown
     EXPECT_EQ(pattern_->isTouch_, true);
 
@@ -718,7 +707,7 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
      * @tc.steps: step3. Create touchEventInfo, set TouchType::UP
      * @tc.expected: isTouch_ is false.
      */
-    touchEventInfo = CreateTouchEventInfo(TouchType::UP, 0.f);
+    touchEventInfo = CreateTouchEventInfo(TouchType::UP, Offset());
     onPopupTouchDown(touchEventInfo);
     EXPECT_EQ(pattern_->isTouch_, false);
 }

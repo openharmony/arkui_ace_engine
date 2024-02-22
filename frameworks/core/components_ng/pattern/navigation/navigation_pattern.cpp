@@ -1130,7 +1130,6 @@ void NavigationPattern::AddDividerHotZoneRect()
     DimensionRect responseRect(Dimension(dragRect_.Width(), DimensionUnit::PX),
         Dimension(dragRect_.Height(), DimensionUnit::PX), responseOffset);
     responseRegion.emplace_back(responseRect);
-    dividerGestureHub->MarkResponseRegion(true);
     dividerGestureHub->SetResponseRegion(responseRegion);
 }
 
@@ -1558,4 +1557,44 @@ void NavigationPattern::DealTransitionVisibility(const RefPtr<FrameNode>& node, 
     });
 }
 
+void NavigationPattern::AddToDumpManager()
+{
+    auto node = GetHost();
+    auto context = PipelineContext::GetCurrentContext();
+    if (!node || !context) {
+        return;
+    }
+    auto mgr = context->GetNavigationDumpManager();
+    if (!mgr) {
+        return;
+    }
+    auto callback = [weakPattern = WeakClaim(this)](int depth) {
+        auto pattern = weakPattern.Upgrade();
+        if (!pattern) {
+            return;
+        }
+        const auto& stack = pattern->GetNavigationStack();
+        if (!stack) {
+            return;
+        }
+        auto infos = stack->DumpStackInfo();
+        for (const auto& info : infos) {
+            DumpLog::GetInstance().Print(depth, info);
+        }
+    };
+    mgr->AddNavigationDumpCallback(node->GetId(), node->GetDepth(), callback);
+}
+
+void NavigationPattern::RemoveFromDumpManager()
+{
+    auto node = GetHost();
+    auto context = PipelineContext::GetCurrentContext();
+    if (!node || !context) {
+        return;
+    }
+    auto mgr = context->GetNavigationDumpManager();
+    if (mgr) {
+        mgr->RemoveNavigationDumpCallback(node->GetId(), node->GetDepth());
+    }
+}
 } // namespace OHOS::Ace::NG

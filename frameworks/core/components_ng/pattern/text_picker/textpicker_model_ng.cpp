@@ -218,6 +218,33 @@ RefPtr<FrameNode> TextPickerModelNG::CreateButtonNode()
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
 }
 
+RefPtr<FrameNode> TextPickerModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto textPickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    uint32_t TEXT = 0x02;
+    textPickerPattern->SetColumnsKind(TEXT);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    textPickerPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
+    uint32_t showCount = BUFFER_NODE_NUMBER + 1;
+
+    if (textPickerNode->GetChildren().empty()) {
+        auto columnNode = CreateColumnNode(TEXT, showCount);
+        auto stackNode = CreateStackNode();
+        auto buttonNode = CreateButtonNode();
+        buttonNode->MountToParent(stackNode);
+        columnNode->MountToParent(stackNode);
+        columnNode->MarkModifyDone();
+        columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        stackNode->MountToParent(textPickerNode);
+    }
+    return textPickerNode;
+}
+
 void TextPickerModelNG::SetSelected(uint32_t value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

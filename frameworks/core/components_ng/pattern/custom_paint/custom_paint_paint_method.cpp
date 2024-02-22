@@ -115,6 +115,40 @@ inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t l
 }
 } // namespace
 
+const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
+    CustomPaintPaintMethod::staticPattern[] = {
+        { "clamp",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::CLAMP, RSTileMode::CLAMP, RSSamplingOptions(), matrix);
+            } },
+        { "mirror",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::MIRROR, RSTileMode::MIRROR, RSSamplingOptions(), matrix);
+            } },
+        { "no-repeat",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::DECAL, RSTileMode::DECAL, RSSamplingOptions(), matrix);
+            } },
+        { "repeat",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::REPEAT, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
+            } },
+        { "repeat-x",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::REPEAT, RSTileMode::DECAL, RSSamplingOptions(), matrix);
+            } },
+        { "repeat-y",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::DECAL, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
+            } },
+    };
+
 void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
 {
 #ifndef USE_ROSEN_DRAWING
@@ -385,60 +419,9 @@ std::shared_ptr<RSImage> CustomPaintPaintMethod::GetImage(const std::string& src
 }
 #endif
 
-#ifndef USE_ROSEN_DRAWING
-void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint)
-{
-    auto pixelMap = pattern.GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
-    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
-    sk_sp<SkImage> image;
-    image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-    CHECK_NULL_VOID(image);
-    SkMatrix* matrix = nullptr;
-    SkMatrix tempMatrix;
-    if (pattern.IsTransformable()) {
-        tempMatrix = GetMatrixFromPattern(pattern);
-        matrix = &tempMatrix;
-    }
-    static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&, SkMatrix*)> staticPattern[] = {
-        { "clamp",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions(), matrix));
-            } },
-        { "mirror",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(
-                    image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, SkSamplingOptions(), matrix));
-            } },
-        { "no-repeat",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, SkSamplingOptions(), matrix));
-            } },
-        { "repeat",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(
-                    image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, SkSamplingOptions(), matrix));
-            } },
-        { "repeat-x",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(
-                    image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, SkSamplingOptions(), matrix));
-            } },
-        { "repeat-y",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(
-                    image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, SkSamplingOptions(), matrix));
-            } },
-    };
-    auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
-    if (operatorIter != -1) {
-        staticPattern[operatorIter].value(image, paint, matrix);
-    }
-}
-#else
 void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush)
 {
+#if !defined(PREVIEW)
     auto pixelMap = pattern.GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     auto rsBitmapFormat = Ace::ImageProvider::MakeRSBitmapFormatFromPixelMap(pixelMap);
@@ -447,43 +430,14 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, RSPe
     rsBitmap->SetPixels(const_cast<void*>(reinterpret_cast<const void*>(pixelMap->GetPixels())));
     auto image = std::make_shared<RSImage>();
     CHECK_NULL_VOID(image->BuildFromBitmap(*rsBitmap));
+#else
+    auto image = GetImage(pattern.GetImgSrc());
+    CHECK_NULL_VOID(image);
+#endif
     RSMatrix matrix;
     if (pattern.IsTransformable()) {
         matrix = GetMatrixFromPattern(pattern);
     }
-    static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
-        staticPattern[] = {
-            { "clamp",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::CLAMP, RSTileMode::CLAMP, RSSamplingOptions(), matrix);
-                } },
-            { "mirror",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::MIRROR, RSTileMode::MIRROR, RSSamplingOptions(), matrix);
-                } },
-            { "no-repeat",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::DECAL, RSTileMode::DECAL, RSSamplingOptions(), matrix);
-                } },
-            { "repeat",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::REPEAT, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
-                } },
-            { "repeat-x",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::REPEAT, RSTileMode::DECAL, RSSamplingOptions(), matrix);
-                } },
-            { "repeat-y",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::DECAL, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
-                } },
-        };
     auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
     if (operatorIter != -1) {
         std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
@@ -496,7 +450,6 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, RSPe
         }
     }
 }
-#endif
 
 #ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::InitPaintBlend(SkPaint& paint)

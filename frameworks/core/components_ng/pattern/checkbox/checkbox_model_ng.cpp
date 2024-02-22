@@ -23,6 +23,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
+
 void CheckBoxModelNG::Create(
     const std::optional<std::string>& name, const std::optional<std::string>& groupName, const std::string& tagName)
 {
@@ -195,50 +197,76 @@ void CheckBoxModelNG::SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle check
 bool CheckBoxModelNG::GetSelect(FrameNode* frameNode)
 {
     bool value = false;
-    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, value, frameNode);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(CheckBoxPaintProperty, CheckBoxSelect, value, frameNode, value);
     return value;
 }
 
 Color CheckBoxModelNG::GetSelectedColor(FrameNode* frameNode)
 {
     Color value;
-    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, value, frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    value = theme->GetActiveColor();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxPaintProperty, CheckBoxSelectedColor, value, frameNode, value);
     return value;
 }
 
 Color CheckBoxModelNG::GetUnSelectedColor(FrameNode* frameNode)
 {
     Color value;
-    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, value, frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    value = theme->GetInactiveColor();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxPaintProperty, CheckBoxUnSelectedColor, value, frameNode, value);
     return value;
 }
 
 Color CheckBoxModelNG::GetCheckMarkColor(FrameNode* frameNode)
 {
     Color value;
-    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkColor, value, frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    value = theme->GetPointColor();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxPaintProperty, CheckBoxCheckMarkColor, value, frameNode, value);
     return value;
 }
 
 Dimension CheckBoxModelNG::GetCheckMarkSize(FrameNode* frameNode)
 {
-    Dimension value;
-    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkSize, value, frameNode);
+    Dimension value = Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxPaintProperty, CheckBoxCheckMarkSize, value, frameNode, value);
     return value;
 }
 
 Dimension CheckBoxModelNG::GetCheckMarkWidth(FrameNode* frameNode)
 {
     Dimension value;
-    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkWidth, value, frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    value = theme->GetCheckStroke();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxPaintProperty, CheckBoxCheckMarkWidth, value, frameNode, value);
     return value;
 }
 
 CheckBoxStyle CheckBoxModelNG::GetCheckboxStyle(FrameNode* frameNode)
 {
-    CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
-    ACE_GET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, checkboxStyle, frameNode);
-    return checkboxStyle;
+    CheckBoxStyle value = CheckBoxStyle::CIRCULAR_STYLE;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxPaintProperty, CheckBoxSelectedStyle, value, frameNode, value);
+    return value;
 }
 
 void CheckBoxModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)

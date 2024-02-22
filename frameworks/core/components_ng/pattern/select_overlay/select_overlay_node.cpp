@@ -928,14 +928,12 @@ void SelectOverlayNode::CreateToolBar()
     }
 
     selectMenuInner_->MountToParent(selectMenu_);
-    selectMenuInner_->GetOrCreateGestureEventHub()->MarkResponseRegion(true);
 
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
     CHECK_NULL_VOID(shadowTheme);
     auto colorMode = SystemProperties::GetColorMode();
     selectMenu_->GetRenderContext()->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
     selectMenu_->MountToParent(Claim(this));
-    selectMenu_->GetOrCreateGestureEventHub()->MarkResponseRegion(true);
     selectMenu_->MarkModifyDone();
 }
 

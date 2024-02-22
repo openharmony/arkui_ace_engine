@@ -33,7 +33,7 @@ public:
     static bool IsBackGroundColorAvailable(const XComponentType& type)
     {
         return type == XComponentType::TEXTURE || type == XComponentType::NODE ||
-               (type == XComponentType::SURFACE && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
+               (type == XComponentType::SURFACE && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
     }
     virtual ~XComponentModel() = default;
 

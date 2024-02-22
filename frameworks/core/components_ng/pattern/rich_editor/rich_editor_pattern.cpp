@@ -1081,8 +1081,12 @@ void RichEditorPattern::FireOnSelectionChange(int32_t start, int32_t end)
     if (start > end) {
         std::swap(start, end);
     }
-    auto rangeInfo = SelectionRangeInfo(start, end);
-    eventHub->FireOnSelectionChange(&rangeInfo);
+    auto range = SelectionRangeInfo(start, end);
+    if (range == lastSelectionRange_) {
+        return;
+    }
+    eventHub->FireOnSelectionChange(&range);
+    lastSelectionRange_ = std::move(range);
 }
 
 bool RichEditorPattern::GetCaretVisible() const
@@ -1720,6 +1724,7 @@ void RichEditorPattern::HandleBlurEvent()
         CloseSelectOverlay();
         ResetSelection();
     }
+    lastSelectionRange_.reset();
 }
 
 void RichEditorPattern::HandleFocusEvent()
@@ -1922,10 +1927,10 @@ void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
     auto onTextSelectorChange = [weak = WeakClaim(this), &selector = textSelector_]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->FireOnSelectionChange(selector);
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
-        pattern->FireOnSelectionChange(selector);
     };
     textSelector_.SetOnAccessibility(std::move(onTextSelectorChange));
 }
@@ -4341,6 +4346,10 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
 
 void RichEditorPattern::CreateHandles()
 {
+    if (IsDragging()) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "do not show handles when dragging");
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     float startSelectHeight = 0.0f;

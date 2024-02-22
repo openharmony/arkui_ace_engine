@@ -839,6 +839,10 @@ void PipelineContext::FlushFrameRate()
 
 void PipelineContext::FlushBuild()
 {
+    if (vsyncListener_ != nullptr) {
+        ACE_SCOPED_TRACE("arkoala build");
+        vsyncListener_();
+    }
     isRebuildFinished_ = false;
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
@@ -1755,6 +1759,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
                 exclusiveRecognizer->BeginReferee(scalePoint.id);
                 touchTestResults_[point.id].emplace_back(exclusiveRecognizer);
                 eventManager_->touchTestResults_ = touchTestResults_;
+                eventManager_->SetInnerFlag(true);
             }
         }
         if (IsFormRender() && touchTestResults_.find(point.id) != touchTestResults_.end()) {
@@ -1793,6 +1798,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 
     if (scalePoint.type == TouchType::MOVE) {
+        if (!eventManager_->GetInnerFlag()) {
+            auto mockPoint = point;
+            mockPoint.type = TouchType::CANCEL;
+            HandleEtsCardTouchEvent(mockPoint, etsSerializedGesture);
+            RemoveEtsCardTouchEventCallback(mockPoint.id);
+        }
         touchEvents_.emplace_back(point);
         hasIdleTasks_ = true;
         RequestFrame();
@@ -1940,6 +1951,11 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         } else {
             rootNode_->DumpTree(0);
             DumpLog::GetInstance().OutPutBySize();
+        }
+    } else if (params[0] == "-navigation") {
+        auto navigationDumpMgr = GetNavigationDumpManager();
+        if (navigationDumpMgr) {
+            navigationDumpMgr->OnDumpInfo();
         }
     } else if (params[0] == "-focus") {
         if (rootNode_->GetFocusHub()) {

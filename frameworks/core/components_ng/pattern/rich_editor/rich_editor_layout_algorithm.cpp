@@ -94,9 +94,14 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         res.AddHeight(shadowOffset);
         textHeight += paragraph->GetHeight();
         auto firstSpan = *group.begin();
+        auto lastSpan = *group.rbegin();
+        if (!firstSpan || !lastSpan) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "MeasureContent failed. firstSpan or lastSpan is null.");
+            continue;
+        }
         pManager_->AddParagraph({ .paragraph = paragraph,
             .start = firstSpan->position - StringUtils::ToWstring(firstSpan->content).length(),
-            .end = (*group.rbegin())->position });
+            .end = lastSpan->position });
         std::for_each(group.begin(), group.end(), [&](RefPtr<SpanItem>& item) {
             auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(item);
             if (imageSpanItem && imageSpanItem->placeholderIndex >= 0) {

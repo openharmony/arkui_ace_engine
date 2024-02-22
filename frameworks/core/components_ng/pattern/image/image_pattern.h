@@ -32,17 +32,18 @@
 #include "core/image/image_source_info.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
+namespace OHOS::Ace {
+class ImageAnalyzerAdapter;
+}
+
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ImagePattern : public Pattern, public SelectionHost {
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
-    ImagePattern()
-    {
-        InitDefaultValue();
-    }
-    ~ImagePattern() override = default;
+    ImagePattern();
+    ~ImagePattern() override;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
@@ -136,7 +137,7 @@ public:
     }
 
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
-
+    void SetImageAnalyzerConfig(void* config);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
@@ -250,10 +251,9 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<Clipboard> clipboard_;
     RefPtr<SelectOverlayProxy> selectOverlay_;
-    ImageAnalyzerConfig analyzerConfig_;
+    std::shared_ptr<ImageAnalyzerAdapter> imageAnalyzerAdapter_;
     ImageAnalyzerInnerConfig analyzerUIConfig_;
 
-    void* aiNapiValue_ = nullptr;
     void* overlayData_ = nullptr;
 
     bool syncLoad_ = false;
