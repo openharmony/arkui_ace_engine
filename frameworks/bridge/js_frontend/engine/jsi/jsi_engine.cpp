@@ -73,9 +73,9 @@ const int SYSTEM_BASE = 10;
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_debugger.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_debugger.z.so";
 #endif
 const int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PATTERN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
