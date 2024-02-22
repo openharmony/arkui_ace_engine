@@ -1674,14 +1674,14 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
     CHECK_NULL_VOID(!focusEventInitialized_);
     auto focusTask = [weak = WeakClaim(this)]() {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "rich editor in focus");
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "rich editor in focus");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
     auto blurTask = [weak = WeakClaim(this)]() {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "rich editor in blur");
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "rich editor in blur");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleBlurEvent();
@@ -1741,6 +1741,7 @@ void RichEditorPattern::HandleFocusEvent()
     UseHostToUpdateTextFieldManager();
     StartTwinkling();
     if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Handle Focus Event, Request keyboard.");
         RequestKeyboard(false, true, true);
     }
 }
