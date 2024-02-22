@@ -808,6 +808,10 @@ private:
 
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
 
+    void PreloadItems(const std::set<int32_t>& indexSet);
+    void DoPreloadItems(const std::set<int32_t>& indexSet, int32_t errorCode);
+    void FirePreloadFinishEvent(int32_t errorCode);
+
     WeakPtr<NestableScrollContainer> parent_;
     /**
      *  ============================================================
