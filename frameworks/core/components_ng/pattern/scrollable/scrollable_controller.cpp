@@ -29,7 +29,8 @@ void ScrollableController::JumpTo(int32_t index, bool smooth, ScrollAlign align,
     pattern->ScrollToIndex(index, smooth, align);
 }
 
-bool ScrollableController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
+bool ScrollableController::AnimateTo(
+    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
@@ -38,7 +39,7 @@ bool ScrollableController::AnimateTo(const Dimension& position, float duration, 
             return false;
         }
         if (Positive(duration) || smooth) {
-            pattern->AnimateTo(position.ConvertToPx(), duration, curve, smooth);
+            pattern->AnimateTo(position.ConvertToPx(), duration, curve, smooth, canOverScroll);
         } else {
             pattern->ScrollTo(position.ConvertToPx());
         }
