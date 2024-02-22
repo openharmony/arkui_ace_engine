@@ -116,6 +116,8 @@ void ComponentSnapshot::Create(
     CHECK_NULL_VOID(pipeline);
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
+    pipeline->FlushUITasks();
+    pipeline->FlushMessages();
 
     executor->PostDelayedTask(
         [callback, node, enableInspector]() mutable {
