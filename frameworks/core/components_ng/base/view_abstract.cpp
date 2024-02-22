@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "base/log/log_wrapper.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -38,11 +39,13 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2915,4 +2918,134 @@ bool ViewAbstract::GetNeedFocus(FrameNode* frameNode)
     return focusHub->IsCurrentFocus();
 }
 
+double ViewAbstract::GetOpacity(FrameNode* frameNode)
+{
+    double opacity = 1.0f;
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetOpacityValue(opacity);
+}
+
+BorderWidthProperty ViewAbstract::GetBorderWidth(FrameNode* frameNode)
+{
+    Dimension defaultDimension(0);
+    BorderWidthProperty borderWidths = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBorderWidthValue(borderWidths);
+}
+
+BorderRadiusProperty ViewAbstract::GetBorderRadius(FrameNode* frameNode)
+{
+    Dimension defaultDimension(0);
+    BorderRadiusProperty borderRadius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBorderRadiusValue(borderRadius);
+}
+
+BorderColorProperty ViewAbstract::GetBorderColor(FrameNode* frameNode)
+{
+    Color defaultColor(0xff000000);
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBorderColorValue(borderColors);
+}
+
+BorderStyleProperty ViewAbstract::GetBorderStyle(FrameNode* frameNode)
+{
+    BorderStyle defaultStyle = BorderStyle::SOLID;
+    BorderStyleProperty borderStyles = { defaultStyle, defaultStyle, defaultStyle, defaultStyle };
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBorderStyleValue(borderStyles);
+}
+
+int ViewAbstract::GetZIndex(FrameNode* frameNode)
+{
+    int zindex = 0;
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetZIndexValue(zindex);
+}
+
+VisibleType ViewAbstract::GetVisibility(FrameNode* frameNode)
+{
+    VisibleType visibility = VisibleType::VISIBLE;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(LayoutProperty, Visibility, visibility, frameNode, visibility);
+    return visibility;
+}
+
+bool ViewAbstract::GetClip(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetClipEdge().has_value();
+}
+
+std::optional<RefPtr<BasicShape>> ViewAbstract::GetClipShape(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetClipShape();
+}
+
+Matrix4 ViewAbstract::GetTransform(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetLocalTransformMatrix();
+}
+
+HitTestMode ViewAbstract::GetHitTestBehavior(FrameNode* frameNode)
+{
+    auto gestureHub = frameNode->GetHitTestMode();
+    return gestureHub;
+}
+
+OffsetT<Dimension> ViewAbstract::GetPosition(FrameNode* frameNode)
+{
+    Dimension PositionX(0, DimensionUnit::VP);
+    Dimension PositionY(0, DimensionUnit::VP);
+    OffsetT<Dimension> position(PositionX, PositionY);
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetPositionValue(position);
+}
+
+std::optional<Shadow> ViewAbstract::GetShadow(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBackShadow();
+}
+
+NG::Gradient ViewAbstract::GetGradient(FrameNode* frameNode)
+{
+    Gradient gradient;
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetSweepGradientValue(gradient);
+}
+
+std::optional<RefPtr<BasicShape>> ViewAbstract::GetMask(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetClipMask();
+}
+
+const std::optional<RefPtr<ProgressMaskProperty>> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetProgressMask();
+}
+
+BlendMode ViewAbstract::GetBlendMode(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBackBlendMode().value();
+}
+
+TextDirection ViewAbstract::GetDirection(FrameNode* frameNode)
+{
+    TextDirection direction = TextDirection::AUTO;
+    auto target = frameNode->GetLayoutProperty<LayoutProperty>();
+    direction = target->GetLayoutDirection();
+    return direction;
+}
+
+FlexAlign ViewAbstract::GetAlignSelf(FrameNode* frameNode)
+{
+    const auto& flexItemProperty = frameNode->GetLayoutProperty()->GetFlexItemProperty();
+    return flexItemProperty->GetAlignSelf().value_or(FlexAlign::AUTO);
+}
 } // namespace OHOS::Ace::NG

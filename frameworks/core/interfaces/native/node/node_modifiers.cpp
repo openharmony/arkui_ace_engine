@@ -86,6 +86,7 @@
 #include "core/interfaces/native/node/rect_modifier.h"
 #include "core/interfaces/native/node/side_bar_container_modifier.h"
 #include "core/interfaces/native/node/stepper_item_modifier.h"
+#include "core/interfaces/native/node/flex_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -196,12 +197,12 @@ const ArkUINodeModifiers impl = {
 #else
     nullptr,
 #endif
-    nullptr,
-    nullptr, // FlexModifier
+    NodeModifier::GetFlexModifier, // FlexModifier
     nullptr, // ScrollBarModifier
     nullptr, // ScrollerModifier
     nullptr, // TabContentModifier
     nullptr, // TabsControllerModifier
+    nullptr, // SwiperControllerModifier
     nullptr, // GestureModifier
     nullptr, // BadgeModifier
     nullptr, // WebModifier

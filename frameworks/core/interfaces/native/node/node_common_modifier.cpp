@@ -23,12 +23,14 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -36,6 +38,7 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -82,6 +85,7 @@ constexpr int32_t ORIGINAL_IMAGE_SIZE_AUTO = 0;
 constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
 
 const int32_t ERROR_INT_CODE = -1;
+const float ERROR_FLOAT_CODE = -1.0f;
 
 constexpr int32_t BLUR_STYLE_NONE_INDEX = 7;
 constexpr int32_t PLAY_MODE_REVERSE_VALUE = 1;
@@ -3344,58 +3348,6 @@ void SetTranslateTransition(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_In
     ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
 }
 
-void SetBlendMode(ArkUINodeHandle node, ArkUI_Int32 blendModeValue, ArkUI_Int32 blendApplyTypeValue)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    OHOS::Ace::BlendMode blendMode = static_cast<OHOS::Ace::BlendMode>(blendModeValue);
-    OHOS::Ace::BlendApplyType blendApplyType = static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue);
-    ViewAbstractModelNG::SetBlendMode(frameNode, blendMode);
-    ViewAbstractModelNG::SetBlendApplyType(frameNode, blendApplyType);
-}
-
-void ResetBlendMode(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelNG::SetBlendMode(frameNode, OHOS::Ace::BlendMode::NONE);
-    ViewAbstractModelNG::SetBlendApplyType(frameNode, OHOS::Ace::BlendApplyType::FAST);
-}
-
-void SetMonopolizeEvents(ArkUINodeHandle node, ArkUI_Bool value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelNG::SetMonopolizeEvents(frameNode, value);
-}
-
-void ResetMonopolizeEvents(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelNG::SetMonopolizeEvents(frameNode, false);
-}
-
-void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetMinWidth(frameNode, CalcLength(values[NUM_0], DimensionUnit::VP));
-    ViewAbstract::SetMaxWidth(frameNode, CalcLength(values[NUM_1], DimensionUnit::VP));
-    ViewAbstract::SetMinHeight(frameNode, CalcLength(values[NUM_2], DimensionUnit::VP));
-    ViewAbstract::SetMaxHeight(frameNode, CalcLength(values[NUM_3], DimensionUnit::VP));
-}
-
-void ResetConstraintSize(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetMaxSize(frameNode, true);
-    ViewAbstract::ResetMinSize(frameNode, true);
-    ViewAbstract::ResetMaxSize(frameNode, false);
-    ViewAbstract::ResetMinSize(frameNode, false);
-}
-
 void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
     ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_Int32 length)
 {
@@ -3732,6 +3684,287 @@ ArkUI_Bool GetNeedFocus(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, false);
     return static_cast<ArkUI_Bool>(ViewAbstract::GetNeedFocus(frameNode));
 }
+
+void SetBlendMode(ArkUINodeHandle node, int32_t blendMode, ArkUI_Int32 blendApplyTypeValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBlendMode(frameNode, static_cast<BlendMode>(blendMode));
+}
+
+void ResetBlendMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBlendMode(frameNode, BlendMode::NONE);
+}
+
+void SetConstraintSize(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetMinWidth(frameNode, CalcLength(values[NUM_0], DimensionUnit::VP));
+    ViewAbstract::SetMaxWidth(frameNode, CalcLength(values[NUM_1], DimensionUnit::VP));
+    ViewAbstract::SetMinHeight(frameNode, CalcLength(values[NUM_2], DimensionUnit::VP));
+    ViewAbstract::SetMaxHeight(frameNode, CalcLength(values[NUM_3], DimensionUnit::VP));
+}
+
+void ResetConstraintSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetMaxSize(frameNode, true);
+    ViewAbstract::ResetMinSize(frameNode, true);
+    ViewAbstract::ResetMaxSize(frameNode, false);
+    ViewAbstract::ResetMinSize(frameNode, false);
+}
+
+ArkUI_Float32 GetOpacity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetOpacity(frameNode);
+}
+
+void GetBorderWidth(ArkUINodeHandle node, ArkUI_Float32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto width = ViewAbstract::GetBorderWidth(frameNode);
+    values[NUM_0] = width.topDimen->Value();
+    values[NUM_1] = width.rightDimen->Value();
+    values[NUM_2] = width.bottomDimen->Value();
+    values[NUM_3] = width.leftDimen->Value();
+}
+
+void GetBorderRadius(ArkUINodeHandle node, ArkUI_Float32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto radius = ViewAbstract::GetBorderRadius(frameNode);
+    values[NUM_0] = radius.radiusTopLeft->Value();
+    values[NUM_1] = radius.radiusTopRight->Value();
+    values[NUM_2] = radius.radiusBottomLeft->Value();
+    values[NUM_3] = radius.radiusBottomRight->Value();
+}
+
+void GetBorderColor(ArkUINodeHandle node, ArkUI_Uint32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto colors = ViewAbstract::GetBorderColor(frameNode);
+    values[NUM_0] = colors.topColor->GetValue();
+    values[NUM_1] = colors.rightColor->GetValue();
+    values[NUM_2] = colors.bottomColor->GetValue();
+    values[NUM_3] = colors.leftColor->GetValue();
+}
+
+void GetBorderStyle(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto styles = ViewAbstract::GetBorderStyle(frameNode);
+    values[NUM_0] = static_cast<ArkUI_Int32>(styles.styleTop.value());
+    values[NUM_1] = static_cast<ArkUI_Int32>(styles.styleRight.value());
+    values[NUM_2] = static_cast<ArkUI_Int32>(styles.styleBottom.value());
+    values[NUM_3] = static_cast<ArkUI_Int32>(styles.styleLeft.value());
+}
+
+ArkUI_Int32 GetZIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetZIndex(frameNode);
+}
+
+ArkUI_Int32 GetVisibility(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Int32>(ViewAbstract::GetVisibility(frameNode));
+}
+
+ArkUI_Int32 GetClip(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Int32>(ViewAbstract::GetClip(frameNode));
+}
+
+void GetClipShape(ArkUINodeHandle node, ArkUIClipShapeOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto basicShape = ViewAbstract::GetClipShape(frameNode);
+    options->width = basicShape.value()->GetWidth().Value();
+    options->height = basicShape.value()->GetHeight().Value();
+    options->type = static_cast<ArkUI_Int32>(basicShape.value()->GetBasicShapeType());
+    switch (basicShape.value()->GetBasicShapeType()) {
+        case BasicShapeType::PATH: {
+            auto path = AceType::DynamicCast<Path>(basicShape.value());
+            options->commands = path->GetValue().c_str();
+        }
+        case BasicShapeType::RECT: {
+            auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape.value());
+            //radius x
+            options->radiusWidth = shapeRect->GetTopLeftRadius().GetX().Value();
+            //radius y
+            options->radiusHeight = shapeRect->GetTopLeftRadius().GetY().Value();
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void GetTransform(ArkUINodeHandle node, ArkUI_Float32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto transforms = ViewAbstract::GetTransform(frameNode);
+    for (int i = 0; i < NUM_16; i++) {
+        values[i] = transforms[i];
+    }
+}
+
+ArkUI_Int32 GetHitTestBehavior(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Int32>(ViewAbstract::GetHitTestBehavior(frameNode));
+}
+
+void GetPosition(ArkUINodeHandle node, ArkUIPositionOptions* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto positions = ViewAbstract::GetPosition(frameNode);
+    values->x = positions.GetX().Value();
+    values->y = positions.GetY().Value();
+}
+
+ArkUI_Int32 GetShadow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    int style = static_cast<ArkUI_Int32>(ViewAbstract::GetShadow(frameNode)->GetStyle());
+    return style;
+}
+
+void GetCustomShadow(ArkUINodeHandle node, ArkUICustomShadowOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto shadow = ViewAbstract::GetShadow(frameNode);
+    options->color = shadow->GetColor().GetValue();
+    options->shadowType = static_cast<ArkUI_Int32>(shadow->GetShadowType());
+    options->colorStrategy = static_cast<ArkUI_Int32>(shadow->GetShadowColorStrategy());
+    options->offsetX = shadow->GetOffset().GetX();
+    options->offsetY = shadow->GetOffset().GetY();
+    options->radius = shadow->GetBlurRadius();
+    options->fill = static_cast<ArkUI_Int32>(shadow->GetIsFilled());
+}
+
+void GetSweepGradient(ArkUINodeHandle node, ArkUISweepGradientOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto gradient = ViewAbstract::GetGradient(frameNode);
+    auto sweepGradient = gradient.GetSweepGradient();
+    auto colors = gradient.GetColors();
+    for (ArkUI_Uint32 i = 0; i < gradient.GetColors().size(); i++) {
+        options->colors[i] = colors[i].GetColor().GetValue();
+        options->dimensions[i] = colors[i].GetDimension().Value();
+    }
+    options->colorSize = gradient.GetColors().size();
+    options->repeating = gradient.GetRepeat();
+    options->ceneterX = sweepGradient->centerX->Value();
+    options->ceneterY = sweepGradient->centerY->Value();
+    options->startAngle = sweepGradient->startAngle->Value();
+    options->endAngle = sweepGradient->endAngle->Value();
+    options->rotation = sweepGradient->rotation->Value();
+}
+
+void GetRadialGradient(ArkUINodeHandle node, ArkUIRadialGradientOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto gradient = ViewAbstract::GetGradient(frameNode);
+    auto radialGradient = gradient.GetRadialGradient();
+    auto colors = gradient.GetColors();
+    for (ArkUI_Uint32 i = 0; i < gradient.GetColors().size(); i++) {
+        options->colors[i] = colors[i].GetColor().GetValue();
+        options->dimensions[i] = colors[i].GetDimension().Value();
+    }
+    options->colorSize = gradient.GetColors().size();
+    options->repeating = gradient.GetRepeat();
+    options->ceneterX = radialGradient->radialCenterX->Value();
+    options->ceneterY = radialGradient->radialCenterY->Value();
+    options->radius = gradient.GetInnerRadius();
+}
+
+void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto basicShape = ViewAbstract::GetMask(frameNode).value();
+    options->type = static_cast<ArkUI_Int32>(basicShape->GetBasicShapeType());
+    if (basicShape->GetBasicShapeType() == BasicShapeType::PATH) {
+        auto path = AceType::DynamicCast<Path>(basicShape);
+        options->commands = path->GetValue().c_str();
+        options->color = basicShape->GetColor().GetValue();
+        options->strockColor = basicShape->GetStrokeColor();
+        options->strockWidth = basicShape->GetStrokeWidth();
+        options->width = basicShape->GetWidth().Value();
+        options->height = basicShape->GetHeight().Value();
+    } else if (basicShape->GetBasicShapeType() == BasicShapeType::RECT) {
+        auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape);
+        options->color = basicShape->GetColor().GetValue();
+        options->strockColor = basicShape->GetStrokeColor();
+        options->strockWidth = basicShape->GetStrokeWidth();
+        options->width = basicShape->GetWidth().Value();
+        options->height = basicShape->GetHeight().Value();
+        options->radiusWidth = shapeRect->GetTopLeftRadius().GetX().Value();
+        options->radiusHeight = shapeRect->GetTopLeftRadius().GetY().Value();
+    } else if (basicShape->GetBasicShapeType() == BasicShapeType::CIRCLE ||
+               basicShape->GetBasicShapeType() == BasicShapeType::ELLIPSE) {
+        options->color = basicShape->GetColor().GetValue();
+        options->strockColor = basicShape->GetStrokeColor();
+        options->strockWidth = basicShape->GetStrokeWidth();
+        options->width = basicShape->GetWidth().Value();
+        options->height = basicShape->GetHeight().Value();
+    } else {
+        auto process = ViewAbstract::GetMaskProgress(frameNode).value();
+        options->value = process->GetValue();
+        options->color = process->GetColor().GetValue();
+        options->maxValue = process->GetMaxValue();
+    }
+}
+
+ArkUI_Int32 GetBlendMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    int blendMode = static_cast<ArkUI_Int32>(ViewAbstract::GetBlendMode(frameNode));
+    return blendMode;
+}
+
+ArkUI_Int32 GetDirection(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    int direction = static_cast<ArkUI_Int32>(ViewAbstract::GetDirection(frameNode));
+    return direction;
+}
+
+ArkUI_Int32 GetAlignSelf(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    int alignSelf = static_cast<ArkUI_Int32>(ViewAbstract::GetAlignSelf(frameNode));
+    return alignSelf;
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -3776,13 +4009,13 @@ const ArkUICommonModifier* GetCommonModifier()
         SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut,
         SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition, SetRotateTransition,
         SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask, SetBlendMode,
-        ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize, ResetConstraintSize,
-        SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius,
-        SetOutlineWidth, ResetOutlineWidth, SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline,
-        GetFocusable, GetDefaultFocus, GetResponseRegion,
-        GetOverlay, GetAccessibilityGroup, GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel,
-        SetNeedFocus, GetNeedFocus
-    };
+        ResetBlendMode, nullptr, nullptr, SetConstraintSize, ResetConstraintSize, SetOutlineColor, ResetOutlineColor,
+        SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth, ResetOutlineWidth, SetOutlineStyle, ResetOutlineStyle,
+        SetOutline, ResetOutline, GetFocusable, GetDefaultFocus, GetResponseRegion, GetOverlay, GetAccessibilityGroup,
+        GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel, SetNeedFocus, GetNeedFocus,
+        GetOpacity, GetBorderWidth, GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip,
+        GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient,
+        GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf };
 
     return &modifier;
 }
