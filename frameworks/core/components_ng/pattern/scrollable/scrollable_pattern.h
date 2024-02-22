@@ -453,6 +453,12 @@ public:
         needLinked_ = needLinked;
     }
 
+    virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems()
+    {
+        std::vector<RefPtr<FrameNode>> children;
+        return children;
+    }
+    
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
         animateCanOverScroll_ = animateCanOverScroll;
