@@ -157,7 +157,7 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     int32_t instanceID = context->GetInstanceId();
-    auto textFunc = [weak = WeakClaim(this), instanceID, startPos](const TextDataDetectResult result) {
+    auto textFunc = [weak = WeakClaim(this), instanceID, startPos, info](const TextDataDetectResult result) {
         ContainerScope scope(instanceID);
         auto dataDetectorAdapter = weak.Upgrade();
         CHECK_NULL_VOID(dataDetectorAdapter);
@@ -166,10 +166,13 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([result, weak, instanceID, startPos] {
+        uiTaskExecutor.PostTask([result, weak, instanceID, startPos, info] {
             ContainerScope scope(instanceID);
             auto dataDetectorAdapter = weak.Upgrade();
             CHECK_NULL_VOID(dataDetectorAdapter);
+            if (info.module != dataDetectorAdapter->textDetectTypes_) {
+                return;
+            }
             dataDetectorAdapter->SetTextDetectResult(result);
             dataDetectorAdapter->FireOnResult(result);
             if (result.code != 0) {
