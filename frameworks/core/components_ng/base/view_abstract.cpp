@@ -957,11 +957,8 @@ void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisi
     CHECK_NULL_VOID(pipeline);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    frameNode->ClearVisibleAreaUserCallback();
-
-    for (const auto &ratio : ratioList) {
-        pipeline->AddVisibleAreaChangeNode(frameNode, ratio, onVisibleChange);
-    }
+    frameNode->CleanVisibleAreaUserCallback();
+    pipeline->AddVisibleAreaChangeNode(frameNode, ratioList, onVisibleChange);
 }
 
 void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect> &responseRegion)

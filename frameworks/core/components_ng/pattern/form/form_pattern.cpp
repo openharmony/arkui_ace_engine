@@ -1192,7 +1192,8 @@ void FormPattern::RegistVisibleAreaChangeCallback()
             CHECK_NULL_VOID(formPattern);
             formPattern->OnVisibleAreaChange(visible);
         };
-        pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
+        std::vector<double> ratioList = {0.0};
+        pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
     }
 }
 } // namespace OHOS::Ace::NG

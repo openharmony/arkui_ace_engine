@@ -515,6 +515,53 @@ public:
         onAreaChangedInnerCallbacks_.clear();
     }
 
+    std::vector<double>& GetVisibleAreaRatios(bool isUser)
+    {
+        if (isUser) {
+            return visibleAreaUserRatios_;
+        } else {
+            return visibleAreaInnerRatios_;
+        }
+    }
+
+    VisibleCallbackInfo& GetVisibleAreaCallback(bool isUser)
+    {
+        if (isUser) {
+            return visibleAreaUserCallback_;
+        } else {
+            return visibleAreaInnerCallback_;
+        }
+    }
+
+    void SetVisibleAreaRatios(const std::vector<double>& ratio, bool isUser)
+    {
+        if (isUser) {
+            visibleAreaUserRatios_ = ratio;
+        } else {
+            visibleAreaInnerRatios_ = ratio;
+        }
+    }
+
+    void SetVisibleAreaCallback(const VisibleCallbackInfo& callback, bool isUser)
+    {
+        if (isUser) {
+            visibleAreaUserCallback_ = callback;
+        } else {
+            visibleAreaInnerCallback_ = callback;
+        }
+    }
+
+    void CleanVisibleAreaCallback(bool isUser)
+    {
+        if (isUser) {
+            visibleAreaUserRatios_.clear();
+            visibleAreaUserCallback_.callback = nullptr;
+        } else {
+            visibleAreaInnerRatios_.clear();
+            visibleAreaInnerCallback_.callback = nullptr;
+        }
+    }
+
 protected:
     virtual void OnModifyDone() {}
 
@@ -546,6 +593,11 @@ private:
     bool enabled_ { true };
     bool developerEnabled_ { true };
     std::vector<KeyboardShortcut> keyboardShortcut_;
+
+    std::vector<double> visibleAreaUserRatios_;
+    std::vector<double> visibleAreaInnerRatios_;
+    VisibleCallbackInfo visibleAreaUserCallback_;
+    VisibleCallbackInfo visibleAreaInnerCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };
