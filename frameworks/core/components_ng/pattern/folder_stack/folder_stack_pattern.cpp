@@ -128,6 +128,7 @@ void FolderStackPattern::SetLayoutBeforeAnimation(const RefPtr<FolderStackGroupN
 
 void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
 {
+    TAG_LOGD(AceLogTag::ACE_FOLDER_STACK, "the current folding state is:%{public}d", foldStatus);
     currentFoldStatus_ = foldStatus;
     if (foldStatusDelayTask_) {
         foldStatusDelayTask_.Cancel();
@@ -168,6 +169,7 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
         }
     });
     lastFoldStatus_ = currentFoldStatus_;
+    TAG_LOGD(AceLogTag::ACE_FOLDER_STACK, "the last folding state was:%{public}d", lastFoldStatus_);
     taskExecutor->PostDelayedTask(foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME);
 }
 
@@ -244,6 +246,9 @@ void FolderStackPattern::SetAutoRotate()
     displayInfo_ = displayInfo;
     auto foldStatus = displayInfo->GetFoldStatus();
     auto orientation = container->GetOrientation();
+    TAG_LOGI(AceLogTag::ACE_FOLDER_STACK,
+        "the autoHalfFold state is:%{public}d, direction of rotation is:%{public}d",
+        autoHalfFold, orientation);
     if (autoHalfFold && foldStatus == FoldStatus::HALF_FOLD && orientation != Orientation::SENSOR) {
         container->SetOrientation(Orientation::SENSOR);
         isScreenRotationLocked_ = true;
@@ -266,6 +271,7 @@ void FolderStackPattern::RestoreScreenState()
         isNeedRestoreScreenState_ = false;
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
+        TAG_LOGD(AceLogTag::ACE_FOLDER_STACK, "set orientation to lastOrientation:%{public}d", lastOrientation_);
         container->SetOrientation(lastOrientation_);
     }
 }
