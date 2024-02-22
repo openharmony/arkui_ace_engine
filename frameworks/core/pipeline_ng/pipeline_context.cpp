@@ -1254,8 +1254,10 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     CHECK_RUN_ON(UI);
     UpdateRootSizeAndScale(width, height);
     CHECK_NULL_VOID(rootNode_);
-    ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
-    ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
+    if (Container::CurrentId() < MIN_SUBCONTAINER_ID) {
+        ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
+        ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
+    }
     SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
     if (rootNode_->GetGeometryNode()->GetFrameSize() != sizeF || rootNode_->IsLayoutDirtyMarked()) {
         CalcSize idealSize { CalcLength(width), CalcLength(height) };
