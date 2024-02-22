@@ -73,15 +73,12 @@ void MoonProgressModifier::SetValue(float value)
         ContainerScope scope(id);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto task = [weak, bigRadius, smallRadius]() {
-            auto modifier = weak.Upgrade();
-            CHECK_NULL_VOID(modifier);
-            double angle = (modifier->value_->Get() / modifier->maxValue_->Get()) * 1;
-            if (NearEqual(std::abs(angle - FLOAT_ONE_ZERO), EPSLION)) {
-                modifier->SetMoonAnimate(bigRadius / smallRadius);
-            }
-        };
-        pipeline->PostSyncEvent(task);
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        double angle = (modifier->value_->Get() / modifier->maxValue_->Get()) * 1;
+        if (NearEqual(std::abs(angle - FLOAT_ONE_ZERO), EPSLION)) {
+            modifier->SetMoonAnimate(bigRadius / smallRadius);
+        }
         pipeline->RequestFrame();
     };
 

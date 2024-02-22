@@ -264,7 +264,7 @@ class UIContext {
     }
 
     getUIObserver() {
-        this.observer_ = new UIObserver();
+        this.observer_ = new UIObserver(this.instanceId_);
         return this.observer_;
     }
 
@@ -351,6 +351,12 @@ class Router {
         __JSScopeUtil__.restoreInstanceId();
     }
 
+    back(index, params) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_router.back(index, params);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
     clear() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_router.clear();
@@ -367,6 +373,20 @@ class Router {
     getState() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let state = this.ohos_router.getState();
+        __JSScopeUtil__.restoreInstanceId();
+        return state;
+    }
+
+    getStateByIndex(index) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let state = this.ohos_router.getState(index);
+        __JSScopeUtil__.restoreInstanceId();
+        return state;
+    }
+
+    getStateByUrl(url) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let state = this.ohos_router.getState(url);
         __JSScopeUtil__.restoreInstanceId();
         return state;
     }
@@ -526,4 +546,20 @@ class AtomicServiceBar {
  */
 function __getUIContext__(instanceId) {
     return new UIContext(instanceId);
+}
+
+/**
+ * check regex valid
+ * @param pattern regex string
+ * @returns valid result
+ */
+function __checkRegexValid__(pattern) {
+    let result = true;
+    try {
+        new RegExp(pattern);
+    } catch (error) {
+        result = false;
+    } finally {
+        return result;
+    }
 }

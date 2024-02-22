@@ -108,7 +108,7 @@ void AnimatedImageObject::UploadToGpuForRender(
         auto codec = SkCodec::MakeFromData(skData_);
 #else
     if (!animatedPlayer_ && drawingData_) {
-        auto skData = drawingData_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+        auto skData = SkData::MakeWithoutCopy(drawingData_->GetData(), drawingData_->GetSize());
         auto codec = SkCodec::MakeFromData(skData);
 #endif
         int32_t dstWidth = -1;

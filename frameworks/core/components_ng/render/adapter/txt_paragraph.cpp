@@ -313,7 +313,7 @@ void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
 #endif
 
 // ToDo:adjust index
-int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset)
+int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos)
 {
     if (!paragraph_) {
         return 0;
@@ -321,9 +321,38 @@ int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset)
     int32_t index;
 #ifndef USE_GRAPHIC_TEXT_GINE
     index = static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY()).position);
+    auto boxes = paragraph_->GetRectsForRange(
+        index, index + 1, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
     index = static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
+    auto boxes = paragraph_->GetTextRectsByBoundary(
+        index, index + 1, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
 #endif
+    if (isSelectionPos) {
+#ifndef USE_GRAPHIC_TEXT_GINE
+        auto boxes = paragraph_->GetRectsForRange(
+            index, index + 1, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+#else
+        auto boxes = paragraph_->GetTextRectsByBoundary(
+            index, index + 1, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+#endif
+        if (boxes.empty()) {
+            return --index;
+        }
+        for (const auto& textBox : boxes) {
+#ifndef USE_GRAPHIC_TEXT_GINE
+            auto left = textBox.rect.fLeft;
+            auto right = textBox.rect.fRight;
+#else
+            auto left = textBox.rect.GetLeft();
+            auto right = textBox.rect.GetRight();
+#endif
+            if (left != right) {
+                return index;
+            }
+        }
+        return --index;
+    }
     return index;
 }
 
@@ -476,8 +505,8 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
         Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
 
-    while (boxes.empty() && !text_.empty()) {
-        graphemeClusterLength *= LENGTH_INCREMENT;
+    if (boxes.empty() && !text_.empty()) {
+        graphemeClusterLength = LENGTH_INCREMENT;
         next = extent + graphemeClusterLength;
 #ifndef USE_GRAPHIC_TEXT_GINE
         boxes = paragraph_->GetRectsForRange(

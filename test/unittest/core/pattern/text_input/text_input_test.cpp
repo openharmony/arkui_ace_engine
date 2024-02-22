@@ -360,12 +360,12 @@ HWTEST_F(TextInputCursorTest, CaretPosition002, TestSize.Level1)
     /**
      * @tc.steps: Create Text filed node with default text and placeholder and set input type
      */
-    std::string text = "openharmony@huawei.com+*0123456789";
+    std::string text = "openharmony@harmony.com+* ()0123456789";
     std::vector<TestItem<TextInputType, int32_t>> testItems;
     testItems.emplace_back(TextInputType::TEXT, text.length(), "TextInputType::TEXT");
     testItems.emplace_back(TextInputType::NUMBER, 10, "TextInputType::NUMBER");
-    testItems.emplace_back(TextInputType::PHONE, 12, "TextInputType::PHONE");
-    testItems.emplace_back(TextInputType::EMAIL_ADDRESS, text.length() - 2, "TextInputType::EMAIL_ADDRESS");
+    testItems.emplace_back(TextInputType::PHONE, 15, "TextInputType::PHONE");
+    testItems.emplace_back(TextInputType::EMAIL_ADDRESS, text.length() - 5, "TextInputType::EMAIL_ADDRESS");
     testItems.emplace_back(TextInputType::VISIBLE_PASSWORD, text.length(), "TextInputType::VISIBLE_PASSWORD");
     testItems.emplace_back(TextInputType::NUMBER_PASSWORD, 10, "TextInputType::NUMBER_PASSWORD");
     testItems.emplace_back(TextInputType::SCREEN_LOCK_PASSWORD, text.length(), "TextInputType::SCREEN_LOCK_PASSWORD");
@@ -1465,7 +1465,7 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
     std::vector<std::string> insertValues = {
         "openharmony123_ *+%$",
         "openharmony123456*+&@huawei.com",
-        "openharmony#15612932075*.com",
+        "openharmony (new)#15612932075*.com",
         "open_harmony@@huawei.com*+$helloworld",
         "open_harmony123 password*+#",
         "openharmony123456*+&@huawei.com",
@@ -1474,7 +1474,7 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
     std::vector<TestItem<TextInputType, std::string>> testItems;
     testItems.emplace_back(TextInputType::TEXT, "openharmony123_ *+%$", "TextInputType::TEXT");
     testItems.emplace_back(TextInputType::NUMBER, "123456", "TextInputType::NUMBER");
-    testItems.emplace_back(TextInputType::PHONE, "#15612932075*", "TextInputType::PHONE");
+    testItems.emplace_back(TextInputType::PHONE, " ()#15612932075*", "TextInputType::PHONE");
     testItems.emplace_back(
         TextInputType::EMAIL_ADDRESS, "open_harmony@huawei.comhelloworld", "TextInputType::EMAIL_ADDRESS");
     testItems.emplace_back(
@@ -2211,7 +2211,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent008, TestSize.Level1)
     GetFocus();
 
     pattern_->PerformAction(TextInputAction::DONE, true);
-    EXPECT_FALSE(pattern_->GetCursorVisible());
+    EXPECT_TRUE(pattern_->GetCursorVisible());
 }
 
 /**
@@ -3286,7 +3286,6 @@ HWTEST_F(TextFieldUXTest, CopyOption001, TestSize.Level1)
      * @tc.step: step2. test default copyOption
      */
     frameNode_->MarkModifyDone();
-    EXPECT_EQ(pattern_->AllowCopy(), true);
     EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.Distributed");
 }
 
@@ -3303,6 +3302,7 @@ HWTEST_F(TextFieldUXTest, CopyOption002, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetCopyOption(CopyOptions::Local);
+        model.SetType(TextInputType::TEXT);
     });
 
     /**
@@ -3326,6 +3326,7 @@ HWTEST_F(TextFieldUXTest, CopyOption003, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetCopyOption(CopyOptions::InApp);
+        model.SetType(TextInputType::TEXT);
     });
 
     /**

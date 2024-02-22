@@ -609,8 +609,8 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
     // navBar title bar
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
         if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
+            initialSubtitleOffsetY_ = menuHeight_ + offsetY;
             if (isInitialSubtitle_) {
-                initialSubtitleOffsetY_ = menuHeight_ + offsetY;
                 isInitialSubtitle_ = false;
                 OffsetF titleOffset =
                     OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialSubtitleOffsetY_);

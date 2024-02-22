@@ -80,6 +80,8 @@ public:
         return false;
     }
 
+    virtual void FlushAnimationStartTime(uint64_t timeStamp) {}
+
     virtual void FlushModifier() {}
 
     virtual bool HasUIAnimation()
@@ -179,6 +181,10 @@ public:
     {
         return 0;
     }
+
+    virtual void Lock() {}
+
+    virtual void Unlock() {}
 
 protected:
     bool isRequestVsync_ = false;

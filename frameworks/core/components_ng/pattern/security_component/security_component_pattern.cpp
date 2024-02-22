@@ -56,8 +56,7 @@ bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
         CHECK_NULL_RETURN(frameNode, false);
         int32_t res = 1;
 #ifdef SECURITY_COMPONENT_ENABLE
-        res = SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
-            frameNode, event);
+        res = ReportSecurityComponentClickEvent(event);
         if (res != 0) {
             LOGE("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
             res = 1;
@@ -94,11 +93,7 @@ bool SecurityComponentPattern::IsParentMenu(RefPtr<FrameNode>& secCompNode)
 {
     auto parent = secCompNode->GetParent();
     while (parent != nullptr) {
-        auto parentNode = AceType::DynamicCast<FrameNode>(parent);
-        if (parentNode == nullptr) {
-            break;
-        }
-        if (parentNode->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        if (parent->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
             return true;
         }
         parent = parent->GetParent();
@@ -111,6 +106,11 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
 #ifdef SECURITY_COMPONENT_ENABLE
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    if (!IsParentMenu(host)) {
+        return;
+    }
+
     auto pointerEvent = info.GetPointerEvent();
     CHECK_NULL_VOID(pointerEvent);
 
@@ -124,10 +124,8 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
     GestureEvent gestureInfo;
     gestureInfo.SetDisplayX(item.GetDisplayX());
     gestureInfo.SetDisplayY(item.GetDisplayY());
-    gestureInfo.SetTimeStamp(TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime())));
-    gestureInfo.SetEnhanceData(pointerEvent->GetEnhanceData());
-    int res = SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
-        host, gestureInfo);
+    gestureInfo.SetPointerEvent(info.GetPointerEvent());
+    int res = ReportSecurityComponentClickEvent(gestureInfo);
     if (res != 0) {
         LOGW("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
         res = 1;
@@ -199,8 +197,7 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
         if (buttonPattern->IsParentMenu(frameNode)) {
             res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
         } else {
-            res = SecurityComponentHandler::ReportSecurityComponentClickEvent(buttonPattern->scId_,
-                frameNode, info);
+            res = buttonPattern->ReportSecurityComponentClickEvent(info);
             if (res != 0) {
                 LOGW("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
                 res = static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED);
@@ -405,17 +402,8 @@ void SecurityComponentPattern::OnModifyDone()
     InitOnKeyEvent(frameNode);
     InitAppearCallback(frameNode);
     InitOnTouch(frameNode);
-    RegisterOrUpdateSecurityComponent(frameNode, scId_);
-}
-
-void SecurityComponentPattern::RegisterOrUpdateSecurityComponent(RefPtr<FrameNode>& frameNode, int32_t& scId)
-{
 #ifdef SECURITY_COMPONENT_ENABLE
-    if (scId == -1) {
-        SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId);
-    } else {
-        SecurityComponentHandler::UpdateSecurityComponent(frameNode, scId);
-    }
+    RegisterSecurityComponentAsync();
 #endif
 }
 
@@ -431,9 +419,8 @@ void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
 #ifdef SECURITY_COMPONENT_ENABLE
         auto securityComponentPattern = weak.Upgrade();
         CHECK_NULL_VOID(securityComponentPattern);
-        auto frameNode = securityComponentPattern->GetHost();
-        securityComponentPattern->RegisterOrUpdateSecurityComponent(frameNode,
-            securityComponentPattern->scId_);
+        securityComponentPattern->isAppear_ = true;
+        securityComponentPattern->RegisterSecurityComponentAsync();
 #endif
     };
 
@@ -441,12 +428,137 @@ void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
 #ifdef SECURITY_COMPONENT_ENABLE
         auto securityComponentPattern = weak.Upgrade();
         CHECK_NULL_VOID(securityComponentPattern);
-        SecurityComponentHandler::UnregisterSecurityComponent(securityComponentPattern->scId_);
-        securityComponentPattern->scId_ = -1;
+        securityComponentPattern->isAppear_ = false;
+        securityComponentPattern->UnregisterSecurityComponent();
 #endif
     };
     eventHub->SetOnAppear(std::move(onAppear));
     eventHub->SetOnDisappear(std::move(onDisAppear));
     isAppearCallback_ = true;
 }
+
+void SecurityComponentPattern::OnWindowHide()
+{
+#ifdef SECURITY_COMPONENT_ENABLE
+    UnregisterSecurityComponent();
+#endif
+}
+
+void SecurityComponentPattern::OnWindowShow()
+{
+#ifdef SECURITY_COMPONENT_ENABLE
+    if (!isAppear_) {
+        return;
+    }
+    RegisterSecurityComponentAsync();
+#endif
+}
+
+#ifdef SECURITY_COMPONENT_ENABLE
+void SecurityComponentPattern::RegisterSecurityComponentAsync()
+{
+    if (regStatus_ == SecurityComponentRegisterStatus::REGISTERED ||
+        regStatus_ == SecurityComponentRegisterStatus::REGISTERING) {
+        return;
+    }
+
+    regMutex_.lock();
+    regStatus_ = SecurityComponentRegisterStatus::REGISTERING;
+    auto scTaskExecutor =
+        SingleTaskExecutor::Make(PipelineContext::GetCurrentContext()->GetTaskExecutor(),
+        TaskExecutor::TaskType::BACKGROUND);
+    scTaskExecutor.PostTask([weak = WeakClaim(this)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto frameNode = pattern->GetHost();
+        // service is shutdowning, try to load it.
+        int32_t retryCount = MAX_RETRY_TIMES;
+        while (retryCount > 0) {
+            int32_t res = SecurityComponentHandler::RegisterSecurityComponent(frameNode, pattern->scId_);
+            if (res == Security::SecurityComponent::SCErrCode::SC_OK) {
+                pattern->regStatus_ = SecurityComponentRegisterStatus::REGISTERED;
+                pattern->regMutex_.unlock();
+                return;
+            } else if (res != Security::SecurityComponent::SCErrCode::SC_SERVICE_ERROR_SERVICE_NOT_EXIST) {
+                pattern->regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
+                pattern->regMutex_.unlock();
+                return;
+            }
+
+            retryCount--;
+            std::this_thread::sleep_for(std::chrono::milliseconds(REGISTER_RETRY_INTERVAL));
+        }
+        pattern->regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
+        pattern->regMutex_.unlock();
+    });
+}
+
+void SecurityComponentPattern::UnregisterSecurityComponent()
+{
+    if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
+        return;
+    }
+    if (regStatus_ == SecurityComponentRegisterStatus::REGISTERED) {
+        SecurityComponentHandler::UnregisterSecurityComponent(scId_);
+        scId_ = -1;
+        regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
+        return;
+    }
+
+    if (!regMutex_.try_lock_for(std::chrono::milliseconds(MAX_REGISTER_WAITING_TIME))) {
+        LOGW("register task timeout.");
+        return;
+    }
+    SecurityComponentHandler::UnregisterSecurityComponent(scId_);
+    scId_ = -1;
+    regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
+    regMutex_.unlock();
+}
+
+int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent& event)
+{
+    if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
+        LOGW("ClickEventHandler: security component has not registered.");
+        return -1;
+    }
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, -1);
+    if (regStatus_ == SecurityComponentRegisterStatus::REGISTERED) {
+        return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
+            frameNode, event);
+    }
+
+    if (!regMutex_.try_lock_for(std::chrono::milliseconds(MAX_REGISTER_WAITING_TIME))) {
+        LOGW("ClickEventHandler: wait for register task timeout.");
+        return -1;
+    }
+    int32_t res = SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
+        frameNode, event);
+    regMutex_.unlock();
+    return res;
+}
+
+int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEvent& event)
+{
+    if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
+        LOGW("KeyEventHandler: security component has not registered.");
+        return -1;
+    }
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, -1);
+    if (regStatus_ == SecurityComponentRegisterStatus::REGISTERED) {
+        return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
+            frameNode, event);
+    }
+
+    if (!regMutex_.try_lock_for(std::chrono::milliseconds(MAX_REGISTER_WAITING_TIME))) {
+        LOGW("KeyEventHandler: wait for register task timeout.");
+        return -1;
+    }
+    int32_t res = SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
+        frameNode, event);
+    regMutex_.unlock();
+    return res;
+}
+#endif
 } // namespace OHOS::Ace::NG

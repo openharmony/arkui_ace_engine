@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -138,6 +138,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
     auto predictSnapEndPos = listLayoutAlgorithm->GetPredictSnapEndPosition();
     if (listLayoutAlgorithm->NeedEstimateOffset()) {
+        lanes_ = listLayoutAlgorithm->GetLanes();
         auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
         calculate.GetEstimateHeightAndOffset(GetHost());
         currentOffset_ = calculate.GetEstimateOffset();
@@ -359,6 +360,11 @@ void ListPattern::ProcessEvent(
         }
     }
 
+    auto onDidScroll = listEventHub->GetOnDidScroll();
+    if (onDidScroll) {
+        FireOnScroll(finalOffset, onDidScroll);
+    }
+
     if (indexChanged) {
         auto onScrollIndex = listEventHub->GetOnScrollIndex();
         if (onScrollIndex) {
@@ -443,7 +449,8 @@ void ListPattern::CheckScrollable()
     } else {
         if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_) &&
             !IsScrollSnapAlignCenter()) {
-            scrollable_ = GetAlwaysEnabled() || GreatNotEqual((endMainPos_ - startMainPos_), contentMainSize_);
+            scrollable_ = GetAlwaysEnabled() || GreatNotEqual(endMainPos_ - startMainPos_,
+                contentMainSize_ - contentStartOffset_ - contentEndOffset_);
         } else {
             scrollable_ = true;
         }
@@ -583,7 +590,7 @@ bool ListPattern::IsAtBottom() const
 
 bool ListPattern::OutBoundaryCallback()
 {
-    bool outBoundary = IsAtTop() || IsAtBottom();
+    bool outBoundary = IsOutOfBoundary();
     if (!dragFromSpring_ && outBoundary && chainAnimation_) {
         chainAnimation_->SetOverDrag(false);
         auto delta = chainAnimation_->SetControlIndex(IsAtTop() ? 0 : maxListItemIndex_);
@@ -706,12 +713,14 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     SetScrollSource(source);
     FireAndCleanScrollingListener();
+    auto lastDelta = currentDelta_;
     currentDelta_ = currentDelta_ - offset;
     if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING) {
         isNeedCheckOffset_ = true;
     }
     MarkDirtyNodeSelf();
     if (!IsOutOfBoundary() || !scrollable_) {
+        FireOnWillScroll(currentDelta_ - lastDelta);
         return true;
     }
 
@@ -740,6 +749,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
         currentDelta_ = currentDelta_ * friction;
     }
+    FireOnWillScroll(currentDelta_ - lastDelta);
     return true;
 }
 
@@ -1904,6 +1914,7 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
         }
         canReplaceSwiperItem_ = false;
     }
+    FireAndCleanScrollingListener();
 }
 
 int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
@@ -2146,5 +2157,28 @@ DisplayMode ListPattern::GetDefaultScrollBarDisplayMode() const
         defaultDisplayMode = DisplayMode::AUTO;
     }
     return defaultDisplayMode;
+}
+
+std::vector<RefPtr<FrameNode>> ListPattern::GetVisibleSelectedItems()
+{
+    std::vector<RefPtr<FrameNode>> children;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, children);
+    for (int32_t index = startIndex_; index <= endIndex_; ++index) {
+        auto item = host->GetChildByIndex(index);
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto itemPattern = itemFrameNode->GetPattern<ListItemPattern>();
+        if (!itemPattern) {
+            continue;
+        }
+        if (!itemPattern->IsSelected()) {
+            continue;
+        }
+        children.emplace_back(itemFrameNode);
+    }
+    return children;
 }
 } // namespace OHOS::Ace::NG

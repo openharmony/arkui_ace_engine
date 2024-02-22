@@ -24,10 +24,6 @@
 namespace OHOS::Ace {
 class MockTaskExecutor : public TaskExecutor {
 public:
-    MOCK_METHOD(void, AddTaskObserver, (Task && callback), (override));
-    MOCK_METHOD(void, RemoveTaskObserver, (), (override));
-    MOCK_METHOD(Task, WrapTaskWithTraceId, (Task && task, int32_t id), (const override));
-
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& callerInfo) const override
     {
         CHECK_NULL_RETURN(task, false);
@@ -39,6 +35,15 @@ public:
     {
         return true;
     }
+
+    Task WrapTaskWithTraceId(Task&&  /*task*/, int32_t  /*id*/) const override
+    {
+        return nullptr;
+    }
+
+    void AddTaskObserver(Task&& callback) override {}
+
+    void RemoveTaskObserver() override {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_TASK_EXECUTOR_H

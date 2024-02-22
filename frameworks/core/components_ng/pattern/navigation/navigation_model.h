@@ -41,8 +41,11 @@ public:
     virtual void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
         std::function<void(RefPtr<NG::NavigationStack>)> updater) {};
     virtual void SetNavigationStackProvided(bool provided) = 0;
-    virtual bool ParseCommonTitle(
-        bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) = 0;
+    virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
+        const std::string& title, bool ignoreMainTitle = false)
+    {
+        return false;
+    }
     virtual void SetTitle(const std::string& title, bool hasSubTitle = false) = 0;
     virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {}
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;

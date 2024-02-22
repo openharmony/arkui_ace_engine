@@ -27,12 +27,13 @@
 #include "core/common/container.h"
 #include "core/common/layout_inspector.h"
 #include "core/event/ace_events.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 
 constexpr double CAP_COEFFICIENT = 0.45;
-constexpr int32_t FIRST_THRESHOLD = 5;
+constexpr int32_t FIRST_THRESHOLD = 4;
 constexpr int32_t SECOND_THRESHOLD = 10;
 constexpr double CAP_FIXED_VALUE = 16.0;
 constexpr uint32_t DRAG_INTERVAL_TIME = 900;
@@ -158,6 +159,11 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         }
         if (scroll->dragCancelCallback_) {
             scroll->dragCancelCallback_();
+        }
+        GestureEvent info;
+        scroll->HandleDragEnd(info);
+        if (scroll->actionEnd_) {
+            scroll->actionEnd_(info);
         }
         scroll->isDragging_ = false;
     };
@@ -523,6 +529,13 @@ void Scrollable::SetDelayedTask()
     taskExecutor.PostDelayedTask(task_, DRAG_INTERVAL_TIME);
 }
 
+void Scrollable::MarkNeedFlushAnimationStartTime()
+{
+    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->MarkNeedFlushAnimationStartTime();
+}
+
 double Scrollable::ComputeCap(int dragCount)
 {
     if (dragCount < FIRST_THRESHOLD) {
@@ -694,6 +707,7 @@ void Scrollable::ProcessScrollSnapMotion(double position)
     if (outBoundaryCallback_ && outBoundaryCallback_()  && !isSnapScrollAnimationStop_) {
         scrollPause_ = true;
         skipRestartSpring_ = true;
+        MarkNeedFlushAnimationStartTime();
         StopSnapAnimation();
     }
 }
@@ -875,7 +889,8 @@ void Scrollable::ProcessScrollMotionStop(bool stopFriction)
 
 void Scrollable::ProcessSpringMotion(double position)
 {
-    position = Round(position);
+    // Do not round when the current position is less than 0.5 px from the final position.
+    position = NearEqual(position, finalPosition_, 0.5) ? position : Round(position);
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
         currentPos_, position);
     auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
@@ -887,12 +902,15 @@ void Scrollable::ProcessSpringMotion(double position)
     }
     lastVsyncTime_ = currentVsync;
     if (NearEqual(currentPos_, position)) {
+        // trace stop at OnScrollStop
+        AceAsyncTraceBegin(0, TRAILING_ANIMATION);
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
         moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
         if ((currentPos_ - finalPosition_) * (position - finalPosition_) < 0) {
             double currentVelocity = currentVelocity_;
             scrollPause_ = true;
+            MarkNeedFlushAnimationStartTime();
             StopSpringAnimation();
             StartScrollAnimation(position, currentVelocity);
         }
@@ -910,7 +928,8 @@ void Scrollable::ProcessSpringMotion(double position)
 
 void Scrollable::ProcessScrollMotion(double position)
 {
-    position = Round(position);
+    double nearPosition = isSnapAnimation_ ? endPos_ : finalPosition_;
+    position = NearEqual(position, nearPosition, 0.5) ? position : Round(position);
     currentVelocity_ = frictionVelocity_;
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
@@ -919,6 +938,8 @@ void Scrollable::ProcessScrollMotion(double position)
         "needScrollSnapChange_ is %{public}u",
         position, currentVelocity_, needScrollSnapChange_);
     if ((NearEqual(currentPos_, position))) {
+        // trace stop at OnScrollStop
+        AceAsyncTraceBegin(0, TRAILING_ANIMATION);
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION);
     } else {
         // UpdateScrollPosition return false, means reach to scroll limit.
@@ -940,6 +961,7 @@ void Scrollable::ProcessScrollMotion(double position)
         (!Container::IsCurrentUseNewPipeline() && outBoundaryCallback_ && outBoundaryCallback_())) {
         scrollPause_ = true;
         skipRestartSpring_ = true;
+        MarkNeedFlushAnimationStartTime();
         StopFrictionAnimation();
     }
 }
@@ -1034,6 +1056,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         if (scroll->isFrictionAnimationStop_ || scroll->isTouching_) {
             return;
         }
+        scroll->isSnapAnimation_ = false;
         scroll->ProcessScrollMotion(position);
         if (NearEqual(scroll->finalPosition_, position, 1.0)) {
             scroll->StopFrictionAnimation();
@@ -1093,6 +1116,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
             if (!scroll->isSnapScrollAnimationStop_) {
                 scroll->ProcessScrollSnapMotion(scroll->endPos_);
             } else if (!scroll->isSnapAnimationStop_) {
+                scroll->isSnapAnimation_ = true;
                 scroll->ProcessScrollMotion(scroll->endPos_);
             }
             scroll->StopSnapAnimation();
@@ -1100,6 +1124,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
             if (!scroll->isSnapScrollAnimationStop_) {
                 scroll->ProcessScrollSnapMotion(position);
             } else if (!scroll->isSnapAnimationStop_) {
+                scroll->isSnapAnimation_ = true;
                 scroll->ProcessScrollMotion(position);
             }
         }
@@ -1178,7 +1203,7 @@ void Scrollable::OnCollectTouchTarget(
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
 {
     if (panRecognizerNG_) {
-        panRecognizerNG_->AssignNodeId(frameNode->GetId());
+        panRecognizerNG_->SetNodeId(frameNode->GetId());
         panRecognizerNG_->AttachFrameNode(frameNode);
         panRecognizerNG_->SetTargetComponent(targetComponent);
         panRecognizerNG_->SetIsSystemGesture(true);

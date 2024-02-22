@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 const DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;
 const double DEFAULT_VALUE = 0.0;
 
-void SetPluginWidth(NodeHandle node, double value, int32_t widthUnit)
+void SetPluginWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 widthUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -32,7 +32,7 @@ void SetPluginWidth(NodeHandle node, double value, int32_t widthUnit)
     PluginModelNG::SetWidth(frameNode, width);
 }
 
-void SetPluginHeight(NodeHandle node, double value, int32_t heightUnit)
+void SetPluginHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 heightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -40,7 +40,8 @@ void SetPluginHeight(NodeHandle node, double value, int32_t heightUnit)
     PluginModelNG::SetHeight(frameNode, height);
 }
 
-void SetPluginSize(NodeHandle node, double widthVal, double heightVal, int32_t widthUnit, int32_t heightUnit)
+void SetPluginSize(ArkUINodeHandle node, ArkUI_Float32 widthVal, ArkUI_Float32 heightVal,
+    ArkUI_Int32 widthUnit, ArkUI_Int32 heightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -49,7 +50,7 @@ void SetPluginSize(NodeHandle node, double widthVal, double heightVal, int32_t w
     PluginModelNG::SetPluginSize(frameNode, width, height);
 }
 
-void ResetPluginWidth(NodeHandle node)
+void ResetPluginWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -57,7 +58,7 @@ void ResetPluginWidth(NodeHandle node)
     PluginModelNG::SetWidth(frameNode, width);
 }
 
-void ResetPluginHeight(NodeHandle node)
+void ResetPluginHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -65,7 +66,7 @@ void ResetPluginHeight(NodeHandle node)
     PluginModelNG::SetHeight(frameNode, height);
 }
 
-void ResetPluginSize(NodeHandle node)
+void ResetPluginSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -74,11 +75,13 @@ void ResetPluginSize(NodeHandle node)
     PluginModelNG::SetPluginSize(frameNode, width, height);
 }
 
-ArkUIPluginModifierAPI GetPluginModifier()
+namespace NodeModifier {
+const ArkUIPluginModifier* GetPluginModifier()
 {
-    static const ArkUIPluginModifierAPI modifier = {SetPluginWidth, SetPluginHeight, SetPluginSize,
+    static const ArkUIPluginModifier modifier = {SetPluginWidth, SetPluginHeight, SetPluginSize,
         ResetPluginWidth, ResetPluginHeight, ResetPluginSize };
 
-    return modifier;
+    return &modifier;
+}
 }
 }

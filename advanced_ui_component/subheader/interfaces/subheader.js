@@ -769,6 +769,26 @@ export class SubHeader extends ViewPU {
       Row.onAreaChange(((e, t) => {
         this.arrowWidth = Number(parseInt(t.width.toString(), 0))
       }));
+      ViewStackProcessor.visualState("focused");
+      Row.border({
+        radius: 4,
+        width: 2,
+        color: {
+          id: -1,
+          type: 10001,
+          params: ["sys.color.ohos_id_color_focused_outline"],
+          bundleName: "",
+          moduleName: ""
+        },
+        style: BorderStyle.Solid
+      });
+      ViewStackProcessor.visualState("normal");
+      Row.border({
+        radius: 4,
+        width: 2,
+        color: Color.Transparent
+      });
+      ViewStackProcessor.visualState();
       o || Row.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -837,36 +857,6 @@ export class SubHeader extends ViewPU {
     }));
     Row.pop();
     Row.pop();
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.textArrowFocus ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, t) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Row.create();
-          Row.height(32);
-          Row.width(this.arrowWidth);
-          Row.hitTestBehavior(HitTestMode.None);
-          Row.border({
-            width: 2,
-            color: {
-              id: -1,
-              type: 10001,
-              params: ["sys.color.ohos_id_color_focused_outline"],
-              bundleName: "",
-              moduleName: ""
-            }
-          });
-          Row.borderRadius(4);
-          t || Row.pop();
-          ViewStackProcessor.StopGetAccessRecording()
-        }));
-        Row.pop()
-      })) : If.branchId(1);
-      t || If.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    If.pop();
     Stack.pop();
     Row.pop()
   }

@@ -386,15 +386,6 @@ public:
     void CombineIntoExclusiveRecognizer(
         const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId);
 
-    bool IsResponseRegion() const
-    {
-        return isResponseRegion_;
-    }
-    void MarkResponseRegion(bool isResponseRegion)
-    {
-        isResponseRegion_ = isResponseRegion;
-    }
-
     const std::vector<DimensionRect>& GetResponseRegion() const
     {
         return responseRegion_;

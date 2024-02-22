@@ -103,7 +103,9 @@ private:
     int32_t instanceId_ = -1;
 };
 
-class WebClientImpl : public OHOS::NWeb::NWebHandler {
+class WebClientImpl :
+    public std::enable_shared_from_this<WebClientImpl>,
+    public OHOS::NWeb::NWebHandler {
 public:
     WebClientImpl() = default;
     explicit WebClientImpl(int32_t instanceId) : instanceId_(instanceId) {}
@@ -112,7 +114,7 @@ public:
     void SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> nweb) override;
     void OnProxyDied() override;
     void OnRouterPush(const std::string& param) override;
-    bool OnConsoleLog(const OHOS::NWeb::NWebConsoleLog& message) override;
+    bool OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message) override;
     void OnMessage(const std::string& param) override;
     void OnPageLoadBegin(const std::string& url) override;
     void OnPageLoadEnd(int httpStatusCode, const std::string& url) override;
@@ -137,7 +139,7 @@ public:
                              const std::string &message,
                              const std::string &defaultValue,
                              std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
-    bool OnFileSelectorShow(std::shared_ptr<NWeb::FileSelectorCallback> callback,
+    bool OnFileSelectorShow(std::shared_ptr<NWeb::NWebStringVectorValueCallback> callback,
                             std::shared_ptr<NWeb::NWebFileSelectorParams> params) override;
 
     bool OnFocus() override;
@@ -147,8 +149,8 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason) override;
     void OnRefreshAccessedHistory(const std::string& url, bool isReload) override;
-    std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> OnHandleInterceptRequest(
-        std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
+    bool OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+                                  std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
     bool OnHandleInterceptUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     void OnResource(const std::string& url) override;
     void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;
@@ -203,7 +205,7 @@ public:
     void OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone) override;
     void OnDateTimeChooserPopup(
         const NWeb::DateTimeChooser& chooser,
-        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        const std::vector<std::shared_ptr<NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback) override;
     void OnDateTimeChooserClose() override;
     void OnOverScroll(float xOffset, float yOffset) override;
@@ -213,8 +215,8 @@ public:
     void OnScrollState(bool scrollState) override;
     void OnRootLayerChanged(int width, int height) override;
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity) override;
-    void OnNativeEmbedLifecycleChange(const NWeb::NativeEmbedDataInfo& dataInfo) override;
-    void OnNativeEmbedGestureEvent(const NWeb::NativeEmbedTouchEvent& event) override;
+    void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo) override;
+    void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

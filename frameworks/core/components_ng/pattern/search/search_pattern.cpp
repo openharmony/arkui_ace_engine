@@ -177,9 +177,6 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
     cancelButtonLayoutProperty->UpdateLabel("");
     cancelButtonFrameNode->MarkModifyDone();
-
-    HandleEnabled();
-
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldValueChangeEvent();
@@ -192,6 +189,7 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+    HandleEnabled();
 }
 
 void SearchPattern::HandleBackgroundColor()
@@ -281,6 +279,8 @@ void SearchPattern::InitTextFieldDragEvent()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldEventHub = textFieldFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(textFieldEventHub);
+
+    textFieldFrameNode->SetDragPreview(host->GetDragPreview());
 
     auto dragStart = searchEventHub->GetOnDragStart();
     if (dragStart != nullptr) {
@@ -642,6 +642,9 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     }
 
     if (event.action != KeyAction::DOWN) {
+        if (event.code == KeyCode::KEY_TAB && focusChoice_ == FocusChoice::SEARCH) {
+            textFieldPattern->OnKeyEvent(event);
+        }
         return false;
     }
 
@@ -767,9 +770,10 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
 
-    if (focusChoice_ == SearchPattern::FocusChoice::SEARCH) {
+    if (focusChoice_ == FocusChoice::SEARCH) {
         if (!recoverFlag) {
             if (!textFieldPattern->GetTextValue().empty()) {
+                textFieldPattern->NeedRequestKeyboard();
                 textFieldPattern->HandleOnSelectAll(true); // Select all text
                 textFieldPattern->StopTwinkling();         // Hide caret
             } else {

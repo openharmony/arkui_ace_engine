@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -52,7 +53,13 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     drawCmdSize_.SetHeight(drawCmdList->GetHeight());
     rsDrawCmdList->SetWidth(drawCmdList->GetWidth());
     rsDrawCmdList->SetHeight(drawCmdList->GetHeight());
-    
+
+    if (needResetSurface_) {
+        CHECK_NULL_VOID(renderContext_);
+        renderContext_->ResetSurface();
+        needResetSurface_ = false;
+    }
+
     if (drawCmdList->GetSize() == 0) {
         return;
     }
@@ -80,6 +87,13 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     drawCmdSize_.SetHeight(drawCmdList->GetHeight());
     rsDrawCmdList->SetWidth(drawCmdList->GetWidth());
     rsDrawCmdList->SetHeight(drawCmdList->GetHeight());
+
+    if (needResetSurface_) {
+        CHECK_NULL_VOID(renderContext_);
+        renderContext_->ResetSurface();
+        needResetSurface_ = false;
+    }
+
     if (drawCmdList->IsEmpty()) {
         return;
     }

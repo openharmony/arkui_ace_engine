@@ -113,6 +113,7 @@ template("ace_ohos_standard_source_set") {
       "ability_runtime:abilitykit_native",
       "ability_runtime:auto_fill_manager",
       "ability_runtime:data_ability_helper",
+      "bundle_framework:appexecfwk_core",
       "common_event_service:cesfwk_innerkits",
       "data_share:datashare_consumer",
       "ets_runtime:libark_jsruntime",
@@ -134,6 +135,7 @@ template("ace_ohos_standard_source_set") {
       "window_manager:libwm",
       "window_manager:libwsutils",
       "window_manager:scene_session",
+      "window_manager:screen_session_manager_client",
     ]
 
     if (defined(config.media_library_exists) && config.media_library_exists) {

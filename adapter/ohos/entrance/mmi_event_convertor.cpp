@@ -96,6 +96,22 @@ void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, To
     touchEvent.CovertId();
 }
 
+Offset GetTouchEventOriginOffset(const TouchEvent& event)
+{
+    auto pointerEvent = event.pointerEvent;
+    if (!pointerEvent) {
+        return Offset();
+    }
+    int32_t pointerID = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = pointerEvent->GetPointerItem(pointerID, item);
+    if (!ret) {
+        return Offset();
+    } else {
+        return Offset(item.GetWindowX(), item.GetWindowY());
+    }
+}
+
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
@@ -114,9 +130,6 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         touchPoint.sourceTool };
     AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
-#ifdef SECURITY_COMPONENT_ENABLE
-    event.enhanceData = pointerEvent->GetEnhanceData();
-#endif
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
@@ -265,9 +278,6 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     TimeStamp time(microseconds);
     events.time = time;
     events.pointerEvent = pointerEvent;
-#ifdef SECURITY_COMPONENT_ENABLE
-    events.enhanceData = pointerEvent->GetEnhanceData();
-#endif
     auto sourceTool = GetSourceTool(item.GetToolType());
     if (events.sourceType == SourceType::TOUCH && sourceTool == SourceTool::PEN) {
         events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
@@ -278,12 +288,15 @@ void GetAxisEventAction(int32_t action, AxisEvent& event)
 {
     switch (action) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN:
             event.action = AxisAction::BEGIN;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_UPDATE:
             event.action = AxisAction::UPDATE;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_END:
             event.action = AxisAction::END;
             break;
         default:
@@ -310,8 +323,11 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
     event.pinchAxisScale = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
+    event.rotateAxisAngle = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ROTATE);
     int32_t orgAction = pointerEvent->GetPointerAction();
     GetAxisEventAction(orgAction, event);
+    event.isRotationEvent = (orgAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN) &&
+                            (orgAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     event.sourceTool = GetSourceTool(item.GetToolType());

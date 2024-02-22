@@ -432,6 +432,7 @@ private:
     double ComputeCap(int dragCount);
     double GetGain(double delta);
     void SetDelayedTask();
+    void MarkNeedFlushAnimationStartTime();
     float GetFrictionVelocityByFinalPosition(float final, float position, float signum, float friction,
         float threshold = DEFAULT_MULTIPLIER);
 
@@ -530,6 +531,7 @@ private:
     bool isSnapScrollAnimationStop_ = true;
     float snapVelocity_ = 0.0f;
     float endPos_ = 0.0;
+    bool isSnapAnimation_ = false;
 };
 
 } // namespace OHOS::Ace::NG

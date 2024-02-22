@@ -16,12 +16,10 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SELECT_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SELECT_MODIFIER_H
 
-#include "core/interfaces/native/node/api.h"
-#include "core/components_ng/pattern/select/select_model.h"
-#include "frameworks/bridge/common/utils/utils.h"
+#include "core/interfaces/native/node/node_api.h"
 
-namespace OHOS::Ace::NG {
-ArkUISelectModifierAPI GetSelectModifier();
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUISelectModifier* GetSelectModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SELECT_MODIFIER_H

@@ -92,17 +92,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
 {
     auto&& config = canvasImage_->GetPaintConfig();
     config.renderMode_ = renderProps->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
-    ImageInterpolation intepolation = renderProps->GetImageInterpolation().value_or(ImageInterpolation::NONE);
-    // add API version protection
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        intepolation = renderProps->GetImageInterpolation().value_or(ImageInterpolation::LOW);
-    }
-    auto container = Container::Current();
-    // If the default value is set to ImageInterpolation::LOW, the ScenceBoard memory increases.
-    // Therefore the default value is different in the ScenceBoard.
-    if (container && container->IsScenceBoardWindow()) {
-        intepolation = renderProps->GetImageInterpolation().value_or(ImageInterpolation::NONE);
-    }
+    ImageInterpolation intepolation = renderProps->GetImageInterpolation().value_or(interpolationDefault_);
     config.imageInterpolation_ = intepolation;
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     config.smoothEdge_ = renderProps->GetSmoothEdge().value_or(0.0f);

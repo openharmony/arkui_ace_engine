@@ -16,10 +16,10 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_RICH_EDITOR_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_RICH_EDITOR_MODIFIER_H
 
-#include "core/interfaces/native/node/api.h"
+#include "core/interfaces/native/node/node_api.h"
 
-namespace OHOS::Ace::NG {
-ArkUIRichEditorModifierAPI GetRichEditorModifier();
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUIRichEditorModifier* GetRichEditorModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_RichEditor_MODIFIER_H

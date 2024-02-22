@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -696,6 +696,13 @@ void WebModelNG::SetDefaultFontSize(int32_t defaultFontSize)
     webPattern->UpdateDefaultFontSize(defaultFontSize);
 }
 
+void WebModelNG::SetDefaultTextEncodingFormat(const std::string& textEncodingFormat)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDefaultTextEncodingFormat(textEncodingFormat);
+}
+
 void WebModelNG::SetMinFontSize(int32_t minFontSize)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -848,10 +855,9 @@ void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)
 {
 #if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
     if (webId != -1) {
-        std::weak_ptr<OHOS::NWeb::NWeb> nwebWeak = OHOS::NWeb::NWebHelper::Instance().GetNWeb(webId);
-        auto nwebSptr = nwebWeak.lock();
-        if (nwebSptr) {
-            nwebSptr->NotifyPopupWindowResult(result);
+        std::shared_ptr<OHOS::NWeb::NWeb> nweb = OHOS::NWeb::NWebHelper::Instance().GetNWeb(webId);
+        if (nweb) {
+            nweb->NotifyPopupWindowResult(result);
         }
     }
 #endif

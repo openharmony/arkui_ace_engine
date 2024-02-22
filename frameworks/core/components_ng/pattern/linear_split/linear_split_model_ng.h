@@ -24,9 +24,9 @@ namespace OHOS::Ace::NG {
 class  ACE_EXPORT LinearSplitModelNG : public OHOS::Ace::LinearSplitModel {
 public:
     void Create(SplitType splitType) override;
-    void SetResizeable(NG::SplitType splitType, bool resizeable) override;
+    void SetResizable(NG::SplitType splitType, bool resizable) override;
     void SetDivider(NG::SplitType splitType, const NG::ItemDivider& divider) override;
-    static void SetResizeable(FrameNode* frameNode, NG::SplitType splitType, bool resizeable);
+    static void SetResizable(FrameNode* frameNode, NG::SplitType splitType, bool resizable);
     static void SetDivider(FrameNode* frameNode, NG::SplitType splitType, const NG::ItemDivider& divider);
 };
 

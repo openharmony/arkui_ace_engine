@@ -160,6 +160,7 @@ private:
     std::vector<std::string> formLinkInfos_;
     TimeStamp touchDownTime_;
     bool shouldResponseClick_ = false;
+    Offset lastTouchLocation_;
 
     bool isJsCard_ = true;
 };

@@ -90,25 +90,17 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     }
     auto effect = FindPageTransitionEffect(type);
     pageTransitionFinish_ = std::make_shared<std::function<void()>>(onFinish);
-    auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_,
-                               instanceId = Container::CurrentId()]() {
-        ContainerScope scope(instanceId);
-        auto taskExecutor = Container::CurrentTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostSyncTask(
-            [weak, sharedFinish] {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                auto host = pattern->GetHost();
-                CHECK_NULL_VOID(host);
-                if (sharedFinish == pattern->pageTransitionFinish_) {
-                    // ensure this is exactly the finish callback saved in pagePattern,
-                    // otherwise means new pageTransition started
-                    pattern->FirePageTransitionFinish();
-                    host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
-                }
-            },
-            TaskExecutor::TaskType::UI);
+    auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        if (sharedFinish == pattern->pageTransitionFinish_) {
+            // ensure this is exactly the finish callback saved in pagePattern,
+            // otherwise means new pageTransition started
+            pattern->FirePageTransitionFinish();
+            host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
+        }
     };
     if (effect && effect->GetUserCallback()) {
         RouteType routeType = (type == PageTransitionType::ENTER_POP || type == PageTransitionType::EXIT_POP)
@@ -162,6 +154,22 @@ void PagePattern::ProcessShowState()
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto manager = context->GetSafeAreaManager();
+    if (manager) {
+        auto safeArea = manager->GetSafeArea();
+        auto parentGlobalOffset = host->GetParentGlobalOffsetDuringLayout();
+        auto geometryNode = host->GetGeometryNode();
+        auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
+        // if page's frameRect not fit current safeArea, need layout page again
+        if (!NearEqual(frame.GetY(), safeArea.top_.end)) {
+            host->MarkDirtyNode(manager->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE);
+        }
+        if (!NearEqual(frame.GetY() + frame.Height(), safeArea.bottom_.start)) {
+            host->MarkDirtyNode(manager->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE);
+        }
+    }
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
 }
@@ -176,6 +184,9 @@ void PagePattern::OnDetachFromMainTree()
 {
     state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    if (disappearCallback_) {
+        disappearCallback_();
+    }
 }
 
 void PagePattern::OnShow()
@@ -185,8 +196,6 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID(!isOnShow_);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    state_ = RouterPageState::ON_PAGE_SHOW;
-    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
     }
@@ -199,6 +208,8 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(true);
     isOnShow_ = true;
+    state_ = RouterPageState::ON_PAGE_SHOW;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     JankFrameReport::GetInstance().StartRecord(pageInfo_->GetPageUrl());
     PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
     auto pageUrlChecker = container->GetPageUrlChecker();
@@ -225,8 +236,6 @@ void PagePattern::OnHide()
     JankFrameReport::GetInstance().FlushRecord();
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    state_ = RouterPageState::ON_PAGE_HIDE;
-    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), false);
     }
@@ -234,6 +243,8 @@ void PagePattern::OnHide()
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(false);
     isOnShow_ = false;
+    state_ = RouterPageState::ON_PAGE_HIDE;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     auto container = Container::Current();
     if (container) {
         auto pageUrlChecker = container->GetPageUrlChecker();
@@ -263,8 +274,8 @@ bool PagePattern::OnBackPressed()
     // if in page transition, do not set to ON_BACK_PRESS
     state_ = RouterPageState::ON_BACK_PRESS;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
-    if (OnBackPressed_) {
-        return OnBackPressed_();
+    if (onBackPressed_) {
+        return onBackPressed_();
     }
     return false;
 }

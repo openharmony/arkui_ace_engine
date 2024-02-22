@@ -289,6 +289,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto targetOffset = targetNode->GetPaintRectOffset();
         auto constrainHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
         auto constrainWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+        float maxWidth = constrainWidth - targetSecurity_ * DOUBLE;
         auto placement = bubbleLayoutProperty->GetPlacement().value_or(Placement::BOTTOM);
         std::unordered_set<Placement> setHorizontal = { Placement::LEFT, Placement::LEFT_BOTTOM, Placement::LEFT_TOP,
             Placement::RIGHT, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP };
@@ -311,6 +312,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                     targetOffset.GetY() - scaledBubbleSpacing);
             }
         }
+        constrainWidth = std::min(constrainWidth, maxWidth);
         SizeF size = SizeF(constrainWidth, constrainHeight);
         childLayoutConstraint.UpdateMaxSizeWithCheck(size);
         child->Measure(childLayoutConstraint);
@@ -363,7 +365,7 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
         InitCaretTargetSizeAndPosition();
         // subtract the global offset of the overlay node,
         // because the final node position is set relative to the overlay node.
-        auto overlayGlobalOffset = bubbleNode->GetPaintRectOffset();
+        auto overlayGlobalOffset = bubbleNode->GetOffsetRelativeToWindow();
         targetOffset_ -= overlayGlobalOffset;
     }
     childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
@@ -497,11 +499,11 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     userSetTargetSpace_ = layoutProp->GetTargetSpace().value_or(Dimension(0.0f));
     targetSpace_ = layoutProp->GetTargetSpace().value_or(popupTheme->GetTargetSpace());
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
-    scaledBubbleSpacing_ = static_cast<float>(popupTheme->GetBubbleSpacing().ConvertToPx());
     auto height = layoutProp->GetArrowHeight().value_or(DEFAULT_BUBBLE_ARROW_HEIGHT);
     auto width = layoutProp->GetArrowWidth().value_or(DEFAULT_BUBBLE_ARROW_WIDTH);
     calculateArrowPoint(height, width);
     arrowHeight_ = height.ConvertToPx();
+    scaledBubbleSpacing_ = arrowHeight_;
     realArrowWidth_ = BUBBLE_ARROW_WIDTH.ConvertToPx();
     realArrowHeight_ = BUBBLE_ARROW_HEIGHT.ConvertToPx();
     positionOffset_ = layoutProp->GetPositionOffset().value_or(OffsetF());
@@ -674,21 +676,6 @@ OffsetF BubbleLayoutAlgorithm::GetChildPositionNew(
             positionOffset_ = OffsetF(0.0f, 0.0f);
         }
         childPosition = GetPositionWithPlacementNew(childSize, topPosition, bottomPosition, ArrowOffset);
-        if (placement_ == Placement::RIGHT ||
-            placement_ == Placement::RIGHT_TOP ||
-            placement_ == Placement::RIGHT_BOTTOM) {
-            childPosition += OffsetF(arrowHeight_, 0);
-        } else if (placement_ == Placement::LEFT ||
-            placement_ == Placement::LEFT_TOP ||
-            placement_ == Placement::LEFT_BOTTOM) {
-            childPosition -= OffsetF(arrowHeight_, 0);
-        } else if (placement_ == Placement::TOP_LEFT ||
-            placement_ == Placement::TOP_RIGHT) {
-            childPosition -= OffsetF(0, arrowHeight_);
-        } else if (placement_ == Placement::BOTTOM_LEFT ||
-            placement_ == Placement::BOTTOM_RIGHT) {
-            childPosition += OffsetF(0, arrowHeight_);
-        }
         UpdateChildPosition(childPosition);
         didNeedArrow = GetIfNeedArrow(bubbleProp, childSize_);
         position = FitToScreenNew(childPosition, step, i, childSize, didNeedArrow);

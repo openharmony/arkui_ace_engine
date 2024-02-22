@@ -108,7 +108,13 @@ public:
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
         if (!bundleName.empty() && !moduleName.empty()) {
-            resourceAdapters_.erase(std::make_pair(bundleName, moduleName));
+            auto mapKey = std::make_pair(bundleName, moduleName);
+            if (resourceAdapters_.find(mapKey) != resourceAdapters_.end()) {
+                resourceAdapters_.erase(mapKey);
+            }
+
+            std::string key = MakeCacheKey(bundleName, moduleName);
+            CountLimitLRU::RemoveCacheObjFromCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
         }
     }
 

@@ -59,11 +59,13 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                      pickerTheme->GetDividerSpacing().ConvertToPx());
     auto columnNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(columnNode);
-    auto stackNode = DynamicCast<FrameNode>(columnNode->GetParent());
+    auto blendNode = DynamicCast<FrameNode>(columnNode->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
     CHECK_NULL_VOID(stackNode);
     auto pickerNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(pickerNode);
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    auto layoutConstraint = blendNode->GetLayoutProperty()->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
     auto width = layoutConstraint->parentIdealSize.Width();
     float pickerWidth = 0.0f;
@@ -97,21 +99,21 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(std::min(height, pickerMaxHeight));
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
-    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutChildConstraint = blendNode->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutChildConstraint);
     }
     MeasureText(layoutWrapper, frameSize);
     auto gradientPercent = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()) / frameSize.Height();
-    InitGradient(gradientPercent, stackNode, columnNode);
+    InitGradient(gradientPercent, blendNode, columnNode);
 }
 
-void DatePickerColumnLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> stackNode,
+void DatePickerColumnLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> blendNode,
     const RefPtr<FrameNode> columnNode)
 {
-    auto stackRenderContext = stackNode->GetRenderContext();
+    auto blendRenderContext = blendNode->GetRenderContext();
     auto columnRenderContext = columnNode->GetRenderContext();
-    CHECK_NULL_VOID(stackRenderContext);
+    CHECK_NULL_VOID(blendRenderContext);
     CHECK_NULL_VOID(columnRenderContext);
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
@@ -122,9 +124,9 @@ void DatePickerColumnLayoutAlgorithm::InitGradient(const float& gradientPercent,
 
     columnRenderContext->UpdateBackBlendMode(BlendMode::SRC_IN);
     columnRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
-    stackRenderContext->UpdateLinearGradient(gradient);
-    stackRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
-    stackRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
+    blendRenderContext->UpdateLinearGradient(gradient);
+    blendRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
+    blendRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 
 void DatePickerColumnLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size)

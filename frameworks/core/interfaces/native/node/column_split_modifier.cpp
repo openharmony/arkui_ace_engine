@@ -16,7 +16,6 @@
 
 #include <optional>
 
-#include "core/interfaces/native/node/api.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
@@ -24,24 +23,25 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-constexpr bool DEFAULT_COLUMN_SPLIT_RESIZEABLE = false;
+constexpr bool DEFAULT_COLUMN_SPLIT_RESIZABLE = false;
 constexpr Dimension DEFAULT_DIVIDER_START = Dimension(0.0, DimensionUnit::VP);
 constexpr Dimension DEFAULT_DIVIDER_END = Dimension(0.0, DimensionUnit::VP);
-void SetColumnSplitResizeable(NodeHandle node, bool resizeable)
+void SetColumnSplitResizable(ArkUINodeHandle node, ArkUI_Bool resizable)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::SetResizeable(frameNode, NG::SplitType::COLUMN_SPLIT, resizeable);
+    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, resizable);
 }
 
-void ResetColumnSplitResizeable(NodeHandle node)
+void ResetColumnSplitResizable(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::SetResizeable(frameNode, NG::SplitType::COLUMN_SPLIT, DEFAULT_COLUMN_SPLIT_RESIZEABLE);
+    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, DEFAULT_COLUMN_SPLIT_RESIZABLE);
 }
 
-void SetColumnSplitDivider(NodeHandle node, double stVal, int32_t stUnit, double endVal, int32_t endUnit)
+void SetColumnSplitDivider(ArkUINodeHandle node, ArkUI_Float32 stVal, int32_t stUnit,
+    ArkUI_Float32 endVal, int32_t endUnit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -51,17 +51,19 @@ void SetColumnSplitDivider(NodeHandle node, double stVal, int32_t stUnit, double
     LinearSplitModelNG::SetDivider(frameNode, SplitType::COLUMN_SPLIT, divider);
 }
 
-void ResetColumnSplitDivider(NodeHandle node)
+void ResetColumnSplitDivider(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     LinearSplitModelNG::SetDivider(frameNode, SplitType::COLUMN_SPLIT, { DEFAULT_DIVIDER_START, DEFAULT_DIVIDER_END });
 }
 
-ArkUIColumnSplitModifierAPI GetColumnSplitModifier()
+namespace NodeModifier {
+const ArkUIColumnSplitModifier* GetColumnSplitModifier()
 {
-    static const ArkUIColumnSplitModifierAPI modifier = { SetColumnSplitDivider, ResetColumnSplitDivider,
-                                                          SetColumnSplitResizeable, ResetColumnSplitResizeable };
-    return modifier;
+    static const ArkUIColumnSplitModifier modifier = { SetColumnSplitDivider, ResetColumnSplitDivider,
+                                                       SetColumnSplitResizable, ResetColumnSplitResizable };
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

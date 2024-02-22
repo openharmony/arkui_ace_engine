@@ -51,9 +51,12 @@ public:
     static void SetStartDate(FrameNode* frameNode, const PickerDate& value);
     static void SetEndDate(FrameNode* frameNode, const PickerDate& value);
     static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);
+    static void SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& onChange);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
+    static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
 };
 

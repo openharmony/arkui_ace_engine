@@ -156,15 +156,21 @@ void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
     for (int32_t i = 0; i < length; i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
         CalcDimension dim;
-        if (ParseJsDimensionVp(value, dim)) {
+        bool paramIsValid = false;
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            paramIsValid = ParseJsDimensionVp(value, dim);
+        } else {
+            paramIsValid = ParseJsDimensionVpNG(value, dim);
+        }
+        if (paramIsValid) {
             dashArray.emplace_back(dim);
+        } else {
+            dashArray.clear();
+            break;
         }
     }
-    if (length != static_cast<int32_t>(dashArray.size())) {
-        return;
-    }
     // if odd,add twice
-    if ((static_cast<uint32_t>(length) & 1)) {
+    if (static_cast<uint32_t>(length) == dashArray.size() && (static_cast<uint32_t>(length) & 1)) {
         for (int32_t i = 0; i < length; i++) {
             dashArray.emplace_back(dashArray[i]);
         }
@@ -194,6 +200,8 @@ void JSShape::SetFill(const JSCallbackInfo& info)
         Color fillColor;
         if (ParseJsColor(info[0], fillColor)) {
             ShapeModel::GetInstance()->SetFill(fillColor);
+        } else {
+            ShapeModel::GetInstance()->SetFill(Color::BLACK);
         }
     }
 }
@@ -203,9 +211,16 @@ void JSShape::SetStrokeDashOffset(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    CalcDimension offset;
-    if (!ParseJsDimensionVp(info[0], offset)) {
-        return;
+    CalcDimension offset(0.0f);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!ParseJsDimensionVp(info[0], offset)) {
+            return;
+        }
+    } else {
+        if (!ParseJsDimensionVpNG(info[0], offset)) {
+            // set to default value(0.0f)
+            offset.SetValue(0.0f);
+        }
     }
     ShapeModel::GetInstance()->SetStrokeDashOffset(offset);
 }
@@ -259,7 +274,14 @@ void JSShape::SetStrokeWidth(const JSCallbackInfo& info)
     CalcDimension lineWidth = 1.0_vp;
     if (info[0]->IsString()) {
         const std::string& value = info[0]->ToString();
-        lineWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, 1.0);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            lineWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, 1.0);
+        } else {
+            if (!StringUtils::StringToDimensionWithUnitNG(value, lineWidth, DimensionUnit::VP, 1.0)) {
+                // unit is invalid, use default value(1.0vp) instead.
+                lineWidth = 1.0_vp;
+            }
+        }
     } else {
         ParseJsDimensionVp(info[0], lineWidth);
     }

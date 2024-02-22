@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_qrcode_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/properties/text_style.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -27,12 +25,12 @@ ArkUINativeModuleValue QRCodeBridge::SetQRColor(ArkUIRuntimeCallInfo* runtimeCal
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> qrColorArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, qrColorArg, color)) {
-        GetArkUIInternalNodeAPI()->GetQRCodeModifier().ResetQRColor(nativeNode);
+        GetArkUINodeModifiers()->getQRCodeModifier()->resetQRColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetQRCodeModifier().SetQRColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getQRCodeModifier()->setQRColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -42,8 +40,8 @@ ArkUINativeModuleValue QRCodeBridge::ResetQRColor(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetQRCodeModifier().ResetQRColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getQRCodeModifier()->resetQRColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue QRCodeBridge::SetQRBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -53,12 +51,12 @@ ArkUINativeModuleValue QRCodeBridge::SetQRBackgroundColor(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> qrBackgroundColor = runtimeCallInfo->GetCallArgRef(1);
 
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, qrBackgroundColor, color)) {
-        GetArkUIInternalNodeAPI()->GetQRCodeModifier().ResetQRBackgroundColor(nativeNode);
+        GetArkUINodeModifiers()->getQRCodeModifier()->resetQRBackgroundColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetQRCodeModifier().SetQRBackgroundColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getQRCodeModifier()->setQRBackgroundColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -68,8 +66,8 @@ ArkUINativeModuleValue QRCodeBridge::ResetQRBackgroundColor(ArkUIRuntimeCallInfo
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetQRCodeModifier().ResetQRBackgroundColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getQRCodeModifier()->resetQRBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue QRCodeBridge::SetContentOpacity(ArkUIRuntimeCallInfo *runtimeCallInfo)
@@ -78,12 +76,13 @@ ArkUINativeModuleValue QRCodeBridge::SetContentOpacity(ArkUIRuntimeCallInfo *run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> qrContentOpacity = runtimeCallInfo->GetCallArgRef(1);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double opacity;
     if (!ArkTSUtils::ParseJsDouble(vm, qrContentOpacity, opacity)) {
-        GetArkUIInternalNodeAPI()->GetQRCodeModifier().ResetContentOpacity(nativeNode);
+        GetArkUINodeModifiers()->getQRCodeModifier()->resetContentOpacity(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetQRCodeModifier().SetContentOpacity(nativeNode, opacity);
+        GetArkUINodeModifiers()->getQRCodeModifier()->setContentOpacity(nativeNode,
+            static_cast<ArkUI_Float32>(opacity));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -93,8 +92,8 @@ ArkUINativeModuleValue QRCodeBridge::ResetContentOpacity(ArkUIRuntimeCallInfo *r
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetQRCodeModifier().ResetContentOpacity(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getQRCodeModifier()->resetContentOpacity(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

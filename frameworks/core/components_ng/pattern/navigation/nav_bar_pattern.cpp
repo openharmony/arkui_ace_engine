@@ -38,18 +38,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-void UpdateTitleFontSize(const RefPtr<NavBarNode>& hostNode, const Dimension& fontSize)
-{
-    auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_VOID(navBarLayoutProperty);
-    auto titleNode = AceType::DynamicCast<FrameNode>(hostNode->GetTitle());
-    CHECK_NULL_VOID(titleNode);
-    auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(titleLayoutProperty);
-    titleLayoutProperty->UpdateFontSize(fontSize);
-    titleNode->MarkModifyDone();
-}
-
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -254,8 +242,10 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     auto theme = NavigationGetTheme();
     auto navBarPattern = AceType::DynamicCast<NavBarPattern>(navBarNode->GetPattern());
     auto navBarMaxNum = navBarPattern->GetMaxMenuNum();
-    auto mostMenuItemCount = navBarMaxNum < 0 ? theme->GetMostMenuItemCountInBar() :
-        static_cast<uint32_t>(navBarMaxNum);
+    auto mostMenuItemCount =
+        navBarMaxNum < 0 ? theme->GetMostMenuItemCountInBar() : static_cast<uint32_t>(navBarMaxNum);
+    mostMenuItemCount = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE ? MAX_MENU_NUM_LARGE
+                                                                                                  : mostMenuItemCount;
     navBarPattern->SetMaxMenuNum(mostMenuItemCount);
     bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
 
@@ -363,46 +353,6 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     return menuNode;
 }
 
-void BuildTitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
-{
-    CHECK_NULL_VOID(navBarNode->GetTitle());
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_VOID(navBarLayoutProperty);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    if (!navBarNode->GetPrevTitleIsCustomValue(false)) {
-        if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-            UpdateTitleFontSize(navBarNode, theme->GetTitleFontSize());
-        } else {
-            UpdateTitleFontSize(navBarNode, theme->GetTitleFontSizeBig());
-        }
-    }
-
-    if (navBarNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
-        return;
-    }
-    if (navBarNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        titleBarNode->RemoveChild(titleBarNode->GetTitle());
-        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
-    titleBarNode->SetTitle(navBarNode->GetTitle());
-    titleBarNode->AddChild(titleBarNode->GetTitle());
-}
-
-void BuildSubtitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
-{
-    CHECK_NULL_VOID(navBarNode->GetSubtitle());
-    if (navBarNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
-        return;
-    }
-    if (navBarNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        titleBarNode->RemoveChild(titleBarNode->GetSubtitle());
-        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
-    titleBarNode->SetSubtitle(navBarNode->GetSubtitle());
-    titleBarNode->AddChild(titleBarNode->GetSubtitle());
-}
-
 void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
     if (navBarNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
@@ -435,37 +385,35 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
     }
 }
 
-void BuildTitleBar(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode,
-    RefPtr<NavBarLayoutProperty>& navBarLayoutProperty)
+void BuildTitleBar(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    do {
-        if (!navBarNode->HasBackButtonNodeOperation() ||
-            navBarNode->GetBackButtonNodeOperationValue() == ChildNodeOperation::NONE) {
-            break;
+
+    // Update back button visibility
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    if (backButtonNode) {
+        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateVisibility(
+            titleBarLayoutProperty->GetHideBackButtonValue(false) ? VisibleType::GONE : VisibleType::VISIBLE);
+    }
+
+    // update main title
+    auto mainTitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    if (mainTitleNode && !navBarNode->GetPrevTitleIsCustomValue(false)) {
+        auto textLayoutProperty = mainTitleNode->GetLayoutProperty<TextLayoutProperty>();
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+            textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+        } else {
+            textLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
         }
-        if (navBarNode->GetBackButtonNodeOperationValue() == ChildNodeOperation::REMOVE) {
-            auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
-            CHECK_NULL_VOID(backButtonNode);
-            auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
-            CHECK_NULL_VOID(backButtonLayoutProperty);
-            backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
-            break;
-        }
-        titleBarNode->SetBackButton(navBarNode->GetBackButton());
-        titleBarNode->AddChild(titleBarNode->GetBackButton());
-        if (titleBarNode->GetBackButton() && !titleBarLayoutProperty->GetHideBackButtonValue(false)) {
-            auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
-            CHECK_NULL_VOID(backButtonNode);
-            auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
-            CHECK_NULL_VOID(backButtonLayoutProperty);
-            backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-            break;
-        }
-    } while (false);
-    BuildTitle(navBarNode, titleBarNode);
-    BuildSubtitle(navBarNode, titleBarNode);
+        mainTitleNode->MarkModifyDone();
+    }
+
+    // update menu
     BuildMenu(navBarNode, titleBarNode);
 }
 
@@ -480,14 +428,16 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
     auto navBarPattern = AceType::DynamicCast<NavBarPattern>(hostNode->GetPattern());
     auto hasCustomMenu = hostNode->GetPrevMenuIsCustomValue(false) && hostNode->GetMenu();
     // menu is not consume menu, menu item and tool bar menus need all empty
-    auto hideMenu = !hostNode->GetPrevMenuIsCustomValue(false) && navBarPattern->GetTitleBarMenuItems().size() == 0 &&
-                    navBarPattern->GetToolBarMenuItems().size() == 0;
-    if (!hostNode->GetTitle() && !hostNode->GetSubtitle() && !hostNode->GetBackButton() && !hasCustomMenu && hideMenu) {
+    auto hideMenu = !hostNode->GetPrevMenuIsCustomValue(false) && navBarPattern->GetTitleBarMenuItems().empty() &&
+                    navBarPattern->GetToolBarMenuItems().empty();
+    if (!titleBarNode->GetTitle() && !titleBarNode->GetSubtitle() && !titleBarNode->GetBackButton() && !hasCustomMenu &&
+        hideMenu) {
+        titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
         return;
     }
     titleBarLayoutProperty->UpdateTitleMode(navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE));
     titleBarLayoutProperty->UpdateHideBackButton(navBarLayoutProperty->GetHideBackButtonValue(false));
-    BuildTitleBar(hostNode, titleBarNode, navBarLayoutProperty);
+    BuildTitleBar(hostNode, titleBarNode);
     if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
         titleBarNode->SetJSViewActive(false);
@@ -501,6 +451,7 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
         }
     }
     titleBarNode->MarkModifyDone();
+    titleBarNode->MarkDirtyNode();
 }
 
 void MountToolBar(const RefPtr<NavBarNode>& hostNode)
@@ -696,9 +647,6 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
     CHECK_NULL_VOID(navBarNode);
     // change menu num in landscape and orientation
     do {
-        if (type != WindowSizeChangeReason::ROTATION) {
-            break;
-        }
         if (navBarNode->GetPrevMenuIsCustomValue(false)) {
             break;
         }

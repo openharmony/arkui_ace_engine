@@ -387,8 +387,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         actuator->SetEventColumn(actuator);
     };
+    auto longPressCancel = [weak = WeakClaim(this)] {
+        // remove drag overlay info by Cancel event.
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Long press event has been canceled.");
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        actuator->HideEventColumn();
+        actuator->HidePixelMap();
+        actuator->HideFilter();
+        actuator->SetIsNotInPreviewState(false);
+    };
     longPressUpdate_ = longPressUpdate;
     previewLongPressRecognizer_->SetOnAction(longPressUpdate);
+    previewLongPressRecognizer_->SetOnActionCancel(longPressCancel);
     previewLongPressRecognizer_->SetGestureHub(gestureEventHub_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -422,8 +433,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     }
                 };
 
-                auto customNode = AceType::DynamicCast<FrameNode>(dragPreviewInfo.customNode);
-                OHOS::Ace::NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+                OHOS::Ace::NG::ComponentSnapshot::Create(
+                    dragPreviewInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
 #endif
             } else {
                 auto context = frameNode->GetRenderContext();
@@ -576,7 +587,9 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
+    imageNode->SetActive(true);
     imageNode->CreateLayoutTask();
+    FlushSyncGeometryNodeTasks();
 }
 
 void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode)
@@ -613,7 +626,9 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     SetPreviewDefaultAnimateProperty(imageNode);
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     columnNode->MarkModifyDone();
+    columnNode->SetActive(true);
     columnNode->CreateLayoutTask();
+    FlushSyncGeometryNodeTasks();
 }
 
 void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
@@ -671,7 +686,9 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     }
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
+    imageNode->SetActive(true);
     imageNode->CreateLayoutTask();
+    FlushSyncGeometryNodeTasks();
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -959,5 +976,12 @@ void DragEventActuator::CopyDragEvent(const RefPtr<DragEventActuator>& dragEvent
     actionCancel_ = dragEventActuator->actionCancel_;
     textDragCallback_ = dragEventActuator->textDragCallback_;
     longPressInfo_ = dragEventActuator->longPressInfo_;
+}
+
+void DragEventActuator::FlushSyncGeometryNodeTasks()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushSyncGeometryNodeTasks();
 }
 } // namespace OHOS::Ace::NG

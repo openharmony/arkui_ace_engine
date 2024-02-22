@@ -179,8 +179,8 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
     if (isSvg_ && fillColor_ != info.fillColor_) {
         return false;
     }
-    return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_->GetRawPixelMapPtr() ==
-        info.pixmap_->GetRawPixelMapPtr())) && src_ == info.src_ && resourceId_ == info.resourceId_;
+    return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) &&
+           src_ == info.src_ && resourceId_ == info.resourceId_;
 }
 
 bool ImageSourceInfo::operator!=(const ImageSourceInfo& info) const
@@ -290,7 +290,13 @@ std::string ImageSourceInfo::ToString() const
         return std::string("internal resource id: ") + std::to_string(static_cast<int32_t>(resourceId_));
     }
     if (pixmap_) {
-        return std::string("pixmapID: ") + pixmap_->GetId() + std::string(" -> modifyID: ") + pixmap_->GetModifyId();
+        int32_t w = pixmap_->GetWidth();
+        int32_t h = pixmap_->GetHeight();
+        int32_t totalSize = pixmap_->GetByteCount();
+        auto rowStride = pixmap_->GetRowStride();
+        return std::string("pixmapID: ") + pixmap_->GetId() + std::string(" -> modifyID: ") + pixmap_->GetModifyId() +
+               "details: _w" + std::to_string(w) + "_h" + std::to_string(h) + "_rowStride" + std::to_string(rowStride) +
+               "_byteCount" + std::to_string(totalSize);
     }
     return std::string("empty source");
 }

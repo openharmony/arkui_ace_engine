@@ -201,6 +201,8 @@ void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 
 void PipelineContext::FlushMessages() {}
 
+void PipelineContext::FlushUITasks() {}
+
 void PipelineContext::Finish(bool autoFinish) const {}
 
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
@@ -339,7 +341,21 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
     }
 }
 
-void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
+void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
+{
+    if (task) {
+        task();
+    }
+}
+
+void PipelineContext::FlushSyncGeometryNodeTasks() {}
+
+void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
+{
+    if (task) {
+        task();
+    }
+}
 
 void PipelineContext::FlushPipelineImmediately() {}
 
@@ -525,7 +541,7 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
 
 void PipelineBase::OnActionEvent(const std::string& action) {}
 
-void PipelineBase::SetRootSize(double density, int32_t width, int32_t height) {}
+void PipelineBase::SetRootSize(double density, float width, float height) {}
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {

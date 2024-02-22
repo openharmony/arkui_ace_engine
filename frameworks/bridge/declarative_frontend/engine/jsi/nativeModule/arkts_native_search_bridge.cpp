@@ -16,7 +16,6 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
-#include "core/interfaces/native/node/api.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -39,7 +38,7 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> threeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fourArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fiveArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     const char* fontFamilies[1];
     struct ArkUIFontStruct value = {0.0, 0, 0, INVALID_FONT_STYLE, fontFamilies, 0};
@@ -83,7 +82,7 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
         value.fontStyle = fiveArg->Int32Value(vm);
     }
 
-    GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchTextFont(nativeNode, &value);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchTextFont(nativeNode, &value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -92,8 +91,8 @@ ArkUINativeModuleValue SearchBridge::ResetTextFont(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchTextFont(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchTextFont(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -103,14 +102,14 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderColor(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     uint32_t result;
     if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         result = color.GetValue();
-        GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchPlaceholderColor(nativeNode, result);
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchPlaceholderColor(nativeNode, result);
     } else {
-        GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchPlaceholderColor(nativeNode);
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchPlaceholderColor(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -119,8 +118,8 @@ ArkUINativeModuleValue SearchBridge::ResetPlaceholderColor(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchPlaceholderColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchPlaceholderColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -130,12 +129,12 @@ ArkUINativeModuleValue SearchBridge::SetSelectionMenuHidden(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsBoolean()) {
         uint32_t selectionMenuHidden = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
-        GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchSelectionMenuHidden(nativeNode, selectionMenuHidden);
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchSelectionMenuHidden(nativeNode, selectionMenuHidden);
     } else {
-        GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchSelectionMenuHidden(nativeNode);
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchSelectionMenuHidden(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -145,8 +144,8 @@ ArkUINativeModuleValue SearchBridge::ResetSelectionMenuHidden(ArkUIRuntimeCallIn
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchSelectionMenuHidden(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchSelectionMenuHidden(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -157,7 +156,7 @@ ArkUINativeModuleValue SearchBridge::SetCaretStyle(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> caretWidthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> caretColorArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     auto textFieldTheme = ArkTSUtils::GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, panda::JSValueRef::Undefined(vm));
@@ -173,7 +172,7 @@ ArkUINativeModuleValue SearchBridge::SetCaretStyle(ArkUIRuntimeCallInfo* runtime
     } else {
         caretColor = textFieldTheme->GetCursorColor().GetValue();
     }
-    GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchCaretStyle(
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchCaretStyle(
         nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), caretColor);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -183,8 +182,8 @@ ArkUINativeModuleValue SearchBridge::ResetCaretStyle(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchCaretStyle(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchCaretStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -194,12 +193,12 @@ ArkUINativeModuleValue SearchBridge::SetSearchTextAlign(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     if (secondArg->IsNumber()) {
         int32_t value = secondArg->Int32Value(vm);
         if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
-            GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchTextAlign(nativeNode, value);
+            GetArkUINodeModifiers()->getSearchModifier()->setSearchTextAlign(nativeNode, value);
         }
     }
     return panda::JSValueRef::Undefined(vm);
@@ -210,8 +209,8 @@ ArkUINativeModuleValue SearchBridge::ResetSearchTextAlign(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchTextAlign(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchTextAlign(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -235,7 +234,7 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     auto pipelineContext = container->GetPipelineContext();
@@ -275,7 +274,7 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
         srcStr = "";
     }
     const char* src = srcStr.c_str();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchCancelButton(nativeNode, style, &size, color, src);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchCancelButton(nativeNode, style, &size, color, src);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -284,8 +283,8 @@ ArkUINativeModuleValue SearchBridge::ResetCancelButton(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchCancelButton(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchCancelButton(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -295,13 +294,13 @@ ArkUINativeModuleValue SearchBridge::SetEnableKeyboardOnFocus(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     if (secondArg->IsBoolean()) {
         uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
-        GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchEnableKeyboardOnFocus(nativeNode, value);
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchEnableKeyboardOnFocus(nativeNode, value);
     } else {
-        GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchEnableKeyboardOnFocus(nativeNode);
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchEnableKeyboardOnFocus(nativeNode);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -312,8 +311,8 @@ ArkUINativeModuleValue SearchBridge::ResetEnableKeyboardOnFocus(ArkUIRuntimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchEnableKeyboardOnFocus(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchEnableKeyboardOnFocus(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -326,7 +325,7 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> threeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fourArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fiveArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     const char* fontFamilies[1];
     struct ArkUIFontStruct value = {0.0, 0, 0, INVALID_FONT_STYLE, fontFamilies, 0};
@@ -369,7 +368,7 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
     if (!fiveArg->IsNull() && fiveArg->IsNumber()) {
         value.fontStyle = fiveArg->Int32Value(vm);
     }
-    GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchPlaceholderFont(nativeNode, &value);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchPlaceholderFont(nativeNode, &value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -378,8 +377,8 @@ ArkUINativeModuleValue SearchBridge::ResetPlaceholderFont(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchPlaceholderFont(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchPlaceholderFont(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -391,7 +390,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchIcon(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> threeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fourArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     struct ArkUIIconOptionsStruct value = {0.0, 0, INVALID_COLOR_VALUE, nullptr};
 
@@ -428,7 +427,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchIcon(ArkUIRuntimeCallInfo* runtime
     }
     value.src = srcStr.c_str();
 
-    GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchSearchIcon(nativeNode, &value);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchIcon(nativeNode, &value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -437,8 +436,8 @@ ArkUINativeModuleValue SearchBridge::ResetSearchIcon(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchSearchIcon(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchSearchIcon(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -450,7 +449,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> threeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fourArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     struct ArkUISearchButtonOptionsStruct value = {"", 0.0, 0, INVALID_COLOR_VALUE};
     
@@ -484,7 +483,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     } else {
         value.fontColor = static_cast<int32_t>(theme->GetSearchButtonTextColor().GetValue());
     }
-    GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchSearchButton(nativeNode, &value);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -493,8 +492,8 @@ ArkUINativeModuleValue SearchBridge::ResetSearchButton(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchSearchButton(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchSearchButton(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -504,7 +503,7 @@ ArkUINativeModuleValue SearchBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     auto pipelineContext = container->GetPipelineContext();
@@ -518,7 +517,7 @@ ArkUINativeModuleValue SearchBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, value)) {
         color = value.GetValue();
     }
-    GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchFontColor(nativeNode, color);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchFontColor(nativeNode, color);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -527,8 +526,8 @@ ArkUINativeModuleValue SearchBridge::ResetFontColor(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchFontColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchFontColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -538,7 +537,7 @@ ArkUINativeModuleValue SearchBridge::SetCopyOption(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     
     auto copyOptions = CopyOptions::Local;
     uint32_t value = static_cast<uint32_t>(copyOptions);
@@ -548,7 +547,7 @@ ArkUINativeModuleValue SearchBridge::SetCopyOption(ArkUIRuntimeCallInfo* runtime
         copyOptions = CopyOptions::None;
         value = static_cast<uint32_t>(copyOptions);
     }
-    GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchCopyOption(nativeNode, value);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchCopyOption(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -557,8 +556,8 @@ ArkUINativeModuleValue SearchBridge::ResetCopyOption(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchCopyOption(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchCopyOption(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -567,24 +566,24 @@ ArkUINativeModuleValue SearchBridge::SetSearchHeight(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension height;
     std::string calcStr;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, valueArg, height)) {
-        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetHeight(nativeNode);
+        GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
             height.SetValue(0.0);
         }
         if (height.Unit() == DimensionUnit::CALC) {
-            GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
+            GetArkUINodeModifiers()->getCommonModifier()->setHeight(
                 nativeNode, height.Value(), static_cast<int>(height.Unit()), height.CalcValue().c_str());
         } else {
-            GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
+            GetArkUINodeModifiers()->getCommonModifier()->setHeight(
                 nativeNode, height.Value(), static_cast<int>(height.Unit()), calcStr.c_str());
         }
-        GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchHeight(
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchHeight(
             nativeNode, height.Value(), static_cast<int>(height.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -595,8 +594,8 @@ ArkUINativeModuleValue SearchBridge::ResetSearchHeight(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchHeight(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

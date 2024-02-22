@@ -16,10 +16,9 @@
 #include "core/image/image_source_info.h"
 #define NAPI_VERSION 8
 
-#include "core/components_ng/pattern/image/image_pattern.h"
-
 #include <array>
 #include <cstdint>
+#include <memory>
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/matrix4.h"
@@ -36,28 +35,29 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#if defined(PIXEL_MAP_SUPPORTED)
-#include "foundation/multimedia/image_framework/interfaces/kits/js/common/include/pixel_map_napi.h"
-#endif
 #include "core/common/ace_engine_ext.h"
+#include "core/common/ai/image_analyzer_adapter.h"
+#include "core/common/container.h"
 #include "core/common/udmf/udmf_client.h"
 
 namespace OHOS::Ace::NG {
-napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
+ImagePattern::ImagePattern()
 {
-#if defined(PIXEL_MAP_SUPPORTED)
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, {});
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    auto* env = reinterpret_cast<napi_env>(nativeEngine);
-    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap->GetPixelMapSharedPtr());
-    return napiValue;
-#else
-    return nullptr;
-#endif
+    InitDefaultValue();
+    imageAnalyzerAdapter_ = std::shared_ptr<ImageAnalyzerAdapter>(CreateImageAnalyzerAdapter());
+}
+
+ImagePattern::~ImagePattern()
+{
+    if (!isEnableAnalyzer_) {
+        return;
+    }
+    if (IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
+        ImageAnalyzerMgr::GetInstance().Release(&overlayData_);
+    }
 }
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
@@ -186,6 +186,7 @@ RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geomet
 
 void ImagePattern::OnImageLoadSuccess()
 {
+    CHECK_NULL_VOID(loadingCtx_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
@@ -204,7 +205,7 @@ void ImagePattern::OnImageLoadSuccess()
         eventHub->FireCompleteEvent(event);
     }
 
-    SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg(), loadingCtx_->GetFrameCount());
+    SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo(), loadingCtx_->GetFrameCount());
     PrepareAnimation(image_);
     if (host->IsDraggable()) {
         EnableDrag();
@@ -219,12 +220,25 @@ void ImagePattern::OnImageLoadSuccess()
         DeleteAnalyzerOverlay();
     }
     UpdateAnalyzerOverlay();
-    CreateAnalyzerOverlay();
+
+    auto currentContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(currentContext);
+    int32_t instanceID = currentContext->GetInstanceId();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this), instanceID] {
+        ContainerScope scope(instanceID);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CreateAnalyzerOverlay();
+    });
     host->MarkNeedRenderOnly();
 }
 
 void ImagePattern::OnImageDataReady()
 {
+    CHECK_NULL_VOID(loadingCtx_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
@@ -251,9 +265,8 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     imageEventHub->FireErrorEvent(event);
 }
 
-void ImagePattern::SetImagePaintConfig(
-    const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
-    const RectF& dstRect, bool isSvg, int32_t frameCount)
+void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
+    const RectF& dstRect, const ImageSourceInfo& sourceInfo, int32_t frameCount)
 {
     auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
@@ -263,8 +276,9 @@ void ImagePattern::SetImagePaintConfig(
         .dstRect_ = dstRect,
     };
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
-    config.isSvg_ = isSvg;
+    config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
+    config.sourceInfo_ = sourceInfo;
     auto host = GetHost();
     if (!host) {
         canvasImage->SetPaintConfig(config);
@@ -286,14 +300,14 @@ void ImagePattern::SetImagePaintConfig(
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
     if (image_) {
-        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_, interpolationDefault_);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_, interpolationDefault_);
     }
     CreateObscuredImage();
     if (obscuredImage_) {
-        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_, interpolationDefault_);
     }
     return nullptr;
 }
@@ -308,9 +322,8 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && renderProp->HasImageResizableSlice() && image_) {
             loadingCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(
-                image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(),
-                loadingCtx_->GetSrc().IsSvg(), loadingCtx_->GetFrameCount());
+            SetImagePaintConfig(image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(), loadingCtx_->GetSrc(),
+                loadingCtx_->GetFrameCount());
         }
     }
 
@@ -318,9 +331,8 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && renderProp->HasImageResizableSlice() && altImage_) {
             altLoadingCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(
-                altImage_, altLoadingCtx_->GetSrcRect(), altLoadingCtx_->GetDstRect(),
-                altLoadingCtx_->GetSrc().IsSvg(), altLoadingCtx_->GetFrameCount());
+            SetImagePaintConfig(altImage_, altLoadingCtx_->GetSrcRect(), altLoadingCtx_->GetDstRect(),
+                altLoadingCtx_->GetSrc(), altLoadingCtx_->GetFrameCount());
         }
     }
 
@@ -344,7 +356,7 @@ void ImagePattern::CreateObscuredImage()
     if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
         if (!obscuredImage_) {
             obscuredImage_ = MakeRefPtr<ObscuredImage>();
-            SetImagePaintConfig(obscuredImage_, srcRect_, dstRect_, sourceInfo.IsSvg());
+            SetImagePaintConfig(obscuredImage_, srcRect_, dstRect_, sourceInfo);
         }
     }
 }
@@ -374,8 +386,6 @@ void ImagePattern::LoadImageDataIfNeed()
 {
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
@@ -407,6 +417,34 @@ void ImagePattern::LoadImageDataIfNeed()
     }
 }
 
+void ImagePattern::UpdateGestureAndDragWhenModify()
+{
+    // remove long press and mouse events
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    if (longPressEvent_) {
+        gestureHub->SetLongPressEvent(nullptr);
+        longPressEvent_ = nullptr;
+    }
+
+    if (clickEvent_) {
+        gestureHub->RemoveClickEvent(clickEvent_);
+        clickEvent_ = nullptr;
+    }
+
+    if (mouseEvent_) {
+        auto inputHub = host->GetOrCreateInputEventHub();
+        inputHub->RemoveOnMouseEvent(mouseEvent_);
+        mouseEvent_ = nullptr;
+    }
+
+    if (host->IsDraggable()) {
+        EnableDrag();
+    }
+}
+
 void ImagePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -428,26 +466,11 @@ void ImagePattern::OnModifyDone()
     }
 
     CloseSelectOverlay();
-    // remove long press and mouse events
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    if (longPressEvent_) {
-        gestureHub->SetLongPressEvent(nullptr);
-        longPressEvent_ = nullptr;
-    }
-
-    if (clickEvent_) {
-        gestureHub->RemoveClickEvent(clickEvent_);
-        clickEvent_ = nullptr;
-    }
-
-    if (mouseEvent_) {
-        auto inputHub = host->GetOrCreateInputEventHub();
-        inputHub->RemoveOnMouseEvent(mouseEvent_);
-        mouseEvent_ = nullptr;
-    }
+    UpdateGestureAndDragWhenModify();
 
     if (isAnalyzerOverlayBuild_) {
         if (!IsSupportImageAnalyzerFeature()) {
@@ -522,7 +545,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
-            pattern->altLoadingCtx_->GetSourceInfo().IsSvg(), pattern->altLoadingCtx_->GetFrameCount());
+            pattern->altLoadingCtx_->GetSourceInfo(), pattern->altLoadingCtx_->GetFrameCount());
 
         pattern->PrepareAnimation(pattern->altImage_);
 
@@ -591,11 +614,31 @@ void ImagePattern::OnRecycle()
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->ClearDrawCommands();
+    UnregisterWindowStateChangedCallback();
 }
 
 void ImagePattern::OnReuse()
 {
+    RegisterWindowStateChangedCallback();
     LoadImageDataIfNeed();
+}
+
+void ImagePattern::RegisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+}
+
+void ImagePattern::UnregisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(host->GetId());
 }
 
 void ImagePattern::OnWindowHide()
@@ -653,7 +696,7 @@ void ImagePattern::EnableDrag()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string &
+    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string&
                          /* extraParams */) -> DragDropInfo {
         DragDropInfo info;
         auto imagePattern = weak.Upgrade();
@@ -934,14 +977,23 @@ void ImagePattern::OnConfigurationUpdate()
     }
 }
 
+// As an example
 void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig &config)
 {
     if (!isEnableAnalyzer_) {
         return;
     }
-    analyzerConfig_ = config;
+}
+
+void ImagePattern::SetImageAnalyzerConfig(void* config)
+{
+    if (!isEnableAnalyzer_) {
+        return;
+    }
+    imageAnalyzerAdapter_->SetImageAnalyzerConfig(config);
+    auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     if (IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
-        ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, &analyzerConfig_);
+        ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, analyzerConfig);
     }
 }
 
@@ -953,7 +1005,7 @@ void ImagePattern::CreateAnalyzerOverlay()
 
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
+    auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
     auto frameNode = GetHost();
     auto overlayNode = frameNode->GetOverlayNode();
 
@@ -962,8 +1014,9 @@ void ImagePattern::CreateAnalyzerOverlay()
     analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     auto buildNodeFunction = [this, &pixelmapNapiVal]() -> RefPtr<UINode> {
         ScopedViewStackProcessor builderViewStackProcessor;
+        auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
         ImageAnalyzerMgr::GetInstance().BuildNodeFunc(
-            pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_, &overlayData_);
+            pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_, &overlayData_);
         auto customNode = ViewStackProcessor::GetInstance()->Finish();
         return customNode;
     };
@@ -1000,11 +1053,11 @@ void ImagePattern::UpdateAnalyzerOverlay()
 
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
+    auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
     auto frameNode = GetHost();
     auto overlayNode = frameNode->GetOverlayNode();
-    ImageAnalyzerMgr::GetInstance().UpdateImage(
-        &overlayData_, pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_);
+    auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
+    ImageAnalyzerMgr::GetInstance().UpdateImage(&overlayData_, pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_);
     overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1042,9 +1095,10 @@ bool ImagePattern::IsSupportImageAnalyzerFeature()
     CHECK_NULL_RETURN(imageRenderProperty, false);
     ImageRepeat repeat = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
 
-    return isEnabled && !hasObscured && isEnableAnalyzer_ && ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported()
-        && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && repeat == ImageRepeat::NO_REPEAT
-        && loadingCtx_->GetFrameCount() == 1;
+    return isEnabled && !hasObscured && isEnableAnalyzer_ &&
+           ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported() && image_ &&
+           !loadingCtx_->GetSourceInfo().IsSvg() && repeat == ImageRepeat::NO_REPEAT &&
+           loadingCtx_->GetFrameCount() == 1;
 }
 
 void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNode)
@@ -1111,6 +1165,22 @@ void ImagePattern::UpdateAnalyzerOverlayLayout()
     auto renderContext = overlayNode->GetRenderContext();
     if (renderContext) {
         renderContext->SetRenderFrameOffset({-padding.Offset().GetX(), -padding.Offset().GetY()});
+    }
+}
+
+void ImagePattern::InitDefaultValue()
+{
+    // add API version protection
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        autoResizeDefault_ = false;
+        interpolationDefault_ = ImageInterpolation::LOW;
+    }
+    auto container = Container::Current();
+    // If the default value is set to false, the ScenceBoard memory increases.
+    // Therefore the default value is different in the ScenceBoard.
+    if (container && container->IsScenceBoardWindow()) {
+        autoResizeDefault_ = true;
+        interpolationDefault_ = ImageInterpolation::NONE;
     }
 }
 } // namespace OHOS::Ace::NG

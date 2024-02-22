@@ -275,10 +275,8 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             spanTextLength += 1;
             iterItems++;
         } else if (child->unicode != 0) {
-            child->aiSpanMap = aiSpanMap;
             child->SetIsParentText(frameNode->GetTag() == V2::TEXT_ETS_TAG);
             child->UpdateSymbolSpanParagraph(frameNode, paragraph_);
-            aiSpanMap = child->aiSpanMap;
             child->position = spanTextLength + SYMBOL_SPAN_LENGTH;
             child->content = "  ";
             spanTextLength += SYMBOL_SPAN_LENGTH;
@@ -311,6 +309,10 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     dragSpanPosition.dragStart = pattern->GetRecoverStart();
     dragSpanPosition.dragEnd = pattern->GetRecoverEnd();
     bool isDragging = pattern->IsDragging();
+    TextStyle aiSpanTextStyle = textStyle;
+    aiSpanTextStyle.SetTextColor(Color::BLUE);
+    aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
+    aiSpanTextStyle.SetTextDecorationColor(Color::BLUE);
     for (auto kv : pattern->GetAISpanMap()) {
         if (preEnd >= wTextForAILength) {
             break;
@@ -325,10 +327,6 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
             dragSpanPosition.spanEnd = aiSpan.start;
             GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, isDragging);
         }
-        TextStyle aiSpanTextStyle = textStyle;
-        aiSpanTextStyle.SetTextColor(Color::BLUE);
-        aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
-        aiSpanTextStyle.SetTextDecorationColor(Color::BLUE);
         preEnd = aiSpan.end;
         dragSpanPosition.spanStart = aiSpan.start;
         dragSpanPosition.spanEnd = aiSpan.end;

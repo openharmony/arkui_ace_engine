@@ -20,7 +20,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "core/interfaces/native/node/api.h"
+#include "core/interfaces/native/node/node_api.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -1125,7 +1125,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     param2->SetUseCustomComponent(true);
     ViewAbstract::BindPopup(param2, targetNode2, customNode);
     ViewAbstract::BindPopup(param2, targetNode2, customNode);
-    param2->SetUseCustomComponent(false);
     param2->SetShowInSubWindow(true);
     ViewAbstract::BindPopup(param2, targetNode2, customNode);
     param2->SetIsShow(false);
@@ -1726,7 +1725,13 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     menuParam.type = MenuType::CONTEXT_MENU;
     viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.isShow = true;
+    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, buildFunc, menuParam, previewBuildFunc);
     EXPECT_EQ(flag, 0);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(container);
+    EXPECT_EQ(subwindow, nullptr);
+
     /**
      * @tc.steps: step4. create mouseInfo, set some useless params and call onMouseCallback_;
      * @tc.expected: StopPropagation in mouseInfo is false.

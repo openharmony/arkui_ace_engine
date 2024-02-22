@@ -66,12 +66,14 @@ public:
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
+    static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
     static void CreateLunarswitchNode(
         const RefPtr<FrameNode>& contentColumn, std::function<void(const bool)>&& changeEvent, bool isLunar);
     static void SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titleRow);
     static void HandleMouseEvent(const RefPtr<FrameNode>& titleButton, bool isHover);
     static void PlayHoverAnimation(const RefPtr<FrameNode>& titleButton, const Color& color);
+    static void MountColumnNodeToPicker(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& pickerNode);
 };
 } // namespace OHOS::Ace::NG
 

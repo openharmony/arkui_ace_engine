@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,6 +57,7 @@ RefPtr<FrameNode> ScrollModelNG::CreateFrameNode(int32_t nodeId)
     pattern->SetAlwaysEnabled(true);
     auto positionController = AceType::MakeRefPtr<NG::ScrollableController>();
     pattern->SetPositionController(positionController);
+    pattern->TriggerModifyDone();
     positionController->SetScrollPattern(pattern);
     return frameNode;
 }
@@ -153,6 +154,24 @@ void ScrollModelNG::SetOnScroll(NG::ScrollEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     SetOnScroll(AceType::RawPtr(frameNode), std::move(event));
+}
+
+void ScrollModelNG::SetOnWillScroll(NG::ScrollEventWithState&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillScrollEvent(std::move(event));
+}
+
+void ScrollModelNG::SetOnDidScroll(NG::ScrollEventWithState&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidScrollEvent(std::move(event));
 }
 
 void ScrollModelNG::SetOnScrollEdge(NG::ScrollEdgeEvent&& event)
@@ -401,5 +420,44 @@ void ScrollModelNG::SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& 
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollEdge(std::move(event));
 }
+
+NestedScrollOptions ScrollModelNG::GetNestedScroll(FrameNode* frameNode)
+{
+    NestedScrollOptions defaultOptions;
+    CHECK_NULL_RETURN(frameNode, defaultOptions);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, defaultOptions);
+    return pattern->GetNestedScroll();
+}
+
+ScrollEdgeType ScrollModelNG::GetOnScrollEdge(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ScrollEdgeType::SCROLL_TOP);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    Axis axis = Axis::VERTICAL;
+    ACE_GET_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis, frameNode);
+    switch (axis) {
+        case Axis::VERTICAL:
+            if (pattern->IsAtTop()) {
+                return ScrollEdgeType::SCROLL_TOP;
+            }
+            if (pattern->IsAtBottom()) {
+                return ScrollEdgeType::SCROLL_BOTTOM;
+            }
+            break;
+        case Axis::HORIZONTAL:
+            if (pattern->IsAtTop()) {
+                return ScrollEdgeType::SCROLL_LEFT;
+            }
+            if (pattern->IsAtBottom()) {
+                return ScrollEdgeType::SCROLL_RIGHT;
+            }
+            break;
+        default:
+            break;
+    }
+    return ScrollEdgeType::SCROLL_NONE;
+}
+
 
 } // namespace OHOS::Ace::NG

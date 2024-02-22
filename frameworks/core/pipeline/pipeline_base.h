@@ -189,7 +189,7 @@ public:
     // Called by window when received vsync signal.
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
-    // Called by view
+    // Called by viewr
     virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) = 0;
 
     // Called by view when idle event.
@@ -312,7 +312,7 @@ public:
         return nullptr;
     }
 
-    void SetRootSize(double density, int32_t width, int32_t height);
+    void SetRootSize(double density, float width, float height);
 
     void UpdateFontWeightScale();
 
@@ -1113,6 +1113,14 @@ public:
     }
 
     virtual void CheckVirtualKeyboardHeight() {}
+
+    virtual void StartWindowAnimation() {}
+
+    virtual void StopWindowAnimation() {}
+
+    virtual void AddSyncGeometryNodeTask(std::function<void()>&& task) {}
+
+    virtual void FlushSyncGeometryNodeTasks() {}
 
 protected:
     virtual bool MaybeRelease() override;

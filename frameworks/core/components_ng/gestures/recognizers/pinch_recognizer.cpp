@@ -62,7 +62,6 @@ void PinchRecognizer::OnRejected()
     if (refereeState_ == RefereeState::SUCCEED) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 
@@ -78,13 +77,17 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
         return;
     }
+    if (!IsInAttachedNode(event)) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
 
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch down event, begin to detect pinch event");
     activeFingers_.emplace_back(event.id);
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
 
-    if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
+    if (static_cast<int32_t>(activeFingers_.size()) >= fingers_ && refereeState_ != RefereeState::FAIL) {
         initialDev_ = ComputeAverageDeviation();
         pinchCenter_ = ComputePinchCenter();
         refereeState_ = RefereeState::DETECTING;
@@ -93,11 +96,14 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    if (event.isRotationEvent) {
+        return;
+    }
     if (IsRefereeFinished()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch down event, begin to detect pinch event");
-    if (refereeState_ == RefereeState::READY) {
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives axis start event, begin to detect pinch event");
+    if (refereeState_ == RefereeState::READY && (NearEqual(event.pinchAxisScale, 1.0) || IsCtrlBeingPressed())) {
         scale_ = 1.0f;
         pinchCenter_ = Offset(event.x, event.y);
         refereeState_ = RefereeState::DETECTING;
@@ -146,11 +152,17 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    if (!IsActiveFinger(event.id) || currentFingers_ < fingers_) {
+    if (!IsActiveFinger(event.id)) {
         return;
     }
 
-    if (static_cast<int32_t>(activeFingers_.size()) < fingers_) {
+    if (static_cast<int32_t>(activeFingers_.size()) < fingers_ || currentFingers_ < fingers_) {
+        double devX = event.x - touchPoints_[event.id].x;
+        double devY = event.y - touchPoints_[event.id].y;
+        double distance = sqrt(pow(devX, 2) + pow(devY, 2));
+        if (GreatOrEqual(distance, distance_)) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
         return;
     }
 
@@ -192,6 +204,9 @@ void PinchRecognizer::OnFlushTouchEventsEnd()
 
 void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
+    if (event.isRotationEvent) {
+        return;
+    }
     if (isPinchEnd_) {
         return;
     }
@@ -207,7 +222,10 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
             return;
         }
     }
-
+    touchPoints_[event.id].x = event.x;
+    touchPoints_[event.id].y = event.y;
+    touchPoints_[event.id].sourceType = event.sourceType;
+    touchPoints_[event.id].sourceTool = event.sourceTool;
     time_ = event.time;
     if (refereeState_ == RefereeState::DETECTING || refereeState_ == RefereeState::SUCCEED) {
         if (event.pinchAxisScale != 0.0) {
@@ -303,7 +321,7 @@ Offset PinchRecognizer::ComputePinchCenter()
     double focalY = sumOfY / fingers_;
 
     PointF localPoint(focalX, focalY);
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
     Offset pinchCenter = Offset(localPoint.GetX(), localPoint.GetY());
 
     return pinchCenter;
@@ -327,9 +345,6 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        if (recognizerTarget_.has_value()) {
-            info.SetTarget(recognizerTarget_.value());
-        }
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
             info.SetTiltX(lastTouchEvent_.tiltX.value());
@@ -358,9 +373,6 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     info->SetPinchCenter(pinchCenter_);
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
-    if (recognizerTarget_.has_value()) {
-        info->SetTarget(recognizerTarget_.value());
-    }
     info->SetForce(lastTouchEvent_.force);
     if (lastTouchEvent_.tiltX.has_value()) {
         info->SetTiltX(lastTouchEvent_.tiltX.value());

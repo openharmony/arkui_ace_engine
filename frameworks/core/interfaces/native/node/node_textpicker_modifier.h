@@ -20,7 +20,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-const ArkUITextPickerModifier* GetTextpickerModifier();
+const ArkUITextPickerModifier* GetTextPickerModifier();
 void GetPickerTextStyle(uint32_t color, const char* fontInfo, int32_t styleVal, NG::PickerTextStyle& textStyle);
 void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues, const int32_t size);
 void SetSelectedIndexMulti(FrameNode* frameNode, uint32_t* selectedValues, const int32_t size);

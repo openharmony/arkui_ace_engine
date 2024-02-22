@@ -264,7 +264,9 @@ void DatePickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto stack = host->GetParent();
+    auto blend = host->GetParent();
+    CHECK_NULL_VOID(blend);
+    auto stack = blend->GetParent();
     CHECK_NULL_VOID(stack);
     auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
     auto renderContext = buttonNode->GetRenderContext();
@@ -324,7 +326,9 @@ void DatePickerColumnPattern::FlushCurrentOptions(
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto stackNode = DynamicCast<FrameNode>(host->GetParent());
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
     CHECK_NULL_VOID(stackNode);
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(parentNode);
@@ -375,7 +379,8 @@ void DatePickerColumnPattern::FlushCurrentOptions(
             textNode->MarkDirtyNode();
             continue;
         }
-        auto optionValue = datePickerPattern->GetAllOptions(host)[optionIndex];
+        auto date = datePickerPattern->GetAllOptions(host)[optionIndex];
+        auto optionValue = DatePickerPattern::GetFormatString(date);
         textLayoutProperty->UpdateContent(optionValue);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textNode->MarkModifyDone();

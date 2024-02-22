@@ -49,6 +49,8 @@
 #endif
 namespace OHOS::Ace::Napi {
 class DragAction;
+static constexpr uint32_t DRAG_STARTED = 0;
+static constexpr uint32_t DRAG_ENDED = 1;
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
 namespace {
 constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
@@ -689,7 +691,7 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
         return;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
-        LOGI("DragController start on callback %{pubic}d", dragNotifyMsg.result);
+        LOGI("DragController start on callback %{public}d", dragNotifyMsg.result);
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(asyncCtx->env, &scope);
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
@@ -819,7 +821,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 true, false, summary };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
-                LOGI("DragController start on callback %{pubic}d", dragNotifyMsg.result);
+                LOGI("DragController start on callback %{public}d", dragNotifyMsg.result);
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(asyncCtx->env, &scope);
                 HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
@@ -1431,10 +1433,19 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
 
 static napi_value DragControllerExport(napi_env env, napi_value exports)
 {
+    napi_value dragStatus = nullptr;
+    napi_create_object(env, &dragStatus);
+    napi_value prop = nullptr;
+    napi_create_uint32(env, DRAG_STARTED, &prop);
+    napi_set_named_property(env, dragStatus, "STARTED", prop);
+    napi_create_uint32(env, DRAG_ENDED, &prop);
+    napi_set_named_property(env, dragStatus, "ENDED", prop);
+
     napi_property_descriptor dragControllerDesc[] = {
         DECLARE_NAPI_FUNCTION("executeDrag", JSExecuteDrag),
         DECLARE_NAPI_FUNCTION("getDragPreview", JSGetDragPreview),
         DECLARE_NAPI_FUNCTION("createDragAction", JSCreateDragAction),
+        DECLARE_NAPI_PROPERTY("DragStatus", dragStatus),
     };
     NAPI_CALL(env, napi_define_properties(
                        env, exports, sizeof(dragControllerDesc) / sizeof(dragControllerDesc[0]), dragControllerDesc));

@@ -48,7 +48,7 @@ public:
 
     RefPtr<TextTimerController> GetTextTimerController() const;
 
-    ACE_DEFINE_COMPONENT_EVENT(OnTimer, void(const std::string, const std::string));
+    ACE_DEFINE_COMPONENT_EVENT(OnTimer, void(int64_t, int64_t));
 
 private:
     RefPtr<TextTimerController> textTimerController_;

@@ -30,14 +30,14 @@ constexpr int32_t POS_1 = 1;
 constexpr int32_t POS_2 = 2;
 const char DEFAULT_DELIMITER = '|';
 
-void SetTextpickerBackgroundColor(ArkUINodeHandle node, uint32_t color)
+void SetTextPickerBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextPickerModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
-void ResetTextpickerBackgroundColor(ArkUINodeHandle node)
+void ResetTextPickerBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -48,44 +48,45 @@ void ResetTextpickerBackgroundColor(ArkUINodeHandle node)
     TextPickerModelNG::SetBackgroundColor(frameNode, theme->GetBackgroundColor());
 }
 
-void SetTextpickerCanLoop(ArkUINodeHandle node, int canLoop)
+void SetTextPickerCanLoop(ArkUINodeHandle node, int canLoop)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextPickerModelNG::SetCanLoop(frameNode, canLoop);
 }
 
-void ResetTextpickerCanLoop(ArkUINodeHandle node)
+void ResetTextPickerCanLoop(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextPickerModelNG::SetCanLoop(frameNode, true);
 }
 
-void SetTextpickerSelectedIndex(ArkUINodeHandle node, uint32_t* values, int32_t size)
+void SetTextPickerSelectedIndex(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    if (TextPickerModel::GetInstance()->IsSingle()) {
+    if (TextPickerModelNG::IsSingle(frameNode)) {
         NodeModifier::SetSelectedIndexSingle(frameNode, values, size);
     } else {
         NodeModifier::SetSelectedIndexMulti(frameNode, values, size);
     }
 }
 
-void ResetTextpickerSelectedIndex(ArkUINodeHandle node) {
+void ResetTextPickerSelectedIndex(ArkUINodeHandle node)
+{
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    if (TextPickerModel::GetInstance()->IsSingle()) {
+    if (TextPickerModelNG::IsSingle(frameNode)) {
         NodeModifier::SetSelectedIndexSingle(frameNode, 0, 0);
     } else {
         NodeModifier::SetSelectedIndexMulti(frameNode, 0, 0);
     }
 }
 
-void SetTextpickerTextStyle(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t styleVal)
+void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -99,7 +100,7 @@ void SetTextpickerTextStyle(ArkUINodeHandle node, uint32_t color, const char* fo
     TextPickerModelNG::SetNormalTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
-void ResetTextpickerTextStyle(ArkUINodeHandle node)
+void ResetTextPickerTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -112,7 +113,8 @@ void ResetTextpickerTextStyle(ArkUINodeHandle node)
     TextPickerModelNG::SetNormalTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
-void SetTextpickerSelectedTextStyle(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t styleVal)
+void SetTextPickerSelectedTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -126,7 +128,7 @@ void SetTextpickerSelectedTextStyle(ArkUINodeHandle node, uint32_t color, const 
     TextPickerModelNG::SetSelectedTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
-void ResetTextpickerSelectedTextStyle(ArkUINodeHandle node)
+void ResetTextPickerSelectedTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -139,7 +141,8 @@ void ResetTextpickerSelectedTextStyle(ArkUINodeHandle node)
     TextPickerModelNG::SetSelectedTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
-void SetTextpickerDisappearTextStyle(ArkUINodeHandle node, uint32_t color, const char* fontInfo, int32_t styleVal)
+void SetTextPickerDisappearTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+    ArkUI_Int32 styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -153,7 +156,7 @@ void SetTextpickerDisappearTextStyle(ArkUINodeHandle node, uint32_t color, const
     TextPickerModelNG::SetDisappearTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
-void ResetTextpickerDisappearTextStyle(ArkUINodeHandle node)
+void ResetTextPickerDisappearTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -166,7 +169,7 @@ void ResetTextpickerDisappearTextStyle(ArkUINodeHandle node)
     TextPickerModelNG::SetDisappearTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
-void SetTextpickerDefaultPickerItemHeight(ArkUINodeHandle node, float dVal, int32_t dUnit)
+void SetTextPickerDefaultPickerItemHeight(ArkUINodeHandle node, float dVal, ArkUI_Int32 dUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -174,7 +177,7 @@ void SetTextpickerDefaultPickerItemHeight(ArkUINodeHandle node, float dVal, int3
         frameNode, Dimension(dVal, static_cast<DimensionUnit>(dUnit)));
 }
 
-void ResetTextpickerDefaultPickerItemHeight(ArkUINodeHandle node)
+void ResetTextPickerDefaultPickerItemHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -185,22 +188,29 @@ void ResetTextpickerDefaultPickerItemHeight(ArkUINodeHandle node)
 } // namespace
 
 namespace NodeModifier {
-const ArkUITextPickerModifier* GetTextpickerModifier()
+const ArkUITextPickerModifier* GetTextPickerModifier()
 {
     static const ArkUITextPickerModifier modifier = {
-        SetTextpickerBackgroundColor, SetTextpickerCanLoop,
-        SetTextpickerSelectedIndex, SetTextpickerTextStyle,
-        SetTextpickerSelectedTextStyle, SetTextpickerDisappearTextStyle,
-        SetTextpickerDefaultPickerItemHeight, ResetTextpickerCanLoop,
-        ResetTextpickerSelectedIndex, ResetTextpickerTextStyle,
-        ResetTextpickerSelectedTextStyle, ResetTextpickerDisappearTextStyle,
-        ResetTextpickerDefaultPickerItemHeight, ResetTextpickerBackgroundColor
+        SetTextPickerBackgroundColor,
+        SetTextPickerCanLoop,
+        SetTextPickerSelectedIndex,
+        SetTextPickerTextStyle,
+        SetTextPickerSelectedTextStyle,
+        SetTextPickerDisappearTextStyle,
+        SetTextPickerDefaultPickerItemHeight,
+        ResetTextPickerCanLoop,
+        ResetTextPickerSelectedIndex,
+        ResetTextPickerTextStyle,
+        ResetTextPickerSelectedTextStyle,
+        ResetTextPickerDisappearTextStyle,
+        ResetTextPickerDefaultPickerItemHeight,
+        ResetTextPickerBackgroundColor
     };
 
     return &modifier;
 }
 
-void GetPickerTextStyle(uint32_t color, const char* fontInfo, int32_t styleVal, NG::PickerTextStyle& textStyle)
+void GetPickerTextStyle(uint32_t color, ArkUI_CharPtr fontInfo, int32_t styleVal, NG::PickerTextStyle& textStyle)
 {
     textStyle.textColor = Color(color);
 
@@ -231,7 +241,7 @@ void GetPickerTextStyle(uint32_t color, const char* fontInfo, int32_t styleVal, 
 void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues, const int32_t size)
 {
     std::vector<NG::RangeContent> rangeResult;
-    TextPickerModel::GetInstance()->GetSingleRange(rangeResult);
+    TextPickerModelNG::GetSingleRange(frameNode, rangeResult);
     if (selectedValues[0] >= rangeResult.size()) {
         TextPickerModelNG::SetSelected(frameNode, 0);
     } else {
@@ -242,12 +252,12 @@ void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues, cons
 void SetSelectedIndexMultiInternal(FrameNode* frameNode,
     uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
-    if (!TextPickerModel::GetInstance()->IsCascade()) {
+    if (!TextPickerModelNG::IsCascade(frameNode)) {
         NodeModifier::SetSelectedInternal(count, options, selectedValues);
     } else {
         TextPickerModelNG::SetHasSelectAttr(frameNode, true);
         NodeModifier::ProcessCascadeSelected(options, 0, selectedValues);
-        uint32_t maxCount = TextPickerModel::GetInstance()->GetMaxCount();
+        uint32_t maxCount = TextPickerModelNG::GetMaxCount(frameNode);
         if (selectedValues.size() < maxCount) {
             auto differ = maxCount - selectedValues.size();
             for (uint32_t i = 0; i < differ; i++) {
@@ -292,10 +302,10 @@ void SetSelectedInternal(
 void SetSelectedIndexMulti(FrameNode* frameNode, uint32_t* inputs, const int32_t size)
 {
     std::vector<NG::TextCascadePickerOptions> options;
-    TextPickerModel::GetInstance()->GetMultiOptions(options);
+    TextPickerModelNG::GetMultiOptions(frameNode, options);
 
     auto count =
-        TextPickerModel::GetInstance()->IsCascade() ? TextPickerModel::GetInstance()->GetMaxCount() : options.size();
+        TextPickerModelNG::IsCascade(frameNode) ? TextPickerModelNG::GetMaxCount(frameNode) : options.size();
     std::vector<uint32_t> selectedValues;
 
     if (size >= 0) {

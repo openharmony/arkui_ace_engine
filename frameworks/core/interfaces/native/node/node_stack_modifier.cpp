@@ -33,7 +33,7 @@ constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
 constexpr int NUM_8 = 8;
 
-void SetAlignContent(ArkUINodeHandle node, int32_t align)
+void SetAlignContent(ArkUINodeHandle node, ArkUI_Int32 align)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

@@ -140,7 +140,7 @@ void RenderTextTimer::Tick(uint64_t duration)
     elapsedTime_ += duration;
 
     if (onTimer_) {
-        onTimer_(std::to_string(GetMilliseconds()), std::to_string(elapsedTime_));
+        onTimer_(GetMilliseconds(), elapsedTime_);
     }
 
     double tmp_value = static_cast<double>(elapsedTime_);

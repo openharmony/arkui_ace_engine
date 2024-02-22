@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -26,19 +24,19 @@ constexpr int32_t END_MARGIN_INDEX = 4;
 
 constexpr int32_t ARG_GROUP_LENGTH = 3;
 
-ArkUINativeModuleValue ListeItemGroupBridege::SetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue ListItemGroupBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> dividerStrokeWidthArgs = runtimeCallInfo->GetCallArgRef(STROKE_WIDTH_INDEX);
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(COLOR_INDEX);
     Local<JSValueRef> dividerStartMarginArgs = runtimeCallInfo->GetCallArgRef(START_MARGIN_INDEX);
     Local<JSValueRef> dividerEndMarginArgs = runtimeCallInfo->GetCallArgRef(END_MARGIN_INDEX);
     if (dividerStrokeWidthArgs->IsUndefined() && dividerStartMarginArgs->IsUndefined() &&
         dividerEndMarginArgs->IsUndefined() && colorArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetListItemGroupModifier().ListItemGroupResetDivider(nativeNode);
+        GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetDivider(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -73,26 +71,26 @@ ArkUINativeModuleValue ListeItemGroupBridege::SetDivider(ArkUIRuntimeCallInfo* r
         dividerEndMargin.Reset();
     }
     uint32_t size = ARG_GROUP_LENGTH;
-    double values[size];
+    ArkUI_Float32 values[size];
     int32_t units[size];
-    values[NODE_INDEX] = dividerStrokeWidth.Value();
-    values[STROKE_WIDTH_INDEX] = dividerStartMargin.Value();
-    values[COLOR_INDEX] = dividerEndMargin.Value();
+    values[NODE_INDEX] = static_cast<ArkUI_Float32>(dividerStrokeWidth.Value());
+    values[STROKE_WIDTH_INDEX] = static_cast<ArkUI_Float32>(dividerStartMargin.Value());
+    values[COLOR_INDEX] = static_cast<ArkUI_Float32>(dividerEndMargin.Value());
     units[NODE_INDEX] = static_cast<int32_t>(dividerStrokeWidth.Unit());
     units[STROKE_WIDTH_INDEX] = static_cast<int32_t>(dividerStartMargin.Unit());
     units[COLOR_INDEX] = static_cast<int32_t>(dividerEndMargin.Unit());
-    GetArkUIInternalNodeAPI()->GetListItemGroupModifier().ListItemGroupSetDivider(
+    GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupSetDivider(
         nativeNode, color, values, units, size);
 
     return panda::JSValueRef::Undefined(vm);
 }
-ArkUINativeModuleValue ListeItemGroupBridege::ResetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue ListItemGroupBridge::ResetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetListItemGroupModifier().ListItemGroupResetDivider(nativeNode);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetDivider(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

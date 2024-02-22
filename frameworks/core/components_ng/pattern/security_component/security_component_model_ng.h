@@ -69,6 +69,21 @@ public:
         return false;
     }
 
+    virtual bool IsClickResultSuccess(GestureEvent& info)
+    {
+#ifdef SECURITY_COMPONENT_ENABLE
+        auto secEventValue = info.GetSecCompHandleEvent();
+        if (secEventValue != nullptr) {
+            if (secEventValue->GetInt("handleRes",
+                static_cast<int32_t>(SecurityComponentHandleResult::CLICK_SUCCESS)) ==
+                static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK)) {
+                return false;
+            }
+        }
+#endif
+        return true;
+    }
+
 protected:
     static RefPtr<SecurityComponentTheme> GetTheme();
 

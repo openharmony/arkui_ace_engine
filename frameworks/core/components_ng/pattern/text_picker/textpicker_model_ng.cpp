@@ -35,6 +35,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t BUFFER_NODE_NUMBER = 2;
+constexpr uint8_t PIXEL_ROUND = 18;
 
 void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPickerDialog,
                          const RefPtr<DialogTheme>& theme)
@@ -49,7 +50,7 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     if (textPickerDialog.alignment.has_value()) {
         properties.alignment = textPickerDialog.alignment.value();
     }
-    
+
     if (textPickerDialog.backgroundColor.has_value()) {
         properties.backgroundColor = textPickerDialog.backgroundColor.value();
     }
@@ -59,15 +60,6 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-    } else {
-        if (properties.alignment == DialogAlignment::DEFAULT) {
-            if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-                properties.alignment = DialogAlignment::BOTTOM;
-                properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-            } else {
-                properties.alignment = DialogAlignment::CENTER;
-            }
-        }
     }
     if (textPickerDialog.offset.has_value()) {
         properties.offset = textPickerDialog.offset.value();
@@ -99,12 +91,15 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
         auto columnNode = CreateColumnNode(columnKind, showCount);
         auto stackNode = CreateStackNode();
         auto buttonNode = CreateButtonNode();
+        auto columnBlendNode = CreateColumnNode();
         buttonNode->MountToParent(stackNode);
-        columnNode->MountToParent(stackNode);
+        columnNode->MountToParent(columnBlendNode);
+        columnBlendNode->MountToParent(stackNode);
         columnNode->MarkModifyDone();
         columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
         stackNode->MountToParent(textPickerNode);
     }
     stack->Push(textPickerNode);
@@ -200,11 +195,45 @@ RefPtr<FrameNode> TextPickerModelNG::CreateStackNode()
         V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
 }
 
+RefPtr<FrameNode> TextPickerModelNG::CreateColumnNode()
+{
+    auto columnId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, columnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+}
+
 RefPtr<FrameNode> TextPickerModelNG::CreateButtonNode()
 {
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
     return FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+}
+
+RefPtr<FrameNode> TextPickerModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto textPickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    uint32_t TEXT = 0x02;
+    textPickerPattern->SetColumnsKind(TEXT);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    textPickerPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
+    uint32_t showCount = BUFFER_NODE_NUMBER + 1;
+
+    if (textPickerNode->GetChildren().empty()) {
+        auto columnNode = CreateColumnNode(TEXT, showCount);
+        auto stackNode = CreateStackNode();
+        auto buttonNode = CreateButtonNode();
+        buttonNode->MountToParent(stackNode);
+        columnNode->MountToParent(stackNode);
+        columnNode->MarkModifyDone();
+        columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        stackNode->MountToParent(textPickerNode);
+    }
+    return textPickerNode;
 }
 
 void TextPickerModelNG::SetSelected(uint32_t value)
@@ -362,12 +391,15 @@ void TextPickerModelNG::SetUnCascadeColumns(const std::vector<NG::TextCascadePic
             auto columnNode = CreateColumnNode(NG::TEXT, showCount_);
             auto stackNode = CreateStackNode();
             auto buttonNode = CreateButtonNode();
+            auto columnBlendNode = CreateColumnNode();
             buttonNode->MountToParent(stackNode);
-            columnNode->MountToParent(stackNode);
+            columnNode->MountToParent(columnBlendNode);
+            columnBlendNode->MountToParent(stackNode);
             columnNode->MarkModifyDone();
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
+            columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             stackNode->MountToParent(frameNode);
         }
     }
@@ -399,12 +431,15 @@ void TextPickerModelNG::SetCascadeColumns(const std::vector<NG::TextCascadePicke
             auto columnNode = CreateColumnNode(NG::TEXT, showCount_);
             auto stackNode = CreateStackNode();
             auto buttonNode = CreateButtonNode();
+            auto columnBlendNode = CreateColumnNode();
             buttonNode->MountToParent(stackNode);
-            columnNode->MountToParent(stackNode);
+            columnNode->MountToParent(columnBlendNode);
+            columnBlendNode->MountToParent(stackNode);
             columnNode->MarkModifyDone();
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
+            columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             stackNode->MountToParent(frameNode);
         }
     }
@@ -439,6 +474,14 @@ bool TextPickerModelNG::IsSingle()
     return rangeValue_.size() > 0;
 }
 
+bool TextPickerModelNG::IsSingle(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, false);
+    return textPickerPattern->GetRange().size() > 0;
+}
+
 bool TextPickerModelNG::GetSingleRange(std::vector<NG::RangeContent>& rangeValue)
 {
     rangeValue.clear();
@@ -448,6 +491,26 @@ bool TextPickerModelNG::GetSingleRange(std::vector<NG::RangeContent>& rangeValue
     return true;
 }
 
+bool TextPickerModelNG::GetSingleRange(FrameNode* frameNode, std::vector<NG::RangeContent>& rangeValue)
+{
+    rangeValue.clear();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, false);
+    for (auto& item : textPickerPattern->GetRange()) {
+        rangeValue.emplace_back(std::move(item));
+    }
+    return true;
+}
+
+bool TextPickerModelNG::IsCascade(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, false);
+    return textPickerPattern->GetIsCascade();
+}
+
 bool TextPickerModelNG::GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options)
 {
     options.clear();
@@ -455,6 +518,24 @@ bool TextPickerModelNG::GetMultiOptions(std::vector<NG::TextCascadePickerOptions
         options.emplace_back(std::move(item));
     }
     return true;
+}
+
+bool TextPickerModelNG::GetMultiOptions(FrameNode* frameNode, std::vector<NG::TextCascadePickerOptions>& options)
+{
+    options.clear();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, false);
+    for (auto& item : textPickerPattern->GetMultiOptions()) {
+        options.emplace_back(std::move(item));
+    }
+    return true;
+}
+
+uint32_t TextPickerModelNG::GetMaxCount(FrameNode* frameNode)
+{
+    // TODO
+    return 1;
 }
 
 void TextPickerModelNG::SetValues(const std::vector<std::string>& values)

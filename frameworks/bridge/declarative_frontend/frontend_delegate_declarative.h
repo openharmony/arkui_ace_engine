@@ -81,7 +81,7 @@ public:
     void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
 
     // JSFrontend delegate functions.
-    void RunPage(
+    UIContentErrorCode RunPage(
         const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter = false);
     void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::string& params, const std::string& profile);
@@ -120,7 +120,7 @@ public:
         const WeakPtr<Framework::JsEngine>& jsEngineWeak, const std::string& key, const std::string& value);
 
     // distribute
-    std::string RestoreRouterStack(const std::string& contentInfo) override;
+    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo) override;
     std::string GetContentInfo() override;
 
     // Accessibility delegate functions.
@@ -162,10 +162,14 @@ public:
     void ReplaceNamedRoute(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Back(const std::string& uri, const std::string& params) override;
+    void BackToIndex(int32_t index, const std::string& params) override;
     void Clear() override;
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
+    void GetRouterStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params) override;
+    void GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray) override;
     std::string GetParams() override;
+    int32_t GetIndexByUrl(const std::string& url) override;
 
     void PostponePageTransition() override;
     void LaunchPageTransition() override;
@@ -348,7 +352,7 @@ private:
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);
 
-    void LoadPage(
+    UIContentErrorCode LoadPage(
         int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params, bool isRestore = false);
     void OnPageReady(const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage, bool isRestore);
     void FlushPageCommand(

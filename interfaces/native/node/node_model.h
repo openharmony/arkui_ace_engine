@@ -31,6 +31,8 @@ struct ArkUI_Node {
     ArkUINodeHandle uiNodeHandle = nullptr;
 };
 
+constexpr int BASIC_COMPONENT_NUM = 18;
+
 #ifdef __cplusplus
 };
 #endif
@@ -43,16 +45,16 @@ ArkUIFullNodeAPI* GetFullImpl();
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);
 void DisposeNode(ArkUI_NodeHandle nativePtr);
 
-void AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
-void RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
-void InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode);
+int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
+int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
+int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode);
 
 // deprecated.
 [[deprecated]] void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const char* value);
 
 int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value);
 const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
-void ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
+int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
 
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId);
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType);

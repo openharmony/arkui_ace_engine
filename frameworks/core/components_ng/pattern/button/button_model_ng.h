@@ -28,7 +28,7 @@ public:
     void SetFontColor(const Color& textColor) override;
     void SetType(const int value) override;
     void SetStateEffect(const bool stateEffect) override;
-    void SetLableStyle(ButtonParameters& buttonParameters) override;
+    void SetLabelStyle(ButtonParameters& buttonParameters) override;
     void CreateWithLabel(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren) override;
     void Create(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren) override;
     void CreateWithChild(const CreateWithPara& para) override;
@@ -39,7 +39,6 @@ public:
     void SetBorderRadius(const Dimension& radius) override;
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
-    void SetHoverEffect(const int32_t& hoverEffectNum) override;
     void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) override;
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -50,7 +49,7 @@ public:
     static void SetFontColor(FrameNode* frameNode, const Color& textColor);
     static void SetType(FrameNode* frameNode, const int value);
     static void SetStateEffect(FrameNode* frameNode, const bool stateEffect);
-    static void SetLableStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters);
+    static void SetLabelStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters);
     static void BackgroundColor(FrameNode* frameNode, const Color& color, const bool& colorFlag);
     static void SetBorderRadius(FrameNode* frameNode, const Dimension& radius);
     static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
@@ -58,6 +57,7 @@ public:
         const std::optional<Dimension>& radiusBottomRight);
     static void SetSize(
         FrameNode* frameNode, const std::optional<Dimension>& width, const std::optional<Dimension>& height);
+    static void SetButtonLabel(FrameNode* frameNode, const char* label);
 
 private:
     static void CreateWithLabel(const std::string& label);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_MODEL_NG_H
 
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/scroll/scroll_model.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +33,8 @@ public:
     void SetOnScrollBegin(OnScrollBeginEvent&& event) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event) override;
     void SetOnScroll(NG::ScrollEvent&& event) override;
+    void SetOnWillScroll(NG::ScrollEventWithState&& event) override;
+    void SetOnDidScroll(NG::ScrollEventWithState&& event) override;
     void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) override;
     void SetOnScrollEnd(NG::ScrollEndEvent&& event) override;
     void SetOnScrollStart(OnScrollStartEvent&& event) override;
@@ -75,6 +78,9 @@ public:
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& event);
+    static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
+    static ScrollEdgeType GetOnScrollEdge(FrameNode* frameNode);
+    
 };
 
 } // namespace OHOS::Ace::NG

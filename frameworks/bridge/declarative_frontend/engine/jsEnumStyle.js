@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1121,6 +1121,8 @@ var FileSelectorMode;
 var ProtectedResourceType;
 (function (ProtectedResourceType) {
   ProtectedResourceType["MidiSysex"] = "TYPE_MIDI_SYSEX";
+  ProtectedResourceType["VIDEO_CAPTURE"] = "TYPE_VIDEO_CAPTURE";
+  ProtectedResourceType["AUDIO_CAPTURE"] = "TYPE_AUDIO_CAPTURE";
 })(ProtectedResourceType || (ProtectedResourceType = {}));
 
 var ProgressType;
@@ -1720,6 +1722,8 @@ class NavPathStack {
     this.nativeStack = undefined;
     // parent stack
     this.parentStack = undefined;
+    // Array of remove destination indexes
+    this.removeArray = [];
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
@@ -1777,7 +1781,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
-  
+
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
       this.pathArray.pop();
@@ -1982,8 +1986,16 @@ class NavPathStack {
       return 0;
     }
     let originLength = this.pathArray.length;
-    this.pathArray = this.pathArray.filter((item, index) => {
-      return item && !indexes.includes(index) });
+    let tempArray = this.pathArray.slice(0);
+    this.removeArray = [];
+    this.pathArray = [];
+    for (let index = 0 ; index < tempArray.length ; index++) {
+      if (tempArray[index] && !indexes.includes(index)) {
+        this.pathArray.push(tempArray[index]);
+      } else {
+        this.removeArray.push(index);
+      }
+    }
     let cnt = originLength - this.pathArray.length;
     if (cnt > 0) {
       this.changeFlag = this.changeFlag + 1;
@@ -1991,6 +2003,12 @@ class NavPathStack {
       this.nativeStack?.onStateChanged();
     }
     return cnt;
+  }
+  getRemoveArray() {
+    return this.removeArray;
+  }
+  clearRemoveArray() {
+    this.removeArray = [];
   }
   removeByName(name) {
     let originLength = this.pathArray.length;
@@ -2419,6 +2437,11 @@ var FoldStatus;
   FoldStatus[FoldStatus["FOLD_STATUS_FOLDED"] = 2] = "FOLD_STATUS_FOLDED";
   FoldStatus[FoldStatus["FOLD_STATUS_HALF_FOLDED"] = 3] = "FOLD_STATUS_HALF_FOLDED";
 })(FoldStatus || (FoldStatus = {}));
+
+var EmbeddedType;
+(function (EmbeddedType) {
+  EmbeddedType[EmbeddedType["UIEXTENSION"] = 0] = "UIEXTENSION";
+})(EmbeddedType || (EmbeddedType = {}));
 
 var OutlineStyle;
 (function (OutlineStyle) {

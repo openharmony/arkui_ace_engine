@@ -160,6 +160,7 @@ const char MATRIX_COMBINE[] = "combine";
 const char MATRIX_INVERT[] = "invert";
 const char MATRIX_TRANSLATE[] = "translate";
 const char MATRIX_SCALE[] = "scale";
+const char MATRIX_SKEW[] = "skew";
 const char MATRIX_ROTATE[] = "rotate";
 const char MATRIX_TRANSFORM_POINT[] = "transformPoint";
 const char MATRIX_4X4[] = "matrix4x4";

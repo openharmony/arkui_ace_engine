@@ -29,14 +29,15 @@ const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const char* DEFAULT_TEXT_CLOCK_FORMAT_IN_CARD = "hh:mm";
 const char* DEFAULT_TEXT_CLOCK_FORMAT_IN_NOCARD = "aa hh:mm:ss";
 
-void SetTextClockFormat(NodeHandle node, const char* format)
+namespace TextClockModifier {
+void SetFormat(ArkUINodeHandle node, ArkUI_CharPtr format)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextClockModelNG::SetFormat(frameNode, format);
 }
 
-void ResetTextClockFormat(NodeHandle node)
+void ResetFormat(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -50,14 +51,14 @@ void ResetTextClockFormat(NodeHandle node)
     TextClockModelNG::SetFormat(frameNode, defaultFormat);
 }
 
-void SetTextClockFontColor(NodeHandle node, uint32_t color)
+void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextClockModelNG::SetFontColor(frameNode, Color(color));
 }
 
-void ResetTextClockFontColor(NodeHandle node)
+void ResetFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -68,35 +69,35 @@ void ResetTextClockFontColor(NodeHandle node)
     TextClockModelNG::SetFontColor(frameNode, theme->GetTextStyle().GetTextColor());
 }
 
-void SetTextClockFontSize(NodeHandle node, double fontSizeValue, int fontSizeUnit)
+void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSizeValue, ArkUI_Int32 fontSizeUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextClockModelNG::SetFontSize(frameNode, CalcDimension(fontSizeValue, (DimensionUnit)fontSizeUnit));
 }
 
-void ResetTextClockFontSize(NodeHandle node)
+void ResetFontSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextClockModelNG::SetFontSize(frameNode, DEFAULT_FONT_SIZE);
 }
 
-void SetTextClockFontStyle(NodeHandle node, uint32_t fontStyle)
+void SetFontStyle(ArkUINodeHandle node, ArkUI_Uint32 fontStyle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextClockModelNG::SetFontStyle(frameNode, FONT_STYLES[fontStyle]);
 }
 
-void ResetTextClockFontStyle(NodeHandle node)
+void ResetFontStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextClockModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
 }
 
-void SetTextClockFontWeight(NodeHandle node, const char* fontWeight)
+void SetFontWeight(ArkUINodeHandle node, ArkUI_CharPtr fontWeight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -104,14 +105,14 @@ void SetTextClockFontWeight(NodeHandle node, const char* fontWeight)
     TextClockModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeightStr));
 }
 
-void ResetTextClockFontWeight(NodeHandle node)
+void ResetFontWeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextClockModelNG::SetFontWeight(frameNode, DEFAULT_FONT_WEIGHT);
 }
 
-void SetTextClockFontFamily(NodeHandle node, const char* fontFamily)
+void SetFontFamily(ArkUINodeHandle node, ArkUI_CharPtr fontFamily)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -120,7 +121,7 @@ void SetTextClockFontFamily(NodeHandle node, const char* fontFamily)
     TextClockModelNG::SetFontFamily(frameNode, fontFamilyResult);
 }
 
-void ResetTextClockFontFamily(NodeHandle node)
+void ResetFontFamily(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -128,14 +129,27 @@ void ResetTextClockFontFamily(NodeHandle node)
     std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
     TextClockModelNG::SetFontFamily(frameNode, fontFamilyResult);
 }
+} // namespace TextClockModifier
 
-ArkUITextClockModifierAPI GetTextClockModifier()
+namespace NodeModifier {
+const ArkUITextClockModifier* GetTextClockModifier()
 {
-    static const ArkUITextClockModifierAPI modifier = { SetTextClockFormat, ResetTextClockFormat, SetTextClockFontColor,
-        ResetTextClockFontColor, SetTextClockFontSize, ResetTextClockFontSize, SetTextClockFontStyle,
-        ResetTextClockFontStyle, SetTextClockFontWeight, ResetTextClockFontWeight, SetTextClockFontFamily,
-        ResetTextClockFontFamily };
+    static const ArkUITextClockModifier modifier = {
+        TextClockModifier::SetFormat,
+        TextClockModifier::ResetFormat,
+        TextClockModifier::SetFontColor,
+        TextClockModifier::ResetFontColor,
+        TextClockModifier::SetFontSize,
+        TextClockModifier::ResetFontSize,
+        TextClockModifier::SetFontStyle,
+        TextClockModifier::ResetFontStyle,
+        TextClockModifier::SetFontWeight,
+        TextClockModifier::ResetFontWeight,
+        TextClockModifier::SetFontFamily,
+        TextClockModifier::ResetFontFamily
+    };
 
-    return modifier;
+    return &modifier;
 }
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

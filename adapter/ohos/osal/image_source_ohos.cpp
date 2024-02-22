@@ -28,7 +28,7 @@ RefPtr<ImageSource> ImageSource::Create(int32_t fd)
     Media::SourceOptions options;
     auto src = Media::ImageSource::CreateImageSource(fd, options, errorCode);
     if (errorCode != Media::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, " create image source failed, errorCode = %{public}u", errorCode);
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "create image source failed, errorCode = %{public}u", errorCode);
         return nullptr;
     }
     return MakeRefPtr<ImageSourceOhos>(std::move(src));
@@ -90,6 +90,7 @@ RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(const Size& size)
 RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(uint32_t index, const Size& size)
 {
     Media::DecodeOptions options;
+    options.preferDma = true;
     if (size.first > 0 && size.second > 0) {
         options.desiredSize = { size.first, size.second };
     }

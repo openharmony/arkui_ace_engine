@@ -299,6 +299,8 @@ void SpanItem::UpdateTextStyleForAISpan(
         spanStart -= 1;
     }
     int32_t preEnd = spanStart;
+    std::optional<TextStyle> aiSpanTextStyle = textStyle;
+    SetAiSpanTextStyle(aiSpanTextStyle);
     while (!aiSpanMap.empty()) {
         auto aiSpan = aiSpanMap.begin()->second;
         if (aiSpan.start >= position || preEnd >= position) {
@@ -316,8 +318,6 @@ void SpanItem::UpdateTextStyleForAISpan(
                 StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, aiSpanStartInSpan - preEnd));
             UpdateTextStyle(beforeContent, builder, textStyle);
         }
-        std::optional<TextStyle> aiSpanTextStyle = textStyle;
-        SetAiSpanTextStyle(aiSpanTextStyle);
         auto displayContent = StringUtils::ToWstring(
             aiSpan.content).substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
         UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanTextStyle);

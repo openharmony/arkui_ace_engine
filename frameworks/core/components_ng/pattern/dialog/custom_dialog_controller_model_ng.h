@@ -23,13 +23,14 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT CustomDialogControllerModelNG : public OHOS::Ace::CustomDialogControllerModel {
 public:
-    void SetOpenDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, bool& pending,
-        bool& isShown, std::function<void()>&& cancelTask, std::function<void()>&& buildFunc,
+    void SetOpenDialog(DialogProperties& dialogProperties, const WeakPtr<AceType>& controller,
+        std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
+        std::function<void()>&& buildFunc, RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
+        std::list<DialogOperation>& dialogOperation) override;
+    void SetCloseDialog(DialogProperties& dialogProperties, const WeakPtr<AceType>& controller,
+        std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
         RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
         std::list<DialogOperation>& dialogOperation) override;
-    void SetCloseDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, bool& pending,
-        bool& isShown, std::function<void()>&& cancelTask, RefPtr<AceType>& dialogComponent,
-        RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_DIALOG_JS_CUSTOM_DIALOG_CONTROLLER_H

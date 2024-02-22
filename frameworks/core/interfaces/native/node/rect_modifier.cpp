@@ -21,14 +21,14 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t VALID_RADIUS_PAIR_FLAG = 1;
 } // namespace
-void SetRectRadiusWidth(NodeHandle node, double radiusWidthValue, int32_t radiusWidthUnit)
+void SetRectRadiusWidth(ArkUINodeHandle node, ArkUI_Float32 radiusWidthValue, ArkUI_Int32 radiusWidthUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RectModelNG::SetRadiusWidth(frameNode, CalcDimension(radiusWidthValue, (DimensionUnit)radiusWidthUnit));
 }
 
-void ResetRectRadiusWidth(NodeHandle node)
+void ResetRectRadiusWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -38,14 +38,14 @@ void ResetRectRadiusWidth(NodeHandle node)
     return;
 }
 
-void SetRectRadiusHeight(NodeHandle node, double radiusHeightValue, int32_t radiusHeightUnit)
+void SetRectRadiusHeight(ArkUINodeHandle node, ArkUI_Float32 radiusHeightValue, ArkUI_Int32 radiusHeightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RectModelNG::SetRadiusHeight(frameNode, CalcDimension(radiusHeightValue, (DimensionUnit)radiusHeightUnit));
 }
 
-void ResetRectRadiusHeight(NodeHandle node)
+void ResetRectRadiusHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -54,9 +54,11 @@ void ResetRectRadiusHeight(NodeHandle node)
     RectModelNG::SetRadiusHeight(frameNode, defaultDimension);
 }
 
-void SetRectRadiusWithArray(NodeHandle node, double* radiusValues, int32_t* radiusUnits, uint32_t* radiusValidPairs,
-    size_t radiusValidPairsSize)
+void SetRectRadiusWithArray(ArkUINodeHandle node, ArkUI_Float32* radiusValues, ArkUI_Int32* radiusUnits,
+    ArkUI_Uint32* radiusValidPairs, ArkUI_Uint32 radiusValidPairsSize)
 {
+    NG::ResetRectRadiusHeight(node);
+    NG::ResetRectRadiusWidth(node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(radiusValues);
@@ -73,7 +75,7 @@ void SetRectRadiusWithArray(NodeHandle node, double* radiusValues, int32_t* radi
     }
 }
 
-void SetRectRadiusWithValue(NodeHandle node, double radiusValue, int32_t radiusUnit)
+void SetRectRadiusWithValue(ArkUINodeHandle node, ArkUI_Float32 radiusValue, ArkUI_Int32 radiusUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -81,19 +83,19 @@ void SetRectRadiusWithValue(NodeHandle node, double radiusValue, int32_t radiusU
     RectModelNG::SetRadiusHeight(frameNode, CalcDimension(radiusValue, (DimensionUnit)radiusUnit));
 }
 
-void ResetRectRadius(NodeHandle node)
+void ResetRectRadius(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    NG::ResetRectRadiusHeight(frameNode);
-    NG::ResetRectRadiusWidth(frameNode);
+    NG::ResetRectRadiusHeight(node);
+    NG::ResetRectRadiusWidth(node);
 }
 
-ArkUIRectModifierAPI GetRectModifier()
+namespace NodeModifier {
+const ArkUIRectModifier* GetRectModifier()
 {
-    static const ArkUIRectModifierAPI modifier = { SetRectRadiusWidth, ResetRectRadiusWidth, SetRectRadiusHeight,
+    static const ArkUIRectModifier modifier = { SetRectRadiusWidth, ResetRectRadiusWidth, SetRectRadiusHeight,
         ResetRectRadiusHeight, SetRectRadiusWithArray, SetRectRadiusWithValue, ResetRectRadius };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

@@ -147,7 +147,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         if (recognizer) {
             auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(recognizer);
             if (!recognizerGroup && newIdx >= idx) {
-                recognizer->AssignNodeId(host->GetId());
+                recognizer->SetNodeId(host->GetId());
                 recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
                 recognizer->SetTargetComponent(targetComponent);
                 recognizer->SetIsSystemGesture(true);
@@ -155,7 +155,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
             recognizer->BeginReferee(touchId);
             innerRecognizers.push_back(std::move(recognizer));
         } else {
-            eventTarget->AssignNodeId(host->GetId());
+            eventTarget->SetNodeId(host->GetId());
             eventTarget->AttachFrameNode(WeakPtr<FrameNode>(host));
             eventTarget->SetTargetComponent(targetComponent);
             finalResult.push_back(eventTarget);
@@ -216,8 +216,8 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     auto offset = Offset(coordinateOffset.GetX(), coordinateOffset.GetY());
     RefPtr<NGGestureRecognizer> current;
     current = PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
-    auto geometryNode = host->GetGeometryNode();
-    auto size = geometryNode->GetFrameSize();
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     auto context = host->GetContext();
     int32_t parallelIndex = 0;
     int32_t exclusiveIndex = 0;
@@ -227,22 +227,14 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         }
         auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(recognizer);
         if (recognizerGroup) {
-            auto groupRecognizers = recognizerGroup->GetGroupRecognizer();
-            for (const auto& groupRecognizer : groupRecognizers) {
-                if (groupRecognizer) {
-                    groupRecognizer->SetCoordinateOffset(offset);
-                    groupRecognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
-                    groupRecognizer->SetTargetComponent(targetComponent);
-                    groupRecognizer->SetSize(size.Height(), size.Width());
-                }
-            }
+            recognizerGroup->SetRecognizerInfoRecursively(offset, host, targetComponent, getEventTargetImpl);
         }
-        recognizer->AssignNodeId(host->GetId());
+        
         recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
         recognizer->SetTargetComponent(targetComponent);
-        recognizer->SetSize(size.Height(), size.Width());
         recognizer->SetCoordinateOffset(offset);
         recognizer->BeginReferee(touchId, true);
+        recognizer->SetGetEventTargetImpl(getEventTargetImpl);
         auto gestureMask = recognizer->GetPriorityMask();
         if (gestureMask == GestureMask::IgnoreInternal) {
             // In ignore case, dropped the self inner recognizer and children recognizer.
@@ -264,7 +256,6 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 }
                 externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
                 externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
-                externalParallelRecognizer_[parallelIndex]->AssignNodeId(host->GetId());
                 externalParallelRecognizer_[parallelIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
                 externalParallelRecognizer_[parallelIndex]->SetTargetComponent(targetComponent);
                 current = externalParallelRecognizer_[parallelIndex];
@@ -290,7 +281,6 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 }
                 externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
                 externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(touchId);
-                externalExclusiveRecognizer_[exclusiveIndex]->AssignNodeId(host->GetId());
                 externalExclusiveRecognizer_[exclusiveIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
                 externalExclusiveRecognizer_[exclusiveIndex]->SetTargetComponent(targetComponent);
                 current = externalExclusiveRecognizer_[exclusiveIndex];
@@ -660,15 +650,23 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         TAG_LOGI(AceLogTag::ACE_DRAG, "FrameNode is not set onDragStart event.");
         return;
     }
+
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
     if (!IsAllowedDrag(eventHub)) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "FrameNode is not allow drag.");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "FrameNode is not allow drag, tag is %{public}s, id is %{public}s,"
+            "draggable is %{public}d, drag start event is %{public}d,"
+            "default support drag is %{public}d, user set is %{public}d.",
+            frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str(),
+            frameNode->IsDraggable(), eventHub->HasOnDragStart(),
+            pattern->DefaultSupportDrag(), frameNode->IsUserSet());
         HandleNotallowDrag(info);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && eventManager->IsLastMoveBeforeUp()) {
@@ -688,7 +686,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
     auto frameTag = frameNode->GetTag();
     auto hostPattern = frameNode->GetPattern<TextDragBase>();
-    if (hostPattern && (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
+    if (hostPattern && GetTextDraggable() && (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
                         frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG)) {
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
         frameNodeSize_ = SizeF(0.0f, 0.0f);
@@ -712,23 +710,26 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     auto dragPreviewInfo = frameNode->GetDragPreview();
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
-            dragDropInfo.pixelMap = dragPreviewPixelMap_;
-            OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
-            return;
+            if (dragPreviewPixelMap_ != nullptr) {
+                dragDropInfo.pixelMap = dragPreviewPixelMap_;
+                OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+                return;
+            }
         }
     }
-    if (info.GetSourceDevice() == SourceType::MOUSE) {
-        if (dragPreviewInfo.pixelMap != nullptr) {
-            dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
-            OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
-            return;
-        } else if (dragPreviewInfo.customNode != nullptr) {
-            dragDropInfo.customNode = dragPreviewInfo.customNode;
-        }
+
+    if (dragPreviewInfo.pixelMap != nullptr) {
+        dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
+        OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+        return;
+    } else if (dragPreviewInfo.customNode != nullptr) {
+        dragDropInfo.customNode = dragPreviewInfo.customNode;
     }
+
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
         auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
@@ -748,8 +749,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                 },
                 TaskExecutor::TaskType::UI);
         };
-        auto customNode = AceType::DynamicCast<FrameNode>(dragDropInfo.customNode);
-        NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
         return;
     }
 #endif
@@ -774,6 +774,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (eventRet == DragRet::DRAG_FAIL || eventRet == DragRet::DRAG_CANCEL) {
         return;
     }
+    if (GetTextDraggable() && !GetIsTextDraggable()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, forbidden drag");
+        return;
+    }
     std::string udKey;
     int32_t recordsSize = 1;
     auto unifiedData = dragEvent->GetData();
@@ -789,7 +793,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     auto ret = SetDragData(unifiedData, udKey);
     if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, error is %{public}d", ret);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);
     }
 
     std::map<std::string, int64_t> summary;
@@ -836,8 +840,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
     }
     if (!overlayManager->GetIsOnAnimation()) {
-        dragEventActuator_->SetIsNotInPreviewState(true);
+        if (dragEventActuator_ != nullptr) {
+            dragEventActuator_->SetIsNotInPreviewState(true);
+        }
     }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, animation is %{public}d, pixelMap scale is %{public}f",
+        overlayManager->GetIsOnAnimation(), scale);
     pixelMap->Scale(scale, scale, AceAntiAliasingOption::HIGH);
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
@@ -868,21 +876,23 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
     }
     dragDropManager->UpdateDragStyle();
-    dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetPreviewRect(Rect(pixelMapOffset.GetX(), pixelMapOffset.GetY(), width, height));
     dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     eventManager->DoMouseActionRelease();
     eventManager->SetIsDragging(true);
-    if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_->GetIsNotInPreviewState()) {
+    if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_ != nullptr &&
+        dragEventActuator_->GetIsNotInPreviewState()) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
             overlayManager->RemovePixelMap();
             pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
         }
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
-            pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
+            pipeline->AddDragWindowVisibleTask([]() {
+                InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+            });
         }
         dragDropManager->SetIsDragWindowShow(true);
     }
@@ -1186,27 +1196,14 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
     auto callback = [id = Container::CurrentId(), eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](
                         const DragNotifyMsgCore& notifyMessage) {
         ContainerScope scope(id);
-        DragRet result = DragRet::DRAG_FAIL;
-        switch (notifyMessage.result) {
-            case DragRet::DRAG_SUCCESS:
-                result = DragRet::DRAG_SUCCESS;
-                break;
-            case DragRet::DRAG_FAIL:
-                result = DragRet::DRAG_FAIL;
-                break;
-            case DragRet::DRAG_CANCEL:
-                result = DragRet::DRAG_CANCEL;
-                break;
-            default:
-                break;
-        }
-        dragEvent->SetResult(result);
         taskScheduler->PostTask(
-            [eventHub, dragEvent, dragDropManager, eventManager]() {
+            [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage]() {
+                dragDropManager->SetDragResult(notifyMessage, dragEvent);
                 dragDropManager->SetIsDragged(false);
                 dragDropManager->ResetDragging();
                 dragDropManager->SetDraggingPointer(-1);
                 dragDropManager->SetDraggingPressedState(false);
+                dragDropManager->ResetDragPreviewInfo();
                 auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
                 if (ret != 0) {
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Unregister coordination listener failed, error is %{public}d", ret);

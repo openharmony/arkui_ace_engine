@@ -157,7 +157,12 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 
 void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
-    auto gestureGroup = gestureGroup_.Upgrade();
+    RefPtr<NGGestureRecognizer> gestureGroup;
+    if (!eventImportGestureGroup_.Invalid()) {
+        gestureGroup = eventImportGestureGroup_.Upgrade();
+    } else {
+        gestureGroup = gestureGroup_.Upgrade();
+    }
     if (gestureGroup) {
         gestureGroup->Adjudicate(recognizer, disposal);
         return;
@@ -171,7 +176,8 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
     referee->Adjudicate(recognizer, disposal);
 }
 
-void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime)
+void NGGestureRecognizer::Transform(
+    PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime, bool isPostEventResult)
 {
     if (node.Invalid()) {
         return;
@@ -202,7 +208,7 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:%{public}d", host->GetId());
             break;
         }
-        if (host->GetTag() == "NodeContainer") {
+        if (host->GetTag() == "NodeContainer" && isPostEventResult) {
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when used in NodeContainer, id:%{public}d", host->GetId());
             break;
         }
@@ -231,14 +237,16 @@ void NGGestureRecognizer::AboutToAccept()
 
     auto eventManager = GetCurrentEventManager();
     CHECK_NULL_VOID(eventManager);
-    if (fromCardOrUIExtension_) {
-        eventManager->SetInnerFlag(true);
-    }
     auto frameNode = GetAttachedNode();
     auto ctrl = eventManager->GetResponseCtrl();
     CHECK_NULL_VOID(ctrl);
     if (!ctrl->ShouldResponse(frameNode)) {
         return;
+    }
+    if (fromCardOrUIExtension_) {
+        eventManager->SetInnerFlag(true);
+    } else {
+        eventManager->SetInnerFlag(false);
     }
     ctrl->TrySetFirstResponse(frameNode);
     OnAccepted();
@@ -291,6 +299,35 @@ bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& ge
     }
 
     gestureGroup_ = gestureGroup;
+    return true;
+}
+
+void NGGestureRecognizer::SetEventImportGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
+{
+    if (gestureGroup.Invalid()) {
+        return;
+    }
+
+    eventImportGestureGroup_ = gestureGroup;
+}
+
+bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event)
+{
+    PointF localPoint(event.x, event.y);
+    auto frameNode = GetAttachedNode();
+    if (!frameNode.Invalid()) {
+        auto host = frameNode.Upgrade();
+        CHECK_NULL_RETURN(host, false);
+        NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_, isPostEventResult_);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        auto paintRect = renderContext->GetPaintRectWithoutTransform();
+        localPoint = localPoint + paintRect.GetOffset();
+        auto responseRegion = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
+        if (!host->InResponseRegionList(localPoint, responseRegion)) {
+            return false;
+        }
+    }
     return true;
 }
 } // namespace OHOS::Ace::NG

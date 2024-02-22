@@ -28,6 +28,8 @@
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
 #include "core/components_ng/base/frame_node.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
+#include "interfaces/inner_api/ace/constants.h"
+#include "bridge/js_frontend/frontend_delegate.h"
 
 namespace OHOS::Ace::NG {
 
@@ -66,8 +68,8 @@ public:
     void RunPage(const std::string& url, const std::string& params);
     void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params);
     void RunPageByNamedRouter(const std::string& name, const std::string& params);
-    void RunCard(const std::string& url, const std::string& params, int64_t cardId,
-        const std::string& entryPoint = "");
+    UIContentErrorCode RunCard(
+        const std::string& url, const std::string& params, int64_t cardId, const std::string& entryPoint = "");
 
     void SetManifestParser(const RefPtr<Framework::ManifestParser>& manifestParser)
     {
@@ -116,12 +118,18 @@ public:
     void Replace(const RouterPageInfo& target);
     void ReplaceNamedRoute(const RouterPageInfo& target);
     void BackWithTarget(const RouterPageInfo& target);
+    void BackToIndexWithTarget(int32_t index, const std::string& params);
     void Clear();
     int32_t GetStackSize() const;
+    RouterPageInfo GetPageInfoByIndex(int32_t index, const std::string& params);
 
     void GetState(int32_t& index, std::string& name, std::string& path);
+    void GetStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params);
+    void GetStateByUrl(std::string& url, std::vector<Framework::StateInfo>& stateArray);
 
     std::string GetParams() const;
+
+    int32_t GetIndexByUrl(const std::string& url) const;
 
     RefPtr<FrameNode> GetCurrentPageNode() const
     {
@@ -145,7 +153,7 @@ public:
 
     std::unique_ptr<JsonValue> GetStackInfo();
 
-    std::string RestoreRouterStack(std::unique_ptr<JsonValue> stackInfo);
+    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(std::unique_ptr<JsonValue> stackInfo);
 
 private:
     class RouterOptScope {
@@ -174,9 +182,11 @@ private:
     void StartPush(const RouterPageInfo& target);
     void StartReplace(const RouterPageInfo& target);
     void StartBack(const RouterPageInfo& target);
+    void StartBackToIndex(int32_t index, const std::string& params);
     bool StartPop();
     void StartRestore(const RouterPageInfo& target);
     void BackCheckAlert(const RouterPageInfo& target);
+    void BackToIndexCheckAlert(int32_t index, const std::string& params);
     void StartClean();
     void CleanPageOverlay();
 
@@ -193,7 +203,7 @@ private:
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
 
-    void LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, int64_t cardId,
+    UIContentErrorCode LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, int64_t cardId,
         bool isRestore = false, bool needHideLast = true, const std::string& entryPoint = "");
 
     RefPtr<Framework::ManifestParser> manifestParser_;

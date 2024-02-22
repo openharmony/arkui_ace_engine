@@ -327,7 +327,7 @@ RefPtr<FrameNode> ButtonTestNg::CreateLabelButtonParagraphForLableStyle(
     if (lableStyleProperty.fontStyle.has_value()) {
         buttonParameters.fontStyle = lableStyleProperty.fontStyle;
     }
-    buttonModelNG.SetLableStyle(buttonParameters);
+    buttonModelNG.SetLabelStyle(buttonParameters);
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     return AceType::DynamicCast<FrameNode>(element);
@@ -1092,7 +1092,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest016, TestSize.Level1)
      * @tc.steps: step3. ButtonModelNG setLabelStyle.
      * @tc.expected: step3. Button properties are set successfully.
      */
-    buttonModelNG.SetLableStyle(buttonParameters);
+    buttonModelNG.SetLabelStyle(buttonParameters);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();

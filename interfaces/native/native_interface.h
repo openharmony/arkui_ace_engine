@@ -17,7 +17,8 @@
  * @addtogroup ArkUI_NativeModule
  * @{
  *
- * @brief 提供ArkUI在Native侧的UI能力，如UI组件创建销毁、树节点操作，属性设置，事件监听等。
+ * @brief Provides UI capabilities of ArkUI on the native side, such as UI component creation and destruction,
+ * tree node operations, attribute setting, and event listening.
  *
  * @since 12
  */
@@ -25,7 +26,7 @@
 /**
  * @file native_interface.h
  *
- * @brief 提供NativeModule接口的统一入口函数。
+ * @brief Provides a unified entry for the native module APIs.
  *
  * @library libace_ndk.z.so
  * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -42,35 +43,47 @@ extern "C" {
 #endif
 
 /**
- * @brief 定义任意版本的Native接口类型。
+ * @brief Defines the native API type of any version.
  *
  * @since 12
  */
 typedef struct {
     /**
-     * @brief 定义Native接口集合的版本信息。
+     * @brief Defines the version information of the native API set.
      *
-     * 不同于NDK版本，NativeNode接口的version字段标识自身结构体的版本信息。
+     * Unlike the NDK version, the version field of the NativeNode API indicates the version of its own structure.
      */
     int32_t version;
 } ArkUI_AnyNativeAPI;
 
 /**
- * @brief 定义Native接口集合类型。
+ * @brief Defines the native API set type.
  *
  * @since 12
  */
 typedef enum {
-    /** UI组件相关接口类型。*/
+    /** API type related to UI components. */
     ARKUI_NATIVE_NODE,
 } ArkUI_NativeAPIVariantKind;
 
 /**
- * @brief 获取指定版本的Native接口集合。
+ * @brief Defines the version information supported by the ARKUI_NATIVE_NODE type.
  *
- * @param type ArkUI提供的Native接口集合大类，例如UI组件接口类：ARKUI_NATIVE_NODE。
- * @param version native接口结构体的版本信息，通过结构体定义的后缀获得，如版本1的UI组件结构体：ArkUI_NativeNodeAPI_1。
- * @return ArkUI_AnyNativeAPI* 返回携带版本的Native接口抽象对象。
+ * @since 12 
+ */
+typedef enum {
+    /** The ARKUI_NATIVE_NODE type supports the structure {@link ArkUI_NativeNodeAPI_1} of version 1. */
+    ARKUI_NATIVE_NODE_VERSION_1,
+} ArkUI_NativeNodeAPIVersion;
+
+/**
+ * @brief Obtains the native API set of a specified version.
+ *
+ * @param type Indicates the type of the native API set provided by ArkUI, for example, ARKUI_NATIVE_NODE
+ * (API type related to UI components).
+ * @param version Indicates the version of the native API structure, which is obtained through the suffix defined in the
+ * structure. For example, for the ArkUI_NativeNodeAPI_1 structure, the version is 1.
+ * @return Returns the pointer to the native API abstract object that carries the version.
  * @code {.cpp}
  * #include<arkui/native_interface.h>
  * #include<arkui/native_node.h>
@@ -84,6 +97,29 @@ typedef enum {
  * @since 12
  */
 ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32_t version);
+
+/**
+ * @brief Obtains the native module API set of a specified version.
+ *
+ * @param type Indicates the type of the native API set provided by ArkUI, for example, ARKUI_NATIVE_NODE
+ * (API type related to UI components).
+ * @param version Indicates the version of the native API structure, which is obtained through the version enums
+ * supported by the structure. For example, the available version of ARKUI_NATIVE_NODE is
+ * {@link ARKUI_NATIVE_NODE_VERSION_1}.
+ * @return Returns the pointer to the native API abstract object that carries the version.
+ * @code {.cpp}
+ * #include<arkui/native_interface.h>
+ * #include<arkui/native_node.h>
+ *
+ * auto anyNativeAPI = OH_ArkUI_QueryModuleInterface(ARKUI_NATIVE_NODE, ARKUI_NATIVE_NODE_VERSION_1);
+ * if (anyNativeAPI->version == ARKUI_NATIVE_NODE_VERSION_1) {
+ *     auto nativeNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(anyNativeAPI);
+ * }
+ * @endcode
+ *
+ * @since 12
+ */
+ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t version);
 
 #ifdef __cplusplus
 };

@@ -37,7 +37,7 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
     fingerList_.clear();
     for (const auto& point : touchPoints_) {
         PointF localPoint(point.second.x, point.second.y);
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
         FingerInfo fingerInfo = { point.first, point.second.GetOffset(),
             Offset(localPoint.GetX(), localPoint.GetY()), point.second.sourceType, point.second.sourceTool };
         fingerList_.emplace_back(fingerInfo);
@@ -77,6 +77,15 @@ void MultiFingersRecognizer::OnFinishGestureReferee(int32_t touchId, bool isBloc
     activeFingers_.remove(touchId);
     if (IsNeedResetStatus()) {
         ResetStatusOnFinish(isBlocked);
+    }
+}
+
+void MultiFingersRecognizer::CleanRecognizerState()
+{
+    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+        currentFingers_ == 0) {
+        refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
     }
 }
 } // namespace OHOS::Ace::NG

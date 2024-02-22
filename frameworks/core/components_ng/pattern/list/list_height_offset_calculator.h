@@ -43,29 +43,6 @@ public:
     void CalculateFrameNode(RefPtr<FrameNode> frameNode)
     {
         CHECK_NULL_VOID(frameNode);
-        auto listItemPatten = frameNode->GetPattern<ListItemPattern>();
-        if (listItemPatten) {
-            if (currentIndex_ > 0 && currLane_ == 0) {
-                estimateHeight_ += spaceWidth_;
-            }
-            if (currentIndex_ == startIndex_) {
-                estimateOffset_ = estimateHeight_ - targetPos_.first;
-            }
-            float height = listItemPatten->GetEstimateHeight(GetAverageItemHeight(), axis_);
-            currRowHeight_ = std::max(currRowHeight_, height);
-            currLane_++;
-            if (currLane_ == lanes_) {
-                estimateHeight_ += currRowHeight_;
-                currLane_ = 0;
-                currRowHeight_ = 0.0f;
-            }
-            currentIndex_++;
-            if (listItemPatten->GetLayouted()) {
-                totalItemHeight_ += height;
-                totalItemCount_++;
-            }
-            return;
-        }
         auto listItemGroupPatten = frameNode->GetPattern<ListItemGroupPattern>();
         if (listItemGroupPatten) {
             if (currentIndex_ > 0) {
@@ -81,6 +58,32 @@ public:
             }
             estimateHeight_ += listItemGroupPatten->GetEstimateHeight(groupedItemHeight_);
             currentIndex_++;
+            return;
+        }
+        auto listItemPatten = frameNode->GetPattern<ListItemPattern>();
+        if (currentIndex_ > 0 && currLane_ == 0) {
+            estimateHeight_ += spaceWidth_;
+        }
+        if (currentIndex_ == startIndex_) {
+            estimateOffset_ = estimateHeight_ - targetPos_.first;
+        }
+        float height = 0.0f;
+        if (listItemPatten) {
+            height = listItemPatten->GetEstimateHeight(GetAverageItemHeight(), axis_);
+        } else {
+            height = GetMainAxisSize(frameNode->GetGeometryNode()->GetMarginFrameSize(), axis_);
+        }
+        currRowHeight_ = std::max(currRowHeight_, height);
+        currLane_++;
+        if (currLane_ == lanes_) {
+            estimateHeight_ += currRowHeight_;
+            currLane_ = 0;
+            currRowHeight_ = 0.0f;
+        }
+        currentIndex_++;
+        if (listItemPatten && listItemPatten->GetLayouted()) {
+            totalItemHeight_ += height;
+            totalItemCount_++;
         }
     }
 
@@ -118,8 +121,12 @@ public:
             if (itor->first == startIndex_ || itor->first == endIndex_) {
                 auto child = node->GetFrameChildByIndex(itor->first - currentIndex_, false);
                 auto frameNode = AceType::DynamicCast<FrameNode>(child);
+                if (!frameNode) {
+                    itor++;
+                    continue;
+                }
                 auto group = frameNode->GetPattern<ListItemGroupPattern>();
-                if (!group->HasLayoutedItem()) {
+                if (!group || !group->HasLayoutedItem()) {
                     itor++;
                     continue;
                 }

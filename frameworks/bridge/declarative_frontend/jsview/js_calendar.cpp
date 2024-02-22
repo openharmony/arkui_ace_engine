@@ -124,6 +124,7 @@ void JSCalendar::Create(const JSCallbackInfo& info)
     if (controllerObj->IsObject()) {
         auto jsCalendarController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSCalendarController>();
         if (jsCalendarController) {
+            jsCalendarController->SetInstanceId(Container::CurrentId());
             calendarData.controller = jsCalendarController->GetController();
         }
     }

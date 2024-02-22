@@ -105,6 +105,8 @@ public:
     void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
+    void SaveLayer();
+    void RestoreLayer();
 
     void SetFilterParam(const std::string& filterStr)
     {
@@ -332,7 +334,6 @@ protected:
 #ifndef USE_ROSEN_DRAWING
     void UpdateLineDash(SkPaint& paint);
     void UpdatePaintShader(const OffsetF& offset, SkPaint& paint, const Ace::Gradient& gradient);
-    void UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint);
     void InitPaintBlend(SkPaint& paint);
     sk_sp<SkShader> MakeConicGradient(SkPaint& paint, const Ace::Gradient& gradient);
 #else
@@ -422,6 +423,8 @@ protected:
 #else
     std::shared_ptr<RSImage> GetImage(const std::string& src);
 #endif
+    void GetSvgRect(const sk_sp<SkSVGDOM>& skiaDom, const Ace::CanvasImage& canvasImage,
+        RSRect* srcRect, RSRect* dstRect);
     void DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage);
 #ifndef USE_ROSEN_DRAWING
     virtual SkCanvas* GetRawPtrOfSkCanvas() = 0;
@@ -443,6 +446,8 @@ protected:
     double GetAlignOffset(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
     OHOS::Rosen::TextAlign GetEffectiveAlign(OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const;
 #endif
+    double GetFontBaseline(const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const;
+    double GetFontAlign(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph) const;
 
     PaintState fillState_;
     StrokePaintState strokeState_;
@@ -502,6 +507,13 @@ protected:
 
     SizeF lastLayoutSize_;
     RefPtr<ImageCache> imageCache_;
+    enum DrawImageType {
+        THREE_PARAMS,
+        FIVE_PARAMS,
+        NINE_PARAMS,
+    };
+    static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
+        staticPattern[];
 };
 } // namespace OHOS::Ace::NG
 

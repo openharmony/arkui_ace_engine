@@ -32,9 +32,12 @@ public:
 
     // app list fling
     static constexpr char APP_LIST_FLING[] = "APP_LIST_FLING";
-    
-    // app tail animation
-    static constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION";
+
+    // app swiper fling
+    static constexpr char APP_SWIPER_FLING[] = "APP_SWIPER_FLING";
+
+    // app swiper scroll
+    static constexpr char APP_SWIPER_SCROLL[] = "APP_SWIPER_SCROLL";
 
     // volume bar show
     static constexpr char VOLUME_BAR_SHOW[] = "VOLUME_BAR_SHOW";

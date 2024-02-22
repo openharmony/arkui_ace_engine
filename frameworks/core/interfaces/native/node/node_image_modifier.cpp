@@ -33,7 +33,24 @@ constexpr ImageFit DEFAULT_OBJECT_FIT_VALUE = ImageFit::COVER;
 constexpr bool DEFAULT_FIT_ORIGINAL_SIZE = false;
 constexpr ImageInterpolation DEFAULT_IMAGE_INTERPOLATION = ImageInterpolation::NONE;
 constexpr bool DEFAULT_DRAGGABLE = false;
+constexpr ArkUI_Float32 DEFAULT_IMAGE_EDGE_ANTIALIASING = 0;
 const std::vector<float> DEFAULT_COLOR_FILTER = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
+constexpr int32_t LOAD_ERROR_CODE = 401;
+constexpr int32_t IMAGE_LOAD_STATUS_INDEX = 0;
+constexpr int32_t IMAGE_WIDTH_INDEX = 1;
+constexpr int32_t IMAGE_HEIGHT_INDEX = 2;
+constexpr int32_t IMAGE_COMPONENT_WIDTH_INDEX = 3;
+constexpr int32_t IMAGE_COMPONENT_HEIGHT_INDEX = 4;
+constexpr int32_t IMAGE_CONTENT_OFFSET_X_INDEX = 5;
+constexpr int32_t IMAGE_CONTENT_OFFSET_Y_INDEX = 6;
+constexpr int32_t IMAGE_CONTENT_WIDTH_INDEX = 7;
+constexpr int32_t IMAGE_CONTENT_HEIGHT_INDEX = 8;
+constexpr int32_t IMAGE_OBJECT_FIT_CONTAIN_INDEX = 0;
+constexpr int32_t IMAGE_OBJECT_FIT_COVER_INDEX = 1;
+constexpr int32_t IMAGE_OBJECT_FIT_AUTO_INDEX = 2;
+constexpr int32_t IMAGE_OBJECT_FIT_FILL_INDEX = 3;
+constexpr int32_t IMAGE_OBJECT_FIT_SCALE_DOWN_INDEX = 4;
+constexpr int32_t IMAGE_OBJECT_FIT_NONE_INDEX = 5;
 
 void SetImageSrc(ArkUINodeHandle node, const char* value)
 {
@@ -125,11 +142,32 @@ void ResetSyncLoad(ArkUINodeHandle node)
     ImageModelNG::SetSyncMode(frameNode, DEFAULT_SYNC_LOAD_VALUE);
 }
 
+int32_t GetObjectFit(int32_t originObjectFilt)
+{
+    switch (originObjectFilt) {
+        case IMAGE_OBJECT_FIT_CONTAIN_INDEX:
+            return static_cast<int32_t>(ImageFit::CONTAIN);
+        case IMAGE_OBJECT_FIT_COVER_INDEX:
+            return static_cast<int32_t>(ImageFit::COVER);
+        case IMAGE_OBJECT_FIT_AUTO_INDEX:
+            return static_cast<int32_t>(ImageFit::FITWIDTH);
+        case IMAGE_OBJECT_FIT_FILL_INDEX:
+            return static_cast<int32_t>(ImageFit::FILL);
+        case IMAGE_OBJECT_FIT_SCALE_DOWN_INDEX:
+            return static_cast<int32_t>(ImageFit::SCALE_DOWN);
+        case IMAGE_OBJECT_FIT_NONE_INDEX:
+            return static_cast<int32_t>(ImageFit::NONE);
+        default:
+            break;
+    }
+    return originObjectFilt;
+}
+
 void SetObjectFit(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageFit objectFitValue = static_cast<ImageFit>(objectFitNumber);
+    ImageFit objectFitValue = static_cast<ImageFit>(GetObjectFit(objectFitNumber));
     if (objectFitValue < ImageFit::FILL || objectFitValue > ImageFit::SCALE_DOWN) {
         objectFitValue = ImageFit::COVER;
     }
@@ -239,7 +277,7 @@ void ResetImageInterpolation(ArkUINodeHandle node)
     ImageModelNG::SetImageInterpolation(frameNode, DEFAULT_IMAGE_INTERPOLATION);
 }
 
-void SetColorFilter(ArkUINodeHandle node, const float* array, int length)
+void SetColorFilter(ArkUINodeHandle node, const ArkUI_Float32* array, int length)
 {
     CHECK_NULL_VOID(array);
     if (length != COLOR_FILTER_MATRIX_SIZE) {
@@ -318,13 +356,58 @@ void ResetImageDraggable(ArkUINodeHandle node)
  * @param values radius values
  * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
  * value[2] : radius value for BottomLeft，value[3] : radius value for BottomRight
- * @param units adius units
+ * @param units radius units
  * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
  * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
  */
 void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, ArkUI_Int32 length) {}
 
 void ResetImageBorderRadius(ArkUINodeHandle node) {}
+
+void SetImageBorder(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
+
+void ResetImageBorder(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
+
+void SetImageOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
+        opacity = 1.0f;
+    }
+    ViewAbstract::SetOpacity(frameNode, opacity);
+}
+
+void ResetImageOpacity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOpacity(frameNode, 1.0f);
+}
+
+void SetEdgeAntialiasing(ArkUINodeHandle node, ArkUI_Float32 edgeAntialiasing)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetSmoothEdge(frameNode, edgeAntialiasing);
+}
+
+void ResetEdgeAntialiasing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetSmoothEdge(frameNode, DEFAULT_IMAGE_EDGE_ANTIALIASING);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -336,7 +419,9 @@ const ArkUIImageModifier* GetImageModifier()
         SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
         SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
         ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
-        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius };
+        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius,
+        SetImageBorder, ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing,
+        ResetEdgeAntialiasing };
     return &modifier;
 }
 
@@ -349,6 +434,15 @@ void SetImageOnComplete(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraPa
         event.kind = ON_IMAGE_COMPLETE;
         event.eventId = eventId;
         event.extraParam = extraParam;
+        event.componentAsyncEvent.data[IMAGE_LOAD_STATUS_INDEX].i32 = info.GetLoadingStatus();
+        event.componentAsyncEvent.data[IMAGE_WIDTH_INDEX].f32 = info.GetWidth();
+        event.componentAsyncEvent.data[IMAGE_HEIGHT_INDEX].f32 = info.GetHeight();
+        event.componentAsyncEvent.data[IMAGE_COMPONENT_WIDTH_INDEX].f32 = info.GetComponentWidth();
+        event.componentAsyncEvent.data[IMAGE_COMPONENT_HEIGHT_INDEX].f32 = info.GetComponentHeight();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_OFFSET_X_INDEX].f32 = info.GetContentOffsetX();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_OFFSET_Y_INDEX].f32 = info.GetContentOffsetY();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_WIDTH_INDEX].f32 = info.GetContentWidth();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_HEIGHT_INDEX].f32 = info.GetContentHeight();
         SendArkUIAsyncEvent(&event);
     };
     ImageModelNG::SetOnComplete(frameNode, std::move(onEvent));
@@ -363,6 +457,7 @@ void SetImageOnError(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
         event.kind = ON_IMAGE_ERROR;
         event.eventId = eventId;
         event.extraParam = extraParam;
+        event.componentAsyncEvent.data[0].i32 = LOAD_ERROR_CODE;
         SendArkUIAsyncEvent(&event);
     };
     ImageModelNG::SetOnError(frameNode, std::move(onEvent));

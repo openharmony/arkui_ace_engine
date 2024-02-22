@@ -193,7 +193,11 @@ void DatePickerTestNg::CreateDatePickerColumnNode()
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
 
-    columnNode_ = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild()->GetChildAtIndex(1));
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    auto blendNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
+    ASSERT_NE(blendNode, nullptr);
+    columnNode_ = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
     ASSERT_NE(columnNode_, nullptr);
     columnNode_->MarkModifyDone();
     columnPattern_ = columnNode_->GetPattern<DatePickerColumnPattern>();
@@ -213,9 +217,11 @@ HWTEST_F(DatePickerTestNg, DatePickerModelCreateDatePicker001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto buttonNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild()->GetChildAtIndex(0));
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    auto buttonNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildAtIndex(0));
     auto renderContext = buttonNode->GetRenderContext();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild()->GetChildAtIndex(1));
+    auto columnNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildAtIndex(1)->GetLastChild());
     columnNode->MarkModifyDone();
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     columnPattern->FlushCurrentOptions();
@@ -541,7 +547,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow002, TestSize.Level1)
     auto midStackNode =
         AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
     auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
-    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1));
+    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1)->GetLastChild());
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     columnPattern->SetCurrentIndex(0);
     columnPattern->UpdateToss(PATTERN_OFFSET);
@@ -682,7 +688,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow005, TestSize.Level1)
     auto midStackNode =
         AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
     auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
-    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1));
+    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1)->GetLastChild());
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     columnPattern->SetCurrentIndex(0);
     columnPattern->HandleChangeCallback(true, true);
@@ -731,7 +737,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow006, TestSize.Level1)
     auto midStackNode =
         AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
     auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
-    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1));
+    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1)->GetLastChild());
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     columnPattern->SetCurrentIndex(0);
     columnPattern->HandleChangeCallback(true, true);
@@ -780,7 +786,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow007, TestSize.Level1)
     auto midStackNode =
         AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
     auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
-    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1));
+    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1)->GetLastChild());
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     auto opt = columnPattern->GetOptions();
     columnPattern->SetCurrentIndex(opt[columnNode].size() - 1);
@@ -993,7 +999,9 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg001, TestSize.Le
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    auto blendNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
 
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
@@ -1005,7 +1013,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg001, TestSize.Le
     ASSERT_NE(accessibilityProperty, nullptr);
 
     for (auto& Value : DEFAULT_VALUE) {
-        options[columnNode].emplace_back(std::to_string(Value));
+        options[columnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     columnPattern->SetOptions(options);
     EXPECT_EQ(accessibilityProperty->GetCollectionItemCounts(), static_cast<int32_t>(DEFAULT_VALUE.size()));
@@ -1028,7 +1036,9 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg002, TestSize.Le
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
 
-    auto columnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    auto blendNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
@@ -1041,7 +1051,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg002, TestSize.Le
     EXPECT_FALSE(accessibilityProperty->IsScrollable());
 
     for (auto& Value : DEFAULT_VALUE) {
-        options[columnNode].emplace_back(std::to_string(Value));
+        options[columnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     columnPattern->SetOptions(options);
     columnPattern->SetCurrentIndex(-3);
@@ -1063,7 +1073,9 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg003, TestSize.Le
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    auto blendNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
 
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
@@ -1078,7 +1090,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg003, TestSize.Le
     EXPECT_EQ(accessibilityProperty->GetEndIndex(), DEFAULT_INDEX);
 
     for (auto& Value : DEFAULT_VALUE) {
-        options[columnNode].emplace_back(std::to_string(Value));
+        options[columnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     columnPattern->SetOptions(options);
     columnPattern->SetShowCount(BIG_SHOWCOUNT);
@@ -1108,7 +1120,9 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg004, TestSize.Le
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
-    auto yearColumnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    auto blendNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(blendNode, nullptr);
+    auto yearColumnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
     ASSERT_NE(yearColumnNode, nullptr);
 
     auto pickerPattern = pickerFrameNode->GetPattern<DatePickerPattern>();
@@ -1126,10 +1140,12 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg004, TestSize.Le
     EXPECT_EQ(accessibilityProperty->GetText(), "");
 
     for (auto& Value : DEFAULT_VALUE) {
-        options[yearColumnNode].emplace_back(std::to_string(Value));
+        options[yearColumnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     columnPattern->SetOptions(options);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(DEFAULT_VALUE.at(YEARINDEX)));
+    DateTime date;
+    date.year = DEFAULT_VALUE.at(YEARINDEX);
+    EXPECT_EQ(accessibilityProperty->GetText(), Localization::GetInstance()->FormatDateTime(date, "y"));
     options[yearColumnNode].clear();
     columnPattern->SetOptions(options);
     EXPECT_EQ(accessibilityProperty->GetText(), "");
@@ -1150,7 +1166,9 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg005, TestSize.Le
     auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(pickerFrameNode, nullptr);
     pickerFrameNode->MarkModifyDone();
-    auto yearColumnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    auto blendNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(blendNode, nullptr);
+    auto yearColumnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
     ASSERT_NE(yearColumnNode, nullptr);
 
     auto pickerPattern = pickerFrameNode->GetPattern<DatePickerPattern>();
@@ -1163,7 +1181,7 @@ HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg005, TestSize.Le
     auto options = columnPattern->GetOptions();
     options[yearColumnNode].clear();
     for (auto& Value : DEFAULT_VALUE) {
-        options[yearColumnNode].emplace_back(std::to_string(Value));
+        options[yearColumnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     columnPattern->SetOptions(options);
 
@@ -1307,7 +1325,9 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest005, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(pickerTheme));
     auto stackChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(datePickerPattern->focusKeyID_));
     ASSERT_NE(stackChild, nullptr);
-    auto pickerChild = AceType::DynamicCast<FrameNode>(stackChild->GetLastChild());
+    auto blendChild = AceType::DynamicCast<FrameNode>(stackChild->GetLastChild());
+    ASSERT_NE(blendChild, nullptr);
+    auto pickerChild = AceType::DynamicCast<FrameNode>(blendChild->GetLastChild());
     const float FRAME_WIDTH = 10.0f;
     frameNode->GetGeometryNode()->frame_.rect_.SetWidth(PATTERN_OFFSET);
     pickerChild->GetGeometryNode()->frame_.rect_.SetWidth(FRAME_WIDTH);
@@ -1483,10 +1503,12 @@ HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest001, TestSize.Level1)
     layoutWrapper.AppendChild(std::move(subLayoutWrapper));
     layoutWrapper.AppendChild(std::move(subTwoLayoutWrapper));
     EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 2);
-    auto layoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    auto blendNode = AceType::DynamicCast<FrameNode>(yearColumnNode->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto layoutConstraint = blendNode->GetLayoutProperty()->CreateChildConstraint();
     layoutConstraint.selfIdealSize.SetWidth(20);
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    blendNode->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    blendNode->GetLayoutProperty()->UpdateContentConstraint();
     /**
      * @tc.step: step2. initialize DatePickerColumnLayoutAlgorithm and call Measure function.
      */
@@ -1595,7 +1617,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow008, TestSize.Level1)
     /**
      * columnDayNode columnPattern
      */
-    auto columnDayNode = AceType::DynamicCast<FrameNode>(dateNode->GetLastChild()->GetLastChild());
+    auto blendDayNode = AceType::DynamicCast<FrameNode>(dateNode->GetLastChild()->GetLastChild());
+    ASSERT_NE(blendDayNode, nullptr);
+    auto columnDayNode = AceType::DynamicCast<FrameNode>(blendDayNode->GetLastChild());
     ASSERT_NE(columnDayNode, nullptr);
     auto columnPattern = columnDayNode->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
@@ -1653,7 +1677,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow009, TestSize.Level1)
     /**
      * columnMonthNode columnPattern
      */
-    auto columnMonthNode = AceType::DynamicCast<FrameNode>(dateNode->GetChildAtIndex(1)->GetLastChild());
+    auto blendDayNode = AceType::DynamicCast<FrameNode>(dateNode->GetLastChild()->GetLastChild());
+    ASSERT_NE(blendDayNode, nullptr);
+    auto columnMonthNode = AceType::DynamicCast<FrameNode>(blendDayNode->GetLastChild());
     ASSERT_NE(columnMonthNode, nullptr);
     auto columnPattern = columnMonthNode->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
@@ -1711,7 +1737,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow010, TestSize.Level1)
     /**
      * columnYearNode columnPattern
      */
-    auto columnYearNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetLastChild());
+    auto blendYearNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetLastChild());
+    ASSERT_NE(blendYearNode, nullptr);
+    auto columnYearNode = AceType::DynamicCast<FrameNode>(blendYearNode->GetLastChild());
     ASSERT_NE(columnYearNode, nullptr);
     auto columnPattern = columnYearNode->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
@@ -1758,7 +1786,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = columnNode->GetLayoutProperty<DataPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto layoutWrapper =
@@ -1789,7 +1817,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest002, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
     auto pickerColumnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(pickerColumnPattern, nullptr);
@@ -1819,7 +1847,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest003, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
     auto pickerNodeLayout = columnNode->GetLayoutProperty<DataPickerLayoutProperty>();
@@ -1894,7 +1922,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest004, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
     auto pickerNodeLayout = columnNode->GetLayoutProperty<DataPickerLayoutProperty>();
@@ -1955,7 +1983,9 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest006, TestSize.Level1)
     pickerFrameNode->MarkModifyDone();
     auto firstChild = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild());
     ASSERT_NE(firstChild, nullptr);
-    auto columnNode = AceType::DynamicCast<FrameNode>(firstChild->GetChildAtIndex(1));
+    auto blendNode = AceType::DynamicCast<FrameNode>(firstChild->GetChildAtIndex(1));
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
@@ -1995,7 +2025,9 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest007, TestSize.Level1)
     pickerFrameNode->MarkModifyDone();
     auto firstChild = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild());
     ASSERT_NE(firstChild, nullptr);
-    auto columnNode = AceType::DynamicCast<FrameNode>(firstChild->GetChildAtIndex(1));
+    auto blendNode = AceType::DynamicCast<FrameNode>(firstChild->GetChildAtIndex(1));
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
@@ -2056,7 +2088,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest009, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = columnNode->GetLayoutProperty<DataPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto layoutWrapper =
@@ -2162,11 +2194,14 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest012, TestSize.Level1)
     /**
      * test HandleSolarDayChange
      */
-    auto yearColumnNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild()->GetChildAtIndex(1));
+    auto yearColumnNode =
+        AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild()->GetChildAtIndex(1)->GetLastChild());
     ASSERT_NE(yearColumnNode, nullptr);
-    auto monthColumnNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(1)->GetChildAtIndex(1));
+    auto monthColumnNode =
+        AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(1)->GetChildAtIndex(1)->GetLastChild());
     ASSERT_NE(monthColumnNode, nullptr);
-    auto dayColumnNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(2)->GetChildAtIndex(1));
+    auto dayColumnNode =
+        AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(2)->GetChildAtIndex(1)->GetLastChild());
     ASSERT_NE(yearColumnNode, nullptr);
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(yearColumnPattern, nullptr);
@@ -2482,7 +2517,9 @@ HWTEST_F(DatePickerTestNg, PerformActionTest001, TestSize.Level1)
      */
     auto firstChild = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild());
     ASSERT_NE(firstChild, nullptr);
-    auto columnNode = AceType::DynamicCast<FrameNode>(firstChild->GetChildAtIndex(1));
+    auto blendNode = AceType::DynamicCast<FrameNode>(firstChild->GetChildAtIndex(1));
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
@@ -2513,7 +2550,7 @@ HWTEST_F(DatePickerTestNg, PerformActionTest001, TestSize.Level1)
      */
     options[columnNode].clear();
     for (auto& Value : DEFAULT_VALUE) {
-        options[columnNode].emplace_back(std::to_string(Value));
+        options[columnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     options = columnPattern->GetOptions();
     columnPattern->SetOptions(options);
@@ -2521,7 +2558,7 @@ HWTEST_F(DatePickerTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
     options[columnNode].clear();
     for (auto& Value : DEFAULT_VALUE) {
-        options[columnNode].emplace_back(std::to_string(Value));
+        options[columnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     options = columnPattern->GetOptions();
     columnPattern->SetOptions(options);
@@ -2545,7 +2582,7 @@ HWTEST_F(DatePickerTestNg, DatePickerEventActionsTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
 
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild()->GetChildAtIndex(1));
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild()->GetChildAtIndex(1)->GetLastChild());
     columnNode->MarkModifyDone();
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     auto panEvent = columnPattern->panEvent_;
@@ -2580,7 +2617,7 @@ HWTEST_F(DatePickerTestNg, DatePickerEventActionsTest001, TestSize.Level1)
     columnPattern->SetShowCount(0);
     auto options = columnPattern->GetOptions();
     for (auto& Value : DEFAULT_VALUE) {
-        options[columnNode].emplace_back(std::to_string(Value));
+        options[columnNode].emplace_back(PickerDateF::CreateYear(Value));
     }
     columnPattern->SetOptions(options);
     EXPECT_FALSE(columnPattern->NotLoopOptions());
@@ -3181,19 +3218,19 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest014, TestSize.Level1)
     CreateDatePickerColumnNode();
     ASSERT_NE(columnPattern_, nullptr);
     auto options = columnPattern_->GetOptions();
-    auto strings = options[columnNode_];
-    strings.clear();
-    strings.emplace_back("option");
-    strings.emplace_back("option");
-    strings.emplace_back("option");
-    options[columnNode_] = strings;
+    auto pickerDates = options[columnNode_];
+    pickerDates.clear();
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    options[columnNode_] = pickerDates;
     columnPattern_->options_ = options;
 
     /**
      * @tc.steps: step2. Call UpdateFinishToss while scroll can move.
      * @tc.expected: ScrollDelta_ is added.
      */
-    columnPattern_->showCount_ = strings.size() * 2;
+    columnPattern_->showCount_ = pickerDates.size() * 2;
     columnPattern_->SetCurrentIndex(5);
     columnPattern_->UpdateFinishToss(OFFSET_Y);
     EXPECT_FALSE(columnPattern_->CanMove(true));
@@ -3291,12 +3328,12 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest017, TestSize.Level1)
     CreateDatePickerColumnNode();
     ASSERT_NE(columnPattern_, nullptr);
     auto options = columnPattern_->GetOptions();
-    auto strings = options[columnNode_];
-    strings.clear();
-    strings.emplace_back("option");
-    strings.emplace_back("option");
-    strings.emplace_back("option");
-    options[columnNode_] = strings;
+    auto pickerDates = options[columnNode_];
+    pickerDates.clear();
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    options[columnNode_] = pickerDates;
     columnPattern_->options_ = options;
 
     /**
@@ -3348,7 +3385,6 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
     ASSERT_NE(childNode, nullptr);
     auto gestureEventHub = childNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
-    EXPECT_TRUE(gestureEventHub->IsResponseRegion());
     auto responseRegion = gestureEventHub->GetResponseRegion().back();
     EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
     EXPECT_EQ(responseRegion.GetHeight().Value(), height);
@@ -3364,7 +3400,6 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
     ASSERT_NE(childNode, nullptr);
     gestureEventHub = childNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
-    EXPECT_TRUE(gestureEventHub->IsResponseRegion());
     responseRegion = gestureEventHub->GetResponseRegion().back();
     EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
     EXPECT_EQ(responseRegion.GetHeight().Value(), (height - SECLECTED_TEXTNODE_HEIGHT) / MIDDLE_OF_COUNTS);
@@ -3380,7 +3415,6 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
     ASSERT_NE(childNode, nullptr);
     gestureEventHub = childNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
-    EXPECT_TRUE(gestureEventHub->IsResponseRegion());
     responseRegion = gestureEventHub->GetResponseRegion().back();
     EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
     EXPECT_EQ(responseRegion.GetHeight().Value(),

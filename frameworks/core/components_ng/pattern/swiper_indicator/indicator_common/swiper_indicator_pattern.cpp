@@ -304,11 +304,11 @@ void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestu
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto stopAnimationCb = [weak = WeakClaim(this)]() {
+    auto stopAnimationCb = [weak = WeakClaim(this)](bool ifImmediately) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (pattern->dotIndicatorModifier_) {
-                pattern->dotIndicatorModifier_->StopAnimation();
+                pattern->dotIndicatorModifier_->StopAnimation(ifImmediately);
             }
         }
     };
@@ -376,7 +376,7 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     float padding = static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx());
     float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     int32_t currentIndex = swiperPattern->GetCurrentShownIndex();
-    int32_t itemCount = swiperPattern->TotalCount();
+    int32_t itemCount = swiperPattern->RealTotalCount();
     int32_t loopCount = itemCount == 0 ? 0 : std::abs(currentIndex / itemCount);
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
     auto axis = swiperPattern->GetDirection();
@@ -427,6 +427,22 @@ void SwiperIndicatorPattern::UpdateTextContent(const RefPtr<SwiperIndicatorLayou
     UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
 }
 
+int32_t SwiperIndicatorPattern::GetCurrentIndex() const
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_RETURN(swiperNode, 0);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, 0);
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, 0);
+    auto currentIndex = swiperLayoutProperty->GetIndex().value_or(0);
+    if (swiperPattern->IsSwipeByGroup()) {
+        currentIndex = SwiperUtils::ComputePageIndex(currentIndex, swiperPattern->GetDisplayCount());
+    }
+
+    return currentIndex;
+}
+
 void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
     const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode)
 {
@@ -444,11 +460,11 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     auto currentIndex = swiperPattern->GetCurrentFirstIndex() + 1;
-    if (currentIndex > swiperPattern->TotalCount()) {
+    if (currentIndex > swiperPattern->RealTotalCount()) {
         currentIndex = 1;
     } else if (swiperLayoutProperty->HasIndex()) {
-        currentIndex = swiperLayoutProperty->GetIndexValue() + 1;
-        if (currentIndex > swiperPattern->TotalCount()) {
+        currentIndex = GetCurrentIndex() + 1;
+        if (currentIndex > swiperPattern->RealTotalCount()) {
             currentIndex = 1;
         }
     }
@@ -464,7 +480,7 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     lastTextLayoutProperty->UpdateTextColor(fontColor);
     lastTextLayoutProperty->UpdateFontSize(fontSize);
     lastTextLayoutProperty->UpdateFontWeight(fontWeight);
-    lastTextLayoutProperty->UpdateContent("/" + std::to_string(swiperPattern->TotalCount()));
+    lastTextLayoutProperty->UpdateContent("/" + std::to_string(swiperPattern->RealTotalCount()));
     firstTextNode->MarkModifyDone();
     firstTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     lastTextNode->MarkModifyDone();
@@ -504,7 +520,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, false);
     auto currentIndex = swiperPattern->GetCurrentIndex();
-    auto childrenSize = swiperPattern->TotalCount();
+    auto childrenSize = swiperPattern->RealTotalCount();
 
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
@@ -549,7 +565,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, false);
     auto currentIndex = swiperPattern->GetCurrentIndex();
-    auto childrenSize = swiperPattern->TotalCount();
+    auto childrenSize = swiperPattern->RealTotalCount();
 
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
@@ -631,7 +647,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
-    if (swiperPattern->TotalCount() == displayCount) {
+    if (swiperPattern->RealTotalCount() == displayCount) {
         return;
     }
     if (CheckIsTouchBottom(info)) {
@@ -678,7 +694,7 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_RETURN(swiperNode, 0.0f);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    int32_t itemCount = swiperPattern->TotalCount();
+    int32_t itemCount = swiperPattern->RealTotalCount();
     auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount - 1));
     auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());

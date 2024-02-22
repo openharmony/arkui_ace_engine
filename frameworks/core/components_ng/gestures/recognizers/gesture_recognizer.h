@@ -58,7 +58,9 @@ public:
 
     static void ResetGlobalTransCfg();
 
-    static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false);
+    // IsRealTime is true when using real-time layouts.
+    static void Transform(
+        PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false, bool isPostEventResult = false);
 
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
     void BeginReferee(int32_t touchId, bool needUpdateChild = false)
@@ -158,6 +160,13 @@ public:
 
     bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
 
+    void SetEventImportGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
+
+    void ResetEventImportGestureGroup()
+    {
+        eventImportGestureGroup_.Reset();
+    }
+
     const WeakPtr<NGGestureRecognizer>& GetGestureGroup() const
     {
         return gestureGroup_;
@@ -241,14 +250,6 @@ public:
         return deviceType_;
     }
 
-    void SetSize(std::optional<double> recognizerTargetAreaHeight, std::optional<double> recognizerTargetAreaWidth)
-    {
-        EventTarget recognizerTarget;
-        recognizerTarget.area.SetHeight(Dimension(recognizerTargetAreaHeight.value()));
-        recognizerTarget.area.SetWidth(Dimension(recognizerTargetAreaWidth.value()));
-        recognizerTarget_ = recognizerTarget;
-    }
-
     void SetTransInfo(int id);
 
     virtual RefPtr<GestureSnapshot> Dump() const override;
@@ -291,12 +292,15 @@ public:
     }
 
     virtual void ForceCleanRecognizer() {};
+    virtual void CleanRecognizerState() {};
 
     virtual bool AboutToAddCurrentFingers(int32_t touchId)
     {
         currentFingers_++;
         return true;
     }
+
+    bool IsInAttachedNode(const TouchEvent& event);
 
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
@@ -341,8 +345,6 @@ protected:
 
     int64_t deviceId_ = 0;
     SourceType deviceType_ = SourceType::NONE;
-    // size of recognizer target.
-    std::optional<EventTarget> recognizerTarget_ = std::nullopt;
     int32_t transId_ = 0;
 
     int32_t currentFingers_ = 0;
@@ -350,6 +352,7 @@ protected:
     GestureJudgeFunc sysJudge_ = nullptr;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
+    WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;
 };
 
 } // namespace OHOS::Ace::NG

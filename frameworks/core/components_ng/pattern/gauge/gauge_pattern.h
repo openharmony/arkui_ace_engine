@@ -42,9 +42,17 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (!gaugeModifier_) {
-            gaugeModifier_ = AceType::MakeRefPtr<GaugeModifier>();
+            gaugeModifier_ = AceType::MakeRefPtr<GaugeModifier>(WeakClaim(this));
         }
         return MakeRefPtr<GaugePaintMethod>(WeakClaim(this), gaugeModifier_);
+    }
+
+    RefPtr<GaugeModifier> GetContentModifier(PaintWrapper* paintWrapper)
+    {
+        if (!gaugeModifier_) {
+            gaugeModifier_ = AceType::MakeRefPtr<GaugeModifier>(WeakClaim(this));
+        }
+        return gaugeModifier_;
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override

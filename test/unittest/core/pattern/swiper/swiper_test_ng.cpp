@@ -56,7 +56,7 @@ void SwiperTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<SwiperAccessibilityProperty>();
 }
 
-void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& callback)
+void SwiperTestNg::Create(const std::function<void(SwiperModelNG)>& callback)
 {
     SwiperModelNG model;
     model.Create();
@@ -65,9 +65,18 @@ void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& call
     if (callback) {
         callback(model);
     }
-    CreateItem();
     GetInstance();
     FlushLayoutTask(frameNode_);
+}
+
+void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& callback)
+{
+    Create([callback](SwiperModelNG model) {
+        if (callback) {
+            callback(model);
+        }
+        CreateItem();
+    });
 }
 
 void SwiperTestNg::CreateItem(int32_t itemNumber)
@@ -11967,5 +11976,166 @@ HWTEST_F(SwiperTestNg, GetMoveRate001, TestSize.Level1)
     paintMethod->GetMoveRate();
     EXPECT_TRUE(paintMethod->isPressed_ &&
                 paintMethod->touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+}
+
+/**
+ * @tc.name: AdjustCurrentIndexOnSwipePage001
+ * @tc.desc: Test SwiperPattern AdjustCurrentIndexOnSwipePage
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternAdjustCurrentIndexOnSwipePage001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    layoutProperty_->UpdateSwipeByGroup(true);
+    layoutProperty_->UpdateDisplayCount(3);
+    pattern_->needAdjustIndex_ = true;
+    layoutProperty_->UpdateIndex(1);
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(layoutProperty_->GetIndex().value(), 0);
+    EXPECT_FALSE(pattern_->needAdjustIndex_);
+
+    layoutProperty_->UpdateIndex(5);
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(layoutProperty_->GetIndex().value(), 0);
+
+    layoutProperty_->UpdateIndex(6);
+    pattern_->needAdjustIndex_ = true;
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(layoutProperty_->GetIndex().value(), 0);
+
+    layoutProperty_->UpdateIndex(3);
+    pattern_->needAdjustIndex_ = true;
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(layoutProperty_->GetIndex().value(), 3);
+
+    layoutProperty_->UpdateDisplayCount(6);
+    layoutProperty_->UpdateIndex(3);
+    pattern_->needAdjustIndex_ = true;
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(layoutProperty_->GetIndex().value(), 0);
+}
+
+/**
+ * @tc.name: ComputeSwipePageNextIndex001
+ * @tc.desc: Test SwiperPattern ComputeSwipePageNextIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternComputeSwipePageNextIndex001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    layoutProperty_->UpdateSwipeByGroup(true);
+    layoutProperty_->UpdateDisplayCount(3);
+    layoutProperty_->UpdateLoop(true);
+    pattern_->currentIndex_ = 3;
+    float dragVelocity = 500.0f;
+    pattern_->contentMainSize_ = 0.0f;
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 3);
+
+    pattern_->contentMainSize_ = 500.0f;
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 3);
+
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = -200.0f;
+    swiperItemInfo1.endPos = 0.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(3, swiperItemInfo1));
+    struct SwiperItemInfo swiperItemInfo2;
+    swiperItemInfo2.startPos = 0.0f;
+    swiperItemInfo2.endPos = 200.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(4, swiperItemInfo2));
+    struct SwiperItemInfo swiperItemInfo3;
+    swiperItemInfo3.startPos = 200.0f;
+    swiperItemInfo3.endPos = 400.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(5, swiperItemInfo3));
+    pattern_->contentMainSize_ = 600.0f;
+    dragVelocity = -500.0f;
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 3);
+
+    dragVelocity = -781.0f;
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 6);
+
+    pattern_->itemPosition_.clear();
+    swiperItemInfo1.startPos = -301.0f;
+    swiperItemInfo1.endPos = -101.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(3, swiperItemInfo1));
+    swiperItemInfo2.startPos = -101.0f;
+    swiperItemInfo2.endPos = 99.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(4, swiperItemInfo2));
+    swiperItemInfo3.startPos = 99.0f;
+    swiperItemInfo3.endPos = 299.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(5, swiperItemInfo3));
+    dragVelocity = -500.0f;
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 6);
+
+    dragVelocity = -781.0f;
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 6);
+
+    pattern_->itemPosition_.clear();
+    swiperItemInfo1.startPos = -200.0f;
+    swiperItemInfo1.endPos = 0.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(3, swiperItemInfo1));
+    swiperItemInfo2.startPos = 0.0f;
+    swiperItemInfo2.endPos = 200.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(4, swiperItemInfo2));
+    swiperItemInfo3.startPos = 200.0f;
+    swiperItemInfo3.endPos = 400.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(5, swiperItemInfo3));
+    dragVelocity = -781.0f;
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 6);
+
+    layoutProperty_->UpdateLoop(false);
+    pattern_->currentIndex_ = 0;
+    dragVelocity = 500.0f;
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 0);
+
+    pattern_->currentIndex_ = 3;
+    dragVelocity = -500.0f;
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 3);
+}
+
+/**
+ * @tc.name: SwipeByGroupShowNext001
+ * @tc.desc: Test SwiperPattern ShowNext On SwipeByGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSwipeByGroupShowNext001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    layoutProperty_->UpdateSwipeByGroup(true);
+    layoutProperty_->UpdateDisplayCount(3);
+    layoutProperty_->UpdateLoop(true);
+    pattern_->currentIndex_ = 0;
+    pattern_->isVisible_ = true;
+    pattern_->ShowNext();
+    EXPECT_EQ(pattern_->targetIndex_.value_or(0), 3);
+}
+
+
+/**
+ * @tc.name: SwipeByGroupShowPrevious001
+ * @tc.desc: Test SwiperPattern ShowPrevious On SwipeByGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSwipeByGroupShowPrevious001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    layoutProperty_->UpdateSwipeByGroup(true);
+    layoutProperty_->UpdateDisplayCount(3);
+    layoutProperty_->UpdateLoop(true);
+    pattern_->currentIndex_ = 0;
+    pattern_->isVisible_ = true;
+    pattern_->ShowPrevious();
+    EXPECT_EQ(pattern_->targetIndex_.value_or(0), -3);
 }
 } // namespace OHOS::Ace::NG

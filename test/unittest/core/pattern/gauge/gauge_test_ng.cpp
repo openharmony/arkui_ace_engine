@@ -33,6 +33,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_algorithm.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
+#include "core/components_ng/pattern/gauge/gauge_modifier.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_method.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
@@ -468,7 +469,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest001, TestSize.Level1)
      * @tc.steps: step1. create gaugePaintMethod.
      */
     GaugePaintMethod gaugePaintMethod;
-
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     /**
      * @tc.steps: step2. test ShouldHighLight in different cases
      * @tc.expected: the result of ShouldHighLight is correct.
@@ -477,52 +478,61 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest001, TestSize.Level1)
     float start = START;
     float interval = INTERVAL;
     float percent = PERCENT;
-    bool result = gaugePaintMethod.ShouldHighLight(start, interval, percent);
+    bool result = gaugeModifier.ShouldHighLight(start, interval, percent);
     EXPECT_FALSE(result);
 
     //     case2 : percent is LessOrEqual than start and GreatOrEqual than start + interval
     start = START;
     interval = LESS_INTERVAL;
     percent = PERCENT;
-    result = gaugePaintMethod.ShouldHighLight(start, interval, percent);
+    result = gaugeModifier.ShouldHighLight(start, interval, percent);
     EXPECT_FALSE(result);
 
     //     case3 : percent is GreatOrEqual than start and GreatOrEqual than start + interval
     start = LESS_START;
     interval = LESS_INTERVAL;
     percent = PERCENT;
-    result = gaugePaintMethod.ShouldHighLight(start, interval, percent);
+    result = gaugeModifier.ShouldHighLight(start, interval, percent);
     EXPECT_FALSE(result);
 
     //     case4 : percent is GreatOrEqual than start and LessOrEqual than start + interval
     start = LESS_START;
     interval = INTERVAL;
     percent = PERCENT;
-    result = gaugePaintMethod.ShouldHighLight(start, interval, percent);
+    result = gaugeModifier.ShouldHighLight(start, interval, percent);
     EXPECT_TRUE(result);
 }
 
 /**
  * @tc.name: GaugePaintMethodTest002
- * @tc.desc: Test Gauge PaintMethod GetForegroundDrawFunction
+ * @tc.desc: Test Gauge PaintMethod Paint
  * @tc.type: FUNC
  */
 HWTEST_F(GaugeTestNg, GaugePaintMethodTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create gaugePaintMethod.
+     * @tc.steps: step1. create paintMethod.
      */
-    Create(METHOD_VALUE, METHOD_MIN, METHOD_MAX);
-    GaugePaintMethod gaugePaintMethod;
+    Create(VALUE, MIN, MIN);
+    auto paintMethod = pattern_->CreateNodePaintMethod();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty_);
+    auto paintFunc = paintMethod->GetForegroundDrawFunction(Referenced::RawPtr(paintWrapper));
 
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
      */
-    RefPtr<RenderContext> renderContext;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
-    gaugePaintMethod.GetForegroundDrawFunction(AceType::RawPtr(paintWrapper));
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    paintFunc(rsCanvas);
 }
 
 /**
@@ -539,6 +549,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest003, TestSize.Level1)
     });
 
     GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
@@ -547,7 +558,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest003, TestSize.Level1)
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(1);
-    gaugePaintMethod.DrawGauge(rsCanvas, data);
+    gaugeModifier.DrawGauge(rsCanvas, data);
 }
 
 /**
@@ -564,6 +575,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest004, TestSize.Level1)
     });
 
     GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
@@ -577,7 +589,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest004, TestSize.Level1)
     EXPECT_CALL(rsCanvas, Save()).Times(1);
     EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(1);
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    gaugePaintMethod.DrawIndicator(rsCanvas, data);
+    gaugeModifier.DrawIndicator(rsCanvas, data);
 }
 
 /**
@@ -588,19 +600,36 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest004, TestSize.Level1)
 HWTEST_F(GaugeTestNg, GaugePaintMethodTest005, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create gaugePaintMethod.
+     * @tc.steps: step1. create gauge without set shadowOptions.
      */
     Create(METHOD_VALUE, METHOD_MIN, METHOD_MAX);
-    GaugePaintMethod gaugePaintMethod;
 
     /**
-     * @tc.steps: step2. get paintWrapper
-     * @tc.expected: paintWrapper is not null
+     * @tc.steps: step2. UpdateContentModifier
+     * @tc.expected: Expect the result to be false.
      */
-    RefPtr<RenderContext> renderContext;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
-    gaugePaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    auto paintMethod = pattern_->CreateNodePaintMethod();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty_);
+    paintMethod->UpdateContentModifier(Referenced::RawPtr(paintWrapper));
+    EXPECT_FALSE(paintProperty_->HasShadowOptions());
+
+    /**
+     * @tc.steps: step3. create gauge with set shadowOptions.
+     */
+    GaugeShadowOptions shadowOptions;
+    Create(METHOD_VALUE, METHOD_MIN, METHOD_MAX,
+        [shadowOptions](GaugeModelNG model) { model.SetShadowOptions(shadowOptions); });
+
+    /**
+     * @tc.steps: step4. UpdateContentModifier
+     * @tc.expected: Expect the result to be shadowOptions.
+     */
+    paintMethod = pattern_->CreateNodePaintMethod();
+    paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty_);
+    paintMethod->UpdateContentModifier(Referenced::RawPtr(paintWrapper));
+    EXPECT_EQ(paintProperty_->GetShadowOptionsValue(), shadowOptions);
 }
 
 /**
@@ -627,6 +656,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest006, TestSize.Level1)
     });
 
     GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
@@ -639,7 +669,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest006, TestSize.Level1)
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
-    gaugePaintMethod.Paint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
 /**
@@ -662,11 +692,12 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest007, TestSize.Level1)
     });
 
     GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
     Testing::MockCanvas rsCanvas;
-    gaugePaintMethod.Paint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
 /**
@@ -689,11 +720,12 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest008, TestSize.Level1)
     });
 
     GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
     Testing::MockCanvas rsCanvas;
-    gaugePaintMethod.Paint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
 /**
@@ -716,11 +748,12 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest009, TestSize.Level1)
     });
 
     GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
     Testing::MockCanvas rsCanvas;
-    gaugePaintMethod.Paint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
 /**
@@ -743,11 +776,12 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest010, TestSize.Level1)
     });
 
     GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
     Testing::MockCanvas rsCanvas;
-    gaugePaintMethod.Paint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
 /**
@@ -774,6 +808,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest011, TestSize.Level1)
     });
 
     GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
@@ -786,7 +821,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest011, TestSize.Level1)
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
-    gaugePaintMethod.Paint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
 /**
@@ -813,6 +848,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest012, TestSize.Level1)
     });
 
     GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
@@ -825,7 +861,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest012, TestSize.Level1)
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
-    gaugePaintMethod.Paint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
 /**
@@ -849,6 +885,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest013, TestSize.Level1)
     });
 
     GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
@@ -861,7 +898,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest013, TestSize.Level1)
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
-    gaugePaintMethod.Paint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
 /**
@@ -885,6 +922,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest014, TestSize.Level1)
     });
 
     GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
@@ -897,7 +935,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest014, TestSize.Level1)
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
-    gaugePaintMethod.Paint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
 /**
@@ -924,6 +962,7 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest015, TestSize.Level1)
     });
 
     GaugePaintMethod gaugePaintMethod;
+    GaugeModifier gaugeModifier = GaugeModifier(pattern_);
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
@@ -936,7 +975,204 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest015, TestSize.Level1)
     EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
-    gaugePaintMethod.Paint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier.PaintCircularAndIndicator(rsCanvas);
+}
+
+/**
+ * @tc.name: GaugePaintMethodTest016
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugePaintMethodTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gauge.
+     * case : endAngle - startAngle < 0
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto gaugeTheme = AceType::MakeRefPtr<GaugeTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(gaugeTheme));
+    GaugeShadowOptions shadowOptions;
+    shadowOptions.isShadowVisible = false;
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    Create(MIN, MIN, MIN, [shadowOptions](GaugeModelNG model) {
+        model.SetIsShowIndicator(false);
+        model.SetShadowOptions(shadowOptions);
+        model.SetStartAngle(210.f);
+        model.SetEndAngle(150.f);
+        model.SetStrokeWidth(STOKE_WIDTH);
+    });
+
+    paintProperty_->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_MONOCHROME);
+    auto paintMethod = pattern_->CreateNodePaintMethod();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty_);
+    auto paintFunc = paintMethod->GetForegroundDrawFunction(Referenced::RawPtr(paintWrapper));
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    paintFunc(rsCanvas);
+}
+
+/**
+ * @tc.name: GaugePaintMethodTest017
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugePaintMethodTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gauge.
+     * case : endAngle = startAngle and type = TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    Create(VALUE, MIN, MAX, [](GaugeModelNG model) {
+        std::vector<ColorStopArray> colors;
+        ColorStopArray colorStopArray;
+        for (const auto& color : COLORS) {
+            colorStopArray.emplace_back(std::make_pair(color, Dimension(1.0)));
+        }
+        colors.emplace_back(colorStopArray);
+        colors.emplace_back(colorStopArray);
+        colors.emplace_back(colorStopArray);
+        GaugeType type = GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT;
+        model.SetGradientColors(colors, VALUES, type);
+        model.SetStartAngle(START_ANGLE);
+        model.SetEndAngle(START_ANGLE);
+    });
+
+    auto paintMethod = pattern_->CreateNodePaintMethod();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty_);
+    auto paintFunc = paintMethod->GetForegroundDrawFunction(Referenced::RawPtr(paintWrapper));
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    paintFunc(rsCanvas);
+}
+
+/**
+ * @tc.name: GaugePaintMethodTest018
+ * @tc.desc: Test Gauge PaintMethod NewPaint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugePaintMethodTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gauge.
+     * case : endAngle = startAngle and type = TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT
+     */
+    GaugeShadowOptions shadowOptions;
+    shadowOptions.isShadowVisible = false;
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    Create(VALUE, MIN, MAX, [shadowOptions](GaugeModelNG model) { model.SetShadowOptions(shadowOptions); });
+    paintProperty_->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT);
+
+    auto paintMethod = pattern_->CreateNodePaintMethod();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty_);
+    auto paintFunc = paintMethod->GetForegroundDrawFunction(Referenced::RawPtr(paintWrapper));
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    paintFunc(rsCanvas);
+}
+
+/**
+ * @tc.name: GaugePaintMethodTest019
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugePaintMethodTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gauge.
+     * case : endAngle = startAngle and type = TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT
+     */
+    GaugeShadowOptions shadowOptions;
+    shadowOptions.isShadowVisible = false;
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    Create(VALUE, MIN, MAX, [shadowOptions](GaugeModelNG model) { model.SetShadowOptions(shadowOptions); });
+
+    paintProperty_->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT);
+    auto paintMethod = pattern_->CreateNodePaintMethod();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty_);
+    auto paintFunc = paintMethod->GetForegroundDrawFunction(Referenced::RawPtr(paintWrapper));
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    paintFunc(rsCanvas);
+}
+
+/**
+ * @tc.name: GaugeLayoutPropertyTest001
+ * @tc.desc: Test Gauge OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugeLayoutPropertyTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gauge.
+     * case : endAngle - startAngle > 360 and type = TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    Create(MIN, MIN, MIN, [](GaugeModelNG model) {
+        std::vector<ColorStopArray> colors;
+        ColorStopArray colorStopArray;
+        for (const auto& color : COLORS) {
+            colorStopArray.emplace_back(std::make_pair(color, Dimension(1.0)));
+        }
+        colors.emplace_back(colorStopArray);
+        colors.emplace_back(colorStopArray);
+        colors.emplace_back(colorStopArray);
+        GaugeType type = GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
+        model.SetGradientColors(colors, VALUES, type);
+        model.SetStartAngle(START_ANGLE);
+        model.SetEndAngle(361.f);
+    });
+
+    auto paintMethod = pattern_->CreateNodePaintMethod();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty_);
+    auto paintFunc = paintMethod->GetForegroundDrawFunction(Referenced::RawPtr(paintWrapper));
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    paintFunc(rsCanvas);
 }
 
 /**
@@ -976,6 +1212,7 @@ HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
+    RefPtr<GaugeModifier> gaugeModifier = pattern_->GetContentModifier(AceType::RawPtr(paintWrapper));
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1010,7 +1247,7 @@ HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
      */
     paintProperty_->UpdateGradientColors(ColorStopArrayVector);
     paintProperty_->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT);
-    gaugePaint->NewPaint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier->NewPaintCircularAndIndicator(rsCanvas);
     EXPECT_EQ(paintProperty_->GetGradientColorsValue(), ColorStopArrayVector);
 
     /**
@@ -1018,7 +1255,7 @@ HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
      */
     paintProperty_->UpdateGradientColors(ColorStopArrayVector);
     paintProperty_->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT);
-    gaugePaint->NewPaint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier->NewPaintCircularAndIndicator(rsCanvas);
     EXPECT_EQ(paintProperty_->GetGradientColorsValue(), ColorStopArrayVector);
 
     /**
@@ -1026,7 +1263,7 @@ HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
      */
     paintProperty_->UpdateGradientColors(ColorStopArrayVector);
     paintProperty_->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_MONOCHROME);
-    gaugePaint->NewPaint(rsCanvas, AceType::RawPtr(paintWrapper));
+    gaugeModifier->NewPaintCircularAndIndicator(rsCanvas);
     EXPECT_EQ(paintProperty_->GetGradientColorsValue(), ColorStopArrayVector);
 }
 
@@ -1047,6 +1284,7 @@ HWTEST_F(GaugeTestNg, DrawHighLight001, TestSize.Level1)
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
+    RefPtr<GaugeModifier> gaugeModifier = pattern_->GetContentModifier(AceType::RawPtr(paintWrapper));
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1071,7 +1309,7 @@ HWTEST_F(GaugeTestNg, DrawHighLight001, TestSize.Level1)
 
     RenderRingInfo data;
     EXPECT_CALL(rsCanvas, ClipPath(_, _, _)).Times(AtLeast(1));
-    gaugePaint->DrawHighLight(rsCanvas, data, DRAWSTARTDEGREE);
+    gaugeModifier->DrawHighLight(rsCanvas, data, DRAWSTARTDEGREE);
 }
 
 /**
@@ -1091,6 +1329,7 @@ HWTEST_F(GaugeTestNg, NewDrawIndicator001, TestSize.Level1)
     RefPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
+    RefPtr<GaugeModifier> gaugeModifier = pattern_->GetContentModifier(AceType::RawPtr(paintWrapper));
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1126,13 +1365,13 @@ HWTEST_F(GaugeTestNg, NewDrawIndicator001, TestSize.Level1)
     ColorStopArrayVector.push_back(colorStopArray);
 
     RenderRingInfo data;
-    gaugePaint->NewDrawIndicator(rsCanvas, paintProperty_, data);
+    gaugeModifier->NewDrawIndicator(rsCanvas, paintProperty_, data);
 
     data.radius = 300.0;
     float pathStartVertexX = 10.0;
     float pathStartVertexY = 12.0;
     RSPath path;
-    gaugePaint->CreateDefaultTrianglePath(pathStartVertexX, pathStartVertexY, data.radius, path);
+    gaugeModifier->CreateDefaultTrianglePath(pathStartVertexX, pathStartVertexY, data.radius, path);
     EXPECT_TRUE(path.BuildFromSVGString("  "));
 }
 
@@ -1443,6 +1682,7 @@ HWTEST_F(GaugeTestNg, GetMaxValueColor, TestSize.Level1)
      */
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     Create(VALUE, MIN, MAX);
+
     /**
      * @tc.steps: step2. Update property
      * @tc.expected: Related function is called.

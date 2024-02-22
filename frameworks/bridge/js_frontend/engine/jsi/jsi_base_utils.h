@@ -96,8 +96,8 @@ private:
         const bool isBundle = true);
     static std::string GetRelativePath(const std::string& sources, std::string splitStr = "/\\");
 
-    // native aceTraceObject
-    static std::unique_ptr<AceScopedTrace> aceScopedTrace_;
+    // native aceTraceObjects
+    static thread_local std::stack<std::unique_ptr<AceScopedTrace>> aceScopedTrace_;
 };
 } // namespace OHOS::Ace::Framework
 

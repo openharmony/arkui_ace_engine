@@ -37,7 +37,6 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr char BUTTON_PASTE[] = "textoverlay.paste";
 
 RefPtr<FrameNode> Create(int32_t index)
 {
@@ -152,12 +151,35 @@ void OptionView::CreatePasteButton(const RefPtr<FrameNode>& option, const RefPtr
     row->MarkModifyDone();
     auto eventHub = option->GetEventHub<OptionEventHub>();
     CHECK_NULL_VOID(eventHub);
-    pasteNode->GetOrCreateGestureEventHub()->SetUserOnClick([onClickFunc](GestureEvent& /* info */) {
+    pasteNode->GetOrCreateGestureEventHub()->SetUserOnClick([onClickFunc](GestureEvent& info) {
+        if (!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info)) {
+            return;
+        }
         if (onClickFunc) {
             onClickFunc();
         }
     });
     pattern->SetPasteButton(pasteNode);
+}
+
+void OptionView::CreateOption(bool optionsHasIcon, const std::string& value, const std::string& icon,
+    const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, std::function<void()>&& onClickFunc)
+{
+    auto pattern = option->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (optionsHasIcon) {
+        auto iconNode = CreateIcon(icon, row);
+        pattern->SetIconNode(iconNode);
+        pattern->SetIcon(icon);
+    }
+    auto textNode = CreateText(value, row);
+    row->MountToParent(option);
+    row->MarkModifyDone();
+    pattern->SetTextNode(textNode);
+
+    auto eventHub = option->GetEventHub<OptionEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetMenuOnClick(std::move(onClickFunc));
 }
 
 RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::string& value,
@@ -167,26 +189,17 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::s
     CHECK_NULL_RETURN(option, nullptr);
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    auto pattern = option->GetPattern<OptionPattern>();
-    CHECK_NULL_RETURN(pattern, option);
 
+#ifdef OHOS_PLATFORM
+    constexpr char BUTTON_PASTE[] = "textoverlay.paste";
     if (value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
         CreatePasteButton(option, row, std::move(onClickFunc));
     } else {
-        if (optionsHasIcon) {
-            auto iconNode = CreateIcon(icon, row);
-            pattern->SetIconNode(iconNode);
-            pattern->SetIcon(icon);
-        }
-        auto textNode = CreateText(value, row);
-        row->MountToParent(option);
-        row->MarkModifyDone();
-        pattern->SetTextNode(textNode);
-
-        auto eventHub = option->GetEventHub<OptionEventHub>();
-        CHECK_NULL_RETURN(eventHub, nullptr);
-        eventHub->SetMenuOnClick(std::move(onClickFunc));
+        CreateOption(optionsHasIcon, value, icon, row, option, std::move(onClickFunc));
     }
+#else
+    CreateOption(optionsHasIcon, value, icon, row, option, std::move(onClickFunc));
+#endif
     return option;
 }
 

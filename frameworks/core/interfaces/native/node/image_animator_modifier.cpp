@@ -31,6 +31,7 @@ constexpr FillMode DEFAULT_FILL_MODE = FillMode::FORWARDS;
 constexpr uint32_t DEFAULT_ITERATIONS = 1;
 constexpr int32_t IMAGES_LENGTH = 4;
 
+namespace ImageAnimatorModifier {
 void ParseImage(CalcDimension* dimension, int32_t dimensionLength, const ArkUIImagePropertiesStruct* image)
 {
     for (int32_t i = 0; i < dimensionLength; i++) {
@@ -45,7 +46,7 @@ void ParseImage(CalcDimension* dimension, int32_t dimensionLength, const ArkUIIm
     }
 }
 
-void SetState(NodeHandle node, int32_t state)
+void SetState(ArkUINodeHandle node, int32_t state)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -59,14 +60,14 @@ void SetState(NodeHandle node, int32_t state)
     ImageAnimatorModelNG::SetState(frameNode, value);
 }
 
-void ResetState(NodeHandle node)
+void ResetState(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetState(frameNode, static_cast<int32_t>(Animator::Status::IDLE));
 }
 
-void SetDuration(NodeHandle node, int32_t duration)
+void SetDuration(ArkUINodeHandle node, int32_t duration)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -76,7 +77,7 @@ void SetDuration(NodeHandle node, int32_t duration)
     ImageAnimatorModelNG::SetDuration(frameNode, duration);
 }
 
-void SetFixedSize(NodeHandle node, uint32_t fixedSize)
+void SetFixedSize(ArkUINodeHandle node, uint32_t fixedSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -84,7 +85,7 @@ void SetFixedSize(NodeHandle node, uint32_t fixedSize)
     ImageAnimatorModelNG::SetFixedSize(frameNode, static_cast<bool>(fixedSize));
 }
 
-void ResetFixedSize(NodeHandle node)
+void ResetFixedSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -92,7 +93,7 @@ void ResetFixedSize(NodeHandle node)
     ImageAnimatorModelNG::SetFixedSize(frameNode, true);
 }
 
-void SetFillMode(NodeHandle node, int32_t fillMode)
+void SetFillMode(ArkUINodeHandle node, int32_t fillMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -105,28 +106,28 @@ void SetFillMode(NodeHandle node, int32_t fillMode)
     ImageAnimatorModelNG::SetFillMode(frameNode, value);
 }
 
-void ResetFillMode(NodeHandle node)
+void ResetFillMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetFillMode(frameNode, static_cast<int32_t>(DEFAULT_FILL_MODE));
 }
 
-void SetReverse(NodeHandle node, uint32_t value)
+void SetReverse(ArkUINodeHandle node, uint32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetIsReverse(frameNode, static_cast<bool>(value));
 }
 
-void ResetReverse(NodeHandle node)
+void ResetReverse(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetIsReverse(frameNode, false);
 }
 
-void SetImages(NodeHandle node, struct ArkUIImagePropertiesStruct* images, int32_t length)
+void SetImages(ArkUINodeHandle node, struct ArkUIImagePropertiesStruct* images, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -151,14 +152,14 @@ void SetImages(NodeHandle node, struct ArkUIImagePropertiesStruct* images, int32
     ImageAnimatorModelNG::SetImages(frameNode, imageList);
 }
 
-void ResetImages(NodeHandle node)
+void ResetImages(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetImages(frameNode, std::vector<ImageProperties>());
 }
 
-void SetImageAnimatorIteration(NodeHandle node, int32_t value)
+void SetImageAnimatorIteration(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -171,19 +172,34 @@ void SetImageAnimatorIteration(NodeHandle node, int32_t value)
     ImageAnimatorModelNG::SetIteration(frameNode, iteration);
 }
 
-void ResetImageAnimatorIteration(NodeHandle node)
+void ResetImageAnimatorIteration(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetIteration(frameNode, DEFAULT_ITERATION);
 }
+} // namespace ImageAnimatorModifier
 
-ArkUIImageAnimatorModifierAPI GetImageAnimatorModifier()
+namespace NodeModifier {
+const ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
 {
-    static const ArkUIImageAnimatorModifierAPI modifier = { SetState, ResetState, SetDuration, SetFixedSize,
-        ResetFixedSize, SetFillMode, ResetFillMode, SetReverse, ResetReverse, SetImages, ResetImages,
-        SetImageAnimatorIteration, ResetImageAnimatorIteration };
+    static const ArkUIImageAnimatorModifier modifier = {
+        ImageAnimatorModifier::SetState,
+        ImageAnimatorModifier::ResetState,
+        ImageAnimatorModifier::SetDuration,
+        ImageAnimatorModifier::SetFixedSize,
+        ImageAnimatorModifier::ResetFixedSize,
+        ImageAnimatorModifier::SetFillMode,
+        ImageAnimatorModifier::ResetFillMode,
+        ImageAnimatorModifier::SetReverse,
+        ImageAnimatorModifier::ResetReverse,
+        ImageAnimatorModifier::SetImages,
+        ImageAnimatorModifier::ResetImages,
+        ImageAnimatorModifier::SetImageAnimatorIteration,
+        ImageAnimatorModifier::ResetImageAnimatorIteration
+    };
 
-    return modifier;
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

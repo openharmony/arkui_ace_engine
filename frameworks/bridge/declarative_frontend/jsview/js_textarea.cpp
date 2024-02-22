@@ -22,6 +22,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -92,97 +93,7 @@ void JSTextArea::Create(const JSCallbackInfo& info)
 
 void JSTextAreaController::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSTextAreaController>::Declare("TextAreaController");
-    JSClass<JSTextAreaController>::Method("caretPosition", &JSTextAreaController::CaretPosition);
-    JSClass<JSTextAreaController>::CustomMethod("getCaretOffset", &JSTextAreaController::GetCaretOffset);
-    JSClass<JSTextAreaController>::Method("setTextSelection", &JSTextAreaController::SetTextSelection);
-    JSClass<JSTextAreaController>::CustomMethod("getTextContentRect", &JSTextAreaController::GetTextContentRect);
-    JSClass<JSTextAreaController>::CustomMethod("getTextContentLineCount",
-        &JSTextAreaController::GetTextContentLinesNum);
-    JSClass<JSTextAreaController>::Method("stopEditing", &JSTextAreaController::StopEditing);
-    JSClass<JSTextAreaController>::Bind(globalObj, JSTextAreaController::Constructor, JSTextAreaController::Destructor);
-}
-
-void JSTextAreaController::Constructor(const JSCallbackInfo& args)
-{
-    auto scroller = Referenced::MakeRefPtr<JSTextAreaController>();
-    scroller->IncRefCount();
-    args.SetReturnValue(Referenced::RawPtr(scroller));
-}
-
-void JSTextAreaController::Destructor(JSTextAreaController* scroller)
-{
-    if (scroller != nullptr) {
-        scroller->DecRefCount();
-    }
-}
-
-void JSTextAreaController::CaretPosition(int32_t caretPosition)
-{
-    auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        controller->CaretPosition(caretPosition);
-    }
-}
-
-void JSTextAreaController::GetCaretOffset(const JSCallbackInfo& info)
-{
-    auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        JSRef<JSObject> caretObj = JSRef<JSObject>::New();
-        NG::OffsetF caretOffset = controller->GetCaretPosition();
-        caretObj->SetProperty<int32_t>("index", controller->GetCaretIndex());
-        caretObj->SetProperty<float>("x", caretOffset.GetX());
-        caretObj->SetProperty<float>("y", caretOffset.GetY());
-        JSRef<JSVal> ret = JSRef<JSObject>::Cast(caretObj);
-        info.SetReturnValue(ret);
-    }
-}
-
-void JSTextAreaController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
-{
-    auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        controller->SetTextSelection(selectionStart, selectionEnd);
-    }
-}
-
-JSRef<JSObject> JSTextAreaController::CreateRectangle(const Rect& info)
-{
-    JSRef<JSObject> rectObj = JSRef<JSObject>::New();
-    rectObj->SetProperty<double>("x", info.Left());
-    rectObj->SetProperty<double>("y", info.Top());
-    rectObj->SetProperty<double>("width", info.Width());
-    rectObj->SetProperty<double>("height", info.Height());
-    return rectObj;
-}
-
-void JSTextAreaController::GetTextContentRect(const JSCallbackInfo& info)
-{
-    auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        auto rectObj = CreateRectangle(controller->GetTextContentRect());
-        JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
-        info.SetReturnValue(rect);
-    }
-}
-
-void JSTextAreaController::GetTextContentLinesNum(const JSCallbackInfo& info)
-{
-    auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        auto lines = controller->GetTextContentLinesNum();
-        auto linesNum = JSVal(ToJSValue(lines));
-        auto textLines = JSRef<JSVal>::Make(linesNum);
-        info.SetReturnValue(textLines);
-    }
-}
-
-void JSTextAreaController::StopEditing()
-{
-    auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        controller->StopEditing();
-    }
+    JSClass<JSTextEditableController>::Declare("TextAreaController");
+    JSTextEditableController::JSBind(globalObj);
 }
 } // namespace OHOS::Ace::Framework

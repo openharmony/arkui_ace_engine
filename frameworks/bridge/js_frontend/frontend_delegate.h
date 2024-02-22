@@ -30,9 +30,17 @@
 #include "frameworks/bridge/common/utils/componentInfo.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
+#include "interfaces/inner_api/ace/constants.h"
 
 namespace OHOS::Ace::Framework {
 enum class AlertState { USER_CANCEL = 0, USER_CONFIRM, RECOVERY };
+
+typedef struct RouterStateInfo {
+    int32_t index = -1;
+    std::string name;
+    std::string path;
+    std::string params;
+} StateInfo;
 
 class JsAcePage;
 
@@ -77,6 +85,9 @@ public:
     {}
     // Back to specified page or the previous page if url not set.
     virtual void Back(const std::string& uri, const std::string& params = "") = 0;
+    // Back to specified page or the previous page if Index not set.
+    virtual void BackToIndex(int32_t index, const std::string& params = "")
+    {}
     // Postpone page transition after Begin called, usually to wait some async operation
     virtual void PostponePageTransition() = 0;
     // Begin page transition after Postpone called, usually to wait some async operation
@@ -87,8 +98,19 @@ public:
     virtual int32_t GetStackSize() const = 0;
     // Gets current page's states
     virtual void GetState(int32_t& index, std::string& name, std::string& path) = 0;
+    // Gets page's states by index.
+    virtual void GetRouterStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params)
+    {}
+    // Gets page's states by url.
+    virtual void GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray)
+    {}
     // Gets current page's components count
     virtual size_t GetComponentsCount() = 0;
+    // Gets page's index by url
+    virtual int32_t GetIndexByUrl(const std::string& url)
+    {
+        return -1;
+    }
     // Gets current page's params
     virtual std::string GetParams()
     {
@@ -97,9 +119,9 @@ public:
     virtual void GetRectangleById(const std::string& key, NG::Rectangle& rectangle);
 
     // distribute
-    virtual std::string RestoreRouterStack(const std::string& contentInfo)
+    virtual std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo)
     {
-        return "";
+        return std::make_pair("", UIContentErrorCode::NO_ERRORS);
     }
     virtual std::string GetContentInfo()
     {

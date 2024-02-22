@@ -42,7 +42,7 @@ float GetDisplayRefreshRate()
 namespace OHOS::Ace {
 
 #ifdef ENABLE_ROSEN_BACKEND
-std::mutex FormRenderWindow::globalMutex_;
+std::recursive_mutex FormRenderWindow::globalMutex_;
 #endif
 
 FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id)
@@ -65,6 +65,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos, void* data) {
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos, refreshPeriod] {
+            std::lock_guard<std::recursive_mutex> lock(globalMutex_);
             ContainerScope scope(id);
             // use container to get window can make sure the window is valid
             auto container = Container::Current();
@@ -96,7 +97,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
 
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
     {
-        std::lock_guard<std::mutex> lock(globalMutex_);
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
         rsUIDirector_->Init(); // Func Init Thread unsafe.
     }
 
@@ -172,6 +173,20 @@ void FormRenderWindow::FlushTasks()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     rsUIDirector_->SendMessages();
+#endif
+}
+
+void FormRenderWindow::Lock()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    globalMutex_.lock();
+#endif
+}
+
+void FormRenderWindow::Unlock()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    globalMutex_.unlock();
 #endif
 }
 } // namespace OHOS::Ace

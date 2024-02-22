@@ -53,7 +53,9 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float pickerHeight = 0.0f;
     auto columnNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(columnNode);
-    auto stackNode = DynamicCast<FrameNode>(columnNode->GetParent());
+    auto blendNode = DynamicCast<FrameNode>(columnNode->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
     CHECK_NULL_VOID(stackNode);
     auto pickerNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(pickerNode);
@@ -103,21 +105,21 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     textPickerPattern->CheckAndUpdateColumnSize(frameSize);
     pickerItemHeight_ = frameSize.Height();
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
-    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutChildConstraint = blendNode->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutChildConstraint);
     }
     MeasureText(layoutWrapper, frameSize);
     auto gradientPercent = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()) / frameSize.Height();
-    InitGradient(gradientPercent, stackNode, columnNode);
+    InitGradient(gradientPercent, blendNode, columnNode);
 }
 
-void TextPickerLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> stackNode,
+void TextPickerLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> blendNode,
     const RefPtr<FrameNode> columnNode)
 {
-    auto stackRenderContext = stackNode->GetRenderContext();
+    auto blendRenderContext = blendNode->GetRenderContext();
     auto columnRenderContext = columnNode->GetRenderContext();
-    CHECK_NULL_VOID(stackRenderContext);
+    CHECK_NULL_VOID(blendRenderContext);
     CHECK_NULL_VOID(columnRenderContext);
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
@@ -128,9 +130,9 @@ void TextPickerLayoutAlgorithm::InitGradient(const float& gradientPercent, const
 
     columnRenderContext->UpdateBackBlendMode(BlendMode::SRC_IN);
     columnRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
-    stackRenderContext->UpdateLinearGradient(gradient);
-    stackRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
-    stackRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
+    blendRenderContext->UpdateLinearGradient(gradient);
+    blendRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
+    blendRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 
 void TextPickerLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size)

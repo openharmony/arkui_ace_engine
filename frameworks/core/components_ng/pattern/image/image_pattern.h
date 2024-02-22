@@ -32,14 +32,18 @@
 #include "core/image/image_source_info.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
+namespace OHOS::Ace {
+class ImageAnalyzerAdapter;
+}
+
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ImagePattern : public Pattern, public SelectionHost {
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
-    ImagePattern() = default;
-    ~ImagePattern() override = default;
+    ImagePattern();
+    ~ImagePattern() override;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
@@ -60,7 +64,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_);
+        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_, autoResizeDefault_);
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -133,7 +137,7 @@ public:
     }
 
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
-
+    void SetImageAnalyzerConfig(void* config);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
@@ -147,6 +151,11 @@ public:
     {
         return WeakClaim(AceType::RawPtr(altLoadingCtx_));
     }
+
+protected:
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback();
+    bool isShow_ = true;
 
 private:
     class ObscuredImage : public CanvasImage {
@@ -167,6 +176,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     void OnModifyDone() override;
+    void UpdateGestureAndDragWhenModify();
 
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -178,9 +188,8 @@ private:
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
-    void SetImagePaintConfig(
-        const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
-        const RectF& dstRect, bool isSvg, int32_t frameCount = 1);
+    void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
+        const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
@@ -219,6 +228,7 @@ private:
     void DeleteAnalyzerOverlay();
     bool IsSupportImageAnalyzerFeature();
     void UpdateAnalyzerOverlayLayout();
+    void InitDefaultValue();
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;
@@ -241,17 +251,17 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<Clipboard> clipboard_;
     RefPtr<SelectOverlayProxy> selectOverlay_;
-    ImageAnalyzerConfig analyzerConfig_;
+    std::shared_ptr<ImageAnalyzerAdapter> imageAnalyzerAdapter_;
     ImageAnalyzerInnerConfig analyzerUIConfig_;
 
-    void* aiNapiValue_ = nullptr;
     void* overlayData_ = nullptr;
 
     bool syncLoad_ = false;
-    bool isShow_ = true;
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerOverlayBuild_ = false;
- 
+    bool autoResizeDefault_ = true;
+    ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
+
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };
 

@@ -426,9 +426,7 @@ void SubwindowOhos::HideWindow()
     }
 #endif
 
-    if (!window_->IsFocused()) {
-        ContainerModalUnFocus();
-    }
+    ContainerModalUnFocus();
 
     OHOS::Rosen::WMError ret = window_->Hide();
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -536,6 +534,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
     ShowWindow();
     ResizeWindow();
     window_->SetTouchable(true);
+    ContainerScope scope(childContainerId_);
     overlay->ShowMenuInSubWindow(targetId, offset, menuNode);
 }
 
@@ -543,7 +542,6 @@ void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
     if (!isShowed_) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "hide menu ng failed.");
         return;
     }
     isShowed_ = false;
@@ -564,7 +562,6 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
     if (!isShowed_) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "hide menu ng failed.");
         return;
     }
     isShowed_ = false;

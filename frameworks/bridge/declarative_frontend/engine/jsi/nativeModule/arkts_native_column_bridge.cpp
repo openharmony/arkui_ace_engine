@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
@@ -27,7 +25,7 @@ ArkUINativeModuleValue ColumnBridge::SetJustifyContent(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t flexAlign = static_cast<int32_t>(FlexAlign::FLEX_START);
     if (secondArg->IsInt()) {
         flexAlign = secondArg->Int32Value(vm);
@@ -37,12 +35,12 @@ ArkUINativeModuleValue ColumnBridge::SetJustifyContent(ArkUIRuntimeCallInfo* run
             (flexAlign == static_cast<int32_t>(FlexAlign::SPACE_BETWEEN)) ||
             (flexAlign == static_cast<int32_t>(FlexAlign::SPACE_AROUND)) ||
             (flexAlign == static_cast<int32_t>(FlexAlign::SPACE_EVENLY))) {
-            GetArkUIInternalNodeAPI()->GetColumnModifier().SetColumnJustifyContent(nativeNode, flexAlign);
+            GetArkUINodeModifiers()->getColumnModifier()->setColumnJustifyContent(nativeNode, flexAlign);
         } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            GetArkUIInternalNodeAPI()->GetColumnModifier().ResetColumnJustifyContent(nativeNode);
+            GetArkUINodeModifiers()->getColumnModifier()->resetColumnJustifyContent(nativeNode);
         }
     }
-    GetArkUIInternalNodeAPI()->GetColumnModifier().SetColumnJustifyContent(nativeNode, flexAlign);
+    GetArkUINodeModifiers()->getColumnModifier()->setColumnJustifyContent(nativeNode, flexAlign);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -51,8 +49,8 @@ ArkUINativeModuleValue ColumnBridge::ResetJustifyContent(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetColumnModifier().ResetColumnJustifyContent(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getColumnModifier()->resetColumnJustifyContent(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -62,7 +60,7 @@ ArkUINativeModuleValue ColumnBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t value;
     if (secondArg->IsNumber()) {
         value = secondArg->Int32Value(vm);
@@ -70,12 +68,12 @@ ArkUINativeModuleValue ColumnBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtime
             (value == static_cast<int32_t>(FlexAlign::FLEX_END)) ||
             (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
             (value == static_cast<int32_t>(FlexAlign::STRETCH))) {
-            GetArkUIInternalNodeAPI()->GetColumnModifier().SetColumnAlignItems(nativeNode, value);
+            GetArkUINodeModifiers()->getColumnModifier()->setColumnAlignItems(nativeNode, value);
         } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            GetArkUIInternalNodeAPI()->GetColumnModifier().ResetColumnAlignItems(nativeNode);
+            GetArkUINodeModifiers()->getColumnModifier()->resetColumnAlignItems(nativeNode);
         }
     } else {
-        GetArkUIInternalNodeAPI()->GetColumnModifier().ResetColumnAlignItems(nativeNode);
+        GetArkUINodeModifiers()->getColumnModifier()->resetColumnAlignItems(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -85,8 +83,8 @@ ArkUINativeModuleValue ColumnBridge::ResetAlignItems(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetColumnModifier().ResetColumnAlignItems(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getColumnModifier()->resetColumnAlignItems(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

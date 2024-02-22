@@ -31,7 +31,6 @@
 
 namespace OHOS::Ace::NodeModel {
 namespace {
-
 #if defined(WINDOWS_PLATFORM)
 #include <windows.h>
 // Here we need to find module where GetArkUINodeAPI()
@@ -114,21 +113,23 @@ ArkUIFullNodeAPI* GetFullImpl()
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
 {
     static const ArkUINodeType nodes[] = { ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE, ARKUI_TOGGLE,
-        ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_STACK, ARKUI_SCROLL, ARKUI_LIST, ARKUI_SWIPER, ARKUI_TEXTAREA,
-        ARKUI_BUTTON, ARKUI_PROGRESS, ARKUI_CHECKBOX, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_LIST_ITEM,
-        ARKUI_REFRESH, ARKUI_XCOMPONENT, ARKUI_LIST_ITEM_GROUP };
+        ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_TEXTAREA, ARKUI_BUTTON, ARKUI_PROGRESS, ARKUI_CHECKBOX,
+        ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER, ARKUI_CALENDAR_PICKER,
+        ARKUI_SLIDER, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM, ARKUI_LIST_ITEM_GROUP,
+        ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH };
     // already check in entry point.
+    int32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     auto* impl = GetFullImpl();
-    if (type > sizeof(nodes) / sizeof(ArkUINodeType)) {
+    if (nodeType > sizeof(nodes) / sizeof(ArkUINodeType)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d NOT IMPLEMENT", type);
         return nullptr;
     }
 
     ArkUI_Int32 id = -1;
-    if (type == ARKUI_NODE_LOADING_PROGRESS) {
+    if (nodeType == ARKUI_NODE_LOADING_PROGRESS || nodeType == ARKUI_NODE_TEXT) {
         id = ARKUI_AUTO_GENERATE_NODE_ID;
     }
-    auto* uiNode = impl->getBasicAPI()->createNode(nodes[type - 1], id, 0);
+    auto* uiNode = impl->getBasicAPI()->createNode(nodes[nodeType - 1], id, 0);
     if (!uiNode) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d can not find in full impl", type);
         return nullptr;
@@ -146,35 +147,38 @@ void DisposeNode(ArkUI_NodeHandle nativePtr)
     delete nativePtr;
 }
 
-void AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
+int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 {
-    CHECK_NULL_VOID(parentNode);
-    CHECK_NULL_VOID(childNode);
+    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     // already check in entry point.
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->addChild(parentNode->uiNodeHandle, childNode->uiNodeHandle);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
+    return ERROR_CODE_NO_ERROR;
 }
 
-void RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
+int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 {
-    CHECK_NULL_VOID(parentNode);
-    CHECK_NULL_VOID(childNode);
+    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     // already check in entry point.
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->removeChild(parentNode->uiNodeHandle, childNode->uiNodeHandle);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
+    return ERROR_CODE_NO_ERROR;
 }
 
-void InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode)
+int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode)
 {
-    CHECK_NULL_VOID(parentNode);
-    CHECK_NULL_VOID(childNode);
+    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     // already check in entry point.
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->insertChildAfter(
         parentNode->uiNodeHandle, childNode->uiNodeHandle, siblingNode ? siblingNode->uiNodeHandle : nullptr);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
+    return ERROR_CODE_NO_ERROR;
 }
 
 void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const char* value)
@@ -187,9 +191,9 @@ int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, c
     return SetNodeAttribute(node, attribute, value);
 }
 
-void ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
+int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
-    ResetNodeAttribute(node, attribute);
+    return ResetNodeAttribute(node, attribute);
 }
 
 const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
@@ -280,4 +284,4 @@ void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
     impl->getBasicAPI()->markDirty(nodePtr->uiNodeHandle, flag);
 }
 
-} // namespace OHOS::Ace::NodeModel
+} // namespace OHOS::Ace::NodeModelNodeModifier

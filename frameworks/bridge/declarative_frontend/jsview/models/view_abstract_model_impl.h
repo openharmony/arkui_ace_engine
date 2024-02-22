@@ -84,7 +84,7 @@ public:
 
     void SetLayoutPriority(int32_t priority) override;
     void SetPixelRound(uint8_t value) override;
-    void SetLayoutWeight(int32_t value) override;
+    void SetLayoutWeight(float value) override;
     void SetLayoutDirection(TextDirection value) override;
     void SetAspectRatio(float ratio) override;
     void ResetAspectRatio() override {};
@@ -156,6 +156,7 @@ public:
     void SetHueRotate(float value) override;
     void SetUseEffect(bool) override {}
     void SetUseShadowBatching(bool) override {}
+    void SetFreeze(bool) override {}
 
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;

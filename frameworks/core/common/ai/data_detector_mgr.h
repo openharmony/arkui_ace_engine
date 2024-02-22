@@ -27,43 +27,12 @@ class WantParams;
 } // namespace OHOS::AAFwk
 
 namespace OHOS::Ace {
-struct AISpan {
-    int32_t start = 0;
-    int32_t end = 0;
-    std::string content = "";
-    TextDataDetectType type = TextDataDetectType::PHONE_NUMBER;
-};
-
 class ACE_EXPORT DataDetectorMgr : public DataDetectorInterface {
 public:
     static DataDetectorMgr& GetInstance();
 
     bool IsDataDetectorSupported() override;
     void DataDetect(const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc) override;
-
-    // ui extension
-    RefPtr<NG::FrameNode> CreateUIExtensionMenu(
-        const std::map<std::string, std::string>& paramaters, std::function<void(const std::string&)> onClickMenu);
-    bool ShowUIExtensionMenu(const std::map<std::string, std::string>& paramaters, NG::RectF aiRect,
-        std::function<void(const std::string&)> onClickMenu,  const RefPtr<NG::FrameNode>& targetNode);
-    void ResponseBestMatchItem(const std::map<std::string, std::string>& paramaters, const AISpan& aiSpan);
-
-    std::string GetBundleName()
-    {
-        return bundleName_;
-    }
-    void SetBundleName(std::string bundleName)
-    {
-        bundleName_ = bundleName;
-    }
-    std::string GetAbilityName()
-    {
-        return abilityName_;
-    }
-    void SetAbilityName(std::string abilityName)
-    {
-        abilityName_ = abilityName;
-    }
 
     void AdjustCursorPosition(int32_t& caretPos, const std::string& content, TimeStamp& lastAiPosTimeStamp,
         const TimeStamp& lastClickTimeStamp);
@@ -78,13 +47,6 @@ protected:
 private:
     DataDetectorMgr();
     DataDetectorInstance engine_ = nullptr;
-
-    std::function<void(const AAFwk::WantParams&)> GetOnReceive(
-        const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect,
-        std::function<void(const std::string&)> onClickMenu, const RefPtr<NG::FrameNode>& targetNode);
-
-    std::string bundleName_;
-    std::string abilityName_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_DATA_DETECTOR_MGR_H

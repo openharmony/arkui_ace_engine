@@ -37,6 +37,7 @@ public:
 
     void Execute(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& animationCallbackInfo);
     void Execute(int32_t index, const AnimationCallbackInfo& animationCallbackInfo);
+    void Execute(int32_t errorCode);
 };
 } // namespace OHOS::Ace::Framework
 

@@ -14,7 +14,6 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
 
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -28,12 +27,12 @@ ArkUINativeModuleValue NavigationBridge::SetHideToolBar(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (hideArg->IsNull() || hideArg->IsUndefined() || !hideArg->IsBoolean()) {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetHideToolBar(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetHideToolBar(nativeNode);
     } else {
         bool hide = hideArg->ToBoolean(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().SetHideToolBar(nativeNode, hide);
+        GetArkUINodeModifiers()->getNavigationModifier()->setHideToolBar(nativeNode, hide);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -43,8 +42,8 @@ ArkUINativeModuleValue NavigationBridge::ResetHideToolBar(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetHideToolBar(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetHideToolBar(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -54,12 +53,12 @@ ArkUINativeModuleValue NavigationBridge::SetTitleMode(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     int32_t value;
     if (valueArg->IsNull() || valueArg->IsUndefined() || !ArkTSUtils::ParseJsInteger(vm, valueArg, value)) {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetTitleMode(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetTitleMode(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().SetTitleMode(nativeNode, value);
+        GetArkUINodeModifiers()->getNavigationModifier()->setTitleMode(nativeNode, value);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -69,8 +68,8 @@ ArkUINativeModuleValue NavigationBridge::ResetTitleMode(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetTitleMode(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetTitleMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -80,12 +79,12 @@ ArkUINativeModuleValue NavigationBridge::SetHideBackButton(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (hideArg->IsBoolean()) {
         bool hide = hideArg->ToBoolean(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().SetHideBackButton(nativeNode, hide);
+        GetArkUINodeModifiers()->getNavigationModifier()->setHideBackButton(nativeNode, hide);
     } else {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetHideBackButton(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetHideBackButton(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -95,8 +94,8 @@ ArkUINativeModuleValue NavigationBridge::ResetHideBackButton(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetHideBackButton(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetHideBackButton(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -106,12 +105,12 @@ ArkUINativeModuleValue NavigationBridge::SetSubtitle(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> subtitleArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (subtitleArg->IsString()) {
         std::string subtitle = subtitleArg->ToString(vm)->ToString();
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().SetSubtitle(nativeNode, subtitle.c_str());
+        GetArkUINodeModifiers()->getNavigationModifier()->setSubtitle(nativeNode, subtitle.c_str());
     } else {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetSubtitle(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetSubtitle(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -121,8 +120,8 @@ ArkUINativeModuleValue NavigationBridge::ResetSubtitle(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetSubtitle(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetSubtitle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -132,12 +131,12 @@ ArkUINativeModuleValue NavigationBridge::SetHideNavBar(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (hideArg->IsBoolean()) {
         bool hide = hideArg->ToBoolean(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().SetHideNavBar(nativeNode, hide);
+        GetArkUINodeModifiers()->getNavigationModifier()->setHideNavBar(nativeNode, hide);
     } else {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetHideNavBar(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetHideNavBar(nativeNode);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -148,8 +147,8 @@ ArkUINativeModuleValue NavigationBridge::ResetHideNavBar(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetHideNavBar(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetHideNavBar(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -159,13 +158,13 @@ ArkUINativeModuleValue NavigationBridge::SetUsrNavigationMode(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (valueArg->IsUndefined() || !valueArg->IsNumber()) {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetUsrNavigationMode(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetUsrNavigationMode(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     uint32_t value = valueArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().SetUsrNavigationMode(nativeNode, value);
+    GetArkUINodeModifiers()->getNavigationModifier()->setUsrNavigationMode(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -174,8 +173,8 @@ ArkUINativeModuleValue NavigationBridge::ResetUsrNavigationMode(ArkUIRuntimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetUsrNavigationMode(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetUsrNavigationMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -185,12 +184,12 @@ ArkUINativeModuleValue NavigationBridge::SetHideTitleBar(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (hideArg->IsBoolean()) {
         bool hide = hideArg->ToBoolean(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().SetNavHideTitleBar(nativeNode, hide);
+        GetArkUINodeModifiers()->getNavigationModifier()->setNavHideTitleBar(nativeNode, hide);
     } else {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetNavHideTitleBar(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetNavHideTitleBar(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -200,8 +199,8 @@ ArkUINativeModuleValue NavigationBridge::ResetHideTitleBar(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetNavHideTitleBar(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetNavHideTitleBar(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -211,13 +210,13 @@ ArkUINativeModuleValue NavigationBridge::SetNavBarPosition(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (valueArg->IsUndefined() || !valueArg->IsNumber()) {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetNavBarPosition(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetNavBarPosition(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     int32_t value = valueArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().SetNavBarPosition(nativeNode, value);
+    GetArkUINodeModifiers()->getNavigationModifier()->setNavBarPosition(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -226,8 +225,8 @@ ArkUINativeModuleValue NavigationBridge::ResetNavBarPosition(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetNavBarPosition(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetNavBarPosition(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -236,14 +235,14 @@ ArkUINativeModuleValue NavigationBridge::SetNavBarWidth(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     CalcDimension width;
     if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetNavBarWidth(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetNavBarWidth(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().SetNavBarWidth(
+        GetArkUINodeModifiers()->getNavigationModifier()->setNavBarWidth(
             nativeNode, width.Value(), static_cast<int>(width.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -254,8 +253,8 @@ ArkUINativeModuleValue NavigationBridge::ResetNavBarWidth(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetNavBarWidth(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetNavBarWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -264,11 +263,11 @@ ArkUINativeModuleValue NavigationBridge::SetNavBarWidthRange(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     if (jsValue->IsNull() || jsValue->IsUndefined() || !jsValue->IsArray(vm)) {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMinNavBarWidth(nativeNode);
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMaxNavBarWidth(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetMinNavBarWidth(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetMaxNavBarWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     auto rangeArray = panda::Local<panda::ArrayRef>(jsValue);
@@ -276,18 +275,18 @@ ArkUINativeModuleValue NavigationBridge::SetNavBarWidthRange(ArkUIRuntimeCallInf
     CalcDimension minWidth;
     if (minNavBarWidth->IsNull() || minNavBarWidth->IsUndefined() ||
         !ArkTSUtils::ParseJsDimensionVp(vm, minNavBarWidth, minWidth)) {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMinNavBarWidth(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetMinNavBarWidth(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().SetMinNavBarWidth(
+        GetArkUINodeModifiers()->getNavigationModifier()->setMinNavBarWidth(
             nativeNode, minWidth.Value(), static_cast<int>(minWidth.Unit()));
     }
     auto maxNavBarWidth = panda::ArrayRef::GetValueAt(vm, rangeArray, 1);
     CalcDimension maxWidth;
     if (maxNavBarWidth->IsNull() || maxNavBarWidth->IsUndefined() ||
         !ArkTSUtils::ParseJsDimensionVp(vm, maxNavBarWidth, maxWidth)) {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMaxNavBarWidth(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetMaxNavBarWidth(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().SetMaxNavBarWidth(
+        GetArkUINodeModifiers()->getNavigationModifier()->setMaxNavBarWidth(
             nativeNode, maxWidth.Value(), static_cast<int>(maxWidth.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -298,9 +297,9 @@ ArkUINativeModuleValue NavigationBridge::ResetNavBarWidthRange(ArkUIRuntimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMinNavBarWidth(nativeNode);
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMaxNavBarWidth(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetMinNavBarWidth(nativeNode);
+    GetArkUINodeModifiers()->getNavigationModifier()->resetMaxNavBarWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -309,14 +308,14 @@ ArkUINativeModuleValue NavigationBridge::SetMinContentWidth(ArkUIRuntimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     CalcDimension width;
     if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMinContentWidth(nativeNode);
+        GetArkUINodeModifiers()->getNavigationModifier()->resetMinContentWidth(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().SetMinContentWidth(
+        GetArkUINodeModifiers()->getNavigationModifier()->setMinContentWidth(
             nativeNode, width.Value(), static_cast<int>(width.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -327,8 +326,8 @@ ArkUINativeModuleValue NavigationBridge::ResetMinContentWidth(ArkUIRuntimeCallIn
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMinContentWidth(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetMinContentWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -337,7 +336,7 @@ ArkUINativeModuleValue NavigationBridge::SetBackButtonIcon(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
 
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
@@ -363,7 +362,7 @@ ArkUINativeModuleValue NavigationBridge::ResetBackButtonIcon(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     bool noPixMap = false;
     RefPtr<PixelMap> pixMap = nullptr;

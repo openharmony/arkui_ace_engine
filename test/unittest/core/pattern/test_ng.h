@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_TEST_NG_H
 
 #include <type_traits>
+
 #include "gtest/gtest.h"
 
 #define private public
@@ -47,6 +48,7 @@ public:
     static void TearDownTestSuite();
     void FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
+    TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
 
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
     {

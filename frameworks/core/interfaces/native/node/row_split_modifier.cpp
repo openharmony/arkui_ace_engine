@@ -13,32 +13,32 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/row_split_modifier.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 
 namespace OHOS::Ace::NG {
-constexpr bool DEFAULT_ROW_SPLIT_RESIZEABLE = false;
-void SetRowSplitResizeable(NodeHandle node, bool resizeable)
+constexpr bool DEFAULT_ROW_SPLIT_RESIZABLE = false;
+void SetRowSplitResizable(ArkUINodeHandle node, ArkUI_Bool resizable)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::SetResizeable(frameNode, NG::SplitType::ROW_SPLIT, resizeable);
+    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, resizable);
 }
 
-void ResetRowSplitResizeable(NodeHandle node)
+void ResetRowSplitResizable(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::SetResizeable(frameNode, NG::SplitType::ROW_SPLIT, DEFAULT_ROW_SPLIT_RESIZEABLE);
+    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, DEFAULT_ROW_SPLIT_RESIZABLE);
 }
 
-ArkUIRowSplitModifierAPI GetRowSplitModifier()
+namespace NodeModifier {
+const ArkUIRowSplitModifier* GetRowSplitModifier()
 {
-    static const ArkUIRowSplitModifierAPI modifier = { SetRowSplitResizeable, ResetRowSplitResizeable };
-    return modifier;
+    static const ArkUIRowSplitModifier modifier = { SetRowSplitResizable, ResetRowSplitResizable };
+    return &modifier;
+}
 }
 }

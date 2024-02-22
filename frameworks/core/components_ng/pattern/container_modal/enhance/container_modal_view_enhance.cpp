@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -73,7 +74,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const Dimension MENU_CONTAINER_WIDTH = 240.0_vp;
 const Dimension MENU_CONTAINER_HEIGHT = 96.0_vp;
-const Dimension MENU_ITEM_RADIUS = 8.0_vp;
+const Dimension MENU_ITEM_RADIUS = 12.0_vp;
 const Dimension MENU_ITEM_WIDTH = 240.0_vp;
 const Dimension MENU_ITEM_HEIGHT = 48.0_vp;
 const Dimension MENU_ITEM_LEFT_PADDING = 12.0_vp;
@@ -86,8 +87,6 @@ const Dimension MENU_SAFETY_X = 8.0_vp;
 const Dimension MENU_SAFETY_Y = 96.0_vp;
 const int32_t MENU_ITEM_MAXLINES = 1;
 const int32_t MENU_TASK_DELAY_TIME = 600;
-const Color MENU_ITEM_HOVER_COLOR = Color(0x0c000000);
-const Color MENU_ITEM_PRESS_COLOR = Color(0x1a000000);
 const Color MENU_ITEM_COLOR = Color(0xffffff);
 
 const int32_t DOUBLE_CLICK_TO_MAXIMIZE = 1;
@@ -97,6 +96,8 @@ const int32_t MAX_MENU_ITEM_LEFT_SPLIT = 1;
 const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
 
 const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
+
+const float SMOOTH_EDGE_SIZE = 0.35;
 } // namespace
 bool ContainerModalViewEnhance::sIsForbidMenuEvent_ = false;
 bool ContainerModalViewEnhance::sIsMenuPending_ = false;
@@ -452,10 +453,13 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItem(
 void ContainerModalViewEnhance::BondingMenuItemEvent(RefPtr<FrameNode> item)
 {
     auto inputHub = item->GetOrCreateInputEventHub();
-    auto hoverFunc = [item](bool isHover) {
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(theme);
+    auto hoverFunc = [item, weak = AceType::WeakClaim(AceType::RawPtr(theme))](bool isHover) {
+        auto theme = weak.Upgrade();
         auto renderContext = item->GetRenderContext();
-        if (isHover) {
-            renderContext->UpdateBackgroundColor(MENU_ITEM_HOVER_COLOR);
+        if (isHover && theme) {
+            renderContext->UpdateBackgroundColor(theme->GetItemHoverColor());
         } else {
             renderContext->UpdateBackgroundColor(MENU_ITEM_COLOR);
         }
@@ -463,10 +467,11 @@ void ContainerModalViewEnhance::BondingMenuItemEvent(RefPtr<FrameNode> item)
     auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverFunc));
     inputHub->AddOnHoverEvent(hoverEvent);
 
-    auto clickFunc = [item](MouseInfo& info) -> void {
-        if (MouseAction::PRESS == info.GetAction()) {
+    auto clickFunc = [item, weak = AceType::WeakClaim(AceType::RawPtr(theme))](MouseInfo& info) -> void {
+        auto theme = weak.Upgrade();
+        if (MouseAction::PRESS == info.GetAction() && theme) {
             auto renderContext = item->GetRenderContext();
-            renderContext->UpdateBackgroundColor(MENU_ITEM_PRESS_COLOR);
+            renderContext->UpdateBackgroundColor(theme->GetClickColor());
         }
     };
     auto clickEvent = AceType::MakeRefPtr<InputEvent>(std::move(clickFunc));
@@ -489,6 +494,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItemIcon(InternalResource:
     iconLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     iconLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(TITLE_BUTTON_SIZE), CalcLength(TITLE_BUTTON_SIZE)));
+    FrameNode *frameNode = RawPtr(icon);
+    ImageModelNG::SetSmoothEdge(frameNode, SMOOTH_EDGE_SIZE);
+    auto render = icon->GetRenderContext();
+    if (render) {
+        render->UpdateRenderGroup(true);
+    }
     icon->MarkModifyDone();
     return icon;
 }

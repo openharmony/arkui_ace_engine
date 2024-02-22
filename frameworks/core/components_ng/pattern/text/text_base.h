@@ -167,7 +167,7 @@ public:
         CHECK_NULL_VOID(context);
 #ifdef WINDOW_SCENE_SUPPORTED
         auto uiExtMgr = context->GetUIExtensionManager();
-        if (uiExtMgr) {
+        if (uiExtMgr && uiExtMgr->IsWindowTypeUIExtension(context)) {
             return;
         }
 #endif
@@ -179,6 +179,8 @@ public:
     }
 
     virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
+
+    virtual void OnVirtualKeyboardAreaChanged() {}
     
 protected:
     TextSelector textSelector_;

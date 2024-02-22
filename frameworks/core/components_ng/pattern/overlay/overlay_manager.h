@@ -428,7 +428,7 @@ private:
 
     void CloseDialogInner(const RefPtr<FrameNode>& dialogNode);
 
-    void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
+    void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, AnimationOption& option,
@@ -459,6 +459,7 @@ private:
     RefPtr<FrameNode> GetModalNodeInStack(std::stack<WeakPtr<FrameNode>>& stack);
     void PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn);
     void CheckReturnFocus(RefPtr<FrameNode> node);
+    void MountPopup(int32_t targetId, const PopupInfo& popupInfo);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;

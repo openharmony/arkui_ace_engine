@@ -228,6 +228,7 @@ void ButtonPattern::InitHoverEvent()
 
 void ButtonPattern::OnTouchDown()
 {
+    isPress_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
@@ -250,6 +251,7 @@ void ButtonPattern::OnTouchDown()
 
 void ButtonPattern::OnTouchUp()
 {
+    isPress_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
@@ -284,7 +286,10 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
     auto enabled = eventHub->IsEnabled();
     auto inputEventHub = host->GetOrCreateInputEventHub();
     auto hoverEffect = inputEventHub->GetHoverEffect();
-    if (enabled && hoverEffect != HoverEffectType::NONE && hoverEffect != HoverEffectType::SCALE) {
+    if (hoverEffect == HoverEffectType::NONE || hoverEffect == HoverEffectType::SCALE) {
+        return;
+    }
+    if (!isPress_ && (enabled || !isHover)) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         AnimateTouchAndHover(renderContext, isHover ? TYPE_CANCEL : TYPE_HOVER, isHover ? TYPE_HOVER : TYPE_CANCEL,

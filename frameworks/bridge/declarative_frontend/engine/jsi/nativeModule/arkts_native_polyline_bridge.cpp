@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.h"
-
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -27,7 +25,7 @@ ArkUINativeModuleValue PolylineBridge::SetPoints(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> xPoint = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> yPoint = runtimeCallInfo->GetCallArgRef(NUM_2);
     if (!xPoint->IsArray(vm) || !yPoint->IsArray(vm)) {
@@ -39,15 +37,15 @@ ArkUINativeModuleValue PolylineBridge::SetPoints(ArkUIRuntimeCallInfo* runtimeCa
     auto xlength = xPointArray->Length(vm);
     auto ylength = yPointArray->Length(vm);
     if (xlength <= 0 || xlength != ylength) {
-        GetArkUIInternalNodeAPI()->GetPolylineModifier().ResetPoints(nativeNode);
+        GetArkUINodeModifiers()->getPolylineModifier()->resetPoints(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
     bool flag = true;
     CalcDimension x;
     CalcDimension y;
-    std::vector<double> xPointValues;
-    std::vector<double> yPointValues;
+    std::vector<ArkUI_Float32> xPointValues;
+    std::vector<ArkUI_Float32> yPointValues;
     for (size_t i = 0; i < xlength; i++) {
         Local<JSValueRef> xValue = panda::ArrayRef::GetValueAt(vm, xPointArray, i);
         Local<JSValueRef> yValue = panda::ArrayRef::GetValueAt(vm, yPointArray, i);
@@ -62,10 +60,10 @@ ArkUINativeModuleValue PolylineBridge::SetPoints(ArkUIRuntimeCallInfo* runtimeCa
     }
 
     if (flag) {
-        GetArkUIInternalNodeAPI()->GetPolylineModifier().
-            SetPoints(nativeNode, xPointValues.data(), yPointValues.data(), xlength);
+        GetArkUINodeModifiers()->getPolylineModifier()->
+            setPoints(nativeNode, xPointValues.data(), yPointValues.data(), xlength);
     } else {
-        GetArkUIInternalNodeAPI()->GetPolylineModifier().ResetPoints(nativeNode);
+        GetArkUINodeModifiers()->getPolylineModifier()->resetPoints(nativeNode);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -76,8 +74,8 @@ ArkUINativeModuleValue PolylineBridge::ResetPoints(ArkUIRuntimeCallInfo* runtime
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPolylineModifier().ResetPoints(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPolylineModifier()->resetPoints(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

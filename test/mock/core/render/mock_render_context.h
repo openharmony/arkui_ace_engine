@@ -28,12 +28,9 @@ class MockRenderContext : public RenderContext {
 public:
     ~MockRenderContext() override = default;
 
-    MOCK_METHOD4(SetBounds, void(float, float, float, float));
     MOCK_METHOD1(GetPointWithTransform, void(PointF&));
-    MOCK_METHOD2(AddChild, void(const RefPtr<RenderContext>& renderContext, int index));
     MOCK_METHOD1(AnimateHoverEffectScale, void(bool));
     MOCK_METHOD1(SetVisible, void(bool));
-    MOCK_METHOD0(GetLocalTransformMatrix, Matrix4());
 
     void ResetBlendBgColor() override
     {

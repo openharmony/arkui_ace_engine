@@ -122,7 +122,6 @@ void PanRecognizer::OnAccepted()
 
 void PanRecognizer::OnRejected()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture has been rejected");
     // fix griditem drag interrupted by click while pull moving
     if (refereeState_ != RefereeState::SUCCEED) {
         refereeState_ = RefereeState::FAIL;
@@ -132,7 +131,7 @@ void PanRecognizer::OnRejected()
 void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end)
 {
     PointF windowPoint(event.x, event.y);
-    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode());
+    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false, isPostEventResult_);
 
     TouchEvent transformEvent = event;
     transformEvent.x = windowPoint.GetX();
@@ -153,6 +152,10 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
     if (event.sourceType == SourceType::MOUSE && !isAllowMouse_) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+    if (!IsInAttachedNode(event)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -187,6 +190,9 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    if (event.isRotationEvent) {
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer receives axis start event, begin to detect pan event");
     fingers_ = newFingers_;
     distance_ = newDistance_;
@@ -251,7 +257,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED) {
         if (currentFingers_ == fingers_) {
-            ResSchedReport::GetInstance().ResSchedDataReport("click");
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
             averageDistance_.Reset();
@@ -297,8 +302,8 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     PointF windowPoint(event.GetOffset().GetX(), event.GetOffset().GetY());
     PointF windowTouchPoint(touchPoints_[event.id].GetOffset().GetX(), touchPoints_[event.id].GetOffset().GetY());
-    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode());
-    NGGestureRecognizer::Transform(windowTouchPoint, GetAttachedNode());
+    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(windowTouchPoint, GetAttachedNode(), false, isPostEventResult_);
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
 
@@ -351,7 +356,7 @@ void PanRecognizer::OnFlushTouchEventsEnd()
 
 void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
-    if (fingers_ != AXIS_PAN_FINGERS) {
+    if (fingers_ != AXIS_PAN_FINGERS || event.isRotationEvent) {
         return;
     }
 
@@ -555,7 +560,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         }
         info.SetPointerId(touchPoint.id);
         PointF localPoint(globalPoint_.GetX(), globalPoint_.GetY());
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
         info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
@@ -572,9 +577,6 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             info.SetSourceTool(lastTouchEvent_.sourceTool);
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        if (recognizerTarget_.has_value()) {
-            info.SetTarget(recognizerTarget_.value());
-        }
         info.SetInputEventType(inputEventType_);
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
@@ -619,9 +621,6 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
         info->SetSourceTool(lastTouchEvent_.sourceTool);
     }
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
-    if (recognizerTarget_.has_value()) {
-        info->SetTarget(recognizerTarget_.value());
-    }
     info->SetForce(lastTouchEvent_.force);
     if (lastTouchEvent_.tiltX.has_value()) {
         info->SetTiltX(lastTouchEvent_.tiltX.value());
@@ -723,7 +722,7 @@ RefPtr<GestureSnapshot> PanRecognizer::Dump() const
 {
     RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
     std::stringstream oss;
-    oss << "direction: " <<  direction_.type << ", "
+    oss << "direction: " << direction_.type << ", "
         << "isForDrag: " << isForDrag_ << ", "
         << "distance: " << distance_ << ", "
         << "fingers: " << fingers_;

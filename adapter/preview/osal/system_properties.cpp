@@ -40,6 +40,8 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 
 bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::svgTraceEnable_ = false;
+bool SystemProperties::layoutTraceEnable_ = false;
+bool SystemProperties::stateManagerEnable_ = false;
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
@@ -73,6 +75,7 @@ bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::astcEnabled_ = false;
 int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
+bool SystemProperties::imageFileCacheConvertAstc_ = false;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
 bool SystemProperties::resourceDecoupling_ = true;
@@ -267,13 +270,13 @@ bool SystemProperties::GetGridCacheEnabled()
     return gridCacheEnabled_;
 }
 
+bool SystemProperties::GetGridIrregularLayoutEnabled()
+{
+    return false;
+}
+
 bool SystemProperties::GetSideBarContainerBlurEnable()
 {
     return sideBarContainerBlurEnable_;
-}
-
-bool SystemProperties::GetLayoutTraceEnabled()
-{
-    return false;
 }
 } // namespace OHOS::Ace

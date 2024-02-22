@@ -245,6 +245,52 @@ private:
     static std::vector<std::string> tagOrder_; // year month day tag order
 };
 
+class PickerDateF {
+public:
+    std::optional<uint32_t> year;
+    std::optional<uint32_t> month;
+    std::optional<uint32_t> day;
+    bool lunar = false;
+    bool leap = false;
+
+    PickerDateF() = default;
+    ~PickerDateF() = default;
+
+    static PickerDateF CreateYear(uint32_t year)
+    {
+        PickerDateF date;
+        date.year = year;
+        return date;
+    }
+
+    static PickerDateF CreateMonth(uint32_t month, bool lunar = false, bool leap = false)
+    {
+        PickerDateF date;
+        date.month = month;
+        date.lunar = lunar;
+        date.leap = leap;
+        return date;
+    }
+
+    static PickerDateF CreateDay(uint32_t day, bool lunar = false)
+    {
+        PickerDateF date;
+        date.day = day;
+        date.lunar = lunar;
+        return date;
+    }
+
+    static PickerDateF CreateMonthDay(uint32_t month, uint32_t day, bool lunar = false, bool leap = false)
+    {
+        PickerDateF date;
+        date.month = month;
+        date.day = day;
+        date.lunar = lunar;
+        date.leap = leap;
+        return date;
+    }
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PICKER_PICKER_DATA_H

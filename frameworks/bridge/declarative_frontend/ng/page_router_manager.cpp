@@ -44,6 +44,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
+constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 
 void ExitToDesktop()
@@ -152,7 +153,7 @@ void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std:
     LoadPage(GenerateNextPageId(), info);
 }
 
-void PageRouterManager::RunCard(
+UIContentErrorCode PageRouterManager::RunCard(
     const std::string& url, const std::string& params, int64_t cardId, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
@@ -165,7 +166,7 @@ void PageRouterManager::RunCard(
         info.url = manifestParser_->GetRouter()->GetEntry("");
     }
 #endif
-    LoadCard(0, info, params, cardId, false, true, entryPoint);
+    return LoadCard(0, info, params, cardId, false, true, entryPoint);
 }
 
 void PageRouterManager::Push(const RouterPageInfo& target)
@@ -301,6 +302,29 @@ void PageRouterManager::BackWithTarget(const RouterPageInfo& target)
     BackCheckAlert(target);
 }
 
+void PageRouterManager::BackToIndexWithTarget(int32_t index, const std::string& params)
+{
+    CHECK_RUN_ON(JS);
+    if (index > pageRouterStack_.size() || index <= 0) {
+        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return;
+    }
+    if (inRouterOpt_) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent(
+            [weak = WeakClaim(this), index, params]() {
+                auto router = weak.Upgrade();
+                CHECK_NULL_VOID(router);
+                router->BackToIndexWithTarget(index, params);
+            },
+            TaskExecutor::TaskType::JS);
+        return;
+    }
+    RouterOptScope scope(this);
+    BackToIndexCheckAlert(index, params);
+}
+
 void PageRouterManager::Clear()
 {
     CHECK_RUN_ON(JS);
@@ -411,11 +435,24 @@ bool PageRouterManager::StartPop()
     }
 
     // pop top page in page stack
-    auto topNode = pageRouterStack_.back();
-    pageRouterStack_.pop_back();
+    auto preWeakNode = pageRouterStack_.back();
+    auto prePageNode = preWeakNode.Upgrade();
+    if (prePageNode) {
+        auto prePageNodePattern = prePageNode->GetPattern<PagePattern>();
+        // stack's top page should be removed after AboutToDisappear
+        // If in the future, back gesture can BE INTERRUPTED, this delay operation
+        // may lead to error in animation, because the animation will pick a wrong
+        // top element of stack (old top hasn't be removed yet due to interruption).
+        prePageNodePattern->SetDisappearCallback([weak = WeakClaim(this), preWeakNode]() {
+            auto manager = weak.Upgrade();
+            if (manager) {
+                manager->pageRouterStack_.remove(preWeakNode);
+            }
+        });
+    }
 
-    //clean prev top page params
-    currentPage = pageRouterStack_.empty() ? nullptr : pageRouterStack_.back().Upgrade();
+    // clean prev top page params
+    currentPage = (++pageRouterStack_.rbegin())->Upgrade();
     CHECK_NULL_RETURN(currentPage, false);
     pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
@@ -424,9 +461,8 @@ bool PageRouterManager::StartPop()
     std::string params = pageInfo->GetPageParams();
     pageInfo->ReplacePageParams("");
 
-    //do pop page
+    // do pop page
     if (!OnPopPage(true, true)) {
-        pageRouterStack_.emplace_back(topNode);
         pageInfo->ReplacePageParams(params);
         return false;
     }
@@ -461,6 +497,31 @@ int32_t PageRouterManager::GetStackSize() const
 {
     CHECK_RUN_ON(JS);
     return static_cast<int32_t>(pageRouterStack_.size());
+}
+
+RouterPageInfo PageRouterManager::GetPageInfoByIndex(int32_t index, const std::string& params)
+{
+    RouterPageInfo target;
+    if (index > pageRouterStack_.size() || index <= 0) {
+        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return target;
+    }
+    std::string url;
+    int32_t counter = 1;
+    for (const auto& iter : pageRouterStack_) {
+        if (counter == index) {
+            auto pageNode = iter.Upgrade();
+            CHECK_NULL_RETURN(pageNode, target);
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            CHECK_NULL_RETURN(pagePattern, target);
+            auto PageInfo = DynamicCast<NG::EntryPageInfo>(pagePattern->GetPageInfo());
+            CHECK_NULL_RETURN(PageInfo, target);
+            url = PageInfo->GetPageUrl();
+            return NG::RouterPageInfo({ url, params });
+        }
+        counter++;
+    }
+    return target;
 }
 
 void PageRouterManager::GetState(int32_t& index, std::string& name, std::string& path)
@@ -498,6 +559,92 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
     }
 }
 
+void PageRouterManager::GetStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params)
+{
+    CHECK_RUN_ON(JS);
+    if (index > pageRouterStack_.size() || index <= 0) {
+        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return;
+    }
+
+    int32_t counter = 1;
+    for (const auto& iter : pageRouterStack_) {
+        if (counter == index) {
+            auto pageNode = iter.Upgrade();
+            CHECK_NULL_VOID(pageNode);
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            CHECK_NULL_VOID(pagePattern);
+            auto PageInfo = DynamicCast<NG::EntryPageInfo>(pagePattern->GetPageInfo());
+            CHECK_NULL_VOID(PageInfo);
+            auto url = PageInfo->GetPageUrl();
+            params = PageInfo->GetPageParams();
+            auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
+            if (!pagePath.empty()) {
+                url = pagePath;
+            }
+            auto pos = url.rfind(".js");
+            if (pos == url.length() - 3) {
+                url = url.substr(0, pos);
+            }
+            pos = url.rfind("/");
+            if (pos != std::string::npos) {
+                name = url.substr(pos + 1);
+                path = url.substr(0, pos + 1);
+            }
+            if (name.size() == 0) {
+                name = "index";
+            }
+            if (path.size() == 0) {
+                path = "/" + url;
+            }
+            break;
+        }
+        counter++;
+    }
+}
+
+void PageRouterManager::GetStateByUrl(std::string& url, std::vector<Framework::StateInfo>& stateArray)
+{
+    CHECK_RUN_ON(JS);
+    int32_t counter = 1;
+    Framework::StateInfo stateInfo;
+    for (auto& iter : pageRouterStack_) {
+        auto pageNode = iter.Upgrade();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        auto PageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+        CHECK_NULL_VOID(PageInfo);
+        std::string tempUrl;
+        if (PageInfo->GetPageUrl() == url) {
+            auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
+            if (!pagePath.empty()) {
+                url = pagePath;
+            }
+            stateInfo.params = PageInfo->GetPageParams();
+            stateInfo.index = counter;
+            auto pos = url.rfind(".js");
+            if (pos == url.length() - 3) {
+                tempUrl = url.substr(0, pos);
+            }
+            tempUrl = url;
+            pos = tempUrl.rfind("/");
+            if (pos != std::string::npos) {
+                stateInfo.name = tempUrl.substr(pos + 1);
+                stateInfo.path = tempUrl.substr(0, pos + 1);
+            }
+            if (stateInfo.name.size() == 0) {
+                stateInfo.name = "index";
+            }
+            if (stateInfo.path.size() == 0) {
+                stateInfo.path = "/" + tempUrl;
+            }
+            stateArray.emplace_back(stateInfo);
+        }
+        counter++;
+    }
+}
+
 std::string PageRouterManager::GetParams() const
 {
     CHECK_RUN_ON(JS);
@@ -511,6 +658,24 @@ std::string PageRouterManager::GetParams() const
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_RETURN(pageInfo, "");
     return pageInfo->GetPageParams();
+}
+
+int32_t PageRouterManager::GetIndexByUrl(const std::string& url) const
+{
+    int32_t index = 0;
+    for (auto iter : pageRouterStack_) {
+        auto pageNode = iter.Upgrade();
+        if (!pageNode) {
+            continue;
+        }
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        auto localUrl = pagePattern->GetPageInfo()->GetPageUrl();
+        if (localUrl == url) {
+            return index;
+        }
+        ++index;
+    }
+    return INVALID_PAGE_INDEX;
 }
 
 std::string PageRouterManager::GetCurrentPageUrl()
@@ -600,23 +765,23 @@ std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo()
     return jsonRouterStack;
 }
 
-std::string PageRouterManager::RestoreRouterStack(std::unique_ptr<JsonValue> stackInfo)
+std::pair<std::string, UIContentErrorCode> PageRouterManager::RestoreRouterStack(std::unique_ptr<JsonValue> stackInfo)
 {
     if (!stackInfo->IsValid() || !stackInfo->IsArray()) {
-        return "";
+        return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
     }
     int32_t stackSize = stackInfo->GetArraySize();
     if (stackSize < 1) {
-        return "";
+        return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
     }
 
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, "");
+    CHECK_NULL_RETURN(container, std::make_pair("", UIContentErrorCode::NULL_POINTER));
     auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipeline, "");
+    CHECK_NULL_RETURN(pipeline, std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER));
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
-    CHECK_NULL_RETURN(stageManager, "");
+    CHECK_NULL_RETURN(stageManager, std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER));
 
     for (int32_t index = 0; index < stackSize - 1; ++index) {
         std::string url = stackInfo->GetArrayItem(index)->GetValue("url")->ToString();
@@ -626,7 +791,7 @@ std::string PageRouterManager::RestoreRouterStack(std::unique_ptr<JsonValue> sta
     }
     std::string startUrl = stackInfo->GetArrayItem(stackSize - 1)->GetValue("url")->ToString();
     // remove 2 useless character, as "XXX" to XXX
-    return startUrl.substr(1, startUrl.size() - 2);
+    return std::make_pair(startUrl.substr(1, startUrl.size() - 2), UIContentErrorCode::NO_ERRORS);
 }
 
 int32_t PageRouterManager::GenerateNextPageId()
@@ -891,6 +1056,20 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
     }
 }
 
+void PageRouterManager::StartBackToIndex(int32_t index, const std::string& params)
+{
+    CleanPageOverlay();
+    RouterPageInfo target = GetPageInfoByIndex(index, params);
+    if (!manifestParser_) {
+        return;
+    }
+    PopPageToIndex(index - 1, params, true, true);
+    return;
+    if (!restorePageStack_.empty()) {
+        StartRestore(target);
+    }
+}
+
 void PageRouterManager::BackCheckAlert(const RouterPageInfo& target)
 {
     RouterOptScope scope(this);
@@ -913,6 +1092,31 @@ void PageRouterManager::BackCheckAlert(const RouterPageInfo& target)
         return;
     }
     StartBack(target);
+}
+
+void PageRouterManager::BackToIndexCheckAlert(int32_t index, const std::string& params)
+{
+    RouterOptScope scope(this);
+    if (pageRouterStack_.empty()) {
+        return;
+    }
+    RouterPageInfo target = GetPageInfoByIndex(index, params);
+    auto currentPage = pageRouterStack_.back().Upgrade();
+    CHECK_NULL_VOID(currentPage);
+    auto pagePattern = currentPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_VOID(pageInfo);
+    if (pageInfo->GetAlertCallback()) {
+        ngBackTarget_ = target;
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto overlayManager = pipelineContext ? pipelineContext->GetOverlayManager() : nullptr;
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->ShowDialog(
+            pageInfo->GetDialogProperties(), nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+        return;
+    }
+    StartBackToIndex(index, params);
 }
 
 void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition)
@@ -974,7 +1178,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     LOGI("LoadPage Success");
 }
 
-void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
+UIContentErrorCode PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
     int64_t cardId, bool /* isRestore */, bool needHideLast, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
@@ -986,20 +1190,21 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
     pageRouterStack_.emplace_back(pageNode);
 
     if (!loadCard_) {
-        return;
+        return UIContentErrorCode::NULL_CARD_CALLBACK;
     }
     auto result = loadCard_(target.url, cardId, entryPoint);
     if (!result) {
         pageRouterStack_.pop_back();
-        return;
+        return UIContentErrorCode::NULL_CARD_RES;
     }
 
     if (!OnPageReady(pageNode, needHideLast, false, isCardRouter_, cardId)) {
         LOGE("LoadCard OnPageReady Failed");
         pageRouterStack_.pop_back();
-        return;
+        return UIContentErrorCode::CARD_PAGE_NOT_READY;
     }
     LOGI("LoadCard Success");
+    return UIContentErrorCode::NO_ERRORS;
 }
 
 void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const RouterPageInfo& target,

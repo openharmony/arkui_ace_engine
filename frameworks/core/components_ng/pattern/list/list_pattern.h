@@ -182,10 +182,16 @@ public:
     }
     bool IsCurrentSwiperItem(WeakPtr<ListItemPattern> swiperItem)
     {
+        if (!swiperItem_.Upgrade()) {
+            return true;
+        }
         return swiperItem == swiperItem_;
     }
     bool CanReplaceSwiperItem()
     {
+        if (!swiperItem_.Upgrade()) {
+            canReplaceSwiperItem_ = true;
+        }
         return canReplaceSwiperItem_;
     }
 
@@ -221,6 +227,8 @@ public:
     {
         return isNeedToUpdateListDirection_;
     }
+
+    std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
 
 private:
     bool IsNeedInitClickEventRecorder() const override

@@ -204,7 +204,7 @@ HWTEST_F(SelectOverlayTestNg, SelectFrameNodeAnimationTest001, TestSize.Level1)
     pattern->CreateNodePaintMethod();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->MoreOrBackAnimation(true);
-    EXPECT_TRUE(selectOverlayNode->isExtensionMenu_);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
     /**
      * @tc.steps: step4. Execute BackAnimation.
      * @tc.expected: The node state switches correctly.
@@ -2679,7 +2679,7 @@ HWTEST_F(SelectOverlayTestNg, ComputeSelectMenuPosition001, TestSize.Level1)
     };
 
     auto ret1 = newNode->ComputeSelectMenuPosition(AccessibilityManager::RawPtr(layoutWrapper));
-    OffsetF expectRet1(10.0, 0.0);
+    OffsetF expectRet1(16.0, 0.0);
     bool equal1 = (ret1 == expectRet1);
     EXPECT_TRUE(equal1);
 
@@ -2688,7 +2688,7 @@ HWTEST_F(SelectOverlayTestNg, ComputeSelectMenuPosition001, TestSize.Level1)
     infoPtr->secondHandle.isShow = false;
     infoPtr->isSingleHandle = true;
     auto ret2 = newNode->ComputeSelectMenuPosition(AccessibilityManager::RawPtr(layoutWrapper));
-    OffsetF expectRet2(10.0, 0.0);
+    OffsetF expectRet2(16.0, 0.0);
     bool equal2 = (ret2 == expectRet2);
     EXPECT_TRUE(equal2);
 }

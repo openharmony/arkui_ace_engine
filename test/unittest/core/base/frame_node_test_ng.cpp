@@ -619,7 +619,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAttachToMainTree008, TestSize.Level1)
      * @tc.steps: step1. build a object to OnAttachToMainTree
      * @tc.expected: expect The function is run ok.
      */
-    FRAME_NODE2->IsResponseRegion();
     FRAME_NODE2->OnAttachToMainTree(true);
 
     auto request = FRAME_NODE2->hasPendingRequest_ = true;

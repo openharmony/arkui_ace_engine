@@ -15,7 +15,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_gauge_bridge.h"
 
 #include "base/geometry/dimension.h"
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "core/components/common/properties/color.h"
@@ -27,12 +26,13 @@ namespace {
 constexpr Color ERROR_COLOR = Color(0xFFE84026);
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
-void ResetColor(void* nativeNode)
+
+void ResetColor(ArkUINodeHandle nativeNode)
 {
     if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGradientColors(nativeNode);
+        GetArkUINodeModifiers()->getGaugeModifier()->resetGradientColors(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetColors(nativeNode);
+        GetArkUINodeModifiers()->getGaugeModifier()->resetColors(nativeNode);
     }
 }
 }
@@ -89,7 +89,7 @@ void ConvertGradientColor(
 }
 
 void SetGradientColorsObject(const EcmaVM* vm, const Local<JSValueRef>& info, std::vector<NG::ColorStopArray>& colors,
-    std::vector<float>& weights, NG::GaugeType& type, void* nativeNode)
+    std::vector<float>& weights, NG::GaugeType& type, ArkUINodeHandle nativeNode)
 {
     ArkUIGradientType gradient;
     ConvertGradientColor(vm, info, colors, type);
@@ -107,11 +107,11 @@ void SetGradientColorsObject(const EcmaVM* vm, const Local<JSValueRef>& info, st
     gradient.weight = nullptr;
     gradient.type = static_cast<uint32_t>(type);
     gradient.length = 1;
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetGradientColors(nativeNode, &gradient, 0);
+    GetArkUINodeModifiers()->getGaugeModifier()->setGradientColors(nativeNode, &gradient, 0);
 }
 
 void SetGradientColorsArray(const EcmaVM* vm, const Local<JSValueRef>& info, std::vector<NG::ColorStopArray>& colors,
-    std::vector<float>& weights, NG::GaugeType& type, void* nativeNode)
+    std::vector<float>& weights, NG::GaugeType& type, ArkUINodeHandle nativeNode)
 {
     ArkUIGradientType gradient;
     uint32_t totalLength = 0;
@@ -136,13 +136,13 @@ void SetGradientColorsArray(const EcmaVM* vm, const Local<JSValueRef>& info, std
     gradient.weight = &(*weights.begin());
     gradient.type = static_cast<uint32_t>(type);
     gradient.length = colors.size();
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetGradientColors(nativeNode, &gradient, weights.size());
+    GetArkUINodeModifiers()->getGaugeModifier()->setGradientColors(nativeNode, &gradient, weights.size());
 }
 
-void SetGradientColors(const EcmaVM* vm, const Local<JSValueRef>& info, void* nativeNode)
+void SetGradientColors(const EcmaVM* vm, const Local<JSValueRef>& info, ArkUINodeHandle nativeNode)
 {
     if (info->IsNull() || info->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGradientColors(nativeNode);
+        GetArkUINodeModifiers()->getGaugeModifier()->resetGradientColors(nativeNode);
         return;
     }
     NG::GaugeType type = NG::GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
@@ -154,7 +154,7 @@ void SetGradientColors(const EcmaVM* vm, const Local<JSValueRef>& info, void* na
     }
     auto jsColorsArray = panda::CopyableGlobal<panda::ArrayRef>(vm, info);
     if (jsColorsArray->Length(vm) == 0) {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGradientColors(nativeNode);
+        GetArkUINodeModifiers()->getGaugeModifier()->resetGradientColors(nativeNode);
         return;
     }
 
@@ -188,7 +188,7 @@ ArkUINativeModuleValue GaugeBridge::SetColors(ArkUIRuntimeCallInfo* runtimeCallI
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> jsArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SetGradientColors(vm, jsArg, nativeNode);
@@ -224,7 +224,7 @@ ArkUINativeModuleValue GaugeBridge::SetColors(ArkUIRuntimeCallInfo* runtimeCallI
             weights[i] = 0.0f;
         }
     }
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetColors(nativeNode, colors.get(), weights.get(), length);
+    GetArkUINodeModifiers()->getGaugeModifier()->setColors(nativeNode, colors.get(), weights.get(), length);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -233,36 +233,36 @@ ArkUINativeModuleValue GaugeBridge::ResetColors(ArkUIRuntimeCallInfo* runtimeCal
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     ResetColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue GaugeBridge::SetGaugeVaule(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue GaugeBridge::SetGaugeValue(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     if (!secondArg->IsNumber()) {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGaugeVaule(nativeNode);
+        GetArkUINodeModifiers()->getGaugeModifier()->resetGaugeValue(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
-    float vaule = static_cast<float>(secondArg->ToNumber(vm)->Value());
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetGaugeVaule(nativeNode, vaule);
+    float value = static_cast<float>(secondArg->ToNumber(vm)->Value());
+    GetArkUINodeModifiers()->getGaugeModifier()->setGaugeValue(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue GaugeBridge::ResetGaugeVaule(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue GaugeBridge::ResetGaugeValue(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGaugeVaule(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGaugeModifier()->resetGaugeValue(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -272,15 +272,15 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeStartAngle(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     if (!secondArg->IsNumber()) {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGaugeStartAngle(nativeNode);
+        GetArkUINodeModifiers()->getGaugeModifier()->resetGaugeStartAngle(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
-    float vaule = static_cast<float>(secondArg->ToNumber(vm)->Value());
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetGaugeStartAngle(nativeNode, vaule);
+    float value = static_cast<float>(secondArg->ToNumber(vm)->Value());
+    GetArkUINodeModifiers()->getGaugeModifier()->setGaugeStartAngle(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -289,8 +289,8 @@ ArkUINativeModuleValue GaugeBridge::ResetGaugeStartAngle(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGaugeStartAngle(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGaugeModifier()->resetGaugeStartAngle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -300,15 +300,15 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeEndAngle(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     if (!secondArg->IsNumber()) {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGaugeEndAngle(nativeNode);
+        GetArkUINodeModifiers()->getGaugeModifier()->resetGaugeEndAngle(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
-    float vaule = static_cast<float>(secondArg->ToNumber(vm)->Value());
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetGaugeEndAngle(nativeNode, vaule);
+    float value = static_cast<float>(secondArg->ToNumber(vm)->Value());
+    GetArkUINodeModifiers()->getGaugeModifier()->setGaugeEndAngle(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -317,8 +317,8 @@ ArkUINativeModuleValue GaugeBridge::ResetGaugeEndAngle(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGaugeEndAngle(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGaugeModifier()->resetGaugeEndAngle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -327,14 +327,14 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeStrokeWidth(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     CalcDimension strokeWidth;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, strokeWidth) || strokeWidth.Unit() == DimensionUnit::PERCENT) {
         strokeWidth = CalcDimension(0);
     }
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetGaugeStrokeWidth(
+    GetArkUINodeModifiers()->getGaugeModifier()->setGaugeStrokeWidth(
         nativeNode, strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -344,8 +344,8 @@ ArkUINativeModuleValue GaugeBridge::ResetGaugeStrokeWidth(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGaugeStrokeWidth(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGaugeModifier()->resetGaugeStrokeWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -354,21 +354,21 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeTrackShadow(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     auto radiusArg = runtimeCallInfo->GetCallArgRef(2);
     auto offsetXArg = runtimeCallInfo->GetCallArgRef(3);
     auto offsetYArg = runtimeCallInfo->GetCallArgRef(4);
 
     if (jsValue->IsNull()) {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().SetShadowOptions(nativeNode, DEFAULT_GAUGE_SHADOW_RADIUS,
+        GetArkUINodeModifiers()->getGaugeModifier()->setShadowOptions(nativeNode, DEFAULT_GAUGE_SHADOW_RADIUS,
             DEFAULT_GAUGE_SHADOW_OFFSETX, DEFAULT_GAUGE_SHADOW_OFFSETY, false);
         return panda::JSValueRef::Undefined(vm);
     }
 
     if (!jsValue->IsObject()) {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetShadowOptions(nativeNode);
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().SetIsShowIndicator(nativeNode, true);
+        GetArkUINodeModifiers()->getGaugeModifier()->resetShadowOptions(nativeNode);
+        GetArkUINodeModifiers()->getGaugeModifier()->setIsShowIndicator(nativeNode, true);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -391,7 +391,7 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeTrackShadow(ArkUIRuntimeCallInfo* ru
         offsetY = DEFAULT_GAUGE_SHADOW_OFFSETY;
     }
 
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetShadowOptions(nativeNode, radius, offsetX, offsetY, true);
+    GetArkUINodeModifiers()->getGaugeModifier()->setShadowOptions(nativeNode, radius, offsetX, offsetY, true);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -400,8 +400,8 @@ ArkUINativeModuleValue GaugeBridge::ResetGaugeTrackShadow(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetShadowOptions(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGaugeModifier()->resetShadowOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -412,17 +412,17 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeIndicator(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto iconArg = runtimeCallInfo->GetCallArgRef(1);
     auto spaceArg = runtimeCallInfo->GetCallArgRef(2);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetIsShowIndicator(nativeNode, true);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGaugeModifier()->setIsShowIndicator(nativeNode, true);
     std::string iconPath;
     if (ArkTSUtils::ParseJsMedia(vm, iconArg, iconPath)) {
         std::string bundleName;
         std::string moduleName;
         ArkTSUtils::GetJsMediaBundleInfo(vm, iconArg, bundleName, moduleName);
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().SetIndicatorIconPath(nativeNode,
+        GetArkUINodeModifiers()->getGaugeModifier()->setIndicatorIconPath(nativeNode,
             iconPath.c_str(), bundleName.c_str(), moduleName.c_str());
     } else {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetIndicatorIconPath(nativeNode);
+        GetArkUINodeModifiers()->getGaugeModifier()->resetIndicatorIconPath(nativeNode);
     }
     CalcDimension space;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, spaceArg, space, false)) {
@@ -431,7 +431,7 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeIndicator(ArkUIRuntimeCallInfo* runt
     if (space.IsNegative()) {
         space = NG::INDICATOR_DISTANCE_TO_TOP;
     }
-    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetIndicatorSpace(nativeNode,
+    GetArkUINodeModifiers()->getGaugeModifier()->setIndicatorSpace(nativeNode,
         space.CalcValue().c_str(), space.Value(), static_cast<int32_t>(space.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -442,13 +442,13 @@ ArkUINativeModuleValue GaugeBridge::ResetGaugeIndicator(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto valueArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (valueArg->IsNull()) {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().SetIsShowIndicator(nativeNode, false);
+        GetArkUINodeModifiers()->getGaugeModifier()->setIsShowIndicator(nativeNode, false);
     } else if (valueArg->IsUndefined() || (!valueArg->IsObject())) {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetIndicatorIconPath(nativeNode);
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetIndicatorSpace(nativeNode);
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().SetIsShowIndicator(nativeNode, true);
+        GetArkUINodeModifiers()->getGaugeModifier()->resetIndicatorIconPath(nativeNode);
+        GetArkUINodeModifiers()->getGaugeModifier()->resetIndicatorSpace(nativeNode);
+        GetArkUINodeModifiers()->getGaugeModifier()->setIsShowIndicator(nativeNode, true);
     }
     return panda::JSValueRef::Undefined(vm);
 }

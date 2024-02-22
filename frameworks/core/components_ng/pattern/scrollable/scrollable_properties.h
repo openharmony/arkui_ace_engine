@@ -118,6 +118,9 @@ constexpr int32_t SCROLL_FROM_AXIS = 11;
 constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
 constexpr int32_t SCROLL_FROM_BAR_FLING = 13;
 
+// app tail animation
+constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION";
+
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;

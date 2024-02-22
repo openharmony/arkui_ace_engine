@@ -93,7 +93,8 @@ std::string DatePickerColumnAccessibilityProperty::GetText() const
         if (options[frameNode].size() < index) {
             return "";
         }
-        return options[frameNode].at(index);
+        auto date = options[frameNode].at(index);
+        return DatePickerPattern::GetFormatString(date);
     }
     return "";
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -112,6 +112,7 @@ public:
     static void WebStandardFont(const std::string& standardFontFamily);
     static void DefaultFixedFontSize(int32_t defaultFixedFontSize);
     static void DefaultFontSize(int32_t defaultFontSize);
+    static void DefaultTextEncodingFormat(const JSCallbackInfo& args);
     static void MinFontSize(int32_t minFontSize);
     static void MinLogicalFontSize(int32_t minLogicalFontSize);
     static void BlockNetwork(bool isNetworkBlocked);

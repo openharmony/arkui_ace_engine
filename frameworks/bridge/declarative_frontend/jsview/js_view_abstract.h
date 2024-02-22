@@ -187,6 +187,7 @@ public:
     static void JsHitTestBehavior(const JSCallbackInfo& info);
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
+    static void JsSetFreeze(const JSCallbackInfo& info);
 
     // outer border
     static void ParseOuterBorderColor(const JSRef<JSVal>& args);
@@ -202,7 +203,8 @@ public:
     // for dynamic $r
     static void CompleteResourceObject(JSRef<JSObject>& jsObj);
     static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
-    static bool ParseDollarResource(const JSRef<JSVal>& jsValue, ResourceType& resType, std::string& resName);
+    static bool ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
+        std::string& resName, bool isParseType);
 
     // mouse response response region
     static void JsMouseResponseRegion(const JSCallbackInfo& info);
@@ -267,7 +269,7 @@ public:
     static void JsOverlay(const JSCallbackInfo& info);
     static Alignment ParseAlignment(int32_t align);
     static void JsAlignRules(const JSCallbackInfo& info);
-    static void JsChainStyle(const JSCallbackInfo& info);
+    static void JsChainMode(const JSCallbackInfo& info);
 
     static void SetVisibility(const JSCallbackInfo& info);
     static void Pop();
@@ -342,9 +344,6 @@ public:
     static void JSRenderFit(const JSCallbackInfo& info);
 
     static void JsExpandSafeArea(const JSCallbackInfo& info);
-
-    static void ParseImageAnalyzerTextOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig);
-    static void ParseImageAnalyzerSubjectOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig);
 
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);

@@ -258,6 +258,30 @@ std::vector<std::string> NavigationStack::GetAllPathName()
     return pathNames;
 }
 
+std::vector<int32_t> NavigationStack::GetRemoveArray()
+{
+    return {};
+}
+
+void NavigationStack::UpdateRemovedNavPathList()
+{
+    auto removeArray = GetRemoveArray();
+    if (navPathList_.empty() || removeArray.empty()) {
+        return;
+    }
+    int32_t index = 0;
+    int32_t removeIndex = 0;
+    for (auto it = navPathList_.begin(); it != navPathList_.end(); ++index) {
+        if (index == removeArray[removeIndex]) {
+            it = navPathList_.erase(it);
+            removeIndex++;
+        } else {
+            ++it;
+        }
+    }
+    ClearRemoveArray();
+}
+
 void NavigationStack::Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo) {}
 
 void NavigationStack::Push(const std::string& name, int32_t index) {}
@@ -269,6 +293,8 @@ void NavigationStack::Clear()
     navPathList_.clear();
     cacheNodes_.clear();
 }
+
+void NavigationStack::ClearRemoveArray() {}
 
 RefPtr<UINode> NavigationStack::CreateNodeByIndex(int32_t index)
 {
@@ -293,13 +319,19 @@ NavPathList NavigationStack::GetAllCacheNodes()
 }
 
 void NavigationStack::AddCacheNode(
-    const std::string& name, const RefPtr<UINode>& navDestinationNode)
+    const std::string& name, const RefPtr<UINode>& uiNode)
 {
-    if (name.empty() || navDestinationNode == nullptr) {
+    if (name.empty() || uiNode == nullptr) {
         return;
     }
 
-    cacheNodes_.emplace_back(std::make_pair(name, navDestinationNode));
+    auto navDestination = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+        NG::NavigationGroupNode::GetNavDestinationNode(uiNode));
+    if (navDestination) {
+        navDestination->SetIsCacheNode(true);
+    }
+
+    cacheNodes_.emplace_back(std::make_pair(name, uiNode));
 }
 
 void NavigationStack::RemoveCacheNode(int32_t handle)
@@ -310,6 +342,11 @@ void NavigationStack::RemoveCacheNode(int32_t handle)
 
     for (auto it = cacheNodes_.begin(); it != cacheNodes_.end(); ++it) {
         if ((*it).second->GetId() == handle) {
+            auto navDestination = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+                NG::NavigationGroupNode::GetNavDestinationNode(it->second));
+            if (navDestination) {
+                navDestination->SetIsCacheNode(false);
+            }
             cacheNodes_.erase(it);
             return;
         }
@@ -384,5 +421,16 @@ std::optional<std::pair<std::string, RefPtr<UINode>>> NavigationStack::GetFromCa
         }
     }
     return std::nullopt;
+}
+
+std::vector<std::string> NavigationStack::DumpStackInfo() const
+{
+    std::vector<std::string> dumpInfos;
+    for (size_t i = 0; i < navPathList_.size(); ++i) {
+        const auto& name = navPathList_[i].first;
+        std::string info = "[" + std::to_string(i) + "]{ name: \"" + name + "\" }";
+        dumpInfos.push_back(std::move(info));
+    }
+    return dumpInfos;
 }
 } // namespace OHOS::Ace::NG

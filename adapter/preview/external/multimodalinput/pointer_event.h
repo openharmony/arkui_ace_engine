@@ -101,6 +101,9 @@ public:
     static constexpr int32_t POINTER_ACTION_SWIPE_BEGIN = 17;
     static constexpr int32_t POINTER_ACTION_SWIPE_UPDATE = 18;
     static constexpr int32_t POINTER_ACTION_SWIPE_END = 19;
+    static constexpr int32_t POINTER_ACTION_ROTATE_BEGIN = 20;
+    static constexpr int32_t POINTER_ACTION_ROTATE_UPDATE = 21;
+    static constexpr int32_t POINTER_ACTION_ROTATE_END = 22;
 
     // sourceType
     static constexpr int32_t SOURCE_TYPE_UNKNOWN = 0;
@@ -125,6 +128,7 @@ public:
         AXIS_TYPE_SCROLL_VERTICAL,
         AXIS_TYPE_SCROLL_HORIZONTAL,
         AXIS_TYPE_PINCH,
+        AXIS_TYPE_ROTATE,
         AXIS_TYPE_ABS_X,
         AXIS_TYPE_ABS_Y,
         AXIS_TYPE_ABS_Z,

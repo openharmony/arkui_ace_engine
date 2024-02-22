@@ -36,6 +36,7 @@
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/components_ng/manager/navigation_dump/navigation_dump_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -49,6 +50,9 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+
+using VsyncCallbackFun = std::function<void()>;
+
 class ACE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
@@ -255,6 +259,11 @@ public:
 
     void AddAfterRenderTask(std::function<void()>&& task);
 
+    void AddDragWindowVisibleTask(std::function<void()>&& task)
+    {
+        dragWindowVisibleCallback_ = std::move(task);
+    }
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
@@ -392,10 +401,7 @@ public:
     void NotifyMemoryLevel(int32_t level) override;
     void FlushMessages() override;
 
-    void FlushUITasks() override
-    {
-        taskScheduler_->FlushTask();
-    }
+    void FlushUITasks() override;
 
     bool IsLayouting() const override
     {
@@ -486,6 +492,11 @@ public:
     void MarkNeedFlushMouseEvent()
     {
         isNeedFlushMouseEvent_ = true;
+    }
+
+    void MarkNeedFlushAnimationStartTime()
+    {
+        isNeedFlushAnimationStartTime_ = true;
     }
 
     // font
@@ -591,8 +602,31 @@ public:
     const SerializedGesture& GetSerializedGesture() const override;
     // return value means whether it has printed info
     bool PrintVsyncInfoIfNeed() const override;
+    void SetUIExtensionImeShow(bool imeShow);
 
     void CheckVirtualKeyboardHeight() override;
+
+    void StartWindowAnimation() override
+    {
+        isWindowAnimation_ = true;
+    }
+
+    void StopWindowAnimation() override
+    {
+        isWindowAnimation_ = false;
+    }
+
+    void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
+    void FlushSyncGeometryNodeTasks() override;
+    void SetVsyncListener(VsyncCallbackFun vsync)
+    {
+        vsyncListener_ = std::move(vsync);
+    }
+
+    const RefPtr<NavigationDumpManager>& GetNavigationDumpManager() const
+    {
+        return navigationDumpMgr_;
+    }
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -605,7 +639,6 @@ protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
-    void FlushFrameTrace();
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
@@ -744,14 +777,18 @@ private:
     bool isTabJustTriggerOnKeyEvent_ = false;
     bool onShow_ = false;
     bool isNeedFlushMouseEvent_ = false;
+    bool isNeedFlushAnimationStartTime_ = false;
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
+    bool isWindowAnimation_ = false;
+    bool prevKeyboardAvoidMode_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
+    std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;
     std::optional<bool> windowFocus_;
@@ -774,9 +811,12 @@ private:
     std::list<DelayedTask> delayedTasks_;
     RefPtr<PostEventManager> postEventManager_;
 
+    VsyncCallbackFun vsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;
+
+    RefPtr<NavigationDumpManager> navigationDumpMgr_ = MakeRefPtr<NavigationDumpManager>();
 };
 } // namespace OHOS::Ace::NG
 

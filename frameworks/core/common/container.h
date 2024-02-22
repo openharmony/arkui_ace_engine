@@ -307,6 +307,11 @@ public:
         }
     }
 
+    static bool IsInFormContainer() {
+        auto container = Current();
+        return container ? container->isFRSCardContainer_ : false;
+    }
+
     Window* GetWindow() const
     {
         auto context = GetPipelineContext();
@@ -397,6 +402,11 @@ public:
     }
 
     virtual bool IsScenceBoardWindow()
+    {
+        return false;
+    }
+
+    virtual bool IsUIExtensionWindow()
     {
         return false;
     }

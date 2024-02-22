@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "base/log/log_wrapper.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -38,11 +39,13 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -374,7 +377,7 @@ void ViewAbstract::SetLightUpEffect(double radio)
     ACE_UPDATE_RENDER_CONTEXT(LightUpEffect, radio);
 }
 
-void ViewAbstract::SetLayoutWeight(int32_t value)
+void ViewAbstract::SetLayoutWeight(float value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -965,7 +968,6 @@ void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect> &responseR
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->MarkResponseRegion(true);
     gestureHub->SetResponseRegion(responseRegion);
 }
 
@@ -973,7 +975,6 @@ void ViewAbstract::SetMouseResponseRegion(const std::vector<DimensionRect> &mous
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->MarkResponseRegion(true);
     gestureHub->SetMouseResponseRegion(mouseRegion);
 }
 
@@ -1984,6 +1985,14 @@ void ViewAbstract::SetUseEffect(bool useEffect)
     ACE_UPDATE_RENDER_CONTEXT(UseEffect, useEffect);
 }
 
+void ViewAbstract::SetFreeze(bool freeze)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze);
+}
+
 void ViewAbstract::SetUseShadowBatching(bool useShadowBatching)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2688,7 +2697,6 @@ void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<Dim
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->MarkResponseRegion(true);
     gestureHub->SetResponseRegion(responseRegion);
 }
 
@@ -2697,7 +2705,6 @@ void ViewAbstract::SetMouseResponseRegion(FrameNode* frameNode, const std::vecto
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->MarkResponseRegion(true);
     gestureHub->SetMouseResponseRegion(mouseResponseRegion);
 }
 
@@ -2822,6 +2829,15 @@ void ViewAbstract::SetOnAppear(FrameNode* frameNode, std::function<void()> &&onA
     eventHub->SetOnAppear(std::move(onAppear));
 }
 
+void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
+    const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAreaChanged(std::move(onAreaChanged));
+}
+
 void ViewAbstract::SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2836,4 +2852,200 @@ void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback)
     focusHub->SetOnBlurCallback(std::move(onBlurCallback));
 }
 
+void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+}
+
+void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTouchEvent(std::move(touchEventFunc));
+}
+
+bool ViewAbstract::GetFocusable(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsFocusable();
+}
+
+bool ViewAbstract::GetDefaultFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsDefaultFocus();
+}
+
+std::vector<DimensionRect> ViewAbstract::GetResponseRegion(FrameNode* frameNode)
+{
+    std::vector<DimensionRect> defaultRect;
+    CHECK_NULL_RETURN(frameNode, defaultRect);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, defaultRect);
+    return gestureHub->GetResponseRegion();
+}
+
+NG::OverlayOptions ViewAbstract::GetOverlay(FrameNode* frameNode)
+{
+    NG::OverlayOptions defaultOptions;
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetOverlayTextValue(defaultOptions);
+}
+
+void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (value) {
+        focusHub->RequestFocus();
+    } else {
+        focusHub->LostFocusToViewRoot();
+    }
+}
+
+bool ViewAbstract::GetNeedFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsCurrentFocus();
+}
+
+double ViewAbstract::GetOpacity(FrameNode* frameNode)
+{
+    double opacity = 1.0f;
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetOpacityValue(opacity);
+}
+
+BorderWidthProperty ViewAbstract::GetBorderWidth(FrameNode* frameNode)
+{
+    Dimension defaultDimension(0);
+    BorderWidthProperty borderWidths = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBorderWidthValue(borderWidths);
+}
+
+BorderRadiusProperty ViewAbstract::GetBorderRadius(FrameNode* frameNode)
+{
+    Dimension defaultDimension(0);
+    BorderRadiusProperty borderRadius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBorderRadiusValue(borderRadius);
+}
+
+BorderColorProperty ViewAbstract::GetBorderColor(FrameNode* frameNode)
+{
+    Color defaultColor(0xff000000);
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBorderColorValue(borderColors);
+}
+
+BorderStyleProperty ViewAbstract::GetBorderStyle(FrameNode* frameNode)
+{
+    BorderStyle defaultStyle = BorderStyle::SOLID;
+    BorderStyleProperty borderStyles = { defaultStyle, defaultStyle, defaultStyle, defaultStyle };
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBorderStyleValue(borderStyles);
+}
+
+int ViewAbstract::GetZIndex(FrameNode* frameNode)
+{
+    int zindex = 0;
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetZIndexValue(zindex);
+}
+
+VisibleType ViewAbstract::GetVisibility(FrameNode* frameNode)
+{
+    VisibleType visibility = VisibleType::VISIBLE;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(LayoutProperty, Visibility, visibility, frameNode, visibility);
+    return visibility;
+}
+
+bool ViewAbstract::GetClip(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetClipEdge().has_value();
+}
+
+std::optional<RefPtr<BasicShape>> ViewAbstract::GetClipShape(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetClipShape();
+}
+
+Matrix4 ViewAbstract::GetTransform(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetLocalTransformMatrix();
+}
+
+HitTestMode ViewAbstract::GetHitTestBehavior(FrameNode* frameNode)
+{
+    auto gestureHub = frameNode->GetHitTestMode();
+    return gestureHub;
+}
+
+OffsetT<Dimension> ViewAbstract::GetPosition(FrameNode* frameNode)
+{
+    Dimension PositionX(0, DimensionUnit::VP);
+    Dimension PositionY(0, DimensionUnit::VP);
+    OffsetT<Dimension> position(PositionX, PositionY);
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetPositionValue(position);
+}
+
+std::optional<Shadow> ViewAbstract::GetShadow(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBackShadow();
+}
+
+NG::Gradient ViewAbstract::GetGradient(FrameNode* frameNode)
+{
+    Gradient gradient;
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetSweepGradientValue(gradient);
+}
+
+std::optional<RefPtr<BasicShape>> ViewAbstract::GetMask(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetClipMask();
+}
+
+const std::optional<RefPtr<ProgressMaskProperty>> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetProgressMask();
+}
+
+BlendMode ViewAbstract::GetBlendMode(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    return target->GetBackBlendMode().value();
+}
+
+TextDirection ViewAbstract::GetDirection(FrameNode* frameNode)
+{
+    TextDirection direction = TextDirection::AUTO;
+    auto target = frameNode->GetLayoutProperty<LayoutProperty>();
+    direction = target->GetLayoutDirection();
+    return direction;
+}
+
+FlexAlign ViewAbstract::GetAlignSelf(FrameNode* frameNode)
+{
+    const auto& flexItemProperty = frameNode->GetLayoutProperty()->GetFlexItemProperty();
+    return flexItemProperty->GetAlignSelf().value_or(FlexAlign::AUTO);
+}
 } // namespace OHOS::Ace::NG

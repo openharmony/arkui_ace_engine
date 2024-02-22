@@ -72,6 +72,12 @@ public:
         auto contentDraw = paintMethod->GetContentDrawFunction(AceType::RawPtr(paintWrapper));
         EXPECT_EQ(contentDraw == nullptr, false);
         Testing::MockCanvas rsCavas;
+        auto shapePaintProperty = AceType::DynamicCast<ShapePaintProperty>(paintWrapper->GetPaintProperty()->Clone());
+        if (!shapePaintProperty->HasStrokeWidth() || !NearZero(shapePaintProperty->GetStrokeWidth()->Value())) {
+            EXPECT_CALL(rsCavas, AttachPen(_)).WillOnce(ReturnRef(rsCavas));
+        }
+        EXPECT_CALL(rsCavas, DrawLine(_, _)).WillOnce(Return());
+        EXPECT_CALL(rsCavas, DetachPen()).WillOnce(ReturnRef(rsCavas));
         contentDraw(rsCavas);
     }
 

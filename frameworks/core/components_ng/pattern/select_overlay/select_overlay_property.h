@@ -145,6 +145,8 @@ struct SelectOverlayInfo {
     // force hide callback, which may be called when other textOverlay shows.
     std::function<void(bool)> onClose;
 
+    std::function<bool(const PointF&)> checkIsTouchInHostArea;
+
     OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
 
     bool isHandleLineShow = true;

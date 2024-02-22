@@ -3,6 +3,7 @@
     // common
     // declarations of C++ exposed classes
     "src/lib/common/ace_console.native.d.ts",
+    "src/lib/common/state_mgmt_configure.ts",
     "src/lib/common/ace_trace.native.d.ts",
     "src/lib/common/state_mgmt_profiler.ts",
     "src/lib/common/state_mgmt_profiler.native.d.ts",
@@ -35,6 +36,9 @@
     "src/lib/common/custom_dialog_controller_native.d.ts",
     "src/lib/common/custom_dialog_controller.ts",
 
+    // ark runtime debug tools
+    "src/lib/common/ark_tools.d.ts",
+
     // full_update specific
     "src/lib/full_update/fu_view_native.d.ts",
     "src/lib/full_update/fu_observed_property_object_abstract.ts",
@@ -62,6 +66,11 @@
     "src/lib/partial_update/pu_view.ts",
     "src/lib/partial_update/pu_recycle_manager.ts",
     "src/lib/partial_update/pu_builder_proxy.ts",
+
+    // stateMgmt vers 3
+    "src/lib/v3/v3_observed_track.ts",
+    "src/lib/v3/v3_monitor.ts",
+
 
     // init
     "src/index.ts",

@@ -3624,7 +3624,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent005, TestSize.Level1)
     std::map<int32_t, AISpan> aiSpanMap;
     aiSpanMap[AI_SPAN_START] = aiSpan1;
     aiSpanMap[AI_SPAN_START_II] = aiSpan2;
-    pattern->aiSpanMap_ = aiSpanMap;
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> rects { RectF(0, 0, 40, 40) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
@@ -3645,18 +3645,18 @@ HWTEST_F(TextTestNg, HandleMouseEvent005, TestSize.Level1)
     info.button_ = MouseButton::RIGHT_BUTTON;
     info.action_ = MouseAction::RELEASE;
     (*mouseEvent)(info);
-    EXPECT_TRUE(pattern->hasClickedAISpan_);
+    EXPECT_TRUE(pattern->dataDetectorAdapter_->hasClickedAISpan_);
 
     /**
      * @tc.steps: step3. test text_pattern.h HandleMouseRightButton function.
      * @tc.expect: MouseInfo localLocation is not in GetRectsForRange region.
      */
-    pattern->hasClickedAISpan_ = false;
+    pattern->dataDetectorAdapter_->hasClickedAISpan_ = false;
     info.SetLocalLocation(Offset(60.f, 60.f));
     info.button_ = MouseButton::RIGHT_BUTTON;
     info.action_ = MouseAction::RELEASE;
     (*mouseEvent)(info);
-    EXPECT_TRUE(!pattern->hasClickedAISpan_);
+    EXPECT_TRUE(!pattern->dataDetectorAdapter_->hasClickedAISpan_);
     EXPECT_EQ(pattern->textResponseType_, TextResponseType::RIGHT_CLICK);
     EXPECT_EQ(pattern->selectedType_, TextSpanType::TEXT);
 }
@@ -4985,7 +4985,6 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent001, TestSize.Level1)
     EXPECT_FALSE(pattern->hasClicked_);
 }
 
-
 /**
  * @tc.name: HandleDoubleClickEvent002
  * @tc.desc: test test_pattern.h HandleDoubleClickEvent function.
@@ -5335,7 +5334,7 @@ HWTEST_F(TextTestNg, OnTextSelectionChange002, TestSize.Level1)
      */
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     pattern->paragraph_ = paragraph;
-    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(0));
     EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(2), Return(false)));
     GestureEvent info;
@@ -5400,8 +5399,8 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest009, TestSize.Level1)
     std::map<int32_t, AISpan> aiSpanMap;
     aiSpanMap[AI_SPAN_START] = aiSpan1;
     aiSpanMap[AI_SPAN_START_II] = aiSpan2;
-    textPattern->aiSpanMap_ = aiSpanMap;
-    textPattern->textForAI_ = TEXT_FOR_AI;
+    textPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    textPattern->dataDetectorAdapter_->textForAI_ = TEXT_FOR_AI;
 
     /**
      * @tc.steps: step2. Create textLayoutAlgorithm and call UpdateParagraphForAISpan function.
@@ -5414,156 +5413,11 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: ParseAIJson001
- * @tc.desc: Test TextPattern: new method ParseAIJson for TextDataDetectResult
+ * @tc.name: HandleClickAISpanEvent
+ * @tc.desc: test test_pattern.h HandleClickAISpanEvent function with valid textSelector
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, ParseAIJson001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFrameNode.
-     */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Parse to JsonObject.
-     * @tc.expected: parseSuccess phoneNum is not Empty.
-     */
-
-    auto detectResultJson = JsonUtil::ParseJsonString(TEXT_DATA_DETECT_RESULT.entity);
-    ASSERT_NE(detectResultJson, nullptr);
-    EXPECT_TRUE(detectResultJson->Contains("phoneNum"));
-    auto phoneNum = detectResultJson->GetValue("phoneNum");
-    EXPECT_TRUE(phoneNum->IsArray());
-
-    /**
-     * @tc.steps: step3. call ParseAIJson
-     * @tc.expected:aiSpanMap_ not empty
-     */
-    textPattern->textForAI_ = TEXT_FOR_AI_SINGLE;
-    textPattern->aiSpanMap_.clear();
-    textPattern->ParseAIJson(phoneNum, TextDataDetectType::PHONE_NUMBER, 0, false);
-    EXPECT_FALSE(textPattern->aiSpanMap_.empty());
-}
-
-/**
- * @tc.name: ParseAIJson002
- * @tc.desc: Test TextPattern: new method ParseAIJson for methodOption
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, ParseAIJson002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFrameNode.
-     */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. call ParseAIResult function.
-     * @tc.expected: parseSuccess any element is not Empty.
-     */
-
-    auto menuOptionJson = JsonUtil::ParseJsonString(TEXT_DATA_DETECT_RESULT.menuOption);
-    ASSERT_NE(menuOptionJson, nullptr);
-
-    EXPECT_TRUE(menuOptionJson->Contains("phoneNum"));
-    auto phoneNumOpt = menuOptionJson->GetValue("phoneNum");
-    EXPECT_TRUE(phoneNumOpt->IsArray());
-    auto item = phoneNumOpt->GetArrayItem(0);
-    EXPECT_TRUE(item->Contains("option"));
-    std::string optValue = item->GetString("option");
-    EXPECT_EQ(optValue, "呼叫");
-
-    /**
-     * @tc.steps: step3. call ParseAIJson to generate aiMenuOptionsMap_
-     * @tc.expected:aiMenuOptionsMap_ not empty
-     */
-    textPattern->aiMenuOptionsMap_.clear();
-    textPattern->ParseAIJson(phoneNumOpt, TextDataDetectType::PHONE_NUMBER, 0, true);
-    EXPECT_FALSE(textPattern->aiMenuOptionsMap_.empty());
-}
-
-/**
- * @tc.name: ParseAIResult001
- * @tc.desc: Test TextPattern: new method ParseAIResult when methodoption is empty
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, ParseAIResult001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFrameNode.
-     */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. call ParseAIResult function.
-     * @tc.expected: parseSuccess aiSpanMap_ is not Empty.
-     */
-    auto detectResultJson = JsonUtil::ParseJsonString(TEXT_DATA_DETECT_RESULT.entity);
-    ASSERT_NE(detectResultJson, nullptr);
-    EXPECT_TRUE(detectResultJson->Contains("phoneNum"));
-    auto phoneNum = detectResultJson->GetValue("phoneNum");
-    EXPECT_TRUE(phoneNum->IsArray());
-
-    textPattern->textForAI_ = TEXT_FOR_AI_SINGLE;
-    textPattern->aiMenuOptionsMap_.clear();
-    textPattern->aiSpanMap_.clear();
-    textPattern->ParseAIResult(TEXT_DATA_DETECT_RESULT, 0);
-    EXPECT_FALSE(textPattern->aiSpanMap_.empty());
-}
-
-/**
- * @tc.name: ParseAIResult002
- * @tc.desc: Test TextPattern: new method ParseAIResult when methodoption is not empty
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, ParseAIResult002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFrameNode.
-     */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. call ParseAIResult function.
-     * @tc.expected: parseSuccess aiSpanMap_ is not Empty.
-     */
-    std::unordered_map<std::string, std::vector<std::string>> menuOptionsMap;
-    std::vector<std::string> menuOptionsPhone = { "呼叫", "发送信息", "新建联系人", "复制", "选择文本" };
-    std::vector<std::string> menuOptionsEmail = { "新建邮箱", "发送信息", "新建联系人", "复制", "选择文本" };
-    std::vector<std::string> menuOptionsUrl = { "打开", "复制", "选择文本" };
-    std::vector<std::string> menuOptionsLocation = { "导航至该位置", "在地图中打开", "复制", "选择文本" };
-
-    menuOptionsMap["phoneNum"] = menuOptionsPhone;
-    menuOptionsMap["url"] = menuOptionsUrl;
-    menuOptionsMap["email"] = menuOptionsEmail;
-    menuOptionsMap["location"] = menuOptionsLocation;
-
-    textPattern->textForAI_ = TEXT_FOR_AI_SINGLE;
-    textPattern->aiMenuOptionsMap_ = menuOptionsMap;
-    textPattern->aiSpanMap_.clear();
-    textPattern->ParseAIResult(TEXT_DATA_DETECT_RESULT, 0);
-    EXPECT_FALSE(textPattern->aiSpanMap_.empty());
-}
-
-/**
- * @tc.name: HandleSpanSingleClickEvent
- * @tc.desc: test test_pattern.h HandleSpanSingleClickEvent function with valid textSelector
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, HandleSpanSingleClickEvent, TestSize.Level1)
+HWTEST_F(TextTestNg, HandleClickAISpanEvent, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and pattern
@@ -5601,21 +5455,10 @@ HWTEST_F(TextTestNg, HandleSpanSingleClickEvent, TestSize.Level1)
     std::map<int32_t, Ace::AISpan> aiSpanMap;
     aiSpanMap[AI_SPAN_START] = aiSpan1;
     aiSpanMap[AI_SPAN_START_II] = aiSpan2;
-    pattern->aiSpanMap_ = aiSpanMap;
-
-    std::unordered_map<std::string, std::vector<std::string>> menuOptionsMap;
-    std::vector<std::string> menuOptionsPhone = { "呼叫", "发送信息", "新建联系人", "复制", "选择文本" };
-    std::vector<std::string> menuOptionsEmail = { "新建邮箱", "发送信息", "新建联系人", "复制", "选择文本" };
-    std::vector<std::string> menuOptionsUrl = { "打开", "复制", "选择文本" };
-    std::vector<std::string> menuOptionsLocation = { "导航至该位置", "在地图中打开", "复制", "选择文本" };
-    menuOptionsMap["phoneNum"] = menuOptionsPhone;
-    menuOptionsMap["url"] = menuOptionsUrl;
-    menuOptionsMap["email"] = menuOptionsEmail;
-    menuOptionsMap["location"] = menuOptionsLocation;
-    pattern->aiMenuOptionsMap_ = menuOptionsMap;
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
 
     /**
-     * @tc.steps: step3. create GestureEvent and call HandleSpanSingleClickEvent function.
+     * @tc.steps: step3. create GestureEvent and call HandleClickAISpanEvent function.
      * @tc.expected: isClickOnAISpan is been setted true.
      */
     GestureEvent info;
@@ -5624,10 +5467,8 @@ HWTEST_F(TextTestNg, HandleSpanSingleClickEvent, TestSize.Level1)
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
 
-    bool isClickOnSpan = false;
-    bool isClickOnAISpan = false;
-    pattern->HandleSpanSingleClickEvent(info, textContentRect, textOffset, isClickOnSpan, isClickOnAISpan);
-    EXPECT_TRUE(isClickOnAISpan);
+    pattern->HandleClickAISpanEvent(textOffset);
+    EXPECT_TRUE(pattern->dataDetectorAdapter_->hasClickedAISpan_);
 }
 
 /**
@@ -5653,22 +5494,10 @@ HWTEST_F(TextTestNg, ShowUIExtensionMenu, TestSize.Level1)
     aiSpan.content = SPAN_PHONE;
     aiSpan.type = TextDataDetectType::PHONE_NUMBER;
 
-    // /**
-    //  * @tc.steps: step2. set pattern->aiMenuOptionsMap_ and call ShowUIExtensionMenu function
-    //  * @tc.expected: ShowUIExtensionMenu result is true.
-    //  */
-    std::unordered_map<std::string, std::vector<std::string>> menuOptionsMap;
-    std::vector<std::string> menuOptionsPhone = { "呼叫", "发送信息", "新建联系人", "复制", "选择文本" };
-    std::vector<std::string> menuOptionsEmail = { "新建邮箱", "发送信息", "新建联系人", "复制", "选择文本" };
-    std::vector<std::string> menuOptionsUrl = { "打开", "复制", "选择文本" };
-    std::vector<std::string> menuOptionsLocation = { "导航至该位置", "在地图中打开", "复制", "选择文本" };
-
-    menuOptionsMap["phoneNum"] = menuOptionsPhone;
-    menuOptionsMap["url"] = menuOptionsUrl;
-    menuOptionsMap["email"] = menuOptionsEmail;
-    menuOptionsMap["location"] = menuOptionsLocation;
-    pattern->aiMenuOptionsMap_ = menuOptionsMap;
-
+    /**
+     * @tc.steps: step2. call ShowUIExtensionMenu function
+     * @tc.expected: ShowUIExtensionMenu result is true.
+     */
     EXPECT_TRUE(pattern->ShowUIExtensionMenu(aiSpan, nullptr, nullptr));
 }
 
@@ -6067,8 +5896,8 @@ HWTEST_F(TextTestNg, SetTextDetectTypes001, TestSize.Level1)
     textModelNG.SetTextDetectConfig("apple, orange, banana", std::move(onResult));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = frameNode->GetPattern<TextPattern>();
-    EXPECT_EQ(pattern->aiDetectTypesChanged_, true);
-    pattern->InitTextDetect(0, "orange");
+    EXPECT_EQ(pattern->dataDetectorAdapter_->aiDetectInitialized_, false);
+    pattern->dataDetectorAdapter_->InitTextDetect(0, "orange");
 }
 
 /**

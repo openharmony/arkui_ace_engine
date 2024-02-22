@@ -25,7 +25,7 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const RowSplitComposedElement&)>> CREATE_JSON_MAP {
-    { "resizeable", [](const RowSplitComposedElement& inspector) { return inspector.GetResizeable(); } }
+    { "resizeable", [](const RowSplitComposedElement& inspector) { return inspector.GetResizable(); } }
 };
 
 } // namespace
@@ -33,7 +33,7 @@ const std::unordered_map<std::string, std::function<std::string(const RowSplitCo
 void RowSplitComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
-    DumpLog::GetInstance().AddDesc(std::string("resizeable: ").append(GetResizeable()));
+    DumpLog::GetInstance().AddDesc(std::string("resizeable: ").append(GetResizable()));
 }
 
 std::unique_ptr<JsonValue> RowSplitComposedElement::ToJsonObject() const
@@ -45,11 +45,11 @@ std::unique_ptr<JsonValue> RowSplitComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-std::string RowSplitComposedElement::GetResizeable() const
+std::string RowSplitComposedElement::GetResizable() const
 {
     auto renderRowSplit = GetRenderRowSplit();
-    auto resizeable = renderRowSplit ? renderRowSplit->GetResizeable() : false;
-    return ConvertBoolToString(resizeable);
+    auto resizable = renderRowSplit ? renderRowSplit->GetResizable() : false;
+    return ConvertBoolToString(resizable);
 }
 
 RefPtr<RenderRowSplit> RowSplitComposedElement::GetRenderRowSplit() const

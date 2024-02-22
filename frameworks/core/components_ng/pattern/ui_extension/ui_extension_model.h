@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,8 @@ public:
     virtual ~UIExtensionModel() = default;
 
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller = false);
+    // for Embedded Component
+    virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, int32_t embeddedType);
     // for DynamicComponent
     virtual void Create();
     virtual void InitializeDynamicComponent(const RefPtr<NG::FrameNode>& frameNode, const std::string& hapPath,

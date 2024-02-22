@@ -42,8 +42,7 @@ public:
     ~ScopeRAII()
     {
         napi_close_handle_scope(env_, scope_);
-    }
-
+    };
 private:
     napi_env env_;
     napi_handle_scope scope_;
@@ -63,5 +62,6 @@ void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vect
 bool IsDrawable(const JSRef<JSVal>& jsValue);
 RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
+bool CheckRegexValid(const std::string& pattern);
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H

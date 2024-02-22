@@ -95,6 +95,7 @@ float MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
 #endif
 }
 
+#ifdef OHOS_PLATFORM
 RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_t overlayId,
     float& buttonWidth, bool isSelectAll = false)
 {
@@ -133,7 +134,10 @@ RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_
         { CalcLength(buttonWidth), std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
     buttonPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     if (callback) {
-        pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& /* info */) {
+        pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& info) {
+            if (!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info)) {
+                return;
+            }
             if (callback) {
                 callback();
             }
@@ -146,6 +150,7 @@ RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_
     pasteButton->MarkModifyDone();
     return pasteButton;
 }
+#endif
 
 RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void()>& callback, int32_t overlayId,
     float& buttonWidth, bool isSelectAll = false)
@@ -657,22 +662,13 @@ void SelectOverlayNode::MoreAnimation()
     FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty,
                                   id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [selectMenuInnerProperty, extensionProperty, backButtonProperty, id, weak]() {
-                ContainerScope scope(id);
-                selectMenuInnerProperty->UpdateVisibility(VisibleType::GONE);
-                extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
-                backButtonProperty->UpdateVisibility(VisibleType::VISIBLE);
-                auto selectOverlay = weak.Upgrade();
-                CHECK_NULL_VOID(selectOverlay);
-                selectOverlay->SetAnimationStatus(false);
-                selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-            },
-            TaskExecutor::TaskType::UI);
+        selectMenuInnerProperty->UpdateVisibility(VisibleType::GONE);
+        extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
+        backButtonProperty->UpdateVisibility(VisibleType::VISIBLE);
+        auto selectOverlay = weak.Upgrade();
+        CHECK_NULL_VOID(selectOverlay);
+        selectOverlay->SetAnimationStatus(false);
+        selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     };
     AnimationOption selectOption;
     selectOption.SetDuration(ANIMATION_DURATION1);
@@ -742,22 +738,13 @@ void SelectOverlayNode::BackAnimation()
     FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty,
                                   id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [selectMenuInnerProperty, extensionProperty, backButtonProperty, id, weak]() {
-                ContainerScope scope(id);
-                selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
-                extensionProperty->UpdateVisibility(VisibleType::GONE);
-                backButtonProperty->UpdateVisibility(VisibleType::GONE);
-                auto selectOverlay = weak.Upgrade();
-                CHECK_NULL_VOID(selectOverlay);
-                selectOverlay->SetAnimationStatus(false);
-                selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-            },
-            TaskExecutor::TaskType::UI);
+        selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
+        extensionProperty->UpdateVisibility(VisibleType::GONE);
+        backButtonProperty->UpdateVisibility(VisibleType::GONE);
+        auto selectOverlay = weak.Upgrade();
+        CHECK_NULL_VOID(selectOverlay);
+        selectOverlay->SetAnimationStatus(false);
+        selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     };
 
     AnimationOption selectOption;
@@ -941,14 +928,12 @@ void SelectOverlayNode::CreateToolBar()
     }
 
     selectMenuInner_->MountToParent(selectMenu_);
-    selectMenuInner_->GetOrCreateGestureEventHub()->MarkResponseRegion(true);
 
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
     CHECK_NULL_VOID(shadowTheme);
     auto colorMode = SystemProperties::GetColorMode();
     selectMenu_->GetRenderContext()->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
     selectMenu_->MountToParent(Claim(this));
-    selectMenu_->GetOrCreateGestureEventHub()->MarkResponseRegion(true);
     selectMenu_->MarkModifyDone();
 }
 
@@ -1001,7 +986,12 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     }
     if (info->menuInfo.showPaste) {
         float buttonWidth = 0.0f;
+#ifdef OHOS_PLATFORM
         auto button = BuildPasteButton(info->menuCallback.onPaste, GetId(), buttonWidth);
+#else
+        auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE),
+            info->menuCallback.onPaste, GetId(), buttonWidth);
+#endif
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;

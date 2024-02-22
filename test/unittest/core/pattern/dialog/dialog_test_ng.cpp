@@ -1144,8 +1144,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest012, TestSize.Level1)
      * @tc.steps: step6. test dialogNode's RenderContext's BackgroundColorValue value.
      * @tc.expected: equal TRANSPARENT.
      */
-    EXPECT_EQ(dialogNode->GetRenderContext()->GetBackgroundColorValue(Color::BLACK).GetValue(),
-        Color::BLUE.GetValue());
+    EXPECT_EQ(dialogNode->GetRenderContext()->GetBackgroundColorValue(Color::BLACK).GetValue(), Color::BLUE.GetValue());
     /**
      * @tc.steps: step7. mock PlatformVersion TEN.
      * @tc.expected: mock successfully.
@@ -1214,12 +1213,12 @@ HWTEST_F(DialogPatternTestNg, PopDialog02, TestSize.Level1)
     pattern->message_ = MESSAGE;
     pattern->dialogProperties_.isShowInSubWindow = true;
     pattern->dialogProperties_.isModal = true;
-    EXPECT_CALL(*MockPipelineContext::GetCurrent(), GetOverlayManager()).WillRepeatedly(Return(overlayManager));
+    MockPipelineContext::GetCurrent()->overlayManager_ = overlayManager;
     /**
      * @tc.steps: step5. test DialogPattern's PopDialog function.
-     * @tc.expected: dialogMap_.size. equal to 1 after pattern->PopDialog.
+     * @tc.expected: dialogMap_.size. equal to 0 after pattern->PopDialog.
      */
     pattern->PopDialog(0);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

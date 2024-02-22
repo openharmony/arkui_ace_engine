@@ -38,6 +38,8 @@ RecycleDummyNode::~RecycleDummyNode()
         return;
     }
     auto child = GetFirstChild();
+    CHECK_NULL_VOID(child);
+    child->DetachFromMainTree();
     auto customNode = AceType::DynamicCast<CustomNodeBase>(child);
     CHECK_NULL_VOID(customNode);
     customNode->FireRecycleSelf();

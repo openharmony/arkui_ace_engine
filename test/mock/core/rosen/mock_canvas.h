@@ -51,6 +51,9 @@ public:
     MOCK_METHOD2(DrawCircle, void(const TestingPoint& centerPt, float radius));
     MOCK_METHOD1(DrawRoundRect, void(const TestingRoundRect& roundRect));
     MOCK_METHOD3(DrawBitmap, void(const TestingBitmap& bitmap, const float px, const float py));
+    MOCK_METHOD4(DrawImage,
+                 void(const TestingImage &image, const float px, const float py,
+                      const TestingSamplingOptions &sampling));
     MOCK_METHOD1(DrawBackground, void(const TestingBrush& brush));
     MOCK_METHOD3(ClipRect, void(const TestingRect& rect, ClipOp op, bool doAntiAlias));
     MOCK_METHOD3(ClipPath, void(const TestingPath& rect, ClipOp op, bool doAntiAlias));
@@ -58,6 +61,7 @@ public:
         DrawImageRect, void(const TestingImage& image, const TestingRect& dst, const TestingSamplingOptions& sampling));
     MOCK_METHOD5(DrawImageRect, void(const TestingImage& image, const TestingRect& src, const TestingRect& dst,
                                     const TestingSamplingOptions& sampling, SrcRectConstraint constraint));
+    MOCK_METHOD1(DrawOval, void(const TestingRect& oval));
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_ROSEN_MOCK_CANVAS_H

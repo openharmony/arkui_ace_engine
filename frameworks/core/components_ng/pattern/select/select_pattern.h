@@ -134,6 +134,10 @@ public:
     void SetSelectedOptionFontFamily(const std::vector<std::string>& value);
     void SetSelectedOptionFontColor(const Color& color);
 
+    // set props of menu background
+    void SetMenuBackgroundColor(const Color& color);
+    void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
+
     // Get functions for unit tests
     const std::vector<RefPtr<FrameNode>>& GetOptions();
 
@@ -280,6 +284,7 @@ private:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json) const;
     // XTS inspector helper functions
     std::string InspectorGetOptions() const;
     std::string InspectorGetSelectedFont() const;

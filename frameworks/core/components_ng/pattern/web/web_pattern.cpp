@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,6 +154,7 @@ constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
 constexpr uint32_t DEFAULT_WEB_DRAW_HEIGHT = 4000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
+const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 8;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 // web feature params
@@ -292,6 +293,29 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetPanEventType(GestureTypeName::WEBSCROLL);
+    gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
+                                                const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+            if (!gestureInfo) {
+                // info is null, default case to continue
+                return GestureJudgeResult::CONTINUE;
+            }
+            if (gestureInfo->GetType() != GestureTypeName::WEBSCROLL) {
+                // not web pan event type, continue
+                return GestureJudgeResult::CONTINUE;
+            }
+
+            auto inputEventType = gestureInfo->GetInputEventType();
+            if (inputEventType == InputEventType::AXIS) {
+                // axis event type of web pan, dispatch to panEvent to process
+                return GestureJudgeResult::CONTINUE;
+            } else if (inputEventType == InputEventType::MOUSE_BUTTON) {
+                // mouse button event type of web pan, dispatch to DragEvent to process
+                return GestureJudgeResult::REJECT;
+            }
+            // In other cases, the panEvent is used by default
+            return GestureJudgeResult::CONTINUE;
+        });
 }
 
 void WebPattern::HandleDragMove(const GestureEvent& event)
@@ -398,9 +422,6 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
     CHECK_NULL_VOID(delegate_);
     if (info.GetAction() == MouseAction::PRESS) {
         delegate_->OnContextMenuHide("");
-    }
-
-    if (info.GetAction() == MouseAction::RELEASE) {
         WebRequestFocus();
     }
 
@@ -1511,6 +1532,13 @@ void WebPattern::OnScrollBarColorUpdate(const std::string& value)
     }
 }
 
+void WebPattern::OnDefaultTextEncodingFormatUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateDefaultTextEncodingFormat(value);
+    }
+}
+
 void WebPattern::RegistVirtualKeyBoardListener()
 {
     if (!needUpdateWeb_) {
@@ -1558,8 +1586,6 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
-        accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
-        delegate_->UpdateAccessibilityState(accessibilityState_);
         delegate_->SetBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         if (isEnhanceSurface_) {
@@ -1624,6 +1650,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateWebStandardFont(GetWebStandardFontValue(DEFAULT_STANDARD_FONT_FAMILY));
         delegate_->UpdateDefaultFixedFontSize(GetDefaultFixedFontSizeValue(DEFAULT_FIXED_FONT_SIZE));
         delegate_->UpdateDefaultFontSize(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE));
+        delegate_->UpdateDefaultTextEncodingFormat(GetDefaultTextEncodingFormatValue(DEFAULT_WEB_TEXT_ENCODING_FORMAT));
         delegate_->UpdateMinFontSize(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE));
         delegate_->UpdateMinLogicalFontSize(GetMinLogicalFontSizeValue(DEFAULT_MINIMUM_LOGICAL_FONT_SIZE));
         delegate_->UpdateHorizontalScrollBarAccess(GetHorizontalScrollBarAccessEnabledValue(true));
@@ -1646,6 +1673,10 @@ void WebPattern::OnModifyDone()
             webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(host);
         }
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
+        accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+        if (accessibilityState_) {
+            delegate_->SetAccessibilityState(true);
+        }
     }
 
     // Initialize events such as keyboard, focus, etc.
@@ -1851,22 +1882,29 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
     }
     touchEventInfoList_.clear();
 
-    std::list<OHOS::NWeb::TouchPointInfo> touchPointInfoList {};
+    touchInfos.sort([](const TouchInfo &point1, const TouchInfo &point2) {
+        return point1.id < point2.id;
+    });
+
+    std::vector<std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo>> touch_point_infos;
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
         }
-        touchPointInfoList.emplace_back(OHOS::NWeb::TouchPointInfo{touchPoint.id, touchPoint.x, touchPoint.y});
+        std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo> touch_point_info =
+            std::make_shared<NWebTouchPointInfoImpl>(touchPoint.id, touchPoint.x, touchPoint.y);
+        touch_point_infos.emplace_back(touch_point_info);
     }
-    touchPointInfoList.sort([](const OHOS::NWeb::TouchPointInfo& point1, const OHOS::NWeb::TouchPointInfo& point2) {
-        return point1.id_ < point2.id_;
-    });
-    delegate_->HandleTouchMove(touchPointInfoList, fromOverlay);
+
+    delegate_->HandleTouchMove(touch_point_infos, fromOverlay);
 }
 
-void WebPattern::HandleTouchCancel(const TouchEventInfo& /*info*/)
+void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
 {
+    if (IsRootNeedExportTexture()) {
+        HandleTouchUp(info, false);
+    }
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleTouchCancel();
 }
@@ -2264,9 +2302,9 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     CHECK_NULL_VOID(host);
     auto id = host->GetId();
     std::vector<SelectParam> selectParam;
-    for (auto& item : params->menuItems) {
+    for (auto& item : params->GetMenuItems()) {
         selectParam.push_back({
-            item.label, ""
+            item->GetLabel(), ""
         });
     }
     auto menu = MenuView::Create(selectParam, id, host->GetTag());
@@ -2297,13 +2335,13 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
         callback->Cancel();
         pattern->SetSelectPopupMenuShowing(false);
     });
-    auto offset = GetSelectPopupPostion(params->bounds);
+    auto offset = GetSelectPopupPostion(params->GetSelectMenuBound());
     selectPopupMenuShowing_ = true;
     overlayManager->ShowMenu(id, offset, menu);
 }
 
 void WebPattern::OnDateTimeChooserPopup(const NWeb::DateTimeChooser& chooser,
-    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
     bool result = false;
@@ -2333,7 +2371,7 @@ DialogProperties WebPattern::GetDialogProperties(const RefPtr<DialogTheme>& them
 }
 
 bool WebPattern::ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
-    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
     auto container = Container::Current();
@@ -2385,7 +2423,7 @@ bool WebPattern::ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
 }
 
 bool WebPattern::ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
-    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
     auto container = Container::Current();
@@ -2432,7 +2470,7 @@ bool WebPattern::ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
 }
 
 bool WebPattern::ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
-    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
     auto container = Container::Current();
@@ -2452,9 +2490,9 @@ bool WebPattern::ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& choos
     }
     std::map<std::string, OHOS::NWeb::DateTime> suggestionMap;
     for (size_t i = 0; i < suggestions.size(); i++) {
-        settingData.rangeVector.push_back({ "", suggestions[i].localizedValue });
-        settingData.values.push_back(suggestions[i].localizedValue);
-        suggestionMap.emplace(std::make_pair(suggestions[i].localizedValue, suggestions[i].value));
+        settingData.rangeVector.push_back({ "", suggestions[i]->GetLocalizedValue() });
+        settingData.values.push_back(suggestions[i]->GetLocalizedValue());
+        suggestionMap.emplace(std::make_pair(suggestions[i]->GetLocalizedValue(), suggestions[i]->GetValue()));
     }
     settingData.columnKind = NG::TEXT;
     settingData.selected = chooser.suggestionIndex;
@@ -2509,7 +2547,7 @@ void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
                 continue;
             }
             hub->SetOnSelect(std::move(selectCallback));
-            optionPattern->SetFontSize(Dimension(params->itemFontSize * pipeline->GetDipScale()));
+            optionPattern->SetFontSize(Dimension(params->GetItemFontSize() * pipeline->GetDipScale()));
             optionNode->MarkModifyDone();
         }
     }
@@ -2745,13 +2783,13 @@ void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, boo
 {
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
     if (!isFling) {
-        if (scrollState_ && ((velocity < 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST) ||
-                                (velocity > 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST))) {
+        if (scrollState_ && ((velocity < 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST) ||
+                                (velocity > 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST))) {
             HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         }
     } else {
-        if (((velocity > 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST) ||
-                (velocity < 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST))) {
+        if (((velocity > 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST) ||
+                (velocity < 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST))) {
             if (isFirstFlingScrollVelocity_) {
                 HandleScrollVelocity(velocity);
                 isFirstFlingScrollVelocity_ = false;
@@ -2820,8 +2858,8 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
 {
     float offset = GetAxis() == Axis::HORIZONTAL ? x : y;
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
-    if (((offset > 0 || velocity > 0) && nestedScrollForwardMode_ == NestedScrollMode::PARENT_FIRST) ||
-        ((offset < 0 || velocity < 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARENT_FIRST)) {
+    if (((offset > 0 || velocity > 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARENT_FIRST) ||
+        ((offset < 0 || velocity < 0) && nestedScrollForwardMode_ == NestedScrollMode::PARENT_FIRST)) {
         if (offset != 0) {
             auto result = HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
             CHECK_NULL_RETURN(delegate_, false);
@@ -2831,8 +2869,8 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
         } else {
             return HandleScrollVelocity(velocity);
         }
-    } else if (((offset > 0 || velocity > 0) && nestedScrollForwardMode_ == NestedScrollMode::PARALLEL) ||
-               ((offset < 0 || velocity < 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARALLEL)) {
+    } else if (((offset > 0 || velocity > 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARALLEL) ||
+               ((offset < 0 || velocity < 0) && nestedScrollForwardMode_ == NestedScrollMode::PARALLEL)) {
         if (offset != 0) {
             HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         } else {
@@ -2978,8 +3016,9 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeById(int64_t access
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
-    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
-    if (!delegate_->GetAccessibilityNodeInfoById(accessibilityId, info)) {
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
+        delegate_->GetAccessibilityNodeInfoById(accessibilityId);
+    if (!info) {
         return nullptr;
     }
     SetSelfAsParentOfWebCoreNode(info);
@@ -2990,8 +3029,9 @@ RefPtr<WebAccessibilityNode> WebPattern::GetFocusedAccessibilityNode(int64_t acc
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
-    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
-    if (!delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus, info)) {
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
+        delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus);
+    if (!info) {
         return nullptr;
     }
     SetSelfAsParentOfWebCoreNode(info);
@@ -3002,8 +3042,9 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int64_t
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
-    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
-    if (!delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction, info)) {
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
+        delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
+    if (!info) {
         return nullptr;
     }
     SetSelfAsParentOfWebCoreNode(info);
@@ -3026,13 +3067,14 @@ void WebPattern::SetAccessibilityState(bool state)
     }
 }
 
-void WebPattern::SetSelfAsParentOfWebCoreNode(NWeb::NWebAccessibilityNodeInfo& info) const
+void WebPattern::SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (info.parentId == -1) { // root node of web core
-        info.parentId = host->GetAccessibilityId();
+    if (info->GetParentId() == -1) { // root node of web core
+        info->SetParentId(host->GetAccessibilityId());
     }
+    webAccessibilityNode_->SetAccessibilityNodeInfo(info);
 }
 
 void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo)

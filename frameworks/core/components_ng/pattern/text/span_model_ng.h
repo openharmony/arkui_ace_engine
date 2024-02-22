@@ -43,19 +43,19 @@ public:
     void ClearOnClick() override;
 
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::string& content);
-    static void InitSpan(FrameNode* frameNode, const std::string& content);
-    static void SetFontWeight(FrameNode* frameNode, FontWeight value);
-    static void SetTextCase(FrameNode* frameNode, TextCase value);
-    static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
-    static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
-    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
-    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
-    static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
-    static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
-    static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
-    static void SetTextColor(FrameNode* frameNode, const Color& value);
-    static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
-    static void SetFont(FrameNode* frameNode, const Font& value);
+    static void InitSpan(UINode* uiNode, const std::string& content);
+    static void SetFontWeight(UINode* uiNode, FontWeight value);
+    static void SetTextCase(UINode* uiNode, TextCase value);
+    static void SetItalicFontStyle(UINode* uiNode, Ace::FontStyle value);
+    static void SetLineHeight(UINode* uiNode, const Dimension& value);
+    static void SetFontSize(UINode* uiNode, const Dimension& value);
+    static void SetFontFamily(UINode* uiNode, const std::vector<std::string>& value);
+    static void SetTextDecoration(UINode* uiNode, TextDecoration value);
+    static void SetTextDecorationStyle(UINode* uiNode, TextDecorationStyle value);
+    static void SetTextDecorationColor(UINode* uiNode, const Color& value);
+    static void SetTextColor(UINode* uiNode, const Color& value);
+    static void SetLetterSpacing(UINode* uiNode, const Dimension& value);
+    static void SetFont(UINode* uiNode, const Font& value);
 
     void CreateContainSpan() override;
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;

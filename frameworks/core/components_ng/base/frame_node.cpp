@@ -56,6 +56,7 @@ constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t SUBSTR_LENGTH = 3;
 const char DIMENSION_UNIT_VP[] = "vp";
+const char FORM_COMPONENT_TAG[] = "FormComponent";
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -420,7 +421,11 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     node->UpdateLayoutPropertyFlag();
     node->SetActive();
     node->isLayoutDirtyMarked_ = true;
+    auto pipeline = PipelineContext::GetCurrentContext();
     node->CreateLayoutTask();
+    if (pipeline) {
+        pipeline->FlushSyncGeometryNodeTasks();
+    }
 
     auto paintProperty = node->GetPaintProperty<PaintProperty>();
     auto wrapper = node->CreatePaintWrapper();
@@ -428,7 +433,6 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
         wrapper->FlushRender();
     }
     paintProperty->CleanDirty();
-    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushMessages();
     node->SetActive(false);
@@ -714,16 +718,6 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
     pattern_->OnAttachToMainTree();
-    if (IsResponseRegion() || HasPositionProp()) {
-        auto parent = GetParent();
-        while (parent) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(parent);
-            if (frameNode) {
-                frameNode->MarkResponseRegion(true);
-            }
-            parent = parent->GetParent();
-        }
-    }
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -786,7 +780,6 @@ void FrameNode::OnVisibleChange(bool isVisible)
 {
     pattern_->OnVisibleChange(isVisible);
     UpdateChildrenVisible(isVisible);
-    TriggerVisibleAreaChangeCallback(!isVisible);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive)
@@ -965,7 +958,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
-    bool isFrameDisappear = forceDisappear || !context->GetOnShow() || !IsOnMainTree();
+    bool isFrameDisappear = forceDisappear || !context->GetOnShow() || !IsOnMainTree() || !IsVisible();
     if (!isFrameDisappear) {
         bool curFrameIsActive = isActive_;
         bool curIsVisible = IsVisible();
@@ -995,6 +988,12 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
             ProcessAllVisibleCallback(visibleAreaInnerCallbacks_, VISIBLE_RATIO_MIN);
             lastVisibleRatio_ = VISIBLE_RATIO_MIN;
         }
+        return;
+    }
+
+    if (GetTag() == FORM_COMPONENT_TAG && visibleAreaUserCallbacks_.empty() && !visibleAreaInnerCallbacks_.empty()) {
+        ProcessAllVisibleCallback(visibleAreaInnerCallbacks_, VISIBLE_RATIO_MAX);
+        lastVisibleRatio_ = VISIBLE_RATIO_MAX;
         return;
     }
 
@@ -1052,22 +1051,12 @@ void FrameNode::ProcessAllVisibleCallback(
         }
 
         if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MIN)) {
-            if (callbackIsVisible) {
-                nodeCallbackInfo.second.isCurrentVisible = false;
-                isVisible = (!isHandled) ? false : isVisible;
-            } else {
-                nodeCallbackInfo.second.isCurrentVisible = true;
-                isVisible = (!isHandled) ? true : isVisible;
-            }
+            nodeCallbackInfo.second.isCurrentVisible = false;
+            isVisible = (!isHandled) ? false : isVisible;
             isHandled = true;
         } else if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MAX)) {
-            if (!callbackIsVisible) {
-                nodeCallbackInfo.second.isCurrentVisible = true;
-                isVisible = (!isHandled) ? true : isVisible;
-            } else {
-                nodeCallbackInfo.second.isCurrentVisible = false;
-                isVisible = (!isHandled) ? false : isVisible;
-            }
+            nodeCallbackInfo.second.isCurrentVisible = true;
+            isVisible = (!isHandled) ? true : isVisible;
             isHandled = true;
         }
     }
@@ -1378,16 +1367,6 @@ void FrameNode::MarkModifyDone()
         }
     }
     eventHub_->MarkModifyDone();
-    if (IsResponseRegion() || HasPositionProp()) {
-        auto parent = GetParent();
-        while (parent) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(parent);
-            if (frameNode) {
-                frameNode->MarkResponseRegion(true);
-            }
-            parent = parent->GetParent();
-        }
-    }
     renderContext_->OnModifyDone();
 }
 
@@ -1595,26 +1574,6 @@ bool FrameNode::GetMonopolizeEvents() const
 {
     auto gestureHub = eventHub_->GetGestureEventHub();
     return gestureHub ? gestureHub->GetMonopolizeEvents() : false;
-}
-
-bool FrameNode::IsResponseRegion() const
-{
-    auto renderContext = GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto clip = renderContext->GetClipEdge().value_or(false);
-    if (clip) {
-        return false;
-    }
-    auto gestureHub = eventHub_->GetGestureEventHub();
-    return gestureHub ? gestureHub->IsResponseRegion() : false;
-}
-
-void FrameNode::MarkResponseRegion(bool isResponseRegion)
-{
-    auto gestureHub = eventHub_->GetOrCreateGestureEventHub();
-    if (gestureHub) {
-        gestureHub->MarkResponseRegion(isResponseRegion);
-    }
 }
 
 RectF FrameNode::GetPaintRectWithTransform() const
@@ -2783,13 +2742,42 @@ void FrameNode::Layout()
     CHECK_NULL_VOID(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
     AvoidKeyboard(isFocusOnPage);
-    SyncGeometryNode();
+    auto task = [weak = WeakClaim(this)]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->SyncGeometryNode();
+    };
+    if (HasTransitionRunning()) {
+        task();
+    } else {
+        pipeline->AddSyncGeometryNodeTask(task);
+    }
+}
+
+bool FrameNode::HasTransitionRunning()
+{
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    return geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
+}
+
+bool FrameNode::SelfOrParentExpansive()
+{
+    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    if (opts && opts->Expansive()) {
+        return true;
+    }
+    auto parent = GetAncestorNodeOfFrame();
+    CHECK_NULL_RETURN(parent, false);
+    auto parentLayoutProperty = parent->GetLayoutProperty();
+    CHECK_NULL_RETURN(parentLayoutProperty, false);
+    auto&& parentOpts = parentLayoutProperty->GetSafeAreaExpandOpts();
+    return parentOpts && parentOpts->Expansive();
 }
 
 void FrameNode::SyncGeometryNode()
 {
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
+    bool hasTransition = HasTransitionRunning();
 
     if (!isActive_ && !hasTransition) {
         layoutAlgorithm_.Reset();
@@ -2843,7 +2831,7 @@ void FrameNode::SyncGeometryNode()
         if (geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
             isLayoutDirtyMarked_ = true;
         }
-    } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
+    } else if (frameSizeChange || frameOffsetChange || HasPositionProp() || SelfOrParentExpansive() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         isLayoutComplete_ = true;
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
@@ -3261,6 +3249,28 @@ RefPtr<FrameNode> FrameNode::GetDispatchFrameNode(const TouchResult& touchRes)
     return nullptr;
 }
 
+OffsetF FrameNode::CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto offset = context->GetPaintRectWithTransform().GetOffset();
+
+    auto parent = GetAncestorNodeOfFrame(true);
+    if (parent) {
+        auto parentTimestampOffset = parent->GetCachedTransformRelativeOffset();
+        if (parentTimestampOffset.first == nanoTimestamp) {
+            auto result = offset + parentTimestampOffset.second;
+            SetCachedTransformRelativeOffset({ nanoTimestamp, result });
+            return result;
+        }
+        auto result = offset + parent->CalculateCachedTransformRelativeOffset(nanoTimestamp);
+        SetCachedTransformRelativeOffset({ nanoTimestamp, result });
+        return result;
+    }
+    SetCachedTransformRelativeOffset({ nanoTimestamp, offset });
+    return offset;
+}
+
 OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp)
 {
     auto currOffset = geometryNode_->GetFrameOffset();
@@ -3319,7 +3329,7 @@ bool FrameNode::SetParentLayoutConstraint(const SizeF& size) const
     layoutConstraint.UpdatePercentReference(size);
     layoutConstraint.UpdateMaxSizeWithCheck(size);
     layoutConstraint.UpdateIllegalParentIdealSizeWithCheck(OptionalSize(size));
-    layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty_->UpdateParentLayoutConstraint(layoutConstraint);
     return true;
 }
 
@@ -3331,5 +3341,14 @@ const std::pair<uint64_t, OffsetF>& FrameNode::GetCachedGlobalOffset() const
 void FrameNode::SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
 {
     cachedGlobalOffset_ = timestampOffset;
+}
+const std::pair<uint64_t, OffsetF>& FrameNode::GetCachedTransformRelativeOffset() const
+{
+    return cachedTransformRelativeOffset_;
+}
+
+void FrameNode::SetCachedTransformRelativeOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
+{
+    cachedTransformRelativeOffset_ = timestampOffset;
 }
 } // namespace OHOS::Ace::NG

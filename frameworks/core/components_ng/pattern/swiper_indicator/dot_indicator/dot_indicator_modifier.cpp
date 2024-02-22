@@ -770,18 +770,19 @@ void DotIndicatorModifier::PlayIndicatorAnimation(const LinearVector<float>& vec
     PlayLongPointAnimation(longPointCenterX, gestureState, touchBottomTypeLoop, vectorBlackPointCenterX);
 }
 
-void DotIndicatorModifier::StopAnimation()
+void DotIndicatorModifier::StopAnimation(bool ifImmediately)
 {
-    AnimationOption option;
-    option.SetDuration(0);
-    option.SetCurve(Curves::LINEAR);
-    AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
-        auto modifier = weak.Upgrade();
-        CHECK_NULL_VOID(modifier);
-        modifier->longPointLeftCenterX_->Set(modifier->longPointLeftCenterX_->Get());
-        modifier->longPointRightCenterX_->Set(modifier->longPointRightCenterX_->Get());
-    });
-
+    if (ifImmediately) {
+        AnimationOption option;
+        option.SetDuration(0);
+        option.SetCurve(Curves::LINEAR);
+        AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->longPointLeftCenterX_->Set(modifier->longPointLeftCenterX_->Get());
+            modifier->longPointRightCenterX_->Set(modifier->longPointRightCenterX_->Get());
+        });
+    }
     AnimationUtils::StopAnimation(blackPointsAnimation_);
     longPointLeftAnimEnd_ = true;
     longPointRightAnimEnd_ = true;

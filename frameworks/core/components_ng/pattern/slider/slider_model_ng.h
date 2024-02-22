@@ -85,6 +85,30 @@ public:
     static void ResetStepSize(FrameNode* frameNode);
     static void ResetBlockColor(FrameNode* frameNode);
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetOnChange(FrameNode* frameNode, SliderOnChangeEvent&& eventOnChange);
+    static void SetSliderValue(FrameNode* frameNode, float value);
+    static void SetMinLabel(FrameNode* frameNode, float value);
+    static void SetMaxLabel(FrameNode* frameNode, float value);
+    static void SetDirection(FrameNode* frameNode, Axis value);
+    static void SetStep(FrameNode* frameNode, float value);
+    static void SetReverse(FrameNode* frameNode, bool value);
+    static void SetSliderMode(FrameNode* frameNode, const SliderMode& value);
+
+    static Color GetBlockColor(FrameNode* frameNode);
+    static Color GetTrackBackgroundColor(FrameNode* frameNode);
+    static Color GetSelectColor(FrameNode* frameNode);
+    static bool GetShowSteps(FrameNode* frameNode);
+    static BlockStyleType GetBlockType(FrameNode* frameNode);
+    static float GetSliderValue(FrameNode* frameNode);
+    static float GetMinLabel(FrameNode* frameNode);
+    static float GetMaxLabel(FrameNode* frameNode);
+    static OHOS::Ace::Axis GetDirection(FrameNode* frameNode);
+    static float GetStep(FrameNode* frameNode);
+    static bool GetReverse(FrameNode* frameNode);
+    static SliderModel::SliderMode GetSliderMode(FrameNode* frameNode);
+    static std::string GetBlockImageValue(FrameNode* frameNode);
+    static RefPtr<BasicShape> GetBlockShape(FrameNode* frameNode);
 private:
     void SetSliderValue(float value);
 };

@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
 
@@ -29,6 +30,11 @@ using DetachCallback = std::function<void(const std::string&)>;
 class XComponentModel {
 public:
     static XComponentModel* GetInstance();
+    static bool IsBackGroundColorAvailable(const XComponentType& type)
+    {
+        return type == XComponentType::TEXTURE || type == XComponentType::NODE ||
+               (type == XComponentType::SURFACE && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
+    }
     virtual ~XComponentModel() = default;
 
     virtual void Create(const std::string& id, XComponentType type, const std::string& libraryname,

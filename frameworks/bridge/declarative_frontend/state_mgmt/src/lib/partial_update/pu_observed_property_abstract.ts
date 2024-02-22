@@ -30,6 +30,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   };
   
   private owningView_ : ViewPU = undefined;
+
+  private dependentElementIds_: Set<number> = new Set<number>();
   
   // PU code stores object references to dependencies directly as class variable
   // SubscriberManager is not used for lookup in PU code path to speedup updates
@@ -40,11 +42,12 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   // install when current value is ObservedObject and the value type is not using compatibility mode
   // note value may change for union type variables when switching an object from one class to another.
-  protected shouldInstallTrackedObjectReadCb : boolean = true;
+  protected shouldInstallTrackedObjectReadCb : boolean = false;
   private dependentElmtIdsByProperty_ = new PropertyDependencies();
 
   constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
     super(subscriber, viewName);
+    ConfigureStateMgmt.instance.intentUsingV2(`V2 Decorated variable`, this.debugInfo());
     Object.defineProperty(this, 'owningView_', {writable: true, enumerable: false});
     Object.defineProperty(this, 'subscriberRefs_',
       {writable: true, enumerable: false, value: new Set<IPropertySubscriber>()});
@@ -107,6 +110,48 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return this.dependentElmtIdsByProperty_.dumpInfoDependencies();
   }
 
+  public debugInfoElmtId(elmtId: number): string {
+    if (this.owningView_) {
+      return this.owningView_.debugInfoElmtId(elmtId);
+    }
+    return "<unknown element id " + elmtId + ", missing owning view>";
+  }
+
+  public debugInfoDependentComponents(): string {
+    let result: string = `|--Dependent elements: `;
+    let sepa: string = "";
+
+    let queue: Array<ObservedPropertyAbstractPU<any>> = [this];
+    let seen = new Set<ObservedPropertyAbstractPU<any>>();
+
+    while (queue.length) {
+      let item = queue.shift();
+      seen.add(item);
+
+      if (item != this) {
+        result += `${sepa}${item.debugInfoOwningView()}`;
+        sepa = ", ";
+      }
+
+      if (item.owningView_) {
+        item.dependentElementIds_.forEach((elmtId: number) => {
+          const owningViewInfo = item.owningView_.debugInfoElmtId(elmtId);
+          result += `${owningViewInfo ? sepa : ""}${owningViewInfo}`;
+          sepa = ", ";
+        });
+      }
+
+      item.subscriberRefs_.forEach((subscriber: IPropertySubscriber) => {
+        if ((subscriber instanceof ObservedPropertyAbstractPU)) {
+          if (!seen.has(subscriber)) {
+            queue.push(subscriber);
+          }
+        }
+      });
+    }
+    return result;
+  }
+
   /* for @Prop value from source we need to generate a @State
      that observes when this value changes. This ObservedPropertyPU
      sits inside SynchedPropertyOneWayPU.
@@ -117,7 +162,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
 
   protected isPropSourceObservedPropertyFakeName(): string | false {
-    return this.info().endsWith("_prop_fake_state_source___")
+    return this.info() && this.info().endsWith("_prop_fake_state_source___")
       ? this.info().substring(0, this.info().length - "_prop_fake_state_source___".length)
       : false;
   }

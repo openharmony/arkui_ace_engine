@@ -27,7 +27,9 @@ namespace OHOS::Ace::Framework {
 
 void JsEngine::RunNativeEngineLoop()
 {
-    if (nativeEngine_ != nullptr) {
+    static bool hasPendingExpection = false;
+    if (nativeEngine_ && !hasPendingExpection) {
+        hasPendingExpection = nativeEngine_->HasPendingException();
         nativeEngine_->Loop(LOOP_NOWAIT, false);
     }
 }

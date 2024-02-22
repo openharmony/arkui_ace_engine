@@ -27,11 +27,14 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_layout_info.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/popup_param.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -65,11 +68,17 @@ struct OptionParam {
     ~OptionParam() = default;
 };
 
+enum class ContextMenuRegisterType : char {
+    NORMAL_TYPE = 0,
+    CUSTOM_TYPE = 1,
+};
+
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
     bool setShow = false;
     bool isShow = false;
+    ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
     std::function<void(const std::string&)> onStateChange;
     std::optional<Placement> placement;
     std::function<void()> onAppear;
@@ -102,7 +111,7 @@ public:
 
     static void SetAspectRatio(float ratio);
     static void ResetAspectRatio();
-    static void SetLayoutWeight(int32_t value);
+    static void SetLayoutWeight(float value);
     static void SetPixelRound(uint8_t value);
     static void SetLayoutDirection(TextDirection value);
 
@@ -316,6 +325,8 @@ public:
     // useEffect
     static void SetUseEffect(bool useEffect);
 
+    static void SetFreeze(bool freeze);
+
     // useShadowBatching
     static void SetUseShadowBatching(bool useShadowBatching);
 
@@ -477,8 +488,39 @@ public:
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
     static void SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear);
+    static void SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
+        const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
+    static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc);
+    static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
+
+    static bool GetFocusable(FrameNode* frameNode);
+    static bool GetDefaultFocus(FrameNode* frameNode);
+    static std::vector<DimensionRect> GetResponseRegion(FrameNode* frameNode);
+    static NG::OverlayOptions GetOverlay(FrameNode* frameNode);
+    static void SetNeedFocus(FrameNode* frameNode, bool value);
+    static bool GetNeedFocus(FrameNode* frameNode);
+    static double GetOpacity(FrameNode* frameNode);
+    static BorderWidthProperty GetBorderWidth(FrameNode* frameNode);
+    static BorderRadiusProperty GetBorderRadius(FrameNode* frameNode);
+    static BorderColorProperty GetBorderColor(FrameNode* frameNode);
+    static BorderStyleProperty GetBorderStyle(FrameNode* frameNode);
+    static int GetZIndex(FrameNode* frameNode);
+    static VisibleType GetVisibility(FrameNode* frameNode);
+    static bool GetClip(FrameNode* frameNode);
+    static std::optional<RefPtr<BasicShape>> GetClipShape(FrameNode* frameNode);
+    static Matrix4 GetTransform(FrameNode* frameNode);
+    static HitTestMode GetHitTestBehavior(FrameNode* frameNode);
+    static OffsetT<Dimension> GetPosition(FrameNode* frameNode);
+    static std::optional<Shadow> GetShadow(FrameNode* frameNode);
+    static NG::Gradient GetGradient(FrameNode* frameNode);
+    static std::optional<RefPtr<BasicShape>> GetMask(FrameNode* frameNode);
+    static const std::optional<RefPtr<ProgressMaskProperty>> GetMaskProgress(FrameNode* frameNode);
+    static BlendMode GetBlendMode(FrameNode* frameNode);
+    static TextDirection GetDirection(FrameNode* frameNode);
+    static FlexAlign GetAlignSelf(FrameNode* frameNode);
+
 private:
     static void AddDragFrameNodeToManager();
 };

@@ -96,6 +96,18 @@ public:
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetFont(FrameNode* frameNode, const Font& value);
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
+
+    static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
+    static CopyOptions GetCopyOption(FrameNode* frameNode);
+    static TextHeightAdaptivePolicy GetHeightAdaptivePolicy(FrameNode* frameNode);
+    static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
+    static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
+    static Font GetFont(FrameNode* frameNode);
+
+    static Dimension GetFontSize(FrameNode* frameNode);
+    static Ace::FontWeight GetFontWeight(FrameNode* frameNode);
+    static Ace::FontStyle GetItalicFontStyle(FrameNode* frameNode);
+
 };
 } // namespace OHOS::Ace::NG
 

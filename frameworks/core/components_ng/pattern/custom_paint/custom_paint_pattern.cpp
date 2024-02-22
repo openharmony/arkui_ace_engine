@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 #include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "render_service_client/core/ui/rs_canvas_drawing_node.h"
 #include "base/log/dump_log.h"
 
 namespace {} // namespace
@@ -87,10 +86,11 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     }
 
     if (!isCanvasInit_) {
-        auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(host->GetRenderContext());
-        std::shared_ptr<Rosen::RSNode> rsNode = rosenRenderContext->GetRSNode();
-        auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode);
-        rsCanvasDrawingNode->ResetSurface();
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        CHECK_NULL_RETURN(contentModifier_, false);
+        contentModifier_->needResetSurface_ = true;
+        contentModifier_->renderContext_ = renderContext;
 
         auto context = PipelineContext::GetCurrentContext();
         if (context) {
@@ -929,6 +929,28 @@ void CustomPaintPattern::SetFilterParam(const std::string& filterStr)
 TransformParam CustomPaintPattern::GetTransform() const
 {
     return paintMethod_->GetTransform();
+}
+
+void CustomPaintPattern::SaveLayer()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SaveLayer();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::RestoreLayer()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.RestoreLayer();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)

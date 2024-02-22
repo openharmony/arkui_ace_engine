@@ -223,6 +223,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
         if (controller->IsObject()) {
             auto* jsTabsController = JSRef<JSObject>::Cast(controller)->Unwrap<JSTabsController>();
             if (jsTabsController) {
+                jsTabsController->SetInstanceId(Container::CurrentId());
                 tabController = jsTabsController->GetController();
                 swiperController = jsTabsController->GetSwiperController();
             }

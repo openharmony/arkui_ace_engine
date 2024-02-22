@@ -125,17 +125,8 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& props = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
     const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
-    bool autoResize = props->GetAutoResize().value_or(true);
-    // add API version protection
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        autoResize = props->GetAutoResize().value_or(false);
-    }
-    auto container = Container::Current();
-    // If the default value is set to false, the ScenceBoard memory increases.
-    // Therefore the default value is different in the ScenceBoard.
-    if (container && container->IsScenceBoardWindow()) {
-        autoResize = props->GetAutoResize().value_or(true);
-    }
+    bool autoResize = props->GetAutoResize().value_or(autoResizeDefault_);
+
     ImageFit imageFit = props->GetImageFit().value_or(ImageFit::COVER);
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
     bool hasValidSlice = false;
@@ -160,7 +151,7 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto altLoadingCtx = altLoadingCtx_.Upgrade();
     if (altLoadingCtx) {
         altLoadingCtx->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
-    } else {
+    } else if (props->GetAlt()) {
         auto host = layoutWrapper->GetHostNode();
         if (host && host->GetPattern<ImagePattern>()) {
             auto pattern = host->GetPattern<ImagePattern>();

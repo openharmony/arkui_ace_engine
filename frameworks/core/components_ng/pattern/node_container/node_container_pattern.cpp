@@ -24,6 +24,10 @@ void NodeContainerPattern::RemakeNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto newNode = FireMakeFunction();
+    auto oldChild = host->GetChildAtIndex(0);
+    if ((!oldChild && !newNode) || (oldChild && oldChild == newNode)) {
+        return;
+    }
     host->RemoveChildAtIndex(0);
     host->AddChild(newNode, 0);
     OnAddBaseNode();
@@ -35,10 +39,16 @@ bool NodeContainerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
-    auto geometryNode = dirty->GetGeometryNode();
-    auto size = geometryNode->GetFrameSize();
-    FireOnResize(size);
     auto context = PipelineContext::GetCurrentContext();
+    if (config.frameSizeChange) {
+        auto geometryNode = dirty->GetGeometryNode();
+        auto size = geometryNode->GetFrameSize();
+        context->AddAfterLayoutTask([weak = WeakClaim(this), size]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireOnResize(size);
+        });
+    }
     if (context && surfaceId_ != 0U && !exportTextureNode_.Invalid()) {
         context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();

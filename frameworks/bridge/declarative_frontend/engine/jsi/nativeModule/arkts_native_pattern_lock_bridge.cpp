@@ -16,7 +16,6 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
-#include "core/interfaces/native/node/api.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -32,12 +31,12 @@ ArkUINativeModuleValue PatternLockBridge::SetSideLength(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension sideLength;
     if (!(ArkTSUtils::ParseJsDimensionVp(vm, secondArg, sideLength))) {
-        GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockSideLength(nativeNode);
+        GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSideLength(nativeNode);
     }
-    GetArkUIInternalNodeAPI()->GetPatternLockModifier().SetPatternLockSideLength(
+    GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockSideLength(
         nativeNode, sideLength.Value(), static_cast<int8_t>(sideLength.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -47,8 +46,8 @@ ArkUINativeModuleValue PatternLockBridge::ResetSideLength(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockSideLength(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSideLength(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -58,12 +57,12 @@ ArkUINativeModuleValue PatternLockBridge::SetAutoReset(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     uint32_t value = 1;
     if (secondArg->IsBoolean()) {
         value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
     }
-    GetArkUIInternalNodeAPI()->GetPatternLockModifier().SetPatternLockAutoReset(nativeNode, value);
+    GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockAutoReset(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -72,8 +71,8 @@ ArkUINativeModuleValue PatternLockBridge::ResetAutoReset(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockAutoReset(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockAutoReset(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -83,12 +82,12 @@ ArkUINativeModuleValue PatternLockBridge::SetPathStrokeWidth(ArkUIRuntimeCallInf
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension strokeWidth;
     if (!(ArkTSUtils::ParseJsDimensionVp(vm, secondArg, strokeWidth))) {
-        GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockPathStrokeWidth(nativeNode);
+        GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockPathStrokeWidth(nativeNode);
     }
-    GetArkUIInternalNodeAPI()->GetPatternLockModifier().SetPatternLockPathStrokeWidth(
+    GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockPathStrokeWidth(
         nativeNode, strokeWidth.Value(), static_cast<int8_t>(strokeWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -98,8 +97,8 @@ ArkUINativeModuleValue PatternLockBridge::ResetPathStrokeWidth(ArkUIRuntimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockPathStrokeWidth(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockPathStrokeWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -109,12 +108,12 @@ ArkUINativeModuleValue PatternLockBridge::SetRegularColor(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockRegularColor(nativeNode);
+        GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockRegularColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetPatternLockModifier().SetPatternLockRegularColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockRegularColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -124,8 +123,8 @@ ArkUINativeModuleValue PatternLockBridge::ResetRegularColor(ArkUIRuntimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockRegularColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockRegularColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -135,12 +134,12 @@ ArkUINativeModuleValue PatternLockBridge::SetPathColor(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockPathColor(nativeNode);
+        GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockPathColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetPatternLockModifier().SetPatternLockPathColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockPathColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -150,8 +149,8 @@ ArkUINativeModuleValue PatternLockBridge::ResetPathColor(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockPathColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockPathColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -161,12 +160,12 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockActiveColor(ArkUIRuntime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockActiveColor(nativeNode);
+        GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetPatternLockModifier().SetPatternLockActiveColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockActiveColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -176,8 +175,8 @@ ArkUINativeModuleValue PatternLockBridge::ResetPatternLockActiveColor(ArkUIRunti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockActiveColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -187,13 +186,13 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockCircleRadius(ArkUIRuntim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension circleRadius;
     if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, circleRadius) && !(circleRadius.IsNonPositive())) {
-        GetArkUIInternalNodeAPI()->GetPatternLockModifier().SetPatternLockCircleRadius(
+        GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockCircleRadius(
             nativeNode, circleRadius.Value(), static_cast<int8_t>(circleRadius.Unit()));
     } else {
-        GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockCircleRadius(nativeNode);
+        GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockCircleRadius(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -203,8 +202,8 @@ ArkUINativeModuleValue PatternLockBridge::ResetPatternLockCircleRadius(ArkUIRunt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockCircleRadius(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockCircleRadius(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -214,12 +213,12 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockSelectedColor(ArkUIRunti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockSelectedColor(nativeNode);
+        GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSelectedColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetPatternLockModifier().SetPatternLockSelectedColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockSelectedColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -229,8 +228,8 @@ ArkUINativeModuleValue PatternLockBridge::ResetPatternLockSelectedColor(ArkUIRun
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockSelectedColor(nativeNode);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSelectedColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

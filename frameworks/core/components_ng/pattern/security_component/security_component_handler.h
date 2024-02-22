@@ -28,17 +28,17 @@ namespace OHOS::Ace::NG {
 class SecurityComponentHandler {
 public:
     static int32_t RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId);
-    static int32_t UpdateSecurityComponent(RefPtr<FrameNode>& node, int32_t scId);
-    static int32_t UnregisterSecurityComponent(int32_t scId);
-    static int32_t ReportSecurityComponentClickEvent(int32_t scId, RefPtr<FrameNode>& node, GestureEvent& event);
-    static int32_t ReportSecurityComponentClickEvent(int32_t scId, RefPtr<FrameNode>& node, const KeyEvent& event);
+    static int32_t UpdateSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId);
+    static int32_t UnregisterSecurityComponent(int32_t& scId);
+    static int32_t ReportSecurityComponentClickEvent(int32_t& scId, RefPtr<FrameNode>& node, GestureEvent& event);
+    static int32_t ReportSecurityComponentClickEvent(int32_t& scId, RefPtr<FrameNode>& node, const KeyEvent& event);
     static bool InitButtonInfo(std::string& componentInfo,
         RefPtr<FrameNode>& node, Security::SecurityComponent::SecCompType& scType);
     static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY);
     static bool GetWindowRect(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompRect& winRect);
     static OHOS::Security::SecurityComponent::SecCompUiRegister uiRegister;
     static SecurityComponentProbe probe;
-    static int32_t ReportSecurityComponentClickEventInner(int32_t scId,
+    static int32_t ReportSecurityComponentClickEventInner(int32_t& scId,
         RefPtr<FrameNode>& node, Security::SecurityComponent::SecCompClickEvent& event);
 
 private:

@@ -15,14 +15,98 @@
 
 #include "core/gestures/velocity_tracker.h"
 
-#include <chrono>
+#include <algorithm>
+#include <optional>
 
 namespace OHOS::Ace {
+namespace {
+void CheckExtremePoint(const LeastSquareImpl& axis, double extremX, uint32_t valSize)
+{
+    const auto& x = axis.GetXVals();
+    const auto& y = axis.GetYVals();
+    auto count = axis.GetTrackNum();
+
+    // filter quiver
+    if (LessNotEqual(std::fabs(y[count - 1] - y[count - 2]), 100)) { // 2: const, 100: quiver threshold
+        return;
+    }
+    // check if extrem point exists between axis's points.
+    if (GreatNotEqual(extremX, x[x.size() - valSize]) && LessNotEqual(extremX, x.back())) {
+        LOGI("Extrem point %{public}f exists between tracker points.", extremX);
+    }
+    // dump points
+    int32_t i = static_cast<int32_t>(x.size());
+    for (int32_t cnt = VelocityTracker::POINT_NUMBER; i > 0 && cnt > 0; --cnt) {
+        --i;
+        LOGI("Last tracker points[%{public}d] x=%{public}f y=%{public}f", cnt, x[i], y[i]);
+    }
+}
+
+// true for increasing, false for decreasing, nullopt for nonmonotonic
+std::optional<bool> GetMononicity(const std::vector<double>& vals, uint32_t valSize)
+{
+    std::optional<bool> compareResult;
+    for (uint32_t i = vals.size() - valSize + 1; i < vals.size(); ++i) {
+        double delta = vals[i] - vals[i - 1];
+        if (NearZero(delta)) {
+            continue;
+        }
+        bool isIncreasing = Positive(delta);
+        if (compareResult.value_or(isIncreasing) != isIncreasing) {
+            return std::nullopt;
+        }
+        compareResult = isIncreasing;
+    }
+    return compareResult;
+}
+
+inline double GetLinearSlope(const LeastSquareImpl& axis)
+{
+    const auto& x = axis.GetXVals();
+    const auto& y = axis.GetYVals();
+    auto count = axis.GetTrackNum();
+    return (y[count - 1] - y[count - 2]) / (x[count - 1] - x[count - 2]); // 2: const
+}
+
+void CorrectMonotonicAxisVelocity(const LeastSquareImpl& axis, double& v, double extremX)
+{
+    const auto& yVals = axis.GetYVals();
+    uint32_t valSize = std::min(static_cast<int32_t>(yVals.size()), VelocityTracker::POINT_NUMBER);
+    auto mononicity = GetMononicity(yVals, valSize);
+    if (!mononicity.has_value()) {
+        return;
+    }
+
+    // velocity is still, no need to do correction
+    if (mononicity.value() ? GreatOrEqual(v, 0) : LessOrEqual(v, 0)) {
+        return;
+    }
+
+    // Do correction
+    v = GetLinearSlope(axis);
+    CheckExtremePoint(axis, extremX, valSize);
+}
+
+double UpdateAxisVelocity(LeastSquareImpl& axis)
+{
+    std::vector<double> param(VelocityTracker::LEAST_SQUARE_PARAM_NUM, 0);
+    auto x = axis.GetXVals().back();
+    // curve is param[0] * x^2 + param[1] * x + param[2]
+    // the velocity is 2 * param[0] * x + param[1];
+    double velocity = 0.0;
+    if (axis.GetLeastSquareParams(param)) {
+        velocity = 2 * param[0] * x + param[1];      // 2: const of formula
+        double extremX = -0.5 * param[1] / param[0]; // 0.5: const of formula
+        CorrectMonotonicAxisVelocity(axis, velocity, extremX);
+    } else { // Use linear velocity instead
+        velocity = GetLinearSlope(axis);
+    }
+    return velocity;
+}
+} // namespace
 
 void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
 {
-    isVelocityDone_ = false;
-    currentTrackPoint_ = event;
     if (isFirstPoint_) {
         firstTrackPoint_ = event;
         isFirstPoint_ = false;
@@ -30,13 +114,26 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
         delta_ = event.GetOffset() - lastPosition_;
         lastPosition_ = event.GetOffset();
     }
+    TouchEvent lastTrackPoint(currentTrackPoint_);
+    currentTrackPoint_ = event;
+    isVelocityDone_ = false;
     std::chrono::duration<double> diffTime = event.time - lastTimePoint_;
     lastTimePoint_ = event.time;
     lastPosition_ = event.GetOffset();
     // judge duration is 500ms.
     static const double range = 0.5;
-    if (delta_.IsZero() && end && (diffTime.count() < range)) {
-        return;
+    if (end) {
+        Offset oriDelta;
+        if (isFirstPoint_) {
+            oriDelta = delta_;
+        } else {
+            Offset lastMoveEvent = Platform::GetTouchEventOriginOffset(lastTrackPoint);
+            Offset upEvent = Platform::GetTouchEventOriginOffset(event);
+            oriDelta = upEvent - lastMoveEvent;
+        }
+        if (oriDelta.IsZero() && (diffTime.count() < range)) {
+            return;
+        }
     }
     // nanoseconds duration to seconds.
     std::chrono::duration<double> duration = event.time - firstTrackPoint_.time;
@@ -76,50 +173,12 @@ void VelocityTracker::UpdateVelocity()
     if (isVelocityDone_) {
         return;
     }
-    if (xAxis_.GetXVals().empty() || yAxis_.GetXVals().empty()) {
+    if (xAxis_.GetTrackNum() < 2) { // Velocity is calculated from at least 2 points.
         return;
     }
-    // the least square method three params curve is 0 * x^3 + a2 * x^2 + a1 * x + a0
-    // the velocity is 2 * a2 * x + a1;
-    static const int32_t linearParam = 2;
-    std::vector<double> xAxis { 3, 0 };
-    auto xValue = xAxis_.GetXVals().back();
-    double xVelocity = 0.0;
-    if (xAxis_.GetLeastSquareParams(xAxis)) {
-        xVelocity = linearParam * xAxis[0] * xValue + xAxis[1];
-    }
-    std::vector<double> yAxis { 3, 0 };
-    auto yValue = yAxis_.GetXVals().back();
-    double yVelocity = 0.0;
-    if (yAxis_.GetLeastSquareParams(yAxis)) {
-        yVelocity = linearParam * yAxis[0] * yValue + yAxis[1];
-    }
 
-    if (currentTrackPoint_.type == TouchType::UP) {
-        static const int32_t minSize = 2;
-        if (yAxis_.GetYVals().size() >= minSize) {
-            auto yAxisDelta = yAxis_.GetYVals()[yAxis_.GetYVals().size() - 1] -
-                yAxis_.GetYVals()[yAxis_.GetYVals().size() - 2];
-            if (yAxisDelta > 0 && yVelocity < 0) {
-                yVelocity = 0;
-            } else if (yAxisDelta < 0 && yVelocity > 0) {
-                yVelocity = 0;
-            } else if (yAxisDelta == 0) {
-                yVelocity = 0;
-            }
-        }
-        if (xAxis_.GetYVals().size() >= minSize) {
-            auto xAxisDelta = xAxis_.GetYVals()[xAxis_.GetYVals().size() - 1] -
-                xAxis_.GetYVals()[xAxis_.GetYVals().size() - 2];
-            if (xAxisDelta > 0 && xVelocity < 0) {
-                xVelocity = 0;
-            } else if (xAxisDelta < 0 && xVelocity > 0) {
-                xVelocity = 0;
-            } else if (xAxisDelta == 0) {
-                xVelocity = 0;
-            }
-        }
-    }
+    double xVelocity = UpdateAxisVelocity(xAxis_);
+    double yVelocity = UpdateAxisVelocity(yAxis_);
     velocity_.SetOffsetPerSecond({ xVelocity, yVelocity });
     isVelocityDone_ = true;
 }

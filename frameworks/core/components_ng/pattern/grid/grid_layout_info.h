@@ -38,13 +38,14 @@ constexpr float HALF = 0.5f;
 // Try not to add more variables in [GridLayoutInfo] because the more state variables, the more problematic and the
 // harder it is to maintain
 struct GridLayoutInfo {
-    float GetTotalHeightOfItemsInView(float mainGap)
+    float GetTotalHeightOfItemsInView(float mainGap) const
     {
         float lengthOfItemsInViewport = 0.0;
         for (auto i = startMainLineIndex_; i <= endMainLineIndex_; i++) {
-            if (GreatOrEqual(lineHeightMap_[i], 0)) {
-                lengthOfItemsInViewport += (lineHeightMap_[i] + mainGap);
+            if (lineHeightMap_.find(i) == lineHeightMap_.end()) {
+                continue;
             }
+            lengthOfItemsInViewport += (lineHeightMap_.at(i) + mainGap);
         }
         return lengthOfItemsInViewport - mainGap;
     }
@@ -104,34 +105,88 @@ struct GridLayoutInfo {
         return (removeLastGap) ? totalHeight - mainGap : totalHeight;
     }
 
+    struct EndIndexInfo {
+        int32_t itemIdx = -1; /**< Index of the last item. */
+        int32_t y = -1;       /**< Main-axis position (line index) of the item. */
+        int32_t x = -1;       /**< Cross-axis position (column index) of the item. */
+    };
     /**
-     * @brief Finds the index of the last item in the grid matrix, and update startIndex_ and startMainLineIndex_ to
-     * that last item.
+     * @brief Traverse the matrix backward to find the last item index, starting from Line [endLine].
      *
+     * @param endLine index of the line to start traversing.
+     * @return last item index above endLine (inclusive) and the position it resides in.
      */
-    void UpdateStartIdxToLastItem();
+    EndIndexInfo FindEndIdx(int32_t endLine) const;
+
+    /**
+     * Checks if the item at the specified index is partially or fully above the viewport.
+     *
+     * REQUIRES: Item is between startIndex_ and endIndex_. Otherwise, the result is undefined.
+     *
+     * @param idx The index of the item.
+     * @param mainGap The gap between lines.
+     * @return True if the item is at least partially above the viewport, false otherwise.
+     */
+    bool ItemAboveViewport(int32_t idx, float mainGap) const;
+
+    /**
+     * Checks if the item at the specified index is partially or fully below the viewport.
+     *
+     * REQUIRES: Item is between startIndex_ and endIndex_. Otherwise, the result is undefined.
+     *
+     * @param idx The index of the item.
+     * @param itemHeight The number of rows the item occupies.
+     * @param mainSize The size of the viewport on the main axis.
+     * @param mainGap The gap between items in the main axis.
+     * @return True if the item is at least partially below the viewport, false otherwise.
+     */
+    bool ItemBelowViewport(int32_t idx, int32_t itemHeight, float mainSize, float mainGap) const;
+
+    /**
+     * @brief Perform a binary search to find item with [index] in the gridMatrix_.
+     *
+     * @param index target item index
+     * @return iterator to that item, or map::end if not found.
+     */
+    std::map<int32_t, std::map<int32_t, int32_t>>::const_iterator FindInMatrix(int32_t index) const;
 
     /**
      * @brief Tries to find the item between startMainLine and endMainLine.
      *
      * @param target The target item to find.
-     * @return The line index of the found item.
+     * @return The line index and column index of the found item.
      */
-    int32_t FindItemInRange(int32_t target) const;
+    std::pair<int32_t, int32_t> FindItemInRange(int32_t target) const;
 
     /**
-     * @brief clears gridMatrix_ and lineHeightMap_ starting from line [idx]
+     * @brief clears lineHeightMap_ and gridMatrix_ starting from line [idx]
      *
      * @param idx starting line index
      */
     void ClearMapsToEnd(int32_t idx);
 
     /**
-     * @brief clears gridMatrix_ and lineHeightMap_ in range [0, idx)
+     * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
      *
      * @param idx ending line index, exclusive.
      */
     void ClearMapsFromStart(int32_t idx);
+
+    /**
+     * @brief clears lineHeightMap_ starting from line [idx]
+     *
+     * @param idx starting line index
+     */
+    void ClearHeightsToEnd(int32_t idx);
+
+    /**
+     * @brief clear gridMatrix_ in range [idx, end)
+     *
+     * REQUIRES: idx and lineIdx have to match each other.
+     * @param idx item index to start clearing from.
+     * @param lineIdx already-found line index of the target item.
+     */
+    void ClearMatrixToEnd(int32_t idx, int32_t lineIdx);
 
     void ResetPositionFlags()
     {

@@ -92,7 +92,7 @@ public:
     }
 
     NavPathList GetAllCacheNodes();
-    void AddCacheNode(const std::string& name, const RefPtr<UINode>& navDestinationNode);
+    void AddCacheNode(const std::string& name, const RefPtr<UINode>& uiNode);
     RefPtr<UINode> GetFromCacheNode(NavPathList& cacheNodes, const std::string& name);
     RefPtr<UINode> GetFromCacheNode(const std::string& name);
     std::optional<std::pair<std::string, RefPtr<UINode>>> GetFromCacheNode(int32_t handle);
@@ -111,18 +111,21 @@ public:
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
+    void UpdateRemovedNavPathList();
     RefPtr<UINode> Get();
     RefPtr<UINode> Get(const std::string& name);
     RefPtr<UINode> GetFromPreBackup(const std::string& name);
     RefPtr<UINode> GetPre(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     virtual bool IsEmpty();
     virtual std::vector<std::string> GetAllPathName();
+    virtual std::vector<int32_t> GetRemoveArray();
     virtual void Pop();
     virtual void Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo = nullptr);
     virtual void Push(const std::string& name, int32_t index);
     virtual void RemoveName(const std::string& name);
     virtual void RemoveIndex(int32_t index);
     virtual void Clear();
+    virtual void ClearRemoveArray();
     virtual void UpdateReplaceValue(int32_t replaceValue) const;
     virtual int32_t GetReplaceValue() const;
     virtual RefPtr<UINode> CreateNodeByIndex(int32_t index);
@@ -149,7 +152,9 @@ public:
     virtual void OnDetachFromParent() {}
     virtual void ClearPreBuildNodeList() {}
 
-private:
+    virtual std::vector<std::string> DumpStackInfo() const;
+
+protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);

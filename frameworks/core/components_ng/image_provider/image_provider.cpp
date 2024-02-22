@@ -111,19 +111,22 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceIn
 void ImageProvider::FailCallback(const std::string& key, const std::string& errorMsg, bool sync)
 {
     auto ctxs = EndTask(key);
-    auto notifyLoadFailTask = [ctxs, errorMsg] {
-        for (auto&& it : ctxs) {
-            auto ctx = it.Upgrade();
-            if (!ctx) {
-                continue;
-            }
-            ctx->FailCallback(errorMsg);
+    for (auto&& it : ctxs) {
+        auto ctx = it.Upgrade();
+        if (!ctx) {
+            continue;
         }
-    };
-    if (sync) {
-        notifyLoadFailTask();
-    } else {
-        ImageUtils::PostToUI(std::move(notifyLoadFailTask));
+
+        if (sync) {
+            ctx->FailCallback(errorMsg);
+        } else {
+            // NOTE: contexts may belong to different arkui pipelines
+            auto notifyLoadFailTask = [ctx, errorMsg] {
+                ctx->FailCallback(errorMsg);
+            };
+
+            ImageUtils::PostToUI(std::move(notifyLoadFailTask), ctx->GetContainerId());
+        }
     }
 }
 
@@ -132,19 +135,20 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
     canvasImage->Cache(key);
     auto ctxs = EndTask(key);
     // when upload success, pass back canvasImage to LoadingContext
-    auto notifyLoadSuccess = [ctxs, canvasImage] {
-        for (auto&& it : ctxs) {
-            auto ctx = it.Upgrade();
-            if (!ctx) {
-                continue;
-            }
-            ctx->SuccessCallback(canvasImage->Clone());
+    for (auto&& it : ctxs) {
+        auto ctx = it.Upgrade();
+        if (!ctx) {
+            continue;
         }
-    };
-    if (sync) {
-        notifyLoadSuccess();
-    } else {
-        ImageUtils::PostToUI(std::move(notifyLoadSuccess));
+        if (sync) {
+            ctx->SuccessCallback(canvasImage->Clone());
+        } else {
+            // NOTE: contexts may belong to different arkui pipelines
+            auto notifyLoadSuccess = [ctx, canvasImage] {
+                ctx->SuccessCallback(canvasImage->Clone());
+            };
+            ImageUtils::PostToUI(std::move(notifyLoadSuccess), ctx->GetContainerId());
+        }
     }
 }
 
@@ -171,25 +175,30 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
         FailCallback(src.GetKey(), "Failed to build image object", sync);
         return;
     }
-    CacheImageObject(imageObj);
+
+    auto cloneImageObj = imageObj->Clone();
+
+    // ImageObject cache is only for saving image size info, clear data to save memory
+    cloneImageObj->ClearData();
+
+    CacheImageObject(cloneImageObj);
 
     auto ctxs = EndTask(src.GetKey());
     // callback to LoadingContext
-    auto notifyDataReadyTask = [ctxs, imageObj, src] {
-        for (auto&& it : ctxs) {
-            auto ctx = it.Upgrade();
-            if (!ctx) {
-                continue;
-            }
-            ctx->DataReadyCallback(imageObj);
+    for (auto&& it : ctxs) {
+        auto ctx = it.Upgrade();
+        if (!ctx) {
+            continue;
         }
-        // ImageObject cache is only for saving image size info, clear data to save memory
-        imageObj->ClearData();
-    };
-    if (sync) {
-        notifyDataReadyTask();
-    } else {
-        ImageUtils::PostToUI(std::move(notifyDataReadyTask));
+        if (sync) {
+            ctx->DataReadyCallback(imageObj);
+        } else {
+            // NOTE: contexts may belong to different arkui pipelines
+            auto notifyDataReadyTask = [ctx, imageObj, src] {
+                ctx->DataReadyCallback(imageObj);
+            };
+            ImageUtils::PostToUI(std::move(notifyDataReadyTask), ctx->GetContainerId());
+        }
     }
 }
 
@@ -240,9 +249,9 @@ void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadin
     it->second.ctxs_.erase(ctx);
 }
 
-void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctx, bool sync)
+void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync)
 {
-    if (!RegisterTask(src.GetKey(), ctx)) {
+    if (!RegisterTask(src.GetKey(), ctxWp)) {
         // task is already running, only register callbacks
         return;
     }
@@ -252,9 +261,11 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
         std::scoped_lock<std::mutex> lock(taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
-        task.Reset([src] { ImageProvider::CreateImageObjHelper(src); });
+        task.Reset([src, ctxWp] { ImageProvider::CreateImageObjHelper(src); });
         tasks_[src.GetKey()].bgTask_ = task;
-        ImageUtils::PostToBg(task);
+        auto ctx = ctxWp.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        ImageUtils::PostToBg(task, ctx->GetContainerId());
     }
 }
 
@@ -306,6 +317,7 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
     }
     auto context = ctxWp.Upgrade();
     if (context && context->Downloadable() && !obj->GetData() && context->GetStateManger()) {
+        EndTask(key);
         auto stateManager = context->GetStateManger();
         if (stateManager) {
             stateManager->SetState(ImageLoadingState::UNLOADED);
@@ -322,7 +334,9 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
         CancelableCallback<void()> task;
         task.Reset([key, obj, size, forceResize] { MakeCanvasImageHelper(obj, size, key, forceResize); });
         tasks_[key].bgTask_ = task;
-        ImageUtils::PostToBg(task);
+        auto ctx = ctxWp.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        ImageUtils::PostToBg(task, ctx->GetContainerId());
     }
 }
 

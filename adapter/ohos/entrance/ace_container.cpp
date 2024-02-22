@@ -148,6 +148,19 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
         }
     }
 }
+
+std::string EncodeBundleAndModule(const std::string& bundleName, const std::string& moduleName)
+{
+    return bundleName + " " + moduleName;
+}
+
+void DecodeBundleAndModule(const std::string& encode, std::string& bundleName, std::string& moduleName)
+{
+    std::vector<std::string> tokens;
+    StringUtils::StringSplitter(encode, ' ', tokens);
+    bundleName = tokens[0];
+    moduleName = tokens[1];
+}
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -265,6 +278,15 @@ void AceContainer::Destroy()
 {
     LOGI("AceContainer Destroy begin");
     ContainerScope scope(instanceId_);
+
+    for (auto& encode : resAdapterRecord_) {
+        std::string bundleName;
+        std::string moduleName;
+        DecodeBundleAndModule(encode, bundleName, moduleName);
+        ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName);
+    }
+    resAdapterRecord_.clear();
+
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
         RefPtr<PipelineBase> context;
@@ -936,15 +958,15 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
     container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), callback);
 }
 
-void AceContainer::SetViewNew(
-    AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow)
+UIContentErrorCode AceContainer::SetViewNew(
+    AceView* view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    CHECK_NULL_VOID(view);
+    CHECK_NULL_RETURN(view, UIContentErrorCode::NULL_POINTER);
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
+    CHECK_NULL_RETURN(taskExecutor, UIContentErrorCode::NULL_POINTER);
     AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
     if (container->isFormRender_) {
@@ -954,6 +976,8 @@ void AceContainer::SetViewNew(
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
         container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), nullptr);
     }
+
+    return UIContentErrorCode::NO_ERRORS;
 #endif
 }
 
@@ -979,32 +1003,30 @@ OHOS::AppExecFwk::Ability* AceContainer::GetAbility(int32_t instanceId)
     return container->GetAbilityInner().lock().get();
 }
 
-bool AceContainer::RunPage(
+UIContentErrorCode AceContainer::RunPage(
     int32_t instanceId, const std::string& content, const std::string& params, bool isNamedRouter)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, false);
+    CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN(front, false);
+    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
     if (isNamedRouter) {
-        front->RunPageByNamedRouter(content);
-    } else {
-        front->RunPage(content, params);
+        return front->RunPageByNamedRouter(content);
     }
-    return true;
+
+    return front->RunPage(content, params);
 }
 
-bool AceContainer::RunPage(
+UIContentErrorCode AceContainer::RunPage(
     int32_t instanceId, const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, false);
+    CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN(front, false);
-    front->RunPage(content, params);
-    return true;
+    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
+    return front->RunPage(content, params);
 }
 
 bool AceContainer::RunDynamicPage(
@@ -1386,8 +1408,8 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
     assetManagerImpl->SetLibPath("default", libPath);
 }
 
-void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width,
-    int32_t height, uint32_t windowId, UIEnvCallback callback)
+void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, float width,
+    float height, uint32_t windowId, UIEnvCallback callback)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
@@ -1677,13 +1699,14 @@ void AceContainer::SetDialogCallback(int32_t instanceId, FrontendDialogCallback 
     }
 }
 
-std::string AceContainer::RestoreRouterStack(int32_t instanceId, const std::string& contentInfo)
+std::pair<std::string, UIContentErrorCode> AceContainer::RestoreRouterStack(
+    int32_t instanceId, const std::string& contentInfo)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, "");
+    CHECK_NULL_RETURN(container, std::make_pair("", UIContentErrorCode::NULL_POINTER));
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN(front, "");
+    CHECK_NULL_RETURN(front, std::make_pair("", UIContentErrorCode::NULL_POINTER));
     return front->RestoreRouterStack(contentInfo);
 }
 
@@ -1798,6 +1821,10 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
 {
     auto context = runtimeContext_.lock();
     CHECK_NULL_RETURN(context, nullptr);
+    if (!isFormRender_ && !bundle.empty() && !module.empty()) {
+        std::string encode = EncodeBundleAndModule(bundle, module);
+        resAdapterRecord_.emplace(encode);
+    }
     return isFormRender_ ? nullptr : context->CreateModuleContext(bundle, module);
 }
 
@@ -1955,7 +1982,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     themeManager->LoadResourceThemes();
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
-    front->OnConfigurationUpdated(configuration);
+    if (!configurationChange.directionUpdate && !configurationChange.dpiUpdate) {
+        front->OnConfigurationUpdated(configuration);
+    }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
 #endif
@@ -2242,6 +2271,12 @@ bool AceContainer::IsScenceBoardWindow()
 {
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
+}
+
+bool AceContainer::IsUIExtensionWindow()
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
 }
 
 bool AceContainer::IsSceneBoardEnabled()

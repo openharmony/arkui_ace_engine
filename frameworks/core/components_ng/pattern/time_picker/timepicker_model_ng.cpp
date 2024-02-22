@@ -33,6 +33,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
+constexpr uint8_t PIXEL_ROUND = 18;
 } // namespace
 void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond)
 {
@@ -82,6 +83,94 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool h
     }
     if (!hasHourNode) {
         auto stackHourNode = CreateStackNode();
+        auto columnBlendNode = CreateColumnNode();
+        auto buttonYearNode = CreateButtonNode();
+        buttonYearNode->MountToParent(stackHourNode);
+        hourColumnNode->MountToParent(columnBlendNode);
+        columnBlendNode->MountToParent(stackHourNode);
+        auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
+        stackHourNode->MountToParent(timePickerNode);
+        hourColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
+    }
+    if (!hasMinuteNode) {
+        auto stackMinuteNode = CreateStackNode();
+        auto columnBlendNode = CreateColumnNode();
+        auto buttonYearNode = CreateButtonNode();
+        buttonYearNode->MountToParent(stackMinuteNode);
+        minuteColumnNode->MountToParent(columnBlendNode);
+        columnBlendNode->MountToParent(stackMinuteNode);
+        auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
+        stackMinuteNode->MountToParent(timePickerNode);
+        minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
+    }
+    timePickerRowPattern->SetHasSecond(hasSecond);
+    stack->Push(timePickerNode);
+}
+
+RefPtr<FrameNode> TimePickerModelNG::CreateStackNode()
+{
+    auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+}
+
+RefPtr<FrameNode> TimePickerModelNG::CreateColumnNode()
+{
+    auto columnId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, columnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+}
+
+RefPtr<FrameNode> TimePickerModelNG::CreateButtonNode()
+{
+    auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+}
+
+RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto timePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::TIME_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
+
+    uint32_t showCount = BUFFER_NODE_NUMBER;
+    auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetShowCount(showCount);
+    timePickerRowPattern->SetPickerTag(true);
+    auto hasHourNode = timePickerRowPattern->HasHourNode();
+    auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
+    auto hourId = timePickerRowPattern->GetHourId();
+    auto minuteId = timePickerRowPattern->GetMinuteId();
+
+    auto hourColumnNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, hourId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+    if (!hasHourNode) {
+        for (uint32_t index = 0; index < showCount; index++) {
+            auto textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            textNode->MountToParent(hourColumnNode);
+        }
+        hourColumnNode->MarkModifyDone();
+        timePickerRowPattern->SetColumn(hourColumnNode);
+    }
+
+    auto minuteColumnNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, minuteId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+    if (!hasMinuteNode) {
+        for (uint32_t index = 0; index < showCount; index++) {
+            auto textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            textNode->MountToParent(minuteColumnNode);
+        }
+        minuteColumnNode->MarkModifyDone();
+        timePickerRowPattern->SetColumn(minuteColumnNode);
+    }
+    if (!hasHourNode) {
+        auto stackHourNode = CreateStackNode();
         auto buttonYearNode = CreateButtonNode();
         buttonYearNode->MountToParent(stackHourNode);
         hourColumnNode->MountToParent(stackHourNode);
@@ -100,22 +189,8 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool h
         layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
     }
-    timePickerRowPattern->SetHasSecond(hasSecond);
-    stack->Push(timePickerNode);
-}
-
-RefPtr<FrameNode> TimePickerModelNG::CreateStackNode()
-{
-    auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
-    return FrameNode::GetOrCreateFrameNode(
-        V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
-}
-
-RefPtr<FrameNode> TimePickerModelNG::CreateButtonNode()
-{
-    auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
-    return FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    timePickerRowPattern->SetHasSecond(false);
+    return timePickerNode;
 }
 
 void TimePickerModelNG::SetSelectedTime(const PickerTime& value)
@@ -143,6 +218,14 @@ void TimePickerModelNG::SetWheelModeEnabled(bool wheelModeEnabled)
 void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
+void TimePickerModelNG::SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange)
+{
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -265,7 +348,7 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     if (pickerDialog.alignment.has_value()) {
         properties.alignment = pickerDialog.alignment.value();
     }
-    
+
     if (pickerDialog.backgroundColor.has_value()) {
         properties.backgroundColor = pickerDialog.backgroundColor.value();
     }
@@ -275,15 +358,6 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-    } else {
-        if (properties.alignment == DialogAlignment::DEFAULT) {
-            if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-                properties.alignment = DialogAlignment::BOTTOM;
-                properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-            } else {
-                properties.alignment = DialogAlignment::CENTER;
-            }
-        }
     }
     if (pickerDialog.offset.has_value()) {
         properties.offset = pickerDialog.offset.value();

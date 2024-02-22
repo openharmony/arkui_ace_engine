@@ -47,6 +47,7 @@
 #include "core/image/image_provider.h"
 #include "core/image/sk_image_cache.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/common/font_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
@@ -54,6 +55,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double HANGING_PERCENT = 0.8;
 constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr double CONIC_START_ANGLE = 0.0;
@@ -113,6 +115,40 @@ inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t l
 }
 } // namespace
 
+const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
+    CustomPaintPaintMethod::staticPattern[] = {
+        { "clamp",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::CLAMP, RSTileMode::CLAMP, RSSamplingOptions(), matrix);
+            } },
+        { "mirror",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::MIRROR, RSTileMode::MIRROR, RSSamplingOptions(), matrix);
+            } },
+        { "no-repeat",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::DECAL, RSTileMode::DECAL, RSSamplingOptions(), matrix);
+            } },
+        { "repeat",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::REPEAT, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
+            } },
+        { "repeat-x",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::REPEAT, RSTileMode::DECAL, RSSamplingOptions(), matrix);
+            } },
+        { "repeat-y",
+            [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
+                shaderEffect = RSShaderEffect::CreateImageShader(
+                    *image, RSTileMode::DECAL, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
+            } },
+    };
+
 void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
 {
 #ifndef USE_ROSEN_DRAWING
@@ -123,6 +159,17 @@ void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
     rsRecordingCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
     rsCanvas_ = std::static_pointer_cast<RSCanvas>(rsRecordingCanvas_);
     contentModifier_->UpdateCanvas(rsRecordingCanvas_);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto fontManager = context->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (fontManager->IsDefaultFontChanged()) {
+        CHECK_NULL_VOID(rsRecordingCanvas_);
+        rsRecordingCanvas_->SetIsCustomTextType(true);
+    } else {
+        CHECK_NULL_VOID(rsRecordingCanvas_);
+        rsRecordingCanvas_->SetIsCustomTextType(false);
+    }
 #endif
 }
 
@@ -344,7 +391,7 @@ sk_sp<SkImage> CustomPaintPaintMethod::GetImage(const std::string& src)
         return cacheImage->imagePtr;
     }
 
-    auto context = context_.Upgrade();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto image = Ace::ImageProvider::GetSkImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
@@ -363,7 +410,7 @@ std::shared_ptr<RSImage> CustomPaintPaintMethod::GetImage(const std::string& src
         return cacheImage->imagePtr;
     }
 
-    auto context = context_.Upgrade();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto image = Ace::ImageProvider::GetDrawingImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
@@ -372,60 +419,9 @@ std::shared_ptr<RSImage> CustomPaintPaintMethod::GetImage(const std::string& src
 }
 #endif
 
-#ifndef USE_ROSEN_DRAWING
-void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint)
-{
-    auto pixelMap = pattern.GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
-    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
-    sk_sp<SkImage> image;
-    image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-    CHECK_NULL_VOID(image);
-    SkMatrix* matrix = nullptr;
-    SkMatrix tempMatrix;
-    if (pattern.IsTransformable()) {
-        tempMatrix = GetMatrixFromPattern(pattern);
-        matrix = &tempMatrix;
-    }
-    static const LinearMapNode<void (*)(sk_sp<SkImage>, SkPaint&, SkMatrix*)> staticPattern[] = {
-        { "clamp",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(image->makeShader(SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions(), matrix));
-            } },
-        { "mirror",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(
-                    image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, SkSamplingOptions(), matrix));
-            } },
-        { "no-repeat",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(image->makeShader(SkTileMode::kDecal, SkTileMode::kDecal, SkSamplingOptions(), matrix));
-            } },
-        { "repeat",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(
-                    image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, SkSamplingOptions(), matrix));
-            } },
-        { "repeat-x",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(
-                    image->makeShader(SkTileMode::kRepeat, SkTileMode::kDecal, SkSamplingOptions(), matrix));
-            } },
-        { "repeat-y",
-            [](sk_sp<SkImage> image, SkPaint& paint, SkMatrix* matrix) {
-                paint.setShader(
-                    image->makeShader(SkTileMode::kDecal, SkTileMode::kRepeat, SkSamplingOptions(), matrix));
-            } },
-    };
-    auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
-    if (operatorIter != -1) {
-        staticPattern[operatorIter].value(image, paint, matrix);
-    }
-}
-#else
 void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush)
 {
+#if !defined(PREVIEW)
     auto pixelMap = pattern.GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     auto rsBitmapFormat = Ace::ImageProvider::MakeRSBitmapFormatFromPixelMap(pixelMap);
@@ -434,43 +430,14 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, RSPe
     rsBitmap->SetPixels(const_cast<void*>(reinterpret_cast<const void*>(pixelMap->GetPixels())));
     auto image = std::make_shared<RSImage>();
     CHECK_NULL_VOID(image->BuildFromBitmap(*rsBitmap));
+#else
+    auto image = GetImage(pattern.GetImgSrc());
+    CHECK_NULL_VOID(image);
+#endif
     RSMatrix matrix;
     if (pattern.IsTransformable()) {
         matrix = GetMatrixFromPattern(pattern);
     }
-    static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
-        staticPattern[] = {
-            { "clamp",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::CLAMP, RSTileMode::CLAMP, RSSamplingOptions(), matrix);
-                } },
-            { "mirror",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::MIRROR, RSTileMode::MIRROR, RSSamplingOptions(), matrix);
-                } },
-            { "no-repeat",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::DECAL, RSTileMode::DECAL, RSSamplingOptions(), matrix);
-                } },
-            { "repeat",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::REPEAT, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
-                } },
-            { "repeat-x",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::REPEAT, RSTileMode::DECAL, RSSamplingOptions(), matrix);
-                } },
-            { "repeat-y",
-                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& shaderEffect, RSMatrix& matrix) {
-                    shaderEffect = RSShaderEffect::CreateImageShader(
-                        *image, RSTileMode::DECAL, RSTileMode::REPEAT, RSSamplingOptions(), matrix);
-                } },
-        };
     auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
     if (operatorIter != -1) {
         std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
@@ -483,7 +450,6 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, RSPe
         }
     }
 }
-#endif
 
 #ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::InitPaintBlend(SkPaint& paint)
@@ -650,79 +616,50 @@ void CustomPaintPaintMethod::InitImageCallbacks()
     onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
 }
 
+void CustomPaintPaintMethod::GetSvgRect(
+    const sk_sp<SkSVGDOM>& skiaDom, const Ace::CanvasImage& canvasImage, RSRect* srcRect, RSRect* dstRect)
+{
+    switch (canvasImage.flag) {
+        case DrawImageType::THREE_PARAMS:
+            *srcRect = RSRect(0, 0, skiaDom->containerSize().width(), skiaDom->containerSize().height());
+            *dstRect = RSRect(canvasImage.dx, canvasImage.dy, skiaDom->containerSize().width() + canvasImage.dx,
+                skiaDom->containerSize().height() + canvasImage.dy);
+            break;
+        case DrawImageType::FIVE_PARAMS: {
+            *srcRect = RSRect(0, 0, skiaDom->containerSize().width(), skiaDom->containerSize().height());
+            *dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            break;
+        }
+        case DrawImageType::NINE_PARAMS: {
+            *srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
+                canvasImage.sHeight + canvasImage.sy);
+            *dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage)
 {
     // Make the ImageSourceInfo
     canvasImage_ = canvasImage;
     loadingSource_ = ImageSourceInfo(canvasImage.src);
     // get the ImageObject
+    auto context = PipelineBase::GetCurrentContext();
     if (currentSource_ != loadingSource_) {
         ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
-            failedCallback_, context_, true, true, true, onPostBackgroundTask_);
+            failedCallback_, context, true, true, true, onPostBackgroundTask_);
     }
 
     CHECK_NULL_VOID(skiaDom_);
     // draw the svg
-#ifndef USE_ROSEN_DRAWING
-    SkRect srcRect;
-    SkRect dstRect;
-    switch (canvasImage.flag) {
-        case 0:
-            srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = SkRect::MakeXYWH(
-                canvasImage.dx, canvasImage.dy, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            break;
-        case 1: {
-            srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            break;
-        }
-        case 2: {
-            srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
-            dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            break;
-        }
-        default:
-            break;
-    }
-    float scaleX = dstRect.width() / srcRect.width();
-    float scaleY = dstRect.height() / srcRect.height();
-    OffsetF offset = GetContentOffset(paintWrapper);
-    OffsetF startPoint =
-        offset + OffsetF(dstRect.left(), dstRect.top()) - OffsetF(srcRect.left() * scaleX, srcRect.top() * scaleY);
-
-    SkCanvas* skCanvas = GetRawPtrOfSkCanvas();
-    skCanvas->save();
-    skCanvas->clipRect(dstRect);
-    skCanvas->translate(startPoint.GetX(), startPoint.GetY());
-    skCanvas->scale(scaleX, scaleY);
-    skiaDom_->render(skCanvas);
-    skCanvas->restore();
-#else
     RSRect srcRect;
     RSRect dstRect;
-    switch (canvasImage.flag) {
-        case 0:
-            srcRect = RSRect(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = RSRect(canvasImage.dx, canvasImage.dy, skiaDom_->containerSize().width() + canvasImage.dx,
-                skiaDom_->containerSize().height() + canvasImage.dy);
-            break;
-        case 1: {
-            srcRect = RSRect(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
-                canvasImage.dHeight + canvasImage.dy);
-            break;
-        }
-        case 2: {
-            srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
-                canvasImage.sHeight + canvasImage.sy);
-            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
-                canvasImage.dHeight + canvasImage.dy);
-            break;
-        }
-        default:
-            break;
-    }
+    GetSvgRect(skiaDom_, canvasImage, &srcRect, &dstRect);
     float scaleX = dstRect.GetWidth() / srcRect.GetWidth();
     float scaleY = dstRect.GetHeight() / srcRect.GetHeight();
     OffsetF offset = GetContentOffset(paintWrapper);
@@ -753,7 +690,6 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
         rsCanvas->DrawSVGDOM(skiaDom_);
     }
     rsCanvas->Restore();
-#endif
 }
 
 void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, RefPtr<SvgDomBase> svgDom,
@@ -1528,23 +1464,19 @@ void CustomPaintPaintMethod::Ellipse(PaintWrapper* paintWrapper, const EllipsePa
 {
     OffsetF offset = GetContentOffset(paintWrapper);
     // Init the start and end angle, then calculated the sweepAngle.
-    double startAngle = std::fmod(param.startAngle, M_PI * 2.0);
-    double endAngle = std::fmod(param.endAngle, M_PI * 2.0);
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / M_PI;
+    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / M_PI;
     if (NearEqual(param.startAngle, param.endAngle)) {
         return; // Just return when startAngle is same as endAngle.
     }
     double rotation = param.rotation * HALF_CIRCLE_ANGLE / M_PI;
     double sweepAngle = endAngle - startAngle;
     if (param.anticlockwise) {
-        if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.
-            sweepAngle -= FULL_CIRCLE_ANGLE;
-        }
+        sweepAngle =
+            endAngle > startAngle ? (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE) : sweepAngle;
     } else {
-        if (sweepAngle < 0.0) { // Make sure the sweepAngle is positive when clockwise.
-            sweepAngle += FULL_CIRCLE_ANGLE;
-        }
+        sweepAngle =
+            endAngle > startAngle ? sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
     }
 
     // Init the oval Rect(left, top, right, bottom).
@@ -1579,12 +1511,19 @@ void CustomPaintPaintMethod::Ellipse(PaintWrapper* paintWrapper, const EllipsePa
         matrix.Rotate(-rotation, param.x + offset.GetX(), param.y + offset.GetY());
         rsPath_.Transform(matrix);
     }
-    if (NearZero(sweepAngle) && !NearZero(param.endAngle - param.startAngle)) {
-        // The entire ellipse needs to be drawn with two arcTo.
-        rsPath_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
-        rsPath_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
+    if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) ||
+        NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), FULL_CIRCLE_ANGLE)) {
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
+    } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
+        rsPath_.ArcTo(
+            point1, point2, static_cast<RSScalar>(half + half + startAngle), static_cast<RSScalar>(sweepAngle));
     } else {
-        rsPath_.ArcTo(point1, point2, startAngle, sweepAngle);
+        rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(sweepAngle));
     }
     if (!NearZero(rotation)) {
         RSMatrix matrix;
@@ -1754,7 +1693,9 @@ void CustomPaintPaintMethod::Path2DArc(const OffsetF& offset, const PathArgs& ar
         skPath2d_.arcTo(rect, startAngle, sweepAngle, false);
     }
 #else
-    if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
+    if (!NearEqual(startAngle, endAngle) &&
+        (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) ||
+         NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), FULL_CIRCLE_ANGLE))) {
         rsPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
         rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
     } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
@@ -1793,20 +1734,16 @@ void CustomPaintPaintMethod::Path2DEllipse(const OffsetF& offset, const PathArgs
     double rx = args.para3;
     double ry = args.para4;
     double rotation = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
-    double startAngle = std::fmod(args.para6, M_PI * 2.0);
-    double endAngle = std::fmod(args.para7, M_PI * 2.0);
+    double startAngle = args.para6 * HALF_CIRCLE_ANGLE / M_PI;
+    double endAngle = args.para7 * HALF_CIRCLE_ANGLE / M_PI;
     bool anticlockwise = NearZero(args.para8) ? false : true;
-    startAngle = (startAngle < 0.0 ? startAngle + M_PI * 2.0 : startAngle) * HALF_CIRCLE_ANGLE / M_PI;
-    endAngle = (endAngle < 0.0 ? endAngle + M_PI * 2.0 : endAngle) * HALF_CIRCLE_ANGLE / M_PI;
     double sweepAngle = endAngle - startAngle;
     if (anticlockwise) {
-        if (sweepAngle > 0.0) { // Make sure the sweepAngle is negative when anticlockwise.
-            sweepAngle -= FULL_CIRCLE_ANGLE;
-        }
+        sweepAngle =
+            endAngle > startAngle ? (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE) : sweepAngle;
     } else {
-        if (sweepAngle < 0.0) { // Make sure the sweepAngle is positive when clockwise.
-            sweepAngle += FULL_CIRCLE_ANGLE;
-        }
+        sweepAngle =
+            endAngle > startAngle ? sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
     }
 #ifndef USE_ROSEN_DRAWING
     auto rect = SkRect::MakeLTRB(
@@ -1838,10 +1775,14 @@ void CustomPaintPaintMethod::Path2DEllipse(const OffsetF& offset, const PathArgs
         matrix.Rotate(-rotation, x + offset.GetX(), y + offset.GetY());
         rsPath2d_.Transform(matrix);
     }
-    if (NearZero(sweepAngle) && !NearZero(args.para6 - args.para7)) {
-        // The entire ellipse needs to be drawn with two arcTo.
+    if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) ||
+        NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), FULL_CIRCLE_ANGLE)) {
         rsPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
         rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
+    } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
+        rsPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
+        rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
+        rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE + HALF_CIRCLE_ANGLE, sweepAngle);
     } else {
         rsPath2d_.ArcTo(point1, point2, startAngle, sweepAngle);
     }
@@ -2001,6 +1942,48 @@ double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<O
             break;
     }
     return x;
+}
+
+double CustomPaintPaintMethod::GetFontBaseline(
+    const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const
+{
+    switch (baseline) {
+        case TextBaseline::TOP:
+            return fontMetrics.fAscent;
+        case TextBaseline::HANGING:
+            return fontMetrics.fAscent * HANGING_PERCENT;
+        case TextBaseline::MIDDLE:
+            return fontMetrics.fAscent + fontMetrics.fDescent;
+        case TextBaseline::BOTTOM:
+        case TextBaseline::IDEOGRAPHIC:
+            return fontMetrics.fDescent;
+        case TextBaseline::ALPHABETIC:
+            return 0;
+        default:
+            break;
+    }
+    return 0;
+}
+
+double CustomPaintPaintMethod::GetFontAlign(
+    TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph) const
+{
+    TextDirection textDirection = fillState_.GetOffTextDirection();
+    switch (align) {
+        case TextAlign::LEFT:
+            return 0;
+        case TextAlign::START:
+            return (textDirection == TextDirection::LTR) ? 0.0 : paragraph->GetMaxIntrinsicWidth();
+        case TextAlign::RIGHT:
+            return paragraph->GetMaxIntrinsicWidth();
+        case TextAlign::END:
+            return (textDirection == TextDirection::LTR) ? paragraph->GetMaxIntrinsicWidth() : 0.0;
+        case TextAlign::CENTER:
+            return paragraph->GetMaxIntrinsicWidth() / 2.0;
+        default:
+            break;
+    }
+    return 0;
 }
 
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -2668,5 +2651,19 @@ void CustomPaintPaintMethod::TranslateMatrix(double tx, double ty)
     if (tx || ty) {
         matrix_.preTranslate(tx, ty);
     }
+}
+
+void CustomPaintPaintMethod::SaveLayer()
+{
+    RSBrush compositeOperationpBrush;
+    InitPaintBlend(compositeOperationpBrush);
+    auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+    RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+    rsCanvas_->SaveLayer(slo);
+}
+
+void CustomPaintPaintMethod::RestoreLayer()
+{
+    rsCanvas_->Restore();
 }
 } // namespace OHOS::Ace::NG

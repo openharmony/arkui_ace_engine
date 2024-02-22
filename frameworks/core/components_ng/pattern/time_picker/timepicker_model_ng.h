@@ -45,9 +45,12 @@ public:
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetHour24(FrameNode* frameNode, bool isUseMilitaryTime);
+    static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
+    static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
 };
 

@@ -109,8 +109,13 @@ public:
     void CloseSelectionMenu();
     void SetSelection(int32_t selectionStart, int32_t selectionEnd);
     void GetSelection(const JSCallbackInfo& args);
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
 
 private:
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     bool ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     bool IsPixelMap(const JSRef<JSVal>& jsValue);
     bool IsDrawable(const JSRef<JSVal>& jsValue);

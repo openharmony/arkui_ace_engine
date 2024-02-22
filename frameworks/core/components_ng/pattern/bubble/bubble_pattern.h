@@ -130,6 +130,10 @@ public:
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
+    bool AvoidKeyboard() const override
+    {
+        return false;
+    }
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

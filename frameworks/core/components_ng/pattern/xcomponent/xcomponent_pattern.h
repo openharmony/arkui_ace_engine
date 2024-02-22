@@ -85,6 +85,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
+        if (type_ == XComponentType::NODE) {
+            return { FocusType::SCOPE, true };
+        }
         return { FocusType::NODE, false };
     }
 
@@ -248,6 +251,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnAreaChangedInner() override;
+    void OnModifyDone() override;
 
     void InitNativeNodeCallbacks();
     void InitEvent();

@@ -46,12 +46,12 @@ public:
     MOCK_METHOD1(AddText, void(const std::u16string& text));
     MOCK_METHOD1(AddSymbol, void(const uint32_t& symbolId));
     MOCK_METHOD1(Layout, void(float width));
-    MOCK_METHOD1(GetGlyphIndexByCoordinate, int32_t(const Offset& offset));
     MOCK_METHOD1(AddPlaceholder, int32_t(const PlaceholderRun& span));
     MOCK_METHOD1(GetRectsForPlaceholders, void(std::vector<RectF>& selectedRects));
     MOCK_METHOD1(SetIndents, void(const std::vector<float>& indents));
     MOCK_METHOD1(GetCharacterWidth, float(int32_t index));
     MOCK_METHOD1(SetParagraphSymbolAnimation, void(const RefPtr<FrameNode>& frameNode));
+    MOCK_METHOD2(GetGlyphIndexByCoordinate, int32_t(const Offset& offset, bool isSelectionPos));
     MOCK_METHOD3(ComputeOffsetForCaretDownstream, bool(int32_t extent, CaretMetricsF& result,
         bool needLineHighest));
     MOCK_METHOD3(ComputeOffsetForCaretUpstream, bool(int32_t extent, CaretMetricsF& result,

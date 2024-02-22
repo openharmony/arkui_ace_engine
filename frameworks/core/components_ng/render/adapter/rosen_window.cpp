@@ -17,6 +17,7 @@
 
 #include "transaction/rs_interfaces.h"
 
+#include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/time_util.h"
@@ -45,6 +46,9 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos) {
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos] {
+            if (FrameReport::GetInstance().GetEnable()) {
+                FrameReport::GetInstance().FlushBegin();
+            }
             ContainerScope scope(id);
             // use container to get window can make sure the window is valid
             auto container = Container::Current();
@@ -57,6 +61,9 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             CHECK_NULL_VOID(pipeline);
             pipeline->OnIdle(timeStampNanos + refreshPeriod);
             JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
+            if (FrameReport::GetInstance().GetEnable()) {
+                FrameReport::GetInstance().FlushEnd();
+            }
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {

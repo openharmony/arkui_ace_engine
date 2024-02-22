@@ -61,6 +61,16 @@ public:
      */
     RangeInfo FindRangeOnJump(int32_t jumpLineIdx, float mainGap);
 
+    /**
+     * @brief Solves the forward end index for a given target length and starting line index.
+     *
+     * @param mainGap The main gap between grid items.
+     * @param targetLen The target length for the forward traversal.
+     * @param line The starting line index.
+     * @return { ending line index, ending GridItem index }
+     */
+    std::pair<int32_t, int32_t> SolveForwardForEndIdx(float mainGap, float targetLen, int32_t line);
+
 private:
     /**
      * @brief Find the starting row after offsetting by [targetLen] going forward (scrolling down).
@@ -70,16 +80,6 @@ private:
      * @param idx The index of the current starting row
      */
     StartingRowInfo SolveForward(float mainGap, float targetLen, int32_t idx);
-
-    /**
-     * @brief Solves the forward end index for a given target length and starting line index.
-     *
-     * @param mainGap The main gap between grid items.
-     * @param targetLen The target length for the forward traversal.
-     * @param idx The starting line index.
-     * @return { ending line index, ending GridItem index }
-     */
-    std::pair<int32_t, int32_t> SolveForwardForEndIdx(float mainGap, float targetLen, int32_t idx);
 
     /**
      * @brief Adds the next rows to the layout in SolveForward.

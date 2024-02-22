@@ -264,6 +264,8 @@ thread_local shared_ptr<JsRuntime> localRuntime_;
 thread_local bool isUnique_ = false;
 // ArkTsCard end
 
+thread_local bool isWorker_ = false;
+
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
@@ -330,7 +332,12 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         JsiTimerModule::GetInstance()->InitTimerModule(runtime_, global);
     }
 #endif
+    return true;
+}
 
+void JsiDeclarativeEngineInstance::InitJsObject()
+{
+    CHECK_RUN_ON(JS);
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
     if (!isModulePreloaded_ || !usingSharedRuntime_) {
         InitGlobalObjectTemplate();
@@ -383,7 +390,6 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     currentConfigResourceData_ = JsonUtil::CreateArray(true);
     frontendDelegate_->LoadResourceConfiguration(mediaResourceFileMap_, currentConfigResourceData_);
     isEngineInstanceInitialized_ = true;
-    return true;
 }
 
 bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
@@ -422,6 +428,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleWorker(void* runtime)
 
 void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
 {
+    isWorker_ = true;
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
 
     if (!sharedRuntime) {
@@ -436,6 +443,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     if (!arkRuntime->InitializeFromExistVM(vm)) {
         return;
     }
+    arkRuntime->SetNativeEngine(nativeArkEngine);
     localRuntime_ = arkRuntime;
     LocalScope scope(vm);
 
@@ -475,6 +483,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     if (!arkRuntime->InitializeFromExistVM(vm)) {
         return;
     }
+    arkRuntime->SetNativeEngine(nativeArkEngine);
     LocalScope scope(vm);
     {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
@@ -619,7 +628,7 @@ void JsiDeclarativeEngineInstance::InitJsContextModuleObject()
 void JsiDeclarativeEngineInstance::InitGlobalObjectTemplate()
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
-    JsRegisterViews(JSNApi::GetGlobalObject(runtime->GetEcmaVm()));
+    JsRegisterViews(JSNApi::GetGlobalObject(runtime->GetEcmaVm()), reinterpret_cast<void*>(nativeEngine_));
 }
 
 void JsiDeclarativeEngineInstance::InitGroupJsBridge()
@@ -779,6 +788,10 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
 
     // ArkTsCard
     if (isUnique_ && localRuntime_) {
+        return localRuntime_;
+    }
+
+    if (isWorker_ && localRuntime_) {
         return localRuntime_;
     }
 
@@ -1003,6 +1016,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
     }
     engineInstance_->SetNativeEngine(nativeEngine_);
+    engineInstance_->InitJsObject();
     if (!sharedRuntime) {
         SetPostTask(nativeEngine_);
 #if !defined(PREVIEW)
@@ -2227,7 +2241,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     }
 
     // preload js views
-    JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList);
+    JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, false, runtime);
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     PreloadAceConsole(arkRuntime, global);

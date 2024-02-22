@@ -395,7 +395,7 @@ public:
 
     void SetLayoutPriority(int32_t priority) override {}
 
-    void SetLayoutWeight(int32_t value) override
+    void SetLayoutWeight(float value) override
     {
         ViewAbstract::SetLayoutWeight(value);
     }
@@ -742,6 +742,11 @@ public:
     void SetUseShadowBatching(bool useShadowBatching) override
     {
         ViewAbstract::SetUseShadowBatching(useShadowBatching);
+    }
+
+    void SetFreeze(bool freeze) override
+    {
+        ViewAbstract::SetFreeze(freeze);
     }
 
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override
@@ -1126,6 +1131,12 @@ public:
     {
         ViewAbstract::SetKeyboardShortcut(frameNode, value, keys, std::move(onKeyboardShortcutAction));
     }
+
+    static bool GetAccessibilityGroup(FrameNode* frameNode);
+    static std::string GetAccessibilityText(FrameNode* frameNode);
+    static std::string GetAccessibilityDescription(FrameNode* frameNode);
+    static std::string GetAccessibilityImportance(FrameNode* frameNode);
+
 private:
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);

@@ -18,53 +18,53 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr double FRICTION_DEFAULT = -1.0;
-constexpr double DIMENSION_DEFAULT = 0.0;
+constexpr ArkUI_Float64 FRICTION_DEFAULT = -1.0;
+constexpr ArkUI_Float64 DIMENSION_DEFAULT = 0.0;
 }
 
-void ResetColumnsTemplate(NodeHandle node)
+void ResetColumnsTemplate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetColumnsTemplate(frameNode, "");
 }
 
-void SetColumnsTemplate(NodeHandle node, const char* value)
+void SetColumnsTemplate(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetColumnsTemplate(frameNode, value);
 }
 
-void ResetRowsTemplate(NodeHandle node)
+void ResetRowsTemplate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetRowsTemplate(frameNode, "");
 }
 
-void SetRowsTemplate(NodeHandle node, const char* value)
+void SetRowsTemplate(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetRowsTemplate(frameNode, value);
 }
 
-void ResetWaterFlowEnableScrollInteraction(NodeHandle node)
+void ResetWaterFlowEnableScrollInteraction(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetScrollEnabled(frameNode, true);
 }
 
-void SetWaterFlowEnableScrollInteraction(NodeHandle node, bool value)
+void SetWaterFlowEnableScrollInteraction(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetScrollEnabled(frameNode, value);
 }
 
-void SetColumnsGap(NodeHandle node, double value, int32_t unit, const char* calcValue)
+void SetColumnsGap(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -78,14 +78,14 @@ void SetColumnsGap(NodeHandle node, double value, int32_t unit, const char* calc
     WaterFlowModelNG::SetColumnsGap(frameNode, columnsGapDimension);
 }
 
-void ResetColumnsGap(NodeHandle node)
+void ResetColumnsGap(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetColumnsGap(frameNode, CalcDimension(DIMENSION_DEFAULT));
 }
 
-void SetRowsGap(NodeHandle node, double value, int32_t unit, const char* calcValue)
+void SetRowsGap(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -99,14 +99,14 @@ void SetRowsGap(NodeHandle node, double value, int32_t unit, const char* calcVal
     WaterFlowModelNG::SetRowsGap(frameNode, rowsGapDimension);
 }
 
-void ResetRowsGap(NodeHandle node)
+void ResetRowsGap(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetRowsGap(frameNode, CalcDimension(DIMENSION_DEFAULT));
 }
 
-void SetItemMinWidth(NodeHandle node, double value, int32_t unit, const char* calcValue)
+void SetItemMinWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -120,9 +120,9 @@ void SetItemMinWidth(NodeHandle node, double value, int32_t unit, const char* ca
     WaterFlowModelNG::SetItemMinWidth(frameNode, minWidthDimension);
 }
 
-void ResetItemMinWidth(NodeHandle node) {}
+void ResetItemMinWidth(ArkUINodeHandle node) {}
 
-void SetItemMinHeight(NodeHandle node, double value, int32_t unit, const char* calcValue)
+void SetItemMinHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -136,9 +136,9 @@ void SetItemMinHeight(NodeHandle node, double value, int32_t unit, const char* c
     WaterFlowModelNG::SetItemMinHeight(frameNode, minHeightDimension);
 }
 
-void ResetItemMinHeight(NodeHandle node) {}
+void ResetItemMinHeight(ArkUINodeHandle node) {}
 
-void SetItemMaxWidth(NodeHandle node, double value, int32_t unit, const char* calcValue)
+void SetItemMaxWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -152,9 +152,9 @@ void SetItemMaxWidth(NodeHandle node, double value, int32_t unit, const char* ca
     WaterFlowModelNG::SetItemMaxWidth(frameNode, maxWidthDimension);
 }
 
-void ResetItemMaxWidth(NodeHandle node) {}
+void ResetItemMaxWidth(ArkUINodeHandle node) {}
 
-void SetItemMaxHeight(NodeHandle node, double value, int32_t unit, const char* calcValue)
+void SetItemMaxHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -168,23 +168,23 @@ void SetItemMaxHeight(NodeHandle node, double value, int32_t unit, const char* c
     WaterFlowModelNG::SetItemMaxHeight(frameNode, maxHeightDimension);
 }
 
-void ResetItemMaxHeight(NodeHandle node) {}
+void ResetItemMaxHeight(ArkUINodeHandle node) {}
 
-void SetLayoutDirection(NodeHandle node, int32_t direction)
+void SetLayoutDirection(ArkUINodeHandle node, ArkUI_Int32 direction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetLayoutDirection(frameNode, static_cast<FlexDirection>(direction));
 }
 
-void ResetLayoutDirection(NodeHandle node)
+void ResetLayoutDirection(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetLayoutDirection(frameNode, FlexDirection::COLUMN);
 }
 
-void SetWaterFlowNestedScroll(NodeHandle node, int32_t scrollForward, int32_t scrollBackward)
+void SetWaterFlowNestedScroll(ArkUINodeHandle node, ArkUI_Int32 scrollForward, ArkUI_Int32 scrollBackward)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -197,7 +197,7 @@ void SetWaterFlowNestedScroll(NodeHandle node, int32_t scrollForward, int32_t sc
     WaterFlowModelNG::SetNestedScroll(frameNode, nestedOpt);
 }
 
-void ResetWaterFlowNestedScroll(NodeHandle node)
+void ResetWaterFlowNestedScroll(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -208,23 +208,24 @@ void ResetWaterFlowNestedScroll(NodeHandle node)
     WaterFlowModelNG::SetNestedScroll(frameNode, nestedOpt);
 }
 
-void SetWaterFlowFriction(NodeHandle node, double friction)
+void SetWaterFlowFriction(ArkUINodeHandle node, ArkUI_Float32 friction)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFriction(frameNode, friction);
 }
 
-void ResetWaterFlowFriction(NodeHandle node)
+void ResetWaterFlowFriction(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFriction(frameNode, FRICTION_DEFAULT);
 }
 
-ArkUIWaterFlowModifierAPI GetWaterFlowModifier()
+namespace NodeModifier {
+const ArkUIWaterFlowModifier* GetWaterFlowModifier()
 {
-    static const ArkUIWaterFlowModifierAPI modifier = {
+    static const ArkUIWaterFlowModifier modifier = {
         ResetColumnsTemplate,
         SetColumnsTemplate,
         ResetRowsTemplate,
@@ -250,6 +251,7 @@ ArkUIWaterFlowModifierAPI GetWaterFlowModifier()
         SetWaterFlowFriction,
         ResetWaterFlowFriction,
     };
-    return modifier;
+    return &modifier;
 }
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

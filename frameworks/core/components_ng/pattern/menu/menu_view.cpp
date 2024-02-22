@@ -20,7 +20,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -154,6 +153,24 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     return scroll;
 }
 
+void MountScrollToMenu(
+    const RefPtr<UINode>& customNode, RefPtr<FrameNode> scroll, MenuType type, RefPtr<FrameNode> menuNode)
+{
+    auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
+    if (customMenuNode) {
+        customMenuNode->SetDraggable(false);
+        auto menuLayoutProperty = customMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+        auto renderContext = scroll->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (menuLayoutProperty && menuLayoutProperty->HasBorderRadius()) {
+            BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
+            renderContext->UpdateBorderRadius(borderRadius);
+        }
+    }
+    scroll->MountToParent(menuNode);
+    scroll->MarkModifyDone();
+}
+
 void OptionKeepMenu(RefPtr<FrameNode>& option, WeakPtr<FrameNode>& menuWeak)
 {
     auto pattern = option->GetPattern<OptionPattern>();
@@ -179,8 +196,20 @@ OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
     return OffsetF(offsetX, offsetY);
 }
 
-void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, float scaleBefore, float scaleAfter)
+RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuNode)
 {
+    CHECK_NULL_RETURN(menuNode, nullptr);
+    auto menuHostNode = menuNode->GetChildByIndex(0)->GetHostNode();
+    CHECK_NULL_RETURN(menuHostNode, nullptr);
+    return menuHostNode->GetPattern<MenuPattern>();
+}
+
+void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
+{
+    auto menuPattern = GetMenuPattern(menuNode);
+    CHECK_NULL_VOID(menuPattern);
+    auto scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
+    auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->SetClipToBounds(true);
@@ -193,9 +222,6 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, float scaleBefore
         LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
     auto previewAfterAnimationScale =
         LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
-    auto springMotionResponse = menuTheme->GetSpringMotionResponse();
-    auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
-    auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
 
     imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
     auto shadow = imageContext->GetBackShadow();
@@ -204,7 +230,8 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, float scaleBefore
     }
 
     AnimationOption scaleOption = AnimationOption();
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(
+        menuTheme->GetSpringMotionResponse(), menuTheme->GetSpringMotionDampingFraction());
     scaleOption.SetCurve(motion);
     AnimationUtils::Animate(
         scaleOption,
@@ -218,6 +245,7 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, float scaleBefore
     AnimationOption option;
     option.SetDuration(menuTheme->GetPreviewAnimationDuration());
     option.SetCurve(Curves::SHARP);
+    auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
     AnimationUtils::Animate(
         option,
         [imageContext, previewBorderRadius, shadow]() mutable {
@@ -263,8 +291,7 @@ void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameN
     gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
-void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuNode,
-    float scaleBefore, float scaleAfter)
+void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuNode)
 {
     CHECK_NULL_VOID(target);
     auto eventHub = target->GetEventHub<NG::EventHub>();
@@ -298,7 +325,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(offsetX), Dimension(offsetY)));
     imageNode->MarkModifyDone();
     imageNode->MountToParent(menuNode);
-    ShowPixelMapAnimation(imageNode, scaleBefore, scaleAfter);
+    ShowPixelMapAnimation(imageNode, menuNode);
 }
 
 void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
@@ -350,7 +377,7 @@ void SetFilter(const RefPtr<FrameNode>& targetNode)
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
         bool isBindOverlayValue = targetNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
         CHECK_NULL_VOID(isBindOverlayValue && (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-            SystemProperties::GetDeviceType() == DeviceType::TABLET));
+                                                  SystemProperties::GetDeviceType() == DeviceType::TABLET));
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -377,15 +404,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     MenuType type, const MenuParam& menuParam)
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
-    auto menuNodeRenderContext = menuNode->GetRenderContext();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        menuNodeRenderContext->IsUniRenderEnabled()) {
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = static_cast<BlurStyle>(
-            menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
-        menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
-        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
-    }
+    UpdateMenuBackgroundStyle(menuNode, menuParam);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     if (!menuParam.title.empty()) {
@@ -446,15 +465,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 {
     auto type = menuParam.type;
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type, previewCustomNode);
-    auto menuNodeRenderContext = menuNode->GetRenderContext();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        menuNodeRenderContext->IsUniRenderEnabled()) {
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = static_cast<BlurStyle>(
-            menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
-        menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
-        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
-    }
+    UpdateMenuBackgroundStyle(menuNode, menuParam);
     auto pattern = menuNode->GetPattern<MenuPattern>();
     if (pattern) {
         pattern->SetPreviewMode(menuParam.previewMode);
@@ -464,28 +475,8 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     // put custom node in a scroll to limit its height
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
+    MountScrollToMenu(customNode, scroll, type, menuNode);
 
-    auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
-    if (customMenuNode) {
-        customMenuNode->SetDraggable(false);
-        auto menuLayoutProperty = customMenuNode->GetLayoutProperty<MenuLayoutProperty>();
-        auto renderContext = scroll->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, nullptr);
-        if (menuLayoutProperty && menuLayoutProperty->HasBorderRadius()) {
-            BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
-            renderContext->UpdateBorderRadius(borderRadius);
-        }
-    }
-    if (type == MenuType::SELECT_OVERLAY_CUSTOM_MENU) {
-        BorderRadiusProperty borderRadiusProperty;
-        borderRadiusProperty.SetRadius(0.0_vp);
-        scroll->GetRenderContext()->UpdateBorderRadius(borderRadiusProperty);
-        scroll->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-        menuNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-        menuNode->GetRenderContext()->UpdateBackShadow(ShadowConfig::NoneShadow);
-    }
-    scroll->MountToParent(menuNode);
-    scroll->MarkModifyDone();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         UpdateMenuBorderEffect(menuNode);
     }
@@ -510,8 +501,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
         SetFilter(targetNode);
         if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
-            SetPixelMap(targetNode, wrapperNode,
-                menuParam.previewAnimationOptions.scaleFrom, menuParam.previewAnimationOptions.scaleTo);
+            SetPixelMap(targetNode, wrapperNode);
         }
     }
     return wrapperNode;
@@ -607,7 +597,7 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         outerWidthProp.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
         renderContext->SetOuterBorderStyle(styleProp);
         renderContext->SetOuterBorderColor(outerColorProp);
-        renderContext->SetOuterBorderRadius(outerRadiusProp);
+        renderContext->UpdateOuterBorderRadius(outerRadiusProp);
         renderContext->SetOuterBorderWidth(outerWidthProp);
         BorderColorProperty innerColorProp;
         innerColorProp.SetColor(menuTheme->GetInnerBorderColor());
@@ -617,8 +607,20 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         innerWidthProp.SetBorderWidth(Dimension(menuTheme->GetInnerBorderWidth()));
         renderContext->SetBorderStyle(styleProp);
         renderContext->SetBorderColor(innerColorProp);
-        renderContext->SetBorderRadius(innerRadiusProp);
+        renderContext->UpdateBorderRadius(innerRadiusProp);
         renderContext->SetBorderWidth(innerWidthProp);
+    }
+}
+void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    auto menuNodeRenderContext = menuNode->GetRenderContext();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        menuNodeRenderContext->IsUniRenderEnabled()) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = static_cast<BlurStyle>(
+            menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
+        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
     }
 }
 } // namespace OHOS::Ace::NG

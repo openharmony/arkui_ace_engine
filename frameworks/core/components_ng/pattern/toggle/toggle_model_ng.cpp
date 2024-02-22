@@ -35,6 +35,8 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr uint32_t DEFAULT_COLOR = 0xffffffff;
+
 void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -516,4 +518,21 @@ void ToggleModelNG::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEf
     }
     NG::ViewAbstract::SetHoverEffect(frameNode, hoverEffect);
 }
+
+Color ToggleModelNG::GetSelectedColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SwitchPaintProperty, SelectedColor, value, frameNode, Color(DEFAULT_COLOR));
+    return value;
+}
+
+Color ToggleModelNG::GetSwitchPointColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SwitchPaintProperty, SwitchPointColor, value, frameNode, Color(DEFAULT_COLOR));
+    return value;
+}
+
 } // namespace OHOS::Ace::NG

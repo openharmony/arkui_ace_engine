@@ -136,7 +136,7 @@ void XComponentPattern::Initialize(int32_t instanceId)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    instanceId_ = (instanceId <= 0) ? Container::CurrentId() : instanceId;
+    instanceId_ = (instanceId <= 0) ? Container::CurrentIdSafely() : instanceId;
     auto renderContext = host->GetRenderContext();
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         renderContext->SetClipToFrame(true);
@@ -179,13 +179,24 @@ void XComponentPattern::Initialize(int32_t instanceId)
             InitNativeNodeCallbacks();
         }
     }
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 }
 
 void XComponentPattern::OnAttachToFrameNode()
 {
-    instanceId_ = Container::CurrentId();
+    instanceId_ = Container::CurrentIdSafely();
     Initialize(instanceId_);
+}
+
+void XComponentPattern::OnModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto bkColor = renderContext->GetBackgroundColor();
+    if (bkColor.has_value() && handlingSurfaceRenderContext_) {
+        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
 }
 
 void XComponentPattern::OnAreaChangedInner()
@@ -433,6 +444,7 @@ void XComponentPattern::InitNativeNodeCallbacks()
     nativeXComponentImpl_->registerContaner(AceType::RawPtr(host));
 
     auto OnAttachRootNativeNode = [](void* container, void* root) {
+        ContainerScope scope(Container::CurrentIdSafely());
         auto node = AceType::Claim(reinterpret_cast<NG::FrameNode*>(root));
         CHECK_NULL_VOID(node);
         auto host = AceType::Claim(reinterpret_cast<NG::FrameNode*>(container));
@@ -442,6 +454,7 @@ void XComponentPattern::InitNativeNodeCallbacks()
     };
 
     auto OnDetachRootNativeNode = [](void* container, void* root) {
+        ContainerScope scope(Container::CurrentIdSafely());
         auto node = AceType::Claim(reinterpret_cast<NG::FrameNode*>(root));
         CHECK_NULL_VOID(node);
         auto host = AceType::Claim(reinterpret_cast<NG::FrameNode*>(container));

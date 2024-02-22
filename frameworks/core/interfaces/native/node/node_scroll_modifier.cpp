@@ -32,13 +32,10 @@ constexpr double FRICTION_DEFAULT = 0.6;
 constexpr double DEFAULT_DIMENSION_VALUE = 0.0;
 constexpr double DEFAULT_SCROLLBARWIDTH_VALUE = 4.0;
 constexpr int32_t PARAM_SIZE = 4;
-constexpr int32_t SCROLL_TO_INDEX_0 = 0;
-constexpr int32_t SCROLL_TO_INDEX_1 = 1;
-constexpr int32_t SCROLL_TO_INDEX_2 = 2;
-constexpr int32_t SCROLL_TO_INDEX_3 = 3;
-constexpr int32_t SCROLL_TO_INDEX_4 = 4;
-constexpr int32_t SCROLL_TO_INDEX_5 = 5;
-constexpr int32_t SCROLL_TO_INDEX_6 = 6;
+constexpr float DEFAULT_OFFSET_VALUE = 0.0;
+
+constexpr int32_t EDGE_NONE = -1;
+
 const std::vector<RefPtr<Curve>> CurvesVector = { Curves::LINEAR, Curves::EASE, Curves::EASE_IN,
     Curves::EASE_OUT, Curves::EASE_IN_OUT, Curves::FAST_OUT_SLOW_IN, Curves::LINEAR_OUT_SLOW_IN,
     Curves::FAST_OUT_LINEAR_IN, Curves::EXTREME_DECELERATION, Curves::SHARP, Curves::RHYTHM,
@@ -258,13 +255,13 @@ void ResetEnableScrollInteraction(ArkUINodeHandle node) {}
 void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32* values)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    RefPtr<ScrollControllerBase> scrollControllerBase =  ScrollModelNG::GetOrCreateController(frameNode);
+    RefPtr<ScrollControllerBase> scrollControllerBase = ScrollModelNG::GetOrCreateController(frameNode);
 
-    Dimension xOffset(values[SCROLL_TO_INDEX_0], static_cast<OHOS::Ace::DimensionUnit>(values[SCROLL_TO_INDEX_1]));
-    Dimension yOffset(values[SCROLL_TO_INDEX_2], static_cast<OHOS::Ace::DimensionUnit>(values[SCROLL_TO_INDEX_3]));
-    float duration = values[SCROLL_TO_INDEX_4];
-    RefPtr<Curve> curve = CurvesVector[static_cast<int>(values[SCROLL_TO_INDEX_5])];
-    auto smooth = static_cast<bool>(values[SCROLL_TO_INDEX_6]);
+    Dimension xOffset(values[0], static_cast<OHOS::Ace::DimensionUnit>(values[1]));
+    Dimension yOffset(values[2], static_cast<OHOS::Ace::DimensionUnit>(values[3]));
+    float duration = values[4];
+    RefPtr<Curve> curve = CurvesVector[static_cast<int>(values[5])];
+    auto smooth = static_cast<bool>(values[6]);
     auto direction = scrollControllerBase->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
     scrollControllerBase->AnimateTo(position, duration, curve, smooth);
@@ -278,6 +275,16 @@ void SetScrollEdge(ArkUINodeHandle node, ArkUI_Int32 value)
     scrollControllerBase->ScrollToEdge(static_cast<ScrollEdgeType>(value), true);
 }
 
+void ResetScrollTo(ArkUINodeHandle node)
+{
+    std::vector<float> values = { DEFAULT_OFFSET_VALUE, DEFAULT_OFFSET_VALUE };
+    SetScrollTo(node, values.data());
+}
+
+void ResetScrollEdge(ArkUINodeHandle node)
+{
+    SetScrollEdge(node, DEFAULT_SNAP_ALIGN_VALUE);
+}
 void SetScrollEnablePaging(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -292,6 +299,36 @@ void ResetScrollEnablePaging(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
 
     ScrollModelNG::SetEnablePaging(frameNode, false);
+}
+
+void GetScrollNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NestedScrollOptions options = ScrollModelNG::GetNestedScroll(frameNode);
+    values[0] = static_cast<ArkUI_Int32>(options.forward);
+    values[1] = static_cast<ArkUI_Int32>(options.backward);
+}
+
+void GetScrollOffset(ArkUINodeHandle node, ArkUI_Float32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<ScrollControllerBase> scrollControllerBase = ScrollModelNG::GetOrCreateController(frameNode);
+    Offset offset = scrollControllerBase->GetCurrentOffset();
+    values[0] = offset.GetX();
+    values[1] = offset.GetY();
+}
+
+ArkUI_Int32 GetScrollEdge(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, EDGE_NONE);
+    ScrollEdgeType type = ScrollModelNG::GetOnScrollEdge(frameNode);
+    if (type == ScrollEdgeType::SCROLL_NONE) {
+        return EDGE_NONE;
+    }
+    return static_cast<ArkUI_Int32>(type);
 }
 
 } // namespace
@@ -323,8 +360,13 @@ const ArkUIScrollModifier* GetScrollModifier()
         ResetEnableScrollInteraction,
         SetScrollTo,
         SetScrollEdge,
+        ResetScrollTo,
+        ResetScrollEdge,
         SetScrollEnablePaging,
         ResetScrollEnablePaging,
+        GetScrollNestedScroll,
+        GetScrollOffset,
+        GetScrollEdge,
     };
     /* clang-format on */
     return &modifier;

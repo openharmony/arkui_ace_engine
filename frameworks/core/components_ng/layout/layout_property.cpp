@@ -124,6 +124,7 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
     json->Put("visibility", VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str());
     json->Put("direction", TextDirectionToString(GetLayoutDirection()).c_str());
+    json->Put("pixelRound", PixelRoundToJsonValue().c_str());
 }
 
 void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -141,6 +142,40 @@ void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     }
     UpdateVisibility(StringToVisibleType(json->GetString("visibility")));
     UpdateLayoutDirection(StringToTextDirection(json->GetString("direction")));
+}
+
+const std::string LayoutProperty::PixelRoundToJsonValue() const
+{
+    auto res = JsonUtil::Create(true);
+    if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START)) {
+        res->Put("start", "PixelRoundCalcPolicy.FORCE_CEIL");
+    } else if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START)) {
+        res->Put("start", "PixelRoundCalcPolicy.FORCE_FLOOR");
+    } else {
+        res->Put("start", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
+    }
+    if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP)) {
+        res->Put("top", "PixelRoundCalcPolicy.FORCE_CEIL");
+    } else if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP)) {
+        res->Put("top", "PixelRoundCalcPolicy.FORCE_FLOOR");
+    } else {
+        res->Put("top", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
+    }
+    if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END)) {
+        res->Put("end", "PixelRoundCalcPolicy.FORCE_CEIL");
+    } else if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END)) {
+        res->Put("end", "PixelRoundCalcPolicy.FORCE_FLOOR");
+    } else {
+        res->Put("end", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
+    }
+    if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM)) {
+        res->Put("bottom", "PixelRoundCalcPolicy.FORCE_CEIL");
+    } else if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM)) {
+        res->Put("bottom", "PixelRoundCalcPolicy.FORCE_FLOOR");
+    } else {
+        res->Put("bottom", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
+    }
+    return res->ToString();
 }
 
 RefPtr<LayoutProperty> LayoutProperty::Clone() const
@@ -399,7 +434,7 @@ void LayoutProperty::CheckSelfIdealSize(const LayoutConstraintF& parentConstrain
         layoutConstraint_->selfIdealSize.UpdateWidthWhenSmaller(maxSize);
         if (GreatNotEqual(maxSize.Width(), 0.0f) && GreatOrEqual(maxSize.Width(), minSize.Width())) {
             layoutConstraint_->UpdateMaxWidthWithCheck(maxSize);
-        } else if (LessNotEqual(maxSize.Width(), minSize.Width())) {
+        } else if (GreatNotEqual(maxSize.Width(), 0.0f) && LessNotEqual(maxSize.Width(), minSize.Width())) {
             layoutConstraint_->maxSize.SetWidth(minSize.Width());
         } else {
             layoutConstraint_->maxSize.SetWidth(originMax.Width());
@@ -407,7 +442,7 @@ void LayoutProperty::CheckSelfIdealSize(const LayoutConstraintF& parentConstrain
         layoutConstraint_->selfIdealSize.UpdateHeightWhenSmaller(maxSize);
         if (GreatNotEqual(maxSize.Height(), 0.0f) && GreatOrEqual(maxSize.Height(), minSize.Height())) {
             layoutConstraint_->UpdateMaxHeightWithCheck(maxSize);
-        } else if (LessNotEqual(maxSize.Height(), minSize.Height())) {
+        } else if (GreatNotEqual(maxSize.Height(), 0.0f) && LessNotEqual(maxSize.Height(), minSize.Height())) {
             layoutConstraint_->maxSize.SetHeight(minSize.Height());
         } else {
             layoutConstraint_->maxSize.SetHeight(originMax.Height());
@@ -944,6 +979,15 @@ void LayoutProperty::UpdateChainStyle(const ChainInfo& chainInfo)
 {
     if (!flexItemProperty_) {
         flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
+    if (!chainInfo.direction.has_value()) {
+        ChainInfo nullChainInfo;
+        if (flexItemProperty_->UpdateHorizontalChainStyle(nullChainInfo)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+        if (flexItemProperty_->UpdateVerticalChainStyle(nullChainInfo)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
     }
     if (chainInfo.direction == LineDirection::HORIZONTAL) {
         if (flexItemProperty_->UpdateHorizontalChainStyle(chainInfo)) {

@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 using namespace OHOS::NWeb;
-class WebJavaScriptExecuteCallBack : public OHOS::NWeb::NWebValueCallback<std::shared_ptr<NWebMessage>> {
+class WebJavaScriptExecuteCallBack : public OHOS::NWeb::NWebMessageValueCallback {
 public:
     WebJavaScriptExecuteCallBack() = delete;
     explicit WebJavaScriptExecuteCallBack(int32_t instanceId) : instanceId_(instanceId) {}
@@ -43,7 +43,7 @@ public:
     int32_t instanceId_;
 };
 
-class WebMessageValueCallBackImpl : public OHOS::NWeb::NWebValueCallback<std::shared_ptr<NWebMessage>> {
+class WebMessageValueCallBackImpl : public OHOS::NWeb::NWebMessageValueCallback {
 public:
     WebMessageValueCallBackImpl() = delete;
     explicit WebMessageValueCallBackImpl(int32_t instanceId) : instanceId_(instanceId) {}

@@ -20,17 +20,22 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
+#include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
+#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -44,6 +49,7 @@
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -158,6 +164,7 @@ void* createColumnNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ColumnModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
+    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createColumnNode: frameNode %{public}p", AceType::RawPtr(frameNode));
     return AceType::RawPtr(frameNode);
 }
 
@@ -182,10 +189,34 @@ void* createListItemNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
-void* createRefreshode(ArkUI_Int32 nodeId)
+void* createRefreshNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = RefreshModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createRootNode(ArkUI_Int32 nodeId)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    RefPtr<PipelineBase> pipeline;
+    pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(context, nullptr);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, nullptr);
+    auto stageNode = stageManager->GetStageNode();
+    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createRootNode: stageNode %{public}p", AceType::RawPtr(stageNode));
+    return AceType::RawPtr(stageNode);
+}
+
+void* createComponentRootNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CommonViewModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createComponentRootNode: frameNode %{public}p", AceType::RawPtr(frameNode));
     return AceType::RawPtr(frameNode);
 }
 
@@ -201,6 +232,41 @@ void* createXComponentNode(ArkUI_Int32 nodeId)
 void* createListItemGroupNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ListItemGroupModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createSliderNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SliderModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createDatePickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = DatePickerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTimePickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TimePickerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTextPickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createCalendarPickerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CalendarPickerModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -232,7 +298,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr,
         nullptr,
         nullptr,
-        nullptr,
+        createSliderNode,
         nullptr,
         nullptr,
         nullptr,
@@ -242,12 +308,17 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr,
 #endif
         nullptr,
-        createRefreshode,
-        nullptr,
-        nullptr,
+        createRefreshNode,
+        createRootNode,
+        createComponentRootNode,
         nullptr,
         nullptr,
         createListItemGroupNode,
+        createDatePickerNode,
+        createTimePickerNode,
+        createTextPickerNode,
+        createCalendarPickerNode,
+        nullptr, // GridItem
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);

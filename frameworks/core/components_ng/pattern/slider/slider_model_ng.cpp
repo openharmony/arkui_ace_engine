@@ -25,6 +25,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+const float DEFAULT_STEP = 1.0f;
+const float DEFAULT_MIN_VALUE = 0.0f;
+const float DEFAULT_MAX_VALUE = 100.0f;
+constexpr uint32_t BLOCK_COLOR = 0xffffffff;
+constexpr uint32_t TRACK_COLOR = 0x19182431;
+constexpr uint32_t SELECTED_COLOR = 0xff007dff;
+
 void SliderModelNG::Create(float value, float step, float min, float max)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -393,5 +400,170 @@ void SliderModelNG::ResetBlockImage(FrameNode* frameNode)
         SliderPaintProperty, BlockImageBundleName, PROPERTY_UPDATE_RENDER, frameNode);
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
         SliderPaintProperty, BlockImageModuleName, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+RefPtr<FrameNode> SliderModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SLIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SliderPattern>(); });
+
+    SetMinLabel(AceType::RawPtr(frameNode), DEFAULT_MIN_VALUE);
+    SetMaxLabel(AceType::RawPtr(frameNode), DEFAULT_MAX_VALUE);
+    SetStep(AceType::RawPtr(frameNode), DEFAULT_STEP);
+    SetSliderValue(AceType::RawPtr(frameNode), DEFAULT_MIN_VALUE);
+
+    return frameNode;
+}
+
+void SliderModelNG::SetOnChange(FrameNode* frameNode, SliderOnChangeEvent&& eventOnChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(eventOnChange));
+}
+
+void SliderModelNG::SetSliderValue(FrameNode* frameNode, float value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateValue(value);
+}
+
+void SliderModelNG::SetMinLabel(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Min, value, frameNode);
+}
+void SliderModelNG::SetMaxLabel(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Max, value, frameNode);
+}
+
+void SliderModelNG::SetSliderMode(FrameNode* frameNode, const SliderMode& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, SliderMode, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SliderMode, value, frameNode);
+}
+void SliderModelNG::SetDirection(FrameNode* frameNode, Axis value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Direction, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Direction, value, frameNode);
+}
+void SliderModelNG::SetReverse(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Reverse, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Reverse, value, frameNode);
+}
+void SliderModelNG::SetStep(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Step, value, frameNode);
+}
+
+Color SliderModelNG::GetBlockColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, BlockColor, value, frameNode, Color(BLOCK_COLOR));
+    return value;
+}
+
+Color SliderModelNG::GetTrackBackgroundColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, TrackBackgroundColor, value, frameNode, Color(TRACK_COLOR));
+    return value;
+}
+
+Color SliderModelNG::GetSelectColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, SelectColor, value, frameNode, Color(SELECTED_COLOR));
+    return value;
+}
+
+bool SliderModelNG::GetShowSteps(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, ShowSteps, value, frameNode, false);
+    return value;
+}
+
+SliderModel::BlockStyleType SliderModelNG::GetBlockType(FrameNode* frameNode)
+{
+    SliderModel::BlockStyleType value = SliderModel::BlockStyleType::DEFAULT;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, BlockType, value, frameNode, SliderModel::BlockStyleType::DEFAULT);
+    return value;
+}
+
+float SliderModelNG::GetSliderValue(FrameNode* frameNode)
+{
+    float value = DEFAULT_MIN_VALUE;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, Value, value, frameNode, DEFAULT_MIN_VALUE);
+    return value;
+}
+
+float SliderModelNG::GetMinLabel(FrameNode* frameNode)
+{
+    float value = DEFAULT_MIN_VALUE;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, Min, value, frameNode, DEFAULT_MIN_VALUE);
+    return value;
+}
+float SliderModelNG::GetMaxLabel(FrameNode* frameNode)
+{
+    float value = DEFAULT_MAX_VALUE;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, Max, value, frameNode, DEFAULT_MAX_VALUE);
+    return value;
+}
+
+SliderModel::SliderMode SliderModelNG::GetSliderMode(FrameNode* frameNode)
+{
+    SliderModel::SliderMode value = SliderModel::SliderMode::OUTSET;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, SliderMode, value, frameNode, SliderModel::SliderMode::OUTSET);
+    return value;
+}
+OHOS::Ace::Axis SliderModelNG::GetDirection(FrameNode* frameNode)
+{
+    OHOS::Ace::Axis value = OHOS::Ace::Axis::HORIZONTAL;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, Direction, value, frameNode, OHOS::Ace::Axis::HORIZONTAL);
+    return value;
+}
+bool SliderModelNG::GetReverse(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, Reverse, value, frameNode, false);
+    return value;
+}
+float SliderModelNG::GetStep(FrameNode* frameNode)
+{
+    float value = DEFAULT_STEP;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, Step, value, frameNode, DEFAULT_STEP);
+    return value;
+}
+
+std::string SliderModelNG::GetBlockImageValue(FrameNode* frameNode)
+{
+    std::string value = "";
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, BlockImage, value, frameNode, value);
+    return value;
+}
+
+RefPtr<BasicShape> SliderModelNG::GetBlockShape(FrameNode* frameNode)
+{
+    RefPtr<BasicShape> value = AceType::MakeRefPtr<BasicShape>();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SliderPaintProperty, BlockShape, value, frameNode, value);
+    return value;
 }
 } // namespace OHOS::Ace::NG

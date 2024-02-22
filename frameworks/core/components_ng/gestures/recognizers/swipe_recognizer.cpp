@@ -71,7 +71,6 @@ void SwipeRecognizer::OnAccepted()
 
 void SwipeRecognizer::OnRejected()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe gesture has been rejected");
     refereeState_ = RefereeState::FAIL;
 }
 
@@ -85,6 +84,11 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 
     if (direction_.type == SwipeDirection::NONE) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+
+    if (!IsInAttachedNode(event)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -128,12 +132,7 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if ((refereeState_ == RefereeState::DETECTING) || (refereeState_ == RefereeState::PENDING)) {
-        PointF curPoint(event.x, event.y);
-        PointF downPoint(downEvents_[event.id].x, downEvents_[event.id].y);
-        NGGestureRecognizer::Transform(curPoint, GetAttachedNode());
-        NGGestureRecognizer::Transform(downPoint, GetAttachedNode());
-
-        Offset offset(curPoint.GetX() - downPoint.GetX(), curPoint.GetY() - downPoint.GetY());
+        auto offset = event.GetOffset() - downEvents_[event.id].GetOffset();
         // nanoseconds duration to seconds.
         std::chrono::duration<double> duration = event.time - touchDownTime_;
         auto seconds = duration.count();
@@ -210,8 +209,8 @@ void SwipeRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     PointF curLocalPoint(event.x, event.y);
     PointF lastLocalPoint(touchPoints_[event.id].x, touchPoints_[event.id].y);
-    NGGestureRecognizer::Transform(curLocalPoint, GetAttachedNode());
-    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode());
+    NGGestureRecognizer::Transform(curLocalPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false, isPostEventResult_);
     Offset moveDistance(curLocalPoint.GetX() - lastLocalPoint.GetX(), curLocalPoint.GetY() - lastLocalPoint.GetY());
     touchPoints_[event.id] = event;
     if (NearZero(moveDistance.GetX()) && NearZero(moveDistance.GetY())) {
@@ -329,9 +328,6 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        if (recognizerTarget_.has_value()) {
-            info.SetTarget(recognizerTarget_.value());
-        }
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
             info.SetTiltX(lastTouchEvent_.tiltX.value());
@@ -366,9 +362,6 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
     }
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
-    if (recognizerTarget_.has_value()) {
-        info->SetTarget(recognizerTarget_.value());
-    }
     info->SetForce(lastTouchEvent_.force);
     if (lastTouchEvent_.tiltX.has_value()) {
         info->SetTiltX(lastTouchEvent_.tiltX.value());

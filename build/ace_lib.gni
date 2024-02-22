@@ -89,6 +89,7 @@ template("libace_static") {
         deps += [
           "$ace_root/frameworks/bridge/declarative_frontend:declarative_js_engine_ark_$platform",
           "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_ark_$platform",
+          "$ace_root/frameworks/core/interfaces/native/svg:ace_core_interfaces_native_svg_$platform",
         ]
       }
     }
