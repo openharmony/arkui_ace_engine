@@ -207,6 +207,7 @@ public:
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
+    void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
     void UpdateOverCounterColor();
     void UpdateCounterMargin();
     void CleanCounterNode();
