@@ -65,7 +65,7 @@ RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string
     }
     // set draggable for framenode
     if (frameNode->IsFirstBuilding()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto draggable = pipeline->GetDraggable<TextTheme>();
         frameNode->SetDraggable(draggable);
