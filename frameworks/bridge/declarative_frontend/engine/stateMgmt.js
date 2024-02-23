@@ -1463,6 +1463,97 @@ class SubscribaleAbstract extends SubscribableAbstract {
  * limitations under the License.
  */
 /**
+ * MapInfo
+ *
+ * Helper class to persist Map in Persistent storage
+ *
+ */
+class MapInfo {
+    constructor(mapReplacer, keys, values) {
+        this.mapReplacer = mapReplacer;
+        this.keys = keys;
+        this.values = values;
+    }
+    // Check if the given object is of type MapInfo
+    static isObject(obj) {
+        const typedObject = obj;
+        if ('mapReplacer' in typedObject && typedObject.mapReplacer === MapInfo.replacer) {
+            return true;
+        }
+        return false;
+    }
+    // Convert Map to Object
+    static toObject(map) {
+        const keys = Array.from(map.keys());
+        const values = Array.from(map.values());
+        return new MapInfo(MapInfo.replacer, keys, values);
+    }
+    // Convert Object to Map
+    static toMap(obj) {
+        return new Map(obj.keys.map((key, i) => [key, obj.values[i]]));
+    }
+}
+MapInfo.replacer = "ace_engine_state_mgmt_map_replacer";
+/**
+ * SetInfo
+ *
+ * Helper class to persist Set in Persistent storage
+ *
+ */
+class SetInfo {
+    constructor(setReplacer, values) {
+        this.setReplacer = setReplacer;
+        this.values = values;
+    }
+    // Check if the given object is of type SetInfo
+    static isObject(obj) {
+        const typedObject = obj;
+        if ('setReplacer' in typedObject && typedObject.setReplacer === SetInfo.replacer) {
+            return true;
+        }
+        return false;
+    }
+    // Convert Set to Object
+    static toObject(set) {
+        const values = Array.from(set.values());
+        return new SetInfo(SetInfo.replacer, values);
+    }
+    // Convert Object to Set
+    static toSet(obj) {
+        return new Set(obj.values);
+    }
+}
+SetInfo.replacer = "ace_engine_state_mgmt_set_replacer";
+/**
+ * DateInfo
+ *
+ * Helper class to persist Date in Persistent storage
+ *
+ */
+class DateInfo {
+    constructor(dateReplacer, date) {
+        this.dateReplacer = dateReplacer;
+        this.date = date;
+    }
+    // Check if the given object is of type DateInfo
+    static isObject(obj) {
+        const typedObject = obj;
+        if ('dateReplacer' in typedObject && typedObject.dateReplacer === DateInfo.replacer) {
+            return true;
+        }
+        return false;
+    }
+    // Convert Date to Object
+    static toObject(date) {
+        return new DateInfo(DateInfo.replacer, date.toISOString());
+    }
+    // Convert Object to Date
+    static toDate(obj) {
+        return new Date(obj.date);
+    }
+}
+DateInfo.replacer = "ace_engine_state_mgmt_date_replacer";
+/**
  * PersistentStorage
  *
  * Keeps current values of select AppStorage property properties persisted to file.
@@ -1607,7 +1698,7 @@ class PersistentStorage {
       */
     static notifyHasChanged(propName) {
         
-        PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
+        PersistentStorage.getOrCreate().writeToPersistentStorage(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
     }
     /**
      * @see notifyHasChanged
@@ -1615,7 +1706,7 @@ class PersistentStorage {
      */
     static NotifyHasChanged(propName) {
         
-        PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
+        PersistentStorage.getOrCreate().writeToPersistentStorage(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
     }
     keys() {
         return this.links_.keys();
@@ -1624,7 +1715,7 @@ class PersistentStorage {
         if (this.persistProp1(propName, defaultValue)) {
             // persist new prop
             
-            PersistentStorage.storage_.set(propName, this.links_.get(propName).get());
+            this.writeToPersistentStorage(propName, this.links_.get(propName).get());
         }
     }
     // helper function to persist a property
@@ -1645,7 +1736,7 @@ class PersistentStorage {
             this.links_.set(propName, link);
         }
         else {
-            let newValue = PersistentStorage.storage_.get(propName);
+            let newValue = this.readFromPersistentStorage(propName);
             let returnValue;
             if (newValue == undefined || newValue == null) {
                 
@@ -1679,8 +1770,39 @@ class PersistentStorage {
     write() {
         this.links_.forEach((link, propName, map) => {
             
-            PersistentStorage.storage_.set(propName, link.get());
+            this.writeToPersistentStorage(propName, link.get());
         });
+    }
+    // helper function to write to the persistent storage
+    // any additional check and formatting can to be done here
+    writeToPersistentStorage(propName, value) {
+        if (value instanceof Map) {
+            value = MapInfo.toObject(value);
+        }
+        else if (value instanceof Set) {
+            value = SetInfo.toObject(value);
+        }
+        else if (value instanceof Date) {
+            value = DateInfo.toObject(value);
+        }
+        PersistentStorage.storage_.set(propName, value);
+    }
+    // helper function to read from the persistent storage
+    // any additional check and formatting can to be done here
+    readFromPersistentStorage(propName) {
+        let newValue = PersistentStorage.storage_.get(propName);
+        if (newValue instanceof Object) {
+            if (MapInfo.isObject(newValue)) {
+                newValue = MapInfo.toMap(newValue);
+            }
+            else if (SetInfo.isObject(newValue)) {
+                newValue = SetInfo.toSet(newValue);
+            }
+            else if (DateInfo.isObject(newValue)) {
+                newValue = DateInfo.toDate(newValue);
+            }
+        }
+        return newValue;
     }
     // FU code path method
     propertyHasChanged(info) {
