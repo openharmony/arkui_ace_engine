@@ -617,7 +617,6 @@ void PageRouterManager::GetStateByUrl(std::string& url, std::vector<Framework::S
         CHECK_NULL_VOID(PageInfo);
         std::string tempUrl;
         if (PageInfo->GetPageUrl() == url) {
-            auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
             stateInfo.params = PageInfo->GetPageParams();
             stateInfo.index = counter;
             auto pos = url.rfind(".js");
@@ -625,6 +624,7 @@ void PageRouterManager::GetStateByUrl(std::string& url, std::vector<Framework::S
                 tempUrl = url.substr(0, pos);
             }
             tempUrl = url;
+            auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
             if (!pagePath.empty()) {
                 tempUrl = pagePath;
             }
