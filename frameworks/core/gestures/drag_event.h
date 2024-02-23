@@ -57,6 +57,7 @@ enum class DragRet {
     DISABLE_DROP,
 };
 enum class DragBehavior {
+    UNKNOWN = -1,
     COPY = 0,
     MOVE = 1,
 };
@@ -188,6 +189,16 @@ public:
         return copy_;
     }
 
+    void SetDragBehavior(DragBehavior dragBehavior)
+    {
+        dragBehavior_ = dragBehavior;
+    }
+
+    DragBehavior GetDragBehavior() const
+    {
+        return dragBehavior_;
+    }
+
     void SetUdKey(const std::string udKey)
     {
         udKey_ = udKey;
@@ -240,6 +251,7 @@ private:
     bool useCustomAnimation_ = false;
     bool isGetDataSuccess_ = false;
     bool copy_ = true;
+    DragBehavior dragBehavior_ = DragBehavior::UNKNOWN;
     RefPtr<UnifiedData> unifiedData_;
     RefPtr<UnifiedData> dragInfo_;
     Velocity velocity_;

@@ -95,7 +95,7 @@ public:
     void ClearExtraInfo();
     float GetWindowScale() const;
     void UpdateDragStyle(const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT);
-    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy);
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior);
     void RequireSummary();
     void ClearSummary();
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
@@ -259,6 +259,7 @@ public:
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
     void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event);
     void SetDragResult(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    void SetDragBehavior(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void ResetDragPreviewInfo()
     {
         info_ = DragPreviewInfo();
