@@ -577,8 +577,17 @@ public:
         return GetTag();
     }
 
-    bool HasTransitionRunning();
     bool SelfOrParentExpansive();
+    bool SelfExpansive();
+    bool ParentExpansive();
+    void SetNeedRestoreSafeArea(bool needRestore)
+    {
+        needRestoreSafeArea_ = needRestore;
+    }
+    bool NeedRestoreSafeArea()
+    {
+        return needRestoreSafeArea_;
+    }
 
     bool IsActive() const override
     {
@@ -597,7 +606,7 @@ public:
     void SetCacheCount(
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
-    void SyncGeometryNode();
+    void SyncGeometryNode(bool needSkipSync = false);
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
@@ -821,6 +830,7 @@ private:
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
+    bool needRestoreSafeArea_ = true;
 
     RefPtr<FrameNode> overlayNode_;
 
