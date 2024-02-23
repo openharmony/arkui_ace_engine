@@ -91,6 +91,10 @@ public:
     static bool GetMultiOptions(FrameNode* frameNode, std::vector<NG::TextCascadePickerOptions>& options);
     static uint32_t GetMaxCount(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
+    static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
+    static PickerTextStyle getDisappearTextStyle(FrameNode* frameNode);
+    static int32_t getTextPickerSelectedIndex(FrameNode* frameNode);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

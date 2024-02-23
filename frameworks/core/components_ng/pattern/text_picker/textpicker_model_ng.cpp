@@ -743,4 +743,67 @@ void TextPickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& co
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetBackgroundColor(color);
 }
+
+PickerTextStyle TextPickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
+{
+    PickerTextStyle pickerTextStyle;
+    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, pickerTextStyle);
+    auto style = theme->GetDisappearOptionStyle();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextPickerLayoutProperty, DisappearFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextPickerLayoutProperty, DisappearColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextPickerLayoutProperty, DisappearWeight, pickerTextStyle.fontWeight, frameNode, style.GetFontWeight());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextPickerLayoutProperty, DisappearFontFamily,
+        pickerTextStyle.fontFamily, frameNode, style.GetFontFamilies());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextPickerLayoutProperty, DisappearFontStyle,
+        pickerTextStyle.fontStyle, frameNode, style.GetFontStyle());
+    return pickerTextStyle;
+}
+
+PickerTextStyle TextPickerModelNG::getNormalTextStyle(FrameNode* frameNode)
+{
+    PickerTextStyle pickerTextStyle;
+    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, pickerTextStyle);
+    auto style = theme->GetOptionStyle(false, false);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextPickerLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextPickerLayoutProperty, Color, pickerTextStyle.textColor, frameNode, style.GetTextColor());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextPickerLayoutProperty, Weight, pickerTextStyle.fontWeight, frameNode, style.GetFontWeight());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextPickerLayoutProperty, FontFamily,
+        pickerTextStyle.fontFamily, frameNode, style.GetFontFamilies());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextPickerLayoutProperty, FontStyle,
+        pickerTextStyle.fontStyle, frameNode, style.GetFontStyle());
+    return pickerTextStyle;
+}
+
+PickerTextStyle TextPickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
+{
+    PickerTextStyle pickerTextStyle;
+    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, pickerTextStyle);
+    auto style = theme->GetOptionStyle(true, false);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextPickerLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextPickerLayoutProperty, SelectedColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextPickerLayoutProperty, SelectedWeight, pickerTextStyle.fontWeight, frameNode, style.GetFontWeight());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextPickerLayoutProperty, SelectedFontFamily,
+        pickerTextStyle.fontFamily, frameNode, style.GetFontFamilies());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextPickerLayoutProperty, SelectedFontStyle,
+        pickerTextStyle.fontStyle, frameNode, style.GetFontStyle());
+    return pickerTextStyle;
+}
+
+int32_t TextPickerModelNG::getTextPickerSelectedIndex(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return frameNode->GetLayoutProperty<TextPickerLayoutProperty>()->GetSelectedValue();
+}
 } // namespace OHOS::Ace::NG
