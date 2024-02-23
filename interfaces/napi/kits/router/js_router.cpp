@@ -35,6 +35,7 @@ const char EN_ALERT_REJECT[] = "enableAlertBeforeBackPage:fail cancel";
 const char DIS_ALERT_SUCCESS[] = "disableAlertBeforeBackPage:ok";
 
 static constexpr size_t ARGC_WITH_MODE = 2;
+static constexpr size_t ARGC_WITH_ROUTER_PARAMTER = 2;
 static constexpr size_t ARGC_WITH_MODE_AND_CALLBACK = 3;
 static constexpr uint32_t STANDARD = 0;
 static constexpr uint32_t SINGLE = 1;
@@ -372,8 +373,8 @@ static napi_value JSReplaceNamedRoute(napi_env env, napi_callback_info info)
 
 static napi_value JsBackToIndex(napi_env env, napi_callback_info info)
 {
-    size_t argc = 2;
-    napi_value argv[2] = { nullptr, nullptr };
+    size_t argc = ARGC_WITH_ROUTER_PARAMTER;
+    napi_value argv[ARGC_WITH_ROUTER_PARAMTER] = { nullptr };
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
@@ -389,6 +390,9 @@ static napi_value JsBackToIndex(napi_env env, napi_callback_info info)
     napi_typeof(env, argv[0], &valueType);
     if (valueType == napi_number) {
         napi_get_value_int32(env, argv[0], &routeIndex);
+    } else {
+        LOGE("Index is not of type number");
+        return nullptr;
     }
     napi_typeof(env, argv[1], &valueType);
     if (valueType == napi_object) {
@@ -400,15 +404,15 @@ static napi_value JsBackToIndex(napi_env env, napi_callback_info info)
 
 static napi_value JSRouterBack(napi_env env, napi_callback_info info)
 {
-    size_t argc = 1;
-    napi_value argv = nullptr;
+    size_t argc = ARGC_WITH_ROUTER_PARAMTER;
+    napi_value argv[ARGC_WITH_ROUTER_PARAMTER] = { nullptr };
     napi_value thisVar = nullptr;
     void* data = nullptr;
-    napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
 
     napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv, &valueType);
-    if (valueType == napi_number) {
+    napi_typeof(env, argv[0], &valueType);
+    if (argc == ARGC_WITH_ROUTER_PARAMTER || valueType == napi_number) {
         return JsBackToIndex(env, info);
     }
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
@@ -421,17 +425,17 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
     napi_value uriNApi = nullptr;
     napi_value params = nullptr;
     if (valueType == napi_object) {
-        napi_get_named_property(env, argv, "url", &uriNApi);
+        napi_get_named_property(env, argv[0], "url", &uriNApi);
         napi_typeof(env, uriNApi, &valueType);
         if (valueType == napi_undefined) {
-            napi_get_named_property(env, argv, "path", &uriNApi);
+            napi_get_named_property(env, argv[0], "path", &uriNApi);
             napi_typeof(env, uriNApi, &valueType);
         }
         if (valueType == napi_string) {
             ParseUri(env, uriNApi, uriString);
         }
 
-        napi_get_named_property(env, argv, "params", &params);
+        napi_get_named_property(env, argv[0], "params", &params);
         napi_typeof(env, params, &valueType);
         if (valueType == napi_object) {
             ParseParams(env, params, paramsString);
