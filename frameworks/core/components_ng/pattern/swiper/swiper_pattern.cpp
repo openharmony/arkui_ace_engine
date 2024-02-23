@@ -25,6 +25,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
@@ -35,7 +36,9 @@
 #include "core/common/container_scope.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
@@ -43,6 +46,9 @@
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -367,6 +373,10 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     if (mainSizeIsMeasured_ && isNeedResetPrevMarginAndNextMargin_) {
         layoutProperty->UpdatePrevMarginWithoutMeasure(0.0_px);
         layoutProperty->UpdateNextMarginWithoutMeasure(0.0_px);
+    }
+    if (oldIndex_ != currentIndex_ && !isInit_) {
+        FireWillShowEvent(currentIndex_);
+        FireWillHideEvent(oldIndex_);
     }
 }
 
@@ -853,6 +863,10 @@ void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationC
 
 void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 {
+    if (currentIndex_ != index) {
+        FireWillShowEvent(index);
+        FireWillHideEvent(currentIndex_);
+    }
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
@@ -940,6 +954,10 @@ void SwiperPattern::SwipeTo(int32_t index)
         return;
     }
 
+    if (currentIndex_ != targetIndex_.value_or(0)) {
+        FireWillShowEvent(targetIndex_.value_or(0));
+        FireWillHideEvent(currentIndex_);
+    }
     MarkDirtyNodeSelf();
 }
 
@@ -2033,6 +2051,11 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     }
 
     isDragging_ = false;
+
+    if (currentIndex_ != pauseTargetIndex_.value_or(0)) {
+        FireWillShowEvent(pauseTargetIndex_.value_or(0));
+        FireWillHideEvent(currentIndex_);
+    }
 }
 
 void SwiperPattern::UpdateCurrentIndex(int32_t index)
@@ -3514,6 +3537,9 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
 
 void SwiperPattern::OnWindowShow()
 {
+    if (!isParentHiddenChange_) {
+        FireWillShowEvent(currentIndex_);
+    }
     isWindowShow_ = true;
     if (NeedStartAutoPlay()) {
         StartAutoPlay();
@@ -3522,6 +3548,9 @@ void SwiperPattern::OnWindowShow()
 
 void SwiperPattern::OnWindowHide()
 {
+    if (!isParentHiddenChange_) {
+        FireWillHideEvent(currentIndex_);
+    }
     isWindowShow_ = false;
     StopAutoPlay();
 
@@ -4453,5 +4482,67 @@ bool SwiperPattern::CheckSwiperPanEvent(const GestureEvent& info)
     bool ret = ContentWillChange(currentIndex, comingIndex);
     indexCanChangeMap_.emplace(comingIndex, ret);
     return ret;
+}
+
+void SwiperPattern::FireWillHideEvent(int32_t willHideIndex) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(host->GetChildByIndex(willHideIndex));
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->FireWillHideEvent();
+}
+
+void SwiperPattern::FireWillShowEvent(int32_t willShowIndex) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(host->GetChildByIndex(willShowIndex));
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->FireWillShowEvent();
+}
+
+void SwiperPattern::SetOnHiddenChangeForParent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    while (parent) {
+        if (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    auto onHiddenChange = [weak = WeakClaim(this)](bool isShow) {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        auto index = swiperPattern->GetCurrentIndex();
+
+        if (isShow) {
+            swiperPattern->FireWillShowEvent(index);
+        } else {
+            swiperPattern->FireWillHideEvent(index);
+        }
+        swiperPattern->isParentHiddenChange_ = true;
+    };
+    CHECK_NULL_VOID(parent);
+    if (parent->GetTag() == V2::PAGE_ETS_TAG) {
+        auto pagePattern = parent->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetOnHiddenChange(std::move(onHiddenChange));
+    }
+
+    if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        auto navDestinationePattern = parent->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(navDestinationePattern);
+        auto navDestinationEventHub = navDestinationePattern->GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_VOID(navDestinationEventHub);
+        navDestinationEventHub->SetOnHiddenChange(std::move(onHiddenChange));
+    }
 }
 } // namespace OHOS::Ace::NG

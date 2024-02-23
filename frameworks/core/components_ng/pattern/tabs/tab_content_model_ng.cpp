@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_event_hub.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
@@ -457,5 +458,23 @@ void TabContentModelNG::UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<Te
     if (labelStyle.heightAdaptivePolicy.has_value()) {
         textLayoutProperty->UpdateHeightAdaptivePolicy(labelStyle.heightAdaptivePolicy.value());
     }
+}
+
+void TabContentModelNG::SetOnWillShow(std::function<void()>&& onWillShow)
+{
+    auto tabContentNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->SetOnWillShow(onWillShow);
+}
+
+void TabContentModelNG::SetOnWillHide(std::function<void()>&& onWillHide)
+{
+    auto tabContentNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->SetOnWillHide(onWillHide);
 }
 } // namespace OHOS::Ace::NG

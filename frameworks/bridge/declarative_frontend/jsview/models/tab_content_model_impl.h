@@ -38,6 +38,8 @@ public:
     void SetVerticalAlign(FlexAlign verticalAlign) override {}
     void SetSymmetricExtensible(bool isExtensible) override {}
     void SetId(const std::string& id) override {}
+    void SetOnWillShow(std::function<void()>&& onWillShow) override {}
+    void SetOnWillHide(std::function<void()>&& onWillHide) override {}
 
 private:
     RefPtr<Component> ProcessTabBarBuilderFunction(
