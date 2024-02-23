@@ -407,6 +407,66 @@ bool BubblePattern::PostTask(const TaskExecutor::Task& task)
     return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
+void BubblePattern::StartEnteringTransitionEffects(
+    const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish)
+{
+    auto popupId = popupNode->GetId();
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    layoutProp->UpdateVisibility(VisibleType::VISIBLE, true);
+    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    auto isBlock = layoutProp->GetBlockEventValue(true);
+    auto& renderContext = popupNode->GetRenderContext();
+    renderContext->SetTransitionInCallback(
+        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->transitionStatus_ != TransitionStatus::ENTERING) {
+                return;
+            }
+            pattern->transitionStatus_ = TransitionStatus::NORMAL;
+            if (showInSubWindow) {
+                std::vector<Rect> rects;
+                if (!isBlock) {
+                    auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
+                        pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
+                    rects.emplace_back(rect);
+                } else {
+                    auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+                    auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
+                        pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
+                    rects.emplace_back(parentWindowRect);
+                    rects.emplace_back(rect);
+                }
+                auto subWindowMgr = SubwindowManager::GetInstance();
+                subWindowMgr->SetPopupHotAreas(rects, popupId, pattern->GetContainerId());
+            }
+            if (finish) {
+                finish();
+            }
+        });
+}
+
+void BubblePattern::StartExitingTransitionEffects(
+    const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish)
+{
+    auto layoutProperty = popupNode->GetLayoutProperty();
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
+    auto renderContext = popupNode->GetRenderContext();
+    renderContext->SetTransitionOutCallback(
+        [weak = WeakClaim(this), finish]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->transitionStatus_ != TransitionStatus::EXITING) {
+                return;
+            }
+            pattern->transitionStatus_ = TransitionStatus::INVISIABLE;
+            if (finish) {
+                finish();
+            }
+        });
+}
+
 void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
 {
     if (!arrowPlacement_.has_value()) {

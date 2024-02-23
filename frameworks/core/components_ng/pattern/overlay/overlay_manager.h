@@ -83,6 +83,9 @@ public:
     void HideAllPopups();
     void HideCustomPopups();
     void SetPopupHotAreas(RefPtr<FrameNode> popupNode);
+    void ShowPopupAnimation(const RefPtr<FrameNode>& popupNode);
+    void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);
+    void HidePopupAnimation(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
 
     PopupInfo GetPopupInfo(int32_t targetId) const
     {

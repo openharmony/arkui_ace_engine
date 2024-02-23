@@ -974,6 +974,14 @@ void ParsePopupCommonParam(
             popupParam->SetBlurStyle(static_cast<BlurStyle>(blurStyle));
         }
     }
+
+    auto popupTransition = popupObj->GetProperty("transition");
+    if (popupTransition->IsObject()) {
+        popupParam->SetHasTransition(true);
+        auto obj = JSRef<JSObject>::Cast(popupTransition);
+        auto effects = ParseChainedTransition(obj, info.GetExecutionContext());
+        popupParam->SetTransitionEffects(effects);
+    }
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
