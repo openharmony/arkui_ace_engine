@@ -62,6 +62,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_DATE_PICKER_DATE_CHANGE;
         case NODE_TIME_PICKER_EVENT_ON_CHANGE:
             return ON_TIME_PICKER_CHANGE;
+        case NODE_CALENDAR_PICKER_EVENT_ON_CHANGE:
+            return ON_CALENDAR_PICKER_CHANGE;
         case NODE_TOUCH_EVENT:
             return ON_TOUCH;
         case NODE_ON_CLICK:
@@ -116,6 +118,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE;
         case ON_TIME_PICKER_CHANGE:
             return NODE_TIME_PICKER_EVENT_ON_CHANGE;
+        case ON_CALENDAR_PICKER_CHANGE:
+            return NODE_CALENDAR_PICKER_EVENT_ON_CHANGE;
         case ON_TOUCH:
             return NODE_TOUCH_EVENT;
         case ON_CLICK:

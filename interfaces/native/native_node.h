@@ -4080,14 +4080,14 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[1].u32: selected year. \n
-     * .value[2].u32: selected month. \n
-     * .value[3].u32: selected day. \n
+     * .value[0].u32: selected year. \n
+     * .value[1].u32: selected month. \n
+     * .value[2].u32: selected day. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[1].u32: selected year. \n
-     * .value[2].u32: selected month. \n
-     * .value[3].u32: selected day. \n
+     * .value[0].u32: selected year. \n
+     * .value[1].u32: selected month. \n
+     * .value[2].u32: selected day. \n
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .u32 = 2028 }, { .u32 = 1 }, { .u32 = 1 } };
