@@ -49,6 +49,8 @@ void RichEditorModelImpl::BindSelectionMenu(NG::TextSpanType& editorType, NG::Te
 
 void RichEditorModelImpl::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) {}
 
+void RichEditorModelImpl::SetPlaceholder(PlaceholderOptions& options) {}
+
 void RichEditorModelImpl::SetTextDetectEnable(bool value) {}
 
 void RichEditorModelImpl::SetTextDetectConfig(const std::string& value,
