@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 
 #include "core/components/common/properties/alignment.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -27,4 +28,13 @@ void ModalPresentationPattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
 }
 
+void ModalPresentationPattern::ModalInteractiveDismiss()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SetDismissTargetId(targetId_);
+    CallOnWillDismiss(static_cast<int32_t>(ContentCoverDismissReason::BACK_PRESSED));
+}
 } // namespace OHOS::Ace::NG
