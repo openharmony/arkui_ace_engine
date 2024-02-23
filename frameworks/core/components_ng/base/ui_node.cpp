@@ -600,7 +600,7 @@ void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
 
 RefPtr<PipelineContext> UINode::GetContext()
 {
-    return PipelineContext::GetCurrentContext();
+    return PipelineContext::GetCurrentContextSafely();
 }
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
