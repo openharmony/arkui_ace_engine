@@ -22,7 +22,7 @@
 namespace OHOS::Ace {
 namespace {
 
-const size_t MAX_STRING_SIZE = 128;
+const size_t MAX_STRING_SIZE = 512;
 
 }
 
