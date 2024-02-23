@@ -95,7 +95,7 @@ public:
             }
         } leave;
         delayDeleteListenerSets_ = &delayDeleteListenerSets;
-        for (auto listener : listenerSets_[jsEngine]) {
+        for (auto listener : listenerSets_[AceType::WeakClaim(jsEngine)]) {
             auto json = MediaQueryInfo::GetMediaQueryJsonInfo();
             listener->matches_ = queryer.MatchCondition(listener->media_, json);
             for (auto& cbRef : listener->cbList_) {
@@ -232,7 +232,10 @@ private:
         while (iter != listenerSets_.end()) {
             iter->second.erase(this);
             if (iter->second.empty()) {
-                iter->first->UnregisterMediaUpdateCallback();
+                auto jsEngineWeak = iter->first.Upgrade();
+                if (jsEngineWeak) {
+                    jsEngineWeak->UnregisterMediaUpdateCallback();
+                }
                 iter = listenerSets_.erase(iter);
             } else {
                 iter++;
@@ -258,7 +261,7 @@ private:
         }
         {
             std::lock_guard<std::mutex> lock(mutex_);
-            listenerSets_[AceType::RawPtr(jsEngine)].emplace(this);
+            listenerSets_[jsEngine].emplace(this);
         }
     }
 
@@ -301,11 +304,11 @@ private:
     napi_env env_ = nullptr;
     std::list<napi_ref> cbList_;
     static std::set<std::unique_ptr<MediaQueryListener>>* delayDeleteListenerSets_;
-    static std::map<JsEngine*, std::set<MediaQueryListener*>> listenerSets_;
+    static std::map<WeakPtr<JsEngine>, std::set<MediaQueryListener*>> listenerSets_;
     static std::mutex mutex_;
 };
 std::set<std::unique_ptr<MediaQueryListener>>* MediaQueryListener::delayDeleteListenerSets_;
-std::map<JsEngine*, std::set<MediaQueryListener*>> MediaQueryListener::listenerSets_;
+std::map<WeakPtr<JsEngine>, std::set<MediaQueryListener*>> MediaQueryListener::listenerSets_;
 std::mutex MediaQueryListener::mutex_;
 
 static napi_value JSMatchMediaSync(napi_env env, napi_callback_info info)
