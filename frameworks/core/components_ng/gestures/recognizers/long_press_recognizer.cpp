@@ -200,6 +200,9 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE, "long press recognizer receives touch cancel event");
     if (IsRefereeFinished()) {
+        if (isForDrag_) {
+            SendCancelMsg();
+        }
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {
