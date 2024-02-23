@@ -341,7 +341,11 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     previewScale_ = LessOrEqual(scale, 0.0f) ? previewScale_ : scale;
     position_ = props->GetMenuOffset().value_or(OffsetF());
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
-    InitializePadding(layoutWrapper);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        InitializePaddingAPI11(layoutWrapper);
+    } else {
+        InitializePadding(layoutWrapper);
+    }
     InitWrapperRect(props, menuPattern);
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
     ModifyPositionToWrapper(layoutWrapper, position_);
@@ -464,19 +468,17 @@ void MenuLayoutAlgorithm::InitializePaddingAPI11(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
-    if (!menuPattern->IsSelectOverlayExtensionMenu() && !hierarchicalParameters_) {
+    if (!menuPattern->IsSelectOverlayExtensionMenu()) {
         margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
         optionPadding_ = margin_;
-        paddingStart_ = static_cast<float>(theme->GetMaxPaddingStart().ConvertToPx());
-        paddingEnd_ = static_cast<float>(theme->GetMaxPaddingEnd().ConvertToPx());
-        paddingTop_ = static_cast<float>(theme->GetDefaultPaddingTop().ConvertToPx());
-        paddingBottom_ = static_cast<float>(theme->GetDefaultPaddingBottomFixed().ConvertToPx());
+        if (!hierarchicalParameters_) {
+            paddingStart_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
+            paddingEnd_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
+        } else {
+            paddingStart_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
+            paddingEnd_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
+        }
     } else {
-        margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-        paddingStart_ = margin_;
-        paddingEnd_ = margin_;
-        paddingTop_ = margin_;
-        paddingBottom_ = margin_;
         optionPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
     }
 }
