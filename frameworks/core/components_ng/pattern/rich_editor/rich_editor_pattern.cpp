@@ -2813,7 +2813,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
 {
     if (textSelector_.IsValid()) {
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-        SetCaretPosition(textSelector_.GetTextEnd());
+        caretPosition_ = textSelector_.GetTextEnd();
         CloseSelectOverlay();
         ResetSelection();
     }
@@ -4048,6 +4048,9 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnCopy();
             pattern->CloseSelectOverlay();
+            if (!pattern->textDetectEnable_) {
+                pattern->StartTwinkling();
+            }
             if (!usingMouse) {
                 pattern->ResetSelection();
             }
@@ -4163,9 +4166,6 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         resultProcessor(*resultObj);
     }
     clipboard_->SetData(pasteData, copyOption_);
-    if (!textDetectEnable_) {
-        StartTwinkling();
-    }
 }
 
 void RichEditorPattern::ResetAfterPaste()
