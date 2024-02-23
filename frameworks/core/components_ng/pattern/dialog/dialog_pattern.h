@@ -31,6 +31,12 @@
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
+    
+enum class DialogDismissReason {
+    DIALOG_PRESS_BACK = 0,
+    DIALOG_TOUCH_OUTSIDE,
+    DIALOG_CLOSE_BUTTON,
+};
 class DialogPattern : public PopupBasePattern {
     DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern);
 
@@ -43,6 +49,26 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    void SetOnWillDismiss(const std::function<void(const int32_t& info)>& onWillDismiss)
+    {
+        onWillDismiss_ = onWillDismiss;
+    }
+
+    bool ShouldDismiss() const
+    {
+        if (onWillDismiss_) {
+            return true;
+        }
+        return false;
+    }
+
+    void CallOnWillDismiss(const int32_t reason)
+    {
+        if (onWillDismiss_) {
+            onWillDismiss_(reason);
+        }
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -182,6 +208,7 @@ private:
     std::string message_;
     std::string title_;
     std::string subtitle_;
+    std::function<void(const int32_t& info)> onWillDismiss_;
 
     DialogProperties dialogProperties_;
     WeakPtr<FrameNode> menuNode_;

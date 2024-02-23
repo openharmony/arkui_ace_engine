@@ -143,6 +143,7 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+constexpr uint32_t ON_WILL_DISMISS_FIELD_COUNT = 2;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
@@ -5254,6 +5255,32 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     }
 }
 #endif
+
+void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,
+    std::function<void(const int32_t& info)>& onWillDismiss)
+{
+    auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
+    if (onWillDismissFunc->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
+        onWillDismiss = [func = std::move(jsFunc)](const int32_t& info) {
+            JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+            objectTemplate->SetInternalFieldCount(ON_WILL_DISMISS_FIELD_COUNT);
+            JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
+            dismissObj->SetPropertyObject(
+                "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissDialog));
+            dismissObj->SetProperty<int32_t>("reason", info);
+            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            func->ExecuteJS(1, &newJSVal);
+        };
+    }
+}
+
+panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ViewAbstractModel::GetInstance()->DismissDialog();
+    return JSValueRef::Undefined(runtimeCallInfo->GetVM());
+}
 
 void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
 {

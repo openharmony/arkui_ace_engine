@@ -1720,6 +1720,13 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             }
         }
         if (InstanceOf<DialogPattern>(pattern)) {
+            auto dialogPattern = DynamicCast<DialogPattern>(pattern);
+            CHECK_NULL_RETURN(dialogPattern, false);
+            if (dialogPattern->ShouldDismiss()) {
+                dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
+                TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
+                return true;
+            }
             return RemoveDialog(overlay, isBackPressed, isPageRouter);
         }
         if (InstanceOf<BubblePattern>(pattern)) {
@@ -1934,6 +1941,13 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     // close dialog with animation
     auto pattern = overlay->GetPattern();
     if (InstanceOf<DialogPattern>(pattern)) {
+        auto dialogPattern = DynamicCast<DialogPattern>(pattern);
+        CHECK_NULL_RETURN(dialogPattern, false);
+        if (dialogPattern->ShouldDismiss()) {
+            dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
+            return true;
+        }
         return RemoveDialog(overlay, false, false);
     }
     if (InstanceOf<BubblePattern>(pattern)) {
