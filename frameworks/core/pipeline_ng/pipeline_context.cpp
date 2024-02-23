@@ -2000,6 +2000,9 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "-imagefilecache") {
         ImageFileCache::GetInstance().DumpCacheInfo();
+    } else if (params[0] == "-default") {
+        rootNode_->DumpTree(0);
+        DumpLog::GetInstance().OutPutDefault();
     }
     return true;
 }
