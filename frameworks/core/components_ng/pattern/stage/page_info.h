@@ -71,8 +71,18 @@ public:
         dialogProperties_ = dialogProperties;
     }
 
+    void SetPageIndex(int32_t pageIndex)
+    {
+        pageIndex_ = pageIndex;
+    }
+
+    int32_t GetPageIndex() const
+    {
+        return pageIndex_;
+    }
 private:
     int32_t pageId_ = 0;
+    int32_t pageIndex_ = -1;
     std::string url_;
     std::string path_;
 
