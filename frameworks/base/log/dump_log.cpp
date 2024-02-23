@@ -138,4 +138,15 @@ bool DumpLog::OutPutBySize()
     ostream_->flush();
     return true;
 }
+
+void DumpLog::OutPutDefault()
+{
+    if (!ostream_->good()) {
+        result_.clear();
+        return;
+    }
+    ostream_->write(result_.c_str(), result_.length());
+    result_.clear();
+    ostream_->flush();
+}
 } // namespace OHOS::Ace
