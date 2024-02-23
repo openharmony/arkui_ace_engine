@@ -6108,7 +6108,10 @@ void TextFieldPattern::NotifyOnEditChanged(bool isChanged)
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnEditChanged(isChanged);
+    if (isChanged != isEdit_) {
+        isEdit_ = isChanged;
+        eventHub->FireOnEditChanged(isChanged);
+    }
 }
 
 int32_t TextFieldPattern::GetLineCount() const
