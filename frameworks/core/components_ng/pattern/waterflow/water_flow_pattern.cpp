@@ -215,6 +215,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto eventHub = host->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto onScroll = eventHub->GetOnScroll();
+    PrintOffsetLog(AceLogTag::ACE_WATERFLOW, host->GetId(), prevOffset_ - layoutInfo.currentOffset_);
     if (onScroll) {
         FireOnScroll(prevOffset_ - layoutInfo.currentOffset_, onScroll);
     }

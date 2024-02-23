@@ -2313,4 +2313,13 @@ void ScrollablePattern::AddHotZoneSenceInterface(SceneStatus scene)
     auto velocity = velocityMotion_->GetCurrentVelocity();
     NotifyFRCSceneInfo(SCROLL_IN_HOTZONE_SCENE, velocity, scene);
 }
+
+
+void ScrollablePattern::PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset)
+{
+    if (SystemProperties::GetDebugOffsetLogEnabled()) {
+        TAG_LOGD(tag, "Scrollable id:%{public}d, scrollSource:%{public}d, scrollOffset:%{public}f",
+            id, scrollSource_, finalOffset);
+    }
+}
 } // namespace OHOS::Ace::NG

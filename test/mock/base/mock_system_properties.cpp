@@ -45,6 +45,7 @@ bool SystemProperties::debugEnabled_ = false;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
+bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::traceEnabled_ = false;
 int32_t SystemProperties::devicePhysicalWidth_ = 0;

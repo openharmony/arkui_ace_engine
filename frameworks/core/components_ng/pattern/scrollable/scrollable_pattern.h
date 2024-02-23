@@ -464,6 +464,8 @@ public:
         animateCanOverScroll_ = animateCanOverScroll;
     }
 
+    void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const

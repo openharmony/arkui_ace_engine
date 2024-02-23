@@ -477,6 +477,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     CHECK_NULL_VOID(gridEventHub);
 
     auto onScroll = gridEventHub->GetOnScroll();
+    PrintOffsetLog(AceLogTag::ACE_GRID, host->GetId(), finalOffset);
     if (onScroll) {
         FireOnScroll(finalOffset, onScroll);
     }
