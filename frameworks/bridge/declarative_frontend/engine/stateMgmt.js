@@ -6520,6 +6520,8 @@ class ViewPU extends NativeViewPartialUpdate {
         if (ConfigureStateMgmt.instance.needsV3Observe()) {
             ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
         }
+        // Always use ID_REFS in ViewPU
+        this[ObserveV3.ID_REFS] = {};
     }
     /**
      * v3: find a @provide'ed variable in the nearest ancestor ViewPU.
@@ -6827,9 +6829,16 @@ class ObserveV3 {
     clearBinding(id) {
         var _a;
         (_a = this.id2targets_[id]) === null || _a === void 0 ? void 0 : _a.forEach((target) => {
-            for (let key in target[ObserveV3.SYMBOL_REFS]) {
-                if (id in target[ObserveV3.SYMBOL_REFS][key]) {
-                    delete target[ObserveV3.SYMBOL_REFS][key][id];
+            var _a, _b;
+            const idRefs = target[ObserveV3.ID_REFS];
+            const symRefs = target[ObserveV3.SYMBOL_REFS];
+            if (idRefs) {
+                (_a = idRefs[id]) === null || _a === void 0 ? void 0 : _a.forEach(key => { var _a; return (_a = symRefs === null || symRefs === void 0 ? void 0 : symRefs[key]) === null || _a === void 0 ? void 0 : _a.delete(id); });
+                delete idRefs[id];
+            }
+            else {
+                for (let key in symRefs) {
+                    (_b = symRefs[key]) === null || _b === void 0 ? void 0 : _b.delete(id);
                 }
             }
         });
@@ -6839,6 +6848,8 @@ class ObserveV3 {
     // add dependency view model object 'target' property 'attrName'
     // to current this.bindId
     addRef(target, attrName) {
+        var _a, _b, _c, _d;
+        var _e, _f;
         if (this.bindCmp_ === null) {
             return;
         }
@@ -6847,18 +6858,17 @@ class ObserveV3 {
             stateMgmtConsole.applicationError(error);
             throw new TypeError(error);
         }
-        if (!target[ObserveV3.SYMBOL_REFS]) {
-            target[ObserveV3.SYMBOL_REFS] = {};
+        const id = this.bindId_;
+        const symRefs = (_a = target[_e = ObserveV3.SYMBOL_REFS]) !== null && _a !== void 0 ? _a : (target[_e] = {});
+        (_b = symRefs[attrName]) !== null && _b !== void 0 ? _b : (symRefs[attrName] = new Set());
+        symRefs[attrName].add(id);
+        const idRefs = target[ObserveV3.ID_REFS];
+        if (idRefs) {
+            (_c = idRefs[id]) !== null && _c !== void 0 ? _c : (idRefs[id] = new Set());
+            idRefs[id].add(attrName);
         }
-        if (!target[ObserveV3.SYMBOL_REFS][attrName]) {
-            target[ObserveV3.SYMBOL_REFS][attrName] = {};
-        }
-        let obj = target[ObserveV3.SYMBOL_REFS][attrName];
-        obj[this.bindId_] = 1;
-        if (!this.id2targets_[this.bindId_]) {
-            this.id2targets_[this.bindId_] = new Set();
-        }
-        this.id2targets_[this.bindId_].add(target);
+        (_d = (_f = this.id2targets_)[id]) !== null && _d !== void 0 ? _d : (_f[id] = new Set());
+        this.id2targets_[id].add(target);
     }
     /**
      * setReadOnlyAttr - helper function used to update an immutable attribute
@@ -6932,36 +6942,31 @@ class ObserveV3 {
     // mark view model object 'target' property 'attrName' as changed
     // notify affected watchIds and elmtIds
     fireChange(target, attrName) {
-        if (!target[ObserveV3.SYMBOL_REFS] || this.disabled_) {
-            return;
-        }
-        let obj = target[ObserveV3.SYMBOL_REFS][attrName];
-        if (!obj) {
+        var _a, _b;
+        if (this.disabled_) {
             return;
         }
         
-        // FIXME seem to cause the crash, investigate
-        //  obj.forEach((id : number) => {
-        for (let idA in obj) {
-            const id = parseInt(idA);
+        (_b = (_a = target[ObserveV3.SYMBOL_REFS]) === null || _a === void 0 ? void 0 : _a[attrName]) === null || _b === void 0 ? void 0 : _b.forEach((id) => {
             // Cannot fireChange the object that is being created.
             if (id === this.bindId_) {
-                continue;
+                return;
             }
             // if this is the first id to be added to elmtIdsChanged_ and monitorIdsChanged_, 
             // schedule an 'updateDirty' task
             // that will run after the current call stack has unwound.
             // purpose of check for startDirty_ is to avoid going into recursion. This could happen if
             // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
-            if ((0 === this.elmtIdsChanged_.size) && (0 === this.monitorIdsChanged_.size)
-                && !this.startDirty_) {
-                Promise.resolve(true).then(this.updateDirty.bind(this));
+            const c1 = (0 === this.elmtIdsChanged_.size);
+            const c2 = (0 === this.monitorIdsChanged_.size);
+            if (c1 && c2 && !this.startDirty_) {
+                Promise.resolve().then(this.updateDirty.bind(this));
             }
             // add bindId to Set of pending changes.
             (id < MonitorV3.MIN_WATCH_ID)
                 ? this.elmtIdsChanged_.add(id)
                 : this.monitorIdsChanged_.add(id);
-        } // for
+        });
     }
     updateDirty() {
         this.startDirty_ = true;
@@ -7070,6 +7075,7 @@ class ObserveV3 {
 } // class ObserveV3
 ObserveV3.V3_DECO_META = Symbol('__v3_deco_meta__');
 ObserveV3.SYMBOL_REFS = Symbol('__use_refs__');
+ObserveV3.ID_REFS = Symbol('__id_refs__');
 ObserveV3.SYMBOL_PROXY_GET_TARGET = Symbol("__proxy_get_target");
 ObserveV3.OB_PREFIX = "__ob_"; // OB_PREFIX + attrName => backing store attribute name
 ObserveV3.OB_PREFIX_LEN = 5;
@@ -7293,6 +7299,13 @@ function ObservedV2(BaseClass) {
         const error = `'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`;
         stateMgmtConsole.applicationError(error);
         throw new Error(error);
+    }
+    // Use ID_REFS only if number of observed attrs is significant
+    const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
+    const prefix = ObserveV3.OB_PREFIX;
+    const count = attrList.filter(attr => attr.startsWith(prefix)).length;
+    if (count > 5) {
+        BaseClass.prototype[ObserveV3.ID_REFS] = {};
     }
     return class extends BaseClass {
         constructor(...args) {

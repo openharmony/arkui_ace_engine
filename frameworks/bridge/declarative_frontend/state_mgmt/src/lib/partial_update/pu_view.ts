@@ -1561,6 +1561,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     if (ConfigureStateMgmt.instance.needsV3Observe()) {
       ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
     }
+    // Always use ID_REFS in ViewPU
+    this[ObserveV3.ID_REFS] = {};
   }
 
   /**

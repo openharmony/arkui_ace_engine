@@ -28,6 +28,8 @@
 class ObserveV3 {
   public static readonly V3_DECO_META = Symbol('__v3_deco_meta__'); 
   public static readonly SYMBOL_REFS = Symbol('__use_refs__');
+  public static readonly ID_REFS = Symbol('__id_refs__');
+
   private static readonly SYMBOL_PROXY_GET_TARGET = Symbol("__proxy_get_target");
 
   public static readonly OB_PREFIX = "__ob_";  // OB_PREFIX + attrName => backing store attribute name
@@ -96,12 +98,17 @@ class ObserveV3 {
   // find these view model objects with the reverse map id2targets_
   public clearBinding(id: number): void {
     this.id2targets_[id]?.forEach((target) => {
-      for (let key in target[ObserveV3.SYMBOL_REFS]) {
-        if (id in target[ObserveV3.SYMBOL_REFS][key]) {
-          delete target[ObserveV3.SYMBOL_REFS][key][id]
-        }
+      const idRefs = target[ObserveV3.ID_REFS]
+      const symRefs= target[ObserveV3.SYMBOL_REFS]
+
+      if (idRefs) {
+        idRefs[id]?.forEach(key => symRefs?.[key]?.delete(id))
+        delete idRefs[id]
+      } else {
+        for (let key in symRefs) { symRefs[key]?.delete(id) }
       }
     })
+
     delete this.id2targets_[id]
     delete this.id2cmp_[id]
   }
@@ -117,21 +124,20 @@ class ObserveV3 {
       stateMgmtConsole.applicationError(error);
       throw new TypeError(error);
     }
+    const id = this.bindId_
 
-    if (!target[ObserveV3.SYMBOL_REFS]) {
-      target[ObserveV3.SYMBOL_REFS] = {}
-    }
-    if (!target[ObserveV3.SYMBOL_REFS][attrName]) {
-      target[ObserveV3.SYMBOL_REFS][attrName] = {}
+    const symRefs = target[ObserveV3.SYMBOL_REFS] ??= {}
+    symRefs[attrName] ??= new Set()
+    symRefs[attrName].add(id)
+
+    const idRefs = target[ObserveV3.ID_REFS]
+    if (idRefs) {
+      idRefs[id] ??= new Set()
+      idRefs[id].add(attrName)
     }
 
-    let obj = target[ObserveV3.SYMBOL_REFS][attrName];
-    obj[this.bindId_] = 1
-
-    if (!this.id2targets_[this.bindId_]) {
-      this.id2targets_[this.bindId_] = new Set();
-    }
-    this.id2targets_[this.bindId_].add(target);
+    this.id2targets_[id] ??= new Set()
+    this.id2targets_[id].add(target);
   }
 
   /**
@@ -207,24 +213,16 @@ class ObserveV3 {
   // mark view model object 'target' property 'attrName' as changed
   // notify affected watchIds and elmtIds
   public fireChange(target: object, attrName: string): void {
-    if (!target[ObserveV3.SYMBOL_REFS] || this.disabled_) {
-      return;
-    }
-    let obj = target[ObserveV3.SYMBOL_REFS][attrName];
-    if (!obj) {
+    if (this.disabled_) {
       return;
     }
 
     stateMgmtConsole.propertyAccess(`ObserveV3.fireChange ...`);
 
-    // FIXME seem to cause the crash, investigate
-    //  obj.forEach((id : number) => {
-    for (let idA in obj) {
-      const id = parseInt(idA);
-
+    target[ObserveV3.SYMBOL_REFS]?.[attrName]?.forEach((id:number) => {
       // Cannot fireChange the object that is being created.
       if (id === this.bindId_) {
-        continue;
+        return;
       }
 
       // if this is the first id to be added to elmtIdsChanged_ and monitorIdsChanged_, 
@@ -232,15 +230,16 @@ class ObserveV3 {
       // that will run after the current call stack has unwound.
       // purpose of check for startDirty_ is to avoid going into recursion. This could happen if
       // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
-      if ((0 === this.elmtIdsChanged_.size) && (0 === this.monitorIdsChanged_.size)
-        && !this.startDirty_) {
-        Promise.resolve(true).then(this.updateDirty.bind(this))
+      const c1 = (0 === this.elmtIdsChanged_.size)
+      const c2 = (0 === this.monitorIdsChanged_.size)
+      if (c1 && c2 && !this.startDirty_) {
+        Promise.resolve().then(this.updateDirty.bind(this))
       }
       // add bindId to Set of pending changes.
       (id < MonitorV3.MIN_WATCH_ID)
         ? this.elmtIdsChanged_.add(id)
         : this.monitorIdsChanged_.add(id);
-    } // for
+    })
   }
 
   private updateDirty(): void {
@@ -311,6 +310,7 @@ class ObserveV3 {
   public clearWatch(id: number): void {
     this.clearBinding(id)
   }
+
 
 
   public static autoProxyObject(target : Object, key : string | symbol)  : any {
@@ -599,6 +599,13 @@ function ObservedV2<T extends ConstructorV3>(BaseClass: T) : ConstructorV3 {
     throw new Error(error);
   }
 
+  // Use ID_REFS only if number of observed attrs is significant
+  const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
+  const prefix= ObserveV3.OB_PREFIX;
+  const count = attrList.filter(attr => attr.startsWith(prefix)).length;
+  if (count > 5) {
+    BaseClass.prototype[ObserveV3.ID_REFS] = {};
+  }
   return class extends BaseClass {
     constructor(...args) {
       super(...args)
@@ -609,4 +616,3 @@ function ObservedV2<T extends ConstructorV3>(BaseClass: T) : ConstructorV3 {
     }
   }
 }
-
