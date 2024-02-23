@@ -56,7 +56,7 @@ class BuilderNode {
     constructor(uiContext, options) {
         let jsBuilderNode = new JSBuilderNode(uiContext, options);
         this._JSBuilderNode = jsBuilderNode;
-        let id = Symbol("BuilderNode");
+        let id = Symbol('BuilderNode');
         BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
         BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderNode', idOfNode: id });
     }
@@ -322,7 +322,7 @@ class JSBuilderNode extends BaseNode {
 class BuilderNodeFinalizationRegisterProxy {
     constructor() {
         this.finalizationRegistry_ = new FinalizationRegistry((heldValue) => {
-            if (heldValue.name === "BuilderNode") {
+            if (heldValue.name === 'BuilderNode') {
                 const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
                 BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
                 builderNode.dispose();
@@ -335,6 +335,18 @@ class BuilderNodeFinalizationRegisterProxy {
 }
 BuilderNodeFinalizationRegisterProxy.instance_ = new BuilderNodeFinalizationRegisterProxy();
 BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_ = new Map();
+class FrameNodeFinalizationRegisterProxy {
+    constructor() {
+        this.finalizationRegistry_ = new FinalizationRegistry((heldValue) => {
+            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(heldValue);
+        });
+    }
+    static register(target, heldValue) {
+        FrameNodeFinalizationRegisterProxy.instance_.finalizationRegistry_.register(target, heldValue);
+    }
+}
+FrameNodeFinalizationRegisterProxy.instance_ = new FrameNodeFinalizationRegisterProxy();
+FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_ = new Map();
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -349,13 +361,6 @@ BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_ = new Map();
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const arkUINativeModule = globalThis.getArkUINativeModule();
-function GetUINativeModule() {
-    if (arkUINativeModule) {
-        return arkUINativeModule;
-    }
-    return arkUINativeModule;
-}
 class NodeController {
     constructor() {
         this.nodeContainerId_ = -1;
@@ -366,7 +371,7 @@ class NodeController {
     onTouchEvent(event) { }
     rebuild() {
         if (this.nodeContainerId_ >= 0) {
-            GetUINativeModule().nodeContainer.rebuild(this.nodeContainerId_);
+            getUINativeModule().nodeContainer.rebuild(this.nodeContainerId_);
         }
     }
 }
@@ -386,26 +391,45 @@ class NodeController {
  */
 class FrameNode {
     constructor(uiContext, type) {
-        this.renderNode_ = new RenderNode('FrameNode');
-        if (type === 'BuilderNode') {
+        this.uiContext_ = uiContext;
+        this.nodeId_ = -1;
+        if (type === 'BuilderNode' || type === 'ArkTsNode') {
+            this.renderNode_ = new RenderNode('BuilderNode');
+            this.type_ = type;
             return;
         }
+        this.renderNode_ = new RenderNode('FrameNode');
         this.baseNode_ = new BaseNode(uiContext);
-        this.nodePtr_ = this.baseNode_.createRenderNode(this);
+        this.nodePtr_ = this.baseNode_.createFrameNode(this);
+        this.nodeId_ = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this.nodeId_, new WeakRef(this));
+        FrameNodeFinalizationRegisterProxy.register(this, this.nodeId_);
         this.renderNode_.setNodePtr(this.nodePtr_);
         this.renderNode_.setBaseNode(this.baseNode_);
     }
     getRenderNode() {
         if (this.renderNode_ !== undefined &&
             this.renderNode_ !== null &&
-            this.renderNode_.getNodePtr() !== null) {
+            this.renderNode_.getNodePtr() !== null && this.type_ !== 'ArkTsNode') {
             return this.renderNode_;
         }
         return null;
     }
     setNodePtr(nodePtr) {
-        this.nodePtr_ = nodePtr;
         this.renderNode_.setNodePtr(nodePtr);
+        if (nodePtr === null) {
+            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this.nodeId_);
+            this.nodeId_ = -1;
+            this.nodePtr_ = null;
+            return;
+        }
+        this.nodePtr_ = nodePtr;
+        this.nodeId_ = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
+        if (this.nodeId_ === -1) {
+            return;
+        }
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this.nodeId_, new WeakRef(this));
+        FrameNodeFinalizationRegisterProxy.register(this, this.nodeId_);
     }
     setBaseNode(baseNode) {
         this.baseNode_ = baseNode;
@@ -416,6 +440,136 @@ class FrameNode {
     }
     dispose() {
         this.baseNode_.dispose();
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this.nodeId_);
+        this.nodeId_ = -1;
+        this.nodePtr_ = null;
+    }
+    checkType() {
+        if (!getUINativeModule().frameNode.isModifiable(this.nodePtr_)) {
+            throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+        }
+    }
+    isModifiable() {
+        return getUINativeModule().frameNode.isModifiable(this.nodePtr_);
+    }
+    convertToFrameNode(nodePtr) {
+        var nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+        if (nodeId !== -1 && !getUINativeModule().frameNode.isModifiable(nodePtr)) {
+            var frameNode = new FrameNode(this.uiContext_, 'ArkTsNode');
+            var baseNode = new BaseNode(this.uiContext_);
+            var node = baseNode.convertToFrameNode(nodePtr);
+            if (nodeId !== getUINativeModule().frameNode.getIdByNodePtr(node)) {
+                return null;
+            }
+            frameNode.setNodePtr(nodePtr);
+            frameNode.setBaseNode(baseNode);
+            frameNode.uiContext_ = this.uiContext_;
+            frameNode.nodeId_ = nodeId;
+            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode.nodeId_, new WeakRef(frameNode));
+            FrameNodeFinalizationRegisterProxy.register(frameNode, frameNode.nodeId_);
+            return frameNode;
+        }
+        return null;
+    }
+    appendChild(node) {
+        this.checkType();
+        if (node === undefined || node === null) {
+            return;
+        }
+        if (node.type_ === 'ArkTsNode') {
+            throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+        }
+        getUINativeModule().frameNode.appendChild(this.nodePtr_, node.nodePtr_);
+    }
+    insertChildAfter(child, sibling) {
+        this.checkType();
+        if (child === undefined || child === null) {
+            return;
+        }
+        if (child.type_ === 'ArkTsNode') {
+            throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+        }
+        if (sibling === undefined || sibling === null) {
+            getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, null);
+        }
+        else {
+            getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, sibling.nodePtr_);
+        }
+    }
+    removeChild(node) {
+        this.checkType();
+        if (node === undefined || node === null) {
+            return;
+        }
+        getUINativeModule().frameNode.removeChild(this.nodePtr_, node.nodePtr_);
+    }
+    clearChildren() {
+        this.checkType();
+        getUINativeModule().frameNode.clearChildren(this.nodePtr_);
+    }
+    getChild(index) {
+        const nodePtr = getUINativeModule().frameNode.getChild(this.nodePtr_, index);
+        var nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+        if (nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(nodePtr);
+    }
+    getFirstChild() {
+        const nodePtr = getUINativeModule().frameNode.getFirst(this.nodePtr_);
+        var nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+        if (nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(nodePtr);
+    }
+    getNextSibling() {
+        const nodePtr = getUINativeModule().frameNode.getNextSibling(this.nodePtr_);
+        var nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+        if (nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(nodePtr);
+    }
+    getPreviousSibling() {
+        const nodePtr = getUINativeModule().frameNode.getPreviousSibling(this.nodePtr_);
+        var nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+        if (nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(nodePtr);
+    }
+    getParent() {
+        const nodePtr = getUINativeModule().frameNode.getParent(this.nodePtr_);
+        var nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+        if (nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(nodePtr);
+    }
+    getChildrenCount() {
+        const number = getUINativeModule().frameNode.getChildNumber(this.nodePtr_);
+        return number;
     }
 }
 /*
@@ -508,7 +662,7 @@ class RenderNode {
             0, 0, 1, 0,
             0, 0, 0, 1];
         this.translationValue = { x: 0, y: 0 };
-        if (type === 'FrameNode') {
+        if (type === 'BuilderNode' || type === 'FrameNode') {
             return;
         }
         this.baseNode_ = new __JSBaseNode__();
@@ -517,11 +671,11 @@ class RenderNode {
     }
     set backgroundColor(color) {
         this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue(color, 0);
-        GetUINativeModule().renderNode.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
+        getUINativeModule().renderNode.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
     }
     set clipToFrame(useClip) {
         this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue(useClip, false);
-        GetUINativeModule().renderNode.setClipToFrame(this.nodePtr, this.clipToFrameValue);
+        getUINativeModule().renderNode.setClipToFrame(this.nodePtr, this.clipToFrameValue);
     }
     set frame(frame) {
         if (frame === undefined || frame === null) {
@@ -534,7 +688,7 @@ class RenderNode {
     }
     set opacity(value) {
         this.opacityValue = this.checkUndefinedOrNullWithDefaultValue(value, 1.0);
-        GetUINativeModule().common.setOpacity(this.nodePtr, this.opacityValue);
+        getUINativeModule().common.setOpacity(this.nodePtr, this.opacityValue);
     }
     set pivot(pivot) {
         if (pivot === undefined || pivot === null) {
@@ -544,7 +698,7 @@ class RenderNode {
             this.pivotValue.x = this.checkUndefinedOrNullWithDefaultValue(pivot.x, 0.5);
             this.pivotValue.y = this.checkUndefinedOrNullWithDefaultValue(pivot.y, 0.5);
         }
-        GetUINativeModule().renderNode.setPivot(this.nodePtr, this.pivotValue.x, this.pivotValue.y);
+        getUINativeModule().renderNode.setPivot(this.nodePtr, this.pivotValue.x, this.pivotValue.y);
     }
     set position(position) {
         if (position === undefined || position === null) {
@@ -555,7 +709,7 @@ class RenderNode {
             this.frameValue.x = this.checkUndefinedOrNullWithDefaultValue(position.x, 0);
             this.frameValue.y = this.checkUndefinedOrNullWithDefaultValue(position.y, 0);
         }
-        GetUINativeModule().common.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y);
+        getUINativeModule().common.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y);
     }
     set rotation(rotation) {
         if (rotation === undefined || rotation === null) {
@@ -566,7 +720,7 @@ class RenderNode {
             this.rotationValue.y = this.checkUndefinedOrNullWithDefaultValue(rotation.y, 0);
             this.rotationValue.z = this.checkUndefinedOrNullWithDefaultValue(rotation.z, 0);
         }
-        GetUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z);
+        getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z);
     }
     set scale(scale) {
         if (scale === undefined || scale === null) {
@@ -576,11 +730,11 @@ class RenderNode {
             this.scaleValue.x = this.checkUndefinedOrNullWithDefaultValue(scale.x, 1.0);
             this.scaleValue.y = this.checkUndefinedOrNullWithDefaultValue(scale.y, 1.0);
         }
-        GetUINativeModule().renderNode.setScale(this.nodePtr, this.scaleValue.x, this.scaleValue.y);
+        getUINativeModule().renderNode.setScale(this.nodePtr, this.scaleValue.x, this.scaleValue.y);
     }
     set shadowColor(color) {
         this.shadowColorValue = this.checkUndefinedOrNullWithDefaultValue(color, 0);
-        GetUINativeModule().renderNode.setShadowColor(this.nodePtr, this.shadowColorValue);
+        getUINativeModule().renderNode.setShadowColor(this.nodePtr, this.shadowColorValue);
     }
     set shadowOffset(offset) {
         if (offset === undefined || offset === null) {
@@ -590,19 +744,19 @@ class RenderNode {
             this.shadowOffsetValue.x = this.checkUndefinedOrNullWithDefaultValue(offset.x, 0);
             this.shadowOffsetValue.y = this.checkUndefinedOrNullWithDefaultValue(offset.y, 0);
         }
-        GetUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y);
+        getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y);
     }
     set shadowAlpha(alpha) {
         this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue(alpha, 0);
-        GetUINativeModule().renderNode.setShadowAlpha(this.nodePtr, this.shadowAlphaValue);
+        getUINativeModule().renderNode.setShadowAlpha(this.nodePtr, this.shadowAlphaValue);
     }
     set shadowElevation(elevation) {
         this.shadowElevationValue = this.checkUndefinedOrNullWithDefaultValue(elevation, 0);
-        GetUINativeModule().renderNode.setShadowElevation(this.nodePtr, this.shadowElevationValue);
+        getUINativeModule().renderNode.setShadowElevation(this.nodePtr, this.shadowElevationValue);
     }
     set shadowRadius(radius) {
         this.shadowRadiusValue = this.checkUndefinedOrNullWithDefaultValue(radius, 0);
-        GetUINativeModule().renderNode.setShadowRadius(this.nodePtr, this.shadowRadiusValue);
+        getUINativeModule().renderNode.setShadowRadius(this.nodePtr, this.shadowRadiusValue);
     }
     set size(size) {
         if (size === undefined || size === null) {
@@ -613,7 +767,7 @@ class RenderNode {
             this.frameValue.width = this.checkUndefinedOrNullWithDefaultValue(size.width, 0);
             this.frameValue.height = this.checkUndefinedOrNullWithDefaultValue(size.height, 0);
         }
-        GetUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
+        getUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
     }
     set transform(transform) {
         if (transform === undefined || transform === null) {
@@ -634,7 +788,7 @@ class RenderNode {
                 i = i + 1;
             }
         }
-        GetUINativeModule().common.setTransform(this.nodePtr, this.transformValue);
+        getUINativeModule().common.setTransform(this.nodePtr, this.transformValue);
     }
     set translation(translation) {
         if (translation === undefined || translation === null) {
@@ -644,7 +798,7 @@ class RenderNode {
             this.translationValue.x = this.checkUndefinedOrNullWithDefaultValue(translation.x, 0);
             this.translationValue.y = this.checkUndefinedOrNullWithDefaultValue(translation.y, 0);
         }
-        GetUINativeModule().renderNode.setTranslate(this.nodePtr, this.translationValue.x, this.translationValue.y, 0);
+        getUINativeModule().renderNode.setTranslate(this.nodePtr, this.translationValue.x, this.translationValue.y, 0);
     }
     get backgroundColor() {
         return this.backgroundColorValue;
@@ -711,7 +865,7 @@ class RenderNode {
         }
         this.childrenList.push(node);
         node.parentRenderNode = this;
-        GetUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
+        getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
     }
     insertChildAfter(child, sibling) {
         if (child === undefined || child === null) {
@@ -728,11 +882,11 @@ class RenderNode {
         }
         if (sibling === undefined || sibling === null) {
             this.childrenList.splice(0, 0, child);
-            GetUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, null);
+            getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, null);
         }
         else {
             this.childrenList.splice(indexOfSibling + 1, 0, child);
-            GetUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
+            getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
         }
     }
     removeChild(node) {
@@ -746,11 +900,11 @@ class RenderNode {
         const child = this.childrenList[index];
         child.parentRenderNode = null;
         this.childrenList.splice(index, 1);
-        GetUINativeModule().renderNode.removeChild(this.nodePtr, node.nodePtr);
+        getUINativeModule().renderNode.removeChild(this.nodePtr, node.nodePtr);
     }
     clearChildren() {
         this.childrenList = new Array();
-        GetUINativeModule().renderNode.clearChildren(this.nodePtr);
+        getUINativeModule().renderNode.clearChildren(this.nodePtr);
     }
     getChild(index) {
         if (this.childrenList.length > index && index >= 0) {
@@ -801,7 +955,7 @@ class RenderNode {
     draw(context) {
     }
     invalidate() {
-        GetUINativeModule().renderNode.invalidate(this.nodePtr);
+        getUINativeModule().renderNode.invalidate(this.nodePtr);
     }
     set borderStyle(style) {
         if (style === undefined || style === null) {
@@ -810,7 +964,7 @@ class RenderNode {
         else {
             this.borderStyleValue = style;
         }
-        GetUINativeModule().renderNode.setBorderStyle(this.nodePtr, this.borderStyleValue.left, this.borderStyleValue.top, this.borderStyleValue.right, this.borderStyleValue.bottom);
+        getUINativeModule().renderNode.setBorderStyle(this.nodePtr, this.borderStyleValue.left, this.borderStyleValue.top, this.borderStyleValue.right, this.borderStyleValue.bottom);
     }
     get borderStyle() {
         return this.borderStyleValue;
@@ -822,7 +976,7 @@ class RenderNode {
         else {
             this.borderWidthValue = width;
         }
-        GetUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom);
+        getUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom);
     }
     get borderWidth() {
         return this.borderWidthValue;
@@ -834,7 +988,7 @@ class RenderNode {
         else {
             this.borderColorValue = color;
         }
-        GetUINativeModule().renderNode.setBorderColor(this.nodePtr, this.borderColorValue.left, this.borderColorValue.top, this.borderColorValue.right, this.borderColorValue.bottom);
+        getUINativeModule().renderNode.setBorderColor(this.nodePtr, this.borderColorValue.left, this.borderColorValue.top, this.borderColorValue.right, this.borderColorValue.bottom);
     }
     get borderColor() {
         return this.borderColorValue;
@@ -846,7 +1000,7 @@ class RenderNode {
         else {
             this.borderRadiusValue = radius;
         }
-        GetUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight);
+        getUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight);
     }
     get borderRadius() {
         return this.borderRadiusValue;
@@ -860,25 +1014,25 @@ class RenderNode {
         }
         if (this.shapeMaskValue.rect !== null) {
             const rectMask = this.shapeMaskValue.rect;
-            GetUINativeModule().renderNode.setRectMask(this.nodePtr, rectMask.left, rectMask.top, rectMask.right, rectMask.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+            getUINativeModule().renderNode.setRectMask(this.nodePtr, rectMask.left, rectMask.top, rectMask.right, rectMask.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
         }
         else if (this.shapeMaskValue.circle !== null) {
             const circle = this.shapeMaskValue.circle;
-            GetUINativeModule().renderNode.setCircleMask(this.nodePtr, circle.centerX, circle.centerY, circle.radius, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+            getUINativeModule().renderNode.setCircleMask(this.nodePtr, circle.centerX, circle.centerY, circle.radius, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
         }
         else if (this.shapeMaskValue.roundRect !== null) {
             const reoundRect = this.shapeMask.roundRect;
             const corners = reoundRect.corners;
             const rect = reoundRect.rect;
-            GetUINativeModule().renderNode.setRoundRectMask(this.nodePtr, corners.topLeft.x, corners.topLeft.y, corners.topRight.x, corners.topRight.y, corners.bottomLeft.x, corners.bottomLeft.y, corners.bottomRight.x, corners.bottomRight.y, rect.left, rect.top, rect.right, rect.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+            getUINativeModule().renderNode.setRoundRectMask(this.nodePtr, corners.topLeft.x, corners.topLeft.y, corners.topRight.x, corners.topRight.y, corners.bottomLeft.x, corners.bottomLeft.y, corners.bottomRight.x, corners.bottomRight.y, rect.left, rect.top, rect.right, rect.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
         }
         else if (this.shapeMaskValue.oval !== null) {
             const oval = this.shapeMaskValue.oval;
-            GetUINativeModule().renderNode.setOvalMask(this.nodePtr, oval.left, oval.top, oval.right, oval.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+            getUINativeModule().renderNode.setOvalMask(this.nodePtr, oval.left, oval.top, oval.right, oval.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
         }
         else if (this.shapeMaskValue.path !== null) {
             const path = this.shapeMaskValue.path;
-            GetUINativeModule().renderNode.setPath(this.nodePtr, path.commands, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+            getUINativeModule().renderNode.setPath(this.nodePtr, path.commands, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
         }
     }
     get shapeMask() {
@@ -915,7 +1069,7 @@ class XComponentNode extends FrameNode {
     constructor(uiContext, options, id, type, libraryname) {
         super(uiContext, 'XComponentNode');
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-        this.xcomponentNode_ = GetUINativeModule().xcomponentNode;
+        this.xcomponentNode_ = getUINativeModule().xcomponentNode;
         this.renderType_ = options.type;
         const surfaceId = options.surfaceId;
         const selfIdealWidth = options.selfIdealSize.width;

@@ -31,3 +31,18 @@ class BuilderNodeFinalizationRegisterProxy {
   public static ElementIdToOwningBuilderNode_ = new Map<Symbol, BaseNode>();
   private finalizationRegistry_: FinalizationRegistry;
 }
+
+class FrameNodeFinalizationRegisterProxy {
+  constructor() {
+    this.finalizationRegistry_ = new FinalizationRegistry((heldValue: number) => {
+      FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(heldValue);
+    });
+  }
+  public static register(target: FrameNode, heldValue: number) {
+    FrameNodeFinalizationRegisterProxy.instance_.finalizationRegistry_.register(target, heldValue);
+  }
+
+  public static instance_: FrameNodeFinalizationRegisterProxy = new FrameNodeFinalizationRegisterProxy();
+  public static ElementIdToOwningFrameNode_ = new Map<number, WeakRef<FrameNode>>();
+  private finalizationRegistry_: FinalizationRegistry;
+}
