@@ -1243,6 +1243,8 @@ struct ArkUITextModifier {
     ArkUI_Float32 (*getFontSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getFontWeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getItalicFontStyle)(ArkUINodeHandle node);
+    void (*setEllipsisMode)(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode);
+    void (*resetEllipsisMode)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {

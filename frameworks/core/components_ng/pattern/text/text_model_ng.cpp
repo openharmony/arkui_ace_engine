@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -469,6 +470,11 @@ void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
 void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value, frameNode);
+}
+
+void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value, frameNode);
 }
 
 void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType,
