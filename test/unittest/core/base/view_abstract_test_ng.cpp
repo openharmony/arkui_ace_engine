@@ -1842,6 +1842,31 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest041, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ViewAbstractTest042
+ * @tc.desc: Test the DismissDialog of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Change some params，callback DismissDialog function.
+     * @tc.expected: DismissDialog function is called.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+    auto overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    overlayManager->RemoveDialog(overlay, false, false);
+    auto pattern = overlay->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    ViewAbstract::DismissDialog();
+}
+
+/**
  * @tc.name: ViewAbstractDisableClickTest
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
