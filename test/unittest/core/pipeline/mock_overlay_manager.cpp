@@ -65,17 +65,20 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 }
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {}
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
     std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {}
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
     std::map<std::string, NG::DialogTextEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {}
 
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)

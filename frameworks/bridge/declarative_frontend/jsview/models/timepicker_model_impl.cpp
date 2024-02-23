@@ -59,7 +59,8 @@ void TimePickerModelImpl::SetBackgroundColor(const Color& color)
 
 void TimePickerDialogModelImpl::SetTimePickerDialogShow(PickerDialogInfo& pickerDialog,
     NG::TimePickerSettingData& settingData, std::function<void()>&& onCancel,
-    std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange)
+    std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
+    TimePickerDialogEvent& timePickerDialogEvent)
 {
     RefPtr<Component> component;
     auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();

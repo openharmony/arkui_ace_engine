@@ -357,6 +357,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(theme);
     auto root = rootNodeWeak_.Upgrade();
     auto dialogPattern = node->GetPattern<DialogPattern>();
+    dialogPattern->CallDialogWillAppearCallback();
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         root = dialogPattern->GetDialogProperties().windowScene.Upgrade();
@@ -384,6 +385,8 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
             auto node = nodeWK.Upgrade();
             CHECK_NULL_VOID(overlayManager && node);
             overlayManager->FocusOverlayNode(node);
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            dialogPattern->CallDialogDidAppearCallback();
         });
     auto ctx = node->GetRenderContext();
     option.SetFinishCallbackType(dialogPattern->GetOpenAnimation().has_value()
@@ -423,6 +426,7 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     option.SetDuration(theme->GetAnimationDurationOut());
     // get customized animation params
     auto dialogPattern = node->GetPattern<DialogPattern>();
+    dialogPattern->CallDialogWillDisappearCallback();
     option = dialogPattern->GetCloseAnimation().value_or(option);
     option.SetIteration(1);
     option.SetAnimationDirection(AnimationDirection::NORMAL);
@@ -431,6 +435,10 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->PostDialogFinishEvent(nodeWk);
+        auto node = nodeWk.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto dialogPattern = node->GetPattern<DialogPattern>();
+        dialogPattern->CallDialogDidDisappearCallback();
     });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -1483,34 +1491,61 @@ void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
     OpenDialogAnimation(customNode);
 }
 
+void RegisterDialogCallback(
+    const RefPtr<FrameNode>& node, std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
+{
+    CHECK_NULL_VOID(node);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(theme);
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    if (!dialogLifeCycleEvent.empty()) {
+        auto didAppearEvent = dialogLifeCycleEvent["didAppearId"];
+        auto didDisappearEvent = dialogLifeCycleEvent["didDisappearId"];
+        auto willAppearEvent = dialogLifeCycleEvent["willAppearId"];
+        auto willDisappearEvent = dialogLifeCycleEvent["willDisappearId"];
+        dialogPattern->RegisterDialogDidAppearCallback(std::move(didAppearEvent));
+        dialogPattern->RegisterDialogDidDisappearCallback(std::move(didDisappearEvent));
+        dialogPattern->RegisterDialogWillAppearCallback(std::move(willAppearEvent));
+        dialogPattern->RegisterDialogWillDisappearCallback(std::move(willDisappearEvent));
+    }
+}
+
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show date dialog enter");
     auto dialogNode = DatePickerDialogView::Show(
         dialogProps, std::move(settingData), std::move(dialogEvent), std::move(dialogCancelEvent));
+    RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
     std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show time dialog enter");
     auto dialogNode = TimePickerDialogView::Show(
         dialogProps, settingData, std::move(timePickerProperty), std::move(dialogEvent), std::move(dialogCancelEvent));
+    RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
     std::map<std::string, NG::DialogTextEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show text dialog enter");
     auto dialogNode =
         TextPickerDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
+    RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
@@ -1521,11 +1556,13 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
 }
 
 void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show calendar dialog enter");
     auto dialogNode =
         CalendarDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
+    RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
 }

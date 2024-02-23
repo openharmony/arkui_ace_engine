@@ -150,6 +150,54 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    void RegisterDialogDidAppearCallback(std::function<void()>&& onDidAppear)
+    {
+        onDidAppearCallback_ = std::move(onDidAppear);
+    }
+
+    void RegisterDialogDidDisappearCallback(std::function<void()>&& onDidDisappear)
+    {
+        onDidDisappearCallback_ = std::move(onDidDisappear);
+    }
+
+    void RegisterDialogWillAppearCallback(std::function<void()>&& onWillAppear)
+    {
+        onWillAppearCallback_ = std::move(onWillAppear);
+    }
+
+    void RegisterDialogWillDisappearCallback(std::function<void()>&& onWillDisappear)
+    {
+        onWillDisappearCallback_ = std::move(onWillDisappear);
+    }
+
+    void CallDialogDidAppearCallback()
+    {
+        if (onDidAppearCallback_) {
+            onDidAppearCallback_();
+        }
+    }
+
+    void CallDialogDidDisappearCallback()
+    {
+        if (onDidDisappearCallback_) {
+            onDidDisappearCallback_();
+        }
+    }
+
+    void CallDialogWillAppearCallback()
+    {
+        if (onWillAppearCallback_) {
+            onWillAppearCallback_();
+        }
+    }
+
+    void CallDialogWillDisappearCallback()
+    {
+        if (onWillDisappearCallback_) {
+            onWillDisappearCallback_();
+        }
+    }
+
 private:
     bool AvoidKeyboard() const override
     {
@@ -216,6 +264,11 @@ private:
     RefPtr<FrameNode> buttonContainer_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
+
+    std::function<void()> onDidAppearCallback_ = nullptr;
+    std::function<void()> onDidDisappearCallback_ = nullptr;
+    std::function<void()> onWillAppearCallback_ = nullptr;
+    std::function<void()> onWillDisappearCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 
