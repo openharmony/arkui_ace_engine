@@ -41,6 +41,7 @@ public:
         const std::string& id, NG::ScrollEventType eventType, float offset);
     void OnRouterPageStateChange(napi_value context, int32_t index,
         const std::string& name, const std::string& path, NG::RouterPageState state);
+    void OnDensityChange(double density);
     bool NapiEqual(napi_value cb);
 
 private:

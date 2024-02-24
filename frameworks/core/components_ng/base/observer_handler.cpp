@@ -80,6 +80,17 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
     routerPageHandleFunc_(info, context, index, name, path, state);
 }
 
+void UIObserverHandler::NotifyDensityChange(double density)
+{
+    CHECK_NULL_VOID(densityHandleFunc_);
+    AbilityContextInfo info = {
+        AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(),
+        Container::Current()->GetModuleName()
+    };
+    densityHandleFunc_(info, density);
+}
+
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -163,6 +174,11 @@ void UIObserverHandler::SetHandleScrollEventChangeFunc(ScrollEventHandleFunc fun
 void UIObserverHandler::SetHandleRouterPageChangeFunc(RouterPageHandleFunc func)
 {
     routerPageHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleDensityChangeFunc(const DensityHandleFunc& func)
+{
+    densityHandleFunc_ = func;
 }
 
 napi_value UIObserverHandler::GetUIContextValue()
