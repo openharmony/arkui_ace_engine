@@ -508,6 +508,101 @@ struct ArkUIFlexOptions {
     ArkUI_Int32 alignContent;
 };
 
+struct ArkUIAnimationOptionType {
+    ArkUI_Int32 duration;
+    ArkUI_Int32 curve;
+    ArkUI_Int32 delay;
+    ArkUI_Int32 iteration;
+    ArkUI_Int32 playMode;
+    ArkUI_Float32 tempo;
+};
+
+struct ArkUITransformCenterType {
+    ArkUI_Float32 centerX;
+    ArkUI_Float32 centerY;
+    ArkUI_Float32 centerZ;
+};
+
+struct ArkUIOpacityTransitionType {
+    ArkUI_Float32 opacity;
+    ArkUIAnimationOptionType animation;
+};
+
+struct ArkUIRotateTransitionType {
+    ArkUI_Float32 xRotation;
+    ArkUI_Float32 yRotation;
+    ArkUI_Float32 zRotation;
+    ArkUI_Float32 angle;
+    ArkUI_Float32 perspective;
+    ArkUIAnimationOptionType animation;
+};
+
+struct ArkUIScaleTransitionType {
+    ArkUI_Float32 xScale;
+    ArkUI_Float32 yScale;
+    ArkUI_Float32 zScale;
+    ArkUIAnimationOptionType animation;
+};
+
+struct ArkUITranslateTransitionType {
+    ArkUI_Float32 xTransition;
+    ArkUI_Float32 yTransition;
+    ArkUI_Float32 zTransition;
+    ArkUIAnimationOptionType animation;
+};
+
+struct ArkUIOffsetType {
+    ArkUI_Float32 xComponent;
+    ArkUI_Float32 yComponent;
+};
+
+struct ArkUIAnchorType {
+    ArkUI_Float32 xCoordinate;
+    ArkUI_Float32 yCoordinate;
+};
+
+struct ArkUIImageSizeType {
+    ArkUI_Float32 xValue;
+    ArkUI_Float32 yValue;
+    ArkUI_Int32 xType;
+    ArkUI_Int32 yType;
+};
+
+struct ArkUIBlurStyleOptionType {
+    ArkUI_Int32 blurStyle;
+    ArkUI_Int32 colorMode;
+    ArkUI_Int32 adaptiveColor;
+    ArkUI_Float32 scale;
+};
+
+struct ArkUITextDecorationType {
+    ArkUI_Int32 decorationType;
+    ArkUI_Uint32 color;
+};
+
+struct ArkUIFilterColorType {
+    ArkUI_Int32* filterArray;
+    ArkUI_Int32 filterSize;
+};
+
+struct ArkUISelectedDateType {
+    ArkUI_Uint32 year;
+    ArkUI_Uint32 month;
+    ArkUI_Uint32 day;
+};
+
+struct ArkUICalendarTextStyleType {
+    ArkUI_Uint32 fontColor;
+    ArkUI_Float32 fontSize;
+    ArkUI_Int32 fontWeight;
+};
+
+struct ArkUIEdgeAlignType {
+    ArkUI_Int32 alignType;
+    ArkUI_Float32 offsetX;
+    ArkUI_Float32 offsetY;
+};
+
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
     ARKUI_SPAN,
@@ -630,7 +725,8 @@ enum ArkUIAsyncEventKind {
     ON_REFRESH_STATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_REFRESH,
     ON_REFRESH_REFRESHING,
     ON_DATE_PICKER_DATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_DATE_PICKER,
-    ON_TIME_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TIME_PICKER
+    ON_TIME_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TIME_PICKER,
+    ON_CALENDAR_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_CALENDAR_PICKER,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -782,15 +878,6 @@ struct ArkUIBorderOptions {
     ArkUI_Float32* radiusValues;
     ArkUI_Int32* radiusUnits;
     ArkUI_Int32* styles;
-};
-
-struct ArkUIAnimationOptionType {
-    ArkUI_Int32 duration;
-    ArkUI_CharPtr curve;
-    ArkUI_Int32 delay;
-    ArkUI_Int32 iteration;
-    ArkUI_Int32 palyMode;
-    ArkUI_Float32 tempo;
 };
 
 struct ArkUITextFont {
@@ -1101,6 +1188,16 @@ struct ArkUICommonModifier {
     ArkUI_Int32 (*getBlendMode)(ArkUINodeHandle node);
     ArkUI_Int32 (*getDirection)(ArkUINodeHandle node);
     ArkUI_Int32 (*getAlignSelf)(ArkUINodeHandle node);
+    ArkUITransformCenterType (*getTransformCenter)(ArkUINodeHandle node);
+    ArkUIOpacityTransitionType (*getOpacityTransition)(ArkUINodeHandle node);
+    ArkUIRotateTransitionType (*getRotateTransition)(ArkUINodeHandle node);
+    ArkUIScaleTransitionType (*getScaleTransition)(ArkUINodeHandle node);
+    ArkUITranslateTransitionType (*getTranslateTransition)(ArkUINodeHandle node);
+    ArkUIOffsetType (*getOffset)(ArkUINodeHandle node);
+    ArkUIAnchorType (*getMarkAnchor)(ArkUINodeHandle node);
+    ArkUIBlurStyleOptionType (*getBackgroundBlurStyle)(ArkUINodeHandle node);
+    ArkUIImageSizeType (*getBackgroundImageSize)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getBackgroundImageSizeWithStyle)(ArkUINodeHandle node);
     ArkUI_Float32 (*getFlexGrow)(ArkUINodeHandle node);
     ArkUI_Float32 (*getFlexShrink)(ArkUINodeHandle node);
     ArkUI_Float32 (*getFlexBasis)(ArkUINodeHandle node);
@@ -1245,6 +1342,15 @@ struct ArkUITextModifier {
     ArkUI_Float32 (*getFontSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getFontWeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getItalicFontStyle)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getTextContent)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextLineHeight)(ArkUINodeHandle node);
+    ArkUITextDecorationType (*getTextDecoration)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextTextCase)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextLetterSpacing)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextMaxLines)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextAlign)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextTextOverflow)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextTextIndent)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -1323,6 +1429,13 @@ struct ArkUIImageModifier {
     void (*resetImageOpacity)(ArkUINodeHandle node);
     void (*setEdgeAntialiasing)(ArkUINodeHandle node, ArkUI_Float32 edgeAntialiasing);
     void (*resetEdgeAntialiasing)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getImageSrc)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getAutoResize)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getObjectRepeat)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getObjectFit)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getImageInterpolation)(ArkUINodeHandle node);
+    ArkUIFilterColorType (*getColorFilter)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getAlt)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {
@@ -1487,6 +1600,7 @@ struct ArkUISwiperControllerModifier {
 struct ArkUIStackModifier {
     void (*setAlignContent)(ArkUINodeHandle node, ArkUI_Int32 alignment);
     void (*resetAlignContent)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getAlignContent)(ArkUINodeHandle node);
 };
 
 struct ArkUINavigatorModifier {
@@ -2019,6 +2133,8 @@ struct ArkUIImageSpanModifier {
     void (*resetImageSpanVerticalAlign)(ArkUINodeHandle node);
     void (*setImageSpanObjectFit)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetImageSpanObjectFit)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getImageSpanVerticalAlign)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getImageSpanObjectFit)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuModifier {
@@ -2273,6 +2389,11 @@ struct ArkUISideBarContainerModifier {
 };
 
 struct ArkUICalendarPickerModifier {
+    void (*setHintRadius)(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Int32 unit);
+    void (*setSelectDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetSelectDate)(ArkUINodeHandle node);
+    void (*setTextStyleWithWeightEnum)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 fontSize, ArkUI_Int32 unit, ArkUI_Int32 fontWeight);
     void (*setTextStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontSize, ArkUI_CharPtr fontWeight);
     void (*resetTextStyle)(ArkUINodeHandle node);
     void (*setEdgeAlign)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 size,
@@ -2283,6 +2404,10 @@ struct ArkUICalendarPickerModifier {
     void (*resetCalendarPickerPadding)(ArkUINodeHandle node);
     void (*setCalendarPickerBorder)(ArkUINodeHandle node, const ArkUI_Uint32 color);
     void (*resetCalendarPickerBorder)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getHintRadius)(ArkUINodeHandle node);
+    ArkUISelectedDateType (*getSelectedDate)(ArkUINodeHandle node);
+    ArkUICalendarTextStyleType (*getCalendarPickerTextStyle)(ArkUINodeHandle node);
+    ArkUIEdgeAlignType (*getEdgeAlign)(ArkUINodeHandle node);
 };
 
 struct ArkUIRatingModifier {
@@ -2470,6 +2595,15 @@ struct ArkUISpanModifier {
     void (*setSpanFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
     void (*resetSpanFont)(ArkUINodeHandle node);
     void (*setSpanFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    ArkUI_CharPtr (*getSpanContent)(ArkUINodeHandle node);
+    ArkUITextDecorationType (*getSpanDecoration)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getSpanFontColor)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getSpanFontSize)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSpanFontStyle)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSpanFontWeight)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getSpanLineHeight)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSpanTextCase)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getSpanLetterSpacing)(ArkUINodeHandle node);
 };
 
 struct ArkUISelectModifier {

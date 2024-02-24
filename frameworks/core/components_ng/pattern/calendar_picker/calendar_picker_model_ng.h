@@ -42,6 +42,14 @@ public:
         int32_t contentId, const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme);
     static RefPtr<FrameNode> CreateButtonFlexChild(int32_t buttonFlexId, const RefPtr<CalendarTheme>& theme);
     static RefPtr<FrameNode> CreateDateTextNode(const std::string& textContent);
+    static void SetHintRadiusWithNode(FrameNode* frameNode, Dimension& radius);
+    static void SetSelectDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day);
+    static Dimension GetHintRadius(FrameNode* frameNode);
+    static PickerDate GetSelectDateWithNode(FrameNode* frameNode);
+    static PickerTextStyle GetTextStyle(FrameNode* frameNode);
+    static CalendarEdgeAlign GetEdgeAlignType(FrameNode* frameNode);
+    static DimensionOffset GetEdgeOffset(FrameNode* frameNode);
+    static void SetOnChangeWithNode(FrameNode* frameNode, SelectedChangeEvent&& onChange);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_NG_H

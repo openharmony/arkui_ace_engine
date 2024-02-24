@@ -67,5 +67,28 @@ RefPtr<FrameNode> ImageSpanView::CreateFrameNode(int32_t nodeId)
     return imageSpanNode;
 }
 
+ImageSourceInfo ImageSpanView::GetImageSpanSrc(FrameNode* frameNode)
+{
+    ImageSourceInfo defaultImageSource;
+    CHECK_NULL_RETURN(frameNode, defaultImageSource);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultImageSource);
+    return layoutProperty->GetImageSourceInfo().value_or(defaultImageSource);
+}
 
+ImageFit ImageSpanView::GetObjectFit(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ImageFit::COVER);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ImageFit::COVER);
+    return layoutProperty->GetImageFit().value_or(ImageFit::COVER);
+}
+
+VerticalAlign ImageSpanView::GetVerticalAlign(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, VerticalAlign::BOTTOM);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, VerticalAlign::BOTTOM);
+    return layoutProperty->GetVerticalAlign().value_or(VerticalAlign::BOTTOM);
+}
 } // namespace OHOS::Ace::NG

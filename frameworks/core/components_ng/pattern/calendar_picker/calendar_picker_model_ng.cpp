@@ -323,6 +323,47 @@ void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextS
         CalendarPickerLayoutProperty, Weight, textStyle.fontWeight.value_or(FontWeight::NORMAL), frameNode);
 }
 
+RefPtr<CalendarTheme> GetDefaultTextTheme()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<CalendarTheme>();
+}
+
+PickerTextStyle CalendarPickerModelNG::GetTextStyle(FrameNode* frameNode)
+{
+    PickerTextStyle textStyle;
+    CHECK_NULL_RETURN(frameNode, textStyle);
+    auto calendarTheme = GetDefaultTextTheme();
+    CHECK_NULL_RETURN(calendarTheme, textStyle);
+    auto calendarPickerProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    CHECK_NULL_RETURN(calendarPickerProperty, textStyle);
+    textStyle.textColor =
+        calendarPickerProperty->HasColor() ? calendarPickerProperty->GetColor() : calendarTheme->GetEntryFontColor();
+    textStyle.fontSize = calendarPickerProperty->HasFontSize() ? calendarPickerProperty->GetFontSize()
+                                                               : calendarTheme->GetEntryFontSize();
+    textStyle.fontWeight =
+        calendarPickerProperty->HasWeight() ? calendarPickerProperty->GetWeight() : FontWeight::NORMAL;
+    return textStyle;
+}
+
+CalendarEdgeAlign CalendarPickerModelNG::GetEdgeAlignType(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, CalendarEdgeAlign::EDGE_ALIGN_END);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, CalendarEdgeAlign::EDGE_ALIGN_END);
+    return layoutProperty->GetDialogAlignType().value_or(CalendarEdgeAlign::EDGE_ALIGN_END);
+}
+
+DimensionOffset CalendarPickerModelNG::GetEdgeOffset(FrameNode* frameNode)
+{
+    DimensionOffset offsetDimension(0.0_vp, 0.0_vp);
+    CHECK_NULL_RETURN(frameNode, offsetDimension);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offsetDimension);
+    return layoutProperty->GetDialogOffset().value_or(offsetDimension);
+}
+
 void CalendarPickerModelNG::SetEdgeAlign(
     FrameNode* frameNode, const CalendarEdgeAlign& alignType, const DimensionOffset& offset)
 {
@@ -343,5 +384,58 @@ void CalendarPickerModelNG::SetPadding(FrameNode* frameNode, const PaddingProper
     auto linearLayoutProperty = contentNode->GetLayoutProperty();
     CHECK_NULL_VOID(linearLayoutProperty);
     linearLayoutProperty->UpdatePadding(padding);
+}
+
+void CalendarPickerModelNG::SetHintRadiusWithNode(FrameNode* frameNode, Dimension& radius)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    auto calendarDate = pickerPattern->GetCalendarData();
+    calendarDate.dayRadius = radius;
+}
+
+void CalendarPickerModelNG::SetSelectDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    auto calendarDate = pickerPattern->GetCalendarData();
+    if (year > 0) {
+        calendarDate.selectedDate.SetYear(year);
+    }
+    if (month > 0) {
+        calendarDate.selectedDate.SetMonth(year);
+    }
+    if (day > 0) {
+        calendarDate.selectedDate.SetDay(day);
+    }
+}
+
+Dimension CalendarPickerModelNG::GetHintRadius(FrameNode* frameNode)
+{
+    Dimension defaultRadius(0);
+    CHECK_NULL_RETURN(frameNode, defaultRadius);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, defaultRadius);
+    auto calendarDate = pickerPattern->GetCalendarData();
+    return calendarDate.dayRadius.value_or(defaultRadius);
+}
+
+PickerDate CalendarPickerModelNG::GetSelectDateWithNode(FrameNode* frameNode)
+{
+    auto defaultSelectedDate = PickerDate::Current();
+    CHECK_NULL_RETURN(frameNode, defaultSelectedDate);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, defaultSelectedDate);
+    return pickerPattern->GetCalendarData().selectedDate;
+}
+
+void CalendarPickerModelNG::SetOnChangeWithNode(FrameNode* frameNode, SelectedChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChange));
 }
 } // namespace OHOS::Ace::NG
