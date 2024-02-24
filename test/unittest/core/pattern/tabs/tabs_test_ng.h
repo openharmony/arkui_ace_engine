@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,6 +119,7 @@ public:
 
     static void CreateItem(
         int32_t itemNumber, const std::function<void(TabContentModelNG, int32_t)>& callback = nullptr);
+    static void CreateSingleItem(const std::function<void(TabContentModelNG)>& callback, int32_t nodeId);
     static TabBarBuilderFunc TabBarItemBuilder();
 
     RefPtr<TabsNode> frameNode_;
