@@ -592,6 +592,8 @@ enum ArkUIAsyncEventKind {
     ON_TEXT_INPUT_EDIT_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT_INPUT,
     ON_TEXT_INPUT_SUBMIT,
     ON_TEXT_INPUT_CHANGE,
+    ON_TEXT_INPUT_CUT,
+    ON_TEXT_INPUT_PASTE,
 
     ON_TEXTAREA_EDIT_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXTAREA,
     ON_TEXTAREA_SUBMIT,
@@ -1930,6 +1932,9 @@ struct ArkUITextInputModifier {
     void (*setTextInputTextString)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setTextInputFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
     void (*stopTextInputTextEditing)(ArkUINodeHandle node);
+    void (*setTextInputCancelButton)(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
+        ArkUI_Uint32 color, ArkUI_CharPtr src);
+    void (*resetTextinputCancelButton)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

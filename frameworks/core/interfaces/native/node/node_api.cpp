@@ -155,6 +155,8 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     nullptr,
     NodeModifier::SetTextInputOnSubmit,
     NodeModifier::SetOnTextInputChange,
+    NodeModifier::SetOnTextInputCut,
+    NodeModifier::SetOnTextInputPaste,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
