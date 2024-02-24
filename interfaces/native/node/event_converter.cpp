@@ -70,6 +70,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_CHECKBOX_CHANGE;
         case NODE_SLIDER_EVENT_ON_CHANGE:
             return ON_SLIDER_CHANGE;
+        case NODE_TEXT_INPUT_ON_CUT:
+            return ON_TEXT_INPUT_CUT;
+        case NODE_TEXT_INPUT_ON_PASTE:
+            return ON_TEXT_INPUT_PASTE;
         default:
             return -1;
     }
@@ -124,6 +128,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_CHECKBOX_EVENT_ON_CHANGE;
         case ON_SLIDER_CHANGE:
             return NODE_SLIDER_EVENT_ON_CHANGE;
+        case ON_TEXT_INPUT_CUT:
+            return NODE_TEXT_INPUT_ON_CUT;
+        case ON_TEXT_INPUT_PASTE:
+            return NODE_TEXT_INPUT_ON_PASTE;
         default:
             return -1;
     }
