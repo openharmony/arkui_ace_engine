@@ -1039,6 +1039,8 @@ public:
         return isShowMagnifier_;
     }
 
+    void InitBackGroundColorAndBorderRadius();
+
     void SetLocalOffset(OffsetF localOffset)
     {
         localOffset_.SetX(localOffset.GetX());

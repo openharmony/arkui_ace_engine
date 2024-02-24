@@ -2052,6 +2052,7 @@ void TextFieldPattern::OnModifyDone()
         UpdatePasswordModeState();
     }
     InitClickEvent();
+    InitBackGroundColorAndBorderRadius();
     InitLongPressEvent();
     InitFocusEvent();
     InitMouseEvent();
@@ -2166,6 +2167,24 @@ void TextFieldPattern::OnModifyDone()
     preInputStyle_ = inputStyle;
     Register2DragDropManager();
     isModifyDone_ = true;
+}
+
+void TextFieldPattern::InitBackGroundColorAndBorderRadius()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    if (!renderContext->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    }
+    if (!renderContext->HasBorderRadius()) {
+        auto radius = textFieldTheme->GetBorderRadius();
+        BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
+        renderContext->UpdateBorderRadius(borderRadius);
+    }
 }
 
 void TextFieldPattern::OnAfterModifyDone()
