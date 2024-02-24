@@ -37,9 +37,22 @@ namespace OHOS::Ace {
 namespace {
 const Dimension STROKE_WIDTH { 0.0, DimensionUnit::PX };
 const NG::RectF TEST_RECT { 10.0f, 20.0f, 15.0f, 15.0f };
+
+Testing::MockCanvas canvas;
 } // namespace
 
-class EllipsePainterTestNg : public testing::Test {};
+class EllipsePainterTestNg : public testing::Test {
+public:
+    void CallBack(Testing::MockCanvas& rSCanvas);
+};
+
+void EllipsePainterTestNg::CallBack(Testing::MockCanvas& rSCanvas)
+{
+    EXPECT_CALL(rSCanvas, AttachBrush(_)).WillOnce(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachBrush()).WillOnce(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, AttachPen(_)).WillOnce(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachPen()).WillOnce(ReturnRef(rSCanvas));
+}
 
 /**
  * @tc.name: EllipsePainterTestNg001
@@ -51,7 +64,7 @@ HWTEST_F(EllipsePainterTestNg, EllipsePainterTestNg001, TestSize.Level1)
     /**
      * @tc.steps1: create canvas and shapePaintProperty object.
      */
-    Testing::MockCanvas canvas;
+    CallBack(canvas);
     NG::ShapePaintProperty shapePaintProperty;
 
     /**
@@ -66,6 +79,7 @@ HWTEST_F(EllipsePainterTestNg, EllipsePainterTestNg001, TestSize.Level1)
      * @tc.expected: .
      */
     shapePaintProperty.UpdateStrokeWidth(STROKE_WIDTH);
+    CallBack(canvas);
     NG::EllipsePainter::DrawEllipse(canvas, TEST_RECT, shapePaintProperty);
     EXPECT_TRUE(shapePaintProperty.HasStrokeWidth());
 }
