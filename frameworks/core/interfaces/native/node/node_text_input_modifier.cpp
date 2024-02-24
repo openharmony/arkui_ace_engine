@@ -701,7 +701,7 @@ void SetOnTextInputPaste(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraP
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onPaste = [node, eventId, extraParam](const std::string& str) {
+    auto onPaste = [node, eventId, extraParam](const std::string& str, NG::TextCommonEvent& commonEvent) {
         ArkUINodeEvent event;
         event.kind = ON_TEXT_INPUT_PASTE;
         event.eventId = eventId;
@@ -709,7 +709,7 @@ void SetOnTextInputPaste(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraP
         event.stringAsyncEvent.pStr = str.c_str();
         SendArkUIAsyncEvent(&event);
     };
-    TextFieldModelNG::SetOnPaste(frameNode, std::move(onPaste));
+    TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
 
 } // namespace NodeModifier

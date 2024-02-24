@@ -2380,6 +2380,8 @@ struct ArkUITextPickerModifier {
     void (*resetTextPickerDisappearTextStyle)(ArkUINodeHandle node);
     void (*resetTextPickerDefaultPickerItemHeight)(ArkUINodeHandle node);
     void (*resetTextPickerBackgroundColor)(ArkUINodeHandle node);
+    void (*setTextPickerRangeStr)(ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange);
+    void (*setTextPickerValue)(ArkUINodeHandle node, ArkUI_CharPtr valueStr);
 };
 
 struct ArkUITextTimerModifier {
