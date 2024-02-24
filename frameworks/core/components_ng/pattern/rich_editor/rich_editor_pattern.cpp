@@ -3736,6 +3736,9 @@ bool RichEditorPattern::IsScrollBarPressed(const MouseInfo& info)
 void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 {
     if (blockPress_ || !leftMousePress_) {
+        if (blockPress_) {
+            dragBoxes_ = GetTextBoxes();
+        }
         return;
     }
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
