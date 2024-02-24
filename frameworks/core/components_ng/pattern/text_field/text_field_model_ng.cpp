@@ -73,12 +73,7 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textfieldPaintProperty);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
-    auto renderContext = frameNode->GetRenderContext();
-    renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
-    auto radius = textFieldTheme->GetBorderRadius();
     SetCaretColor(textFieldTheme->GetCursorColor());
-    BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
-    renderContext->UpdateBorderRadius(borderRadius);
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
