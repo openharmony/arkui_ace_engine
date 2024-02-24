@@ -385,6 +385,7 @@ private:
     void LoadReplacePage(int32_t pageId, const PageTarget& url, const std::string& params);
 
     void ReplacePageInSubStage(const RefPtr<JsAcePage>& page, const std::string& url);
+    std::optional<int32_t> GetEffectiveContainerId();
 
     uint64_t GetSystemRealTime();
 
