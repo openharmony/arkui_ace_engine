@@ -976,12 +976,13 @@ void TextFieldModelNG::SetOnCut(FrameNode* frameNode, std::function<void(const s
     eventHub->SetOnCut(std::move(func));
 }
 
-void TextFieldModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+void TextFieldModelNG::SetOnPasteWithEvent(FrameNode* frameNode,
+    std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnPaste(std::move(func));
+    eventHub->SetOnPasteWithEvent(std::move(func));
 }
 
 void TextFieldModelNG::SetCleanNodeStyle(FrameNode* frameNode, CleanNodeStyle cleanNodeStyle)

@@ -5426,6 +5426,50 @@ void ResetTextPickerSelectedIndex(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTextPickerModifier()->resetTextPickerSelectedIndex(node->uiNodeHandle);
 }
 
+int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || !InRegion(static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE),
+        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_MULTI), item->value[NUM_0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    bool isSingleRange = false;
+    auto fullImpl = GetFullImpl();
+    if (!item->string) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    isSingleRange = item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE);
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(
+        node->uiNodeHandle, item->string, isSingleRange);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextPickerRange(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(node->uiNodeHandle, "", true);
+}
+
+int32_t SetTextPickerValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item->string) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerValue(
+        node->uiNodeHandle, item->string);
+    
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextPickerValue(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerValue(node->uiNodeHandle, "");
+}
+
 // Row&Column
 int32_t SetAlignItems(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -7845,8 +7889,9 @@ const ArkUI_AttributeItem* GetTextPickerAttribute(ArkUI_NodeHandle node, int32_t
 int32_t SetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     using Setter = int32_t(ArkUI_NodeHandle node, const ArkUI_AttributeItem* value);
-    static Setter* setters[] = { SetTextPickerDisappearTextStyle, SetTextPickerTextStyle,
-        SetTextPickerSelectedTextStyle, SetTextPickerSelectedIndex };
+    static Setter* setters[] = { SetTextPickerRange, SetTextPickerSelectedIndex, SetTextPickerValue,
+        SetTextPickerDisappearTextStyle, SetTextPickerTextStyle, SetTextPickerSelectedTextStyle,
+        SetTextPickerSelectedIndex };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textpicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -7857,8 +7902,9 @@ int32_t SetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const A
 void ResetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     using Resetter = void(ArkUI_NodeHandle node);
-    static Resetter* resetters[] = { ResetTextPickerDisappearTextStyle, ResetTextPickerTextStyle,
-        ResetTextPickerSelectedTextStyle, ResetTextPickerSelectedIndex };
+    static Resetter* resetters[] = { ResetTextPickerRange, ResetTextPickerSelectedIndex, ResetTextPickerValue,
+        ResetTextPickerDisappearTextStyle, ResetTextPickerTextStyle, ResetTextPickerSelectedTextStyle,
+        ResetTextPickerSelectedIndex };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "timepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
