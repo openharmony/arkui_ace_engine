@@ -270,11 +270,11 @@ void ParseDateByStr(const std::string& date, ArkUISelectedDateType& selectedDate
     }
     auto year = json->GetValue("year");
     if (year && year->IsNumber()) {
-        selectedDate.year = year->GetInt() - 1900; // local date start from 1900
+        selectedDate.year = year->GetInt(); // local date start from 1900
     }
     auto month = json->GetValue("month");
     if (month && month->IsNumber()) {
-        selectedDate.month = month->GetInt() - 1;
+        selectedDate.month = month->GetInt();
     }
     auto day = json->GetValue("day");
     if (day && day->IsNumber()) {

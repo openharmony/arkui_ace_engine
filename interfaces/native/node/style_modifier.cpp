@@ -6186,17 +6186,7 @@ int32_t SetObjectFit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->value[0].i32 < 0 || item->value[0].i32 > static_cast<int32_t>(ARKUI_OBJECT_FIT_NONE)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    switch (node->type) {
-        case ARKUI_IMAGE_SPAN:
-            fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanObjectFit(
-                node->uiNodeHandle, item->value[0].i32);
-            break;
-        case ARKUI_IMAGE:
-            fullImpl->getNodeModifiers()->getImageModifier()->setObjectFit(node->uiNodeHandle, item->value[0].i32);
-            break;
-        default:
-            break;
-    }
+    fullImpl->getNodeModifiers()->getImageModifier()->setObjectFit(node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6356,8 +6346,9 @@ int32_t SetEdgeAlignment(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         yOffset = item->value[EDGE_OFFSET_Y_INDEX].f32;
     }
     sizeArray.emplace_back(yOffset);
+    std::vector<int32_t> unitArray = { UNIT_VP, UNIT_VP };
     fullImpl->getNodeModifiers()->getCalendarPickerModifier()->setEdgeAlign(
-        node->uiNodeHandle, &sizeArray[0], nullptr, static_cast<int32_t>(sizeArray.size()), defaultAlignment);
+        node->uiNodeHandle, &sizeArray[0], &unitArray[0], static_cast<int32_t>(sizeArray.size()), defaultAlignment);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7010,19 +7001,8 @@ const ArkUI_AttributeItem* GetImageSrc(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetObjectFit(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
-    switch (node->type) {
-        case ARKUI_IMAGE_SPAN:
-            g_numberValues[0].i32 =
-                fullImpl->getNodeModifiers()->getImageSpanModifier()->getImageSpanObjectFit(node->uiNodeHandle);
-            g_attributeItem.size = REQUIRED_ONE_PARAM;
-            break;
-        case ARKUI_IMAGE:
-            g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getImageModifier()->getObjectFit(node->uiNodeHandle);
-            g_attributeItem.size = REQUIRED_ONE_PARAM;
-            break;
-        default:
-            break;
-    }
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getImageModifier()->getObjectFit(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
 }
 
