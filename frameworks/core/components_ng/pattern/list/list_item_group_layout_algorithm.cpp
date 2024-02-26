@@ -786,6 +786,15 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
     }
 }
 
+void ListItemGroupLayoutAlgorithm::UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(1);
+}
+
 void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapper,
     const OffsetF& paddingOffset, float crossSize)
 {
@@ -797,6 +806,7 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapp
     if (headerIndex_ >= 0) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
         CHECK_NULL_VOID(wrapper);
+        UpdateZIndex(wrapper);
         headerMainSize = wrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
         float headerPos = 0.0f;
         if ((sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::HEADER) && !itemPosition_.empty()) {
@@ -813,6 +823,7 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapp
     if (footerIndex_ >= 0) {
         float endPos = totalMainSize_ - footerMainSize_;
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
+        UpdateZIndex(wrapper);
         CHECK_NULL_VOID(wrapper);
         float const listMainSize = endPos_ - startPos_;
         if (Positive(listMainSize) && (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::FOOTER)) {
