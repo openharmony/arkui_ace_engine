@@ -525,6 +525,8 @@ public:
 
     virtual bool SetParentLayoutConstraint(const SizeF& size) const;
 
+    void PaintDebugBoundaryTreeAll(bool flag);
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -575,6 +577,8 @@ protected:
     void CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId);
 
     bool needCallChildrenUpdate_ = true;
+
+    virtual void PaintDebugBoundary(bool flag) {}
 
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,

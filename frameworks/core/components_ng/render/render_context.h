@@ -419,6 +419,7 @@ public:
     virtual void SetActualForegroundColor(const Color& value) {}
 
     virtual void ResetSurface() {}
+    virtual void PaintDebugBoundary(bool flag) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
 

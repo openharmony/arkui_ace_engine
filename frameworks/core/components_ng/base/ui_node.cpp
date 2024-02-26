@@ -1064,4 +1064,12 @@ void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>
     // Fetch all the child elementIDs recursively
     CollectRemovedChildren(child->GetChildren(), removedElmtId);
 }
+
+void UINode::PaintDebugBoundaryTreeAll(bool flag)
+{
+    PaintDebugBoundary(flag);
+    for (const auto& child : GetChildren()) {
+        child->PaintDebugBoundaryTreeAll(flag);
+    }
+}
 } // namespace OHOS::Ace::NG
