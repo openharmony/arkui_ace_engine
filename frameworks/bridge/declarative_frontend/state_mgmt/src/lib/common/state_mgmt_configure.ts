@@ -15,9 +15,7 @@
 
 class ConfigureStateMgmt {
     
-    private static readonly HOW_TO_SAY = `Older state management features such as @State, @Link, @ObjectLink, @Observed, or @Track,
-    can not be used on the same ArkUI page as state management v3 features such as @observe, @track, @state, or @param
-    Please correct your application to use either!";`;
+    private static readonly HOW_TO_SAY = `Your application uses both state management V2 and V3 features! - It is strongly recommended not to mix V2 and V3. Consult the rules how state management V2 and V3 can be mixed in the same app.`;
 
     private v2InUse_ : boolean = false;
     private v3InUse_ : boolean = false;
@@ -35,16 +33,16 @@ class ConfigureStateMgmt {
      * @param feature specify feature separately from context of use, so that in future decision can be made 
      *                for individual features, not use permit either use of V2 or V3.
      * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
-     * @returns true if use is permitted
-     * @throws Error exception if use is not permitted.
+     * @returns true if no mix of features detected, false if mix is detected
      */
-    public intentUsingV3(feature : string, contextOfUse : string = "") : boolean {
+    public intentUsingV3(feature: string, contextOfUse: string = ""): boolean {
         this.v3InUse_ = true;
-        const ret= !this.v2InUse_ && this.v3InUse_;
-        if (!ret) {
+        const ret = !this.v2InUse_ && this.v3InUse_;
+        if (ret) {
+            stateMgmtConsole.debug(`ConfigureStateMgmt: Found use of ${feature} ${contextOfUse} - configure to use stateMgmt v3`);
+        } else {
             stateMgmtConsole.featureCombinationError(`Found ${feature} ${contextOfUse} - ${ConfigureStateMgmt.HOW_TO_SAY}`);
         }
-        stateMgmtConsole.debug(`ConfigureStateMgmt: Found use of ${feature} ${contextOfUse} - configure to use stateMgmt v3`);
         return ret;
     }
 
@@ -54,16 +52,16 @@ class ConfigureStateMgmt {
      * @param feature specify feature separately from context of use, so that in future decision can be made 
      *                for individual features, not use permit either use of V2 or V3.
      * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
-     * @returns true if use is permitted
-     * @throws Error exception if use is not permitted.
+     * @returns true if no mix of features detected, false if mix is detected
      */
     public intentUsingV2(feature : string, contextOfUse : string = "") : boolean {
         this.v2InUse_ = true;
-        const ret= this.v2InUse_ && !this.v3InUse_;
-        if (!ret) {
+        const ret = this.v2InUse_ && !this.v3InUse_;
+        if (ret) {
+            stateMgmtConsole.debug(`ConfigureStateMgmt: Found use of ${feature} ${contextOfUse} - configure to use stateMgmt v2`);
+        } else {
             stateMgmtConsole.featureCombinationError(`Found ${feature} ${contextOfUse} - ${ConfigureStateMgmt.HOW_TO_SAY}`);
         }
-        stateMgmtConsole.debug(`ConfigureStateMgmt: Found use of ${feature} ${contextOfUse} - configure to use stateMgmt v2`);
         return ret;
     }
 
