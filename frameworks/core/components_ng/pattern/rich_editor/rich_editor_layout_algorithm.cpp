@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs)
     : pManager_(paragraphs)
 {
+    allSpans_ = spans;
     // split spans into groups by \newline
     auto it = spans.begin();
     while (it != spans.end()) {
@@ -164,12 +165,7 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(context);
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
 
-    // merge spans
-    std::list<RefPtr<SpanItem>> allSpans;
-    for (auto&& group : spans_) {
-        allSpans.splice(allSpans.end(), group);
-    }
-    SetSpans(allSpans);
+    SetSpans(allSpans_);
     TextLayoutAlgorithm::Layout(layoutWrapper);
 }
 
