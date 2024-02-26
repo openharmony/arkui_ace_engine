@@ -265,7 +265,8 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover001, TestSize.Level1)
     modalStyle.modalTransition = ModalTransition::NONE;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetNode);
+    overlayManager->BindContentCover(
+        isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     overlayManager->PlayDefaultModalTransition(rootNode, false);
     auto topModalNode = overlayManager->modalStack_.top().Upgrade();
@@ -320,10 +321,11 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
      */
     ModalStyle modalStyle;
     bool isShow = true;
+    auto onWillAppear = []() {};
     auto onAppear = []() {};
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->BindContentCover(
-        isShow, nullptr, std::move(builderFunc), modalStyle, onAppear, nullptr, targetNode);
+        isShow, nullptr, std::move(builderFunc), modalStyle, onAppear, nullptr, onWillAppear, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topModalNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_NE(topModalNode, nullptr);
@@ -337,7 +339,8 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
      * @tc.expected: the ModalTransition is updated successfully
      */
     modalStyle.modalTransition = ModalTransition::NONE;
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetNode);
+    overlayManager->BindContentCover(
+        isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
     topModalNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_NE(topModalNode, nullptr);
     topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
@@ -350,11 +353,13 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
      * @tc.expected: the backgroundColor is updated successfully
      */
     modalStyle.backgroundColor = Color::GREEN;
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetNode);
+    overlayManager->BindContentCover(
+        isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
     topModalNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_NE(topModalNode, nullptr);
     EXPECT_EQ(topModalNode->GetRenderContext()->GetBackgroundColorValue(), Color::GREEN);
-    overlayManager->BindContentCover(!isShow, nullptr, nullptr, modalStyle, nullptr, nullptr, targetNode);
+    overlayManager->BindContentCover(
+        !isShow, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
 }
 
 /**
@@ -395,15 +400,18 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover003, TestSize.Level1)
     modalStyle.modalTransition = ModalTransition::NONE;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetNode);
+    overlayManager->BindContentCover(
+        isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
 
     /**
      * @tc.steps: step4. destroy modal page.
      * @tc.expected: destroy successfully
      */
+    auto onWillDisappear = []() {};
     auto onDisappear = []() {};
-    overlayManager->BindContentCover(!isShow, nullptr, nullptr, modalStyle, nullptr, onDisappear, targetNode);
+    overlayManager->BindContentCover(
+        !isShow, nullptr, nullptr, modalStyle, nullptr, onDisappear, nullptr, onWillDisappear, targetNode);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
 
@@ -458,7 +466,7 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet001, TestSize.Level1)
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
@@ -576,7 +584,7 @@ HWTEST_F(OverlayManagerTestNg, RemoveAllModalInOverlay001, TestSize.Level1)
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
@@ -588,11 +596,11 @@ HWTEST_F(OverlayManagerTestNg, RemoveAllModalInOverlay001, TestSize.Level1)
     overlayManager->modalList_.pop_back();
     EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
 
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     sheetNode = overlayManager->modalStack_.top().Upgrade();
     sheetNode->tag_ = V2::ROOT_ETS_TAG;
     EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
@@ -646,10 +654,11 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet002, TestSize.Level1)
     SheetStyle sheetStyle;
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
+    auto onWillAppear = []() {};
     auto onAppear = []() {};
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        onAppear, nullptr, nullptr, targetNode);
+        onAppear, nullptr, nullptr, onWillAppear, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
@@ -665,14 +674,14 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet002, TestSize.Level1)
     sheetStyle.sheetMode = SheetMode::AUTO;
     sheetStyle.showDragBar = false;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->InitialLayoutProps();
     sheetStyle.sheetMode = SheetMode::MEDIUM;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     sheetNode = overlayManager->modalStack_.top().Upgrade();
     sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->InitialLayoutProps();
@@ -688,11 +697,12 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet002, TestSize.Level1)
      */
     sheetStyle.backgroundColor = Color::GREEN;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
     EXPECT_EQ(sheetNode->GetRenderContext()->GetBackgroundColorValue(), Color::GREEN);
-    overlayManager->OnBindSheet(!isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, nullptr, nullptr, targetNode);
+    overlayManager->OnBindSheet(
+        !isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
 }
 
 /**
@@ -746,7 +756,7 @@ HWTEST_F(OverlayManagerTestNg, DestroySheet003, TestSize.Level1)
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
@@ -773,10 +783,10 @@ HWTEST_F(OverlayManagerTestNg, DestroySheet003, TestSize.Level1)
     auto targetNodeSecond = CreateTargetNode();
     targetNodeSecond->MountToParent(stageNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNodeSecond);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNodeSecond);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     overlayManager->DestroySheet(sheetNode, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
@@ -833,7 +843,7 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet003, TestSize.Level1)
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
@@ -842,9 +852,10 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet003, TestSize.Level1)
      * @tc.steps: step4. destroy modal page.
      * @tc.expected: destroy modal successfully.
      */
+    auto onWillDisappear = []() {};
     auto onDisappear = []() {};
-    overlayManager->OnBindSheet(
-        !isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, onDisappear, nullptr, targetNode);
+    overlayManager->OnBindSheet(!isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, onDisappear, nullptr, nullptr,
+        onWillDisappear, targetNode);
     overlayManager->modalList_.emplace_back(AceType::WeakClaim(AceType::RawPtr(stageNode)));
     overlayManager->DestroySheet(sheetNode, targetId);
     overlayManager->FindWindowScene(targetNode);
@@ -903,7 +914,7 @@ HWTEST_F(OverlayManagerTestNg, GetSheetMask001, TestSize.Level1)
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
@@ -913,12 +924,13 @@ HWTEST_F(OverlayManagerTestNg, GetSheetMask001, TestSize.Level1)
      * @tc.expected: if the color is set, Make sure the maskNode is exist and it's color is right.
      */
     auto maskNode = overlayManager->GetSheetMask(sheetNode);
+    auto onWillDisappear = []() {};
     auto onDisappear = []() {};
-    overlayManager->OnBindSheet(
-        !isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, onDisappear, nullptr, targetNode);
+    overlayManager->OnBindSheet(!isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, onDisappear, nullptr, nullptr,
+        onWillDisappear, targetNode);
     sheetStyle.maskColor = Color::BLUE;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(sheetNode == nullptr);
     EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
@@ -931,8 +943,8 @@ HWTEST_F(OverlayManagerTestNg, GetSheetMask001, TestSize.Level1)
      * @tc.steps: step5. destroy sheetNode.
      * @tc.expected: Make sure the maskNode is destroyed.
      */
-    overlayManager->OnBindSheet(
-        !isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, onDisappear, nullptr, targetNode);
+    overlayManager->OnBindSheet(!isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, onDisappear, nullptr, nullptr,
+        onWillDisappear, targetNode);
     overlayManager->modalList_.emplace_back(AceType::WeakClaim(AceType::RawPtr(stageNode)));
     overlayManager->DestroySheet(sheetNode, targetId);
     overlayManager->FindWindowScene(targetNode);
@@ -1378,14 +1390,14 @@ HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     overlayManager->modalList_.emplace_back(nullptr);
     overlayManager->DeleteModal(targetId);
     EXPECT_EQ(overlayManager->modalList_.size(), 1);
 
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     overlayManager->modalList_.emplace_back(nullptr);
     overlayManager->DeleteModal(targetId + 1);
@@ -1540,7 +1552,8 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest002, TestSize.Level1)
     modalStyle.modalTransition = ModalTransition::NONE;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetNode);
+    overlayManager->BindContentCover(
+        isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     EXPECT_TRUE(overlayManager->RemoveOverlay(false));
 
@@ -1549,7 +1562,8 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest002, TestSize.Level1)
      * @tc.expected: remove successfully.
      */
     modalStyle.modalTransition = ModalTransition::ALPHA;
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetNode);
+    overlayManager->BindContentCover(
+        isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_TRUE(overlayManager->RemoveModalInOverlay());
 }
 
@@ -1789,19 +1803,12 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
-    auto lifeCycleFunc = []() {};
-    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
-    dialogLifeCycleEvent["didAppearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["didDisappearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["willAppearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["willDisappearId"] = lifeCycleFunc;
     /**
      * @tc.steps: step2. create overlayManager and call ShowDateDialog.
      * @tc.expected: dateDialogNode is created successfully
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowDateDialog(
-        dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+    overlayManager->ShowDateDialog(dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
 
     /**
@@ -1815,8 +1822,8 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
     std::map<std::string, PickerTime> timePickerProperty;
     timePickerProperty["selected"] = PickerTime(1, 1, 1);
 
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
-        dialogCancelEvent, dialogLifeCycleEvent);
+    overlayManager->ShowTimeDialog(
+        dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent, dialogCancelEvent);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
 
     /**
@@ -1830,13 +1837,13 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
      * @tc.steps: step5. ShowTimeDialog again and call RemoveOverlay with isBackPressed
      * @tc.expected: remove  successfully
      */
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
-        dialogCancelEvent, dialogLifeCycleEvent);
+    overlayManager->ShowTimeDialog(
+        dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent, dialogCancelEvent);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
-        dialogCancelEvent, dialogLifeCycleEvent);
+    overlayManager->ShowTimeDialog(
+        dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent, dialogCancelEvent);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
 }
 
@@ -1883,10 +1890,11 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern1, TestSize.Level1)
     SheetStyle sheetStyle;
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
+    auto onWillAppear = []() {};
     auto onAppear = []() {};
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        onAppear, nullptr, nullptr, targetNode);
+        onAppear, nullptr, nullptr, onWillAppear, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
@@ -1898,7 +1906,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern1, TestSize.Level1)
     sheetStyle.sheetMode = SheetMode::LARGE;
     sheetStyle.showDragBar = false;
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
     auto geometryNode = sheetNode->GetGeometryNode();
@@ -1990,7 +1998,7 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet004, TestSize.Level1)
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     // assert
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
@@ -2038,7 +2046,7 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet005, TestSize.Level1)
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
@@ -2150,7 +2158,7 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet006, TestSize.Level1)
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
@@ -2190,7 +2198,7 @@ HWTEST_F(OverlayManagerTestNg, HandleDragUpdate001, TestSize.Level1)
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
@@ -2496,7 +2504,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern2, TestSize.Level1)
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
@@ -2542,7 +2550,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern3, TestSize.Level1)
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
@@ -2645,7 +2653,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern4, TestSize.Level1)
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
@@ -2710,7 +2718,7 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet007, TestSize.Level1)
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
@@ -2751,7 +2759,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern5, TestSize.Level1)
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
@@ -2792,7 +2800,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern6, TestSize.Level1)
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
@@ -2849,7 +2857,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
@@ -2918,7 +2926,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern8, TestSize.Level1)
     CreateSheetBuilder();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
-        nullptr, nullptr, nullptr, targetNode);
+        nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
@@ -3049,7 +3057,7 @@ HWTEST_F(OverlayManagerTestNg, ShowUIExtensionMenu, TestSize.Level1)
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto baseFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     auto uiExtId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtNode = FrameNode::CreateFrameNode(
         V2::DIALOG_ETS_TAG, uiExtId, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
@@ -3061,7 +3069,7 @@ HWTEST_F(OverlayManagerTestNg, ShowUIExtensionMenu, TestSize.Level1)
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     ASSERT_NE(overlayManager, nullptr);
-    
+
     RectF handleRect(3.0, 3.0, 100.0f, 75.0f);
     EXPECT_FALSE(overlayManager->ShowUIExtensionMenu(uiExtNode, handleRect, LONGEST_CONTENT, MENU_SIZE, baseFrameNode));
 }

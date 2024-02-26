@@ -585,6 +585,7 @@ void SheetPresentationPattern::DismissTransition(bool isTransitionIn, float drag
     if (sheetType == SheetType::SHEET_POPUP) {
         BubbleStyleSheetTransition(isTransitionIn);
     } else {
+        OnWillDisappear();
         SheetTransition(isTransitionIn, dragVelocity);
     }
 }
