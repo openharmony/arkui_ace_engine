@@ -138,6 +138,7 @@ public:
         // TODO: modify done need to optimize.
         MarkModifyDone();
         MarkDirtyNode();
+        isPropertyDiffMarked_ = false;
     }
 
     void FlushUpdateAndMarkDirty() override;

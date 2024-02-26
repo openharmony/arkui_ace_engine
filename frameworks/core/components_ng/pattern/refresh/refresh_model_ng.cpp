@@ -141,9 +141,7 @@ void RefreshModelNG::SetRefreshing(FrameNode* frameNode, bool isRefreshing)
 bool RefreshModelNG::GetRefreshing(FrameNode* frameNode)
 {
     bool value = false;
-    ACE_GET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefreshing, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, IsRefreshing, value, frameNode, value);
     return value;
 }
-
-
 } // namespace OHOS::Ace::NG
