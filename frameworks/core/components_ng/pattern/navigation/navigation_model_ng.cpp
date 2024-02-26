@@ -690,7 +690,7 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
             V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
         navigationGroupNode->AddChild(dividerNode);
         navigationGroupNode->SetDividerNode(dividerNode);
-        
+
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
             dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
@@ -724,6 +724,9 @@ bool NavigationModelNG::ParseCommonTitle(
     CHECK_NULL_RETURN(navBarNode, false);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, false);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titleBarPattern, false);
+    titleBarPattern->SetIsTitleChanged(true);
     if (navBarNode->GetPrevTitleIsCustomValue(false)) {
         titleBarNode->RemoveChild(titleBarNode->GetTitle());
         titleBarNode->SetTitle(nullptr);
