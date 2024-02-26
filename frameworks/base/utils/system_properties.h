@@ -435,6 +435,11 @@ public:
 
     static float GetDefaultResolution();
 
+    static bool GetAcePerformanceMonitorEnabled()
+    {
+        return acePerformanceMonitorEnable_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
@@ -483,6 +488,7 @@ private:
     static bool gridCacheEnabled_;
     static bool sideBarContainerBlurEnable_;
     static bool stateManagerEnable_;
+    static bool acePerformanceMonitorEnable_;
 };
 
 } // namespace OHOS::Ace

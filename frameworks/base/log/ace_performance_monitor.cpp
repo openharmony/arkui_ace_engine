@@ -18,12 +18,16 @@
 #include <cinttypes>
 
 #include "base/log/ace_trace.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 using namespace std;
 using namespace std::chrono;
 ScopedMonitor::ScopedMonitor(MonitorTag tag) : tag_(tag)
 {
+    if (!SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        return;
+    }
     begin_ = steady_clock::now();
     if (tag == MonitorTag::STATIC_API) {
         ArkUIPerfMonitor::GetInstance().RecordPropertyUpdate();
@@ -32,6 +36,9 @@ ScopedMonitor::ScopedMonitor(MonitorTag tag) : tag_(tag)
 
 ScopedMonitor::~ScopedMonitor()
 {
+    if (!SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        return;
+    }
     auto end = steady_clock::now();
     ArkUIPerfMonitor::GetInstance().RecordTimeSlice(tag_, duration_cast<nanoseconds>(end - begin_).count());
 }
@@ -49,12 +56,20 @@ ArkUIPerfMonitor::ArkUIPerfMonitor()
 
 void ArkUIPerfMonitor::StartPerf()
 {
+    if (!SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        ClearPerfMonitor();
+        return;
+    }
     begin_ = steady_clock::now();
     ClearPerfMonitor();
 }
 
 void ArkUIPerfMonitor::FinishPerf()
 {
+    if (!SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        ClearPerfMonitor();
+        return;
+    }
     end_ = steady_clock::now();
     FlushPerfMonitor();
     ClearPerfMonitor();
