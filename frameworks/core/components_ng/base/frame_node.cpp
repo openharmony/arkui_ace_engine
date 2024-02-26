@@ -723,7 +723,14 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     }
-
+    if (GetNodeStatus() == NodeStatus::BUILDER_NODE_ON_MAINTREE) {
+        const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+        if (geometryTransition) {
+            layoutProperty_->UpdateGeometryTransition("");
+            layoutProperty_->UpdateGeometryTransition(geometryTransition->GetId());
+            MarkDirtyNode();
+        }
+    }
     UINode::OnAttachToMainTree(recursive);
 
     if (!hasPendingRequest_) {
