@@ -61,14 +61,14 @@ private:
 
     /**
      * @brief Measure self before measuring children.
-     * 
+     *
      * @return [idealSize given by parent, whether measure is successful (need to adapt to children size if not)].
      */
     std::pair<SizeF, bool> PreMeasureSelf();
 
     /**
      * @brief Measure self after measuring children. Only when pre-measure failed.
-     * 
+     *
      * @param size ideal content size from parent.
      */
     void PostMeasureSelf(SizeF size);
@@ -94,7 +94,7 @@ private:
 
     /**
      * @brief Layout a FlowItem at [idx].
-     * 
+     *
      * @param idx FlowItem index.
      * @param padding top-left padding of WaterFlow component.
      * @param isReverse need to layout in reverse.

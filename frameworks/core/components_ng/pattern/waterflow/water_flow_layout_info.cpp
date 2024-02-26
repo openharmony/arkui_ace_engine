@@ -297,7 +297,6 @@ int32_t WaterFlowLayoutInfo::FastSolveEndIndex(float mainSize) const
 
     auto it = std::lower_bound(itemInfos_.begin(), itemInfos_.end(), mainSize - currentOffset_,
         [](const ItemInfo& info, float value) { return info.mainOffset < value; });
-
     if (it == itemInfos_.end()) {
         return itemInfos_.size() - 1;
     }
