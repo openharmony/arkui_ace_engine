@@ -23,6 +23,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
@@ -214,11 +215,41 @@ RefPtr<FrameNode> TextPickerModelNG::CreateFrameNode(int32_t nodeId)
     auto textPickerNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, textPickerNode);
     uint32_t TEXT = 0x02;
     textPickerPattern->SetColumnsKind(TEXT);
     auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, textPickerNode);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, textPickerNode);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, textPickerNode);
     textPickerPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
+    uint32_t showCount = BUFFER_NODE_NUMBER + pickerTheme->GetShowOptionCount();
+
+    if (textPickerNode->GetChildren().empty()) {
+        auto columnNode = CreateColumnNode(TEXT, showCount);
+        auto stackNode = CreateStackNode();
+        auto buttonNode = CreateButtonNode();
+        auto columnBlendNode = CreateColumnNode();
+        buttonNode->MountToParent(stackNode);
+        columnNode->MountToParent(columnBlendNode);
+        columnBlendNode->MountToParent(stackNode);
+        columnNode->MarkModifyDone();
+        columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
+        stackNode->MountToParent(textPickerNode);
+    }
+    std::vector<RangeContent> value;
+    RangeContent item = {"0", "0"};
+    value.emplace_back(item);
+    textPickerPattern->SetRange(value);
+    for (auto& range : value) {
+        rangeValue_.emplace_back(std::move(range));
+    }
+
     return textPickerNode;
 }
 
@@ -740,7 +771,11 @@ void TextPickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& co
 void TextPickerModelNG::SetRange(FrameNode* frameNode, const std::vector<NG::RangeContent>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    uint32_t showCount = BUFFER_NODE_NUMBER + 1;
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     if (frameNode->GetChildren().empty()) {
         auto columnNode = CreateColumnNode(TEXT, showCount);
         auto stackNode = CreateStackNode();
