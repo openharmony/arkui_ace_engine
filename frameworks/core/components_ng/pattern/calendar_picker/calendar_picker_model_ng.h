@@ -46,6 +46,9 @@ public:
     static void SetSelectDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day);
     static Dimension GetHintRadius(FrameNode* frameNode);
     static PickerDate GetSelectDateWithNode(FrameNode* frameNode);
+    static RefPtr<FrameNode> GetYearNode(FrameNode* calendarPickerNode);
+    static RefPtr<FrameNode> GetMonthNode(FrameNode* calendarPickerNode);
+    static RefPtr<FrameNode> GetDayNode(FrameNode* calendarPickerNode);
     static PickerTextStyle GetTextStyle(FrameNode* frameNode);
     static CalendarEdgeAlign GetEdgeAlignType(FrameNode* frameNode);
     static DimensionOffset GetEdgeOffset(FrameNode* frameNode);

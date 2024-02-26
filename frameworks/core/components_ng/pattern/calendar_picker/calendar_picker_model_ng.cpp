@@ -25,6 +25,9 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t MONTH_NODE_INDEX = 2;
+constexpr int32_t DAY_NODE_INDEX = 4;
+constexpr int32_t ONE_DIGIT_BOUNDARY = 10;
 void CalendarPickerModelNG::Create(const CalendarSettingData& settingData)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -403,13 +406,66 @@ void CalendarPickerModelNG::SetSelectDateWithNode(FrameNode* frameNode, uint32_t
     auto calendarDate = pickerPattern->GetCalendarData();
     if (year > 0) {
         calendarDate.selectedDate.SetYear(year);
+        auto yearNode = CalendarPickerModelNG::GetYearNode(frameNode);
+        if (yearNode) {
+            auto textLayoutProperty = yearNode->GetLayoutProperty<TextLayoutProperty>();
+            if (textLayoutProperty) {
+                textLayoutProperty->UpdateContent(std::to_string(year));
+                yearNode->MarkModifyDone();
+                yearNode->MarkDirtyNode();
+            }
+        }
     }
     if (month > 0) {
-        calendarDate.selectedDate.SetMonth(year);
+        calendarDate.selectedDate.SetMonth(month);
+        auto monthNode = CalendarPickerModelNG::GetMonthNode(frameNode);
+        if (monthNode) {
+            auto textLayoutProperty = monthNode->GetLayoutProperty<TextLayoutProperty>();
+            if (textLayoutProperty) {
+                auto selectedMonthStr = (month < ONE_DIGIT_BOUNDARY  ? "0" : "") + std::to_string(month);
+                textLayoutProperty->UpdateContent(selectedMonthStr);
+                monthNode->MarkModifyDone();
+                monthNode->MarkDirtyNode();
+            }
+        }
     }
     if (day > 0) {
         calendarDate.selectedDate.SetDay(day);
+        auto dayNode = CalendarPickerModelNG::GetDayNode(frameNode);
+        if (dayNode) {
+            auto textLayoutProperty = dayNode->GetLayoutProperty<TextLayoutProperty>();
+            if (textLayoutProperty) {
+                auto selectedDayStr = (day < ONE_DIGIT_BOUNDARY  ? "0" : "") + std::to_string(day);
+                textLayoutProperty->UpdateContent(selectedDayStr);
+                dayNode->MarkModifyDone();
+                dayNode->MarkDirtyNode();
+            }
+        }
     }
+}
+
+RefPtr<FrameNode> CalendarPickerModelNG::GetYearNode(FrameNode* calendarPickerNode)
+{
+    CHECK_NULL_RETURN(calendarPickerNode, nullptr);
+    auto feedbackNode = calendarPickerNode->GetFirstChild();
+    CHECK_NULL_RETURN(feedbackNode, nullptr);
+    return AceType::DynamicCast<FrameNode>(feedbackNode->GetFirstChild());
+}
+
+RefPtr<FrameNode> CalendarPickerModelNG::GetMonthNode(FrameNode* calendarPickerNode)
+{
+    CHECK_NULL_RETURN(calendarPickerNode, nullptr);
+    auto feedbackNode = calendarPickerNode->GetFirstChild();
+    CHECK_NULL_RETURN(feedbackNode, nullptr);
+    return AceType::DynamicCast<FrameNode>(feedbackNode->GetChildAtIndex(MONTH_NODE_INDEX));
+}
+
+RefPtr<FrameNode> CalendarPickerModelNG::GetDayNode(FrameNode* calendarPickerNode)
+{
+    CHECK_NULL_RETURN(calendarPickerNode, nullptr);
+    auto feedbackNode = calendarPickerNode->GetFirstChild();
+    CHECK_NULL_RETURN(feedbackNode, nullptr);
+    return AceType::DynamicCast<FrameNode>(feedbackNode->GetChildAtIndex(DAY_NODE_INDEX));
 }
 
 Dimension CalendarPickerModelNG::GetHintRadius(FrameNode* frameNode)
