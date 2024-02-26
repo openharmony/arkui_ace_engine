@@ -47,12 +47,12 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -74,6 +74,7 @@ constexpr float PX_EPSILON = 0.01f;
 constexpr float FADE_DURATION = 500.0f;
 constexpr float SPRING_DURATION = 600.0f;
 constexpr int32_t INDEX_DIFF_TWO = 2;
+constexpr int32_t FIRST_CAPTURE_DELAY_TIME = 30;
 const std::string SWIPER_DRAG_SCENE = "swiper_drag_scene";
 const std::string FADE_PROPERTY_NAME = "fade";
 const std::string SPRING_PROPERTY_NAME = "spring";
@@ -157,6 +158,8 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     auto effect = swiperPaintProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
     bool canOverScroll = effect == EdgeEffect::SPRING;
     swiperLayoutAlgorithm->SetCanOverScroll(canOverScroll);
+    swiperLayoutAlgorithm->SetHasCachedCapture(hasCachedCapture_);
+    swiperLayoutAlgorithm->SetIsCaptureReverse(isCaptureReverse_);
     return swiperLayoutAlgorithm;
 }
 
@@ -223,6 +226,38 @@ void SwiperPattern::AdjustCurrentIndexOnSwipePage(int32_t index)
     currentIndex_ = GetLoopIndex(adjustIndex);
 }
 
+void SwiperPattern::InitCapture()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    bool hasCachedCapture = SwiperUtils::IsStretch(layoutProperty) && layoutProperty->GetLoop().value_or(true) &&
+                            GetDisplayCount() == TotalCount() - 1 &&
+                            (Positive(layoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx()) ||
+                                Positive(layoutProperty->GetNextMarginValue(0.0_px).ConvertToPx()));
+    if (hasCachedCapture) {
+        leftCaptureIndex_ = std::nullopt;
+        rightCaptureIndex_ = std::nullopt;
+    }
+
+    if (!hasCachedCapture_ && hasCachedCapture) {
+        auto leftCaptureNode = FrameNode::GetOrCreateFrameNode(
+            V2::SWIPER_LEFT_CAPTURE_ETS_TAG, GetLeftCaptureId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        leftCaptureNode->MarkModifyDone();
+        host->AddChild(leftCaptureNode);
+
+        auto rightCaptureNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_CAPTURE_ETS_TAG, GetRightCaptureId(),
+            []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        rightCaptureNode->MarkModifyDone();
+        host->AddChild(rightCaptureNode);
+    }
+    if (hasCachedCapture_ && !hasCachedCapture) {
+        RemoveAllCaptureNode();
+    }
+    hasCachedCapture_ = hasCachedCapture;
+}
+
 void SwiperPattern::OnModifyDone()
 {
     currentOffset_ = 0.0f;
@@ -236,6 +271,7 @@ void SwiperPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
+    InitCapture();
     InitIndicator();
     InitArrow();
     SetLazyLoadIsLoop();
@@ -314,6 +350,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (hasCachedCapture_ && host->GetChildrenUpdated() != -1) {
+        InitCapture();
+    }
     if (host->GetChildrenUpdated() != -1 && NeedAutoPlay() && !translateTask_) {
         StartAutoPlay();
         host->ChildrenUpdatedFrom(-1);
@@ -378,6 +417,69 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         FireWillShowEvent(currentIndex_);
         FireWillHideEvent(oldIndex_);
     }
+}
+
+void SwiperPattern::UpdateTaregtCapture()
+{
+    if (itemPosition_.empty()) {
+        return;
+    }
+    auto leftTargetIndex = GetLoopIndex(itemPosition_.rbegin()->first);
+    auto rightTargetIndex = GetLoopIndex(itemPosition_.begin()->first);
+    if (isCaptureReverse_) {
+        leftTargetIndex = GetLoopIndex(itemPosition_.begin()->first);
+        rightTargetIndex = GetLoopIndex(itemPosition_.rbegin()->first);
+    }
+    if (!leftCaptureIndex_.has_value() || leftCaptureIndex_.value() != leftTargetIndex) {
+        CreateCaptureCallback(leftTargetIndex, GetLeftCaptureId());
+        leftCaptureIndex_ = leftTargetIndex;
+    }
+    if (!rightCaptureIndex_.has_value() || rightCaptureIndex_.value() != rightTargetIndex) {
+        CreateCaptureCallback(rightTargetIndex, GetRightCaptureId());
+        rightCaptureIndex_ = rightTargetIndex;
+    }
+}
+
+void SwiperPattern::CreateCaptureCallback(int32_t targetCaptureIndex, int32_t captureId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(targetCaptureIndex));
+    CHECK_NULL_VOID(targetNode);
+    auto callback = [weak = WeakClaim(this), id = Container::CurrentId(), captureId](
+                        std::shared_ptr<Media::PixelMap> pixelMap) {
+        ContainerScope scope(id);
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_VOID(swiper);
+        swiper->UpdateCaptureSource(pixelMap, captureId);
+    };
+    if (firstGetPixelMap_) {
+        auto piplineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(piplineContext);
+        auto taskExecutor = piplineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostDelayedTask(
+            [targetNode, callback]() { ComponentSnapshot::GetNormalCapture(targetNode, std::move(callback)); },
+            TaskExecutor::TaskType::UI, FIRST_CAPTURE_DELAY_TIME);
+    } else {
+        ComponentSnapshot::GetNormalCapture(targetNode, std::move(callback));
+    }
+}
+
+void SwiperPattern::UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId)
+{
+    if (pixelMap) {
+        firstGetPixelMap_ = false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto captureNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(captureId)));
+    CHECK_NULL_VOID(captureNode);
+    auto imageLayoutProperty = captureNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap)));
+    captureNode->MarkModifyDone();
+    captureNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void SwiperPattern::InitSurfaceChangedCallback()
@@ -685,6 +787,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         }
 
         placeItemWidth_ = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+    }
+    if (hasCachedCapture_) {
+        isCaptureReverse_ = swiperLayoutAlgorithm->GetIsCaptureReverse();
+        UpdateTaregtCapture();
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -2178,7 +2284,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
                     startNewAnimationFlag = true;
                     break;
                 }
-                if (animationItem.second.finialOffset != offset ||
+                if (animationItem.second.finalOffset != offset ||
                     !NearEqual(animationItem.second.startPos, iter->second.startPos) ||
                     !NearEqual(animationItem.second.endPos, iter->second.endPos)) {
                     startNewAnimationFlag = true;
@@ -2213,8 +2319,12 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     for (auto& item : itemPosition_) {
         auto frameNode = item.second.node;
         if (frameNode) {
-            frameNode->GetRenderContext()->UpdateTranslateInXY(item.second.finialOffset);
+            frameNode->GetRenderContext()->UpdateTranslateInXY(item.second.finalOffset);
         }
+    }
+    if (IsCaptureNodeValid()) {
+        GetLeftCaptureNode()->GetRenderContext()->UpdateTranslateInXY(captureFinalOffset_);
+        GetRightCaptureNode()->GetRenderContext()->UpdateTranslateInXY(captureFinalOffset_);
     }
     // property callback will call immediately.
     auto propertyUpdateCallback = [swiper = WeakClaim(this), offset]() {
@@ -2226,10 +2336,15 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
             auto frameNode = item.second.node;
             if (frameNode) {
                 frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
-                item.second.finialOffset = offset;
+                item.second.finalOffset = offset;
             }
         }
         swiperPattern->itemPositionInAnimation_ = swiperPattern->itemPosition_;
+        if (swiperPattern->IsCaptureNodeValid()) {
+            swiperPattern->GetLeftCaptureNode()->GetRenderContext()->UpdateTranslateInXY(offset);
+            swiperPattern->GetRightCaptureNode()->GetRenderContext()->UpdateTranslateInXY(offset);
+            swiperPattern->captureFinalOffset_ = offset;
+        }
     };
     usePropertyAnimation_ = true;
     propertyAnimationIndex_ = nextIndex;
@@ -2278,9 +2393,14 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
         if (frameNode) {
             frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
         }
-        item.second.finialOffset = OffsetF();
+        item.second.finalOffset = OffsetF();
     }
     itemPositionInAnimation_.clear();
+    if (IsCaptureNodeValid()) {
+        GetLeftCaptureNode()->GetRenderContext()->UpdateTranslateInXY(OffsetF());
+        GetRightCaptureNode()->GetRenderContext()->UpdateTranslateInXY(OffsetF());
+        captureFinalOffset_ = OffsetF();
+    }
     // update postion info.
     UpdateOffsetAfterPropertyAnimation(offset.GetMainOffset(GetDirection()));
     OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_);
@@ -2307,6 +2427,10 @@ void SwiperPattern::StopPropertyTranslateAnimation(bool isFinishAnimation, bool 
             }
             frameNode->GetRenderContext()->CancelTranslateXYAnimation();
         }
+        if (swiper->IsCaptureNodeValid()) {
+            swiper->GetLeftCaptureNode()->GetRenderContext()->CancelTranslateXYAnimation();
+            swiper->GetRightCaptureNode()->GetRenderContext()->CancelTranslateXYAnimation();
+        }
     };
     AnimationUtils::Animate(option, propertyUpdateCallback);
     OffsetF currentOffset;
@@ -2317,9 +2441,14 @@ void SwiperPattern::StopPropertyTranslateAnimation(bool isFinishAnimation, bool 
         }
         currentOffset = frameNode->GetRenderContext()->GetTranslateXYProperty();
         frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
-        item.second.finialOffset = OffsetF();
+        item.second.finalOffset = OffsetF();
     }
     itemPositionInAnimation_.clear();
+    if (IsCaptureNodeValid()) {
+        GetLeftCaptureNode()->GetRenderContext()->UpdateTranslateInXY(OffsetF());
+        GetRightCaptureNode()->GetRenderContext()->UpdateTranslateInXY(OffsetF());
+        captureFinalOffset_ = OffsetF();
+    }
     if (!isBeforeCreateLayoutWrapper) {
         UpdateOffsetAfterPropertyAnimation(currentOffset.GetMainOffset(GetDirection()));
     }
@@ -2871,6 +3000,9 @@ RefPtr<Curve> SwiperPattern::GetCurve() const
 
 bool SwiperPattern::IsLoop() const
 {
+    if (hasCachedCapture_) {
+        return true;
+    }
     if (TotalDisPlayCount() >= TotalCount()) {
         return false;
     }
@@ -2979,7 +3111,7 @@ int32_t SwiperPattern::RealTotalCount() const
     CHECK_NULL_RETURN(host, 0);
     // last child is swiper indicator
     int num = 0;
-    if (IsShowIndicator()) {
+    if (HasIndicatorNode()) {
         num += 1;
     }
     if (HasLeftButtonNode()) {
@@ -2988,7 +3120,9 @@ int32_t SwiperPattern::RealTotalCount() const
     if (HasRightButtonNode()) {
         num += 1;
     }
-
+    if (hasCachedCapture_ && leftCaptureId_.has_value() && rightCaptureId_.has_value()) {
+        num += 2;
+    }
     return host->TotalChildCount() - num;
 }
 
