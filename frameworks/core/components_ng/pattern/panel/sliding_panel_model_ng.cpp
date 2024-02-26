@@ -73,22 +73,16 @@ void SlidingPanelModelNG::Create(bool isShow)
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
 
     auto renderContext = columnNode->GetRenderContext();
-    auto panelRenderContext = panelNode->GetRenderContext();
-    CHECK_NULL_VOID(panelRenderContext);
     if (renderContext) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto dragBarTheme = pipeline->GetTheme<DragBarTheme>();
         CHECK_NULL_VOID(dragBarTheme);
         renderContext->UpdateBackgroundColor(dragBarTheme->GetPanelBgColor());
-        if (!panelRenderContext->HasBorderRadius()) {
-            BorderRadiusProperty radius;
-            radius.radiusTopLeft = PANEL_RADIUS;
-            radius.radiusTopRight = PANEL_RADIUS;
-            renderContext->UpdateBorderRadius(radius);
-        } else {
-            renderContext->UpdateBorderRadius(panelRenderContext->GetBorderRadius().value());
-        }
+        BorderRadiusProperty radius;
+        radius.radiusTopLeft = PANEL_RADIUS;
+        radius.radiusTopRight = PANEL_RADIUS;
+        renderContext->UpdateBorderRadius(radius);
         renderContext->UpdateClipEdge(true);
     }
 }
