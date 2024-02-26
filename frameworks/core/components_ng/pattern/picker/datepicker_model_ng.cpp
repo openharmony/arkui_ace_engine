@@ -171,6 +171,7 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
     auto dateNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
     auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(datePickerPattern, dateNode);
     datePickerPattern->SetPickerTag(true);
     bool hasYearNode = datePickerPattern->HasYearNode();
     bool hasMonthNode = datePickerPattern->HasMonthNode();
@@ -185,10 +186,12 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
 
     auto yearColumnNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, yearId, []() { return AceType::MakeRefPtr<DatePickerColumnPattern>(); });
+    CHECK_NULL_RETURN(yearColumnNode, dateNode);
     if (!hasYearNode) {
         for (uint32_t index = 0; index < showCount; index++) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_RETURN(textNode, dateNode);
             textNode->MountToParent(yearColumnNode);
         }
         yearColumnNode->MarkModifyDone();
@@ -197,10 +200,12 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
 
     auto monthColumnNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, monthId, []() { return AceType::MakeRefPtr<DatePickerColumnPattern>(); });
+    CHECK_NULL_RETURN(monthColumnNode, dateNode);
     if (!hasMonthNode) {
         for (uint32_t index = 0; index < showCount; index++) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_RETURN(textNode, dateNode);
             textNode->MountToParent(monthColumnNode);
         }
         monthColumnNode->MarkModifyDone();
@@ -209,10 +214,12 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
 
     auto dayColumnNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, dayId, []() { return AceType::MakeRefPtr<DatePickerColumnPattern>(); });
+    CHECK_NULL_RETURN(dayColumnNode, dateNode);
     if (!hasDayNode) {
         for (uint32_t index = 0; index < showCount; index++) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_RETURN(textNode, dateNode);
             textNode->MountToParent(dayColumnNode);
         }
         dayColumnNode->MarkModifyDone();
@@ -221,35 +228,44 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
 
     if (!hasYearNode) {
         auto stackYearNode = CreateStackNode();
+        auto blendYearNode = CreateColumnNode();
         auto buttonYearNode = CreateButtonNode();
         buttonYearNode->MountToParent(stackYearNode);
-        yearColumnNode->MountToParent(stackYearNode);
+        yearColumnNode->MountToParent(blendYearNode);
+        blendYearNode->MountToParent(stackYearNode);
         auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackYearNode->MountToParent(dateNode);
+        yearColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     if (!hasMonthNode) {
         auto stackMonthNode = CreateStackNode();
+        auto blendMonthNode = CreateColumnNode();
         auto buttonMonthNode = CreateButtonNode();
         buttonMonthNode->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
         buttonMonthNode->MountToParent(stackMonthNode);
-        monthColumnNode->MountToParent(stackMonthNode);
+        monthColumnNode->MountToParent(blendMonthNode);
+        blendMonthNode->MountToParent(stackMonthNode);
         auto layoutProperty = stackMonthNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackMonthNode->MountToParent(dateNode);
+        monthColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     if (!hasDayNode) {
         auto stackDayNode = CreateStackNode();
+        auto blendDayNode = CreateColumnNode();
         auto buttonDayNode = CreateButtonNode();
         buttonDayNode->GetRenderContext()->UpdateBackgroundColor(Color::GRAY);
         buttonDayNode->MountToParent(stackDayNode);
-        dayColumnNode->MountToParent(stackDayNode);
+        dayColumnNode->MountToParent(blendDayNode);
+        blendDayNode->MountToParent(stackDayNode);
         auto layoutProperty = stackDayNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackDayNode->MountToParent(dateNode);
+        dayColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     return dateNode;
 }

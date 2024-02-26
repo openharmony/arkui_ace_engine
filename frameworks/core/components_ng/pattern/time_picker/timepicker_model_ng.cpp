@@ -134,11 +134,13 @@ RefPtr<FrameNode> TimePickerModelNG::CreateButtonNode()
 
 RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
 {
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TIME_PICKER_ETS_TAG, nodeId);
     auto timePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::TIME_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
 
-    uint32_t showCount = BUFFER_NODE_NUMBER;
+    uint32_t showCount = BUFFER_NODE_NUMBER + 1;
     auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, timePickerNode);
     timePickerRowPattern->SetShowCount(showCount);
     timePickerRowPattern->SetPickerTag(true);
     auto hasHourNode = timePickerRowPattern->HasHourNode();
@@ -148,10 +150,12 @@ RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
 
     auto hourColumnNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, hourId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+    CHECK_NULL_RETURN(hourColumnNode, timePickerNode);
     if (!hasHourNode) {
         for (uint32_t index = 0; index < showCount; index++) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_RETURN(textNode, timePickerNode);
             textNode->MountToParent(hourColumnNode);
         }
         hourColumnNode->MarkModifyDone();
@@ -160,10 +164,12 @@ RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
 
     auto minuteColumnNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, minuteId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+    CHECK_NULL_RETURN(minuteColumnNode, timePickerNode);
     if (!hasMinuteNode) {
         for (uint32_t index = 0; index < showCount; index++) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_RETURN(textNode, timePickerNode);
             textNode->MountToParent(minuteColumnNode);
         }
         minuteColumnNode->MarkModifyDone();
@@ -171,23 +177,29 @@ RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
     }
     if (!hasHourNode) {
         auto stackHourNode = CreateStackNode();
+        auto columnBlendNode = CreateColumnNode();
         auto buttonYearNode = CreateButtonNode();
         buttonYearNode->MountToParent(stackHourNode);
-        hourColumnNode->MountToParent(stackHourNode);
+        hourColumnNode->MountToParent(columnBlendNode);
+        columnBlendNode->MountToParent(stackHourNode);
         auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
+        hourColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     if (!hasMinuteNode) {
         auto stackMinuteNode = CreateStackNode();
+        auto columnBlendNode = CreateColumnNode();
         auto buttonYearNode = CreateButtonNode();
         buttonYearNode->MountToParent(stackMinuteNode);
-        minuteColumnNode->MountToParent(stackMinuteNode);
+        minuteColumnNode->MountToParent(columnBlendNode);
+        columnBlendNode->MountToParent(stackMinuteNode);
         auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
+        minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     timePickerRowPattern->SetHasSecond(false);
     return timePickerNode;
