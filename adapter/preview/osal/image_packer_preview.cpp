@@ -31,6 +31,11 @@ uint32_t ImagePackerPreview::StartPacking(uint8_t* data, uint32_t maxSize, const
     return 0;
 }
 
+uint32_t ImagePackerPreview::StartPacking(const std::string& filePath, const PackOption& option)
+{
+    return 0;
+}
+
 uint32_t ImagePackerPreview::FinalizePacking(int64_t& packedSize)
 {
     return 0;

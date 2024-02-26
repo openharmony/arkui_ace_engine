@@ -39,6 +39,12 @@ uint32_t ImagePackerOhos::StartPacking(uint8_t* data, uint32_t maxSize, const Pa
     return imagePacker_->StartPacking(data, maxSize, packOption);
 }
 
+uint32_t ImagePackerOhos::StartPacking(const std::string& filePath, const PackOption& option)
+{
+    Media::PackOption packOption {option.format, option.quality, option.numberHint};
+    return imagePacker_->StartPacking(filePath, packOption);
+}
+
 uint32_t ImagePackerOhos::FinalizePacking(int64_t& packedSize)
 {
     return imagePacker_->FinalizePacking(packedSize);
