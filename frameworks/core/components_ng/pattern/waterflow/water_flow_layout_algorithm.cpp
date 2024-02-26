@@ -65,6 +65,7 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
     const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount)
 {
     itemsCrossSize_.clear();
+    itemsCrossPosition_.clear();
     auto rowsTemplate = layoutProperty->GetRowsTemplate().value_or("1fr");
     auto columnsTemplate = layoutProperty->GetColumnsTemplate().value_or("1fr");
     axis_ = layoutProperty->GetAxis();
@@ -113,6 +114,10 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     Axis axis = layoutProperty->GetAxis();
     auto idealSize =
         CreateIdealSize(layoutProperty->GetLayoutConstraint().value(), axis, layoutProperty->GetMeasureType(), true);
+    if (NearZero(GetCrossAxisSize(idealSize, axis))) {
+        TAG_LOGI(AceLogTag::ACE_WATERFLOW, "cross size is 0, skip measure");
+        return;
+    }
     auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(idealSize, axis));
     if (!matchChildren) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
