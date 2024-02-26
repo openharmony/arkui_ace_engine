@@ -1296,7 +1296,7 @@ bool TextPickerColumnPattern::NotLoopOptions() const
 {
     RefPtr<TextPickerLayoutProperty> layout = GetParentLayout();
     CHECK_NULL_RETURN(layout, false);
-    bool canLoop = layout->GetCanLoop().value();
+    bool canLoop = layout->GetCanLoop().value_or(true);
     return !canLoop;
 }
 
