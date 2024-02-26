@@ -24,6 +24,8 @@ std::list<std::shared_ptr<UIObserverListener>> UIObserver::unspecifiedNavigation
 std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedCNavigationListeners_;
 
+std::list<std::shared_ptr<UIObserverListener>> UIObserver::scrollEventListeners_;
+
 std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::abilityContextRouterPageListeners_;
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
@@ -116,6 +118,31 @@ void UIObserver::HandleNavigationStateChange(const std::string& navigationId, co
 
     for (const auto& listener : holder) {
         listener->OnNavigationStateChange(navigationId, navDestinationName, state);
+    }
+}
+
+// UIObserver.on(type: "scrollEvent", callback)
+// register a global listener without options
+void UIObserver::RegisterScrollEventCallback(const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (std::find(scrollEventListeners_.begin(), scrollEventListeners_.end(), listener) !=
+        scrollEventListeners_.end()) {
+        return;
+    }
+    scrollEventListeners_.emplace_back(listener);
+}
+
+// UIObserver.off(type: "scrollEvent", callback)
+void UIObserver::UnRegisterScrollEventCallback()
+{
+    scrollEventListeners_.clear();
+}
+
+void UIObserver::HandleScrollEventStateChange(const std::string& id, NG::ScrollEventType eventType,
+                                             float offset)
+{
+    for (const auto& listener : scrollEventListeners_) {
+        listener->OnScrollEventStateChange(id, eventType, offset);
     }
 }
 

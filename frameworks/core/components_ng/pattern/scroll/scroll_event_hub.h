@@ -20,12 +20,6 @@
 
 namespace OHOS::Ace::NG {
 
-enum class ScrollEventType {
-    SCROLL_TOP = 0,
-    SCROLL_END,
-    SCROLL_EDGE,
-};
-
 // which edge is reached
 enum class ScrollEdge {
     TOP = 0,

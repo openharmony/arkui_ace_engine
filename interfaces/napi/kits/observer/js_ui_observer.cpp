@@ -38,6 +38,9 @@ namespace {
 static constexpr uint32_t ON_SHOWN = 0;
 static constexpr uint32_t ON_HIDDEN = 1;
 
+static constexpr uint32_t SCROLL_START = 0;
+static constexpr uint32_t SCROLL_STOP = 1;
+
 static constexpr uint32_t ABOUT_TO_APPEAR = 0;
 static constexpr uint32_t ABOUT_TO_DISAPPEAR = 1;
 static constexpr uint32_t ON_PAGE_SHOW = 2;
@@ -106,10 +109,12 @@ ObserverProcess::ObserverProcess()
 {
     registerProcess_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationRegister },
+        { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageRegister },
     };
     unregisterProcess_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationUnRegister },
+        { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventUnRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageUnRegister },
     };
 }
@@ -195,6 +200,31 @@ napi_value ObserverProcess::ProcessNavigationUnRegister(napi_env env, napi_callb
     return result;
 }
 
+napi_value ObserverProcess::ProcessScrollEventRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, 3);
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
+        UIObserver::RegisterScrollEventCallback(listener);
+    }
+
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessScrollEventUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, 3);
+
+    if (argc == 1) {
+        UIObserver::UnRegisterScrollEventCallback(nullptr);
+    }
+
+    napi_value result = nullptr;
+    return result;
+}
+
 napi_value ObserverProcess::ProcessRouterPageRegister(napi_env env, napi_callback_info info)
 {
     GET_PARAMS(env, info, 3);
@@ -274,6 +304,7 @@ napi_value ObserverOff(napi_env env, napi_callback_info info)
 static napi_value UIObserverExport(napi_env env, napi_value exports)
 {
     NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFunc(&UIObserver::HandleNavigationStateChange);
+    NG::UIObserverHandler::GetInstance().SetHandleScrollEventChangeFunc(&UIObserver::HandleScrollEventStateChange);
     NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFunc(&UIObserver::HandleRouterPageStateChange);
     napi_value navDestinationState = nullptr;
     napi_create_object(env, &navDestinationState);
@@ -282,6 +313,13 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     napi_set_named_property(env, navDestinationState, "ON_SHOWN", prop);
     napi_create_uint32(env, ON_HIDDEN, &prop);
     napi_set_named_property(env, navDestinationState, "ON_HIDDEN", prop);
+
+    napi_value scrollEventType = nullptr;
+    napi_create_object(env, &scrollEventType);
+    napi_create_uint32(env, SCROLL_START, &prop);
+    napi_set_named_property(env, scrollEventType, "SCROLL_START", prop);
+    napi_create_uint32(env, SCROLL_STOP, &prop);
+    napi_set_named_property(env, scrollEventType, "SCROLL_STOP", prop);
 
     napi_value routerPageState = nullptr;
     napi_create_object(env, &routerPageState);
@@ -300,6 +338,7 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("on", ObserverOn),
         DECLARE_NAPI_FUNCTION("off", ObserverOff),
         DECLARE_NAPI_PROPERTY("NavDestinationState", navDestinationState),
+        DECLARE_NAPI_PROPERTY("ScrollEventType", scrollEventType),
         DECLARE_NAPI_PROPERTY("RouterPageState", routerPageState),
     };
     NAPI_CALL(

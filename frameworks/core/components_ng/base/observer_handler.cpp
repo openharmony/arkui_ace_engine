@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -49,6 +50,20 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     std::string navDestinationName = pattern->GetName();
     CHECK_NULL_VOID(navigationHandleFunc_);
     navigationHandleFunc_(navigationId, navDestinationName, state);
+}
+
+void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType eventType)
+{
+    auto ref = weakPattern.Upgrade();
+    CHECK_NULL_VOID(ref);
+    auto pattern = AceType::DynamicCast<ScrollablePattern>(ref);
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    auto parent = host->GetParent();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+    std::string id = frameNode->GetInspectorId().value_or("");
+    float offset = pattern->GetTotleOffset();
+    scrollEventHandleFunc_(id, eventType, offset);
 }
 
 void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
@@ -88,6 +103,28 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
         pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN);
 }
 
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetScrollEventState(const RefPtr<AceType>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto current = AceType::DynamicCast<UINode>(node);
+    while (current) {
+        if (current->GetTag() == V2::SCROLL_ETS_TAG) {
+            break;
+        }
+        current = current->GetParent();
+    }
+    CHECK_NULL_RETURN(current, nullptr);
+    auto nav = AceType::DynamicCast<FrameNode>(current);
+    CHECK_NULL_RETURN(nav, nullptr);
+    std::string id = std::to_string(nav->GetId());
+    auto pattern = nav->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return std::make_shared<NavDestinationInfo>(
+        id,
+        ScrollEventType::SCROLL_START,
+        pattern->GetTotleOffset());
+}
+
 std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const RefPtr<AceType>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -118,6 +155,11 @@ std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const Re
 void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
 {
     navigationHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func)
+{
+    scrollEventHandleFunc_ = func;
 }
 
 void UIObserverHandler::SetHandleRouterPageChangeFunc(RouterPageHandleFunc func)
