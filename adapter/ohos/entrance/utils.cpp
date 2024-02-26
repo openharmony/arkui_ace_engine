@@ -88,6 +88,11 @@ std::string GetStringFromHap(const std::string& hapPath, const std::string& file
 
 bool CheckUrlValid(const std::string& url, const std::string& hapPath)
 {
+    std::string bundleNameFlag = "@bundle:";
+    if (url.find(bundleNameFlag) == 0) {
+        return true;
+    }
+
     auto moduleContent = GetStringFromHap(hapPath, "module.json");
     auto moduleValue = JsonUtil::ParseJsonString(moduleContent);
     auto pagesValue = moduleValue->GetValue("module")->GetString("pages");
