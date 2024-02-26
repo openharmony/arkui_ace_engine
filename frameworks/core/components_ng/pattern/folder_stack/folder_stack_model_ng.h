@@ -27,6 +27,7 @@ public:
     void SetOnFolderStateChange(std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange) override;
     void SetEnableAnimation(bool IsEnableAnimation) override;
     void SetAutoHalfFold(bool IsAutoHalfFold) override;
+    void SetOnHoverStatusChange(std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange) override;
 
 private:
     void Create() override;
