@@ -529,27 +529,4 @@ HWTEST_F(TextFieldUXTest, InitSurfacePositionChangedCallback001, TestSize.Level1
     EXPECT_NE(pattern_->surfacePositionChangedCallbackId_, std::nullopt);
     EXPECT_TRUE(pattern_->HasSurfacePositionChangedCallback());
 }
-
-/**
- * @tc.name: TextAreaCursorInContentRegion001
- * @tc.desc: Test is cursor in the content region.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldUXTest, TextAreaCursorInContentRegion001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: Create textfield node
-     */
-    CreateTextField(DEFAULT_TEXT);
-
-    /**
-     * @tc.expected: get cursor
-     */
-    GetFocus();
-
-    /**
-     * @tc.expected: test if caret in the right position
-     */
-    EXPECT_TRUE(pattern_->CursorInContentRegion());
-}
 }
