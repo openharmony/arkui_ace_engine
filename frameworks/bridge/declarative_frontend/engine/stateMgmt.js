@@ -5776,6 +5776,10 @@ class ViewPU extends NativeViewPartialUpdate {
             if (!isFirstRender) {
                 _popFunc();
             }
+            let node = this.getNodeById(elmtId);
+            if (node !== undefined) {
+                node.cleanStageValue();
+            }
             if (ConfigureStateMgmt.instance.needsV3Observe()) {
                 // FIXME dito
                 ObserveV3.getObserve().startBind(null, -1);
@@ -6071,6 +6075,15 @@ class ViewPU extends NativeViewPartialUpdate {
             nodeInfo = builder();
             entry.setNode(nodeInfo);
         }
+        return nodeInfo;
+    }
+
+    getNodeById(elmtId) {
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        if (entry === undefined) {
+            throw new Error(`${this.debugInfo__()} fail to get node, elmtId is illegal`);
+        }
+        let nodeInfo = entry.getNode();
         return nodeInfo;
     }
     /**

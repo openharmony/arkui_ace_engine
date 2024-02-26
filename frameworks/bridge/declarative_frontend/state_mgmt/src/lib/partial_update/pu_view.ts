@@ -955,6 +955,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
         _popFunc();
       }
 
+      let node = this.getNodeById(elmtId);
+      if (node !== undefined) {
+        node.cleanStageValue();
+      }
+
       if (ConfigureStateMgmt.instance.needsV3Observe()) {
         // FIXME dito
         ObserveV3.getObserve().startBind(null, -1);
@@ -1296,6 +1301,15 @@ abstract class ViewPU extends NativeViewPartialUpdate
       nodeInfo = builder();
       entry.setNode(nodeInfo);
     }
+    return nodeInfo;
+  }
+
+  public getNodeById(elmtId: number): object {
+    const entry = this.updateFuncByElmtId.get(elmtId);
+    if (entry === undefined) {
+        throw new Error(`${this.debugInfo__()} fail to get node, elmtId is illegal`);
+    }
+    let nodeInfo = entry.getNode();
     return nodeInfo;
   }
 
