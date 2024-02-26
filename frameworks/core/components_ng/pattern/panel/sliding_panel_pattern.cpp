@@ -625,6 +625,7 @@ void SlidingPanelPattern::AnimateTo(float targetLocation, PanelMode mode)
             panel->invisibleFlag_ = true;
             panelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
+        AceAsyncTraceEnd(0, TRAILING_ANIMATION);
         panel->OnAnimationStop();
         panel->preAnimateFlag_ = false;
     });
@@ -658,7 +659,13 @@ void SlidingPanelPattern::AppendBlankHeightAnimation(float targetLocation, Panel
                     dragBarPattern->ShowInPanelMode(mode);
                 }
             }
-            panel->UpdateCurrentOffsetOnAnimate((end - start) * value + start);
+            auto currentOffset = (end - start) * value + start;
+            auto lastOffset = panel->GetLastOffset();
+            if (NearEqual(currentOffset, lastOffset, 1.0)) {
+                AceAsyncTraceBegin(0, TRAILING_ANIMATION);
+            }
+            panel->SetLastOffset(currentOffset);
+            panel->UpdateCurrentOffsetOnAnimate(currentOffset);
             panel->FireHeightChangeEvent();
             panel->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         });
