@@ -1731,6 +1731,7 @@ class NavPathStack {
     this.parentStack = undefined;
     // Array of remove destination indexes
     this.removeArray = [];
+    this.interception = undefined;
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
@@ -2101,6 +2102,9 @@ class NavPathStack {
   }
   disableAnimation(disableAnimation) {
     this.disableAllAnimation = disableAnimation;
+  }
+  setInterception(interception) {
+    this.interception = interception;
   }
 }
 

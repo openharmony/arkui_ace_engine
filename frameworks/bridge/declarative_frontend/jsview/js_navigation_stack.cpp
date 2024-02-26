@@ -374,7 +374,8 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
         }
         auto children = node->GetChildren();
         if (children.size() != 1) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "router map is invalid, child size is more than one");
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+                "router map is invalid, child size is not one: %{public}zu", children.size());
         }
         node = children.front();
     }
@@ -671,5 +672,65 @@ std::vector<std::string> JSNavigationStack::DumpStackInfo() const
         dumpInfos.push_back(std::move(info));
     }
     return dumpInfos;
+}
+
+void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
+    const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto delegate = JSRef<JSObject>::Cast(dataSourceObj_->GetProperty("interception"));
+    if (delegate->IsEmpty()) {
+        return;
+    }
+    std::string targetFunc = isBefore ? "willShow" : "didShow";
+    if (!delegate->HasProperty(targetFunc.c_str())) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(delegate->GetProperty(targetFunc.c_str()));
+    if (func->IsEmpty()) {
+        return;
+    }
+    const uint8_t argsNum = 4;
+    JSRef<JSVal> params[argsNum];
+    auto preDestination = AceType::DynamicCast<JSNavDestinationContext>(from);
+    if (preDestination) {
+        params[0] = preDestination->CreateJSObject();
+    } else {
+        params[0] = JSRef<JSVal>::Make(ToJSValue("NavBar"));
+    }
+    auto topDestination = AceType::DynamicCast<JSNavDestinationContext>(to);
+    if (topDestination) {
+        params[1] = topDestination->CreateJSObject();
+    } else {
+        params[1] = JSRef<JSVal>::Make(ToJSValue("NavBar"));
+    }
+    const uint8_t operationIndex = 2;
+    params[operationIndex] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(operation)));
+    const uint8_t animatedIndex = 3;
+    params[animatedIndex] = JSRef<JSVal>::Make(ToJSValue(isAnimated));
+    func->Call(JSRef<JSObject>(), argsNum, params);
+}
+
+void JSNavigationStack::FireNavigationModeChange(NG::NavigationMode mode)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto delegate = JSRef<JSObject>::Cast(dataSourceObj_->GetProperty("interception"));
+    if (delegate->IsEmpty()) {
+        return;
+    }
+    if (!delegate->HasProperty("modeChange")) {
+        return;
+    }
+    auto modeFunc = JSRef<JSFunc>::Cast(delegate->GetProperty("modeChange"));
+    if (modeFunc->IsEmpty()) {
+        return;
+    }
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(mode)));
+    modeFunc->Call(JSRef<JSObject>(), 1, params);
 }
 } // namespace OHOS::Ace::Framework
