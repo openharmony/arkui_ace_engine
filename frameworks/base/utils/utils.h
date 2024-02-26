@@ -43,6 +43,13 @@
         }                                 \
     } while (0)                           \
 
+#define CHECK_EQUAL_VOID(var, value) \
+    do {                             \
+        if ((var) == (value)) {      \
+            return;                  \
+        }                            \
+    } while (0)                      \
+
 #define PRIMITIVE_CAT(x, y) x##y
 #define CAT(x, y) PRIMITIVE_CAT(x, y)
 
