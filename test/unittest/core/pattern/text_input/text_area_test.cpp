@@ -531,11 +531,11 @@ HWTEST_F(TextFieldUXTest, InitSurfacePositionChangedCallback001, TestSize.Level1
 }
 
 /**
- * @tc.name: CursorInContentRegion001
+ * @tc.name: TextAreaCursorInContentRegion001
  * @tc.desc: Test is cursor in the content region.
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldUXTest, CursorInContentRegion001, TestSize.Level1)
+HWTEST_F(TextFieldUXTest, TextAreaCursorInContentRegion001, TestSize.Level1)
 {
     /**
      * @tc.steps: Create textfield node
