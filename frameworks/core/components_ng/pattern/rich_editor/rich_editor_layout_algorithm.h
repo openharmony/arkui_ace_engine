@@ -75,6 +75,7 @@ private:
     }
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
+    std::list<RefPtr<SpanItem>> allSpans_;
     ParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
     RectF richTextRect_;
