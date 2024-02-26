@@ -770,6 +770,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         density = defaultDisplay->GetVirtualPixelRatio();
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
+        TAG_LOGI(AceLogTag::ACE_FORM,
+            "[%{public}s][%{public}s][%{public}d]: CommonInitializeForm virtualPixelRatio: %{public}f, deviceWidth: "
+            "%{public}d, deviceHeight: %{public}d",
+            bundleName_.c_str(), moduleName_.c_str(), instanceId_, density, deviceWidth, deviceHeight);
     }
 
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
