@@ -1039,7 +1039,7 @@ public:
         return isShowMagnifier_;
     }
 
-    void InitBackGroundColorAndBorderRadius();
+    virtual void InitBackGroundColorAndBorderRadius();
 
     void SetLocalOffset(OffsetF localOffset)
     {
