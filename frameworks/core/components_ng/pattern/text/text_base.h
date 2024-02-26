@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_BASE_H
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -163,14 +164,11 @@ public:
     {
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-#ifdef WINDOW_SCENE_SUPPORTED
-        auto uiExtMgr = context->GetUIExtensionManager();
-        if (uiExtMgr && uiExtMgr->IsWindowTypeUIExtension(context)) {
+        if (container->IsUIExtensionWindow()) {
             return;
         }
-#endif
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
         auto keyboardArea = container->GetKeyboardSafeArea();
         auto keyboardLength = keyboardArea.bottom_.Length();
         Rect keyboardRect;

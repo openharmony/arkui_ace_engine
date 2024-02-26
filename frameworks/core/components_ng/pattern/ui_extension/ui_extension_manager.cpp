@@ -59,14 +59,6 @@ bool UIExtensionManager::IsWrapExtensionAbilityId(int64_t elementId)
     return elementId > UI_EXTENSION_OFFSET_MIN;
 }
 
-bool UIExtensionManager::IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pipeline)
-{
-    auto instanceId = pipeline->GetInstanceId();
-    auto window = Platform::AceContainer::GetUIWindow(instanceId);
-    CHECK_NULL_RETURN(window, false);
-    return window->GetType() == OHOS::Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
-}
-
 bool UIExtensionManager::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
     int64_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline)
 {
