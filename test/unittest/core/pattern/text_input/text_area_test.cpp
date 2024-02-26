@@ -78,6 +78,7 @@ namespace {
 constexpr double ICON_SIZE = 24;
 constexpr double ICON_HOT_ZONE_SIZE = 40;
 constexpr double FONT_SIZE = 16;
+constexpr float OFFSET = 3;
 constexpr int32_t DEFAULT_NODE_ID = 1;
 constexpr int32_t MIN_PLATFORM_VERSION = 10;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
@@ -260,6 +261,55 @@ HWTEST_F(TextFieldUXTest, PerformAction001, TestSize.Level1)
     EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
     pattern_->PerformAction(textInputAction, false);
     EXPECT_EQ(pattern_->TextInputActionToString(), "EnterKeyType.Done");
+}
+
+/**
+ * @tc.name: CursorInContentRegion001
+ * @tc.desc: Test function CursorInContentRegion.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CursorInContentRegion001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.expected: Cursor realy in the content region
+     */
+    GetFocus();
+    EXPECT_EQ(pattern_->GetTextOrPlaceHolderFontSize(), FONT_SIZE);
+    EXPECT_TRUE(pattern_->CursorInContentRegion());
+}
+
+/**
+ * @tc.name: OnTextAreaScroll001
+ * @tc.desc: Test textfield to create paint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnTextAreaScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call OnTextAreaScroll
+     * tc.expected: step2. Check if the currentOffset_ is right.
+     */
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
+
+    /**
+     * @tc.steps: step3.set contentRect_.GetY() = 1
+     */
+    pattern_->contentRect_ = RectF(1.0f, 1.0f, 1.0f, 1.0f);
+    FlushLayoutTask(frameNode_);
+    pattern_->OnTextAreaScroll(OFFSET);
+    EXPECT_EQ(pattern_->currentOffset_, 1);
 }
 
 /**

@@ -374,7 +374,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         layoutProperty->UpdatePrevMarginWithoutMeasure(0.0_px);
         layoutProperty->UpdateNextMarginWithoutMeasure(0.0_px);
     }
-    if (oldIndex_ != currentIndex_ && !isInit_) {
+    if (oldIndex_ != currentIndex_ && !isInit_ && !IsUseCustomAnimation()) {
         FireWillShowEvent(currentIndex_);
         FireWillHideEvent(oldIndex_);
     }
@@ -4256,6 +4256,8 @@ void SwiperPattern::OnCustomContentTransition(int32_t toIndex)
     customAnimationToIndex_ = toIndex;
     indexsInAnimation_.insert(toIndex);
     auto fromIndex = CurrentIndex();
+    FireWillShowEvent(toIndex);
+    FireWillHideEvent(fromIndex);
     if (currentProxyInAnimation_) {
         fromIndex = currentProxyInAnimation_->GetToIndex();
 

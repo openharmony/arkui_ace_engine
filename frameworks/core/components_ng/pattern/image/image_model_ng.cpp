@@ -26,6 +26,7 @@
 #endif
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -404,6 +405,65 @@ void ImageModelNG::SetOnError(FrameNode* frameNode, std::function<void(const Loa
     auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(callback));
+}
+
+ImageSourceInfo ImageModelNG::GetSrc(FrameNode* frameNode)
+{
+    ImageSourceInfo defaultImageSourceInfo;
+    CHECK_NULL_RETURN(frameNode, defaultImageSourceInfo);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultImageSourceInfo);
+    return layoutProperty->GetImageSourceInfo().value_or(defaultImageSourceInfo);
+}
+
+ImageFit ImageModelNG::GetObjectFit(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ImageFit::COVER);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ImageFit::COVER);
+    return layoutProperty->GetImageFit().value_or(ImageFit::COVER);
+}
+
+ImageInterpolation ImageModelNG::GetInterpolation(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ImageInterpolation::NONE);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, ImageInterpolation::NONE);
+    return paintProperty->GetImagePaintStyle()->GetImageInterpolation().value_or(ImageInterpolation::NONE);
+}
+
+ImageRepeat ImageModelNG::GetObjectRepeat(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ImageRepeat::NO_REPEAT);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, ImageRepeat::NO_REPEAT);
+    return paintProperty->GetImagePaintStyle()->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
+}
+
+std::vector<float> ImageModelNG::GetColorFilter(FrameNode* frameNode)
+{
+    std::vector<float> defaultColorFilter;
+    CHECK_NULL_RETURN(frameNode, defaultColorFilter);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, defaultColorFilter);
+    return paintProperty->GetImagePaintStyle()->GetColorFilter().value_or(defaultColorFilter);
+}
+
+bool ImageModelNG::GetAutoResize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, true);
+    return layoutProperty->GetImageSizeStyle()->GetAutoResize().value_or(true);
+}
+
+ImageSourceInfo ImageModelNG::GetAlt(FrameNode* frameNode)
+{
+    ImageSourceInfo defaultImageSourceInfo;
+    CHECK_NULL_RETURN(frameNode, defaultImageSourceInfo);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultImageSourceInfo);
+    return layoutProperty->GetAlt().value_or(defaultImageSourceInfo);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

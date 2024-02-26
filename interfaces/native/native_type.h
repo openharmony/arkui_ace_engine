@@ -1175,6 +1175,32 @@ typedef enum {
     /** 路径类型。 */
     ARKUI_SHAPE_TYPE_PATH,
 } ArkUI_ShapeType;
+
+/**
+ * @brief 定义渐变方向结构。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** left */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_LEFT = 0,
+    /** top */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_TOP,
+    /** right */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_RIGHT,
+    /** bottom */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_BOTTOM,
+    /** left-top */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_LEFT_TOP,
+    /** left-bottom */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_LEFT_BOTTOM,
+    /** right-top */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_RIGHT_TOP,
+    /** right-bottom */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_RIGHT_BOTTOM,
+    /** none */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_NONE,
+} ArkUI_LinearGradientDirection;
 #ifdef __cplusplus
 };
 #endif

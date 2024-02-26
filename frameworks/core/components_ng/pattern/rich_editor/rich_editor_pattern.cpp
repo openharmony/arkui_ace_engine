@@ -96,6 +96,7 @@ constexpr float TIME_UNIT = 1000.0f;
 constexpr float DOUBLE_CLICK_INTERVAL_MS = 300.0f;
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
+constexpr Color DEFAULT_PLACEHOLDER_COLOR = Color(0x99000000);
 
 const std::wstring lineSeparator = L"\n";
 // hen do ai anaylsis, we should limit the left an right limit of the string
@@ -2813,7 +2814,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
 {
     if (textSelector_.IsValid()) {
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-        SetCaretPosition(textSelector_.GetTextEnd());
+        caretPosition_ = textSelector_.GetTextEnd();
         CloseSelectOverlay();
         ResetSelection();
     }
@@ -3735,6 +3736,9 @@ bool RichEditorPattern::IsScrollBarPressed(const MouseInfo& info)
 void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 {
     if (blockPress_ || !leftMousePress_) {
+        if (blockPress_) {
+            dragBoxes_ = GetTextBoxes();
+        }
         return;
     }
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
@@ -4048,6 +4052,9 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnCopy();
             pattern->CloseSelectOverlay();
+            if (!pattern->textDetectEnable_) {
+                pattern->StartTwinkling();
+            }
             if (!usingMouse) {
                 pattern->ResetSelection();
             }
@@ -4163,9 +4170,6 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         resultProcessor(*resultObj);
     }
     clipboard_->SetData(pasteData, copyOption_);
-    if (!textDetectEnable_) {
-        StartTwinkling();
-    }
 }
 
 void RichEditorPattern::ResetAfterPaste()
@@ -4941,7 +4945,7 @@ void RichEditorPattern::MoveCaretToContentRect(const OffsetF& caretOffset, float
 {
     auto contentRect = GetTextContentRect();
     auto textRect = GetTextRect();
-    if (LessOrEqual(textRect.Height(), contentRect.Height())) {
+    if (LessOrEqual(textRect.Height(), contentRect.Height()) || isShowPlaceholder_) {
         return;
     }
     if (LessNotEqual(contentRect.GetSize().Height(), caretHeight) &&
@@ -5579,5 +5583,52 @@ bool RichEditorPattern::IsTouchInFrameArea(const PointF& touchPoint)
     auto parent = host->GetAncestorNodeOfFrame();
     viewPort = GetVisibleContentRect(parent, viewPort);
     return viewPort.IsInRegion(touchPoint);
+}
+
+void RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList)
+{
+    if (!spanItemList.empty() || !spans_.empty()) {
+        isShowPlaceholder_ = false;
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->HasPlaceholder() || layoutProperty->GetPlaceholder().value().empty()) {
+        return;
+    }
+    auto placeholderValue = layoutProperty->GetPlaceholder().value();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(theme);
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto nodeId = stack->ClaimNodeId();
+    auto placeholderNode = SpanNode::GetOrCreateSpanNode(nodeId);
+    CHECK_NULL_VOID(placeholderNode);
+    if (layoutProperty->HasPlaceholderFontSize()) {
+        placeholderNode->UpdateFontSize(layoutProperty->GetPlaceholderFontSize().value());
+    }
+    if (layoutProperty->HasPlaceholderFontWeight()) {
+        placeholderNode->UpdateFontWeight(layoutProperty->GetPlaceholderFontWeight().value());
+    }
+    if (layoutProperty->HasPlaceholderFontFamily()) {
+        placeholderNode->UpdateFontFamily(layoutProperty->GetPlaceholderFontFamily().value());
+    }
+    if (layoutProperty->HasPlaceholderItalicFontStyle()) {
+        placeholderNode->UpdateItalicFontStyle(layoutProperty->GetPlaceholderItalicFontStyle().value());
+    }
+    placeholderNode->UpdateTextColor(
+        layoutProperty->GetPlaceholderTextColorValue(theme ? theme->GetPlaceholderColor() : DEFAULT_PLACEHOLDER_COLOR));
+
+    auto spanItem = placeholderNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    spanItem->content = placeholderValue;
+    std::list<RefPtr<SpanItem>> newGroup;
+    newGroup.push_back(spanItem);
+    spanItemList.push_back(std::move(newGroup));
+    isShowPlaceholder_ = true;
 }
 } // namespace OHOS::Ace::NG

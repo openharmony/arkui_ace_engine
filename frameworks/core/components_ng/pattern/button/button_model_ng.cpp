@@ -172,7 +172,7 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
 }
 
-void ButtonModelNG::SetButtonLabel(FrameNode* frameNode, const char* label)
+void ButtonModelNG::SetLabel(FrameNode* frameNode, const char* label)
 {
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {

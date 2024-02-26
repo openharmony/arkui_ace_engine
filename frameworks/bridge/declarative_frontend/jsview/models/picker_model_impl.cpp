@@ -94,7 +94,7 @@ void DatePickerDialogModelImpl::SetDatePickerDialogShow(PickerDialogInfo& picker
     NG::DatePickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onDateAccept,
     std::function<void(const std::string&)>&& onDateChange, std::function<void(const std::string&)>&& onChange,
-    DatePickerType pickerType)
+    DatePickerType pickerType, PickerDialogEvent& pickerDialogEvent)
 {
     std::string name;
     RefPtr<Component> component;

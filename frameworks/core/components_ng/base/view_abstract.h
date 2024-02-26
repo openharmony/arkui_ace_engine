@@ -276,6 +276,7 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
+    static void DismissDialog();
     static void BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
         const NG::OffsetF &offset, const MenuParam &menuParam);
     static void BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,

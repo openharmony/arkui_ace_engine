@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
@@ -26,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/animation_pub.h"
+#include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
@@ -86,7 +88,22 @@ constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
 
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
-
+const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
+    OHOS::Ace::Curves::LINEAR,
+    OHOS::Ace::Curves::EASE,
+    OHOS::Ace::Curves::EASE_IN,
+    OHOS::Ace::Curves::EASE_OUT,
+    OHOS::Ace::Curves::EASE_IN_OUT,
+    OHOS::Ace::Curves::FAST_OUT_SLOW_IN,
+    OHOS::Ace::Curves::LINEAR_OUT_SLOW_IN,
+    OHOS::Ace::Curves::FAST_OUT_LINEAR_IN,
+    OHOS::Ace::Curves::EXTREME_DECELERATION,
+    OHOS::Ace::Curves::SHARP,
+    OHOS::Ace::Curves::RHYTHM,
+    OHOS::Ace::Curves::SMOOTH,
+    OHOS::Ace::Curves::FRICTION,
+};
+constexpr int32_t DEFAULT_DURATION = 1000;
 constexpr int32_t BLUR_STYLE_NONE_INDEX = 7;
 constexpr int32_t PLAY_MODE_REVERSE_VALUE = 1;
 constexpr int32_t PLAY_MODE_ALTERNATE_VALUE = 2;
@@ -1493,6 +1510,23 @@ void SetBackgroundBlurStyle(
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 
+ArkUIBlurStyleOptionType GetBackgroundBlurStyle(ArkUINodeHandle node)
+{
+    ArkUIBlurStyleOptionType styleOptionType = { 0, 0, 0, 1.0f };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, styleOptionType);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, styleOptionType);
+    if (!renderContext->GetBackBlurStyle().has_value()) {
+        return styleOptionType;
+    }
+    styleOptionType.blurStyle = static_cast<int32_t>(renderContext->GetBackBlurStyle()->blurStyle);
+    styleOptionType.colorMode = static_cast<int32_t>(renderContext->GetBackBlurStyle()->colorMode);
+    styleOptionType.adaptiveColor = static_cast<int32_t>(renderContext->GetBackBlurStyle()->adaptiveColor);
+    styleOptionType.scale = static_cast<int32_t>(renderContext->GetBackBlurStyle()->scale);
+    return styleOptionType;
+}
+
 void ResetBackgroundBlurStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1648,6 +1682,31 @@ void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkU
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
 
+ArkUIImageSizeType GetBackgroundImageSize(ArkUINodeHandle node)
+{
+    ArkUIImageSizeType imageSizeType = { 0, 0, 0, 0 };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, imageSizeType);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, imageSizeType);
+    CHECK_NULL_RETURN(renderContext->GetBackground(), imageSizeType);
+    auto imageSize = renderContext->GetBackground()->GetBackgroundImageSize();
+    CHECK_NULL_RETURN(imageSize, imageSizeType);
+    imageSizeType.xValue = imageSize->GetSizeValueX();
+    imageSizeType.yValue = imageSize->GetSizeValueY();
+    imageSizeType.xType = static_cast<int32_t>(imageSize->GetSizeTypeX());
+    imageSizeType.yType = static_cast<int32_t>(imageSize->GetSizeTypeY());
+    return imageSizeType;
+}
+
+int32_t GetBackgroundImageSizeWidthStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    // todo
+    return 0;
+}
+
 void ResetBackgroundImageSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1719,8 +1778,8 @@ void ResetTranslate(ArkUINodeHandle node)
  * values[2]: scaleX;values[3]: scaleY;values[4]: scaleZ
  * @param length shadows length
  */
-void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength,
-    const ArkUI_Int32* units, ArkUI_Int32 unitLength)
+void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength, const ArkUI_Int32* units,
+    ArkUI_Int32 unitLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1795,8 +1854,8 @@ void ResetScale(ArkUINodeHandle node)
  * values[7]: angle;values[8]:perspective
  * @param length shadows length
  */
-void SetRotate(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength,
-    const ArkUI_Int32* units, ArkUI_Int32 unitLength)
+void SetRotate(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength, const ArkUI_Int32* units,
+    ArkUI_Int32 unitLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1882,6 +1941,22 @@ void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_In
     ViewAbstract::SetOffset(frameNode, { xVal, yVal });
 }
 
+ArkUIOffsetType GetOffset(ArkUINodeHandle node)
+{
+    ArkUIOffsetType offsetVp = { 0.0f, 0.0f };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, offsetVp);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, offsetVp);
+    CHECK_NULL_RETURN(renderContext->GetPositionProperty(), offsetVp);
+    if (!renderContext->GetPositionProperty()->HasOffset()) {
+        return offsetVp;
+    }
+    offsetVp.xComponent = renderContext->GetPositionProperty()->GetOffsetValue().GetX().Value();
+    offsetVp.yComponent = renderContext->GetPositionProperty()->GetOffsetValue().GetY().Value();
+    return offsetVp;
+}
+
 void ResetOffset(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1890,6 +1965,7 @@ void ResetOffset(ArkUINodeHandle node)
     Dimension yVal(0.0, DimensionUnit::VP);
     ViewAbstract::SetOffset(frameNode, { xVal, yVal });
 }
+
 void SetPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
 {
@@ -1946,8 +2022,8 @@ void ResetPadding(ArkUINodeHandle node)
  * units[0] : left, units[1] : top, units[2] : right, units[3] : bottom
  * @param length values length
  */
-void SetPixelStretchEffect(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units,
-    ArkUI_Int32 length)
+void SetPixelStretchEffect(
+    ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2263,6 +2339,22 @@ void SetMarkAnchor(
     Dimension yDimension { yValue, static_cast<DimensionUnit>(yUnit) };
     OffsetT<Dimension> value = { xDimension, yDimension };
     ViewAbstract::MarkAnchor(frameNode, value);
+}
+
+ArkUIAnchorType GetMarkAnchor(ArkUINodeHandle node)
+{
+    ArkUIAnchorType anchorType = { 0.0f, 0.0f };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, anchorType);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, anchorType);
+    CHECK_NULL_RETURN(renderContext->GetPositionProperty(), anchorType);
+    if (!renderContext->GetPositionProperty()->HasAnchor()) {
+        return anchorType;
+    }
+    anchorType.xCoordinate = renderContext->GetPositionProperty()->GetAnchor()->GetX().Value();
+    anchorType.yCoordinate = renderContext->GetPositionProperty()->GetAnchor()->GetY().Value();
+    return anchorType;
 }
 
 void ResetMarkAnchor(ArkUINodeHandle node)
@@ -2823,8 +2915,8 @@ void ResetResponseRegion(ArkUINodeHandle node)
 }
 
 void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_CharPtr radiusArg, ArkUI_Float32 saturationArg,
-    ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg,
-    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+    ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg, const ArkUI_Float32* blurValues,
+    ArkUI_Int32 blurValuesSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
 
@@ -2835,7 +2927,7 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_CharPtr radiusArg, ArkUI_Fl
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
 
     EffectOption option = { radius, saturationArg, brightnessArg, color, static_cast<AdaptiveColor>(adaptiveColorArg),
-                            blurOption };
+        blurOption };
 
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetBackgroundEffect(frameNode, option);
@@ -3112,10 +3204,10 @@ int32_t GetAnimationDirection(int32_t animationPlayMode)
 void SetAnimationOption(std::shared_ptr<AnimationOption>& option, const ArkUIAnimationOptionType* animationOption)
 {
     option->SetDuration(animationOption->duration);
-    option->SetCurve(Framework::CreateCurve(std::string(animationOption->curve)));
+    option->SetCurve(CURVES[std::clamp(animationOption->curve, 0, static_cast<int32_t>(CURVES.size() - 1))]);
     option->SetDelay(animationOption->delay);
     option->SetIteration(animationOption->iteration);
-    option->SetAnimationDirection(static_cast<AnimationDirection>(GetAnimationDirection(animationOption->palyMode)));
+    option->SetAnimationDirection(static_cast<AnimationDirection>(GetAnimationDirection(animationOption->playMode)));
     option->SetTempo(animationOption->tempo);
 }
 
@@ -3163,6 +3255,48 @@ void SetTransitionCenter(ArkUINodeHandle node, ArkUI_Float32 centerXValue, ArkUI
     DimensionOffset offset(centerXDimension, centerYDimension);
     offset.SetZ(centerZDimension);
     ViewAbstract::SetPivot(frameNode, offset);
+}
+
+ArkUITransformCenterType GetTransformCenter(ArkUINodeHandle node)
+{
+    ArkUITransformCenterType transformCenter = { 0.0f, 0.0f, 0.0f };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, transformCenter);
+    CHECK_NULL_RETURN(frameNode->GetGeometryNode(), transformCenter);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, transformCenter);
+    auto oneCenterTransform = renderContext->GetOneCenterTransitionOption();
+    auto width = frameNode->GetGeometryNode() ? frameNode->GetGeometryNode()->GetFrameSize().Width() : 0.0f;
+    auto height = frameNode->GetGeometryNode() ? frameNode->GetGeometryNode()->GetFrameSize().Height() : 0.0f;
+    Dimension centerXDimension(HALF, DimensionUnit::PERCENT);
+    Dimension centerYDimension(HALF, DimensionUnit::PERCENT);
+    Dimension centerZDimension(0, DimensionUnit::VP);
+    if (renderContext && oneCenterTransform) {
+        centerXDimension.SetValue(oneCenterTransform->GetCenterX().Value());
+        centerXDimension.SetUnit(oneCenterTransform->GetCenterX().Unit());
+        centerYDimension.SetValue(oneCenterTransform->GetCenterY().Value());
+        centerYDimension.SetUnit(oneCenterTransform->GetCenterY().Unit());
+        centerZDimension.SetValue(oneCenterTransform->GetCenterZ().Value());
+        centerZDimension.SetUnit(oneCenterTransform->GetCenterZ().Unit());
+    }
+    if (centerXDimension.Unit() == DimensionUnit::PERCENT) {
+        Dimension centerXPx(width * centerXDimension.Value(), DimensionUnit::PX);
+        centerXDimension.SetValue(centerXPx.ConvertToVp());
+        centerXDimension.SetUnit(DimensionUnit::VP);
+    }
+    if (centerYDimension.Unit() == DimensionUnit::PERCENT) {
+        Dimension centerYPx(height * centerYDimension.Value(), DimensionUnit::PX);
+        centerYDimension.SetValue(centerYPx.ConvertToVp());
+        centerYDimension.SetUnit(DimensionUnit::VP);
+    }
+    if (centerZDimension.Unit() == DimensionUnit::PERCENT) {
+        centerZDimension.SetValue(0.0f);
+        centerZDimension.SetUnit(DimensionUnit::VP);
+    }
+    transformCenter.centerX = centerXDimension.Value();
+    transformCenter.centerY = centerYDimension.Value();
+    transformCenter.centerZ = centerZDimension.Value();
+    return transformCenter;
 }
 
 void ResetTransformCenter(RefPtr<OneCenterTransitionOptionType>& oneCenterTransition)
@@ -3216,6 +3350,54 @@ void SetOpacityTransition(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI
     ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
 }
 
+int32_t findCurveIndex(const RefPtr<Curve> curve)
+{
+    CHECK_NULL_RETURN(curve, 0);
+    auto iterator = std::find(CURVES.begin(), CURVES.end(), curve);
+    if (iterator == CURVES.end()) {
+        return 0;
+    }
+    return iterator - CURVES.begin();
+}
+
+void ParseAnimationOptionToStruct(
+    const std::shared_ptr<AnimationOption> animationOption, ArkUIAnimationOptionType& animationType)
+{
+    animationType.duration = animationOption->GetDuration();
+    animationType.curve = findCurveIndex(animationOption->GetCurve());
+    animationType.delay = animationOption->GetDelay();
+    animationType.iteration = animationOption->GetIteration();
+    animationType.playMode = static_cast<int32_t>(animationOption->GetAnimationDirection());
+    animationType.tempo = animationOption->GetTempo();
+}
+
+ArkUIOpacityTransitionType GetOpacityTransition(ArkUINodeHandle node)
+{
+    ArkUIAnimationOptionType animationType = { DEFAULT_DURATION, 0, 0, 1, 0, 1.0f };
+    ArkUIOpacityTransitionType opacityAnimationStruct = { 1.0f, animationType };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, opacityAnimationStruct);
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition;
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        oneCenterTransition = renderContext->GetOneCenterTransitionOption();
+    }
+    CHECK_NULL_RETURN(oneCenterTransition, opacityAnimationStruct);
+    RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
+    RefPtr<NG::ChainedOpacityEffect> opacityEffect;
+    while (chainEffect) {
+        if (chainEffect->GetType() == ChainedTransitionEffectType::OPACITY) {
+            opacityEffect = AceType::DynamicCast<NG::ChainedOpacityEffect>(chainEffect);
+            break;
+        }
+        chainEffect = chainEffect->GetNext();
+    }
+    CHECK_NULL_RETURN(opacityEffect, opacityAnimationStruct);
+    opacityAnimationStruct.opacity = opacityEffect->GetEffect();
+    ParseAnimationOptionToStruct(opacityEffect->GetAnimationOption(), opacityAnimationStruct.animation);
+    return opacityAnimationStruct;
+}
+
 void SetRotateTransition(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length, ArkUI_Float32 perspective,
     ArkUI_Float32 angle, const ArkUIAnimationOptionType* animationOption)
 {
@@ -3259,6 +3441,42 @@ void SetRotateTransition(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_
     }
     ACE_UPDATE_NODE_RENDER_CONTEXT(OneCenterTransitionOption, oneCenterTransition, frameNode);
     ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
+}
+
+ArkUIRotateTransitionType GetRotateTransition(ArkUINodeHandle node)
+{
+    ArkUIAnimationOptionType animationType = { DEFAULT_DURATION, 0, 0, 1, 0, 1.0f };
+    ArkUIRotateTransitionType rotateAnimationStruct = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, animationType };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, rotateAnimationStruct);
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition;
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        oneCenterTransition = renderContext->GetOneCenterTransitionOption();
+    }
+    CHECK_NULL_RETURN(oneCenterTransition, rotateAnimationStruct);
+    RefPtr<NG::ChainedRotateEffect> rotateEffect;
+    RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
+    while (chainEffect) {
+        if (chainEffect->GetType() == ChainedTransitionEffectType::ROTATE) {
+            rotateEffect = AceType::DynamicCast<NG::ChainedRotateEffect>(chainEffect);
+            break;
+        }
+        chainEffect = chainEffect->GetNext();
+    }
+    CHECK_NULL_RETURN(rotateEffect, rotateAnimationStruct);
+    auto xRotation = rotateEffect->GetEffect().xDirection;
+    auto yRotation = rotateEffect->GetEffect().yDirection;
+    auto zRotation = rotateEffect->GetEffect().zDirection;
+    auto angle = rotateEffect->GetEffect().angle;
+    auto perspective = rotateEffect->GetEffect().perspective;
+    rotateAnimationStruct.xRotation = xRotation;
+    rotateAnimationStruct.yRotation = yRotation;
+    rotateAnimationStruct.zRotation = zRotation;
+    rotateAnimationStruct.angle = angle;
+    rotateAnimationStruct.perspective = perspective;
+    ParseAnimationOptionToStruct(rotateEffect->GetAnimationOption(), rotateAnimationStruct.animation);
+    return rotateAnimationStruct;
 }
 
 void SetScaleTransition(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length,
@@ -3305,6 +3523,38 @@ void SetScaleTransition(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_I
     ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
 }
 
+ArkUIScaleTransitionType GetScaleTransition(ArkUINodeHandle node)
+{
+    ArkUIAnimationOptionType animationType = { DEFAULT_DURATION, 0, 0, 1, 0, 1.0f };
+    ArkUIScaleTransitionType scaleAnimationStruct = { 1.0f, 1.0f, 1.0f, animationType };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, scaleAnimationStruct);
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition;
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        oneCenterTransition = renderContext->GetOneCenterTransitionOption();
+    }
+    CHECK_NULL_RETURN(oneCenterTransition, scaleAnimationStruct);
+    RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
+    RefPtr<NG::ChainedScaleEffect> scaleEffect;
+    while (chainEffect) {
+        if (chainEffect->GetType() == ChainedTransitionEffectType::SCALE) {
+            scaleEffect = AceType::DynamicCast<NG::ChainedScaleEffect>(chainEffect);
+            break;
+        }
+        chainEffect = chainEffect->GetNext();
+    }
+    CHECK_NULL_RETURN(scaleEffect, scaleAnimationStruct);
+    auto xScale = scaleEffect->GetEffect().xScale;
+    auto yScale = scaleEffect->GetEffect().yScale;
+    auto zScale = scaleEffect->GetEffect().zScale;
+    scaleAnimationStruct.xScale = xScale;
+    scaleAnimationStruct.yScale = yScale;
+    scaleAnimationStruct.zScale = zScale;
+    ParseAnimationOptionToStruct(scaleEffect->GetAnimationOption(), scaleAnimationStruct.animation);
+    return scaleAnimationStruct;
+}
+
 void SetTranslateTransition(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue,
     ArkUI_Int32 yUnit, ArkUI_Float32 zValue, ArkUI_Int32 zUnit, const ArkUIAnimationOptionType* animationOption)
 {
@@ -3346,6 +3596,38 @@ void SetTranslateTransition(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_In
     }
     ACE_UPDATE_NODE_RENDER_CONTEXT(OneCenterTransitionOption, oneCenterTransition, frameNode);
     ViewAbstract::SetChainedTransition(frameNode, oneCenterTransition->GetTransitionEffect());
+}
+
+ArkUITranslateTransitionType GetTranslateTransition(ArkUINodeHandle node)
+{
+    ArkUIAnimationOptionType animationType = { DEFAULT_DURATION, 0, 0, 1, 0, 1.0f };
+    ArkUITranslateTransitionType translateAnimationStruct = { 0.0f, 0.0f, 0.0f, animationType };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, translateAnimationStruct);
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition;
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        oneCenterTransition = renderContext->GetOneCenterTransitionOption();
+    }
+    CHECK_NULL_RETURN(oneCenterTransition, translateAnimationStruct);
+    RefPtr<NG::ChainedTransitionEffect> chainEffect = oneCenterTransition->GetTransitionEffect();
+    RefPtr<NG::ChainedTranslateEffect> translateEffect;
+    while (chainEffect) {
+        if (chainEffect->GetType() == ChainedTransitionEffectType::TRANSLATE) {
+            translateEffect = AceType::DynamicCast<NG::ChainedTranslateEffect>(chainEffect);
+            break;
+        }
+        chainEffect = chainEffect->GetNext();
+    }
+    CHECK_NULL_RETURN(translateEffect, translateAnimationStruct);
+    auto xTransition = translateEffect->GetEffect().x.Value();
+    auto yTransition = translateEffect->GetEffect().y.Value();
+    auto zTransition = translateEffect->GetEffect().z.Value();
+    translateAnimationStruct.xTransition = xTransition;
+    translateAnimationStruct.yTransition = yTransition;
+    translateAnimationStruct.zTransition = zTransition;
+    ParseAnimationOptionToStruct(translateEffect->GetAnimationOption(), translateAnimationStruct.animation);
+    return translateAnimationStruct;
 }
 
 void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
@@ -3535,9 +3817,8 @@ void ResetOutlineStyle(ArkUINodeHandle node)
  * colorAndStyle[offset + 14], option[offset + 15]: OutlineStyles styleBottom(hasValue, value)
  * @param optionsLength options colorAndStyleSize
  */
-void SetOutline(
-    ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valuesSize,
-    const uint32_t* colorAndStyle, int32_t colorAndStyleSize)
+void SetOutline(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valuesSize, const uint32_t* colorAndStyle,
+    int32_t colorAndStyleSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4015,7 +4296,9 @@ const ArkUICommonModifier* GetCommonModifier()
         GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel, SetNeedFocus, GetNeedFocus,
         GetOpacity, GetBorderWidth, GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip,
         GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient,
-        GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf };
+        GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
+        GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor,
+        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle };
 
     return &modifier;
 }
@@ -4133,7 +4416,7 @@ void SetOnClick(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
         event.componentAsyncEvent.data[6].f32 = PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX());
         //displayY
         event.componentAsyncEvent.data[7].f32 = PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY());
-        
+
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));

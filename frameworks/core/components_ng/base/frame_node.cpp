@@ -321,8 +321,9 @@ private:
     bool needResetChild_ = false;
 }; // namespace OHOS::Ace::NG
 
-FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
-    : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern),
+FrameNode::FrameNode(
+    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, int32_t instanceId, bool isRoot)
+    : UINode(tag, nodeId, instanceId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern),
       frameProxy_(std::make_unique<FramePorxy>(this))
 {
     renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam());
@@ -407,7 +408,7 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
-    auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
+    auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, -1, isRoot);
     ElementRegister::GetInstance()->AddUINode(frameNode);
     frameNode->InitializePatternAndContext();
     return frameNode;
@@ -1341,15 +1342,6 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
-    // restore info will overwrite the first setted attribute
-    auto &&opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-    if (opts && opts->Expansive()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto safeAreaManager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID(safeAreaManager);
-        safeAreaManager->AddNeedExpandNode(GetHostNode());
-    }
     if (!isRestoreInfoUsed_) {
         isRestoreInfoUsed_ = true;
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -2675,6 +2667,11 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         }
     }
 
+    if (SelfOrParentExpansive() && needRestoreSafeArea_) {
+        RestoreGeoState();
+        needRestoreSafeArea_ = false;
+    }
+
     auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
     if (size.has_value()) {
         geometryNode_->SetContentSize(size.value());
@@ -2704,6 +2701,12 @@ void FrameNode::Layout()
 {
     ACE_LAYOUT_SCOPED_TRACE("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+    if (SelfOrParentExpansive() && needRestoreSafeArea_) {
+        // if safeArea not restored in measure because of constraint not changed and so on,
+        // restore this node
+        RestoreGeoState();
+        needRestoreSafeArea_ = false;
+    }
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
@@ -2740,30 +2743,38 @@ void FrameNode::Layout()
     CHECK_NULL_VOID(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
     AvoidKeyboard(isFocusOnPage);
-    auto task = [weak = WeakClaim(this)]() {
+    auto task = [weak = WeakClaim(this), needSkipSync = needSkipSyncGeometryNode_]() {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        frameNode->SyncGeometryNode();
+        frameNode->SyncGeometryNode(needSkipSync);
     };
-    if (HasTransitionRunning()) {
-        task();
-    } else {
-        pipeline->AddSyncGeometryNodeTask(task);
+
+    pipeline->AddSyncGeometryNodeTask(task);
+    // if a node has geo transition but not the root node, add task only but not flush
+    // or add to expand list, self node will be added to expand list in next layout
+    if (geometryTransition != nullptr && !IsRootMeasureNode()) {
+        return;
+    }
+    if (SelfOrParentExpansive()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
+        safeAreaManager->AddNeedExpandNode(GetHostNode());
+    }
+    if (geometryTransition != nullptr) {
+        pipeline->FlushSyncGeometryNodeTasks();
     }
 }
 
-bool FrameNode::HasTransitionRunning()
-{
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    return geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
-}
-
-bool FrameNode::SelfOrParentExpansive()
+bool FrameNode::SelfExpansive()
 {
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-    if (opts && opts->Expansive()) {
-        return true;
-    }
+    return opts && opts->Expansive();
+}
+
+bool FrameNode::ParentExpansive()
+{
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_RETURN(parent, false);
     auto parentLayoutProperty = parent->GetLayoutProperty();
@@ -2772,16 +2783,21 @@ bool FrameNode::SelfOrParentExpansive()
     return parentOpts && parentOpts->Expansive();
 }
 
-void FrameNode::SyncGeometryNode()
+bool FrameNode::SelfOrParentExpansive()
+{
+    return SelfExpansive() || ParentExpansive();
+}
+
+void FrameNode::SyncGeometryNode(bool needSkipSync)
 {
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool hasTransition = HasTransitionRunning();
+    bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
 
     if (!isActive_ && !hasTransition) {
         layoutAlgorithm_.Reset();
         return;
     }
-    if (SkipSyncGeometryNode() && (!geometryTransition || !geometryTransition->IsNodeInAndActive(Claim(this)))) {
+    if (needSkipSync && (!geometryTransition || !geometryTransition->IsNodeInAndActive(Claim(this)))) {
         layoutAlgorithm_.Reset();
         return;
     }

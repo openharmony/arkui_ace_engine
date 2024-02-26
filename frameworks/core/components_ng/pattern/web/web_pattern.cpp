@@ -2135,16 +2135,76 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
         selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(beginTouchHandle);
         selectInfo.secondHandle.isShow = IsTouchHandleShow(endTouchHandle);
         selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endTouchHandle);
+        QuickMenuIsNeedNewAvoid(selectInfo, params, beginTouchHandle, endTouchHandle);
     }
     selectInfo.menuInfo.menuIsShow = true;
     RegisterSelectOverlayCallback(selectInfo, params, callback);
     RegisterSelectOverlayEvent(selectInfo);
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
+    if (selectInfo.isNewAvoid && selectOverlayProxy_) {
+        selectOverlayProxy_->ShowOrHiddenMenu(false);
+    }
     selectMenuInfo_ = selectInfo.menuInfo;
     insertHandle_ = insertTouchHandle;
     startSelectionHandle_ = beginTouchHandle;
     endSelectionHandle_ = endTouchHandle;
     return selectOverlayProxy_ ? true : false;
+}
+
+RectF WebPattern::ComputeClippedSelectionBounds(
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (!pipeline) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "ComputeClippedSelectionBounds pipeline is nullptr");
+        return RectF();
+    }
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    int32_t startY = static_cast<int32_t>(startHandle->GetY() / pipeline->GetDipScale());
+    int32_t endY = static_cast<int32_t>(endHandle->GetY() / pipeline->GetDipScale());
+    int32_t startEdgeHeight = static_cast<int32_t>(startHandle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
+    int32_t endEdgeHeight = static_cast<int32_t>(endHandle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
+    float selectX = 0;
+    float selectY = 0;
+    float selectWidth = params->GetSelectWidth();
+    float selectHeight = static_cast<float>((startHandle->GetEdgeHeight() + endHandle->GetEdgeHeight()) / 2);
+    if (endY < endEdgeHeight) {
+        selectY -= selectHeight;
+    } else if (startY >= startEdgeHeight &&
+        LessOrEqual(GetHostFrameSize().value_or(SizeF()).Height(), startHandle->GetY())) {
+        selectY += GetHostFrameSize().value_or(SizeF()).Height();
+    } else {
+        selectY -= selectHeight;
+    }
+    float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX()) / 2);
+    float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY()) / 2);
+    if (viewPortX) {
+        selectX += viewPortX;
+    }
+    if (viewPortY) {
+        selectY += viewPortY;
+    }
+    selectX = selectX + offset.GetX() + params->GetSelectX();
+    selectY += offset.GetY();
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "SelectionBounds selectX:%{publc}f, selectY:%{publc}f, selectWidth:%{publc}f, selectHeight:%{publc}f",
+        selectX, selectY, selectWidth, selectHeight);
+    return RectF(selectX, selectY, selectWidth, selectHeight);
+}
+
+void WebPattern::QuickMenuIsNeedNewAvoid(
+    SelectOverlayInfo& selectInfo,
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle)
+{
+    if (!selectInfo.firstHandle.isShow && !selectInfo.secondHandle.isShow) {
+        selectInfo.isNewAvoid = true;
+        selectInfo.selectArea =
+            ComputeClippedSelectionBounds(params, startHandle, endHandle);
+    }
 }
 
 void WebPattern::OnQuickMenuDismissed()

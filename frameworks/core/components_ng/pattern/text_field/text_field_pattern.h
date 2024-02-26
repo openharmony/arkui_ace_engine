@@ -1039,6 +1039,8 @@ public:
         return isShowMagnifier_;
     }
 
+    void InitBackGroundColorAndBorderRadius();
+
     void SetLocalOffset(OffsetF localOffset)
     {
         localOffset_.SetX(localOffset.GetX());
@@ -1419,6 +1421,7 @@ private:
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool isLongPress_ = false;
+    bool isEdit_ = false;
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
     RefPtr<NG::UINode> unitNode_;

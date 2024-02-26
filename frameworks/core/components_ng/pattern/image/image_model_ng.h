@@ -82,6 +82,13 @@ public:
     static bool IsSrcSvgImage(FrameNode* frameNode);
     static void SetOnComplete(FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback);
     static void SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback);
+    static ImageSourceInfo GetSrc(FrameNode* frameNode);
+    static ImageFit GetObjectFit(FrameNode* frameNode);
+    static ImageInterpolation GetInterpolation(FrameNode* frameNode);
+    static ImageRepeat GetObjectRepeat(FrameNode* frameNode);
+    static std::vector<float> GetColorFilter(FrameNode* frameNode);
+    static bool GetAutoResize(FrameNode* frameNode);
+    static ImageSourceInfo GetAlt(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H

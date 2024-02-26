@@ -85,7 +85,8 @@ public:
 
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
     // avoid use creator function, use CreateFrameNode
-    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, int32_t instanceId = -1,
+        bool isRoot = false);
 
     ~FrameNode() override;
 
@@ -583,8 +584,17 @@ public:
         return GetTag();
     }
 
-    bool HasTransitionRunning();
     bool SelfOrParentExpansive();
+    bool SelfExpansive();
+    bool ParentExpansive();
+    void SetNeedRestoreSafeArea(bool needRestore)
+    {
+        needRestoreSafeArea_ = needRestore;
+    }
+    bool NeedRestoreSafeArea()
+    {
+        return needRestoreSafeArea_;
+    }
 
     bool IsActive() const override
     {
@@ -603,7 +613,7 @@ public:
     void SetCacheCount(
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
-    void SyncGeometryNode();
+    void SyncGeometryNode(bool needSkipSync = false);
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
@@ -829,6 +839,7 @@ private:
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
+    bool needRestoreSafeArea_ = true;
 
     RefPtr<FrameNode> overlayNode_;
 
