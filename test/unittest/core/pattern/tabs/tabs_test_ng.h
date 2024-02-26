@@ -117,7 +117,8 @@ public:
     void CreateWithItem(const std::function<void(TabsModelNG)>& callback,
         BarPosition barPosition = BarPosition::START, int32_t index = 0);
 
-    static void CreateItem(int32_t itemNumber, const std::function<void(TabContentModelNG)>& callback = nullptr);
+    static void CreateItem(
+        int32_t itemNumber, const std::function<void(TabContentModelNG, int32_t)>& callback = nullptr);
     static TabBarBuilderFunc TabBarItemBuilder();
 
     RefPtr<TabsNode> frameNode_;
