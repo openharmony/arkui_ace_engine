@@ -5491,7 +5491,7 @@ void ResetTextPickerValue(ArkUI_NodeHandle node)
 // Row&Column
 int32_t SetAlignItems(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    if (item->size == 0 || !InRegion(NUM_0, NUM_2, item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -5545,18 +5545,18 @@ const ArkUI_AttributeItem* GetAlignItems(ArkUI_NodeHandle node)
 
 int32_t SetJustifyContent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    if (item->size == 0 || !InRegion(NUM_1, NUM_8, item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
     switch (node->type) {
         case ARKUI_NODE_COLUMN:
             fullImpl->getNodeModifiers()->getColumnModifier()->setColumnJustifyContent(
-                node->uiNodeHandle, item->value[0].i32 + NUM_1);
+                node->uiNodeHandle, item->value[0].i32);
             break;
         case ARKUI_NODE_ROW:
             fullImpl->getNodeModifiers()->getRowModifier()->setRowJustifyContent(
-                node->uiNodeHandle, item->value[0].i32 + NUM_1);
+                node->uiNodeHandle, item->value[0].i32);
             break;
         default:
             break;
@@ -5606,18 +5606,33 @@ int32_t SetFlexOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     int options[NUM_5] = { 0, 0, 0, 1, 0 };
     if (item->size > NUM_0) {
+        if (!InRegion(NUM_0, NUM_3, item->value[NUM_0].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         options[NUM_0] = item->value[NUM_0].i32;
     }
     if (item->size > NUM_1) {
+        if (!InRegion(NUM_0, NUM_2, item->value[NUM_1].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         options[NUM_1] = item->value[NUM_1].i32;
     }
     if (item->size > NUM_2) {
+        if (!InRegion(NUM_1, NUM_8, item->value[NUM_2].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         options[NUM_2] = item->value[NUM_2].i32;
     }
     if (item->size > NUM_3) {
+        if (!InRegion(NUM_0, NUM_5, item->value[NUM_3].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         options[NUM_3] = item->value[NUM_3].i32;
     }
     if (item->size > NUM_4) {
+        if (!InRegion(NUM_1, NUM_8, item->value[NUM_4].i32)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         options[NUM_4] = item->value[NUM_4].i32;
     }
     fullImpl->getNodeModifiers()->getFlexModifier()->setFlexOptions(node->uiNodeHandle, options, NUM_5);
