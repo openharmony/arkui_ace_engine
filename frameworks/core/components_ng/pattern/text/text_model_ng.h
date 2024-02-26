@@ -105,6 +105,15 @@ public:
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
     static Font GetFont(FrameNode* frameNode);
+    static std::string GetContent(FrameNode* frameNode);
+    static float GetLineHeight(FrameNode* frameNode);
+    static TextDecoration GetDecoration(FrameNode* frameNode);
+    static TextCase GetTextCase(FrameNode* frameNode);
+    static Dimension GetLetterSpacing(FrameNode* frameNode);
+    static uint32_t GetMaxLines(FrameNode* frameNode);
+    static TextAlign GetTextAlign(FrameNode* frameNode);
+    static TextOverflow GetTextOverflow(FrameNode* frameNode);
+    static Dimension GetTextIndent(FrameNode* frameNode);
 
     static Dimension GetFontSize(FrameNode* frameNode);
     static Ace::FontWeight GetFontWeight(FrameNode* frameNode);

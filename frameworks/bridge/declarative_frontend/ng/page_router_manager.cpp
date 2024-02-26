@@ -436,23 +436,10 @@ bool PageRouterManager::StartPop()
 
     // pop top page in page stack
     auto preWeakNode = pageRouterStack_.back();
-    auto prePageNode = preWeakNode.Upgrade();
-    if (prePageNode) {
-        auto prePageNodePattern = prePageNode->GetPattern<PagePattern>();
-        // stack's top page should be removed after AboutToDisappear
-        // If in the future, back gesture can BE INTERRUPTED, this delay operation
-        // may lead to error in animation, because the animation will pick a wrong
-        // top element of stack (old top hasn't be removed yet due to interruption).
-        prePageNodePattern->SetDisappearCallback([weak = WeakClaim(this), preWeakNode]() {
-            auto manager = weak.Upgrade();
-            if (manager) {
-                manager->pageRouterStack_.remove(preWeakNode);
-            }
-        });
-    }
+    pageRouterStack_.pop_back();
 
     // clean prev top page params
-    currentPage = (++pageRouterStack_.rbegin())->Upgrade();
+    currentPage = pageRouterStack_.back().Upgrade();
     CHECK_NULL_RETURN(currentPage, false);
     pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
@@ -463,6 +450,7 @@ bool PageRouterManager::StartPop()
 
     // do pop page
     if (!OnPopPage(true, true)) {
+        pageRouterStack_.emplace_back(preWeakNode);
         pageInfo->ReplacePageParams(params);
         return false;
     }
@@ -617,10 +605,6 @@ void PageRouterManager::GetStateByUrl(std::string& url, std::vector<Framework::S
         CHECK_NULL_VOID(PageInfo);
         std::string tempUrl;
         if (PageInfo->GetPageUrl() == url) {
-            auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
-            if (!pagePath.empty()) {
-                url = pagePath;
-            }
             stateInfo.params = PageInfo->GetPageParams();
             stateInfo.index = counter;
             auto pos = url.rfind(".js");
@@ -628,6 +612,10 @@ void PageRouterManager::GetStateByUrl(std::string& url, std::vector<Framework::S
                 tempUrl = url.substr(0, pos);
             }
             tempUrl = url;
+            auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
+            if (!pagePath.empty()) {
+                tempUrl = pagePath;
+            }
             pos = tempUrl.rfind("/");
             if (pos != std::string::npos) {
                 stateInfo.name = tempUrl.substr(pos + 1);
@@ -1253,6 +1241,18 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
         pageRouterStack_.insert(last, pageNode);
         if (!tempParam.empty()) {
             pageInfo->ReplacePageParams(tempParam);
+        }
+    }
+    
+    // update index in pageInfo
+    for (auto iter = last; iter != pageRouterStack_.end(); ++iter, ++index) {
+        auto pageNode = iter->Upgrade();
+        if (!pageNode) {
+            continue;
+        }
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        if (pagePattern) {
+            pagePattern->GetPageInfo()->SetPageIndex(index);
         }
     }
 }

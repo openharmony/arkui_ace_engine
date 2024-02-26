@@ -356,11 +356,8 @@ void JSTextField::SetCaretPosition(const JSCallbackInfo& info)
     }
 
     int32_t caretPosition = 0;
-    if (!ParseJsInt32(info[0], caretPosition)) {
-        return;
-    }
-    if (caretPosition < 0) {
-        return;
+    if (!ParseJsInt32(info[0], caretPosition) || caretPosition < 0) {
+        caretPosition = 0;
     }
     TextFieldModel::GetInstance()->SetCaretPosition(caretPosition);
 }

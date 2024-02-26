@@ -957,11 +957,8 @@ void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisi
     CHECK_NULL_VOID(pipeline);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    frameNode->ClearVisibleAreaUserCallback();
-
-    for (const auto &ratio : ratioList) {
-        pipeline->AddVisibleAreaChangeNode(frameNode, ratio, onVisibleChange);
-    }
+    frameNode->CleanVisibleAreaUserCallback();
+    pipeline->AddVisibleAreaChangeNode(frameNode, ratioList, onVisibleChange);
 }
 
 void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect> &responseRegion)
@@ -1385,6 +1382,24 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
         }
     } else {
         overlayManager->HidePopup(targetId, popupInfo);
+    }
+}
+
+void ViewAbstract::DismissDialog()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+    CHECK_NULL_VOID(overlay);
+    overlayManager->RemoveDialog(overlay, false, false);
+    auto pattern = overlay->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (overlayManager->isMaskNode(pattern->GetHost()->GetId())) {
+        overlayManager->PopModalDialog(pattern->GetHost()->GetId());
     }
 }
 

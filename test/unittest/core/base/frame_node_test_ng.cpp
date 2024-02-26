@@ -802,7 +802,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
      * @tc.expected: expect The function is run ok.
      */
     VisibleCallbackInfo callbackInfo;
-    FRAME_NODE2->AddVisibleAreaUserCallback(0.0f, callbackInfo);
+    FRAME_NODE2->SetVisibleAreaUserCallback({0.0f}, callbackInfo);
     FRAME_NODE2->TriggerVisibleAreaChangeCallback();
 
     /**
@@ -1196,24 +1196,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCalculateCurrentVisibleRatio0030, TestSize.Le
 }
 
 /**
- * @tc.name: FrameNodeTestNg00_OnVisibleAreaChangeCallback31
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeOnVisibleAreaChangeCallback31, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. callback RemoveLastHotZoneRect.
-     * @tc.expected: step1. expect The function is run ok.
-     */
-    std::unordered_map<double, VisibleCallbackInfo> map;
-    VisibleCallbackInfo info;
-    bool isHandled = false;
-    FRAME_NODE2->OnVisibleAreaChangeCallback(map, true, 1.0, isHandled);
-    EXPECT_TRUE(map.empty());
-}
-
-/**
  * @tc.name: FrameNodeTestNg_InitializePatternAndContext0032
  * @tc.desc: Test InitializePatternAndContext
  * @tc.type: FUNC
@@ -1241,65 +1223,48 @@ HWTEST_F(FrameNodeTestNg, FrameNodeInitializePatternAndContext0032, TestSize.Lev
 HWTEST_F(FrameNodeTestNg, FrameNodeProcessAllVisibleCallback0033, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create a node and init a map for preparing for args, then set a flag
+     * @tc.steps: step1. create a node and init a vector for preparing for args, then set a flag
      */
     auto one = FrameNode::GetOrCreateFrameNode("one", 11, []() { return AceType::MakeRefPtr<Pattern>(); });
-    std::unordered_map<double, VisibleCallbackInfo> visibleAreaCallbacks;
-    auto insert = [&visibleAreaCallbacks](double callbackRatio, std::function<void(bool, double)> callback,
-                      bool isCurrentVisible = false, double visibleRatio = 1.0) {
-        VisibleCallbackInfo callbackInfo { callback, visibleRatio, isCurrentVisible };
-        visibleAreaCallbacks.emplace(callbackRatio, callbackInfo);
-    };
-    bool flag = false;
-    auto defaultCallback = [&flag](bool input1, double input2) { flag = !flag; };
-    insert(0.2, std::function<void(bool, double)>(defaultCallback), false);
-    insert(0.8, std::function<void(bool, double)>(defaultCallback), true);
-    insert(0.21, std::function<void(bool, double)>(defaultCallback), true);
-    insert(0.79, std::function<void(bool, double)>(defaultCallback), false);
-    insert(0.5, std::function<void(bool, double)>(defaultCallback), false);
+    std::vector<double> visibleAreaRatios{0.2, 0.8, 0.21, 0.79, 0.5};
+    int flag = 0;
+    auto defaultCallback = [&flag](bool input1, double input2) { flag += 1; };
+    VisibleCallbackInfo callbackInfo { defaultCallback, 1.0, false };
 
     /**
-     * @tc.steps: step2. call ProcessAllVisibleCallback with .5
-     * @tc.expected: flag is true
+     * @tc.steps: step2. call ProcessAllVisibleCallback with 0.5 from 0
+     * @tc.expected: flag is 1
      */
-    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 0.5);
-    EXPECT_TRUE(flag);
+    one->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0.5, 0);
+    EXPECT_EQ(flag, 1);
 
     /**
-     * @tc.steps: step3. call ProcessAllVisibleCallback with 0
-     * @tc.expected: flag turns false
+     * @tc.steps: step3. call ProcessAllVisibleCallback with 0 from 0.5
+     * @tc.expected: flag is 2
      */
-    visibleAreaCallbacks.clear();
-    insert(0, std::function<void(bool, double)>(defaultCallback), false);
-    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 0);
-    EXPECT_FALSE(flag);
+    one->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0, 0.5);
+    EXPECT_EQ(flag, 2);
 
     /**
-     * @tc.steps: step4. call ProcessAllVisibleCallback with 0
-     * @tc.expected: flag turns true
+     * @tc.steps: step4. call ProcessAllVisibleCallback with 0 from 0
+     * @tc.expected: flag is 2
      */
-    visibleAreaCallbacks.clear();
-    insert(0, std::function<void(bool, double)>(defaultCallback), true);
-    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 0);
-    EXPECT_TRUE(flag);
+    one->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 0, 0);
+    EXPECT_EQ(flag, 2);
 
     /**
-     * @tc.steps: step5. call ProcessAllVisibleCallback with 0
-     * @tc.expected: flag turns false
+     * @tc.steps: step5. call ProcessAllVisibleCallback with 1 from 0
+     * @tc.expected: flag is 3
      */
-    visibleAreaCallbacks.clear();
-    insert(1, std::function<void(bool, double)>(defaultCallback), false);
-    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 1);
-    EXPECT_FALSE(flag);
+    one->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 1, 0);
+    EXPECT_EQ(flag, 3);
 
     /**
-     * @tc.steps: step6. call ProcessAllVisibleCallback with 1
-     * @tc.expected: flag turns true
+     * @tc.steps: step6. call ProcessAllVisibleCallback with 1 from 1
+     * @tc.expected: flag is 3
      */
-    visibleAreaCallbacks.clear();
-    insert(1, std::function<void(bool, double)>(defaultCallback), true);
-    one->ProcessAllVisibleCallback(visibleAreaCallbacks, 1);
-    EXPECT_TRUE(flag);
+    one->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 1, 1);
+    EXPECT_EQ(flag, 3);
 }
 
 /**

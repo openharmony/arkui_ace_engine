@@ -407,6 +407,13 @@ public:
 
     bool IsShowSelectMenuUsingMouse();
 
+    bool IsShowPlaceholder() const
+    {
+        return isShowPlaceholder_;
+    }
+
+    void SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+
     void HandleOnCameraInput() override;
 
     RefPtr<FocusHub> GetFocusHub() const;
@@ -662,6 +669,7 @@ private:
     TimeStamp lastAiPosTimeStamp_;
     bool adjusted_ = false;
     bool isShowMenu_ = true;
+    bool isShowPlaceholder_ = false;
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };

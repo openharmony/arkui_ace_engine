@@ -100,6 +100,20 @@ void SetOptionalBorderRadius(
     offset = offset + OFFSET_3;
 }
 
+void SetButtonLabel(ArkUINodeHandle node, ArkUI_CharPtr label)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetLabel(frameNode, label);
+}
+
+void ResetButtonLabel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetLabel(frameNode, "");
+}
+
 void SetButtonType(ArkUINodeHandle node, int type)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -476,7 +490,7 @@ void ResetButtonSize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIButtonModifier* GetButtonModifier()
 {
-    static const ArkUIButtonModifier modifier = { nullptr, nullptr,
+    static const ArkUIButtonModifier modifier = { SetButtonLabel, ResetButtonLabel,
         SetButtonType, ResetButtonType, SetButtonStateEffect,
         ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize, ResetButtonFontSize,
         SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle, SetButtonFontFamily,

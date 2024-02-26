@@ -171,6 +171,12 @@ void ListModelNG::SetCachedCount(int32_t cachedCount)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount);
 }
 
+int32_t ListModelNG::GetSticky(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetStickyStyleValue());
+}
+
 void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StickyStyle, stickyStyle);
@@ -197,6 +203,14 @@ void ListModelNG::SetMultiSelectable(bool selectable)
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMultiSelectable(selectable);
+}
+
+int32_t ListModelNG::GetScrollEnabled(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    int32_t value = 0;
+    ACE_GET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, value, frameNode);
+    return value;
 }
 
 void ListModelNG::SetScrollEnabled(bool scrollEnabled)
@@ -419,9 +433,21 @@ void ListModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool a
     ScrollableModelNG::SetEdgeEffect(frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
 }
 
+int32_t ListModelNG::GetListDirection(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetListDirection().value());
+}
+
 void ListModelNG::SetListDirection(FrameNode* frameNode, int32_t axis)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListDirection, static_cast<Axis>(axis), frameNode);
+}
+
+float ListModelNG::GetListFriction(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return frameNode->GetPattern<ListPattern>()->GetFriction();
 }
 
 void ListModelNG::SetListFriction(FrameNode* frameNode, double friction)
@@ -443,6 +469,12 @@ void ListModelNG::SetListNestedScroll(FrameNode* frameNode, const NestedScrollOp
     pattern->SetNestedScroll(nestedOpt);
 }
 
+int32_t ListModelNG::GetListScrollBar(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<int32_t>(frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarMode().value());
+}
+
 void ListModelNG::SetListScrollBar(FrameNode* frameNode, int32_t barState)
 {
     int32_t displayNumber;
@@ -461,9 +493,23 @@ void ListModelNG::SetListScrollBar(FrameNode* frameNode, int32_t barState)
     ScrollableModelNG::SetScrollBarMode(frameNode, displayNumber);
 }
 
+float ListModelNG::GetScrollBarWidth(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarWidth();
+    return value->ConvertToVp();
+}
+
 void ListModelNG::SetListScrollBarWidth(FrameNode* frameNode, const std::string& value)
 {
     ScrollableModelNG::SetScrollBarWidth(frameNode, value);
+}
+
+uint32_t ListModelNG::GetScrollBarColor(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarColor();
+    return value->GetValue();
 }
 
 void ListModelNG::SetListScrollBarColor(FrameNode* frameNode, const std::string& value)
@@ -505,14 +551,35 @@ void ListModelNG::SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutte
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, laneGutter, frameNode);
 }
 
+int32_t ListModelNG::GetListItemAlign(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetListItemAlign().value());
+}
+
 void ListModelNG::SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listItemAlign)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign, frameNode);
 }
 
+float ListModelNG::GetListSpace(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto value = frameNode->GetLayoutProperty<ListLayoutProperty>()->GetSpaceValue();
+    return value.ConvertToVp();
+}
+
 void ListModelNG::SetListSpace(FrameNode* frameNode, const Dimension& space)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space, frameNode);
+}
+
+int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, 0.0f);
+    return pattern->GetAlwaysEnabled();
 }
 
 void ListModelNG::SetScrollSnapAlign(FrameNode* frameNode, V2::ScrollSnapAlign scrollSnapAlign)

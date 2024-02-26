@@ -75,7 +75,7 @@ void RichEditorPaintMethod::SetCaretOffsetAndHeight(PaintWrapper* paintWrapper)
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
     CHECK_NULL_VOID(overlayMod);
     auto caretPosition = richEditorPattern->GetCaretPosition();
-    if (richEditorPattern->GetTextContentLength() <= 0) {
+    if (richEditorPattern->GetTextContentLength() <= 0 && !richEditorPattern->IsShowPlaceholder()) {
         auto rect = richEditorPattern->GetTextContentRect();
         constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
         overlayMod->SetCaretOffsetAndHeight(

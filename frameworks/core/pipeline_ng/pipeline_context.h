@@ -187,8 +187,8 @@ public:
 
     void HandleOnAreaChangeEvent(uint64_t nanoTimestamp);
 
-    void AddVisibleAreaChangeNode(
-        const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
+    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
+        const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
     void AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback);

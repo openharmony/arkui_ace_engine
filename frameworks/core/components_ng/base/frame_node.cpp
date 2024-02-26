@@ -321,8 +321,9 @@ private:
     bool needResetChild_ = false;
 }; // namespace OHOS::Ace::NG
 
-FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
-    : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern),
+FrameNode::FrameNode(
+    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, int32_t instanceId, bool isRoot)
+    : UINode(tag, nodeId, instanceId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern),
       frameProxy_(std::make_unique<FramePorxy>(this))
 {
     renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam());
@@ -346,8 +347,8 @@ FrameNode::~FrameNode()
         OnDetachFromMainTree(false);
     }
     TriggerVisibleAreaChangeCallback(true);
-    visibleAreaUserCallbacks_.clear();
-    visibleAreaInnerCallbacks_.clear();
+    CleanVisibleAreaUserCallback();
+    CleanVisibleAreaInnerCallback();
     if (eventHub_) {
         eventHub_->ClearOnAreaChangedInnerCallbacks();
     }
@@ -407,7 +408,7 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
-    auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
+    auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, -1, isRoot);
     ElementRegister::GetInstance()->AddUINode(frameNode);
     frameNode->InitializePatternAndContext();
     return frameNode;
@@ -982,17 +983,26 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
         isFrameDisappear = !curIsVisible || !curFrameIsActive;
     }
 
+    CHECK_NULL_VOID(eventHub_);
+    auto& visibleAreaUserRatios = eventHub_->GetVisibleAreaRatios(true);
+    auto& visibleAreaUserCallback = eventHub_->GetVisibleAreaCallback(true);
+    auto& visibleAreaInnerRatios = eventHub_->GetVisibleAreaRatios(false);
+    auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
+
     if (isFrameDisappear) {
         if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
-            ProcessAllVisibleCallback(visibleAreaUserCallbacks_, VISIBLE_RATIO_MIN);
-            ProcessAllVisibleCallback(visibleAreaInnerCallbacks_, VISIBLE_RATIO_MIN);
+            ProcessAllVisibleCallback(visibleAreaUserRatios, visibleAreaUserCallback,
+                VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
+            ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback,
+                VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
             lastVisibleRatio_ = VISIBLE_RATIO_MIN;
         }
         return;
     }
 
-    if (GetTag() == FORM_COMPONENT_TAG && visibleAreaUserCallbacks_.empty() && !visibleAreaInnerCallbacks_.empty()) {
-        ProcessAllVisibleCallback(visibleAreaInnerCallbacks_, VISIBLE_RATIO_MAX);
+    if (GetTag() == FORM_COMPONENT_TAG && visibleAreaUserRatios.empty() && !visibleAreaInnerRatios.empty()) {
+        ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback,
+            VISIBLE_RATIO_MAX, lastVisibleCallbackRatio_);
         lastVisibleRatio_ = VISIBLE_RATIO_MAX;
         return;
     }
@@ -1014,8 +1024,10 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     double currentVisibleRatio =
         std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect), VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
     if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
-        ProcessAllVisibleCallback(visibleAreaUserCallbacks_, currentVisibleRatio);
-        ProcessAllVisibleCallback(visibleAreaInnerCallbacks_, currentVisibleRatio);
+        ProcessAllVisibleCallback(visibleAreaUserRatios, visibleAreaUserCallback,
+            currentVisibleRatio, lastVisibleCallbackRatio_);
+        ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback,
+            currentVisibleRatio, lastVisibleCallbackRatio_);
         lastVisibleRatio_ = currentVisibleRatio;
     }
 }
@@ -1028,50 +1040,37 @@ double FrameNode::CalculateCurrentVisibleRatio(const RectF& visibleRect, const R
     return visibleRect.Width() * visibleRect.Height() / (renderRect.Width() * renderRect.Height());
 }
 
-void FrameNode::ProcessAllVisibleCallback(
-    std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio)
+void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
+    VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio)
 {
     bool isHandled = false;
     bool isVisible = false;
-    for (auto& nodeCallbackInfo : visibleAreaCallbacks) {
-        auto callbackRatio = nodeCallbackInfo.first;
-        auto callbackIsVisible = nodeCallbackInfo.second.isCurrentVisible;
-        if (GreatNotEqual(currentVisibleRatio, callbackRatio) && !callbackIsVisible) {
-            nodeCallbackInfo.second.isCurrentVisible = true;
-            isVisible = (!isHandled) ? true : isVisible;
-            isHandled = true;
-            continue;
+    for (const auto& callbackRatio : visibleAreaUserRatios) {
+        if (isHandled) {
+            break;
         }
-
-        if (LessNotEqual(currentVisibleRatio, callbackRatio) && callbackIsVisible) {
-            nodeCallbackInfo.second.isCurrentVisible = false;
-            isVisible = (!isHandled) ? false : isVisible;
+        if (GreatNotEqual(currentVisibleRatio, callbackRatio) && LessOrEqual(lastVisibleRatio, callbackRatio)) {
+            lastVisibleCallbackRatio_ = currentVisibleRatio;
+            isVisible = true;
             isHandled = true;
-            continue;
-        }
-
-        if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MIN)) {
-            nodeCallbackInfo.second.isCurrentVisible = false;
-            isVisible = (!isHandled) ? false : isVisible;
+        } else if (LessNotEqual(currentVisibleRatio, callbackRatio) && GreatOrEqual(lastVisibleRatio, callbackRatio)) {
+            lastVisibleCallbackRatio_ = currentVisibleRatio;
+            isVisible = false;
             isHandled = true;
-        } else if (NearEqual(currentVisibleRatio, callbackRatio) && NearEqual(callbackRatio, VISIBLE_RATIO_MAX)) {
-            nodeCallbackInfo.second.isCurrentVisible = true;
-            isVisible = (!isHandled) ? true : isVisible;
+        } else if (NearEqual(callbackRatio, VISIBLE_RATIO_MIN) && NearEqual(currentVisibleRatio, callbackRatio)) {
+            lastVisibleCallbackRatio_ = currentVisibleRatio;
+            isVisible = false;
+            isHandled = true;
+        } else if (NearEqual(callbackRatio, VISIBLE_RATIO_MAX) && NearEqual(currentVisibleRatio, callbackRatio)) {
+            lastVisibleCallbackRatio_ = currentVisibleRatio;
+            isVisible = true;
             isHandled = true;
         }
     }
 
-    OnVisibleAreaChangeCallback(visibleAreaCallbacks, isVisible, currentVisibleRatio, isHandled);
-}
-
-void FrameNode::OnVisibleAreaChangeCallback(
-    std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks,
-    bool visibleType, double currentVisibleRatio, bool isHandled)
-{
-    auto iter = visibleAreaCallbacks.begin();
-    if (isHandled && iter != visibleAreaCallbacks.end() && iter->second.callback) {
-        auto callback = iter->second.callback;
-        callback(visibleType, currentVisibleRatio);
+    auto callback = visibleAreaUserCallback.callback;
+    if (isHandled && callback) {
+        callback(isVisible, currentVisibleRatio);
     }
 }
 
@@ -1343,15 +1342,6 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
-    // restore info will overwrite the first setted attribute
-    auto &&opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-    if (opts && opts->Expansive()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto safeAreaManager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID(safeAreaManager);
-        safeAreaManager->AddNeedExpandNode(GetHostNode());
-    }
     if (!isRestoreInfoUsed_) {
         isRestoreInfoUsed_ = true;
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -2677,6 +2667,11 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         }
     }
 
+    if (SelfOrParentExpansive() && needRestoreSafeArea_) {
+        RestoreGeoState();
+        needRestoreSafeArea_ = false;
+    }
+
     auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
     if (size.has_value()) {
         geometryNode_->SetContentSize(size.value());
@@ -2706,6 +2701,12 @@ void FrameNode::Layout()
 {
     ACE_LAYOUT_SCOPED_TRACE("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+    if (SelfOrParentExpansive() && needRestoreSafeArea_) {
+        // if safeArea not restored in measure because of constraint not changed and so on,
+        // restore this node
+        RestoreGeoState();
+        needRestoreSafeArea_ = false;
+    }
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
@@ -2742,30 +2743,38 @@ void FrameNode::Layout()
     CHECK_NULL_VOID(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
     AvoidKeyboard(isFocusOnPage);
-    auto task = [weak = WeakClaim(this)]() {
+    auto task = [weak = WeakClaim(this), needSkipSync = needSkipSyncGeometryNode_]() {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        frameNode->SyncGeometryNode();
+        frameNode->SyncGeometryNode(needSkipSync);
     };
-    if (HasTransitionRunning()) {
-        task();
-    } else {
-        pipeline->AddSyncGeometryNodeTask(task);
+
+    pipeline->AddSyncGeometryNodeTask(task);
+    // if a node has geo transition but not the root node, add task only but not flush
+    // or add to expand list, self node will be added to expand list in next layout
+    if (geometryTransition != nullptr && !IsRootMeasureNode()) {
+        return;
+    }
+    if (SelfOrParentExpansive()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
+        safeAreaManager->AddNeedExpandNode(GetHostNode());
+    }
+    if (geometryTransition != nullptr) {
+        pipeline->FlushSyncGeometryNodeTasks();
     }
 }
 
-bool FrameNode::HasTransitionRunning()
-{
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    return geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
-}
-
-bool FrameNode::SelfOrParentExpansive()
+bool FrameNode::SelfExpansive()
 {
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-    if (opts && opts->Expansive()) {
-        return true;
-    }
+    return opts && opts->Expansive();
+}
+
+bool FrameNode::ParentExpansive()
+{
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_RETURN(parent, false);
     auto parentLayoutProperty = parent->GetLayoutProperty();
@@ -2774,16 +2783,21 @@ bool FrameNode::SelfOrParentExpansive()
     return parentOpts && parentOpts->Expansive();
 }
 
-void FrameNode::SyncGeometryNode()
+bool FrameNode::SelfOrParentExpansive()
+{
+    return SelfExpansive() || ParentExpansive();
+}
+
+void FrameNode::SyncGeometryNode(bool needSkipSync)
 {
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool hasTransition = HasTransitionRunning();
+    bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
 
     if (!isActive_ && !hasTransition) {
         layoutAlgorithm_.Reset();
         return;
     }
-    if (SkipSyncGeometryNode() && (!geometryTransition || !geometryTransition->IsNodeInAndActive(Claim(this)))) {
+    if (needSkipSync && (!geometryTransition || !geometryTransition->IsNodeInAndActive(Claim(this)))) {
         layoutAlgorithm_.Reset();
         return;
     }
@@ -3091,7 +3105,8 @@ void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
         CHECK_NULL_VOID(processor);
         processor->OnVisibleChange(visible);
     };
-    pipeline->AddVisibleAreaChangeNode(Claim(this), exposureProcessor_->GetRatio(), callback, false);
+    std::vector<double> ratios = {exposureProcessor_->GetRatio()};
+    pipeline->AddVisibleAreaChangeNode(Claim(this), ratios, callback, false);
 }
 
 void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList)

@@ -33,6 +33,10 @@ constexpr double DEFAULT_DIMENSION_VALUE = 0.0;
 constexpr double DEFAULT_SCROLLBARWIDTH_VALUE = 4.0;
 constexpr int32_t PARAM_SIZE = 4;
 constexpr float DEFAULT_OFFSET_VALUE = 0.0;
+constexpr int32_t ERROR_INT_CODE = -1;
+constexpr int32_t SCROLL_TO_INDEX_0 = 0;
+constexpr int32_t SCROLL_TO_INDEX_1 = 1;
+constexpr int32_t SCROLL_TO_INDEX_2 = 2;
 
 constexpr int32_t EDGE_NONE = -1;
 
@@ -79,6 +83,13 @@ void ResetScrollNestedScroll(ArkUINodeHandle node)
     ScrollModelNG::SetNestedScroll(frameNode, nestedOpt);
 }
 
+ArkUI_Bool GetScrollEnableScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ScrollModelNG::GetScrollEnabled(frameNode);
+}
+
 void SetScrollEnableScroll(ArkUINodeHandle node, ArkUI_Bool isEnabled)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -91,6 +102,13 @@ void ResetScrollEnableScroll(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ScrollModelNG::SetScrollEnabled(frameNode, true);
+}
+
+ArkUI_Float32 GetScrollFriction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ScrollModelNG::GetFriction(frameNode);
 }
 
 void SetScrollFriction(ArkUINodeHandle node, ArkUI_Float32 friction)
@@ -166,6 +184,13 @@ void ResetScrollScrollSnap(ArkUINodeHandle node)
         frameNode, static_cast<ScrollSnapAlign>(snapAlign), intervalSize, snapPaginations, enableSnapToSide);
 }
 
+ArkUI_Int32 GetScrollScrollBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ScrollModelNG::GetScrollBar(frameNode);
+}
+
 void SetScrollScrollBar(ArkUINodeHandle node, ArkUI_Int32 direction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -180,6 +205,13 @@ void ResetScrollScrollBar(ArkUINodeHandle node)
     ScrollModelNG::SetScrollBar(frameNode, DisplayMode::AUTO);
 }
 
+ArkUI_Int32 GetScrollScrollable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ScrollModelNG::GetAxis(frameNode);
+}
+
 void SetScrollScrollable(ArkUINodeHandle node, ArkUI_Int32 scrollDirection)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -192,6 +224,13 @@ void ResetScrollScrollable(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ScrollModelNG::SetAxis(frameNode, static_cast<Axis>(DEFAULT_SCROLLABLE_AXIS_VALUE));
+}
+
+ArkUI_Uint32 GetScrollScrollBarColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ScrollModelNG::GetScrollBarColor(frameNode);
 }
 
 void SetScrollScrollBarColor(ArkUINodeHandle node, uint32_t scrollBarColor)
@@ -213,6 +252,13 @@ void ResetScrollScrollBarColor(ArkUINodeHandle node)
     ScrollModelNG::SetScrollBarColor(frameNode, foregroundColor);
 }
 
+ArkUI_Float32 GetScrollScrollBarWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ScrollModelNG::GetScrollBarWidth(frameNode);
+}
+
 void SetScrollScrollBarWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -229,6 +275,15 @@ void ResetScrollScrollBarWidth(ArkUINodeHandle node)
     ScrollModelNG::SetScrollBarWidth(frameNode, width);
 }
 
+ArkUI_Int32 GetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    values[SCROLL_TO_INDEX_0] = ScrollModelNG::GetScrollEnabled(frameNode);
+    values[SCROLL_TO_INDEX_1] = ScrollModelNG::GetEdgeEffectAlways(frameNode);
+    return SCROLL_TO_INDEX_2;
+}
+
 void SetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -241,6 +296,13 @@ void ResetScrollEdgeEffect(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ScrollModelNG::SetEdgeEffect(frameNode, EdgeEffect::NONE, true);
+}
+
+ArkUI_Bool GetEnableScrollInteraction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ScrollModelNG::GetScrollEnabled(frameNode);
 }
 
 void SetEnableScrollInteraction(ArkUINodeHandle node, ArkUI_Bool enableScrollInteraction)
@@ -285,6 +347,14 @@ void ResetScrollEdge(ArkUINodeHandle node)
 {
     SetScrollEdge(node, DEFAULT_SNAP_ALIGN_VALUE);
 }
+
+ArkUI_Int32 GetScrollEnablePaging(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ScrollModelNG::GetEnablePaging(frameNode);
+}
+
 void SetScrollEnablePaging(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -340,28 +410,37 @@ const ArkUIScrollModifier* GetScrollModifier()
     static const ArkUIScrollModifier modifier = {
         SetScrollNestedScroll,
         ResetScrollNestedScroll,
+        GetScrollEnableScroll,
         SetScrollEnableScroll,
         ResetScrollEnableScroll,
+        GetScrollFriction,
         SetScrollFriction,
         ResetScrollFriction,
         SetScrollScrollSnap,
         ResetScrollScrollSnap,
+        GetScrollScrollBar,
         SetScrollScrollBar,
         ResetScrollScrollBar,
+        GetScrollScrollable,
         SetScrollScrollable,
         ResetScrollScrollable,
+        GetScrollScrollBarColor,
         SetScrollScrollBarColor,
         ResetScrollScrollBarColor,
+        GetScrollScrollBarWidth,
         SetScrollScrollBarWidth,
         ResetScrollScrollBarWidth,
+        GetScrollEdgeEffect,
         SetScrollEdgeEffect,
         ResetScrollEdgeEffect,
+        GetEnableScrollInteraction,
         SetEnableScrollInteraction,
         ResetEnableScrollInteraction,
         SetScrollTo,
         SetScrollEdge,
         ResetScrollTo,
         ResetScrollEdge,
+        GetScrollEnablePaging,
         SetScrollEnablePaging,
         ResetScrollEnablePaging,
         GetScrollNestedScroll,

@@ -252,8 +252,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg002, TestSize.Level1)
     context_->onAreaChangeNodeIds_.clear();
     context_->onAreaChangeNodeIds_.emplace(NOT_REGISTER_ID);
     context_->onAreaChangeNodeIds_.emplace(customNode_->nodeId_);
-    context_->AddVisibleAreaChangeNode(frameNode_, DEFAULT_DOUBLE1, nullptr);
-    context_->AddVisibleAreaChangeNode(frameNode_, DEFAULT_DOUBLE1, nullptr, false);
+    context_->AddVisibleAreaChangeNode(frameNode_, {DEFAULT_DOUBLE1}, nullptr);
+    context_->AddVisibleAreaChangeNode(frameNode_, {DEFAULT_DOUBLE1}, nullptr, false);
     EXPECT_EQ(context_->onVisibleAreaChangeNodeIds_.size(), DEFAULT_SIZE1);
     context_->onVisibleAreaChangeNodeIds_.emplace(customNode_->GetId());
     context_->onVisibleAreaChangeNodeIds_.emplace(ElementRegister::UndefinedElementId);

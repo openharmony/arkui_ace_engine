@@ -46,11 +46,13 @@ public:
     static void Show(const JSCallbackInfo& info);
     static void CalendarPickerDialogShow(const JSRef<JSObject>& paramObj,
         const std::map<std::string, NG::DialogEvent>& dialogEvent,
-        const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
+        const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
+        const std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent);
 
 private:
     static std::map<std::string, NG::DialogEvent> ChangeDialogEvent(const JSCallbackInfo& info);
     static std::map<std::string, NG::DialogGestureEvent> DialogCancelEvent(const JSCallbackInfo& info);
+    static std::map<std::string, NG::DialogCancelEvent> LifeCycleDialogEvent(const JSCallbackInfo& info);
 
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
 };

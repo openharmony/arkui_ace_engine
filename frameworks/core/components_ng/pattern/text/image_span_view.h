@@ -32,6 +32,9 @@ public:
     static void SetPlaceHolderStyle(TextBackgroundStyle& radius);
     static void Create();
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static ImageSourceInfo GetImageSpanSrc(FrameNode* frameNode);
+    static ImageFit GetObjectFit(FrameNode* frameNode);
+    static VerticalAlign GetVerticalAlign(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_SPAN_VIEW_H

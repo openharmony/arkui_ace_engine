@@ -62,6 +62,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     pManager_->Reset();
+    SetPlaceholder(layoutWrapper);
     if (spans_.empty()) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, std::nullopt);
@@ -125,6 +126,15 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         contentHeight = std::min(contentHeight, contentConstraint.maxSize.Height());
     }
     return SizeF(res.Width(), contentHeight);
+}
+
+void RichEditorLayoutAlgorithm::SetPlaceholder(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPlaceholder(spans_);
 }
 
 float RichEditorLayoutAlgorithm::GetShadowOffset(const std::list<RefPtr<SpanItem>>& group)
@@ -223,6 +233,15 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
         style.leadingMargin->pixmap = lineStyle->propLeadingMargin->pixmap;
     }
 
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, style);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, style);
+    if (pattern->IsShowPlaceholder()) {
+        style.textOverflow = TextOverflow::ELLIPSIS;
+        style.ellipsisMode = EllipsisMode::TAIL;
+        style.maxLines = 1;
+    }
     return style;
 }
 

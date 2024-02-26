@@ -62,6 +62,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_DATE_PICKER_DATE_CHANGE;
         case NODE_TIME_PICKER_EVENT_ON_CHANGE:
             return ON_TIME_PICKER_CHANGE;
+        case NODE_CALENDAR_PICKER_EVENT_ON_CHANGE:
+            return ON_CALENDAR_PICKER_CHANGE;
         case NODE_TOUCH_EVENT:
             return ON_TOUCH;
         case NODE_ON_CLICK:
@@ -70,6 +72,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_CHECKBOX_CHANGE;
         case NODE_SLIDER_EVENT_ON_CHANGE:
             return ON_SLIDER_CHANGE;
+        case NODE_TEXT_INPUT_ON_CUT:
+            return ON_TEXT_INPUT_CUT;
+        case NODE_TEXT_INPUT_ON_PASTE:
+            return ON_TEXT_INPUT_PASTE;
         default:
             return -1;
     }
@@ -116,6 +122,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE;
         case ON_TIME_PICKER_CHANGE:
             return NODE_TIME_PICKER_EVENT_ON_CHANGE;
+        case ON_CALENDAR_PICKER_CHANGE:
+            return NODE_CALENDAR_PICKER_EVENT_ON_CHANGE;
         case ON_TOUCH:
             return NODE_TOUCH_EVENT;
         case ON_CLICK:
@@ -124,6 +132,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_CHECKBOX_EVENT_ON_CHANGE;
         case ON_SLIDER_CHANGE:
             return NODE_SLIDER_EVENT_ON_CHANGE;
+        case ON_TEXT_INPUT_CUT:
+            return NODE_TEXT_INPUT_ON_CUT;
+        case ON_TEXT_INPUT_PASTE:
+            return NODE_TEXT_INPUT_ON_PASTE;
         default:
             return -1;
     }

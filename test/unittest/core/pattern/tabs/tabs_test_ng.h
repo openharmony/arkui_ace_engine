@@ -35,17 +35,22 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "base/memory/ace_type.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
@@ -60,9 +65,6 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -115,7 +117,8 @@ public:
     void CreateWithItem(const std::function<void(TabsModelNG)>& callback,
         BarPosition barPosition = BarPosition::START, int32_t index = 0);
 
-    static void CreateItem(int32_t itemNumber);
+    static void CreateItem(
+        int32_t itemNumber, const std::function<void(TabContentModelNG, int32_t)>& callback = nullptr);
     static TabBarBuilderFunc TabBarItemBuilder();
 
     RefPtr<TabsNode> frameNode_;

@@ -33,6 +33,7 @@ public:
     void SetHasHeight() override {}
     void SetHasWidth() override {}
     static void SetAlignment(FrameNode* frameNode, Alignment align);
+    static Alignment GetAlignment(FrameNode* frameNode);
 private:
     void Create() override;
 };

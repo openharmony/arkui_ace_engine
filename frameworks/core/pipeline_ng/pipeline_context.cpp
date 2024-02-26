@@ -1552,11 +1552,13 @@ bool PipelineContext::OnBackPressed()
 
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
+        LOGI("fullscreen component：video or web consumed backpressed event");
         return true;
     }
 
     // if has sharedTransition, back press will stop the sharedTransition
     if (sharedTransitionManager_->OnBackPressed()) {
+        LOGI("sharedTransition consumed backpressed event");
         return true;
     }
 
@@ -1575,11 +1577,13 @@ bool PipelineContext::OnBackPressed()
         },
         TaskExecutor::TaskType::UI);
     if (hasOverlay) {
+        LOGI("popup consumed backpressed event");
         return true;
     }
 
     auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     if (textfieldManager && textfieldManager->OnBackPressed()) {
+        LOGI("textfield consumed backpressed event");
         return true;
     }
 
@@ -1609,6 +1613,7 @@ bool PipelineContext::OnBackPressed()
 
     if (result) {
         // user accept
+        LOGI("Navigation consumed backpressed event");
         return true;
     }
 
@@ -1625,6 +1630,7 @@ bool PipelineContext::OnBackPressed()
 
     if (result) {
         // user accept
+        LOGI("router consumed backpressed event");
         return true;
     }
     return false;
@@ -1994,6 +2000,9 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "-imagefilecache") {
         ImageFileCache::GetInstance().DumpCacheInfo();
+    } else if (params[0] == "-default") {
+        rootNode_->DumpTree(0);
+        DumpLog::GetInstance().OutPutDefault();
     }
     return true;
 }
@@ -2373,8 +2382,8 @@ bool PipelineContext::HasDifferentDirectionGesture() const
     return eventManager_->HasDifferentDirectionGesture();
 }
 
-void PipelineContext::AddVisibleAreaChangeNode(
-    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback)
+void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
+    const std::vector<double>& ratios, const VisibleRatioCallback& callback, bool isUserCallback)
 {
     CHECK_NULL_VOID(node);
     VisibleCallbackInfo addInfo;
@@ -2382,9 +2391,9 @@ void PipelineContext::AddVisibleAreaChangeNode(
     addInfo.isCurrentVisible = false;
     onVisibleAreaChangeNodeIds_.emplace(node->GetId());
     if (isUserCallback) {
-        node->AddVisibleAreaUserCallback(ratio, addInfo);
+        node->SetVisibleAreaUserCallback(ratios, addInfo);
     } else {
-        node->AddVisibleAreaInnerCallback(ratio, addInfo);
+        node->SetVisibleAreaInnerCallback(ratios, addInfo);
     }
 }
 

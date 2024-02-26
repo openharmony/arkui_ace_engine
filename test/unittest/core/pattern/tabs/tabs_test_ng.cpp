@@ -65,7 +65,7 @@ void TabsTestNg::GetInstance()
     pattern_ = frameNode_->GetPattern<TabsPattern>();
     layoutProperty_ = frameNode_->GetLayoutProperty<TabsLayoutProperty>();
     // swiper>tabContent
-    swiperNode_= AceType::DynamicCast<FrameNode>(frameNode_->GetTabs());
+    swiperNode_ = AceType::DynamicCast<FrameNode>(frameNode_->GetTabs());
     swiperPattern_ = swiperNode_->GetPattern<SwiperPattern>();
     swiperLayoutProperty_ = swiperNode_->GetLayoutProperty<SwiperLayoutProperty>();
     swiperPaintProperty_ = swiperNode_->GetPaintProperty<SwiperPaintProperty>();
@@ -111,7 +111,7 @@ void TabsTestNg::CreateWithItem(
         barPosition, index);
 }
 
-void TabsTestNg::CreateItem(int32_t itemNumber)
+void TabsTestNg::CreateItem(int32_t itemNumber, const std::function<void(TabContentModelNG, int32_t)>& callback)
 {
     auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
@@ -123,11 +123,14 @@ void TabsTestNg::CreateItem(int32_t itemNumber)
         model.SetTabBar("", "", std::move(tabBarItemFunc), true);
         ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
         ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+        if (callback) {
+            callback(model, index);
+        }
         auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
         auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
         tabContentNode->UpdateRecycleElmtId(nodeId); // for AddChildToGroup
-        tabContentNode->GetTabBarItemId(); // for AddTabBarItem
-        tabContentNode->SetParent(weakTab); // for AddTabBarItem
+        tabContentNode->GetTabBarItemId();           // for AddTabBarItem
+        tabContentNode->SetParent(weakTab);          // for AddTabBarItem
         model.Pop();
         nodeId++;
     }
@@ -10206,7 +10209,7 @@ HWTEST_F(TabsTestNg, Layout001, TestSize.Level1)
     AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
         ->UpdateLayoutConstraint(layoutConstrain);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabsLayoutAlgorithm));
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();;
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     tabsLayoutAlgorithm->Layout(&layoutWrapper);
     ASSERT_NE(&layoutWrapper, nullptr);
 
@@ -11077,5 +11080,239 @@ HWTEST_F(TabsTestNg, SetOnContentWillChangeTest001, TestSize.Level1)
     EXPECT_EQ(swiperPattern->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX), true);
     EXPECT_EQ(tabBarPattern->ContentWillChange(BEGIN_INDEX), true);
     EXPECT_EQ(tabBarPattern->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX), true);
+}
+
+/**
+ * @tc.name: SetOnContentWillChangeTest002
+ * @tc.desc: test OnWillShow and OnWillHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetOnContentWillChangeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create parent node
+     */
+    int32_t nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto parentNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    ViewStackProcessor::GetInstance()->Push(parentNode);
+
+    /**
+     * @tc.steps: steps2. Create tabs
+     */
+    TabsModelNG model;
+    model.Create(BarPosition::START, 1, nullptr, nullptr);
+    ViewAbstract::SetWidth(CalcLength(TABS_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(TABS_HEIGHT));
+    bool isShow = false;
+    CreateItem(TABCONTENT_NUMBER, [&isShow](TabContentModelNG model, int32_t index) {
+        std::function<void()> showEvent = [&isShow]() { isShow = true; };
+        std::function<void()> hideEvent = [&isShow]() { isShow = false; };
+        model.SetOnWillShow(std::move(showEvent));
+        model.SetOnWillHide(std::move(hideEvent));
+    });
+    frameNode_ = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ViewStackProcessor::GetInstance()->Pop();
+
+    /**
+     * @tc.steps: step3. first display.
+     * @tc.expected: isShow = true
+     */
+    FlushLayoutTask(frameNode_);
+    ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_TRUE(isShow);
+
+    /**
+     * @tc.steps: step4. callback.
+     * @tc.expected: isShow = false
+     */
+    auto callback = parentNode->GetPattern<PagePattern>()->onHiddenChange_;
+    ASSERT_NE(callback, nullptr);
+    callback(false);
+    EXPECT_FALSE(isShow);
+
+    /**
+     * @tc.steps: step5. callback.
+     * @tc.expected: isShow = true
+     */
+    callback(true);
+    EXPECT_TRUE(isShow);
+}
+
+/**
+ * @tc.name: SetOnContentWillChangeTest003
+ * @tc.desc: test OnWillShow and OnWillHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetOnContentWillChangeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create parent node
+     */
+    int32_t nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto parentNode = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, AceType::MakeRefPtr<NavDestinationPattern>());
+    ViewStackProcessor::GetInstance()->Push(parentNode);
+
+    /**
+     * @tc.steps: steps2. Create tabs
+     */
+    TabsModelNG model;
+    model.Create(BarPosition::START, 1, nullptr, nullptr);
+    ViewAbstract::SetWidth(CalcLength(TABS_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(TABS_HEIGHT));
+
+    bool isShow = false;
+    CreateItem(TABCONTENT_NUMBER, [&isShow](TabContentModelNG model, int32_t index) {
+        std::function<void()> showEvent = [&isShow]() { isShow = true; };
+        std::function<void()> hideEvent = [&isShow]() { isShow = false; };
+        model.SetOnWillShow(std::move(showEvent));
+        model.SetOnWillHide(std::move(hideEvent));
+    });
+    frameNode_ = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ViewStackProcessor::GetInstance()->Pop();
+    FlushLayoutTask(frameNode_);
+    ViewStackProcessor::GetInstance()->Finish();
+
+    /**
+     * @tc.steps: step3. callback.
+     * @tc.expected: isShow = false
+     */
+    auto callback =
+        parentNode->GetPattern<NavDestinationPattern>()->GetEventHub<NavDestinationEventHub>()->onHiddenChange_;
+    ASSERT_NE(callback, nullptr);
+    callback(false);
+    EXPECT_FALSE(isShow);
+
+    /**
+     * @tc.steps: step4. callback.
+     * @tc.expected: isShow = true
+     */
+    callback(true);
+    EXPECT_TRUE(isShow);
+}
+
+/**
+ * @tc.name: SetOnContentWillChangeTest004
+ * @tc.desc: test OnWillShow and OnWillHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetOnContentWillChangeTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps2. Create parentNode
+     */
+    auto parentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ViewStackProcessor::GetInstance()->Push(parentNode);
+
+    /**
+     * @tc.steps: steps2. Create tabs
+     */
+    TabsModelNG model;
+    model.Create(BarPosition::START, 0, nullptr, nullptr);
+    ViewAbstract::SetWidth(CalcLength(TABS_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(TABS_HEIGHT));
+
+    int isShow = 0;
+    CreateItem(TABCONTENT_NUMBER, [&isShow](TabContentModelNG model, int32_t index) {
+        std::function<void()> showEvent = [&isShow, index]() { isShow |= 1 << index; };
+        std::function<void()> hideEvent = [&isShow, index]() { isShow &= ~(1 << index); };
+        model.SetOnWillShow(std::move(showEvent));
+        model.SetOnWillHide(std::move(hideEvent));
+    });
+
+    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
+    tabBarNode->GetOrCreateFocusHub();
+    frameNode_ = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ViewStackProcessor::GetInstance()->Pop();
+    swiperNode_ = AceType::DynamicCast<FrameNode>(frameNode_->GetTabs());
+    swiperPattern_ = swiperNode_->GetPattern<SwiperPattern>();
+    swiperController_ = swiperPattern_->GetSwiperController();
+
+    /**
+     * @tc.steps: step3. first display.
+     * @tc.expected: isShow = 0b0001
+     */
+    FlushLayoutTask(frameNode_);
+    ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(isShow, 1);
+
+    /**
+     * @tc.steps: step4. SwipeTo 1.
+     * @tc.expected: isShow = 0b0010
+     */
+    swiperController_->SwipeTo(1);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(isShow, 2);
+
+    /**
+     * @tc.steps: step6. SwipeTo 3.
+     * @tc.expected: isShow = 0b1000
+     */
+    swiperController_->SwipeTo(3);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(isShow, 8);
+}
+
+/**
+ * @tc.name: SetOnContentWillChangeTest005
+ * @tc.desc: test the middle tabcontents does not trigger OnWillShow and OnWillHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetOnContentWillChangeTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps2. Create parentNode
+     */
+    auto parentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ViewStackProcessor::GetInstance()->Push(parentNode);
+
+    /**
+     * @tc.steps: steps2. Create tabs
+     */
+    TabsModelNG model;
+    model.Create(BarPosition::START, 0, nullptr, nullptr);
+    ViewAbstract::SetWidth(CalcLength(TABS_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(TABS_HEIGHT));
+
+    int isShow = 0;
+    CreateItem(TABCONTENT_NUMBER, [&isShow](TabContentModelNG model, int32_t index) {
+        std::function<void()> showEvent = [&isShow, index]() { isShow |= 1 << index; };
+        model.SetOnWillShow(std::move(showEvent));
+    });
+
+    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
+    tabBarNode->GetOrCreateFocusHub();
+    frameNode_ = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ViewStackProcessor::GetInstance()->Pop();
+    swiperNode_ = AceType::DynamicCast<FrameNode>(frameNode_->GetTabs());
+    swiperPattern_ = swiperNode_->GetPattern<SwiperPattern>();
+    swiperController_ = swiperPattern_->GetSwiperController();
+
+    /**
+     * @tc.steps: step3. first display.
+     * @tc.expected: isShow = 0b0001
+     */
+    FlushLayoutTask(frameNode_);
+    ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(isShow, 1);
+
+    /**
+     * @tc.steps: step4. SwipeTo 3.
+     * @tc.expected: The middle tabcontents does not trigger OnWillShow.
+                    isShow = 0b1001
+     */
+    swiperController_->SwipeTo(3);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(isShow, 9);
 }
 } // namespace OHOS::Ace::NG

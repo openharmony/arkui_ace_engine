@@ -66,7 +66,7 @@ RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string
     }
     // set draggable for framenode
     if (frameNode->IsFirstBuilding()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto draggable = pipeline->GetDraggable<TextTheme>();
         frameNode->SetDraggable(draggable);
@@ -509,27 +509,99 @@ void TextModelNG::SetClipEdge()
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+std::string TextModelNG::GetContent(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return layoutProperty->GetContent().value_or("");
+}
+
+float TextModelNG::GetLineHeight(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, 0.0f);
+    return pattern->GetLineHeight();
+}
+
+TextDecoration TextModelNG::GetDecoration(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextDecoration::NONE);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDecoration::NONE);
+    return layoutProperty->GetFontStyle()->GetTextDecoration().value_or(TextDecoration::NONE);
+}
+
+TextCase TextModelNG::GetTextCase(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextCase::NORMAL);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextCase::NORMAL);
+    return layoutProperty->GetFontStyle()->GetTextCase().value_or(TextCase::NORMAL);
+}
+
+Dimension TextModelNG::GetLetterSpacing(FrameNode* frameNode)
+{
+    Dimension defaultSpacing(0);
+    CHECK_NULL_RETURN(frameNode, defaultSpacing);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultSpacing);
+    return layoutProperty->GetFontStyle()->GetLetterSpacing().value_or(defaultSpacing);
+}
+
+uint32_t TextModelNG::GetMaxLines(FrameNode* frameNode)
+{
+    uint32_t defaultMaxLines = Infinity<uint32_t>();
+    CHECK_NULL_RETURN(frameNode, defaultMaxLines);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultMaxLines);
+    return layoutProperty->GetTextLineStyle()->GetMaxLines().value_or(defaultMaxLines);
+}
+
+TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, OHOS::Ace::TextAlign::START);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, OHOS::Ace::TextAlign::START);
+    return layoutProperty->GetTextLineStyle()->GetTextAlign().value_or(TextAlign::START);
+}
+
+TextOverflow TextModelNG::GetTextOverflow(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextOverflow::NONE);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextOverflow::NONE);
+    return layoutProperty->GetTextLineStyle()->GetTextOverflow().value_or(TextOverflow::NONE);
+}
+
+Dimension TextModelNG::GetTextIndent(FrameNode* frameNode)
+{
+    Dimension defaultTextIndent(0);
+    CHECK_NULL_RETURN(frameNode, defaultTextIndent);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultTextIndent);
+    return layoutProperty->GetTextLineStyle()->GetTextIndent().value_or(defaultTextIndent);
+}
+
 std::vector<std::string> TextModelNG::GetFontFamily(FrameNode* frameNode)
 {
     std::vector<std::string> value;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextLayoutProperty, FontFamily, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontFamily, value, frameNode, value);
     return value;
 }
 
 CopyOptions TextModelNG::GetCopyOption(FrameNode* frameNode)
 {
     CopyOptions value = CopyOptions::None;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextLayoutProperty, CopyOption, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, CopyOption, value, frameNode, value);
     return value;
 }
 
 TextHeightAdaptivePolicy TextModelNG::GetHeightAdaptivePolicy(FrameNode* frameNode)
 {
     TextHeightAdaptivePolicy value = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextLayoutProperty, HeightAdaptivePolicy, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, HeightAdaptivePolicy, value, frameNode, value);
     return value;
 }
 
@@ -562,24 +634,21 @@ Font TextModelNG::GetFont(FrameNode* frameNode)
 Dimension TextModelNG::GetFontSize(FrameNode* frameNode)
 {
     Dimension value;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextLayoutProperty, FontSize, value, frameNode, Dimension());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontSize, value, frameNode, Dimension());
     return value;
 }
 
 Ace::FontWeight TextModelNG::GetFontWeight(FrameNode* frameNode)
 {
     Ace::FontWeight value = Ace::FontWeight::NORMAL;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextLayoutProperty, FontWeight, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontWeight, value, frameNode, value);
     return value;
 }
 
 Ace::FontStyle TextModelNG::GetItalicFontStyle(FrameNode* frameNode)
 {
     Ace::FontStyle value = Ace::FontStyle::NORMAL;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextLayoutProperty, ItalicFontStyle, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, ItalicFontStyle, value, frameNode, value);
     return value;
 }
 } // namespace OHOS::Ace::NG

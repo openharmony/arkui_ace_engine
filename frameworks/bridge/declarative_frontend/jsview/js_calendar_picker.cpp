@@ -410,7 +410,8 @@ void JSCalendarPickerDialog::Show(const JSCallbackInfo& info)
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto dialogEvent = ChangeDialogEvent(info);
         auto dialogCancelEvent = DialogCancelEvent(info);
-        CalendarPickerDialogShow(paramObject, dialogEvent, dialogCancelEvent);
+        auto dialogLifeCycleEvent = LifeCycleDialogEvent(info);
+        CalendarPickerDialogShow(paramObject, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
     }
 }
 
@@ -475,6 +476,75 @@ std::map<std::string, NG::DialogGestureEvent> JSCalendarPickerDialog::DialogCanc
     return dialogCancelEvent;
 }
 
+void AppearDialogEvent(const JSCallbackInfo& info, std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent)
+{
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDidAppear = paramObject->GetProperty("onDidAppear");
+    if (!onDidAppear->IsUndefined() && onDidAppear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppear));
+        auto didAppearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("CalendarDialog.onDidAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        dialogLifeCycleEvent["didAppearId"] = didAppearId;
+    }
+    auto onWillAppear = paramObject->GetProperty("onWillAppear");
+    if (!onWillAppear->IsUndefined() && onWillAppear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillAppear));
+        auto willAppearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("CalendarDialog.onWillAppear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        dialogLifeCycleEvent["willAppearId"] = willAppearId;
+    }
+}
+
+void DisappearDialogEvent(
+    const JSCallbackInfo& info, std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent)
+{
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
+    if (!onDidDisappear->IsUndefined() && onDidDisappear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappear));
+        auto didDisappearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("CalendarDialog.onDidDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        dialogLifeCycleEvent["didDisappearId"] = didDisappearId;
+    }
+    auto onWillDisappear = paramObject->GetProperty("onWillDisappear");
+    if (!onWillDisappear->IsUndefined() && onWillDisappear->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDisappear));
+        auto willDisappearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                                      node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("CalendarDialog.onWillDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        dialogLifeCycleEvent["willDisappearId"] = willDisappearId;
+    }
+}
+
+std::map<std::string, NG::DialogCancelEvent> JSCalendarPickerDialog::LifeCycleDialogEvent(const JSCallbackInfo& info)
+{
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
+    if (!info[0]->IsObject()) {
+        return dialogLifeCycleEvent;
+    }
+    AppearDialogEvent(info, dialogLifeCycleEvent);
+    DisappearDialogEvent(info, dialogLifeCycleEvent);
+    return dialogLifeCycleEvent;
+}
+
 PickerDate JSCalendarPickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
 {
     auto pickerDate = PickerDate();
@@ -506,7 +576,8 @@ PickerDate JSCalendarPickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
 
 void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& paramObj,
     const std::map<std::string, NG::DialogEvent>& dialogEvent,
-    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
+    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
+    const std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent)
 {
     auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
@@ -561,10 +632,12 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowCalendarDialog(properties, settingData, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowCalendarDialog(
+                properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
         },
         TaskExecutor::TaskType::UI);
 }

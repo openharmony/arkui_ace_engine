@@ -81,6 +81,14 @@ RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
 
 NavigationGroupNode::~NavigationGroupNode()
 {
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    const auto& navDestinationNodes = navigationPattern->GetAllNavDestinationNodes();
+    for (auto iter : navDestinationNodes) {
+        auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(iter.second));
+        if (navDestinationNode) {
+            navDestinationNode->GetPattern<NavDestinationPattern>()->SetCustomNode(nullptr);
+        }
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();

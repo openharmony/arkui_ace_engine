@@ -1739,6 +1739,7 @@ bool UIContentImpl::ProcessBackPressed()
     if (pipeline) {
         auto uiExtMgr = pipeline->GetUIExtensionManager();
         if (uiExtMgr && uiExtMgr->OnBackPressed()) {
+            LOGI("UIExtension consumed backpressed event");
             return true;
         }
     }
@@ -1747,14 +1748,11 @@ bool UIContentImpl::ProcessBackPressed()
         [container, this, &ret]() {
             if (AceType::InstanceOf<Platform::DialogContainer>(container)) {
                 if (Platform::DialogContainer::OnBackPressed(instanceId_)) {
-                    LOGI("UIContentImpl ProcessBackPressed DialogContainer return true");
                     ret = true;
                 }
             } else {
-                LOGI("UIContentImpl ProcessBackPressed AceContainer");
                 PerfMonitor::GetPerfMonitor()->RecordInputEvent(LAST_UP, UNKNOWN_SOURCE, 0);
                 if (Platform::AceContainer::OnBackPressed(instanceId_)) {
-                    LOGI("UIContentImpl ProcessBackPressed AceContainer return true");
                     ret = true;
                 }
             }
