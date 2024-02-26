@@ -486,6 +486,11 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
     return undefined;
 }
 
+static napi_value SetOnFrame(napi_env env, napi_callback_info info)
+{
+    return SetOnframe(env, info);
+}
+
 static napi_value SetOnfinish(napi_env env, napi_callback_info info)
 {
     AnimatorResult* animatorResult = nullptr;
@@ -533,6 +538,11 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
     napi_value undefined;
     napi_get_undefined(env, &undefined);
     return undefined;
+}
+
+static napi_value SetOnFinish(napi_env env, napi_callback_info info)
+{
+    return SetOnfinish(env, info);
 }
 
 static napi_value SetOncancel(napi_env env, napi_callback_info info)
@@ -584,6 +594,11 @@ static napi_value SetOncancel(napi_env env, napi_callback_info info)
     return undefined;
 }
 
+static napi_value SetOnCancel(napi_env env, napi_callback_info info)
+{
+    return SetOncancel(env, info);
+}
+
 static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
 {
     AnimatorResult* animatorResult = nullptr;
@@ -633,6 +648,11 @@ static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
     return undefined;
 }
 
+static napi_value SetOnRepeat(napi_env env, napi_callback_info info)
+{
+    return SetOnrepeat(env, info);
+}
+
 static napi_value JSCreate(napi_env env, napi_callback_info info)
 {
     auto option = std::make_shared<AnimatorOption>();
@@ -663,6 +683,10 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
         DECLARE_NAPI_SETTER("onfinish", SetOnfinish),
         DECLARE_NAPI_SETTER("oncancel", SetOncancel),
         DECLARE_NAPI_SETTER("onrepeat", SetOnrepeat),
+        DECLARE_NAPI_SETTER("onFrame", SetOnFrame),
+        DECLARE_NAPI_SETTER("onFinish", SetOnFinish),
+        DECLARE_NAPI_SETTER("onCancel", SetOnCancel),
+        DECLARE_NAPI_SETTER("onRepeat", SetOnRepeat),
     };
 
     NAPI_CALL(env, napi_define_properties(env, jsAnimator, sizeof(resultFuncs) / sizeof(resultFuncs[0]), resultFuncs));

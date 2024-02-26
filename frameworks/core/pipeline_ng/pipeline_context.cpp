@@ -508,12 +508,11 @@ void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
 {
     if ((windowFocus_.has_value() && windowFocus_.value()) ||
         (windowShow_.has_value() && windowShow_.value())) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Normal Window focus first, set focusflag to window.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal Window focus first, set focusflag to window.");
         windowFocus_.reset();
         windowShow_.reset();
         focusOnNodeCallback_();
         preNodeId_ = curFrameNode->GetId();
-        FocusHub::IsCloseKeyboard(curFrameNode);
         return;
     }
 
@@ -524,7 +523,7 @@ void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
     preNodeId_ = -1;
 
     if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Normal WindowPage ready to close keyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal WindowPage ready to close keyboard.");
         FocusHub::IsCloseKeyboard(curFrameNode);
         needSoftKeyboard_ = std::nullopt;
     }
