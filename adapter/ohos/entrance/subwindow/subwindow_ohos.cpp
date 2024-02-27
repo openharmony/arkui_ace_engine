@@ -810,6 +810,51 @@ void SubwindowOhos::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
     return overlay->CloseDialog(dialogNode);
 }
 
+void SubwindowOhos::OpenCustomDialogNG(
+    const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "open customDialog ng subwindow enter");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
+    int dialogMapSize = static_cast<int>(DialogMap.size());
+    if (dialogMapSize == 0) {
+        auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+        CHECK_NULL_VOID(parentAceContainer);
+        auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
+        CHECK_NULL_VOID(parentcontext);
+        auto parentOverlay = parentcontext->GetOverlayManager();
+        CHECK_NULL_VOID(parentOverlay);
+        parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    }
+    SubwindowManager::GetInstance()->SetDialogSubWindowId(
+        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+    ShowWindow();
+    window_->SetFullScreen(true);
+    window_->SetTouchable(true);
+    ResizeWindow();
+    ContainerScope scope(childContainerId_);
+    overlay->OpenCustomDialog(dialogProps, std::move(callback));
+    haveDialog_ = true;
+}
+
+void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng subwindow enter");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    ContainerScope scope(childContainerId_);
+    return overlay->CloseCustomDialog(dialogId);
+}
+
 void SubwindowOhos::HideSubWindowNG()
 {
     ContainerScope scope(childContainerId_);

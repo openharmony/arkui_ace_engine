@@ -1089,7 +1089,7 @@ napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
             JSPromptThrowInterError(env, asyncContext, strMsg);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->CloseCustomDialog(dialogId);
+        SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();

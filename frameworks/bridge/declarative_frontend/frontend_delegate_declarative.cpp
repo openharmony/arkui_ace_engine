@@ -1715,7 +1715,7 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
             CHECK_NULL_VOID(overlayManager);
             LOGI("Begin to open custom dialog ");
             if (dialogProperties.isShowInSubWindow) {
-                SubwindowManager::GetInstance()->OpenCustomDialog(dialogAttr, std::move(callback));
+                SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProperties, std::move(callback));
                 if (dialogProperties.isModal) {
                     // temporary not support isShowInSubWindow and isModal
                     LOGW("temporary not support isShowInSubWindow and isModal");
@@ -1738,6 +1738,7 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
         CHECK_NULL_VOID(overlayManager);
         LOGI("begin to close custom dialog.");
         overlayManager->CloseCustomDialog(dialogId);
+        SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
     MainWindowOverlay(std::move(task));
     return;

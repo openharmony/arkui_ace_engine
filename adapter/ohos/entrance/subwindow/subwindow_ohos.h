@@ -75,6 +75,8 @@ public:
     void ClearPopupNG() override;
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc) override;
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) override;
+    void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) override;
+    void CloseCustomDialogNG(int32_t dialogId) override;
     void HideSubWindowNG() override;
     bool GetShown() override
     {

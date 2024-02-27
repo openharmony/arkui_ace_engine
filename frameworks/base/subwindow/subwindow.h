@@ -56,6 +56,8 @@ public:
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
     virtual void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) = 0;
+    virtual void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) = 0;
+    virtual void CloseCustomDialogNG(int32_t dialogId) = 0;
     virtual void HideSubWindowNG() = 0;
     virtual int32_t GetChildContainerId() const = 0;
     virtual bool GetShown() = 0;
@@ -66,7 +68,7 @@ public:
     virtual void DeleteHotAreas(int32_t overlayId) {};
     virtual void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
     virtual void DeletePopupHotAreas(int32_t overlayId) {};
-	
+
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
 

@@ -79,6 +79,8 @@ public:
     void ClearPopupInSubwindow(int32_t instanceId = -1);
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);
+    void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
+    void CloseCustomDialogNG(int32_t dialogId);
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
     void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);
@@ -115,7 +117,7 @@ public:
     void RequestFocusSubwindow(int32_t instanceId);
     void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback);
     void CloseCustomDialog(const int32_t dialogId);
-    
+
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
 private:
