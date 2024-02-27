@@ -76,6 +76,15 @@ public:
     int32_t GetSegment(int32_t itemIdx) const;
 
     /**
+     * @brief Init data structures based on WaterFlow Sections.
+     *
+     * @param sections vector of Sections info.
+     * @param scale for calculating margins in PX.
+     * @param percentWidth for calculating margins in PX.
+     */
+    void InitSegments(const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth);
+
+    /**
      * @brief Init data structures based on new WaterFlow Sections.
      *
      * @param sections vector of Sections info.

@@ -278,8 +278,19 @@ void WaterFlowSegmentedLayout::InitFooter(float crossSize)
     }
 }
 
-void WaterFlowSegmentedLayout::CheckReset()
+void WaterFlowSegmentedLayout::CheckReset(const RefPtr<WaterFlowSections>& secObj)
 {
+    if (secObj && info_.segmentTails_.empty()) {
+        // empty segmentTails_ implies a segment change
+        const auto& sections = secObj->GetSectionInfo();
+        auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
+        if (info_.endIndex_ > -1) {
+            postJumpOffset_ = ResetAndJump(info_);
+        }
+        info_.InitSegments(sections, constraint->scaleProperty, constraint->percentReference.Width());
+        return;
+    }
+
     if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
         postJumpOffset_ = ResetAndJump(info_);
         return;

@@ -50,7 +50,13 @@ private:
      */
     void Init(const SizeF& frameSize);
 
-    void SegmentInit(const SizeF& frameSize);
+    /**
+     * @brief init member variables for segmented WaterFlow with section info.
+     *
+     * @param options vector of SectionInfo
+     * @param frameSize of WaterFlow.
+     */
+    void SegmentInit(const std::vector<WaterFlowSections::Section>& options, const SizeF& frameSize);
 
     /**
      * @brief init regular WaterFlow with a single segment.
@@ -60,7 +66,7 @@ private:
     void RegularInit(const SizeF& frameSize);
     void InitFooter(float crossSize);
 
-    void CheckReset();
+    void CheckReset(const RefPtr<WaterFlowSections>& secObj);
 
     /**
      * @brief init member variables for segmented WaterFlow with section info.

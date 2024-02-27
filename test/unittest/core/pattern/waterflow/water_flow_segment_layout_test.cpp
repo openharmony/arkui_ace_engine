@@ -15,6 +15,7 @@
 #include "test/unittest/core/pattern/waterflow/water_flow_item_maps.h"
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
+#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/property/measure_property.h"
 
 #define protected public
@@ -143,6 +144,12 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset001, TestSize.Level1)
     algo->overScroll_ = true;
     info.prevOffset_ = 0.0f;
     info.currentOffset_ = -200.0f;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.currentOffset_, -200.0f);
+    EXPECT_EQ(info.startIndex_, 4);
+    EXPECT_EQ(info.endIndex_, 10);
+
+    info.Reset();
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info.currentOffset_, -200.0f);
     EXPECT_EQ(info.startIndex_, 4);
@@ -563,5 +570,170 @@ HWTEST_F(WaterFlowSegmentTest, Reset003, TestSize.Level1)
     EXPECT_EQ(info.align_, ScrollAlign::START);
     // items should be cleared before jumping
     EXPECT_EQ(info.itemInfos_.size(), 58);
+}
+
+/**
+ * @tc.name: Segmented001
+ * @tc.desc: Layout WaterFlow with multiple sections
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Segmented001, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(400.0f));
+        ViewAbstract::SetHeight(CalcLength(600.f));
+        CreateItem(60);
+    });
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_4);
+
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo{});
+
+    auto& info = algo->info_;
+    algo->Measure(AceType::RawPtr(frameNode_));
+
+    EXPECT_EQ(info.endIndex_, 12);
+    EXPECT_EQ(info.margins_.size(), 3);
+    EXPECT_EQ(info.segmentTails_, SEGMENT_TAILS_4);
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(algo->crossGaps_.size(), 3);
+    EXPECT_EQ(algo->mainGaps_.size(), 3);
+
+    info.currentOffset_ = -200.0f;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 3);
+    EXPECT_EQ(info.endIndex_, 16);
+    EXPECT_EQ(info.currentOffset_, -200.0f);
+    EXPECT_EQ(info.segmentStartPos_.size(), 1);
+
+    info.jumpIndex_ = 50;
+    info.align_ = ScrollAlign::END;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 47);
+    EXPECT_EQ(info.endIndex_, 50);
+    EXPECT_EQ(info.currentOffset_, -4000.0f);
+    EXPECT_EQ(info.segmentStartPos_.size(), 3);
+
+    secObj->ChangeData(0, 3, SECTION_5);
+    // section change
+    info.segmentTails_.clear();
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 47);
+    EXPECT_EQ(info.endIndex_, 54);
+    EXPECT_EQ(info.currentOffset_, -5546.0f);
+    EXPECT_EQ(info.segmentStartPos_.size(), 4);
+    EXPECT_EQ(info.align_, ScrollAlign::START);
+    EXPECT_EQ(algo->crossGaps_, CROSS_GAP_5);
+    EXPECT_EQ(algo->mainGaps_, MAIN_GAP_5);
+    EXPECT_EQ(algo->itemsCrossSize_.size(), 4);
+}
+
+/**
+ * @tc.name: Segmented002
+ * @tc.desc: Layout WaterFlow with multiple sections
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Segmented002, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(400.0f));
+        ViewAbstract::SetHeight(CalcLength(600.f));
+        CreateItem(60);
+    });
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo{});
+
+    auto& info = algo->info_;
+    algo->Measure(AceType::RawPtr(frameNode_));
+
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 10);
+    EXPECT_EQ(info.margins_.size(), 4);
+    EXPECT_EQ(info.segmentTails_, SEGMENT_TAILS_5);
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(algo->crossGaps_.size(), 4);
+    EXPECT_EQ(algo->mainGaps_.size(), 4);
+
+    info.currentOffset_ = -200.0f;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 3);
+    EXPECT_EQ(info.endIndex_, 11);
+    EXPECT_EQ(info.segmentStartPos_.size(), 3);
+
+    info.currentOffset_ = -304.0f;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 3);
+    EXPECT_EQ(info.endIndex_, 12);
+    EXPECT_EQ(info.segmentStartPos_.size(), 3);
+
+    info.currentOffset_ = -305.0f;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 5);
+    EXPECT_EQ(info.endIndex_, 12);
+    EXPECT_EQ(info.segmentStartPos_.size(), 3);
+
+    info.Reset();
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.currentOffset_, -305.0f);
+    EXPECT_EQ(info.startIndex_, 5);
+    EXPECT_EQ(info.endIndex_, 12);
+    EXPECT_EQ(info.margins_.size(), 4);
+    EXPECT_EQ(info.segmentTails_, SEGMENT_TAILS_5);
+}
+
+/**
+ * @tc.name: Segmented003
+ * @tc.desc: Layout WaterFlow with multiple sections
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Segmented003, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(400.0f));
+        ViewAbstract::SetHeight(CalcLength(600.f));
+        CreateItem(60);
+    });
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo{});
+
+    auto& info = algo->info_;
+    algo->Measure(AceType::RawPtr(frameNode_));
+
+    info.currentOffset_ = -800.0f;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 11);
+    EXPECT_EQ(info.endIndex_, 15);
+    EXPECT_EQ(info.segmentStartPos_.size(), 3);
+
+    info.currentOffset_ = -1200.0f;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 14);
+    EXPECT_EQ(info.endIndex_, 18);
+
+    info.currentOffset_ = -2300.0f;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 21);
+    EXPECT_EQ(info.endIndex_, 25);
+    EXPECT_EQ(info.segmentStartPos_.size(), 3);
+
+    info.prevOffset_ = -2300.0f;
+    info.currentOffset_ = -1800.0f;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 18);
+    EXPECT_EQ(info.endIndex_, 22);
+    EXPECT_EQ(info.segmentStartPos_.size(), 3);
+
+    info.currentOffset_ = -10000.0f;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 53);
+    EXPECT_EQ(info.endIndex_, 59);
+    EXPECT_EQ(info.currentOffset_, -6058.0f);
+    EXPECT_EQ(info.segmentStartPos_.size(), 4);
+
+    algo->Layout(AceType::RawPtr(frameNode_));
 }
 } // namespace OHOS::Ace::NG

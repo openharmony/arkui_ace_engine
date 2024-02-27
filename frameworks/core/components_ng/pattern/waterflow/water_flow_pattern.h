@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WaterFlowPattern : public ScrollablePattern {
@@ -126,6 +127,13 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
 
+    RefPtr<WaterFlowSections> GetSections() const
+    {
+        return sections_;
+    }
+    RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections();
+    void OnSectionChanged(int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections);
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {
@@ -144,6 +152,7 @@ private:
     bool NeedRender();
     std::optional<int32_t> targetIndex_;
     WaterFlowLayoutInfo layoutInfo_;
+    RefPtr<WaterFlowSections> sections_;
 
     float prevOffset_ = 0.0f;
     SizeF lastSize_;
