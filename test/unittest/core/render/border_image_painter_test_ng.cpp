@@ -72,7 +72,18 @@ BorderImage* MakeBorderImage()
 };
 } // namespace
 
-class BorderImagePainterTestNg : public testing::Test {};
+class BorderImagePainterTestNg : public testing::Test {
+public:
+    void CallBack(Testing::MockCanvas& rSCanvas);
+};
+
+void BorderImagePainterTestNg::CallBack(Testing::MockCanvas& rSCanvas)
+{
+    EXPECT_CALL(rSCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
+}
 
 /**
  * @tc.name: BorderImagePainter001
@@ -170,6 +181,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter003, TestSize.Level1)
     NG::BorderImageProperty borderImageProperty;
     RSImage image;
     Testing::MockCanvas canvas;
+    CallBack(canvas);
     std::unique_ptr<NG::BorderWidthProperty> widthProp { std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST) };
     NG::BorderImagePainter borderImagePainter(borderImageProperty, widthProp, PAINTSIZE, image, DIPSCALE);
 
@@ -348,6 +360,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter007, TestSize.Level1)
     NG::BorderImageProperty borderImageProperty;
     RSImage image;
     Testing::MockCanvas canvas;
+    CallBack(canvas);
     std::unique_ptr<NG::BorderWidthProperty> widthProp;
     NG::BorderImagePainter borderImagePainter(borderImageProperty, widthProp, PAINTSIZE, image, DIPSCALE);
 
@@ -385,6 +398,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter008, TestSize.Level1)
     NG::BorderImageProperty borderImageProperty;
     RSImage image;
     Testing::MockCanvas canvas;
+    CallBack(canvas);
     std::unique_ptr<NG::BorderWidthProperty> widthProp { std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST) };
     NG::BorderImagePainter borderImagePainter(borderImageProperty, widthProp, PAINTSIZE, image, DIPSCALE);
 
