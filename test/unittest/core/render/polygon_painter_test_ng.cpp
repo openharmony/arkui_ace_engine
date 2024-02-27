@@ -39,9 +39,22 @@ const std::pair<Dimension, Dimension> START_POINT = { 10.0_vp, 10.0_vp };
 const std::pair<Dimension, Dimension> END_POINT = { 30.0_vp, 30.0_vp };
 
 std::vector<ShapePoint> shape_Point;
+
+Testing::MockCanvas canvas;
 } // namespace
 
-class PolygonPainterTestNg : public testing::Test {};
+class PolygonPainterTestNg : public testing::Test {
+public:
+    void CallBack(Testing::MockCanvas& rSCanvas);
+};
+
+void PolygonPainterTestNg::CallBack(Testing::MockCanvas& rSCanvas)
+{
+    EXPECT_CALL(rSCanvas, AttachBrush(_)).WillOnce(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachBrush()).WillOnce(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, AttachPen(_)).WillOnce(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachPen()).WillOnce(ReturnRef(rSCanvas));
+}
 
 /**
  * @tc.name: PolygonPainterTestNg001
@@ -53,7 +66,7 @@ HWTEST_F(PolygonPainterTestNg, PolygonPainterTestNg001, TestSize.Level1)
     /**
      * @tc.steps1: create canvas and polygonPaintProperty object.
      */
-    Testing::MockCanvas canvas;
+    CallBack(canvas);
     NG::PolygonPaintProperty polygonPaintProperty;
 
     /**
@@ -68,6 +81,7 @@ HWTEST_F(PolygonPainterTestNg, PolygonPainterTestNg001, TestSize.Level1)
      * @tc.expected: expect HasPoints return true.
      */
     polygonPaintProperty.UpdatePoints(shape_Point);
+    CallBack(canvas);
     NG::PolygonPainter::DrawPolygon(canvas, polygonPaintProperty, true);
     EXPECT_TRUE(polygonPaintProperty.HasPoints());
     EXPECT_TRUE(polygonPaintProperty.GetPointsValue().empty());
@@ -83,7 +97,7 @@ HWTEST_F(PolygonPainterTestNg, PolygonPainterTestNg002, TestSize.Level1)
     /**
      * @tc.steps1: create canvas and polygonPaintProperty object.
      */
-    Testing::MockCanvas canvas;
+    CallBack(canvas);
     NG::PolygonPaintProperty polygonPaintProperty;
 
     /**

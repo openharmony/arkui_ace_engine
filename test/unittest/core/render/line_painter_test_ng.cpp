@@ -39,9 +39,22 @@ const Dimension TEST { 0.0, DimensionUnit::PX };
 const NG::OffsetF OFFSET_TEST { 1, 1 };
 static constexpr NG::ShapePoint START_POINT = ShapePoint(10.0, 10.0);
 static constexpr NG::ShapePoint END_POINT = ShapePoint(30.0, 30.0);
+
+Testing::MockCanvas canvas;
 } // namespace
 
-class LinePainterTestNg : public testing::Test {};
+class LinePainterTestNg : public testing::Test {
+public:
+    void CallBack(Testing::MockCanvas& rSCanvas);
+};
+
+void LinePainterTestNg::CallBack(Testing::MockCanvas& rSCanvas)
+{
+    EXPECT_CALL(rSCanvas, AttachBrush(_)).WillOnce(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachBrush()).WillOnce(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, AttachPen(_)).WillOnce(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachPen()).WillOnce(ReturnRef(rSCanvas));
+}
 
 /**
  * @tc.name: LinePainterTestNg001
@@ -53,7 +66,6 @@ HWTEST_F(LinePainterTestNg, LinePainterTestNg001, TestSize.Level1)
     /**
      * @tc.steps1: create canvas pen and linePaintProperty object.
      */
-    Testing::MockCanvas canvas;
     RSPen pen;
     NG::LinePaintProperty linePaintProperty;
 
@@ -64,6 +76,7 @@ HWTEST_F(LinePainterTestNg, LinePainterTestNg001, TestSize.Level1)
      */
     linePaintProperty.UpdateStartPoint(START_POINT);
     linePaintProperty.UpdateEndPoint(END_POINT);
+    CallBack(canvas);
     NG::LinePainter::DrawLine(canvas, linePaintProperty, OFFSET_TEST);
     bool result = NG::ShapePainter::SetPen(pen, linePaintProperty);
     EXPECT_TRUE(result);
@@ -75,6 +88,7 @@ HWTEST_F(LinePainterTestNg, LinePainterTestNg001, TestSize.Level1)
      * @tc.expected: expect SetPen return false, HasStrokeWidth return true.
      */
     linePaintProperty.UpdateStrokeWidth(TEST);
+    CallBack(canvas);
     NG::LinePainter::DrawLine(canvas, linePaintProperty, OFFSET_TEST);
     bool result_test = NG::ShapePainter::SetPen(pen, linePaintProperty);
     EXPECT_FALSE(result_test);
