@@ -21,6 +21,7 @@
 #include "test/mock/base/mock_drag_window.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_udmf.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -2224,5 +2225,257 @@ HWTEST_F(GestureEventHubTestNg, IsPixelMapNeedScale001, TestSize.Level1)
 
     bool result = guestureEventHub->IsPixelMapNeedScale();
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetDragDropInfo001
+ * @tc.desc: Test GetDragDropInfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetDragDropInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. set defaultOnDragStart for eventHub
+     */
+    auto defaultOnDragStart = [](
+        const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
+        DragDropInfo dragDropInfo;
+        auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+        dragEvent->SetData(unifiedData);
+        dragDropInfo.extraInfo = "default extraInfo";
+        return dragDropInfo;
+    };
+    eventHub->SetDefaultOnDragStart(std::move(defaultOnDragStart));
+
+    /**
+     * @tc.steps: step3. call GetDragDropInfo function
+     *            case: textDraggable is false, and component is text
+     * @tc.expected: customNode is null, extraInfo is 'default extraInfo'.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    GestureEvent info;
+    DragDropInfo dragPreviewInfo;
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto dragDropInfo = gestureEventHub->GetDragDropInfo(info, frameNode, dragPreviewInfo, dragEvent);
+    EXPECT_FALSE(dragDropInfo.customNode);
+    EXPECT_EQ(dragDropInfo.extraInfo, "default extraInfo");
+
+    /**
+     * @tc.steps: step4. call GetDragDropInfo function
+     *            case: textDraggable is true, and component is text
+     * @tc.expected: customNode is null, extraInfo is 'default extraInfo'.
+     */
+    gestureEventHub->SetTextDraggable(true);
+    dragDropInfo = gestureEventHub->GetDragDropInfo(info, frameNode, dragPreviewInfo, dragEvent);
+    EXPECT_FALSE(dragDropInfo.customNode);
+    EXPECT_EQ(dragDropInfo.extraInfo, "default extraInfo");
+
+    /**
+     * @tc.steps: step5. set onDragStart for eventHub
+     */
+    auto onDragStart = [](
+        const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
+        DragDropInfo dragDropInfo;
+        auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+        dragEvent->SetData(unifiedData);
+        auto customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        dragDropInfo.customNode = customNode;
+        dragDropInfo.extraInfo = "user set extraInfo";
+        return dragDropInfo;
+    };
+    eventHub->SetOnDragStart(std::move(onDragStart));
+
+    /**
+     * @tc.steps: step6. call GetDragDropInfo function
+     *            case: textDraggable is true, and component is text
+     * @tc.expected: customNode is null, extraInfo is 'user set extraInfo'.
+     */
+    dragDropInfo = gestureEventHub->GetDragDropInfo(info, frameNode, dragPreviewInfo, dragEvent);
+    EXPECT_FALSE(dragDropInfo.customNode);
+    EXPECT_EQ(dragDropInfo.extraInfo, "user set extraInfo");
+}
+
+/**
+ * @tc.name: GetDragDropInfo002
+ * @tc.desc: Test GetDragDropInfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetDragDropInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. set onDragStart for eventHub
+     */
+    auto onDragStart = [](
+        const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
+        DragDropInfo dragDropInfo;
+        auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+        dragEvent->SetData(unifiedData);
+        auto customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        dragDropInfo.customNode = customNode;
+        dragDropInfo.extraInfo = "user set extraInfo";
+        return dragDropInfo;
+    };
+    eventHub->SetOnDragStart(std::move(onDragStart));;
+
+    /**
+     * @tc.steps: step3. set dragPreview for frameNode
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    DragDropInfo dragPreviewDropInfo;
+    dragPreviewDropInfo.extraInfo = "drag preview extraInfo";
+    auto customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragPreviewDropInfo.customNode = customNode;
+    frameNode->SetDragPreview(dragPreviewDropInfo);
+
+    /**
+     * @tc.steps: step4. call GetDragDropInfo function
+     *            case: textDraggable is false, and component is image
+     * @tc.expected: dragPreviewInfo.customNode is not null, extraInfo is 'drag preview extraInfo'.
+     */
+    GestureEvent info;
+    DragDropInfo dragPreviewInfo;
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto dragDropInfo = gestureEventHub->GetDragDropInfo(info, frameNode, dragPreviewInfo, dragEvent);
+    EXPECT_TRUE(dragDropInfo.customNode);
+    EXPECT_EQ(dragDropInfo.extraInfo, "user set extraInfo");
+    EXPECT_TRUE(dragPreviewInfo.customNode);
+    EXPECT_EQ(dragPreviewInfo.extraInfo, "drag preview extraInfo");
+}
+
+/**
+ * @tc.name: GetUnifiedData001
+ * @tc.desc: Test GetUnifiedData function when user has not set the onDragStart callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetUnifiedData001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. set OnDragStart for eventHub
+     *            case: user not set onDragStart callback function
+     */
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto defaultOnDragStart = [](
+        const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
+        DragDropInfo dragDropInfo;
+        auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+        dragEvent->SetData(unifiedData);
+        dragDropInfo.extraInfo = "default extraInfo";
+        return dragDropInfo;
+    };
+    eventHub->SetDefaultOnDragStart(std::move(defaultOnDragStart));
+    EXPECT_TRUE(eventHub->GetDefaultOnDragStart());
+
+    /**
+     * @tc.steps: step3. Call GetUnifiedData function
+     *            case: Do not set default onDragStart function
+     * @tc.expected: unifiedData is not null, extraInfo is not empty.
+     */
+    DragDropInfo dragDropInfo;
+    gestureEventHub->GetUnifiedData(dragDropInfo, dragEvent);
+    EXPECT_TRUE(dragEvent->GetData());
+    EXPECT_EQ(dragDropInfo.extraInfo, "default extraInfo");
+
+    /**
+     * @tc.steps: step4. Call GetUnifiedData function
+     *            case: Do not set default onDragStart function
+     * @tc.expected: unifiedData is not null, extraInfo is not empty.
+     */
+    dragEvent->SetData(nullptr);
+    dragDropInfo.extraInfo = "";
+    eventHub->SetDefaultOnDragStart(nullptr);
+    gestureEventHub->GetUnifiedData(dragDropInfo, dragEvent);
+    EXPECT_EQ(dragEvent->GetData(), nullptr);
+    EXPECT_EQ(dragDropInfo.extraInfo, "");
+}
+
+/**
+ * @tc.name: GetUnifiedData002
+ * @tc.desc: Test GetUnifiedData function when user set the onDragStart callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetUnifiedData002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. set OnDragStart for eventHub
+     *            case: set user set onDragStart and defaultOnDragStart
+     */
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto defaultOnDragStart = [](
+        const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
+        DragDropInfo dragDropInfo;
+        auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+        dragEvent->SetData(unifiedData);
+        dragDropInfo.extraInfo = "default extraInfo";
+        return dragDropInfo;
+    };
+    eventHub->SetDefaultOnDragStart(std::move(defaultOnDragStart));
+    EXPECT_TRUE(eventHub->GetDefaultOnDragStart());
+
+    /**
+     * @tc.steps: step3. Call GetUnifiedData function
+     *            case: user do not set unifiedData and extraInfo
+     * @tc.expected: unifiedData is not null, extraInfo is not empty.
+     */
+    DragDropInfo dragDropInfo;
+    gestureEventHub->GetUnifiedData(dragDropInfo, dragEvent);
+    EXPECT_TRUE(dragEvent->GetData());
+    EXPECT_EQ(dragDropInfo.extraInfo, "default extraInfo");
+
+    /**
+     * @tc.steps: step4. set OnDragStart for eventHub
+     *            case: user set onDragStart function
+     */
+    auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    dragEvent->SetData(unifiedData);
+    dragDropInfo.extraInfo = "user set extraInfo";
+    eventHub->SetDefaultOnDragStart(std::move(defaultOnDragStart));
+    EXPECT_TRUE(eventHub->GetDefaultOnDragStart());
+
+    /**
+     * @tc.steps: step5. Call GetUnifiedData function
+     *            case: user set unifiedData and extraInfo
+     * @tc.expected: unifiedData is not null, extraInfo is not empty.
+     */
+    gestureEventHub->GetUnifiedData(dragDropInfo, dragEvent);
+    EXPECT_TRUE(dragEvent->GetData());
+    EXPECT_EQ(dragDropInfo.extraInfo, "user set extraInfo");
 }
 } // namespace OHOS::Ace::NG

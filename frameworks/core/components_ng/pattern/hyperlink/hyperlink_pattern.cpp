@@ -51,7 +51,7 @@ void HyperlinkPattern::EnableDrag()
     };
     auto eventHub = GetHost()->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragStart(std::move(dragStart));
+    eventHub->SetDefaultOnDragStart(std::move(dragStart));
 }
 
 void HyperlinkPattern::OnModifyDone()

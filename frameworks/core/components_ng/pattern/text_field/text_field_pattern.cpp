@@ -1607,11 +1607,7 @@ void TextFieldPattern::InitDragDropEvent()
     gestureHub->SetThumbnailCallback(std::move(callback));
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (!eventHub->HasOnDragStart()) {
-        eventHub->SetOnDragStart(OnDragStart());
-    } else if (gestureHub->GetTextDraggable()) {
-        gestureHub->SetTextDraggable(false);
-    }
+    eventHub->SetDefaultOnDragStart(OnDragStart());
     InitDragDropCallBack();
     gestureHub->SetTextDraggable(true);
 }
@@ -1702,6 +1698,7 @@ void TextFieldPattern::ClearDragDropEvent()
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDragStart(nullptr);
+    eventHub->SetDefaultOnDragStart(nullptr);
     eventHub->SetOnDragEnter(nullptr);
     eventHub->SetOnDragMove(nullptr);
     eventHub->SetOnDragLeave(nullptr);
