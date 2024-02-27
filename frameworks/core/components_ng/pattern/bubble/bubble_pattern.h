@@ -184,6 +184,7 @@ private:
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 
     bool delayShow_ = false;
+    std::function<void()> finish_;
 
     std::optional<OffsetF> targetOffset_;
     std::optional<SizeF> targetSize_;
