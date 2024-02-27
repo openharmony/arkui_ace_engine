@@ -1216,4 +1216,9 @@ RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()
     // cross platform is not support now;
     return nullptr;
 }
+
+void WebPattern::OnDefaultTextEncodingFormatUpdate(const std::string& value)
+{
+    // cross platform is not support now;
+}
 } // namespace OHOS::Ace::NG
