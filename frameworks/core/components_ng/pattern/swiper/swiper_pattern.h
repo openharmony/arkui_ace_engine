@@ -815,7 +815,52 @@ private:
     void PreloadItems(const std::set<int32_t>& indexSet);
     void DoPreloadItems(const std::set<int32_t>& indexSet, int32_t errorCode);
     void FirePreloadFinishEvent(int32_t errorCode);
-
+    // capture node start
+    void InitCapture();
+    int32_t GetLeftCaptureId()
+    {
+        if (!leftCaptureId_.has_value()) {
+            leftCaptureId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return leftCaptureId_.value();
+    }
+    int32_t GetRightCaptureId()
+    {
+        if (!rightCaptureId_.has_value()) {
+            rightCaptureId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return rightCaptureId_.value();
+    }
+    void RemoveAllCaptureNode()
+    {
+        auto swiperNode = GetHost();
+        CHECK_NULL_VOID(swiperNode);
+        swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetLeftCaptureId()));
+        leftCaptureId_ = std::nullopt;
+        swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetRightCaptureId()));
+        rightCaptureId_ = std::nullopt;
+        firstGetPixelMap_ = true;
+    }
+    RefPtr<FrameNode> GetLeftCaptureNode()
+    {
+        auto swiperNode = GetHost();
+        CHECK_NULL_RETURN(swiperNode, nullptr);
+        return DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetLeftCaptureId())));
+    }
+    RefPtr<FrameNode> GetRightCaptureNode()
+    {
+        auto swiperNode = GetHost();
+        CHECK_NULL_RETURN(swiperNode, nullptr);
+        return DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetRightCaptureId())));
+    }
+    bool IsCaptureNodeValid()
+    {
+        return hasCachedCapture_ && GetLeftCaptureNode() && GetRightCaptureNode();
+    }
+    void UpdateTaregtCapture();
+    void CreateCaptureCallback(int32_t targetCaptureIndex, int32_t captureId);
+    void UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId);
+    // capture node end
     WeakPtr<NestableScrollContainer> parent_;
     /**
      *  ============================================================
@@ -905,6 +950,8 @@ private:
     std::optional<int32_t> indicatorId_;
     std::optional<int32_t> leftButtonId_;
     std::optional<int32_t> rightButtonId_;
+    std::optional<int32_t> leftCaptureId_;
+    std::optional<int32_t> rightCaptureId_;
     std::optional<SwiperIndicatorType> lastSwiperIndicatorType_;
 
     float startMainPos_ = 0.0f;
@@ -958,6 +1005,13 @@ private:
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
     PaddingPropertyF tabsPaddingAndBorder_;
     std::map<int32_t, bool> indexCanChangeMap_;
+    // capture
+    std::optional<int32_t> leftCaptureIndex_;
+    std::optional<int32_t> rightCaptureIndex_;
+    bool hasCachedCapture_ = false;
+    bool firstGetPixelMap_ = true;
+    bool isCaptureReverse_ = false;
+    OffsetF captureFinalOffset_;
 };
 } // namespace OHOS::Ace::NG
 
