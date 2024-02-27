@@ -18,10 +18,10 @@
 #endif
 #ifdef VIDEO_TEXTURE_SUPPORTED
 #include "core/components_ng/render/adapter/render_texture_impl.h"
-#else
 #ifdef XCOMPONENT_SUPPORTED
 #include "core/components_ng/render/adapter/render_surface_impl.h"
 #endif
+#else
 #include "core/components_ng/render/adapter/render_surface_impl.h"
 #endif
 #include "core/components_ng/render/render_surface.h"
