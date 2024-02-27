@@ -197,6 +197,14 @@ public:
         return scrollable->IsStopped();
     }
 
+    bool GetIsDragging() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->GetIsDragging();
+    }
+
     void StopScrollable()
     {
         CHECK_NULL_VOID(scrollableEvent_);

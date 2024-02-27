@@ -307,6 +307,7 @@ private:
     bool crossMatchChild_ = false;
     bool smooth_ = false;
     float scrollSnapVelocity_ = 0.0f;
+    bool snapTrigOnScrollStart_ = false;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
