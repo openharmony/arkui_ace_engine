@@ -15,6 +15,7 @@
 
 #include <string>
 
+#include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsi_bindings.h"
@@ -402,6 +403,7 @@ template<typename C>
 template<typename T, typename... Args>
 panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    STATIC_API_DURATION();
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     T* instance = static_cast<T*>(ptr);
@@ -421,6 +423,7 @@ template<typename T>
 panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
     panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    STATIC_API_DURATION();
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     EcmaVM* vm = runtimeCallInfo->GetVM();
     C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
@@ -455,6 +458,7 @@ template<typename C>
 template<typename Class, typename R, typename... Args>
 panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    STATIC_API_DURATION();
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     Class* instance = static_cast<Class*>(ptr);
@@ -494,6 +498,7 @@ template<typename C>
 template<typename Class, typename R, typename... Args>
 panda::Local<panda::JSValueRef> JsiClass<C>::JSMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    STATIC_API_DURATION();
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     Class* instance = static_cast<Class*>(ptr);
@@ -513,6 +518,7 @@ template<typename C>
 template<typename R, typename... Args>
 panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    STATIC_API_DURATION();
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
@@ -549,6 +555,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
 template<typename C>
 panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    STATIC_API_DURATION();
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);

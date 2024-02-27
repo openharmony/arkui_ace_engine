@@ -267,6 +267,11 @@ bool IsResourceDecoupling()
 {
     return system::GetBoolParameter("persist.sys.arkui.resource.decoupling", true);
 }
+
+bool IsAcePerformanceMonitorEnabled()
+{
+    return system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
+}
 } // namespace
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
@@ -316,6 +321,7 @@ bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
+bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {

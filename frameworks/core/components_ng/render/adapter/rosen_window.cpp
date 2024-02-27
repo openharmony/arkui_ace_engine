@@ -17,6 +17,7 @@
 
 #include "transaction/rs_interfaces.h"
 
+#include "base/log/ace_performance_monitor.h"
 #include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
 #include "base/thread/task_executor.h"
@@ -46,6 +47,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos) {
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos] {
+            ArkUIPerfMonitor::GetInstance().StartPerf();
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushBegin();
             }
@@ -64,6 +66,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
             }
+            ArkUIPerfMonitor::GetInstance().FinishPerf();
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {

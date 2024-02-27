@@ -88,6 +88,7 @@ bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
+bool SystemProperties::acePerformanceMonitorEnable_ = false;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {
