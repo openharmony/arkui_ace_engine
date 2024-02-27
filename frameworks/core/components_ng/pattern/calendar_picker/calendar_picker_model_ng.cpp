@@ -396,6 +396,7 @@ void CalendarPickerModelNG::SetHintRadiusWithNode(FrameNode* frameNode, Dimensio
     CHECK_NULL_VOID(pickerPattern);
     auto calendarDate = pickerPattern->GetCalendarData();
     calendarDate.dayRadius = radius;
+    pickerPattern->SetCalendarData(calendarDate);
 }
 
 void CalendarPickerModelNG::SetSelectDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day)
@@ -442,6 +443,7 @@ void CalendarPickerModelNG::SetSelectDateWithNode(FrameNode* frameNode, uint32_t
             }
         }
     }
+    pickerPattern->SetCalendarData(calendarDate);
 }
 
 RefPtr<FrameNode> CalendarPickerModelNG::GetYearNode(FrameNode* calendarPickerNode)
