@@ -87,7 +87,7 @@ export struct ComposeTitleBar {
           .active(this.backActive)
 
         ImageMenuItem({ item: {
-          value: PUBLIC_BACK,
+          value: $r('sys.media.ohos_ic_back'),
           isEnabled: true,
           action: () => this.backActive = true
         }, index: -1 })
@@ -342,6 +342,7 @@ struct ImageMenuItem {
         .height(ImageMenuItem.imageSize)
         .focusable(this.item.isEnabled)
         .key(ImageMenuItem.focusablePrefix + this.index)
+        .fillColor($r('sys.color.ohos_id_color_text_primary'))
     }
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
