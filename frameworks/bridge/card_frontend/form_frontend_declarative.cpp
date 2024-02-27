@@ -98,7 +98,6 @@ void FormFrontendDeclarative::UpdatePageData(const std::string& dataList)
 }
 
 void FormFrontendDeclarative::SetColorMode(ColorMode colorMode) {}
-void FormFrontendDeclarative::OnSurfaceChanged(int32_t width, int32_t height) {}
 
 void FormFrontendDeclarative::HandleSurfaceChanged(int32_t width, int32_t height)
 {
