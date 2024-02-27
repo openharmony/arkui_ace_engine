@@ -855,10 +855,13 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dipScale = pipeline->GetDipScale();
     arkExtraInfoJson->Put("dip_scale", dipScale);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), true, false, summary };
+        info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary };
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         if (dragDropManager->IsNeedScaleDragPreview()) {
@@ -1198,6 +1201,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
         taskScheduler->PostTask(
             [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage]() {
                 dragDropManager->SetDragResult(notifyMessage, dragEvent);
+                dragDropManager->SetDragBehavior(notifyMessage, dragEvent);
                 dragDropManager->SetIsDragged(false);
                 dragDropManager->ResetDragging();
                 dragDropManager->SetDraggingPointer(-1);

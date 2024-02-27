@@ -53,6 +53,7 @@ struct DragDataCore {
     int32_t displayX = -1;
     int32_t displayY = -1;
     int32_t displayId = -1;
+    int32_t mainWindow = -1;
     bool hasCanceledAnimation = false;
     bool hasCoordinateCorrected = false;
     std::map<std::string, int64_t> summarys;
@@ -63,12 +64,14 @@ struct DragNotifyMsg {
     int32_t displayY = -1;
     int32_t targetPid = -1;
     DragRet result { DragRet::DRAG_FAIL };
+    DragBehavior dragBehavior { DragBehavior::UNKNOWN };
 };
 
 struct DragDropRet {
     DragRet result { DragRet::DRAG_FAIL };
     bool hasCustomAnimation = false;
-    int32_t windowId = -1;
+    int32_t mainWindow = -1;
+    DragBehavior dragBehavior { DragBehavior::UNKNOWN };
 };
 
 enum class DragState {

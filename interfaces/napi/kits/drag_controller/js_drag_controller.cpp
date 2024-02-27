@@ -492,6 +492,7 @@ void GetCallBackDataForJs(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg&
     auto dragEvent = AceType::MakeRefPtr<DragEvent>();
     CHECK_NULL_VOID(dragEvent);
     dragEvent->SetResult(static_cast<DragRet>(resultCode));
+    dragEvent->SetDragBehavior(static_cast<DragBehavior>(dragNotifyMsg.dragBehavior));
     jsDragEvent->SetDragEvent(dragEvent);
     status = napi_set_named_property(asyncCtx->env, result, "event", eventNapi);
 
@@ -677,9 +678,10 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
+    auto windowId = container->GetWindowId();
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, "", asyncCtx->sourceType,
         dataSize != 0 ? dataSize : shadowInfos.size(), pointerId, asyncCtx->globalX, asyncCtx->globalY,
-        asyncCtx->displayId, true, false, summary };
+        asyncCtx->displayId, windowId, true, false, summary };
 }
 
 void StartDragService(DragControllerAsyncCtx* asyncCtx)
@@ -815,10 +817,12 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 HandleFail(asyncCtx, ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
                 return;
             }
+            auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+            auto windowId = container->GetWindowId();
             Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y };
             Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, asyncCtx->extraParams, "",
                 asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, asyncCtx->displayId,
-                true, false, summary };
+                windowId, true, false, summary };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
                 LOGI("DragController start on callback %{public}d", dragNotifyMsg.result);
@@ -838,7 +842,6 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 napi_close_handle_scope(asyncCtx->env, scope);
                 return;
             }
-            auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
             SetIsDragging(container, true);
             LOGI("drag start success");
             {
@@ -1268,8 +1271,8 @@ bool ConfirmCurPointerEventInfo(DragControllerAsyncCtx *asyncCtx, const RefPtr<C
                     if (SystemProperties::GetDebugEnabled()) {
                         LOGI("JSExecuteDrag, windowId is %{public}d.", windowId);
                     }
-                    Msdp::DeviceStatus::DragDropResult dropResult {
-                        Msdp::DeviceStatus::DragResult::DRAG_CANCEL, false, windowId };
+                    Msdp::DeviceStatus::DragDropResult dropResult { Msdp::DeviceStatus::DragResult::DRAG_CANCEL, false,
+                        windowId, Msdp::DeviceStatus::DragBehavior::UNKNOWN };
                     Msdp::DeviceStatus::InteractionManager::GetInstance()->StopDrag(dropResult);
                     Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(false);
                 },
