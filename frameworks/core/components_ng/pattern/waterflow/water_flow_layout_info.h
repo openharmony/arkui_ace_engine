@@ -23,6 +23,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 struct FlowItemIndex {
@@ -39,15 +40,23 @@ constexpr int32_t EMPTY_JUMP_INDEX = -2;
 
 class WaterFlowLayoutInfo {
 public:
-    int32_t GetCrossIndex(int32_t itemIndex);
+    int32_t GetCrossIndex(int32_t itemIndex) const;
     void UpdateStartIndex();
     int32_t GetEndIndexByOffset(float offset) const;
     float GetMaxMainHeight() const;
     float GetContentHeight() const;
-    bool IsAllCrossReachend(float mainSize) const;
-    FlowItemIndex GetCrossIndexForNextItem() const;
-    float GetMainHeight(int32_t crossIndex, int32_t itemIndex);
-    float GetStartMainPos(int32_t crossIndex, int32_t itemIndex);
+    bool IsAllCrossReachEnd(float mainSize) const;
+
+    /**
+     * @brief Get the next available cross index to place a new item.
+     *
+     * @param segmentIdx index of the WaterFlow segment.
+     * @return FlowItemIndex
+     */
+    FlowItemIndex GetCrossIndexForNextItem(int32_t segmentIdx) const;
+
+    float GetMainHeight(int32_t crossIndex, int32_t itemIndex) const;
+    float GetStartMainPos(int32_t crossIndex, int32_t itemIndex) const;
     void Reset();
     void Reset(int32_t resetFrom);
     int32_t GetCrossCount() const;
@@ -56,6 +65,42 @@ public:
 
     bool ReachStart(float prevOffset, bool firstLayout) const;
     bool ReachEnd(float prevOffset) const;
+
+    int32_t GetSegment(int32_t itemIdx) const;
+
+    void RecordItem(int32_t idx, int32_t crossIdx, float startPos, float height);
+
+    /**
+     * @brief FInd the first item inside viewport in log_n time using endPosReverseMap_.
+     *
+     * @return index of the starting item.
+     */
+    int32_t FastSolveStartIndex() const;
+
+    /**
+     * @brief Find the last item inside viewport in log_n time using itemInfos_.
+     *
+     * @param mainSize main-axis length of viewport.
+     * @return index of the item.
+     */
+    int32_t FastSolveEndIndex(float mainSize) const;
+
+    /**
+     * @brief Calculate and set the start position of next segment after filling the tail item of the current segment.
+     *
+     * @param margins margin of each segment.
+     * @param itemIdx index of the current flow item.
+     */
+    void SetNextSegmentStartPos(const std::vector<PaddingPropertyF>& margins, int32_t itemIdx);
+
+    /**
+     * @brief Update member variables after measure.
+     *
+     * @param mainSize waterFlow length on the main axis.
+     * @param bottomMargin of the last FlowItem segment.
+     * @param overScroll whether overScroll is allowed. Might adjust offset if not.
+     */
+    void Sync(float mainSize, float bottomMargin, bool overScroll);
 
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
@@ -66,16 +111,16 @@ public:
     float storedOffset_ = 0.0f;
     float restoreOffset_ = 0.0f;
 
-    bool itemEnd_ = false;
     bool itemStart_ = false;
-    bool offsetEnd_ = false;
+    bool itemEnd_ = false;   // last item is partially in viewport
+    bool offsetEnd_ = false; // last item's bottom is in viewport
 
     int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
 
     ScrollAlign align_ = ScrollAlign::START;
 
     int32_t startIndex_ = 0;
-    int32_t endIndex_ = 0;
+    int32_t endIndex_ = -1;
     int32_t footerIndex_ = -1;
     int32_t childrenCount_ = 0;
 
@@ -83,12 +128,34 @@ public:
     int32_t firstIndex_ = 0;
     std::optional<int32_t> targetIndex_;
 
-    // Map structure: [crossIndex, [index, (mainOffset, itemMainSize)]],
-    std::map<int32_t, std::map<int32_t, std::pair<float, float>>> waterFlowItems_;
+    // Map structure: [crossIndex, [index, {mainOffset, itemMainSize}]],
+    using ItemMap = std::map<int32_t, std::map<int32_t, std::pair<float, float>>>;
+
+    std::vector<ItemMap> items_ { ItemMap() };
+
+    struct ItemInfo;
+    // quick access to FlowItem by index
+    std::vector<ItemInfo> itemInfos_;
+
+    /**
+     * @brief pair = { item bottom position, item index }.
+     * A strictly increasing array of item endPos to speed up startIndex solver.
+     * Only add to this map when a new endPos is greater than the last one in array.
+     */
+    std::vector<std::pair<float, int32_t>> endPosArray_;
+
+    // Stores the tail item index of each segment.
+    std::vector<int32_t> segmentTails_;
+
+    // Stores the start position of each segment.
+    std::vector<float> segmentStartPos_ = { 0.0f };
+
+    // K: item index; V: corresponding segment index
+    mutable std::unordered_map<int32_t, int32_t> segmentCache_;
 
     void PrintWaterFlowItems() const
     {
-        for (const auto& [key1, map1] : waterFlowItems_) {
+        for (const auto& [key1, map1] : items_[0]) {
             std::stringstream ss;
             ss << key1 << ": {";
             for (const auto& [key2, pair] : map1) {
@@ -102,5 +169,18 @@ public:
         }
     }
 };
+
+struct WaterFlowLayoutInfo::ItemInfo {
+    ItemInfo(int32_t cross, float offset, float size) : crossIdx(cross), mainOffset(offset), mainSize(size) {}
+    bool operator==(const ItemInfo& other) const
+    {
+        return crossIdx == other.crossIdx && mainOffset == other.mainOffset && mainSize == other.mainSize;
+    }
+
+    int32_t crossIdx;
+    float mainOffset;
+    float mainSize;
+};
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_INFO_H

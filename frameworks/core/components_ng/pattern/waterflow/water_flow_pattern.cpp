@@ -19,6 +19,7 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/pattern/waterflow/water_flow_segmented_layout.h"
 
 namespace OHOS::Ace::NG {
 SizeF WaterFlowPattern::GetContentSize() const
@@ -69,6 +70,9 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         }
         if (layoutInfo_.offsetEnd_ && delta < 0) {
             return false;
+        }
+        if (GreatNotEqual(delta, 0.0f)) {
+            delta = std::min(delta, -layoutInfo_.currentOffset_);
         }
     }
     FireOnWillScroll(-delta);
@@ -207,7 +211,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     auto layoutAlgorithmWrapper = dirty->GetLayoutAlgorithm();
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto layoutAlgorithm = DynamicCast<WaterFlowLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    auto layoutAlgorithm = DynamicCast<WaterFlowLayoutBase>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     auto layoutInfo = layoutAlgorithm->GetLayoutInfo();
     auto host = GetHost();
@@ -242,7 +246,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     layoutInfo_ = std::move(layoutInfo);
     if (targetIndex_.has_value()) {
-        ScrollToTargrtIndex(targetIndex_.value());
+        ScrollToTargetIndex(targetIndex_.value());
         targetIndex_.reset();
     }
     layoutInfo_.UpdateStartIndex();
@@ -255,7 +259,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     return NeedRender();
 }
 
-bool WaterFlowPattern::ScrollToTargrtIndex(int32_t index)
+bool WaterFlowPattern::ScrollToTargetIndex(int32_t index)
 {
     if (index == LAST_ITEM) {
         auto host = GetHost();
@@ -267,7 +271,7 @@ bool WaterFlowPattern::ScrollToTargrtIndex(int32_t index)
     if (crossIndex == -1) {
         return false;
     }
-    auto item = layoutInfo_.waterFlowItems_[crossIndex][index];
+    auto item = layoutInfo_.items_[layoutInfo_.GetSegment(index)].at(crossIndex).at(index);
     float targetPosition = 0.0;
     ScrollAlign align = layoutInfo_.align_;
     switch (align) {
@@ -426,7 +430,7 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
     StopAnimate();
     if ((index >= 0) || (index == LAST_ITEM)) {
         if (smooth) {
-            if (!ScrollToTargrtIndex(index)) {
+            if (!ScrollToTargetIndex(index)) {
                 targetIndex_ = index;
                 auto host = GetHost();
                 CHECK_NULL_VOID(host);
