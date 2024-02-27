@@ -348,7 +348,7 @@ class Router {
     back(options, params) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (typeof options === 'number' || arguments.length === 2) {
-            this.ohos_router.back(index, params);
+            this.ohos_router.back(options, params);
         } else {
             this.ohos_router.back(options);
         }
