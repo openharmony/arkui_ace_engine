@@ -1130,6 +1130,7 @@ void SheetPresentationPattern::ClipSheetNode()
     auto path = AceType::MakeRefPtr<Path>();
     path->SetValue(clipPath);
     path->SetBasicShapeType(BasicShapeType::PATH);
+    renderContext->UpdateRenderGroup(true, true, true);
     renderContext->UpdateClipShape(path);
 }
 
