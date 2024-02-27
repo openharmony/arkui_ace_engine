@@ -217,6 +217,11 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     renderFit(fitMode: RenderFit): this;
     attributeModifier(modifier: AttributeModifier<CommonAttribute>): this;
 }
+declare class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttribute> {
+    constructor(nativePtr: KNode);
+    color(value: ResourceColor): BlankAttribute;
+    height(value: Length): this;
+}
 declare class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttribute> {
     constructor(nativePtr: KNode);
     alignItems(value: HorizontalAlign): ColumnAttribute;
@@ -338,6 +343,14 @@ declare class ArkImageComponent extends ArkComponent implements ImageAttribute {
     opacity(value: number | Resource): this;
     transition(value: TransitionOptions | TransitionEffect): this;
 }
+declare class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>> {
+    constructor(value: Array<ImageFrameInfo>);
+    static identity: Symbol;
+    applyPeer(node: KNode, reset: boolean): void;
+    checkObjectDiff(): boolean;
+    isEqual(one: ImageFrameInfo, another: ImageFrameInfo): boolean;
+    convertImageFrames(value: Array<ImageFrameInfo>): ArkImageFrameInfoToArray;
+}
 declare class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<ImageAnimatorAttribute> {
     constructor(nativePtr: KNode);
     images(value: Array<ImageFrameInfo>): ImageAnimatorAttribute;
@@ -386,6 +399,17 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     onDeleteComplete(callback: () => void): RichEditorAttribute;
     bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute;
     customKeyboard(value: CustomBuilder): RichEditorAttribute;
+}
+declare class ArkRowComponent extends ArkComponent implements RowAttribute {
+    constructor(nativePtr: KNode);
+    alignItems(value: VerticalAlign): RowAttribute;
+    justifyContent(value: FlexAlign): RowAttribute;
+    pointLight(value: PointLightStyle): RowAttribute;
+}
+declare class ArkRowSplitComponent extends ArkComponent implements RowSplitAttribute {
+    constructor(nativePtr: KNode);
+    resizeable(value: boolean): RowSplitAttribute;
+    clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
 }
 declare class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
     constructor(nativePtr: KNode);
@@ -775,6 +799,16 @@ declare class ArkVideoComponent extends ArkComponent implements CommonMethod<Vid
     }) => void): VideoAttribute;
     onError(callback: () => void): VideoAttribute;
 }
+declare class ArkImageFrameInfoToArray {
+    arrSrc: Array<string> | undefined;
+    arrWidth: Array<number | string> | undefined;
+    arrHeight: Array<number | string> | undefined;
+    arrTop: Array<number | string> | undefined;
+    arrLeft: Array<number | string> | undefined;
+    arrDuration: Array<number> | undefined;
+    constructor();
+    isEqual(another: ArkImageFrameInfoToArray): boolean;
+}
 declare class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     constructor(nativePtr: KNode);
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
@@ -1157,9 +1191,13 @@ declare class ArkPluginComponent extends ArkComponent implements PluginComponent
 }
 declare class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
     constructor(nativePtr: KNode);
-    value(value: number): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions>;
-    color(value: ResourceColor | LinearGradient): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions>;
-    style(value: LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions>;
+    value(value: number): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions | RingStyleOptions |
+        EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions>;
+    color(value: ResourceColor | LinearGradient): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions |
+        RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions>;
+    style(value: LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions):
+        ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions | RingStyleOptions |
+            EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions>;
     backgroundColor(value: ResourceColor): this;
 }
 declare class ArkQRCodeComponent extends ArkComponent implements QRCodeAttribute {

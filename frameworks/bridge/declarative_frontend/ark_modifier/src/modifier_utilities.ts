@@ -14,7 +14,7 @@
  */
 /// <reference path='./import.ts' />
 
-function applyAndMergeModifier<T, M extends ArkComponent, C extends ArkComponent>(instance: T, modifier: M) {
+function applyAndMergeModifier<T, M extends ArkComponent, C extends ArkComponent>(instance: T, modifier: M): void {
   let myMap = modifier._modifiersWithKeys as ModifierMap;
   myMap.setOnChange(() => {
     modifier._changed = !modifier._changed;
@@ -45,7 +45,7 @@ function copyModifierWithKey(obj: ModifierWithKey<string | number | boolean | ob
 }
 
 function mergeMaps(stageMap: Map<Symbol, ModifierWithKey<number | string | boolean | object>>,
-  newMap: Map<Symbol, ModifierWithKey<number | string | boolean | object>>) {
+  newMap: Map<Symbol, ModifierWithKey<number | string | boolean | object>>): Map<Symbol, ModifierWithKey<number | string | boolean | object>> {
   newMap.forEach((value, key) => {
     stageMap.set(key, copyModifierWithKey(value));
   });
@@ -55,7 +55,7 @@ function mergeMaps(stageMap: Map<Symbol, ModifierWithKey<number | string | boole
 
 class ModifierMap {
   private map_: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
-  private changeCallback: (() => void) | undefined
+  private changeCallback: (() => void) | undefined;
 
   constructor() {
     this.map_ = new Map();
@@ -69,7 +69,8 @@ class ModifierMap {
     return this.map_.delete(key);
   }
 
-  public forEach(callbackfn: (value: ModifierWithKey<number | string | boolean | object>, key: Symbol, map: Map<Symbol, ModifierWithKey<number | string | boolean | object>>) => void, thisArg?: any): void {
+  public forEach(callbackfn: (value: ModifierWithKey<number | string | boolean | object>, key: Symbol, 
+    map: Map<Symbol, ModifierWithKey<number | string | boolean | object>>) => void, thisArg?: any): void {
     this.map_.forEach(callbackfn, thisArg);
   }
   public get(key: Symbol): ModifierWithKey<number | string | boolean | object> | undefined {

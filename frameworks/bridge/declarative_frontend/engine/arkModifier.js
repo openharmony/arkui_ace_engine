@@ -93,6 +93,15 @@ class CommonModifier extends ArkComponent {
     applyAndMergeModifier(instance, this);
   }
 }
+class BlankModifier extends ArkBlankComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
 class ButtonModifier extends ArkButtonComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -100,6 +109,101 @@ class ButtonModifier extends ArkButtonComponent {
   }
   applyNormalAttribute(instance) {
     applyAndMergeModifier(instance, this);
+  }
+}
+class ColumnModifier extends ArkColumnComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class ColumnSplitModifier extends ArkColumnSplitComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class DividerModifier extends ArkDividerComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class GridModifier extends ArkGridComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class GridColModifier extends ArkGridColComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class GridItemModifier extends ArkGridItemComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class GridRowModifier extends ArkGridRowComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+function copyImageAnimatorModifierWithKey(obj) {
+  var _a, _b;
+  let newObj = { ...obj };
+  if (obj.convertImageFrames !== undefined) {
+    newObj.convertImageFrames = (_a = obj) === null || _a === void 0 ? void 0 : _a.convertImageFrames;
+    newObj.isEqual = (_b = obj) === null || _b === void 0 ? void 0 : _b.isEqual;
+  }
+  newObj.applyStage = obj === null || obj === void 0 ? void 0 : obj.applyStage;
+  newObj.applyPeer = obj === null || obj === void 0 ? void 0 : obj.applyPeer;
+  newObj.checkObjectDiff = obj === null || obj === void 0 ? void 0 : obj.checkObjectDiff;
+  return newObj;
+}
+function mergeImageAnimatorMaps(stageMap, newMap) {
+  newMap.forEach((value, key) => {
+    stageMap.set(key, copyImageAnimatorModifierWithKey(value));
+  });
+  return stageMap;
+}
+class ImageAnimatorModifier extends ArkImageAnimatorComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    let myMap = this._modifiersWithKeys;
+    myMap.setOnChange(() => {
+      this._changed = !this._changed;
+    });
+    let component = instance;
+    mergeImageAnimatorMaps(component._modifiersWithKeys, this._modifiersWithKeys);
   }
 }
 class ImageModifier extends ArkImageComponent {
@@ -138,7 +242,106 @@ class ListItemGroupModifier extends ArkListItemGroupComponent {
     applyAndMergeModifier(instance, this);
   }
 }
+class NavDestinationModifier extends ArkNavDestinationComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class NavigationModifier extends ArkNavigationComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class NavigatorModifier extends ArkNavigatorComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class NavRouterModifier extends ArkNavRouterComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class RowModifier extends ArkRowComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class RowSplitModifier extends ArkRowSplitComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
 class ScrollModifier extends ArkScrollComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class SideBarContainerModifier extends ArkSideBarContainerComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class StackModifier extends ArkStackComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class StepperItemModifier extends ArkStepperItemComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class SwiperModifier extends ArkSwiperComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class TabsModifier extends ArkTabsComponent {
   constructor(nativePtr) {
     super(nativePtr);
     this._modifiersWithKeys = new ModifierMap();
@@ -156,5 +359,26 @@ class TextModifier extends ArkTextComponent {
     applyAndMergeModifier(instance, this);
   }
 }
+class VideoModifier extends ArkVideoComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
+class WaterFlowModifier extends ArkWaterFlowComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    applyAndMergeModifier(instance, this);
+  }
+}
 
-export default { CommonModifier, ButtonModifier, ImageModifier, ListModifier, ListItemModifier, ListItemGroupModifier, ScrollModifier, TextModifier }
+export default { CommonModifier, BlankModifier, ButtonModifier, ColumnModifier, ColumnSplitModifier, DividerModifier, GridModifier, GridColModifier,
+  GridItemModifier, GridRowModifier, ImageAnimatorModifier, ImageModifier, ListModifier, ListItemModifier, ListItemGroupModifier, NavDestinationModifier,
+  NavigationModifier, NavigatorModifier, NavRouterModifier, RowModifier, RowSplitModifier, ScrollModifier, SideBarContainerModifier, StackModifier,
+  StepperItemModifier, SwiperModifier, TabsModifier, TextModifier, VideoModifier, WaterFlowModifier };

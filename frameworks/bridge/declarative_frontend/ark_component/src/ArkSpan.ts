@@ -206,8 +206,8 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     this.nativePtr = nativePtr;
   }
 
-  cleanStageValue(){
-    if (!this._modifiersWithKeys){
+  cleanStageValue(): void {
+    if (!this._modifiersWithKeys) {
       return;
     }
     this._modifiersWithKeys.forEach((value, key) => {
