@@ -164,8 +164,7 @@ void UIObserver::UnRegisterScrollEventCallback(napi_value cb)
             scrollEventListeners_.end(),
             [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
                 return registeredListener->NapiEqual(cb);
-            }
-        ),
+            }),
         scrollEventListeners_.end()
     );
 }
@@ -185,11 +184,9 @@ void UIObserver::UnRegisterScrollEventCallback(std::string id, napi_value cb)
         std::remove_if(
             holder.begin(),
             holder.end(),
-            [cb](const std::shared_ptr<UIObserverListener>& registeredListener)
-            {
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
                 return registeredListener->NapiEqual(cb);
-            }
-        ),
+            }),
         holder.end()
     );
 }
