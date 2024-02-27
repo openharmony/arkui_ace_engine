@@ -1918,6 +1918,7 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll()
     CHECK_NULL_VOID(host);
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     selectOverlayProxy_.Reset();
+    showSelect_ = true;
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true, responseType);
     SetCaretPosition(textSize);
     MoveCaretToContentRect();
