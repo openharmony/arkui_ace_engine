@@ -47,7 +47,7 @@ inline constexpr int32_t INDEXER_SELECT_DURATION = 100;
 inline constexpr int32_t INDEXER_BUBBLE_WAIT_DURATION = 2000;
 inline constexpr int32_t INDEXER_BUBBLE_APPEAR_DURATION = 2600;
 inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE = 5;
-inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE_COLLAPSED = 3; // 2 items + 1 letter
+inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE_COLLAPSED = 4; // 3 items + 1 letter
 inline constexpr uint32_t INDEXER_POPUP_SHADOW_BG_COLOR = 0x4d182431;
 inline constexpr float INDEXER_POPUP_SHADOW_RADIUS = 50.0f;
 inline constexpr float INDEXER_POPUP_SHADOW_OFFSET_Y = 10.0f;
@@ -82,7 +82,7 @@ inline constexpr double BUBBLE_BOX_SIZE_CIRCLE = 46.0;
 inline constexpr double BUBBLE_FONT_SIZE_CIRCLE = 19.0;
 inline constexpr uint32_t INDEXER_ACTIVE_BG_COLOR = 0x1F0A59F7;
 inline constexpr float TEXTVIEW_MIN_SIZE = 42.0f;
-inline constexpr float INDEXER_PADDING_TOP = 4.0f;
+inline constexpr float INDEXER_PADDING_TOP = 2.0f;
 inline constexpr float INDEXER_PADDING_LEFT = 4.0f;
 inline constexpr double BUBBLE_RADIUS = 28.0;
 inline constexpr double BUBBLE_ITEM_SIZE = 48.0;
@@ -95,6 +95,8 @@ inline constexpr float BUBBLE_COLLAPSE_COLUMN_MAX_SIZE = 186.0f;
 inline constexpr float BUBBLE_LIST_MAX_SIZE = 282.0f;
 inline constexpr float BUBBLE_COLLAPSE_LIST_MAX_SIZE = 178.0f;
 inline constexpr double GRADIENT_COVER_HEIGHT = 16.0;
+inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE_COLLAPSED_API_TWELVE = 3; // 2 items + 1 letter
+inline constexpr float INDEXER_PADDING_TOP_API_TWELVE = 4.0f;
 
 enum class AlignStyle {
     LEFT = 0,

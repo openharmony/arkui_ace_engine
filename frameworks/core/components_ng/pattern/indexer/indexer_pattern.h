@@ -166,13 +166,14 @@ private:
     void UpdateBubbleBackgroundView();
     CalcSize CalcBubbleListSize(int32_t popupSize, int32_t maxItemsSize);
     GradientColor CreatePercentGradientColor(float percent, Color color);
-    double CalcBubbleListStackHeight(double bubbleSize, double bubbleHeight, double bubbleDivider,
-        int32_t popupSize, int32_t maxItemsSize);
-    void UpdateBubbleLetterStackView();
+    void UpdateBubbleLetterStackAndLetterTextView();
     void DrawPopupListGradient(PopupListGradientStatus gradientStatus);
     void UpdatePopupListGradientView(int32_t popupSize, int32_t maxItemsSize);
+    RefPtr<FrameNode> GetLetterNode();
     RefPtr<FrameNode> GetAutoCollapseLetterNode();
-    void UpdateBubbleDividerView();
+    void UpdateBubbleListSize(std::vector<std::string>& currentListData);
+    void UpdateBubbleListItemContext(
+        const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme, uint32_t pos);
     void UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& listItemNode);
     
     RefPtr<FrameNode> popupNode_;

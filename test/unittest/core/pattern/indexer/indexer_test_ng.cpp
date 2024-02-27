@@ -28,6 +28,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
@@ -556,7 +557,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern002, TestSize.Level1)
 
     pattern_->MoveIndexByStep(1);
     ASSERT_NE(pattern_->popupNode_, nullptr);
-    auto listNode = pattern_->popupNode_->GetLastChild();
+    auto listNode = pattern_->popupNode_->GetLastChild()->GetFirstChild();
     auto listItemNode = AceType::DynamicCast<FrameNode>(listNode->GetFirstChild());
     auto textNode = AceType::DynamicCast<FrameNode>(listItemNode->GetFirstChild());
     ASSERT_NE(textNode, nullptr);
@@ -588,7 +589,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
      * @tc.steps: step1. TouchType::DOWN
      * @tc.expected: trigger OnListItemClick.
      */
-    auto listNode = pattern_->popupNode_->GetLastChild();
+    auto listNode = pattern_->popupNode_->GetLastChild()->GetFirstChild();
     auto listItemNode = AceType::DynamicCast<FrameNode>(listNode->GetFirstChild());
     auto gesture = listItemNode->GetOrCreateGestureEventHub();
     auto touchCallback = gesture->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
@@ -632,7 +633,10 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble001, TestSize.Level1)
     ASSERT_NE(columnLayoutProperty, nullptr);
     ASSERT_NE(columnLayoutProperty->calcLayoutConstraint_, nullptr);
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 3));
+    auto columnCalcSize =
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+            ? CalcSize(CalcLength(bubbleSize), CalcLength(BUBBLE_ITEM_SIZE * 3 + BUBBLE_DIVIDER_SIZE * 4))
+            : CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 3));
     EXPECT_EQ(columnLayoutProperty->calcLayoutConstraint_->selfIdealSize, columnCalcSize);
 }
 
@@ -659,7 +663,10 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble002, TestSize.Level1)
     ASSERT_NE(columnLayoutProperty, nullptr);
     ASSERT_NE(columnLayoutProperty->calcLayoutConstraint_, nullptr);
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 3));
+    auto columnCalcSize =
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+            ? CalcSize(CalcLength(bubbleSize), CalcLength(BUBBLE_ITEM_SIZE * 3 + BUBBLE_DIVIDER_SIZE * 4))
+            : CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 3));
     EXPECT_EQ(columnLayoutProperty->calcLayoutConstraint_->selfIdealSize, columnCalcSize);
 }
 
@@ -686,7 +693,10 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble003, TestSize.Level1)
     ASSERT_NE(columnLayoutProperty, nullptr);
     ASSERT_NE(columnLayoutProperty->calcLayoutConstraint_, nullptr);
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 6));
+    auto columnCalcSize =
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+            ? CalcSize(CalcLength(bubbleSize), CalcLength(BUBBLE_ITEM_SIZE * 6 + BUBBLE_DIVIDER_SIZE * 7))
+            : CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 6));
     EXPECT_EQ(columnLayoutProperty->calcLayoutConstraint_->selfIdealSize, columnCalcSize);
 }
 
@@ -937,6 +947,54 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest003, TestSize.Level1)
     EXPECT_FALSE(paintProperty_->GetPopupItemBackground().has_value());
     EXPECT_FALSE(layoutProperty_->GetPopupHorizontalSpace().has_value());
     EXPECT_FALSE(layoutProperty_->GetFontSize().has_value());
+}
+
+/**
+ * @tc.name: IndexerModelNGTest004
+ * @tc.desc: Test newly added properties of indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerModelNGTest004, TestSize.Level1)
+{
+    BlurStyleOption indexerBlurStyle;
+    indexerBlurStyle.blurStyle = BlurStyle::COMPONENT_REGULAR;
+    Create([&indexerBlurStyle](IndexerModelNG model) {
+        model.SetPopupItemBorderRadius(Dimension(24));
+        model.SetPopupBorderRadius(Dimension(28));
+        model.SetItemBorderRadius(Dimension(12));
+        model.SetIndexerBorderRadius(Dimension(16));
+        model.SetPopupBackgroundBlurStyle(indexerBlurStyle);
+        model.SetPopupTitleBackground(Color(0x00000000));
+    });
+
+    /**
+     * @tc.steps: step1. Get properties.
+     * @tc.expected: Properties are correct.
+     */
+    EXPECT_EQ(layoutProperty_->GetPopupItemBorderRadiusValue(), Dimension(24));
+    EXPECT_EQ(layoutProperty_->GetPopupBorderRadiusValue(), Dimension(28));
+    EXPECT_EQ(layoutProperty_->GetItemBorderRadiusValue(), Dimension(12));
+    EXPECT_EQ(layoutProperty_->GetIndexerBorderRadiusValue(), Dimension(16));
+    EXPECT_EQ(paintProperty_->GetPopupBackgroundBlurStyleValue(), indexerBlurStyle);
+    EXPECT_EQ(paintProperty_->GetPopupTitleBackgroundValue(), Color(0x00000000));
+}
+
+/**
+ * @tc.name: IndexerModelNGTest005
+ * @tc.desc: Test newly added properties of indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerModelNGTest005, TestSize.Level1)
+{
+    Create([](IndexerModelNG model) {
+        model.SetPopupTitleBackground(std::nullopt);
+    });
+
+    /**
+     * @tc.steps: step1. Get properties.
+     * @tc.expected: Properties are correct.
+     */
+    EXPECT_FALSE(paintProperty_->GetPopupTitleBackground().has_value());
 }
 
 /**

@@ -20,6 +20,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/text_style.h"
@@ -211,7 +212,10 @@ private:
             indexerPattern->GetAttr<Color>("selected_background_color", Color(SELECT_BACKGROUD_COLOR)).ChangeOpacity(
                 indexerPattern->GetAttr<double>("selected_background_color_opacity", SELECT_BACKGROUND_OPACITY));
         theme->popupBackgroundColor_ =
-            indexerPattern->GetAttr<Color>("popup_background_color", Color(POPUP_BACKGROUND_COLOR));
+            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+                ? indexerPattern->GetAttr<Color>(
+                      "popup_background_color_api_twelve", Color(POPUP_BACKGROUND_COLOR_API_TWELVE))
+                : indexerPattern->GetAttr<Color>("popup_background_color", Color(POPUP_BACKGROUND_COLOR));
         theme->popupSeparateColor_ =
             indexerPattern->GetAttr<Color>("popup_separator_color", Color(POPUP_SEPARATOR_COLOR));
         theme->popupSelectedTextColor_ =
@@ -226,7 +230,10 @@ private:
             indexerPattern->GetAttr<Dimension>("hover_bg_area_size", Dimension(HOVER_BG_AREA_SIZE, DimensionUnit::VP));
         theme->hoverBgAreaColor_ = indexerPattern->GetAttr<Color>("hover_bg_area_color", Color(HOVER_BG_AREA_COLOR));
         theme->hoverTextSize_ =
-            indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP));
+            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+                ? indexerPattern->GetAttr<Dimension>(
+                      "hover_text_size_api_twelve", Dimension(HOVER_TEXT_SIZE_API_TWELVE, DimensionUnit::FP))
+                : indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP));
         theme->hoverTextAlpha_ =
             indexerPattern->GetAttr<Dimension>("hover_text_alpha", Dimension(HOVER_TEXT_ALPHA, DimensionUnit::PX));
         theme->slipHoverBackgroundColor_ =
@@ -236,20 +243,30 @@ private:
         theme->focusBgOutlineSize_ = indexerPattern->GetAttr<Dimension>(
             "focus_bg_outline_size", Dimension(FOCUS_BG_OUTLINE_SIZE, DimensionUnit::VP));
         theme->seletctTextStyle_.SetFontSize(
-            indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
+            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+                ? indexerPattern->GetAttr<Dimension>(
+                      "hover_text_size_api_twelve", Dimension(HOVER_TEXT_SIZE_API_TWELVE, DimensionUnit::FP))
+                : indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
         theme->seletctTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR)));
-        theme->seletctTextStyle_.SetFontWeight(FontWeight::MEDIUM);
+        theme->seletctTextStyle_.SetFontWeight(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+                                                   ? FontWeight::MEDIUM
+                                                   : FontWeight::REGULAR);
         theme->seletctTextStyle_.SetFontStyle(FontStyle::NORMAL);
         std::vector<std::string> fontFamilies;
         std::string defaultFamily = "HarmonyOS Sans";
         fontFamilies.emplace_back(defaultFamily);
         theme->seletctTextStyle_.SetFontFamilies(fontFamilies);
         theme->defaultTextStyle_.SetFontSize(
-            indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
+            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+                ? indexerPattern->GetAttr<Dimension>(
+                      "hover_text_size_api_twelve", Dimension(HOVER_TEXT_SIZE_API_TWELVE, DimensionUnit::FP))
+                : indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
         theme->defaultTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR)));
-        theme->defaultTextStyle_.SetFontWeight(FontWeight::MEDIUM);
+        theme->defaultTextStyle_.SetFontWeight(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+                                                   ? FontWeight::MEDIUM
+                                                   : FontWeight::REGULAR);
         theme->defaultTextStyle_.SetFontStyle(FontStyle::NORMAL);
         theme->defaultTextStyle_.SetFontFamilies(fontFamilies);
         theme->popupTextStyle_.SetFontSize(
@@ -277,16 +294,16 @@ private:
     static constexpr uint32_t POPUP_TEXT_COLOR = 0xff007dff;
     static constexpr float POPUP_TEXT_SIZE = 24.0;
     static constexpr uint32_t SELECT_BACKGROUD_COLOR = 0x33007dff;
-    static constexpr uint32_t POPUP_BACKGROUND_COLOR = 0x00ffffff;
+    static constexpr uint32_t POPUP_BACKGROUND_COLOR = 0xffffffff;
     static constexpr uint32_t POPUP_SEPARATOR_COLOR = 0x33182431;
     static constexpr float POPUP_AREA_SIZE = 56.0f;
     static constexpr float HOVER_RADIUS_SIZE = 4.0f;
     static constexpr float HOVER_BG_AREA_SIZE = 16.0f;
     static constexpr uint32_t HOVER_BG_AREA_COLOR = 0x0c182431;
-    static constexpr float HOVER_TEXT_SIZE = 10.0f;
+    static constexpr float HOVER_TEXT_SIZE = 12.0f;
     static constexpr uint32_t HOVER_TEXT_COLOR = 0xff182431;
     static constexpr float HOVER_TEXT_ALPHA = 0.6f;
-    static constexpr uint32_t SLIP_HOVER_BACKGROUD_COLOR = 0x0c182431;
+    static constexpr uint32_t SLIP_HOVER_BACKGROUD_COLOR = 0x000000;
     static constexpr uint32_t FOCUS_BG_OUTLINE_COLOR = 0xff007dff;
     static constexpr float FOCUS_BG_OUTLINE_SIZE = 2.0f;
     static constexpr float TEXT_COLOR_OPACITY = 0.6f;
@@ -296,6 +313,8 @@ private:
     static constexpr uint32_t POPUP_CLICKED_BG_AREA_COLOR = 0x0c182431;
     static constexpr uint32_t POPUP_TITLE_BG_AREA_COLOR = 0x00ffffff;
     static constexpr uint32_t POPUP_UNCLICKED_BG_AREA_COLOR = 0x00000000;
+    static constexpr uint32_t POPUP_BACKGROUND_COLOR_API_TWELVE = 0x00ffffff;
+    static constexpr float HOVER_TEXT_SIZE_API_TWELVE = 10.0f;
 };
 } // namespace OHOS::Ace
 #endif
