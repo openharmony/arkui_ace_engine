@@ -50,6 +50,7 @@ public:
     void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
+    void OnSurfaceChanged(int32_t width, int32_t height) override;
     void SetColorMode(ColorMode colorMode) override;
 
     void SetLoadCardCallBack(const WeakPtr<PipelineBase>& outSidePipelineContext)
