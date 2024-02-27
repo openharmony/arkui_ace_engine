@@ -939,7 +939,11 @@ void MenuPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(menuPattern);
 
     auto renderContext = host->GetRenderContext();
-    renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()) {
+        renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
+    } else {
+        renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
+    }
 
     auto optionNode = menuPattern->GetOptions();
     for (const auto& child : optionNode) {
