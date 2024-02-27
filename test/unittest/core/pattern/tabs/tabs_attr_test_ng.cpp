@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -180,6 +180,27 @@ HWTEST_F(TabsAttrTestNg, Divider002, TestSize.Level1)
     divider.isNull = false;
     CreateWithItem([divider](TabsModelNG model) { model.SetDivider(divider); });
     EXPECT_TRUE(IsEqual(dividerNode_->GetGeometryNode()->GetFrameSize(), SizeF(710.f, 4.f)));
+}
+
+/**
+ * @tc.name: Divider003
+ * @tc.desc: Test Tabs attr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, Divider003, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set Divider and isNull is true
+     * @tc.expected: Has divider and create a new divider replace
+     */
+    TabsItemDivider divider;
+    divider.strokeWidth = Dimension(4);
+    divider.startMargin = Dimension(5);
+    divider.endMargin = Dimension(5);
+    divider.color = Color::BLUE;
+    divider.isNull = true;
+    CreateWithItem([divider](TabsModelNG model) { model.SetDivider(divider); });
+    EXPECT_TRUE(IsEqual(dividerNode_->GetGeometryNode()->GetFrameSize(), SizeF(720.f, 1.f)));
 }
 
 /**
