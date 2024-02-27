@@ -1108,7 +1108,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     ViewAbstract::BindPopup(param, targetNode, customNode);
     ViewAbstract::BindPopup(param, targetNode, customNode);
     auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
-    auto popupNode = popupInfo.popupNode;
+    auto popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupInfo.popupId, AceType::MakeRefPtr<BubblePattern>(nodeId, targetNode->GetTag()));
     ASSERT_NE(popupNode, nullptr);
     popupNode->GetPattern<BubblePattern>()->transitionStatus_ = TransitionStatus::ENTERING;
     ViewAbstract::BindPopup(param, targetNode, customNode);
@@ -1116,7 +1117,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     ViewAbstract::BindPopup(param, targetNode, customNode);
     param->SetShowInSubWindow(true);
     ViewAbstract::BindPopup(param, targetNode, customNode);
-    EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
+    EXPECT_FALSE(overlayManager->GetPopupInfo(targetNode->GetId()).isCurrentOnShow);
 
     /**
      * @tc.steps: step4. Call BindPopup with param use custom.
@@ -1129,7 +1130,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     ViewAbstract::BindPopup(param2, targetNode2, customNode);
     param2->SetIsShow(false);
     ViewAbstract::BindPopup(param2, targetNode2, customNode);
-    EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
+    EXPECT_FALSE(overlayManager->GetPopupInfo(targetNode->GetId()).isCurrentOnShow);
 }
 
 /**
