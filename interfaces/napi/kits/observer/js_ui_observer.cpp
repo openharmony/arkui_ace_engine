@@ -103,6 +103,16 @@ bool ParseNavigationId(napi_env env, napi_value obj, std::string& navigationStr)
     }
     return ParseStringFromNapi(env, navigationId, navigationStr);
 }
+
+bool ParseSpecifiedId(napi_env env, napi_value obj, std::string specifiedId,std::string& result)
+{
+    napi_value resultId = nullptr;
+    napi_get_named_property(env, obj, specifiedId, &result);
+    if (!MatchValueType(env, resultId, napi_string)) {
+        return false;
+    }
+    return ParseStringFromNapi(env, resultId, result);
+}
 } // namespace
 
 ObserverProcess::ObserverProcess()
@@ -209,6 +219,14 @@ napi_value ObserverProcess::ProcessScrollEventRegister(napi_env env, napi_callba
         UIObserver::RegisterScrollEventCallback(listener);
     }
 
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+        std::string id;
+        if (ParseSpecifiedId(env, argv[1], "id", id)) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
+            UIObserver::RegisterNavigationCallback(id, listener);
+        }
+    }
+
     napi_value result = nullptr;
     return result;
 }
@@ -219,6 +237,24 @@ napi_value ObserverProcess::ProcessScrollEventUnRegister(napi_env env, napi_call
 
     if (argc == 1) {
         UIObserver::UnRegisterScrollEventCallback(nullptr);
+    }
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+        UIObserver::UnRegisterScrollEventCallback(argv[1]);
+    }
+
+    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
+        std::string id;
+        if (ParseSpecifiedId(env, argv[1], "id", id)) {
+            UIObserver::UnRegisterScrollEventCallback(id, nullptr);
+        }
+    }
+
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+        std::string id;
+        if (ParseSpecifiedId(env, argv[1], "id", id)) {
+            UIObserver::UnRegisterScrollEventCallback(id, argv[2]);
+        }
     }
 
     napi_value result = nullptr;

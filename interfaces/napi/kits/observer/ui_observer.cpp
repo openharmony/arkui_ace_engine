@@ -25,6 +25,8 @@ std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedCNavigationListeners_;
 
 std::list<std::shared_ptr<UIObserverListener>> UIObserver::scrollEventListeners_;
+std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedScrollEventListeners_;
 
 std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::abilityContextRouterPageListeners_;
@@ -132,10 +134,49 @@ void UIObserver::RegisterScrollEventCallback(const std::shared_ptr<UIObserverLis
     scrollEventListeners_.emplace_back(listener);
 }
 
+// UIObserver.on(type: "scrollEvent", options, callback)
+// register a listener on a specified scrollEvent
+void UIObserver::RegisterScrollEventCallback(
+    std::string id, const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (specifiedScrollEventListeners_.find(id) == specifiedScrollEventListeners_.end()) {
+        specifiedScrollEventListeners_[id] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
+        return;
+    }
+    auto& holder = specifiedScrollEventListeners_[id];
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
 // UIObserver.off(type: "scrollEvent", callback)
 void UIObserver::UnRegisterScrollEventCallback()
 {
     scrollEventListeners_.clear();
+}
+
+// UIObserver.off(type: "scrollEvent", options, callback)
+void UIObserver::UnRegisterScrollEventCallback(std::string id, napi_value cb)
+{
+    if (specifiedScrollEventListeners_.find(id) == specifiedScrollEventListeners_.end()) {
+        return;
+    }
+    auto& holder = specifiedScrollEventListeners_[id];
+    if (cb == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(cb);
+            }
+        ),
+        holder.end()
+    );
 }
 
 void UIObserver::HandleScrollEventStateChange(const std::string& id, NG::ScrollEventType eventType,
@@ -143,6 +184,17 @@ void UIObserver::HandleScrollEventStateChange(const std::string& id, NG::ScrollE
 {
     for (const auto& listener : scrollEventListeners_) {
         listener->OnScrollEventStateChange(id, eventType, offset);
+    }
+
+    if (specifiedScrollEventListeners_.find(id) ==
+        specifiedScrollEventListeners_.end()) {
+        return;
+    }
+
+    auto& holder = specifiedScrollEventListeners_[id];
+
+    for (const auto& listener : holder) {
+        listener->OnNavigationStateChange(id, eventType, offset);
     }
 }
 

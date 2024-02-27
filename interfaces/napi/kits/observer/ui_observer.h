@@ -40,7 +40,10 @@ public:
         const std::string& navigationId, const std::string& navDestinationName, NG::NavDestinationState state);
 
     static void RegisterScrollEventCallback(const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterScrollEventCallback(
+        std::string id, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterScrollEventCallback();
+    static void UnRegisterScrollEventCallback(std::string id, napi_value cb);
     static void HandleScrollEventStateChange(const std::string& id, NG::ScrollEventType eventType, float offset);
 
     static void RegisterRouterPageCallback(
@@ -61,6 +64,8 @@ private:
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedCNavigationListeners_;
     static std::list<std::shared_ptr<UIObserverListener>> scrollEventListeners_;
+    static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedScrollEventListeners_;
     static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
         abilityContextRouterPageListeners_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>

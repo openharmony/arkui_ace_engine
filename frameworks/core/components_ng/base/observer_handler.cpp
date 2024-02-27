@@ -59,10 +59,9 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
     auto pattern = AceType::DynamicCast<ScrollablePattern>(ref);
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
-    auto parent = host->GetParent();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-    std::string id = frameNode->GetInspectorId().value_or("");
+    std::string id = host->GetInspectorId().value_or("");
     float offset = pattern->GetTotleOffset();
+    CHECK_NULL_VOID(scrollEventHandleFunc_);
     scrollEventHandleFunc_(id, eventType, offset);
 }
 
