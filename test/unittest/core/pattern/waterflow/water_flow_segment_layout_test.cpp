@@ -24,7 +24,29 @@
 #undef protected
 
 namespace OHOS::Ace::NG {
-class WaterFlowSegmentTest : public WaterFlowTestNg {};
+class WaterFlowSegmentTest : public WaterFlowTestNg {
+public:
+    void SetUpConfig2();
+};
+
+void WaterFlowSegmentTest::SetUpConfig2()
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+            model.SetColumnsGap(Dimension(5.0f));
+            model.SetRowsGap(Dimension(1.0f));
+            auto footer = GetDefaultHeaderBuilder();
+            model.SetFooter(std::move(footer));
+            CreateItem(100);
+            ViewStackProcessor::GetInstance()->Pop();
+        },
+        false);
+
+    LayoutConstraintF constraint { .maxSize = { 480.0f, 800.0f }, .percentReference = { 480.0f, 800.0f } };
+    layoutProperty_->layoutConstraint_ = constraint;
+    layoutProperty_->contentConstraint_ = constraint;
+}
 
 /**
  * @tc.name: Fill001
@@ -33,28 +55,31 @@ class WaterFlowSegmentTest : public WaterFlowTestNg {};
  */
 HWTEST_F(WaterFlowSegmentTest, Fill001, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItemWithHeight(50.0f);
-        CreateItemWithHeight(30.0f);
-        CreateItemWithHeight(40.0f);
-        CreateItemWithHeight(60.0f);
-        CreateItemWithHeight(20.0f);
-        CreateItemWithHeight(50.0f);
-        CreateItemWithHeight(30.0f);
-        CreateItemWithHeight(40.0f);
-        CreateItemWithHeight(2.0f);
-        CreateItemWithHeight(20.0f);
-    }, false);
+    Create(
+        [](WaterFlowModelNG model) {
+            model.SetColumnsTemplate("1fr 1fr");
+            CreateItemWithHeight(50.0f);
+            CreateItemWithHeight(30.0f);
+            CreateItemWithHeight(40.0f);
+            CreateItemWithHeight(60.0f);
+            CreateItemWithHeight(20.0f);
+            CreateItemWithHeight(50.0f);
+            CreateItemWithHeight(30.0f);
+            CreateItemWithHeight(40.0f);
+            CreateItemWithHeight(2.0f);
+            CreateItemWithHeight(20.0f);
+        },
+        false);
 
     auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
     algo->wrapper_ = AceType::RawPtr(frameNode_);
     algo->mainSize_ = 2000.0f;
     algo->itemsCrossSize_ = { { 50.0f, 50.0f, 50.0f, 50.0f }, {}, { 70.0f, 70.0f, 70.0f } };
     algo->mainGaps_ = { 5.0f, 0.0f, 1.0f };
-    algo->margins_ = { {}, {}, PaddingPropertyF { .top = 5.0f } };
 
     auto& info = algo->info_;
+    info.margins_ = { {}, {}, PaddingPropertyF { .top = 5.0f } };
+    info.childrenCount_ = 10;
 
     info.items_.resize(3);
     for (int i = 0; i < 3; ++i) {
@@ -65,7 +90,7 @@ HWTEST_F(WaterFlowSegmentTest, Fill001, TestSize.Level1)
 
     info.segmentTails_ = SEGMENT_TAILS_1;
 
-    algo->Fill();
+    algo->Fill(0);
     EXPECT_EQ(info.items_, ITEM_MAP_1);
 }
 
@@ -76,15 +101,17 @@ HWTEST_F(WaterFlowSegmentTest, Fill001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset001, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(5.0f));
-        model.SetRowsGap(Dimension(1.0f));
-        auto footer = GetDefaultHeaderBuilder();
-        model.SetFooter(std::move(footer));
-        CreateItem(10);
-        ViewStackProcessor::GetInstance()->Pop();
-    }, false);
+    Create(
+        [](WaterFlowModelNG model) {
+            model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+            model.SetColumnsGap(Dimension(5.0f));
+            model.SetRowsGap(Dimension(1.0f));
+            auto footer = GetDefaultHeaderBuilder();
+            model.SetFooter(std::move(footer));
+            CreateItem(10);
+            ViewStackProcessor::GetInstance()->Pop();
+        },
+        false);
 
     LayoutConstraintF constraint { .maxSize = { 480.0f, 800.0f }, .percentReference = { 480.0f, 800.0f } };
     layoutProperty_->layoutConstraint_ = constraint;
@@ -129,15 +156,17 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, Layout001, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(5.0f));
-        model.SetRowsGap(Dimension(1.0f));
-        auto footer = GetDefaultHeaderBuilder();
-        model.SetFooter(std::move(footer));
-        CreateItem(10);
-        ViewStackProcessor::GetInstance()->Pop();
-    }, false);
+    Create(
+        [](WaterFlowModelNG model) {
+            model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+            model.SetColumnsGap(Dimension(5.0f));
+            model.SetRowsGap(Dimension(1.0f));
+            auto footer = GetDefaultHeaderBuilder();
+            model.SetFooter(std::move(footer));
+            CreateItem(10);
+            ViewStackProcessor::GetInstance()->Pop();
+        },
+        false);
 
     LayoutConstraintF constraint { .maxSize = { 480.0f, 800.0f }, .percentReference = { 480.0f, 800.0f } };
     layoutProperty_->layoutConstraint_ = constraint;
@@ -149,8 +178,8 @@ HWTEST_F(WaterFlowSegmentTest, Layout001, TestSize.Level1)
     info.footerIndex_ = 0;
 
     algo->Measure(AceType::RawPtr(frameNode_));
-    const std::vector<std::vector<float>> crossPos = { { 0.0f, 121.25f, 242.5f, 363.75f }, { 0.0f } };
-    EXPECT_EQ(algo->itemsCrossPosition_, crossPos);
+    const std::vector<std::vector<float>> crossSize = { { 116.25f, 116.25f, 116.25f, 116.25f }, { 480.0f } };
+    EXPECT_EQ(algo->itemsCrossSize_, crossSize);
     algo->Layout(AceType::RawPtr(frameNode_));
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0.0f, 0.0f));
     EXPECT_EQ(GetChildOffset(frameNode_, 1), OffsetF(121.25f, 0.0f));
@@ -190,19 +219,7 @@ HWTEST_F(WaterFlowSegmentTest, Layout001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset002, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
-        model.SetColumnsGap(Dimension(5.0f));
-        model.SetRowsGap(Dimension(1.0f));
-        auto footer = GetDefaultHeaderBuilder();
-        model.SetFooter(std::move(footer));
-        CreateItem(100);
-        ViewStackProcessor::GetInstance()->Pop();
-    }, false);
-
-    LayoutConstraintF constraint { .maxSize = { 480.0f, 800.0f }, .percentReference = { 480.0f, 800.0f } };
-    layoutProperty_->layoutConstraint_ = constraint;
-    layoutProperty_->contentConstraint_ = constraint;
+    SetUpConfig2();
 
     auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
     auto& info = algo->info_;
@@ -246,5 +263,305 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset002, TestSize.Level1)
     EXPECT_EQ(info.startIndex_, 5);
     EXPECT_EQ(info.endIndex_, 37);
     EXPECT_EQ(info.segmentStartPos_, std::vector<float> { 0.0f });
+
+    info.prevOffset_ = -300.0f;
+    info.currentOffset_ = -700.0f;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 19);
+    EXPECT_EQ(info.endIndex_, 50);
+    EXPECT_EQ(info.segmentStartPos_, std::vector<float> { 0.0f });
+}
+
+/**
+ * @tc.name: MeasureOnJump001
+ * @tc.desc: Test SegmentedLayout::MeasureOnJump END.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, MeasureOnJump001, TestSize.Level1)
+{
+    SetUpConfig2();
+
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto& info = algo->info_;
+
+    info.footerIndex_ = 0;
+
+    info.align_ = ScrollAlign::END;
+    info.jumpIndex_ = 5;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 27);
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+
+    info.jumpIndex_ = 99;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 75);
+    EXPECT_EQ(info.endIndex_, 99);
+    EXPECT_EQ(info.currentOffset_, -2320.0f);
+
+    info.jumpIndex_ = 100;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 75);
+    EXPECT_EQ(info.endIndex_, 100);
+    EXPECT_EQ(info.currentOffset_, -2370.0f);
+
+    info.jumpIndex_ = 105;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 75);
+    EXPECT_EQ(info.endIndex_, 100);
+    EXPECT_EQ(info.currentOffset_, -2370.0f);
+}
+
+/**
+ * @tc.name: MeasureOnJump002
+ * @tc.desc: Test SegmentedLayout::MeasureOnJump with AUTO scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, MeasureOnJump002, TestSize.Level1)
+{
+    SetUpConfig2();
+
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto& info = algo->info_;
+
+    info.footerIndex_ = 0;
+
+    info.align_ = ScrollAlign::AUTO;
+    info.jumpIndex_ = 10;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 27);
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.align_, ScrollAlign::NONE);
+
+    info.align_ = ScrollAlign::AUTO;
+    info.jumpIndex_ = 53;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 29);
+    EXPECT_EQ(info.endIndex_, 58);
+    EXPECT_EQ(info.currentOffset_, -911.0f);
+    EXPECT_EQ(info.align_, ScrollAlign::END);
+
+    info.align_ = ScrollAlign::AUTO;
+    info.jumpIndex_ = 5;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 1);
+    EXPECT_EQ(info.endIndex_, 30);
+    EXPECT_EQ(info.currentOffset_, -101.0f);
+    EXPECT_EQ(info.align_, ScrollAlign::START);
+
+    info.align_ = ScrollAlign::AUTO;
+    info.jumpIndex_ = 5;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.align_, ScrollAlign::NONE);
+
+    info.align_ = ScrollAlign::AUTO;
+    info.jumpIndex_ = 7;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 1);
+    EXPECT_EQ(info.endIndex_, 30);
+    EXPECT_EQ(info.currentOffset_, -101.0f);
+    EXPECT_EQ(info.align_, ScrollAlign::NONE);
+}
+
+/**
+ * @tc.name: MeasureOnJump003
+ * @tc.desc: Test SegmentedLayout::MeasureOnJump START.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, MeasureOnJump003, TestSize.Level1)
+{
+    SetUpConfig2();
+
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto& info = algo->info_;
+
+    info.footerIndex_ = 0;
+
+    info.align_ = ScrollAlign::START;
+    info.jumpIndex_ = 10;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 5);
+    EXPECT_EQ(info.endIndex_, 34);
+    EXPECT_EQ(info.currentOffset_, -202.0f);
+
+    info.jumpIndex_ = 99;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 75);
+    EXPECT_EQ(info.endIndex_, 100);
+    EXPECT_EQ(info.currentOffset_, -2370.0f);
+
+    info.jumpIndex_ = 42;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 37);
+    EXPECT_EQ(info.endIndex_, 67);
+    EXPECT_EQ(info.currentOffset_, -1207.0f);
+}
+
+/**
+ * @tc.name: MeasureOnJump004
+ * @tc.desc: Test SegmentedLayout::MeasureOnJump CENTER.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, MeasureOnJump004, TestSize.Level1)
+{
+    SetUpConfig2();
+
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto& info = algo->info_;
+
+    info.footerIndex_ = 0;
+
+    info.align_ = ScrollAlign::CENTER;
+    info.jumpIndex_ = 10;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 27);
+    EXPECT_EQ(info.currentOffset_, -0.0f);
+
+    info.jumpIndex_ = 99;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 75);
+    EXPECT_EQ(info.endIndex_, 100);
+    EXPECT_EQ(info.currentOffset_, -2370.0f);
+    EXPECT_EQ(info.segmentStartPos_.size(), 2);
+
+    info.jumpIndex_ = 42;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 25);
+    EXPECT_EQ(info.endIndex_, 57);
+    EXPECT_EQ(info.currentOffset_, -857.0f);
+
+    info.jumpIndex_ = 0;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 27);
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: Reset001
+ * @tc.desc: Test SegmentedLayout::CheckReset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Reset001, TestSize.Level1)
+{
+    SetUpConfig2();
+
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto& info = algo->info_;
+
+    info.footerIndex_ = 0;
+
+    info.align_ = ScrollAlign::CENTER;
+
+    info.jumpIndex_ = 99;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 75);
+    EXPECT_EQ(info.endIndex_, 100);
+    EXPECT_EQ(info.currentOffset_, -2370.0f);
+    EXPECT_EQ(info.segmentStartPos_.size(), 2);
+
+    // change crossCount, should jump back to index 75
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 75);
+    EXPECT_EQ(info.endIndex_, 94);
+    EXPECT_EQ(info.currentOffset_, -3875.0f);
+    EXPECT_EQ(algo->itemsCrossSize_[0].size(), 3);
+    EXPECT_EQ(info.align_, ScrollAlign::START);
+}
+
+/**
+ * @tc.name: Reset002
+ * @tc.desc: Test SegmentedLayout::CheckReset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Reset002, TestSize.Level1)
+{
+    SetUpConfig2();
+
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto& info = algo->info_;
+
+    info.footerIndex_ = 0;
+
+    info.align_ = ScrollAlign::CENTER;
+    info.jumpIndex_ = 99;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 75);
+    EXPECT_EQ(info.endIndex_, 100);
+    EXPECT_EQ(info.currentOffset_, -2370.0f);
+    EXPECT_EQ(info.segmentStartPos_.size(), 2);
+
+    info.jumpIndex_ = 42;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 25);
+    EXPECT_EQ(info.endIndex_, 57);
+    EXPECT_EQ(info.currentOffset_, -857.0f);
+
+    // child requires fresh layout, should jump back to index 75
+    layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_BY_CHILD_REQUEST;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 25);
+    EXPECT_EQ(info.endIndex_, 57);
+    EXPECT_EQ(info.currentOffset_, -857.0f);
+    EXPECT_EQ(info.align_, ScrollAlign::START);
+    // items should be cleared before jumping
+    EXPECT_EQ(info.items_[1][0].size(), 0);
+    EXPECT_EQ(info.segmentStartPos_.size(), 1);
+    EXPECT_EQ(info.itemInfos_.size(), 58);
+}
+
+/**
+ * @tc.name: Reset003
+ * @tc.desc: Test SegmentedLayout::CheckReset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Reset003, TestSize.Level1)
+{
+    SetUpConfig2();
+
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto& info = algo->info_;
+
+    info.footerIndex_ = 0;
+
+    info.align_ = ScrollAlign::CENTER;
+    info.jumpIndex_ = 99;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 75);
+    EXPECT_EQ(info.endIndex_, 100);
+    EXPECT_EQ(info.currentOffset_, -2370.0f);
+    EXPECT_EQ(info.segmentStartPos_.size(), 2);
+    EXPECT_EQ(info.itemInfos_.size(), 101);
+
+    info.jumpIndex_ = 42;
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 25);
+    EXPECT_EQ(info.endIndex_, 57);
+    EXPECT_EQ(info.currentOffset_, -857.0f);
+
+    // index 70 doesn't affect the current layout
+    frameNode_->ChildrenUpdatedFrom(70);
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 25);
+    EXPECT_EQ(info.endIndex_, 57);
+    EXPECT_EQ(info.currentOffset_, -857.0f);
+    EXPECT_EQ(info.align_, ScrollAlign::CENTER);
+    // items starting from 70 are cleared
+    EXPECT_EQ(info.items_[1][0].size(), 0);
+    EXPECT_EQ(info.segmentStartPos_.size(), 1);
+    EXPECT_EQ(info.itemInfos_.size(), 70);
+
+    // index 20 would reset all and trigger jump
+    frameNode_->ChildrenUpdatedFrom(20);
+    algo->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.startIndex_, 25);
+    EXPECT_EQ(info.endIndex_, 57);
+    EXPECT_EQ(info.currentOffset_, -857.0f);
+    EXPECT_EQ(info.align_, ScrollAlign::START);
+    // items should be cleared before jumping
+    EXPECT_EQ(info.itemInfos_.size(), 58);
 }
 } // namespace OHOS::Ace::NG

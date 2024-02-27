@@ -19,7 +19,6 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
-#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 class WaterFlowSegmentedLayout : public WaterFlowLayoutBase {
@@ -51,6 +50,8 @@ private:
      */
     void Init(const SizeF& frameSize);
 
+    void SegmentInit(const SizeF& frameSize);
+
     /**
      * @brief init regular WaterFlow with a single segment.
      *
@@ -58,6 +59,26 @@ private:
      */
     void RegularInit(const SizeF& frameSize);
     void InitFooter(float crossSize);
+
+    void CheckReset();
+
+    /**
+     * @brief init member variables for segmented WaterFlow with section info.
+     *
+     * @param options vector of SectionInfo
+     * @param frameSize of WaterFlow.
+     */
+    void SegmentInit(const std::vector<WaterFlowSections::Section>& options, const SizeF& frameSize);
+
+    /**
+     * @brief init regular WaterFlow with a single segment.
+     *
+     * @param frameSize
+     */
+    void RegularInit(const SizeF& frameSize);
+    void InitFooter(float crossSize);
+
+    void CheckReset(const RefPtr<WaterFlowSections>& secObj);
 
     /**
      * @brief Measure self before measuring children.
@@ -76,21 +97,34 @@ private:
     void MeasureOnOffset();
 
     /**
-     * @brief Fills the viewport with new items when scrolling downwards.
+     * @brief Fills the viewport with new items.
      *
      * WaterFlow's item map only supports orderly forward layout,
      * because the position of a new item always depends on previous items.
+     *
+     * @param startIdx index of the first new FlowItem.
      */
-    void Fill();
+    void Fill(int32_t startIdx);
 
     /**
-     * @brief Helper to measure FlowItems.
-     * Assumes the Item map is already filled and only call Measure on children in range [start, end).
+     * @brief Obtain sizes of new FlowItems up to [targetIdx] and record them in ItemMap.
      *
-     * @param startIdx FlowItem index.
-     * @param endIdx (exclusive)
+     * If user has defined a size for any FlowItem, use that size instead of calling child->Measure.
+     *
+     * @param targetIdx index of the last FlowItem to measure.
      */
-    void MeasureItems(int32_t startIdx, int32_t endIdx);
+    void MeasureToTarget(int32_t targetIdx);
+
+    /**
+     * @brief Helper to measure a single FlowItems.
+     *
+     * @param props LayoutProps.
+     * @param idx index of the FlowItem.
+     * @param crossIdx column (when vertical) index of the target FlowItem.
+     * @return LayoutWrapper of the FlowItem.
+     */
+    inline RefPtr<LayoutWrapper> MeasureItem(
+        const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx) const;
 
     /**
      * @brief Layout a FlowItem at [idx].
@@ -99,18 +133,42 @@ private:
      * @param padding top-left padding of WaterFlow component.
      * @param isReverse need to layout in reverse.
      */
-    void LayoutItem(int32_t idx, const OffsetF& padding, bool isReverse);
+    void LayoutItem(int32_t idx, float crossPos, const OffsetF& padding, bool isReverse);
+
+    void MeasureOnJump(int32_t jumpIdx);
+
+    /**
+     * @brief Parse AUTO align value. If jump item is above viewport, use START; if it's below viewport, use END.
+     *
+     * @param item ItemInfo of the FlowItem to jump to.
+     * @return transformed ScrollAlign value.
+     */
+    ScrollAlign TransformAutoScroll(const WaterFlowLayoutInfo::ItemInfo& item) const;
+
+    /**
+     * @brief Calculate the new offset after jumping to the target item.
+     *
+     * @param item  ItemInfo of the FlowItem to jump to.
+     * @return new offset after jumping.
+     */
+    float SolveJumpOffset(const WaterFlowLayoutInfo::ItemInfo& item) const;
 
     LayoutWrapper* wrapper_ {};
 
+    // [segmentIdx, [crossIdx, item's width]]
     std::vector<std::vector<float>> itemsCrossSize_;
-    std::vector<std::vector<float>> itemsCrossPosition_;
-    std::vector<PaddingPropertyF> margins_; // margin of each segment
     Axis axis_ = Axis::VERTICAL;
 
-    std::vector<float> mainGaps_;
+    // rowGap and columnGap for each segment
     std::vector<float> crossGaps_;
+    std::vector<float> mainGaps_;
+
+    // WaterFlow node's main-axis length
     float mainSize_ = 0.0f;
+
+    // offset to apply after a ResetAndJump
+    float postJumpOffset_ = 0.0f;
+
     WaterFlowLayoutInfo info_;
 
     // true if WaterFlow can be overScrolled
