@@ -329,7 +329,7 @@ void ScrollablePattern::OnScrollEnd()
     // Now: HandleOverScroll moved to ScrollablePattern and renamed HandleScrollVelocity, directly
     // calls OnScrollEnd in ScrollablePattern
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
-                                                                     ScrollEventType::SCROLL_STOP);
+        ScrollEventType::SCROLL_STOP);
     if (refreshCoordination_) {
         isRefreshInReactive_ = false;
         refreshCoordination_->OnScrollEnd(GetVelocity());
@@ -1919,7 +1919,7 @@ void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velo
 void ScrollablePattern::FireOnScrollStart()
 {
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
-                                                                     ScrollEventType::SCROLL_START);
+        ScrollEventType::SCROLL_START);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;

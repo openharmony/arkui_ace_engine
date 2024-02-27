@@ -185,7 +185,8 @@ void UIObserver::UnRegisterScrollEventCallback(std::string id, napi_value cb)
         std::remove_if(
             holder.begin(),
             holder.end(),
-            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener)
+            {
                 return registeredListener->NapiEqual(cb);
             }
         ),
@@ -193,8 +194,7 @@ void UIObserver::UnRegisterScrollEventCallback(std::string id, napi_value cb)
     );
 }
 
-void UIObserver::HandleScrollEventStateChange(const std::string& id, NG::ScrollEventType eventType,
-                                             float offset)
+void UIObserver::HandleScrollEventStateChange(const std::string& id, NG::ScrollEventType eventType, float offset)
 {
     for (const auto& listener : scrollEventListeners_) {
         listener->OnScrollEventStateChange(id, eventType, offset);

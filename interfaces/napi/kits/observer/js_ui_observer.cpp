@@ -35,6 +35,13 @@ namespace {
     void* data;                    \
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data)
 
+static constexpr uint32_t PARAM_SZIE_ONE = 1;
+static constexpr uint32_t PARAM_SZIE_TWO = 2;
+static constexpr uint32_t PARAM_SZIE_THREE = 3;
+
+static constexpr uint32_t PARAM_SECOND = 1;
+static constexpr uint32_t PARAM_THIRD = 2;
+
 static constexpr uint32_t ON_SHOWN = 0;
 static constexpr uint32_t ON_HIDDEN = 1;
 
@@ -212,17 +219,18 @@ napi_value ObserverProcess::ProcessNavigationUnRegister(napi_env env, napi_callb
 
 napi_value ObserverProcess::ProcessScrollEventRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
+    GET_PARAMS(env, info, PARAM_SZIE_THREE);
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
-        auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
+    if (argc == PARAM_SZIE_TWO && MatchValueType(env, argv[PARAM_SECOND], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_SECOND]);
         UIObserver::RegisterScrollEventCallback(listener);
     }
 
-    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+    if (argc == PARAM_SZIE_THREE && MatchValueType(env, argv[PARAM_SECOND], napi_object)
+        && MatchValueType(env, argv[PARAM_THIRD], napi_function)) {
         std::string id;
-        if (ParseScrollId(env, argv[1], id)) {
-            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
+        if (ParseScrollId(env, argv[PARAM_SECOND], id)) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_THIRD]);
             UIObserver::RegisterScrollEventCallback(id, listener);
         }
     }
@@ -233,27 +241,28 @@ napi_value ObserverProcess::ProcessScrollEventRegister(napi_env env, napi_callba
 
 napi_value ObserverProcess::ProcessScrollEventUnRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
+    GET_PARAMS(env, info, PARAM_SZIE_THREE);
 
-    if (argc == 1) {
+    if (argc == PARAM_SZIE_ONE) {
         UIObserver::UnRegisterScrollEventCallback(nullptr);
     }
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
-        UIObserver::UnRegisterScrollEventCallback(argv[1]);
+    if (argc == PARAM_SZIE_TWO && MatchValueType(env, argv[PARAM_SECOND], napi_function)) {
+        UIObserver::UnRegisterScrollEventCallback(argv[PARAM_SECOND]);
     }
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
+    if (argc == PARAM_SZIE_TWO && MatchValueType(env, argv[PARAM_SECOND], napi_object)) {
         std::string id;
-        if (ParseScrollId(env, argv[1], id)) {
+        if (ParseScrollId(env, argv[PARAM_SECOND], id)) {
             UIObserver::UnRegisterScrollEventCallback(id, nullptr);
         }
     }
 
-    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+    if (argc == PARAM_SZIE_THREE && MatchValueType(env, argv[PARAM_SECOND], napi_object)
+        && MatchValueType(env, argv[PARAM_THIRD], napi_function)) {
         std::string id;
-        if (ParseScrollId(env, argv[1], id)) {
-            UIObserver::UnRegisterScrollEventCallback(id, argv[2]);
+        if (ParseScrollId(env, argv[PARAM_SECOND], id)) {
+            UIObserver::UnRegisterScrollEventCallback(id, argv[PARAM_THIRD]);
         }
     }
 
