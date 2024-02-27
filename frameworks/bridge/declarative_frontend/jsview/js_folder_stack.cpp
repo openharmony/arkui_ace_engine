@@ -60,6 +60,16 @@ JSRef<JSVal> FolderStackEventToJSValue(const NG::FolderEventInfo& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> HoverStatusChangeEventToJSValue(const NG::FolderEventInfo& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("foldStatus", static_cast<int32_t>(eventInfo.GetFolderState()));
+    obj->SetProperty("isHoverMode", static_cast<int32_t>(eventInfo.IsHoverMode()));
+    obj->SetProperty("appRotation", static_cast<int32_t>(eventInfo.GetRotation()));
+    obj->SetProperty("windowMode", static_cast<int32_t>(eventInfo.GetWindowMode()));
+    return JSRef<JSVal>::Cast(obj);
+}
+
 void JSFolderStack::Create(const JSCallbackInfo& info)
 {
     if (info[0]->IsObject()) {
@@ -132,6 +142,21 @@ void JSFolderStack::JSOnFolderStateChange(const JSCallbackInfo& info)
     FolderStackModel::GetInstance()->SetOnFolderStateChange(std::move(onFolderStateChange));
 }
 
+void JSFolderStack::JSOnHoverStatusChange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NG::FolderEventInfo, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), HoverStatusChangeEventToJSValue);
+    auto onHoverStatusChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                                   const NG::FolderEventInfo& value) {
+        ACE_SCORING_EVENT("FolderStack.onHoverStatusChange");
+        func->Execute(value);
+    };
+    FolderStackModel::GetInstance()->SetOnHoverStatusChange(std::move(onHoverStatusChange));
+}
+
 void JSFolderStack::JSBind(BindingTarget globalObj)
 {
     JSClass<JSFolderStack>::Declare("FolderStack");
@@ -141,6 +166,7 @@ void JSFolderStack::JSBind(BindingTarget globalObj)
     JSClass<JSFolderStack>::StaticMethod("autoHalfFold", &JSFolderStack::SetAutoHalfFold);
     JSClass<JSFolderStack>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSFolderStack>::StaticMethod("onFolderStateChange", &JSFolderStack::JSOnFolderStateChange);
+    JSClass<JSFolderStack>::StaticMethod("onHoverStatusChange", &JSFolderStack::JSOnHoverStatusChange);
     JSClass<JSFolderStack>::InheritAndBind<JSContainerBase>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

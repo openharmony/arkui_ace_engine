@@ -71,8 +71,16 @@ void GeometryNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 void GeometryNode::Restore()
 {
     CHECK_NULL_VOID(previousState_);
+    restoreCache_ = std::make_unique<RectF>(frame_.rect_);
     frame_.rect_ = *previousState_;
     previousState_ = nullptr;
+}
+
+void GeometryNode::RestoreCache()
+{
+    CHECK_NULL_VOID(restoreCache_);
+    frame_.rect_ = *restoreCache_;
+    restoreCache_ = nullptr;
 }
 
 void GeometryNode::Save()

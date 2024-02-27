@@ -92,6 +92,7 @@ public:
     void Print(int32_t depth, const std::string& content);
     void Append(int32_t depth, const std::string& className, int32_t childSize);
     bool OutPutBySize();
+    void OutPutDefault();
     void Reset();
 
     template<typename T>

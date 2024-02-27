@@ -223,6 +223,36 @@ std::vector<std::string> JSNavigationStack::GetAllPathName()
     return pathNames;
 }
 
+std::vector<int32_t> JSNavigationStack::GetRemoveArray()
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return {};
+    }
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getRemoveArray"));
+    auto array = JSRef<JSArray>::Cast(func->Call(dataSourceObj_));
+    if (array->IsEmpty()) {
+        return {};
+    }
+    std::vector<int32_t> removeArrays;
+    for (size_t i = 0; i < array->Length(); i++) {
+        auto value = array->GetValueAt(i);
+        if (value->IsNumber()) {
+            removeArrays.emplace_back(value->ToNumber<int32_t>());
+        }
+    }
+
+    return removeArrays;
+}
+
+void JSNavigationStack::ClearRemoveArray()
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("clearRemoveArray"));
+    func->Call(dataSourceObj_);
+}
+
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index)
 {
     auto name = GetNameByIndex(index);
@@ -587,7 +617,7 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navDestBuilderFunc_ is empty.");
         return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
     }
-    
+
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, ERROR_CODE_INTERNAL_ERROR);
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
 
@@ -625,5 +655,21 @@ bool JSNavigationStack::GetFlagByIndex(int32_t index) const
         return res->ToBoolean();
     }
     return false;
+}
+
+std::vector<std::string> JSNavigationStack::DumpStackInfo() const
+{
+    std::vector<std::string> dumpInfos;
+    for (size_t i = 0; i < navPathList_.size(); ++i) {
+        const auto& name = navPathList_[i].first;
+        std::string info = "[" + std::to_string(i) + "]{ name: \"" + name + "\"";
+        std::string param = ConvertParamToString(GetParamByIndex(i));
+        if (param.length() > 0) {
+            info += ", param: " + param;
+        }
+        info += " }";
+        dumpInfos.push_back(std::move(info));
+    }
+    return dumpInfos;
 }
 } // namespace OHOS::Ace::Framework

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,9 +32,6 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr int32_t SCROLL_NONE = 0;
-constexpr int32_t SCROLL_TOUCH_DOWN = 1;
-constexpr int32_t SCROLL_TOUCH_UP = 2;
 constexpr float SCROLL_BY_SPEED = 250.0f; // move 250 pixels per second
 constexpr float UNIT_CONVERT = 1000.0f;   // 1s convert to 1000ms
 constexpr Dimension SELECT_SCROLL_MIN_WIDTH = 64.0_vp;
@@ -107,6 +104,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
+    FireOnDidScroll(prevOffset_ - currentOffset_);
     auto onReachStart = eventHub->GetOnReachStart();
     if (onReachStart) {
         if (ReachStart()) {
@@ -311,9 +309,31 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     delta = direction * CalculateOffsetByFriction(overScrollPast, std::abs(delta), friction);
 }
 
+float ScrollPattern::ValidateOffset(int32_t source, float willScrollOffset)
+{
+    if (LessOrEqual(scrollableDistance_, 0.0f) || source == SCROLL_FROM_JUMP) {
+        return willScrollOffset;
+    }
+
+    // restrict position between top and bottom
+    if (IsRestrictBoundary() || source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING ||
+        source == SCROLL_FROM_ROTATE || source == SCROLL_FROM_AXIS) {
+        if (GetAxis() == Axis::HORIZONTAL) {
+            if (IsRowReverse()) {
+                willScrollOffset = std::clamp(willScrollOffset, 0.0f, scrollableDistance_);
+            } else {
+                willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0f);
+            }
+        } else {
+            willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0f);
+        }
+    }
+    return willScrollOffset;
+}
+
 void ScrollPattern::ValidateOffset(int32_t source)
 {
-    if (scrollableDistance_ <= 0.0f || source == SCROLL_FROM_JUMP) {
+    if (LessOrEqual(scrollableDistance_, 0.0f) || source == SCROLL_FROM_JUMP) {
         return;
     }
 
@@ -332,7 +352,7 @@ void ScrollPattern::ValidateOffset(int32_t source)
     }
 }
 
-void ScrollPattern::HandleScrollPosition(float scroll, int32_t scrollState)
+void ScrollPattern::HandleScrollPosition(float scroll)
 {
     auto eventHub = GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -349,6 +369,50 @@ void ScrollPattern::HandleScrollPosition(float scroll, int32_t scrollState)
         scrollY.SetValue(scrollVpValue);
     }
     onScroll(scrollX, scrollY);
+}
+
+void ScrollPattern::FireOnWillScroll(float scroll)
+{
+    auto eventHub = GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onScroll = eventHub->GetOnWillScrollEvent();
+    CHECK_NULL_VOID(onScroll);
+    Dimension scrollX(0, DimensionUnit::VP);
+    Dimension scrollY(0, DimensionUnit::VP);
+    Dimension scrollPx(scroll, DimensionUnit::PX);
+    auto scrollVpValue = scrollPx.ConvertToVp();
+    if (GetAxis() == Axis::HORIZONTAL) {
+        scrollX.SetValue(scrollVpValue);
+    } else {
+        scrollY.SetValue(scrollVpValue);
+    }
+    onScroll(scrollX, scrollY, GetScrollState());
+}
+
+void ScrollPattern::FireOnDidScroll(float scroll)
+{
+    auto eventHub = GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onScroll = eventHub->GetOnDidScrollEvent();
+    CHECK_NULL_VOID(onScroll);
+    Dimension scrollX(0, DimensionUnit::VP);
+    Dimension scrollY(0, DimensionUnit::VP);
+    Dimension scrollPx(scroll, DimensionUnit::PX);
+    auto scrollVpValue = scrollPx.ConvertToVp();
+    if (GetAxis() == Axis::HORIZONTAL) {
+        scrollX.SetValue(scrollVpValue);
+    } else {
+        scrollY.SetValue(scrollVpValue);
+    }
+    auto scrollState = GetScrollState();
+    if (!NearZero(scroll)) {
+        onScroll(scrollX, scrollY, scrollState);
+    }
+    if (scrollStop_ && !GetScrollAbort()) {
+        if (scrollState != ScrollState::IDLE) {
+            onScroll(0.0_vp, 0.0_vp, ScrollState::IDLE);
+        }
+    }
 }
 
 bool ScrollPattern::IsCrashTop() const
@@ -416,30 +480,26 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto frameSize = host->GetGeometryNode()->GetFrameSize();
     for (auto listenerItem : listenerVector_) {
-        auto frameSize = host->GetGeometryNode()->GetFrameSize();
         listenerItem->OnScrollUpdate(frameSize);
     }
-    SetScrollSource(source);
-    FireAndCleanScrollingListener();
-    // TODO: ignore handle refresh
     if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewSize_)) {
         if (IsOutOfBoundary()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         return false;
     }
-    // TODO: scrollBar effect!!
+    SetScrollSource(source);
+    FireAndCleanScrollingListener();
+    auto willScrollPosition = currentOffset_ + delta;
+    willScrollPosition = ValidateOffset(source, willScrollPosition);
+    FireOnWillScroll(currentOffset_ - willScrollPosition);
+
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
     ValidateOffset(source);
-    int32_t touchState = SCROLL_NONE;
-    if (source == SCROLL_FROM_UPDATE) {
-        touchState = SCROLL_TOUCH_DOWN;
-    } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
-        touchState = SCROLL_TOUCH_UP;
-    }
-    HandleScrollPosition(-delta, touchState);
+    HandleScrollPosition(-delta);
     if (IsCrashTop()) {
         HandleCrashTop();
     } else if (IsCrashBottom()) {
@@ -923,5 +983,10 @@ float ScrollPattern::GetPagingDelta(float dragDistance, float velocity, float pa
         return GreatNotEqual(dragDistance, 0.f) ? pageLength : -pageLength;
     }
     return 0.f;
+}
+
+void ScrollPattern::TriggerModifyDone()
+{
+    OnModifyDone();
 }
 } // namespace OHOS::Ace::NG

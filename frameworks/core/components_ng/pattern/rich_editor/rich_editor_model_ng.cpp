@@ -148,6 +148,28 @@ void RichEditorModelNG::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& f
     eventHub->SetOnPaste(std::move(func));
 }
 
+void RichEditorModelNG::SetPlaceholder(PlaceholderOptions& options)
+{
+    if (options.value.has_value() && !options.value.value().empty()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Placeholder, options.value.value());
+    }
+    if (options.fontSize.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontSize, options.fontSize.value());
+    }
+    if (options.fontStyle.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderItalicFontStyle, options.fontStyle.value());
+    }
+    if (options.fontWeight.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontWeight, options.fontWeight.value());
+    }
+    if (options.fontColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderTextColor, options.fontColor.value());
+    }
+    if (!options.fontFamilies.empty()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontFamily, options.fontFamilies);
+    }
+}
+
 void RichEditorModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOptions, frameNode);

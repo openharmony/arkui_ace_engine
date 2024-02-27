@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,8 @@ public:
     static void OnScrollBeginCallback(const JSCallbackInfo& args);
     static void OnScrollFrameBeginCallback(const JSCallbackInfo& args);
     static void OnScrollCallback(const JSCallbackInfo& args);
+    static void OnWillScrollCallback(const JSCallbackInfo& args);
+    static void OnDidScrollCallback(const JSCallbackInfo& args);
     static void OnScrollEdgeCallback(const JSCallbackInfo& args);
     static void OnScrollEndCallback(const JSCallbackInfo& args);
     static void OnScrollStartCallback(const JSCallbackInfo& args);

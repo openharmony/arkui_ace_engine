@@ -57,6 +57,8 @@ void ResetRectRadiusHeight(ArkUINodeHandle node)
 void SetRectRadiusWithArray(ArkUINodeHandle node, ArkUI_Float32* radiusValues, ArkUI_Int32* radiusUnits,
     ArkUI_Uint32* radiusValidPairs, ArkUI_Uint32 radiusValidPairsSize)
 {
+    NG::ResetRectRadiusHeight(node);
+    NG::ResetRectRadiusWidth(node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(radiusValues);

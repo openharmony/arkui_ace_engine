@@ -124,7 +124,13 @@ export class ComposeTitleBar extends ViewPU {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       t ? ViewPU.create(new ImageMenuItem(this, {
         item: {
-          value: PUBLIC_BACK,
+          value: {
+            id: -1,
+            type: 2e4,
+            params: ["sys.media.ohos_ic_back"],
+            bundleName: "",
+            moduleName: ""
+          },
           isEnabled: !0,
           action: () => this.backActive = !0
         },
@@ -741,6 +747,13 @@ class ImageMenuItem extends ViewPU {
       Image.height(ImageMenuItem.imageSize);
       Image.focusable(this.item.isEnabled);
       Image.key(ImageMenuItem.focusablePrefix + this.index);
+      Image.fillColor({
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_text_primary"],
+        bundleName: "",
+        moduleName: ""
+      });
       t || Image.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));

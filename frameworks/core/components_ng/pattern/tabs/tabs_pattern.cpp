@@ -17,6 +17,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
@@ -97,26 +98,23 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         }
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
+            if (Recorder::EventRecorder::Get().IsComponentRecordEnable() && weak.Upgrade()) {
+                auto inspectorId = tabsNode->GetInspectorId().value_or("");
+                auto pattern = weak.Upgrade();
+                auto tabBarText = pattern->GetTabBarTextByIndex(index);
+                Recorder::EventParamsBuilder builder;
+                builder.SetId(inspectorId)
+                    .SetType(tabsNode->GetTag())
+                    .SetIndex(index)
+                    .SetText(tabBarText)
+                    .SetDescription(tabsNode->GetAutoEventParamValue(""));
+                Recorder::EventRecorder::Get().OnChange(std::move(builder));
+                if (!inspectorId.empty()) {
+                    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, tabBarText, index);
+                }
+            }
             TabContentChangeEvent eventInfo(index);
             jsEvent(&eventInfo);
-
-            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-                return;
-            }
-            auto inspectorId = tabsNode->GetInspectorId().value_or("");
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto tabBarText = pattern->GetTabBarTextByIndex(index);
-            Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId)
-                .SetType(tabsNode->GetTag())
-                .SetIndex(index)
-                .SetText(tabBarText)
-                .SetDescription(tabsNode->GetAutoEventParamValue(""));
-            Recorder::EventRecorder::Get().OnChange(std::move(builder));
-            if (!inspectorId.empty()) {
-                Recorder::NodeDataCache::Get().PutMultiple(inspectorId, tabBarText, index);
-            }
         }
     });
 
@@ -439,6 +437,26 @@ void TabsPattern::BeforeCreateLayoutWrapper()
     auto index = tabsLayoutProperty->GetIndex().value_or(0);
     if (index > tabContentNum - 1) {
         index = 0;
+    }
+
+    if (isInit_) {
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_VOID(swiperPattern);
+        swiperPattern->SetOnHiddenChangeForParent();
+        auto parent = tabsNode->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parent);
+        while (parent) {
+            auto navTag = parent->GetTag();
+            if (navTag == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+                break;
+            }
+            parent = parent->GetAncestorNodeOfFrame();
+        }
+        if (!parent) {
+            auto willShowIndex = tabsLayoutProperty->GetIndex().value_or(0);
+            swiperPattern->FireWillShowEvent(willShowIndex);
+        }
+        isInit_ = false;
     }
 
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());

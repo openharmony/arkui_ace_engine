@@ -395,7 +395,7 @@ public:
 
     void SetLayoutPriority(int32_t priority) override {}
 
-    void SetLayoutWeight(int32_t value) override
+    void SetLayoutWeight(float value) override
     {
         ViewAbstract::SetLayoutWeight(value);
     }
@@ -990,6 +990,11 @@ public:
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
+    }
+
+    void DismissDialog() override
+    {
+        ViewAbstract::DismissDialog();
     }
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;

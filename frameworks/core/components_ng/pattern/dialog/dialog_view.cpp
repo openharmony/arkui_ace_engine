@@ -91,6 +91,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     auto pattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->BuildChild(param);
+    pattern->SetOnWillDismiss(param.onWillDismiss);
 
     // set open and close animation
     pattern->SetOpenAnimation(param.openAnimation);

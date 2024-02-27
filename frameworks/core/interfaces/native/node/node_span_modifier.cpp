@@ -38,6 +38,7 @@ constexpr Dimension DEFAULT_LETTER_SPACING_VALUE { 0.0, DimensionUnit::FP };
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
+std::string g_strValue;
 
 void SetSpanContent(ArkUINodeHandle node, const char* value)
 {
@@ -47,11 +48,27 @@ void SetSpanContent(ArkUINodeHandle node, const char* value)
     SpanModelNG::InitSpan(uiNode, content);
 }
 
+const char* GetSpanContent(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    g_strValue = SpanModelNG::GetContent(uiNode);
+    return g_strValue.c_str();
+}
+
 void SetSpanTextCase(ArkUINodeHandle node, int32_t value)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     SpanModelNG::SetTextCase(uiNode, static_cast<TextCase>(value));
+}
+
+int32_t GetSpanTextCase(ArkUINodeHandle node)
+{
+    auto defaultTextCase = static_cast<int32_t>(DEFAULT_TEXT_CASE);
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, defaultTextCase);
+    return static_cast<int32_t>(SpanModelNG::GetTextCase(uiNode));
 }
 
 void ResetSpanTextCase(ArkUINodeHandle node)
@@ -70,9 +87,17 @@ void SetSpanFontWeightStr(ArkUINodeHandle node, const char* value)
 
 void SetSpanFontWeight(ArkUINodeHandle node, ArkUI_Int32 fontWeight)
 {
-    auto *uiNode = reinterpret_cast<UINode *>(node);
+    auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     SpanModelNG::SetFontWeight(uiNode, static_cast<FontWeight>(fontWeight));
+}
+
+int32_t GetSpanFontWeight(ArkUINodeHandle node)
+{
+    int32_t defaultFontWeight = static_cast<int32_t>(DEFAULT_FONT_WEIGHT);
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, defaultFontWeight);
+    return static_cast<int32_t>(SpanModelNG::GetFontWeight(uiNode));
 }
 
 void ResetSpanFontWeight(ArkUINodeHandle node)
@@ -89,6 +114,13 @@ void SetSpanLineHeight(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 u
     SpanModelNG::SetLineHeight(uiNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
+float GetSpanLineHeight(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, 0.0f);
+    return SpanModelNG::GetTextLineHeight(uiNode).ConvertToVp();
+}
+
 void ReSetSpanLineHeight(ArkUINodeHandle node)
 {
     return;
@@ -99,6 +131,14 @@ void SetSpanFontStyle(ArkUINodeHandle node, int32_t value)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     SpanModelNG::SetItalicFontStyle(uiNode, static_cast<Ace::FontStyle>(value));
+}
+
+int32_t GetSpanFontStyle(ArkUINodeHandle node)
+{
+    int32_t defaultFontStyle = static_cast<int32_t>(DEFAULT_FONT_STYLE_VALUE);
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, defaultFontStyle);
+    return static_cast<int32_t>(SpanModelNG::GetFontStyle(uiNode));
 }
 
 void ReSetSpanFontStyle(ArkUINodeHandle node)
@@ -113,6 +153,13 @@ void SetSpanFontSize(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 uni
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     SpanModelNG::SetFontSize(uiNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+}
+
+float GetSpanFontSize(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, DEFAULT_FONT_SIZE.Value());
+    return SpanModelNG::GetFontSize(uiNode).Value();
 }
 
 void ResetSpanFontSize(ArkUINodeHandle node)
@@ -158,6 +205,15 @@ void SetSpanDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint3
     SpanModelNG::SetTextDecorationColor(uiNode, Color(color));
 }
 
+ArkUITextDecorationType GetSpanDecoration(ArkUINodeHandle node)
+{
+    ArkUITextDecorationType decorationType = { 0, 0xff000000 };
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, decorationType);
+    // todo
+    return decorationType;
+}
+
 void ResetSpanDecoration(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
@@ -172,6 +228,13 @@ void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     SpanModelNG::SetTextColor(uiNode, Color(textColor));
+}
+
+uint32_t GetSpanFontColor(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, Color::BLACK.GetValue());
+    return SpanModelNG::GetFontColor(uiNode).GetValue();
 }
 
 void ResetSpanFontColor(ArkUINodeHandle node)
@@ -197,6 +260,13 @@ void SetSpanLetterSpacing(ArkUINodeHandle node, const struct ArkUIStringAndFloat
         result = Dimension(letterSpacingValue->value, DimensionUnit::FP);
     }
     SpanModelNG::SetLetterSpacing(uiNode, result);
+}
+
+float GetSpanLetterSpacing(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, 0.0f);
+    return SpanModelNG::GetLetterSpacing(uiNode).ConvertToVp();
 }
 
 void ResetSpanLetterSpacing(ArkUINodeHandle node)
@@ -240,7 +310,6 @@ void ResetSpanFont(ArkUINodeHandle node)
     SpanModelNG::SetFont(uiNode, font);
 }
 } // namespace
-
 namespace NodeModifier {
 const ArkUISpanModifier* GetSpanModifier()
 {
@@ -248,7 +317,9 @@ const ArkUISpanModifier* GetSpanModifier()
         ResetSpanFontWeight, SetSpanLineHeight, ReSetSpanLineHeight, SetSpanFontStyle, ReSetSpanFontStyle,
         SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily, SetSpanDecoration,
         ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing, ResetSpanLetterSpacing,
-        SetSpanFont, ResetSpanFont, SetSpanFontWeightStr };
+        SetSpanFont, ResetSpanFont, SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor,
+        GetSpanFontSize, GetSpanFontStyle, GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase,
+        GetSpanLetterSpacing };
     return &modifier;
 }
 } // namespace NodeModifier

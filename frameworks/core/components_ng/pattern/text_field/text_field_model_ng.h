@@ -129,6 +129,14 @@ public:
     static void SetTextFieldPlaceHolder(FrameNode* frameNode, const std::string& placeholder);
     static void StopTextFieldEditing(FrameNode* frameNode);
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func);
+    static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnPasteWithEvent(FrameNode* frameNode,
+        std::function<void(const std::string&, NG::TextCommonEvent&)>&& func);
+    static void SetCleanNodeStyle(FrameNode* frameNode, CleanNodeStyle cleanNodeStyle);
+    static void SetIsShowCancelButton(FrameNode* frameNode, bool isShowCancelButton);
+    static void SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize);
+    static void SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc);
+    static void SetCancelIconColor(FrameNode* frameNode, const Color& iconColor);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

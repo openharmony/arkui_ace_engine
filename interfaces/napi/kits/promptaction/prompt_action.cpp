@@ -226,6 +226,7 @@ struct PromptAsyncContext {
     napi_value offsetApi = nullptr;
     napi_value maskRectApi = nullptr;
     napi_value builder = nullptr;
+    napi_value onWillDismiss = nullptr;
     napi_ref callbackSuccess = nullptr;
     napi_ref callbackCancel = nullptr;
     napi_ref callbackComplete = nullptr;
@@ -242,6 +243,7 @@ struct PromptAsyncContext {
     napi_deferred deferred = nullptr;
     napi_ref callbackRef = nullptr;
     napi_ref builderRef = nullptr;
+    napi_ref onWillDismissRef = nullptr;
     int32_t callbackType = -1;
     int32_t successType = -1;
     bool valid = true;
@@ -422,6 +424,12 @@ bool JSPromptParseParam(napi_env env, size_t argc, napi_value* argv, std::shared
             napi_typeof(env, asyncContext->isModal, &valueType);
             if (valueType == napi_boolean) {
                 napi_get_value_bool(env, asyncContext->isModal, &asyncContext->isModalBool);
+            }
+
+            napi_get_named_property(env, argv[0], "onWillDismiss", &asyncContext->onWillDismiss);
+            napi_typeof(env, asyncContext->onWillDismiss, &valueType);
+            if (valueType == napi_function) {
+                napi_create_reference(env, asyncContext->onWillDismiss, 1, &asyncContext->onWillDismissRef);
             }
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
@@ -890,6 +898,38 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JSRemoveCustomDialog(napi_env env, napi_callback_info info)
+{
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (delegate) {
+        delegate->RemoveCustomDialog();
+    }
+    return nullptr;
+}
+
+void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
+    std::function<void(const int32_t& info)>& onWillDismiss)
+{
+    onWillDismiss = [env = asyncContext->env, onWillDismissRef = asyncContext->onWillDismissRef]
+        (const int32_t& info) {
+        if (onWillDismissRef) {
+            napi_value onWillDismissFunc = nullptr;
+            napi_value value = nullptr;
+            napi_value funcValue = nullptr;
+            napi_value paramObj = nullptr;
+            napi_create_object(env, &paramObj);
+
+            napi_create_function(env, "dismiss", strlen("dismiss"), JSRemoveCustomDialog, nullptr, &funcValue);
+            napi_set_named_property(env, paramObj, "dismiss", funcValue);
+
+            napi_create_int32(env, info, &value);
+            napi_set_named_property(env, paramObj, "reason", value);
+            napi_get_reference_value(env, onWillDismissRef, &onWillDismissFunc);
+            napi_call_function(env, nullptr, onWillDismissFunc, 1, &paramObj, nullptr);
+        }
+    };
+}
+
 napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
 {
     size_t requireArgc = 1;
@@ -972,10 +1012,15 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
             napi_delete_reference(env, builderRef);
         }
     };
+    std::function<void(const int32_t& info)> onWillDismiss = nullptr;
+    if (asyncContext->onWillDismissRef) {
+        ParseDialogCallback(asyncContext, onWillDismiss);
+    }
     PromptDialogAttr promptDialogAttr = {
         .showInSubWindow = asyncContext->showInSubWindowBool,
         .isModal = asyncContext->isModalBool,
         .customBuilder = std::move(builder),
+        .customOnWillDismiss = std::move(onWillDismiss),
         .alignment = alignment,
         .offset = offset,
         .maskRect = maskRect,

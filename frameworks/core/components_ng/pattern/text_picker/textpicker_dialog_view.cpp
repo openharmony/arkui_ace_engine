@@ -37,6 +37,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t BUFFER_NODE_NUMBER = 2;
+constexpr uint8_t PIXEL_ROUND = 18;
 } // namespace
 
 WeakPtr<FrameNode> TextPickerDialogView::dialogNode_ = nullptr;
@@ -123,12 +124,15 @@ void TextPickerDialogView::OptionsCreateNode(const RefPtr<TextPickerPattern>& te
             auto columnNode = CreateColumnNode(settingData.columnKind, showCount, pickerTheme);
             auto stackNode = CreateStackNode(pickerTheme);
             auto buttonNode = CreateButtonNode();
+            auto columnBlendNode = CreateColumnNode();
             buttonNode->MountToParent(stackNode);
-            columnNode->MountToParent(stackNode);
+            columnNode->MountToParent(columnBlendNode);
+            columnBlendNode->MountToParent(stackNode);
             columnNode->MarkModifyDone();
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
+            columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             stackNode->MountToParent(textPickerNode);
         }
     }
@@ -331,6 +335,13 @@ RefPtr<FrameNode> TextPickerDialogView::CreateStackNode(RefPtr<PickerTheme> pick
     marginProperty.bottom = CalcLength(pickerTheme->GetContentMarginVertical());
     stackLayout->UpdateMargin(marginProperty);
     return stackNode;
+}
+
+RefPtr<FrameNode> TextPickerDialogView::CreateColumnNode()
+{
+    auto columnId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, columnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
 }
 
 RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode()

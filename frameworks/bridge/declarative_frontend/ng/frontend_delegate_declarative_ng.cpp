@@ -448,6 +448,12 @@ void FrontendDelegateDeclarativeNG::Back(const std::string& uri, const std::stri
     pageRouterManager_->BackWithTarget(NG::RouterPageInfo({ uri, params }));
 }
 
+void FrontendDelegateDeclarativeNG::BackToIndex(int32_t index, const std::string& params)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->BackToIndexWithTarget(index, params);
+}
+
 void FrontendDelegateDeclarativeNG::Clear()
 {
     CHECK_NULL_VOID(pageRouterManager_);
@@ -464,6 +470,19 @@ void FrontendDelegateDeclarativeNG::GetState(int32_t& index, std::string& name, 
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->GetState(index, name, path);
+}
+
+void FrontendDelegateDeclarativeNG::GetRouterStateByIndex(int32_t& index, std::string& name,
+    std::string& path, std::string& params)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->GetStateByIndex(index, name, path, params);
+}
+
+void FrontendDelegateDeclarativeNG::GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->GetStateByUrl(url, stateArray);
 }
 
 std::string FrontendDelegateDeclarativeNG::GetParams()

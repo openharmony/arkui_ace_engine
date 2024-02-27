@@ -140,22 +140,9 @@ void FolderStackLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
     isIntoFolderStack_ = IsIntoFolderStack(size, layoutProperty, layoutWrapper);
     AdjustNodeTree(hostNode);
+    OnHoverStatusChange(layoutWrapper);
     if (!isIntoFolderStack_) {
-        PaddingProperty padding { CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f) };
-        auto controlPartsStackNode = hostNode->GetControlPartsStackNode();
-        CHECK_NULL_VOID(controlPartsStackNode);
-        auto index = hostNode->GetChildIndexById(controlPartsStackNode->GetId());
-        auto controlPartsWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        CHECK_NULL_VOID(controlPartsWrapper);
-        controlPartsWrapper->GetLayoutProperty()->UpdatePadding(padding);
-        StackLayoutAlgorithm::Measure(layoutWrapper);
-        auto hoverNode = hostNode->GetHoverNode();
-        CHECK_NULL_VOID(hoverNode);
-        auto hoverIndex = hostNode->GetChildIndexById(hoverNode->GetId());
-        auto hoverStackWrapper = layoutWrapper->GetOrCreateChildByIndex(hoverIndex);
-        CHECK_NULL_VOID(hoverStackWrapper);
-        auto geometryNode = hoverStackWrapper->GetGeometryNode();
-        geometryNode->SetFrameSize(controlPartsWrapper->GetGeometryNode()->GetFrameSize());
+        MeasureByStack(hostNode, layoutWrapper);
         pattern->SetNeedCallBack(false);
         return;
     }
@@ -320,6 +307,55 @@ bool FolderStackLayoutAlgorithm::IsIntoFolderStack(
     auto foldStatus = displayInfo->GetFoldStatus();
     auto rotation = displayInfo->GetRotation();
     auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
+    TAG_LOGI(AceLogTag::ACE_FOLDER_STACK,
+        "folderStack state isFullWindow:%{public}d, isFoldable:%{public}d, "
+        "foldStatus:%{public}d, isLandscape:%{public}d",
+        isFullWindow, isFoldable, foldStatus, isLandscape);
     return isFullWindow && isFoldable && foldStatus == FoldStatus::HALF_FOLD && isLandscape;
+}
+
+void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrapper)
+{
+    auto pattern = layoutWrapper->GetHostNode()->GetPattern<FolderStackPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (isIntoFolderStack_ == pattern->IsInHoverMode()) {
+        return;
+    }
+    auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto windowMode = windowManager->GetWindowMode();
+    auto displayInfo = pattern->GetDisplayInfo();
+    FolderEventInfo hoverChangeEvent(
+        displayInfo->GetFoldStatus(), isIntoFolderStack_, displayInfo->GetRotation(), windowMode);
+    if (eventHub) {
+        eventHub->OnHoverStatusChange(std::move(hoverChangeEvent));
+        TAG_LOGI(AceLogTag::ACE_FOLDER_STACK,
+            "hoverStatus change callback FoldStatus:%{public}d, isHoverMode:%{public}d, "
+            "appRotation:%{public}d, windowMode:%{public}d",
+            displayInfo->GetFoldStatus(), isIntoFolderStack_, displayInfo->GetRotation(), windowMode);
+    }
+}
+
+void FolderStackLayoutAlgorithm::MeasureByStack(
+    const RefPtr<FolderStackGroupNode>& hostNode, LayoutWrapper* layoutWrapper)
+{
+    PaddingProperty padding { CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f) };
+    auto controlPartsStackNode = hostNode->GetControlPartsStackNode();
+    CHECK_NULL_VOID(controlPartsStackNode);
+    auto index = hostNode->GetChildIndexById(controlPartsStackNode->GetId());
+    auto controlPartsWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(controlPartsWrapper);
+    controlPartsWrapper->GetLayoutProperty()->UpdatePadding(padding);
+    StackLayoutAlgorithm::Measure(layoutWrapper);
+    auto hoverNode = hostNode->GetHoverNode();
+    CHECK_NULL_VOID(hoverNode);
+    auto hoverIndex = hostNode->GetChildIndexById(hoverNode->GetId());
+    auto hoverStackWrapper = layoutWrapper->GetOrCreateChildByIndex(hoverIndex);
+    CHECK_NULL_VOID(hoverStackWrapper);
+    auto geometryNode = hoverStackWrapper->GetGeometryNode();
+    geometryNode->SetFrameSize(controlPartsWrapper->GetGeometryNode()->GetFrameSize());
 }
 } // namespace OHOS::Ace::NG

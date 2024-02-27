@@ -443,6 +443,8 @@ void SetTextInputPlaceholderFont(ArkUINodeHandle node, const struct ArkUIPlaceho
     font.fontSize = fontSize;
     if (placeholderFont->weight != nullptr && std::string(placeholderFont->weight) != "") {
         font.fontWeight = Framework::ConvertStrToFontWeight(placeholderFont->weight);
+    } else if (placeholderFont->weightEnum > -1) {
+        font.fontWeight = static_cast<FontWeight>(placeholderFont->weightEnum);
     }
     if (placeholderFont->fontFamilies != nullptr && placeholderFont->length > 0) {
         for (uint32_t i = 0; i < placeholderFont->length; i++) {
@@ -545,6 +547,45 @@ void SetTextInputTextString(ArkUINodeHandle node, ArkUI_CharPtr value)
     std::string textStr(value);
     TextFieldModelNG::SetTextFieldText(frameNode, textStr);
 }
+
+void StopTextInputTextEditing(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::StopTextFieldEditing(frameNode);
+}
+
+void SetTextInputCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
+    ArkUI_Uint32 color, ArkUI_CharPtr src)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCleanNodeStyle(frameNode, static_cast<CleanNodeStyle>(style));
+    TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
+    // set icon size
+    CalcDimension iconSize = CalcDimension(size->value, static_cast<DimensionUnit>(size->unit));
+    if (LessNotEqual(iconSize.Value(), 0.0)) {
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        iconSize = theme->GetIconSize();
+    }
+    TextFieldModelNG::SetCancelIconSize(frameNode, iconSize);
+    // set icon src
+    std::string iconSrc(src);
+    TextFieldModelNG::SetCanacelIconSrc(frameNode, iconSrc);
+    // set icon color
+    Color iconColor(color);
+    TextFieldModelNG::SetCancelIconColor(frameNode, iconColor);
+}
+
+void ResetTextInputCancelButton(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCleanNodeStyle(frameNode, CleanNodeStyle::INPUT);
+    TextFieldModelNG::SetIsShowCancelButton(frameNode, false);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -604,6 +645,9 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputPlaceholderString,
         SetTextInputTextString,
         SetTextInputFontWeightStr,
+        StopTextInputTextEditing,
+        SetTextInputCancelButton,
+        ResetTextInputCancelButton,
     };
     return &modifier;
 }
@@ -636,6 +680,36 @@ void SetTextInputOnSubmit(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extra
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onEvent));
+}
+
+void SetOnTextInputCut(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCut = [node, eventId, extraParam](const std::string& str) {
+        ArkUINodeEvent event;
+        event.kind = ON_TEXT_INPUT_CUT;
+        event.eventId = eventId;
+        event.extraParam= extraParam;
+        event.stringAsyncEvent.pStr = str.c_str();
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnCut(frameNode, std::move(onCut));
+}
+
+void SetOnTextInputPaste(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onPaste = [node, eventId, extraParam](const std::string& str, NG::TextCommonEvent& commonEvent) {
+        ArkUINodeEvent event;
+        event.kind = ON_TEXT_INPUT_PASTE;
+        event.eventId = eventId;
+        event.extraParam= extraParam;
+        event.stringAsyncEvent.pStr = str.c_str();
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
 
 } // namespace NodeModifier

@@ -33,6 +33,7 @@ constexpr int32_t CHILD_WITH_AMPM_SIZE = 3;
 constexpr int32_t CHILD_WITHOUT_AMPM_SIZE = 2;
 constexpr uint32_t AM_PM_HOUR_12 = 12;
 constexpr uint32_t AM_PM_HOUR_11 = 11;
+constexpr uint8_t PIXEL_ROUND = 18;
 const int32_t AM_PM_COUNT = 3;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
@@ -145,7 +146,7 @@ void TimePickerRowPattern::CreateAmPmNode()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto heigth = pickerTheme->GetDividerSpacing();
+    auto height = pickerTheme->GetDividerSpacing();
     if (!GetHour24() && !HasAmPmNode()) {
         auto amPmColumnNode = FrameNode::GetOrCreateFrameNode(
             V2::COLUMN_ETS_TAG, GetAmPmId(), []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
@@ -161,9 +162,14 @@ void TimePickerRowPattern::CreateAmPmNode()
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
         auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        auto blendNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto columnBlendNode = FrameNode::GetOrCreateFrameNode(
+            V2::COLUMN_ETS_TAG, blendNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         buttonNode->MountToParent(stackAmPmNode);
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        amPmColumnNode->MountToParent(stackAmPmNode);
+        amPmColumnNode->MountToParent(columnBlendNode);
+        amPmColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
+        columnBlendNode->MountToParent(stackAmPmNode);
         auto layoutProperty = stackAmPmNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
@@ -174,9 +180,8 @@ void TimePickerRowPattern::CreateAmPmNode()
             buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
             buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
             buttonLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(SetAmPmButtonIdeaSize()), CalcLength(heigth - PRESS_INTERVAL)));
-            auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
-            buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+                CalcSize(CalcLength(SetAmPmButtonIdeaSize()), CalcLength(height - PRESS_INTERVAL)));
+            buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
             buttonNode->MarkModifyDone();
             buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -206,10 +211,16 @@ void TimePickerRowPattern::CreateOrDeleteSecondNode()
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
             auto buttonSecondNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+            auto blendNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+            auto columnBlendNode = FrameNode::GetOrCreateFrameNode(
+                V2::COLUMN_ETS_TAG, blendNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
             buttonSecondNode->MarkModifyDone();
             buttonSecondNode->MountToParent(stackSecondNode);
             secondColumnNode->MarkModifyDone();
-            secondColumnNode->MountToParent(stackSecondNode);
+            secondColumnNode->MountToParent(columnBlendNode);
+            columnBlendNode->MarkModifyDone();
+            columnBlendNode->MountToParent(stackSecondNode);
+            secondColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             auto layoutProperty = stackSecondNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             layoutProperty->UpdateLayoutWeight(1);
@@ -250,7 +261,9 @@ void TimePickerRowPattern::SetEventCallback(EventCallback&& value)
     for (const auto& child : children) {
         auto stackNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(stackNode);
-        auto childNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        auto columnBlendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(columnBlendNode);
+        auto childNode = DynamicCast<FrameNode>(columnBlendNode->GetLastChild());
         CHECK_NULL_VOID(childNode);
         auto timePickerColumnPattern = childNode->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(timePickerColumnPattern);
@@ -353,12 +366,15 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     auto confirmNode = buttonConfirmNode->GetFirstChild();
     auto confirmNodeLayout = AceType::DynamicCast<FrameNode>(confirmNode)->GetLayoutProperty<TextLayoutProperty>();
     confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto buttonCancelNode = weakButtonCancel_.Upgrade();
     CHECK_NULL_VOID(buttonCancelNode);
     auto cancelNode = buttonCancelNode->GetFirstChild();
     auto cancelNodeLayout = AceType::DynamicCast<FrameNode>(cancelNode)->GetLayoutProperty<TextLayoutProperty>();
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
     FlushAmPmFormatString();
 }
 
@@ -387,7 +403,9 @@ void TimePickerRowPattern::SetChangeCallback(ColumnChangeCallback&& value)
     for (const auto& child : children) {
         auto stackNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(stackNode);
-        auto childNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        auto columnBlendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(columnBlendNode);
+        auto childNode = DynamicCast<FrameNode>(columnBlendNode->GetLastChild());
         CHECK_NULL_VOID(childNode);
         auto timePickerColumnPattern = childNode->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(timePickerColumnPattern);
@@ -586,18 +604,24 @@ void TimePickerRowPattern::UpdateAllChildNode()
     if (!GetHour24()) {
         auto amPm = (*iter);
         CHECK_NULL_VOID(amPm);
+        auto amPmStackNode = DynamicCast<FrameNode>(amPm);
+        auto amPmBlendNode = DynamicCast<FrameNode>(amPmStackNode->GetLastChild());
+        CHECK_NULL_VOID(amPmBlendNode);
         iter++;
         auto hour = *iter;
         CHECK_NULL_VOID(hour);
+        auto hourStackNode = DynamicCast<FrameNode>(hour);
+        auto hourBlendNode = DynamicCast<FrameNode>(hourStackNode->GetLastChild());
+        CHECK_NULL_VOID(hourBlendNode);
         iter++;
         auto minute = *iter;
         CHECK_NULL_VOID(minute);
-        auto amPmStackNode = DynamicCast<FrameNode>(amPm);
-        auto amPmNode = DynamicCast<FrameNode>(amPmStackNode->GetLastChild());
-        auto hourStackNode = DynamicCast<FrameNode>(hour);
-        auto hourNode = DynamicCast<FrameNode>(hourStackNode->GetLastChild());
         auto minuteStackNode = DynamicCast<FrameNode>(minute);
-        auto minuteNode = DynamicCast<FrameNode>(minuteStackNode->GetLastChild());
+        auto minuteBlendNode = DynamicCast<FrameNode>(minuteStackNode->GetLastChild());
+        CHECK_NULL_VOID(minuteBlendNode);
+        auto amPmNode = DynamicCast<FrameNode>(amPmBlendNode->GetLastChild());
+        auto hourNode = DynamicCast<FrameNode>(hourBlendNode->GetLastChild());
+        auto minuteNode = DynamicCast<FrameNode>(minuteBlendNode->GetLastChild());
         CHECK_NULL_VOID(amPmNode);
         CHECK_NULL_VOID(hourNode);
         CHECK_NULL_VOID(minuteNode);
@@ -607,13 +631,17 @@ void TimePickerRowPattern::UpdateAllChildNode()
     } else {
         auto hour = *iter;
         CHECK_NULL_VOID(hour);
+        auto hourStackNode = DynamicCast<FrameNode>(hour);
+        auto hourBlendNode = DynamicCast<FrameNode>(hourStackNode->GetLastChild());
+        CHECK_NULL_VOID(hourBlendNode);
         iter++;
         auto minute = *iter;
         CHECK_NULL_VOID(minute);
-        auto hourStackNode = DynamicCast<FrameNode>(hour);
-        auto hourNode = DynamicCast<FrameNode>(hourStackNode->GetLastChild());
         auto minuteStackNode = DynamicCast<FrameNode>(minute);
-        auto minuteNode = DynamicCast<FrameNode>(minuteStackNode->GetLastChild());
+        auto minuteBlendNode = DynamicCast<FrameNode>(minuteStackNode->GetLastChild());
+        CHECK_NULL_VOID(minuteBlendNode);
+        auto hourNode = DynamicCast<FrameNode>(hourBlendNode->GetLastChild());
+        auto minuteNode = DynamicCast<FrameNode>(minuteBlendNode->GetLastChild());
         CHECK_NULL_VOID(hourNode);
         CHECK_NULL_VOID(minuteNode);
         allChildNode_["hour"] = hourNode;
@@ -646,7 +674,7 @@ void TimePickerRowPattern::GetAllChildNodeWithSecond()
         auto amPm = (*iter);
         CHECK_NULL_VOID(amPm);
         auto amPmStackNode = DynamicCast<FrameNode>(amPm);
-        amPmNode = DynamicCast<FrameNode>(amPmStackNode->GetLastChild());
+        amPmNode = DynamicCast<FrameNode>(amPmStackNode->GetLastChild()->GetLastChild());
         CHECK_NULL_VOID(amPmNode);
         iter++;
     }
@@ -659,11 +687,11 @@ void TimePickerRowPattern::GetAllChildNodeWithSecond()
     auto second = *iter;
     CHECK_NULL_VOID(second);
     auto hourStackNode = DynamicCast<FrameNode>(hour);
-    auto hourNode = DynamicCast<FrameNode>(hourStackNode->GetLastChild());
+    auto hourNode = DynamicCast<FrameNode>(hourStackNode->GetLastChild()->GetLastChild());
     auto minuteStackNode = DynamicCast<FrameNode>(minute);
-    auto minuteNode = DynamicCast<FrameNode>(minuteStackNode->GetLastChild());
+    auto minuteNode = DynamicCast<FrameNode>(minuteStackNode->GetLastChild()->GetLastChild());
     auto secondStackNode = DynamicCast<FrameNode>(second);
-    auto secondNode = DynamicCast<FrameNode>(secondStackNode->GetLastChild());
+    auto secondNode = DynamicCast<FrameNode>(secondStackNode->GetLastChild()->GetLastChild());
 
     CHECK_NULL_VOID(hourNode);
     CHECK_NULL_VOID(minuteNode);
@@ -813,7 +841,9 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto childSize = host->GetChildren().size();
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackChild);
-    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
+    auto columnBlendChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
+    CHECK_NULL_VOID(columnBlendChild);
+    auto pickerChild = DynamicCast<FrameNode>(columnBlendChild->GetLastChild());
     CHECK_NULL_VOID(pickerChild);
     auto columnWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width();
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -887,16 +917,16 @@ bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
     CHECK_NULL_RETURN(host, false);
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     auto childSize = host->GetChildren().size();
-    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
+    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild()->GetLastChild());
     auto pattern = pickerChild->GetPattern<TimePickerColumnPattern>();
-    auto currernIndex = pattern->GetCurrentIndex();
+    auto currentIndex = pattern->GetCurrentIndex();
     auto totalOptionCount = GetOptionCount(pickerChild);
     if (totalOptionCount == 0) {
         return false;
     }
     if (code == KeyCode::KEY_DPAD_UP || code == KeyCode::KEY_DPAD_DOWN) {
         auto index = (code == KeyCode::KEY_DPAD_UP) ? -1 : 1;
-        pattern->SetCurrentIndex((totalOptionCount + currernIndex + index) % totalOptionCount);
+        pattern->SetCurrentIndex((totalOptionCount + currentIndex + index) % totalOptionCount);
         pattern->FlushCurrentOptions();
         pattern->HandleChangeCallback((code == KeyCode::KEY_DPAD_UP) ? false : true, true);
         pattern->HandleEventCallback(true);

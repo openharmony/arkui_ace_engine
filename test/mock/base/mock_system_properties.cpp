@@ -53,6 +53,7 @@ bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
+bool SystemProperties::stateManagerEnable_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -134,5 +135,10 @@ bool SystemProperties::GetGridIrregularLayoutEnabled()
 bool SystemProperties::GetSideBarContainerBlurEnable()
 {
     return sideBarContainerBlurEnable_;
+}
+
+float SystemProperties::GetDefaultResolution()
+{
+    return 1.0f;
 }
 } // namespace OHOS::Ace

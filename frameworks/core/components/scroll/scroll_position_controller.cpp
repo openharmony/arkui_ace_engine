@@ -85,7 +85,7 @@ bool ScrollPositionController::AnimateTo(double position, float duration, const 
 }
 
 bool ScrollPositionController::AnimateTo(
-    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
+    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
 {
     RefPtr<RenderNode> node = scroll_.Upgrade();
     if (node) {

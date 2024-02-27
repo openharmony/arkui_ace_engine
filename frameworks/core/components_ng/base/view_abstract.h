@@ -27,11 +27,14 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_layout_info.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/popup_param.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -108,7 +111,7 @@ public:
 
     static void SetAspectRatio(float ratio);
     static void ResetAspectRatio();
-    static void SetLayoutWeight(int32_t value);
+    static void SetLayoutWeight(float value);
     static void SetPixelRound(uint8_t value);
     static void SetLayoutDirection(TextDirection value);
 
@@ -273,6 +276,7 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
+    static void DismissDialog();
     static void BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
         const NG::OffsetF &offset, const MenuParam &menuParam);
     static void BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,
@@ -498,6 +502,25 @@ public:
     static NG::OverlayOptions GetOverlay(FrameNode* frameNode);
     static void SetNeedFocus(FrameNode* frameNode, bool value);
     static bool GetNeedFocus(FrameNode* frameNode);
+    static double GetOpacity(FrameNode* frameNode);
+    static BorderWidthProperty GetBorderWidth(FrameNode* frameNode);
+    static BorderRadiusProperty GetBorderRadius(FrameNode* frameNode);
+    static BorderColorProperty GetBorderColor(FrameNode* frameNode);
+    static BorderStyleProperty GetBorderStyle(FrameNode* frameNode);
+    static int GetZIndex(FrameNode* frameNode);
+    static VisibleType GetVisibility(FrameNode* frameNode);
+    static bool GetClip(FrameNode* frameNode);
+    static std::optional<RefPtr<BasicShape>> GetClipShape(FrameNode* frameNode);
+    static Matrix4 GetTransform(FrameNode* frameNode);
+    static HitTestMode GetHitTestBehavior(FrameNode* frameNode);
+    static OffsetT<Dimension> GetPosition(FrameNode* frameNode);
+    static std::optional<Shadow> GetShadow(FrameNode* frameNode);
+    static NG::Gradient GetGradient(FrameNode* frameNode);
+    static std::optional<RefPtr<BasicShape>> GetMask(FrameNode* frameNode);
+    static const std::optional<RefPtr<ProgressMaskProperty>> GetMaskProgress(FrameNode* frameNode);
+    static BlendMode GetBlendMode(FrameNode* frameNode);
+    static TextDirection GetDirection(FrameNode* frameNode);
+    static FlexAlign GetAlignSelf(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

@@ -107,7 +107,8 @@ public:
     static float GetStep(FrameNode* frameNode);
     static bool GetReverse(FrameNode* frameNode);
     static SliderModel::SliderMode GetSliderMode(FrameNode* frameNode);
-
+    static std::string GetBlockImageValue(FrameNode* frameNode);
+    static RefPtr<BasicShape> GetBlockShape(FrameNode* frameNode);
 private:
     void SetSliderValue(float value);
 };

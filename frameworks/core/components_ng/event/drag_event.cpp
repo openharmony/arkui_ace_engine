@@ -81,10 +81,10 @@ DragEventActuator::DragEventActuator(
 
     panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
     panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
-    longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, false);
+    longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, true);
     longPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
     previewLongPressRecognizer_ =
-        AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, false);
+        AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, true);
     previewLongPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
     isNotInPreviewState_ = false;
 }
@@ -387,8 +387,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         actuator->SetEventColumn(actuator);
     };
+    auto longPressCancel = [weak = WeakClaim(this)] {
+        // remove drag overlay info by Cancel event.
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Long press event has been canceled.");
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        actuator->HideEventColumn();
+        actuator->HidePixelMap(true);
+        actuator->HideFilter();
+        actuator->SetIsNotInPreviewState(false);
+    };
     longPressUpdate_ = longPressUpdate;
     previewLongPressRecognizer_->SetOnAction(longPressUpdate);
+    previewLongPressRecognizer_->SetOnActionCancel(longPressCancel);
     previewLongPressRecognizer_->SetGestureHub(gestureEventHub_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -576,6 +587,7 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
+    imageNode->SetActive(true);
     imageNode->CreateLayoutTask();
     FlushSyncGeometryNodeTasks();
 }
@@ -614,6 +626,7 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     SetPreviewDefaultAnimateProperty(imageNode);
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     columnNode->MarkModifyDone();
+    columnNode->SetActive(true);
     columnNode->CreateLayoutTask();
     FlushSyncGeometryNodeTasks();
 }
@@ -673,6 +686,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     }
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
+    imageNode->SetActive(true);
     imageNode->CreateLayoutTask();
     FlushSyncGeometryNodeTasks();
     auto focusHub = frameNode->GetFocusHub();

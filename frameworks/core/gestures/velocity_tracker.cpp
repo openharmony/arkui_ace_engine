@@ -107,8 +107,6 @@ double UpdateAxisVelocity(LeastSquareImpl& axis)
 
 void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
 {
-    isVelocityDone_ = false;
-    currentTrackPoint_ = event;
     if (isFirstPoint_) {
         firstTrackPoint_ = event;
         isFirstPoint_ = false;
@@ -116,13 +114,26 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
         delta_ = event.GetOffset() - lastPosition_;
         lastPosition_ = event.GetOffset();
     }
+    TouchEvent lastTrackPoint(currentTrackPoint_);
+    currentTrackPoint_ = event;
+    isVelocityDone_ = false;
     std::chrono::duration<double> diffTime = event.time - lastTimePoint_;
     lastTimePoint_ = event.time;
     lastPosition_ = event.GetOffset();
     // judge duration is 500ms.
     static const double range = 0.5;
-    if (delta_.IsZero() && end && (diffTime.count() < range)) {
-        return;
+    if (end) {
+        Offset oriDelta;
+        if (isFirstPoint_) {
+            oriDelta = delta_;
+        } else {
+            Offset lastMoveEvent = Platform::GetTouchEventOriginOffset(lastTrackPoint);
+            Offset upEvent = Platform::GetTouchEventOriginOffset(event);
+            oriDelta = upEvent - lastMoveEvent;
+        }
+        if (oriDelta.IsZero() && (diffTime.count() < range)) {
+            return;
+        }
     }
     // nanoseconds duration to seconds.
     std::chrono::duration<double> duration = event.time - firstTrackPoint_.time;

@@ -109,7 +109,7 @@ public:
 #endif
 
     // interfaces for calculate the the specified paragraph position
-    int32_t GetGlyphIndexByCoordinate(const Offset& offset) override;
+    int32_t GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos = false) override;
     void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
     void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;

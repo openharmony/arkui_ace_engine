@@ -126,7 +126,7 @@ public:
 
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
-    virtual void SetLayoutWeight(int32_t value) = 0;
+    virtual void SetLayoutWeight(float value) = 0;
     virtual void SetPixelRound(uint8_t value) = 0;
     virtual void SetLayoutDirection(TextDirection value) = 0;
     virtual void SetAspectRatio(float ratio) = 0;
@@ -296,6 +296,7 @@ public:
         std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss) = 0;
     virtual void DismissSheet() = 0;
+    virtual void DismissDialog() {};
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;

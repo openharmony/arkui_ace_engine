@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         return false;
     }
     SetScrollSource(source);
-
+    FireAndCleanScrollingListener();
     if (GetScrollEdgeEffect()) {
         // over scroll in drag update from normal to over scroll.
         float overScroll = 0.0f;
@@ -71,11 +71,10 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
             return false;
         }
     }
-
+    FireOnWillScroll(-delta);
     layoutInfo_.prevOffset_ = layoutInfo_.currentOffset_;
     layoutInfo_.currentOffset_ += delta;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FireAndCleanScrollingListener();
     return true;
 };
 
@@ -218,6 +217,10 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto onScroll = eventHub->GetOnScroll();
     if (onScroll) {
         FireOnScroll(prevOffset_ - layoutInfo.currentOffset_, onScroll);
+    }
+    auto onDidScroll = eventHub->GetOnDidScroll();
+    if (onDidScroll) {
+        FireOnScroll(prevOffset_ - layoutInfo.currentOffset_, onDidScroll);
     }
     bool indexChanged =
         layoutInfo_.firstIndex_ != layoutInfo.firstIndex_ || layoutInfo_.endIndex_ != layoutInfo.endIndex_;

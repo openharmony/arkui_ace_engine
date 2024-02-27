@@ -95,9 +95,9 @@ namespace {
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_debugger.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_debugger.z.so";
 #endif
 const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
@@ -264,6 +264,8 @@ thread_local shared_ptr<JsRuntime> localRuntime_;
 thread_local bool isUnique_ = false;
 // ArkTsCard end
 
+thread_local bool isWorker_ = false;
+
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
@@ -426,6 +428,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleWorker(void* runtime)
 
 void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
 {
+    isWorker_ = true;
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
 
     if (!sharedRuntime) {
@@ -480,7 +483,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     if (!arkRuntime->InitializeFromExistVM(vm)) {
         return;
     }
-    arkRuntime->SetNativeEngine(nativeArkEngine);
     LocalScope scope(vm);
     {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
@@ -785,6 +787,10 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
 
     // ArkTsCard
     if (isUnique_ && localRuntime_) {
+        return localRuntime_;
+    }
+
+    if (isWorker_ && localRuntime_) {
         return localRuntime_;
     }
 
@@ -2234,7 +2240,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     }
 
     // preload js views
-    JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList);
+    JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, false, runtime);
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     PreloadAceConsole(arkRuntime, global);

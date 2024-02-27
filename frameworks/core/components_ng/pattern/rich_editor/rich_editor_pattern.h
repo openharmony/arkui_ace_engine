@@ -148,6 +148,7 @@ public:
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void MoveCaretOnLayoutSwap();
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
@@ -406,6 +407,13 @@ public:
 
     bool IsShowSelectMenuUsingMouse();
 
+    bool IsShowPlaceholder() const
+    {
+        return isShowPlaceholder_;
+    }
+
+    void SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+
     void HandleOnCameraInput() override;
 
     RefPtr<FocusHub> GetFocusHub() const;
@@ -661,6 +669,8 @@ private:
     TimeStamp lastAiPosTimeStamp_;
     bool adjusted_ = false;
     bool isShowMenu_ = true;
+    bool isShowPlaceholder_ = false;
+    SelectionRangeInfo lastSelectionRange_{-1, -1};
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

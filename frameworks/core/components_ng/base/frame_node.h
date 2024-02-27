@@ -85,7 +85,8 @@ public:
 
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
     // avoid use creator function, use CreateFrameNode
-    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, int32_t instanceId = -1,
+        bool isRoot = false);
 
     ~FrameNode() override;
 
@@ -137,6 +138,7 @@ public:
         // TODO: modify done need to optimize.
         MarkModifyDone();
         MarkDirtyNode();
+        isPropertyDiffMarked_ = false;
     }
 
     void FlushUpdateAndMarkDirty() override;
@@ -170,18 +172,26 @@ public:
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
-    void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
+    void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
-        visibleAreaUserCallbacks_[ratio] = callback;
+        eventHub_->SetVisibleAreaRatios(ratios, true);
+        eventHub_->SetVisibleAreaCallback(callback, true);
     }
 
-    void ClearVisibleAreaUserCallback()
+    void CleanVisibleAreaUserCallback()
     {
-        visibleAreaUserCallbacks_.clear();
+        eventHub_->CleanVisibleAreaCallback(true);
     }
-    void AddVisibleAreaInnerCallback(double ratio, const VisibleCallbackInfo& callback)
+
+    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
-        visibleAreaInnerCallbacks_[ratio] = callback;
+        eventHub_->SetVisibleAreaRatios(ratios, false);
+        eventHub_->SetVisibleAreaCallback(callback, false);
+    }
+
+    void CleanVisibleAreaInnerCallback()
+    {
+        eventHub_->CleanVisibleAreaCallback(false);
     }
 
     void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
@@ -300,8 +310,6 @@ public:
     {
         nodeName_ = nodeName;
     }
-    bool IsResponseRegion() const;
-    void MarkResponseRegion(bool isResponseRegion);
 
     void OnWindowShow() override;
 
@@ -577,8 +585,17 @@ public:
         return GetTag();
     }
 
-    bool HasTransitionRunning();
     bool SelfOrParentExpansive();
+    bool SelfExpansive();
+    bool ParentExpansive();
+    void SetNeedRestoreSafeArea(bool needRestore)
+    {
+        needRestoreSafeArea_ = needRestore;
+    }
+    bool NeedRestoreSafeArea()
+    {
+        return needRestoreSafeArea_;
+    }
 
     bool IsActive() const override
     {
@@ -597,7 +614,7 @@ public:
     void SetCacheCount(
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
-    void SyncGeometryNode();
+    void SyncGeometryNode(bool needSkipSync = false);
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
@@ -732,11 +749,8 @@ private:
 
     bool GetTouchable() const;
 
-    void ProcessAllVisibleCallback(
-        std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
-    void OnVisibleAreaChangeCallback(
-        std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks,
-        bool visibleType, double currentVisibleRatio, bool isHandled);
+    void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
+        VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio);
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
 
@@ -769,8 +783,6 @@ private:
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;
-    std::unordered_map<double, VisibleCallbackInfo> visibleAreaUserCallbacks_;
-    std::unordered_map<double, VisibleCallbackInfo> visibleAreaInnerCallbacks_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;
@@ -810,6 +822,7 @@ private:
     bool isFirstBuilding_ = true;
 
     double lastVisibleRatio_ = 0.0;
+    double lastVisibleCallbackRatio_ = 0.0;
 
     // internal node such as Text in Button CreateWithLabel
     // should not seen by preview inspector or accessibility
@@ -827,6 +840,7 @@ private:
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
+    bool needRestoreSafeArea_ = true;
 
     RefPtr<FrameNode> overlayNode_;
 

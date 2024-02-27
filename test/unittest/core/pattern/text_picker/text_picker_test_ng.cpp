@@ -133,9 +133,11 @@ public:
     RefPtr<TextPickerAccessibilityProperty> textPickerAccessibilityProperty_;
     RefPtr<TextPickerRowAccessibilityProperty> textPickerRowAccessibilityProperty_;
     RefPtr<FrameNode> stackNode_;
+    RefPtr<FrameNode> blendNode_;
     RefPtr<FrameNode> columnNode_;
     RefPtr<TextPickerColumnPattern> textPickerColumnPattern_;
     RefPtr<FrameNode> stackNodeNext_;
+    RefPtr<FrameNode> blendNodeNext_;
     RefPtr<FrameNode> columnNodeNext_;
     RefPtr<TextPickerColumnPattern> textPickerColumnPatternNext_;
     RefPtr<TextPickerAccessibilityProperty> textPickerAccessibilityPropertyNext_;
@@ -148,9 +150,11 @@ void TextPickerTestNg::DestroyTextPickerTestNgObject()
     textPickerAccessibilityProperty_ = nullptr;
     textPickerRowAccessibilityProperty_ = nullptr;
     stackNode_ = nullptr;
+    blendNode_ = nullptr;
     columnNode_ = nullptr;
     textPickerColumnPattern_ = nullptr;
     stackNodeNext_ = nullptr;
+    blendNodeNext_ = nullptr;
     columnNodeNext_ = nullptr;
     textPickerColumnPatternNext_ = nullptr;
     textPickerAccessibilityPropertyNext_ = nullptr;
@@ -168,6 +172,9 @@ void TextPickerTestNg::InitTextPickerTestNg()
     stackNode_ = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<StackPattern>(); });
     ASSERT_NE(stackNode_, nullptr);
+    blendNode_ = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(blendNode_, nullptr);
     columnNode_ = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
     ASSERT_NE(columnNode_, nullptr);
@@ -175,12 +182,16 @@ void TextPickerTestNg::InitTextPickerTestNg()
     ASSERT_NE(textPickerAccessibilityProperty_, nullptr);
     textPickerColumnPattern_ = columnNode_->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(textPickerColumnPattern_, nullptr);
-    columnNode_->MountToParent(stackNode_);
+    columnNode_->MountToParent(blendNode_);
+    blendNode_->MountToParent(stackNode_);
     stackNode_->MountToParent(frameNode_);
 
     stackNodeNext_ = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<StackPattern>(); });
     ASSERT_NE(stackNodeNext_, nullptr);
+    blendNodeNext_ = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(blendNodeNext_, nullptr);
     columnNodeNext_ =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
@@ -189,7 +200,8 @@ void TextPickerTestNg::InitTextPickerTestNg()
     ASSERT_NE(textPickerAccessibilityPropertyNext_, nullptr);
     textPickerColumnPatternNext_ = columnNodeNext_->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(textPickerColumnPatternNext_, nullptr);
-    columnNodeNext_->MountToParent(stackNodeNext_);
+    columnNodeNext_->MountToParent(blendNodeNext_);
+    blendNodeNext_->MountToParent(stackNodeNext_);
     stackNodeNext_->MountToParent(frameNode_);
 }
 
@@ -2393,7 +2405,9 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
     ASSERT_NE(stackNode, nullptr);
-    auto columnNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
+    auto blendNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
     auto columnChildren = columnNode->GetChildren();
     EXPECT_EQ(FIVE_CHILDREN + BUFFER_NODE_NUMBER, columnChildren.size());
@@ -2414,7 +2428,9 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGCreate002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
     ASSERT_NE(stackNode, nullptr);
-    auto columnNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
+    auto blendNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
     auto columnChildren = columnNode->GetChildren();
     EXPECT_EQ(FIVE_CHILDREN + BUFFER_NODE_NUMBER, columnChildren.size());
@@ -3173,7 +3189,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     pickerProperty->UpdateDefaultPickerItemHeight(Dimension(10));
@@ -3212,7 +3228,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
@@ -3239,7 +3255,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest002, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto subNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());
@@ -3270,7 +3286,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest003, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     pickerProperty->UpdateDefaultPickerItemHeight(Dimension(10));
@@ -3302,7 +3318,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest004, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     pickerProperty->UpdateDefaultPickerItemHeight(Dimension(10));
@@ -3339,7 +3355,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest005, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     pickerProperty->UpdateDefaultPickerItemHeight(Dimension(10));
@@ -3382,7 +3398,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest006, TestSize.Level1)
      */
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     pickerPattern->SetIsShowInDialog(true);
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
 
@@ -3423,7 +3439,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest007, TestSize.Level1)
      */
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     pickerPattern->SetIsShowInDialog(true);
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
 
@@ -4391,7 +4407,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest003, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto layoutWrapper =
@@ -4421,7 +4437,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto layoutWrapper =
@@ -4453,7 +4469,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest002, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto layoutWrapper =
@@ -4518,7 +4534,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest003, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
     auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -4587,7 +4603,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest005, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
     auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -4659,7 +4675,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest004, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
     auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
@@ -4942,7 +4958,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest005, TestSize.Level1)
     TextPickerModelNG::GetInstance()->SetValues(values);
     TextPickerModelNG::GetInstance()->SetCanLoop(true);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
     auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
@@ -5313,6 +5329,9 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest006, TestSize.Level1)
     auto columnNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
+    auto blendNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -5320,7 +5339,8 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest006, TestSize.Level1)
     auto geometryNode = stackNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     buttonNode->MountToParent(stackNode);
-    columnNode->MountToParent(stackNode);
+    columnNode->MountToParent(blendNode);
+    blendNode->MountToParent(stackNode);
     stackNode->MountToParent(frameNode);
     SizeF frameSize(FONT_SIZE_20, FONT_SIZE_20);
     geometryNode->SetFrameSize(frameSize);
@@ -5381,7 +5401,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest008, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto layoutWrapper =
@@ -5432,7 +5452,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest009, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     pickerProperty->contentConstraint_ = pickerProperty->CreateContentConstraint();
@@ -5532,6 +5552,9 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest012, TestSize.Level1)
     auto columnNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
+    auto blendNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -5539,7 +5562,8 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest012, TestSize.Level1)
     auto geometryNode = stackNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     buttonNode->MountToParent(stackNode);
-    columnNode->MountToParent(stackNode);
+    columnNode->MountToParent(blendNode);
+    blendNode->MountToParent(stackNode);
     stackNode->MountToParent(frameNode);
     SizeF frameSize(FONT_SIZE_20, FONT_SIZE_20);
     geometryNode->SetFrameSize(frameSize);
@@ -5562,7 +5586,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest013, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto layoutWrapper =
@@ -5593,19 +5617,23 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest014, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto blendNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<StackPattern>(); });
     auto geometryNode = stackNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     buttonNode->MountToParent(stackNode);
-    columnNode->MountToParent(stackNode);
+    columnNode->MountToParent(blendNode);
+    blendNode->MountToParent(stackNode);
     stackNode->MountToParent(frameNode);
 
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
@@ -5641,7 +5669,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest015, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto layoutWrapper =
@@ -6008,7 +6036,7 @@ HWTEST_F(TextPickerTestNg, ChangeTextStyle001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
-    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
     ASSERT_NE(columnNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);

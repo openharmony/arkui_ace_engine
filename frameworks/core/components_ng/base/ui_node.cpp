@@ -36,8 +36,8 @@ namespace OHOS::Ace::NG {
 
 thread_local int64_t UINode::currentAccessibilityId_ = 0;
 
-UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
-    : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
+UINode::UINode(const std::string& tag, int32_t nodeId, int32_t instanceId, bool isRoot)
+    : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot), instanceId_(instanceId)
 {
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
@@ -54,6 +54,9 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         distributedUI->AddNewNode(nodeId_);
     } while (false);
 #endif
+    if (instanceId_ == -1) {
+        instanceId_ = Container::CurrentId();
+    }
     nodeStatus_ = ViewStackProcessor::GetInstance()->IsBuilderNode() ? NodeStatus::BUILDER_NODE_OFF_MAINTREE
                                                                      : NodeStatus::NORMAL_NODE;
 }
@@ -506,6 +509,7 @@ void UINode::DumpTree(int32_t depth)
     if (DumpLog::GetInstance().GetDumpFile()) {
         DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
         DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
+        DumpLog::GetInstance().AddDesc("InstanceId: " + std::to_string(instanceId_));
         DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
         if (IsDisappearing()) {
             DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
@@ -600,7 +604,7 @@ void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
 
 RefPtr<PipelineContext> UINode::GetContext()
 {
-    return PipelineContext::GetCurrentContext();
+    return PipelineContext::GetCurrentContextSafely();
 }
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -1045,6 +1049,26 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
         }
         child->OnAttachToBuilderNode(nodeStatus_);
         child->UpdateNodeStatus(nodeStatus_);
+    }
+}
+
+
+// Collects  all the child elements of "children" in a recursive manner
+// Fills the "removedElmtId" list with the collected child elements
+void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId)
+{
+    for (auto const& child : children) {
+        CollectRemovedChild(child, removedElmtId);
+    }
+}
+
+void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId)
+{
+    removedElmtId.emplace_back(child->GetId());
+    // Fetch all the child elementIDs recursively
+    if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
+        // add CustomNode but do not recurse into its children
+        CollectRemovedChildren(child->GetChildren(), removedElmtId);
     }
 }
 } // namespace OHOS::Ace::NG

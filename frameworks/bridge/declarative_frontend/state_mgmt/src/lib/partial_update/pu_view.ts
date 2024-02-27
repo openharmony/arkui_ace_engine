@@ -244,9 +244,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.setCardId(parent.getCardId());
       // Call below will set this.parent_ to parent as well
       parent.addChild(this);
-    } else if (localStorage) {
+    }
+    if (localStorage) {
       this.localStorage_ = localStorage;
-      stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry.`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry or view instance creation.`);
     }
     this.isCompFreezeAllowed = this.isCompFreezeAllowed || (this.parent_ && this.parent_.isCompFreezeAllowed);
 
@@ -315,6 +316,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // it will unregister removed elementids from all the viewpu, equals purgeDeletedElmtIdsRecursively
     this.purgeDeletedElmtIds();
 
+    // unregisters its own id once its children are unregistered above
+    UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
+
     stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID  - DONE`);
 
     // in case ViewPU is currently frozen
@@ -374,7 +378,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private debugInfoStateVars(): string {
     let result: string = `|--${this.constructor.name}[${this.id__()}]`;
     Object.getOwnPropertyNames(this)
-      .filter((varName: string) => varName.startsWith("__"))
+      .filter((varName: string) => varName.startsWith("__") && !varName.startsWith(ObserveV3.OB_PREFIX) )
       .forEach((varName) => {
         const prop: any = Reflect.get(this, varName);
         if ("debugInfoDecorator" in prop) {
@@ -683,6 +687,36 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtProfiler.end();
   }
 
+  /**
+   *  inform that UINode with given elmtId needs rerender
+   *  does NOT exec @Watch function.
+   *  only used on V3 code path from ObserveV3.fireChange.
+   */
+  public uiNodeNeedUpdateV3(elmtId: number): void {
+    if (this.isFirstRender()) {
+      return;
+    }
+
+    stateMgmtProfiler.begin(`ViewPU.uiNodeNeedUpdate ${this.debugInfoElmtId(elmtId)}`);
+
+    // FIXME Its slow to make native calls: what is this for, is this really needed ?
+    // this.syncInstanceId();
+
+      if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
+        // mark ComposedElement dirty when first elmtIds are added
+        // do not need to do this every time
+        this.markNeedUpdate();
+      }
+      if (this.hasRecycleManager()) {
+        this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+      } else {
+        this.dirtDescendantElementIds_.add(elmtId);
+      }
+      stateMgmtConsole.debug(`ViewPU.uiNodeNeedUpdate: updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
+
+    // FIXME dito: this.restoreInstanceId();
+    stateMgmtProfiler.end();
+  }
 
   private performDelayedUpdate(): void {
     if (!this.ownObservedPropertiesStore_.size) {
@@ -812,7 +846,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // process all elmtIds marked as needing update in ascending order.
       // ascending order ensures parent nodes will be updated before their children
       // prior cleanup ensure no already deleted Elements have their update func executed
-      Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
+      const dirtElmtIdsFromRootNode= Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
+      dirtElmtIdsFromRootNode.forEach(elmtId => {
         if (this.hasRecycleManager()) {
           this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
         } else {
@@ -898,11 +933,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
   }
 
-  // executed on first render only
-  // added July 2023, replaces observeComponentCreation
-  // classObject is the ES6 class object , mandatory to specify even the class lacks the pop function.
-  // - prototype : Object is present for every ES6 class
-  // - pop : () => void, static function present for JSXXX classes such as Column, TapGesture, etc.
   public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object, pop?: () => void }): void {
     if (this.isDeleting_) {
       stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
@@ -912,16 +942,28 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const _popFunc: () => void = (classObject && "pop" in classObject) ? classObject.pop! : () => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean) => {
       this.syncInstanceId();
-      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} start ....`);
-      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] start ....`);
+      
+      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);     
       this.currentlyRenderedElmtIdStack_.push(elmtId);
+      if (ConfigureStateMgmt.instance.needsV3Observe()) {
+        // FIXME - we probably need the same stack-based solution for startBind as for old system
+        ObserveV3.getObserve().startBind(this, elmtId);
+      }
+
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       if (!isFirstRender) {
         _popFunc();
       }
+
+      if (ConfigureStateMgmt.instance.needsV3Observe()) {
+        // FIXME dito
+        ObserveV3.getObserve().startBind(null, -1);
+      }
       this.currentlyRenderedElmtIdStack_.pop();
       ViewStackProcessor.StopGetAccessRecording();
-      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} - DONE ....`);
+
+      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
       this.restoreInstanceId();
     };
 
@@ -942,6 +984,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
     stateMgmtConsole.debug(`${this.debugInfo__()} is initial rendering elmtId ${elmtId}, tag: ${_componentName}, and updateFuncByElmtId size :${this.updateFuncByElmtId.size}`);
   }
+
 
   getOrCreateRecycleManager(): RecycleManager {
     if (!this.recycleManager_) {
@@ -1014,13 +1057,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
         this.aboutToReuse(params);
       }
     }, "aboutToReuse", this.constructor.name);
-    this.updateDirtyElements();
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child && !child.hasBeenRecycled_) {
         child.aboutToReuseInternal();
       }
     });
+    this.updateDirtyElements();
     this.runReuse_ = false;
   }
 
@@ -1060,9 +1103,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
     // ifElseNode stores the most recent branch, so we can compare
-    // removedChildElmtIds will be filled with the elmtIds of all childten and their children will be deleted in response to if .. else chnage
+    // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
     let removedChildElmtIds = new Array<number>();
     If.branchId(branchId, removedChildElmtIds);
+
+    //unregisters the removed child elementIDs using proxy
+    UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
 
     // purging these elmtIds from state mgmt will make sure no more update function on any deleted child wi;ll be executed
     stateMgmtConsole.debug(`ViewPU ifElseBranchUpdateFunction: elmtIds need unregister after if/else branch switch: ${JSON.stringify(removedChildElmtIds)}`);
@@ -1448,7 +1494,38 @@ abstract class ViewPU extends NativeViewPartialUpdate
     return Array.from(ViewPU.inactiveComponents_)
       .map((component) => `- ${component}`).join('\n');
   }
-}
+
+  
+  /**
+   * 
+   * @param paramVariableName @param is read only, therefore, update form parent needs to be done without
+   *        causing property setter() to be called
+   * @param newValue 
+   */
+  protected updateParam<Z>(paramVariableName : string, newValue : Z) {
+    ObserveV3.getObserve().setReadOnlyAttr<Z>(this, paramVariableName, newValue);
+  }
+
+  /**
+   * sub-class must call this function at the end of its constructor
+   * especially after init variables from parent ViewPU has been done
+   */
+  protected finalizeConstruction(): void {
+    if (ConfigureStateMgmt.instance.needsV3Observe()) {
+      ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
+    }
+  }
+
+  /**
+   * v3: find a @provide'ed variable in the nearest ancestor ViewPU.
+   * @param provideName 
+   * @returns 
+   */
+  public findProvideV3(provideName: string): [ViewPU | undefined, string, boolean] {
+    // FIXME unimplemented
+    return [ undefined, provideName, true]
+  }
+}  // class ViewPU
 
 class UpdateFuncsByElmtId {
 
@@ -1504,4 +1581,4 @@ class UpdateFuncsByElmtId {
     const updateFuncEntry = this.map_.get(elmtId);
     return updateFuncEntry ? `'${updateFuncEntry!.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
   }
-}
+}  // class UpdateFuncByElmtId

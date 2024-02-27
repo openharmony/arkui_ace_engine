@@ -598,6 +598,10 @@ public:
     }
     void UpdateNextValidIndex();
 
+    void FireWillHideEvent(int32_t willHideIndex) const;
+    void FireWillShowEvent(int32_t willShowIndex) const;
+    void SetOnHiddenChangeForParent();
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -808,6 +812,10 @@ private:
 
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
 
+    void PreloadItems(const std::set<int32_t>& indexSet);
+    void DoPreloadItems(const std::set<int32_t>& indexSet, int32_t errorCode);
+    void FirePreloadFinishEvent(int32_t errorCode);
+
     WeakPtr<NestableScrollContainer> parent_;
     /**
      *  ============================================================
@@ -872,6 +880,7 @@ private:
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
     bool needTurn_ = false;
+    bool isParentHiddenChange_ = false;
     /**
      * @brief Indicates whether the child NestableScrollContainer is currently scrolling and affecting Swiper.
      */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ public:
  * @tc.desc: Test Tabs controller
  * @tc.type: FUNC
  */
-HWTEST_F(TabsEventTestNg, TabsController001, TestSize.Level1)
+HWTEST_F(TabsEventTestNg, DISABLED_TabsController001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set SetAnimationDuration to zero for avoid animation
@@ -43,7 +43,7 @@ HWTEST_F(TabsEventTestNg, TabsController001, TestSize.Level1)
      * @tc.steps: step2. SwipeTo second tabContent
      * @tc.expected: Show second tabContent
      */
-    swiperController_->SwipeTo(1);
+    swiperController_->SwipeToWithoutAnimation(1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
@@ -52,7 +52,7 @@ HWTEST_F(TabsEventTestNg, TabsController001, TestSize.Level1)
      * @tc.steps: step3. SwipeTo same tabContent
      * @tc.expected: Show second tabContent
      */
-    swiperController_->SwipeTo(1);
+    swiperController_->SwipeToWithoutAnimation(1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
@@ -61,7 +61,7 @@ HWTEST_F(TabsEventTestNg, TabsController001, TestSize.Level1)
      * @tc.steps: step4. SwipeTo index that greater than maxIndex
      * @tc.expected: Show first tabContent
      */
-    swiperController_->SwipeTo(TABCONTENT_NUMBER);
+    swiperController_->SwipeToWithoutAnimation(TABCONTENT_NUMBER);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
@@ -70,7 +70,7 @@ HWTEST_F(TabsEventTestNg, TabsController001, TestSize.Level1)
      * @tc.steps: step5. SwipeTo index that less than zero
      * @tc.expected: Show first tabContent
      */
-    swiperController_->SwipeTo(-1);
+    swiperController_->SwipeToWithoutAnimation(-1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);

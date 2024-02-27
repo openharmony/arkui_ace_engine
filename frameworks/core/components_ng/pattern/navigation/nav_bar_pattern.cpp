@@ -432,6 +432,7 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
                     navBarPattern->GetToolBarMenuItems().empty();
     if (!titleBarNode->GetTitle() && !titleBarNode->GetSubtitle() && !titleBarNode->GetBackButton() && !hasCustomMenu &&
         hideMenu) {
+        titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
         return;
     }
     titleBarLayoutProperty->UpdateTitleMode(navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE));

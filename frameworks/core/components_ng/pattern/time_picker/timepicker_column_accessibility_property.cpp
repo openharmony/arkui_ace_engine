@@ -85,7 +85,9 @@ std::string TimePickerColumnAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
-    auto stackNode = DynamicCast<FrameNode>(frameNode->GetParent());
+    auto blendNode = DynamicCast<FrameNode>(frameNode->GetParent());
+    CHECK_NULL_RETURN(blendNode, "");
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
     CHECK_NULL_RETURN(stackNode, "");
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_RETURN(parentNode, "");

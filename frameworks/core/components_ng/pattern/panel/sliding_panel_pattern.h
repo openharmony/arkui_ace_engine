@@ -68,6 +68,16 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    void SetLastOffset(float lastOffset)
+    {
+        lastOffset_ = lastOffset;
+    }
+
+    float GetLastOffset() const
+    {
+        return lastOffset_;
+    }
+
     void OnAnimationStop();
     void UpdateCurrentOffset(float offset);
     void UpdateCurrentOffsetOnAnimate(float currentOffset);
@@ -147,6 +157,7 @@ private:
     std::queue<bool> isShowQueue_;
     bool isClosePanel_ = false;
     bool preAnimateFlag_ = false;
+    float lastOffset_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelPattern);
 };

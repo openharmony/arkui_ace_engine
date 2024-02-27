@@ -57,6 +57,7 @@ public:
         const std::optional<Dimension>& radiusBottomRight);
     static void SetSize(
         FrameNode* frameNode, const std::optional<Dimension>& width, const std::optional<Dimension>& height);
+    static void SetLabel(FrameNode* frameNode, const char* label);
 
 private:
     static void CreateWithLabel(const std::string& label);

@@ -36,6 +36,12 @@ std::map<SliderModel::BlockStyleType, int> SLIDER_STYLE_TYPE_MAP = {
     { SliderModel::BlockStyleType::IMAGE, 1 },
     { SliderModel::BlockStyleType::SHAPE, 2 } };
 
+std::map<BasicShapeType, int> SHAPE_TYPE_MAP = {
+    { BasicShapeType::RECT, 0 },
+    { BasicShapeType::CIRCLE, 1 },
+    { BasicShapeType::ELLIPSE, 2 },
+    { BasicShapeType::PATH, 3 } };
+
 const float DEFAULT_VALUE = 0.0;
 const float DEFAULT_MAX_VALUE = 100.0;
 const float DEFAULT_MIN_VALUE = 0.0;
@@ -44,8 +50,10 @@ const float DEFAULT_STEP_VALUE = 1.0;
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
-
 namespace SliderModifier {
+
+std::string g_strValue;
+
 void SetShowTips(ArkUINodeHandle node, ArkUI_Bool isShow, const char *value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -531,6 +539,45 @@ ArkUI_Int32 GetSliderStyle(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return SLIDER_MODE_MAP[SliderModelNG::GetSliderMode(frameNode)];
 }
+ArkUI_CharPtr GetBlockImageValue(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = SliderModelNG::GetBlockImageValue(frameNode);
+    return g_strValue.c_str();
+}
+
+ArkUI_CharPtr GetSliderBlockShape(ArkUINodeHandle node, ArkUI_Float32* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    RefPtr<BasicShape> basicShape = SliderModelNG::GetBlockShape(frameNode);
+    auto shapeType = basicShape->GetBasicShapeType();
+    //index 0 shapeType
+    value[0] = SHAPE_TYPE_MAP[shapeType];
+    //index 1 width
+    value[1] = basicShape->GetWidth().Value();
+    //index 2 height
+    value[2] = basicShape->GetHeight().Value();
+    switch (shapeType) {
+        case BasicShapeType::PATH: {
+            auto path = AceType::DynamicCast<Path>(basicShape);
+            g_strValue = path->GetValue();
+            return g_strValue.c_str();
+        }
+        case BasicShapeType::RECT: {
+            auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape);
+            //index 3 radius x
+            value[3] = shapeRect->GetTopLeftRadius().GetX().Value();
+            //index 4 radius y
+            value[4] = shapeRect->GetTopLeftRadius().GetY().Value();
+            break;
+        }
+        default:
+            break;
+    }
+    return nullptr;
+}
 } // namespace SliderModifier
 
 namespace NodeModifier {
@@ -593,7 +640,9 @@ const ArkUISliderModifier* GetSliderModifier()
         SliderModifier::GetDirection,
         SliderModifier::GetStep,
         SliderModifier::GetReverse,
-        SliderModifier::GetSliderStyle
+        SliderModifier::GetSliderStyle,
+        SliderModifier::GetBlockImageValue,
+        SliderModifier::GetSliderBlockShape
     };
 
     return &modifier;

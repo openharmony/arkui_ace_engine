@@ -50,9 +50,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem001, Te
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
     ASSERT_NE(groupPattern, nullptr);
 
-    groupPattern->headerIndex_ = 1;
     RefPtr<LayoutAlgorithm> layoutAl = groupPattern->CreateLayoutAlgorithm();
-    EXPECT_TRUE(groupPattern->headerIndex_ != 0);
     ASSERT_NE(layoutAl, nullptr);
 
     /* *
@@ -116,9 +114,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem002, Te
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
     ASSERT_NE(groupPattern, nullptr);
 
-    groupPattern->headerIndex_ = 1;
     RefPtr<LayoutAlgorithm> layoutAl = groupPattern->CreateLayoutAlgorithm();
-    EXPECT_TRUE(groupPattern->headerIndex_ != 0);
     ASSERT_NE(layoutAl, nullptr);
 
     /* *

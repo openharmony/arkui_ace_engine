@@ -177,9 +177,6 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
     cancelButtonLayoutProperty->UpdateLabel("");
     cancelButtonFrameNode->MarkModifyDone();
-
-    HandleEnabled();
-
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldValueChangeEvent();
@@ -192,6 +189,7 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+    HandleEnabled();
 }
 
 void SearchPattern::HandleBackgroundColor()
@@ -281,6 +279,8 @@ void SearchPattern::InitTextFieldDragEvent()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldEventHub = textFieldFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(textFieldEventHub);
+
+    textFieldFrameNode->SetDragPreview(host->GetDragPreview());
 
     auto dragStart = searchEventHub->GetOnDragStart();
     if (dragStart != nullptr) {

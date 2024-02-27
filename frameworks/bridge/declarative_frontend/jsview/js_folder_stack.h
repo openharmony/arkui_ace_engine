@@ -27,6 +27,7 @@ public:
     static void SetAutoHalfFold(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void JSOnFolderStateChange(const JSCallbackInfo& info);
+    static void JSOnHoverStatusChange(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_FOLDER_STACK_H

@@ -62,6 +62,8 @@ private:
     void AdjustNodeTree(const RefPtr<FolderStackGroupNode>& hostNode);
     bool IsIntoFolderStack(SizeF& frameSize, const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty,
         LayoutWrapper* layoutWrapper);
+    void OnHoverStatusChange(LayoutWrapper* layoutWrapper);
+    void MeasureByStack(const RefPtr<FolderStackGroupNode>& hostNode, LayoutWrapper* layoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(FolderStackLayoutAlgorithm);
     float preHoverStackHeight_ = 0.0f;
     float preControlPartsStackHeight_ = 0.0f;

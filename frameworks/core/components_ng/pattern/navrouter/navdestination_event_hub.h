@@ -62,6 +62,9 @@ public:
             auto onShownEvent = onShownEvent_;
             onShownEvent();
         }
+        if (onHiddenChange_) {
+            onHiddenChange_(true);
+        }
         if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
             auto host = GetFrameNode();
             CHECK_NULL_VOID(host);
@@ -87,6 +90,10 @@ public:
         if (onHiddenEvent_) {
             onHiddenEvent_();
         }
+        if (onHiddenChange_) {
+            onHiddenChange_(false);
+        }
+
         if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
             auto host = GetFrameNode();
             CHECK_NULL_VOID(host);
@@ -132,6 +139,11 @@ public:
         }
     }
 
+    void SetOnHiddenChange(std::function<void(bool)>&& onHiddenChange)
+    {
+        onHiddenChange_ = std::move(onHiddenChange);
+    }
+
 private:
     WeakPtr<AceType> GetNavDestinationPattern() const
     {
@@ -145,6 +157,7 @@ private:
     std::function<void()> onHiddenEvent_;
     std::function<bool()> onBackPressedEvent_;
     std::function<void(RefPtr<NavDestinationContext>)> onReadyEvent_;
+    std::function<void(bool)> onHiddenChange_;
 
     bool isActivated_ = false;
 };

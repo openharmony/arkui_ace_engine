@@ -822,6 +822,9 @@ void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Push(NG::RouterPageInfo({ uri, params }));
         OnMediaQueryUpdate();
         return;
@@ -834,6 +837,9 @@ void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
         OnMediaQueryUpdate();
         return;
@@ -846,13 +852,9 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto currentId = Container::CurrentId();
-        if (container->IsSubContainer()) {
-            currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
-        }
-        ContainerScope scope(currentId);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Push(
             NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
         OnMediaQueryUpdate();
@@ -865,6 +867,9 @@ void FrontendDelegateDeclarative::PushNamedRoute(const std::string& uri, const s
     const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
+    auto currentId = GetEffectiveContainerId();
+    CHECK_EQUAL_VOID(currentId.has_value(), false);
+    ContainerScope scope(currentId.value());
     pageRouterManager_->PushNamedRoute(
         NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
@@ -874,6 +879,9 @@ void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::str
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params }));
         OnMediaQueryUpdate();
         return;
@@ -886,6 +894,9 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
         OnMediaQueryUpdate();
         return;
@@ -898,6 +909,9 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Replace(
             NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
         OnMediaQueryUpdate();
@@ -910,6 +924,9 @@ void FrontendDelegateDeclarative::ReplaceNamedRoute(const std::string& uri, cons
     const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
+    auto currentId = GetEffectiveContainerId();
+    CHECK_EQUAL_VOID(currentId.has_value(), false);
+    ContainerScope scope(currentId.value());
     pageRouterManager_->ReplaceNamedRoute(
         NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
@@ -919,11 +936,38 @@ void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->BackWithTarget(NG::RouterPageInfo({ uri, params }));
         OnMediaQueryUpdate();
         return;
     }
     BackWithTarget(PageTarget(uri), params);
+}
+
+void FrontendDelegateDeclarative::BackToIndex(int32_t index, const std::string& params)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->BackToIndexWithTarget(index, params);
+        OnMediaQueryUpdate();
+        return;
+    }
+    if (index > pageRouteStack_.size() || index <= 0) {
+        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return;
+    }
+    std::string url;
+    int32_t counter = 1;
+    for (const auto& iter : pageRouteStack_) {
+        if (counter == index) {
+            url = iter.url;
+            break;
+        }
+        counter++;
+    }
+    BackWithTarget(PageTarget(url), params);
 }
 
 void FrontendDelegateDeclarative::Clear()
@@ -979,6 +1023,83 @@ void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, st
     if (pos != std::string::npos) {
         name = url.substr(pos + 1);
         path = url.substr(0, pos + 1);
+    }
+}
+
+void FrontendDelegateDeclarative::GetRouterStateByIndex(int32_t& index, std::string& name,
+    std::string& path, std::string& params)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->GetStateByIndex(index, name, path, params);
+        return;
+    }
+    if (index > pageRouteStack_.size() || index <= 0) {
+        LOGE("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return;
+    }
+    std::string url;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (pageRouteStack_.empty()) {
+            LOGI("pageRouteStack is empty");
+            return;
+        }
+        int32_t counter = 1;
+        for (const auto& iter : pageRouteStack_) {
+            if (counter == index) {
+                url = iter.url;
+                break;
+            }
+            counter++;
+        }
+    }
+    auto pos = url.rfind(".js");
+    if (pos == url.length() - 3) {
+        url = url.substr(0, pos);
+    }
+    pos = url.rfind("/");
+    if (pos != std::string::npos) {
+        name = url.substr(pos + 1);
+        path = url.substr(0, pos + 1);
+    }
+    params = GetParams();
+}
+
+void FrontendDelegateDeclarative::GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->GetStateByUrl(url, stateArray);
+        return;
+    }
+
+    int32_t counter = 1;
+    std::string tempUrl;
+    StateInfo stateInfo;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (pageRouteStack_.empty()) {
+            LOGI("pageRouteStack is empty");
+            return;
+        }
+        for (const auto& iter : pageRouteStack_) {
+            if (iter.url == url) {
+                stateInfo.index = counter;
+                auto pos = url.rfind(".js");
+                if (pos == url.length() - 3) {
+                    tempUrl = url.substr(0, pos);
+                }
+                pos = tempUrl.rfind("/");
+                if (pos != std::string::npos) {
+                    stateInfo.name = tempUrl.substr(pos + 1);
+                    stateInfo.path = tempUrl.substr(0, pos + 1);
+                }
+                stateInfo.params = GetParams();
+                stateArray.emplace_back(stateInfo);
+            }
+            counter++;
+        }
     }
 }
 
@@ -1557,6 +1678,19 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+void FrontendDelegateDeclarative::RemoveCustomDialog()
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootNode->GetLastChild());
+    CHECK_NULL_VOID(overlay);
+    overlayManager->RemoveDialog(overlay, false, false);
+}
+
 void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
     std::function<void(int32_t)> &&callback)
 {
@@ -1566,6 +1700,7 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
         .isSysBlurStyle = false,
         .customBuilder = dialogAttr.customBuilder,
         .maskRect = dialogAttr.maskRect,
+        .onWillDismiss = dialogAttr.customOnWillDismiss
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -2569,6 +2704,19 @@ void FrontendDelegateDeclarative::ReplacePageInSubStage(const RefPtr<JsAcePage>&
             delegate->isStagingPageExist_ = false;
         },
         TaskExecutor::TaskType::UI);
+}
+
+std::optional<int32_t> FrontendDelegateDeclarative::GetEffectiveContainerId()
+{
+    std::optional<int32_t> id;
+    auto currentId = Container::CurrentId();
+    auto container = Container::GetContainer(currentId);
+    CHECK_NULL_RETURN(container, id);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+    }
+    id.emplace(currentId);
+    return id;
 }
 
 void FrontendDelegateDeclarative::LoadReplacePage(int32_t pageId, const PageTarget& target, const std::string& params)

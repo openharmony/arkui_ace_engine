@@ -20,10 +20,12 @@
 #include <cstdint>
 #include <optional>
 
+#include "base/error/error_code.h"
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
@@ -34,7 +36,9 @@
 #include "core/common/container_scope.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
@@ -42,6 +46,9 @@
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -52,6 +59,7 @@
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -365,6 +373,10 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     if (mainSizeIsMeasured_ && isNeedResetPrevMarginAndNextMargin_) {
         layoutProperty->UpdatePrevMarginWithoutMeasure(0.0_px);
         layoutProperty->UpdateNextMarginWithoutMeasure(0.0_px);
+    }
+    if (oldIndex_ != currentIndex_ && !isInit_ && !IsUseCustomAnimation()) {
+        FireWillShowEvent(currentIndex_);
+        FireWillHideEvent(oldIndex_);
     }
 }
 
@@ -851,6 +863,10 @@ void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationC
 
 void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 {
+    if (currentIndex_ != index) {
+        FireWillShowEvent(index);
+        FireWillHideEvent(currentIndex_);
+    }
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
@@ -938,6 +954,10 @@ void SwiperPattern::SwipeTo(int32_t index)
         return;
     }
 
+    if (currentIndex_ != targetIndex_.value_or(0)) {
+        FireWillShowEvent(targetIndex_.value_or(0));
+        FireWillHideEvent(currentIndex_);
+    }
     MarkDirtyNodeSelf();
 }
 
@@ -1095,6 +1115,78 @@ void SwiperPattern::FinishAnimation()
     }
 }
 
+void SwiperPattern::PreloadItems(const std::set<int32_t>& indexSet)
+{
+    std::set<int32_t> validIndexSet;
+    auto childrenSize = RealTotalCount();
+    auto errorCode = ERROR_CODE_NO_ERROR;
+    for (const auto& index : indexSet) {
+        if (index < 0 || index >= childrenSize) {
+            errorCode = ERROR_CODE_PARAM_INVALID;
+            break;
+        }
+
+        validIndexSet.emplace(index);
+    }
+
+    if (errorCode != ERROR_CODE_PARAM_INVALID) {
+        DoPreloadItems(validIndexSet, errorCode);
+        return;
+    }
+
+    FirePreloadFinishEvent(errorCode);
+}
+
+void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode)
+{
+    if (swiperController_ && swiperController_->GetPreloadFinishCallback()) {
+        auto preloadFinishCallback = swiperController_->GetPreloadFinishCallback();
+        swiperController_->SetPreloadFinishCallback(nullptr);
+        preloadFinishCallback(errorCode);
+    }
+}
+
+void SwiperPattern::DoPreloadItems(const std::set<int32_t>& indexSet, int32_t errorCode)
+{
+    if (indexSet.empty()) {
+        FirePreloadFinishEvent(ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+
+    auto preloadTask = [weak = WeakClaim(this), indexSet, errorCode]() {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        auto host = swiperPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        const auto& children = host->GetChildren();
+        for (const auto& child : children) {
+            if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG && child->GetTag() != V2::JS_LAZY_FOR_EACH_ETS_TAG) {
+                continue;
+            }
+
+            auto forEachNode = AceType::DynamicCast<ForEachNode>(child);
+            auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
+            for (auto index : indexSet) {
+                if (forEachNode && forEachNode->GetChildAtIndex(index)) {
+                    forEachNode->GetChildAtIndex(index)->Build(nullptr);
+                    continue;
+                }
+
+                if (lazyForEachNode) {
+                    lazyForEachNode->GetFrameChildByIndex(index, true);
+                }
+            }
+        }
+
+        swiperPattern->FirePreloadFinishEvent(errorCode);
+    };
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(preloadTask, TaskExecutor::TaskType::UI);
+}
+
 void SwiperPattern::StopTranslateAnimation()
 {
     if (controller_ && !controller_->IsStopped()) {
@@ -1159,6 +1251,13 @@ void SwiperPattern::InitSwiperController()
         auto swiper = weak.Upgrade();
         if (swiper) {
             swiper->FinishAnimation();
+        }
+    });
+
+    swiperController_->SetPreloadItemsImpl([weak = WeakClaim(this)](const std::set<int32_t>& indexSet) {
+        auto swiper = weak.Upgrade();
+        if (swiper) {
+            swiper->PreloadItems(indexSet);
         }
     });
 }
@@ -1952,6 +2051,11 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     }
 
     isDragging_ = false;
+
+    if (currentIndex_ != pauseTargetIndex_.value_or(0)) {
+        FireWillShowEvent(pauseTargetIndex_.value_or(0));
+        FireWillHideEvent(currentIndex_);
+    }
 }
 
 void SwiperPattern::UpdateCurrentIndex(int32_t index)
@@ -3130,7 +3234,8 @@ void SwiperPattern::RegisterVisibleAreaChange()
         }
     };
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
-    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
     hasVisibleChangeRegistered_ = true;
 }
 
@@ -3432,6 +3537,9 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
 
 void SwiperPattern::OnWindowShow()
 {
+    if (!isParentHiddenChange_) {
+        FireWillShowEvent(currentIndex_);
+    }
     isWindowShow_ = true;
     if (NeedStartAutoPlay()) {
         StartAutoPlay();
@@ -3440,6 +3548,9 @@ void SwiperPattern::OnWindowShow()
 
 void SwiperPattern::OnWindowHide()
 {
+    if (!isParentHiddenChange_) {
+        FireWillHideEvent(currentIndex_);
+    }
     isWindowShow_ = false;
     StopAutoPlay();
 
@@ -4145,6 +4256,8 @@ void SwiperPattern::OnCustomContentTransition(int32_t toIndex)
     customAnimationToIndex_ = toIndex;
     indexsInAnimation_.insert(toIndex);
     auto fromIndex = CurrentIndex();
+    FireWillShowEvent(toIndex);
+    FireWillHideEvent(fromIndex);
     if (currentProxyInAnimation_) {
         fromIndex = currentProxyInAnimation_->GetToIndex();
 
@@ -4371,5 +4484,67 @@ bool SwiperPattern::CheckSwiperPanEvent(const GestureEvent& info)
     bool ret = ContentWillChange(currentIndex, comingIndex);
     indexCanChangeMap_.emplace(comingIndex, ret);
     return ret;
+}
+
+void SwiperPattern::FireWillHideEvent(int32_t willHideIndex) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(host->GetChildByIndex(willHideIndex));
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->FireWillHideEvent();
+}
+
+void SwiperPattern::FireWillShowEvent(int32_t willShowIndex) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(host->GetChildByIndex(willShowIndex));
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->FireWillShowEvent();
+}
+
+void SwiperPattern::SetOnHiddenChangeForParent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    while (parent) {
+        if (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    auto onHiddenChange = [weak = WeakClaim(this)](bool isShow) {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        auto index = swiperPattern->GetCurrentIndex();
+
+        if (isShow) {
+            swiperPattern->FireWillShowEvent(index);
+        } else {
+            swiperPattern->FireWillHideEvent(index);
+        }
+        swiperPattern->isParentHiddenChange_ = true;
+    };
+    CHECK_NULL_VOID(parent);
+    if (parent->GetTag() == V2::PAGE_ETS_TAG) {
+        auto pagePattern = parent->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetOnHiddenChange(std::move(onHiddenChange));
+    }
+
+    if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        auto navDestinationePattern = parent->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(navDestinationePattern);
+        auto navDestinationEventHub = navDestinationePattern->GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_VOID(navDestinationEventHub);
+        navDestinationEventHub->SetOnHiddenChange(std::move(onHiddenChange));
+    }
 }
 } // namespace OHOS::Ace::NG

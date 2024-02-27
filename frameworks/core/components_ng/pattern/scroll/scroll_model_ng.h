@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,8 @@ public:
     void SetOnScrollBegin(OnScrollBeginEvent&& event) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event) override;
     void SetOnScroll(NG::ScrollEvent&& event) override;
+    void SetOnWillScroll(NG::ScrollEventWithState&& event) override;
+    void SetOnDidScroll(NG::ScrollEventWithState&& event) override;
     void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) override;
     void SetOnScrollEnd(NG::ScrollEndEvent&& event) override;
     void SetOnScrollStart(OnScrollStartEvent&& event) override;
@@ -59,15 +61,25 @@ public:
     static void SetScrollController(
         FrameNode* frameNode, const RefPtr<ScrollControllerBase>& scroller, const RefPtr<ScrollProxy>& proxy);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
+    static float GetFriction(FrameNode* frameNode);
     static void SetFriction(FrameNode* frameNode, double friction);
+    static int32_t GetScrollSnap(FrameNode* frameNode);
     static void SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
+    static int32_t GetScrollBar(FrameNode* frameNode);
     static void SetScrollBar(FrameNode* frameNode, DisplayMode barState);
+    static int32_t GetAxis(FrameNode* frameNode);
     static void SetAxis(FrameNode* frameNode, Axis axis);
+    static uint32_t GetScrollBarColor(FrameNode* frameNode);
     static void SetScrollBarColor(FrameNode* frameNode, const Color& color);
+    static float GetScrollBarWidth(FrameNode* frameNode);
     static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension);
+    static int32_t GetEdgeEffect(FrameNode* frameNode);
+    static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
     static void SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled);
+    static int32_t GetEnablePaging(FrameNode* frameNode);
     static void SetEnablePaging(FrameNode* frameNode, bool enablePaging);
     static void SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& event);

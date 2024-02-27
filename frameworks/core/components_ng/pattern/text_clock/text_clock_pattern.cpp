@@ -217,7 +217,8 @@ void TextClockPattern::RegistVisibleAreaChangeCallback()
         pattern->OnVisibleAreaChange(visible);
     };
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
-    pipeline->AddVisibleAreaChangeNode(host, 0.0f, areaCallback, false);
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, areaCallback, false);
 
     if (isForm_) {
         pipeline->RemoveFormVisibleChangeNode(host->GetId());

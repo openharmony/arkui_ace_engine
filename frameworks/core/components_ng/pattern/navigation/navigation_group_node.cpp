@@ -81,6 +81,14 @@ RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
 
 NavigationGroupNode::~NavigationGroupNode()
 {
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    const auto& navDestinationNodes = navigationPattern->GetAllNavDestinationNodes();
+    for (auto iter : navDestinationNodes) {
+        auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(iter.second));
+        if (navDestinationNode) {
+            navDestinationNode->GetPattern<NavDestinationPattern>()->SetCustomNode(nullptr);
+        }
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();
@@ -863,6 +871,7 @@ void NavigationGroupNode::OnDetachFromMainTree(bool recursive)
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (pattern) {
         pattern->DetachNavigationStackFromParent();
+        pattern->RemoveFromDumpManager();
     }
 
     GroupNode::OnDetachFromMainTree(recursive);
@@ -875,6 +884,7 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (pattern) {
         pattern->AttachNavigationStackToParent();
+        pattern->AddToDumpManager();
     }
 }
 } // namespace OHOS::Ace::NG

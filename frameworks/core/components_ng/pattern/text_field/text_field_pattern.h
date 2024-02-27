@@ -207,6 +207,7 @@ public:
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
+    void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
     void UpdateOverCounterColor();
     void UpdateCounterMargin();
     void CleanCounterNode();
@@ -1039,6 +1040,8 @@ public:
         return isShowMagnifier_;
     }
 
+    virtual void InitBackGroundColorAndBorderRadius();
+
     void SetLocalOffset(OffsetF localOffset)
     {
         localOffset_.SetX(localOffset.GetX());
@@ -1419,6 +1422,7 @@ private:
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool isLongPress_ = false;
+    bool isEdit_ = false;
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
     RefPtr<NG::UINode> unitNode_;
@@ -1439,6 +1443,7 @@ private:
     MagnifierRect magnifierRect_;
     RefPtr<MagnifierController> magnifierController_;
     bool isKeyboardClosedByUser_ = false;
+    bool lockRecord_ = false;
 };
 } // namespace OHOS::Ace::NG
 
