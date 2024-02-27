@@ -96,6 +96,8 @@ private:
     float GetTitleWidth(const RefPtr<TitleBarNode>& titleBarNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize);
 
+    float WidthAfterAvoidMenubar(const RefPtr<TitleBarNode>& titleBarNode, float width);
+
     void MeasureMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
 
