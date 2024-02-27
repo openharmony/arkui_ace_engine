@@ -19,18 +19,30 @@
 #ifdef VIDEO_TEXTURE_SUPPORTED
 #include "core/components_ng/render/adapter/render_texture_impl.h"
 #else
+#ifdef XCOMPONENT_SUPPORTED
+#include "core/components_ng/render/adapter/render_surface_impl.h"
+#endif
 #include "core/components_ng/render/adapter/render_surface_impl.h"
 #endif
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace::NG {
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+RefPtr<RenderSurface> RenderSurface::Create(bool isUseExtSurface)
+#else
 RefPtr<RenderSurface> RenderSurface::Create()
+#endif
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
 #if defined(OHOS_PLATFORM) && defined(ENABLE_ROSEN_BACKEND)
         return MakeRefPtr<RosenRenderSurface>();
 #else
 #ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef XCOMPONENT_SUPPORTED
+        if (isUseExtSurface) {
+            return MakeRefPtr<RenderSurfaceImpl>();
+        }
+#endif
         return MakeRefPtr<RenderTextureImpl>();
 #else
         return MakeRefPtr<RenderSurfaceImpl>();
