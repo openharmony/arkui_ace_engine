@@ -287,6 +287,7 @@ public:
     static void JsOnDragEnd(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
+    static void JsOnPreDrag(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
     static void JsOnAreaChange(const JSCallbackInfo& info);
     static void JsOnSizeChange(const JSCallbackInfo& info);

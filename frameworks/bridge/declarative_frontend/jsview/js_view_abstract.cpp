@@ -6852,6 +6852,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("bindSheet", &JSViewAbstract::JsBindSheet);
     JSClass<JSViewAbstract>::StaticMethod("draggable", &JSViewAbstract::JsSetDraggable);
     JSClass<JSViewAbstract>::StaticMethod("dragPreviewOptions", &JSViewAbstract::JsSetDragPreviewOptions);
+    JSClass<JSViewAbstract>::StaticMethod("onPreDrag", &JSViewAbstract::JsOnPreDrag);
     JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
@@ -7037,6 +7038,25 @@ void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
         }
     }
     ViewAbstractModel::GetInstance()->SetAllowDrop(allowDropSet);
+}
+
+void JSViewAbstract::JsOnPreDrag(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
+    if (!CheckJSCallbackInfo("JsOnPreDrag", info, checkList)) {
+        return;
+    }
+
+    RefPtr<JsDragFunction> jsDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onPreDrag = [execCtx = info.GetExecutionContext(), func = std::move(jsDragFunc), node = frameNode](
+                         const PreDragStatus preDragStatus) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onPreDrag");
+        PipelineContext::SetCallBackNode(node);
+        func->PreDragExecute(preDragStatus);
+    };
+    ViewAbstractModel::GetInstance()->SetOnPreDrag(onPreDrag);
 }
 
 void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
