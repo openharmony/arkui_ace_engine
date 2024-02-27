@@ -2277,7 +2277,7 @@ class AccessibilityGroupModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class HoverEffectModifier extends Modifier<HoverEffect> {
+class HoverEffectModifier extends ModifierWithKey<HoverEffect> {
   constructor(value: HoverEffect) {
     super(value);
   }
@@ -2785,7 +2785,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   hoverEffect(value: HoverEffect): this {
-    modifier(this._modifiers, HoverEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, HoverEffectModifier.identity, HoverEffectModifier, value);
     return this;
   }
 
