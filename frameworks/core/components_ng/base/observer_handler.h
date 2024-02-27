@@ -52,7 +52,7 @@ struct ScrollEventInfo {
     float offset;
 
     ScrollEventInfo(std::string id, ScrollEventType scrollEvent, float offset)
-        : navigationId(std::move(id)), scrollEvent(scrollEvent), offset(offset)
+        : id(std::move(id)), scrollEvent(scrollEvent), offset(offset)
     {}
 };
 

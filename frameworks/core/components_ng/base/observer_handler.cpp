@@ -18,7 +18,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -60,7 +60,7 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     std::string id = host->GetInspectorId().value_or("");
-    float offset = pattern->GetTotleOffset();
+    float offset = pattern->GetTotalOffset();
     CHECK_NULL_VOID(scrollEventHandleFunc_);
     scrollEventHandleFunc_(id, eventType, offset);
 }
@@ -102,7 +102,7 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
         pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN);
 }
 
-std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetScrollEventState(const RefPtr<AceType>& node)
+std::shared_ptr<ScrollEventInfo> UIObserverHandler::GetScrollEventState(const RefPtr<AceType>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto current = AceType::DynamicCast<UINode>(node);
@@ -116,12 +116,12 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetScrollEventState(const
     auto nav = AceType::DynamicCast<FrameNode>(current);
     CHECK_NULL_RETURN(nav, nullptr);
     std::string id = std::to_string(nav->GetId());
-    auto pattern = nav->GetPattern<NavDestinationPattern>();
+    auto pattern = nav->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    return std::make_shared<NavDestinationInfo>(
+    return std::make_shared<ScrollEventInfo>(
         id,
         ScrollEventType::SCROLL_START,
-        pattern->GetTotleOffset());
+        pattern->GetTotalOffset());
 }
 
 std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const RefPtr<AceType>& node)

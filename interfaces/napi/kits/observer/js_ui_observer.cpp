@@ -104,10 +104,10 @@ bool ParseNavigationId(napi_env env, napi_value obj, std::string& navigationStr)
     return ParseStringFromNapi(env, navigationId, navigationStr);
 }
 
-bool ParseSpecifiedId(napi_env env, napi_value obj, std::string specifiedId,std::string& result)
+bool ParseScrollId(napi_env env, napi_value obj, std::string& result)
 {
     napi_value resultId = nullptr;
-    napi_get_named_property(env, obj, specifiedId, &result);
+    napi_get_named_property(env, obj, "id", &resultId);
     if (!MatchValueType(env, resultId, napi_string)) {
         return false;
     }
@@ -221,9 +221,9 @@ napi_value ObserverProcess::ProcessScrollEventRegister(napi_env env, napi_callba
 
     if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
         std::string id;
-        if (ParseSpecifiedId(env, argv[1], "id", id)) {
+        if (ParseScrollId(env, argv[1], id)) {
             auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
-            UIObserver::RegisterNavigationCallback(id, listener);
+            UIObserver::RegisterScrollEventCallback(id, listener);
         }
     }
 
@@ -245,14 +245,14 @@ napi_value ObserverProcess::ProcessScrollEventUnRegister(napi_env env, napi_call
 
     if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
         std::string id;
-        if (ParseSpecifiedId(env, argv[1], "id", id)) {
+        if (ParseScrollId(env, argv[1], id)) {
             UIObserver::UnRegisterScrollEventCallback(id, nullptr);
         }
     }
 
     if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
         std::string id;
-        if (ParseSpecifiedId(env, argv[1], "id", id)) {
+        if (ParseScrollId(env, argv[1], id)) {
             UIObserver::UnRegisterScrollEventCallback(id, argv[2]);
         }
     }

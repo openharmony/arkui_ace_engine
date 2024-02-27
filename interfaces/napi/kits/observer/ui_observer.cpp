@@ -151,9 +151,23 @@ void UIObserver::RegisterScrollEventCallback(
 }
 
 // UIObserver.off(type: "scrollEvent", callback)
-void UIObserver::UnRegisterScrollEventCallback()
+void UIObserver::UnRegisterScrollEventCallback(napi_value cb)
 {
-    scrollEventListeners_.clear();
+    if (cb == nullptr) {
+        scrollEventListeners_.clear();
+        return;
+    }
+
+    scrollEventListeners_.erase(
+        std::remove_if(
+            scrollEventListeners_.begin(),
+            scrollEventListeners_.end(),
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(cb);
+            }
+        ),
+        scrollEventListeners_.end()
+    );
 }
 
 // UIObserver.off(type: "scrollEvent", options, callback)
@@ -194,7 +208,7 @@ void UIObserver::HandleScrollEventStateChange(const std::string& id, NG::ScrollE
     auto& holder = specifiedScrollEventListeners_[id];
 
     for (const auto& listener : holder) {
-        listener->OnNavigationStateChange(id, eventType, offset);
+        listener->OnScrollEventStateChange(id, eventType, offset);
     }
 }
 
