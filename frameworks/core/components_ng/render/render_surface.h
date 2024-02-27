@@ -33,7 +33,11 @@ public:
     RenderSurface() = default;
     ~RenderSurface() override = default;
 
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    static RefPtr<RenderSurface> Create(bool isUseExtSurface = false);
+#else
     static RefPtr<RenderSurface> Create();
+#endif
 
     virtual void InitSurface() {}
 

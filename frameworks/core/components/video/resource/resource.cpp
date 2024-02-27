@@ -100,6 +100,21 @@ int32_t Resource::GetIntParam(const std::string& param, const std::string& name)
     return result;
 }
 
+int64_t Resource::GetInt64Param(const std::string& param, const std::string& name) const
+{
+    size_t len = name.length();
+    size_t pos = param.find(name);
+    int64_t result = 0;
+
+    if (pos != std::string::npos) {
+        std::stringstream ss;
+        ss << param.substr(pos + 1 + len);
+        ss >> result;
+    }
+
+    return result;
+}
+
 void Resource::GetFloatArrayParam(const std::string& param, const std::string& name, std::vector<float>& matrix) const
 {
     size_t len = name.length();

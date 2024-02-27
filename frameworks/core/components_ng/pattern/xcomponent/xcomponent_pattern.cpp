@@ -141,14 +141,14 @@ void XComponentPattern::Initialize(int32_t instanceId)
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         renderContext->SetClipToFrame(true);
         renderContext->SetClipToBounds(true);
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+        renderSurface_ = RenderSurface::Create(SystemProperties::GetExtSurfaceEnabled());
+#else
         renderSurface_ = RenderSurface::Create();
+#endif
         renderSurface_->SetInstanceId(instanceId_);
         if (type_ == XComponentType::SURFACE) {
-            renderContextForSurface_ = RenderContext::Create();
-            static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
-                id_ + "Surface" };
-            renderContextForSurface_->InitContext(false, param);
-            renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+            InitializeRenderContext();
             if (!SystemProperties::GetExtSurfaceEnabled()) {
                 renderSurface_->SetRenderContext(renderContextForSurface_);
             } else {
@@ -157,6 +157,9 @@ void XComponentPattern::Initialize(int32_t instanceId)
                 pipelineContext->AddOnAreaChangeNode(host->GetId());
                 extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
                 renderSurface_->SetExtSurfaceCallback(extSurfaceClient_);
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+                RegisterRenderContextCallBack();
+#endif
             }
             handlingSurfaceRenderContext_ = renderContextForSurface_;
             auto* controllerNG = static_cast<XComponentControllerNG*>(xcomponentController_.get());
@@ -167,7 +170,6 @@ void XComponentPattern::Initialize(int32_t instanceId)
             renderSurface_->SetRenderContext(renderContext);
             renderSurface_->SetIsTexture(true);
         }
-
         renderSurface_->InitSurface();
         renderSurface_->UpdateXComponentConfig();
         InitEvent();
@@ -180,6 +182,56 @@ void XComponentPattern::Initialize(int32_t instanceId)
         }
     }
 }
+
+void XComponentPattern::InitializeRenderContext()
+{
+    renderContextForSurface_ = RenderContext::Create();
+    static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, id_ + "Surface" };
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    renderContextForSurface_->InitContext(false, param, SystemProperties::GetExtSurfaceEnabled());
+#else
+    renderContextForSurface_->InitContext(false, param);
+#endif
+    renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+}
+
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+void XComponentPattern::RegisterRenderContextCallBack()
+{
+    CHECK_NULL_VOID(renderContextForSurface_);
+    auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto xcomponentNodeSize = geometryNode->GetContentSize();
+        auto xcomponentNodeOffset = geometryNode->GetContentOffset();
+        auto transformRelativeOffset = host->GetTransformRelativeOffset();
+        Rect rect = Rect(transformRelativeOffset.GetX() + xcomponentNodeOffset.GetX(),
+            transformRelativeOffset.GetY() + xcomponentNodeOffset.GetY(), xcomponentNodeSize.Width(),
+            xcomponentNodeSize.Height());
+        if (pattern->renderSurface_) {
+            pattern->renderSurface_->SetExtSurfaceBoundsSync(rect.Left(), rect.Top(),
+                rect.Width(), rect.Height());
+        }
+    };
+    renderContextForSurface_->SetSurfaceChangedCallBack(OnAreaChangedCallBack);
+}
+
+void XComponentPattern::RequestFocus()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    focusHub->RequestFocusImmediately();
+}
+#endif
 
 void XComponentPattern::OnAttachToFrameNode()
 {
@@ -201,6 +253,7 @@ void XComponentPattern::OnModifyDone()
 
 void XComponentPattern::OnAreaChangedInner()
 {
+#if !(defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED))
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -213,6 +266,7 @@ void XComponentPattern::OnAreaChangedInner()
             transformRelativeOffset.GetY() + xcomponentNodeOffset.GetY(), xcomponentNodeSize.Width(),
             xcomponentNodeSize.Height());
     }
+#endif
 }
 
 void XComponentPattern::OnRebuildFrame()
@@ -243,6 +297,11 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestroyEvent();
         eventHub->FireDetachEvent(id_);
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+        if (renderContextForSurface_) {
+            renderContextForSurface_->RemoveSurfaceChangedCallBack();
+        }
+#endif
     }
 }
 
@@ -302,6 +361,7 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         }
     }
     localposition_ = geometryNode->GetContentOffset();
+#if !(defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED))
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -311,6 +371,7 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             static_cast<int32_t>(transformRelativeOffset.GetY() + localposition_.GetY()),
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
     }
+#endif
     if (handlingSurfaceRenderContext_) {
         handlingSurfaceRenderContext_->SetBounds(
             localposition_.GetX(), localposition_.GetY(), drawSize_.Width(), drawSize_.Height());
@@ -355,6 +416,11 @@ void XComponentPattern::NativeXComponentChange(float width, float height)
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(callback->OnSurfaceChanged);
     callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+#endif
 }
 
 void XComponentPattern::NativeXComponentDestroy()
@@ -415,6 +481,11 @@ void XComponentPattern::XComponentSizeInit()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     InitNativeWindow(initSize_.Width(), initSize_.Height());
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    if (xcomponentController_ && renderSurface_) {
+        xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
+    }
+#endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();
@@ -486,6 +557,10 @@ void XComponentPattern::InitEvent()
 
 void XComponentPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    focusHub->SetFocusable(true);
+#endif
+
     auto onFocusEvent = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -623,6 +698,12 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
         nativeXComponentImpl_->SetHistoricalPoint(SetHistoryPoint(info.GetHistory()));
     }
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
+
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    if (touchType == TouchType::DOWN) {
+        RequestFocus();
+    }
+#endif
 }
 
 void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
@@ -764,7 +845,6 @@ std::vector<OH_NativeXComponent_HistoricalPoint> XComponentPattern::SetHistoryPo
     }
     return historicalPoints;
 }
-
 
 void XComponentPattern::FireExternalEvent(RefPtr<NG::PipelineContext> context,
     const std::string& componentId, const uint32_t nodeId, const bool isDestroy)

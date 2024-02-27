@@ -100,6 +100,7 @@ ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
+checking_function_root = "//third_party/bounds_checking_function"
 
 # Config toolchain
 windows_buildtool = "//build/toolchain/mingw:mingw_x86_64"
@@ -219,7 +220,7 @@ if (defined(global_parts_info.multimedia_camera_framework)) {
   enable_camera_framework = false
 }
 
-if (defined(global_parts_info.multimedia_player_framework) || is_arkui_x) {
+if (defined(global_parts_info.multimedia_player_framework)) {
   enable_player_framework = true
   ace_common_defines += [ "PLAYER_FRAMEWORK_EXISTS" ]
 } else {
