@@ -343,7 +343,11 @@ void RosenRenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
     AddFrameNodeInfoToRsNode();
 }
 
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isUseExtSurface)
+#else
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param)
+#endif
 {
     // skip if node already created
     CHECK_NULL_VOID(!rsNode_);
@@ -373,21 +377,11 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             break;
         }
         case ContextType::HARDWARE_SURFACE: {
-#ifndef VIDEO_TEXTURE_SUPPORTED
-            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-                .isTextureExportNode = isTextureExportNode };
-            auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
-            if (surfaceNode) {
-                surfaceNode->SetHardwareEnabled(true, param->patternType == PatternType::VIDEO ?
-                    SelfDrawingNodeType::VIDEO : SelfDrawingNodeType::DEFAULT);
-            }
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+            rsNode_ = CreateHardwareSurface(param, isUseExtSurface, isTextureExportNode);
 #else
-            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-                .isTextureExportNode = isTextureExportNode };
-            auto surfaceNode =
-                Rosen::RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
+            rsNode_ = CreateHardwareSurface(param, false, isTextureExportNode);
 #endif
-            rsNode_ = surfaceNode;
             break;
         }
         case ContextType::EFFECT:
@@ -403,6 +397,44 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
     }
 
     AddFrameNodeInfoToRsNode();
+}
+
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
+    const std::optional<ContextParam>& param, bool isUseExtSurface, bool isTextureExportNode)
+{
+#ifndef VIDEO_TEXTURE_SUPPORTED
+    Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+        .isTextureExportNode = isTextureExportNode };
+    auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+    if (surfaceNode) {
+        surfaceNode->SetHardwareEnabled(true);
+    }
+    return surfaceNode;
+#else
+#ifdef XCOMPONENT_SUPPORTED
+    if (isUseExtSurface) {
+        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+            .isTextureExportNode = isTextureExportNode };
+        auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+        if (surfaceNode) {
+            surfaceNode->SetHardwareEnabled(true);
+        }
+        return surfaceNode;
+    } else {
+        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+            .isTextureExportNode = isTextureExportNode };
+        auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
+            RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
+        return surfaceNode;
+    }
+#else
+    Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+        .isTextureExportNode = isTextureExportNode };
+    auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
+        RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
+    return surfaceNode;
+#endif
+#endif
 }
 
 void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)

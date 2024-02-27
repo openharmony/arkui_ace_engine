@@ -32,7 +32,7 @@ public:
 
     void ProcessSurfaceChange(int32_t width, int32_t height) override;
 
-    void ProcessSurfaceDestroy() override {}
+    void ProcessSurfaceDestroy() override;
 
 private:
     WeakPtr<XComponentPattern> weakXComponentPattern_;

@@ -31,4 +31,12 @@ void XComponentExtSurfaceCallbackClient::ProcessSurfaceChange(int32_t width, int
         xcPattern->XComponentSizeChange(static_cast<float>(width), static_cast<float>(height));
     }
 }
+
+void XComponentExtSurfaceCallbackClient::ProcessSurfaceDestroy()
+{
+    auto xcPattern = weakXComponentPattern_.Upgrade();
+    if (xcPattern) {
+        xcPattern->NativeXComponentDestroy();
+    }
+}
 } // namespace OHOS::Ace::NG
