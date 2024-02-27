@@ -3297,9 +3297,34 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
         hasInsertValue = contentController_->InsertValue(selectController_->GetCaretIndex(), insertValue);
         caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
     }
-    auto wideInsertValue = StringUtils::ToWstring(insertValue);
+    if (layoutProperty->HasMaxLength()) {
+        auto maxlength = GetMaxLength();
+        auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
+        auto inputValue = layoutProperty->GetSetCounterValue(DEFAULT_MODE);
+        if (originLength == static_cast<int32_t>(maxlength) && inputValue == DEFAULT_MODE) {
+            UpdateCounterBorderStyle(originLength, maxlength);
+        }
+    }
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
+    UpdateObscure(insertValue, hasInsertValue);
+    UpdateEditingValueToRecord();
+    if (HasFocus()) {
+        cursorVisible_ = true;
+        StartTwinkling();
+    } else {
+        cursorVisible_ = false;
+        StopTwinkling();
+    }
+}
+
+void TextFieldPattern::UpdateObscure(const std::string& insertValue, bool hasInsertValue)
+{
     if (!IsTextArea() && IsInPasswordMode() && GetTextObscured()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto wideInsertValue = StringUtils::ToWstring(insertValue);
         if (wideInsertValue.length() == 1 &&
             (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::NUMBER_PASSWORD ||
                 std::isdigit(insertValue[0])) && hasInsertValue) {
@@ -3313,14 +3338,6 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
             obscureTickCountDown_ = 0;
             nakedCharPosition_ = -1;
         }
-    }
-    UpdateEditingValueToRecord();
-    if (HasFocus()) {
-        cursorVisible_ = true;
-        StartTwinkling();
-    } else {
-        cursorVisible_ = false;
-        StopTwinkling();
     }
 }
 
@@ -3349,10 +3366,6 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     CHECK_NULL_VOID(theme);
     if (inputValue == DEFAULT_MODE) {
         originLength = originLength + ONE_CHARACTER;
-    }
-    if (textFieldLayoutProperty->GetShowCounterValue(false) && originLength == static_cast<int32_t>(maxlength) &&
-        inputValue == DEFAULT_MODE) {
-        UpdateCounterBorderStyle(originLength, maxlength);
     }
     bool noDeleteOperation = deleteBackwardOperations_.empty() && deleteForwardOperations_.empty();
     if (!IsShowPasswordIcon() && originLength == static_cast<int32_t>(maxlength) && noDeleteOperation &&
@@ -3431,12 +3444,12 @@ void TextFieldPattern::UpdateCounterBorderStyle(int32_t& textLength, uint32_t& m
     CHECK_NULL_VOID(textFieldLayoutProperty);
     counterChange_ = true;
     auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue(true);
-    if (static_cast<uint32_t>(textLength) >= (maxLength - ONE_CHARACTER) && !IsTextArea() && showBorder == true) {
+    if (static_cast<uint32_t>(textLength) >= (maxLength - ONE_CHARACTER) && !IsTextArea() && showBorder &&
+        textFieldLayoutProperty->GetShowCounterValue(false)) {
         SetUnderlineColor(theme->GetErrorUnderlineColor());
-    } else if (textLength >= static_cast<int32_t>(maxLength) && IsTextArea() && showBorder == true) {
+    } else if (textLength >= static_cast<int32_t>(maxLength) && IsTextArea() && showBorder) {
         HandleCounterBorder();
     }
-    return;
 }
 
 void TextFieldPattern::UltralimitShake()
@@ -5751,7 +5764,7 @@ void TextFieldPattern::StopEditing()
         return;
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (GetImeAttached() || isCustomKeyboardAttached_) {
+    if (HasConnection() || isCustomKeyboardAttached_) {
 #else
     if (isCustomKeyboardAttached_) {
 #endif
