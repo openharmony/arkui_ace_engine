@@ -860,8 +860,8 @@ void SheetPresentationPattern::InitSheetDetents()
                 sheetDetentHeight_.emplace_back(height);
             }
             std::sort(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), std::less<float>());
-            sheetDetentHeight_.erase(std::unique(sheetDetentHeight_.begin(), sheetDetentHeight_.end()),
-                sheetDetentHeight_.end());
+            sheetDetentHeight_.erase(
+                std::unique(sheetDetentHeight_.begin(), sheetDetentHeight_.end()), sheetDetentHeight_.end());
             break;
         case SheetType::SHEET_BOTTOMLANDSPACE:
             height = sheetFrameHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
@@ -1148,7 +1148,8 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
         }
         TranslateTo(height_);
     }
-    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::UNDEFINED) {
+    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::UNDEFINED ||
+        type == WindowSizeChangeReason::DRAG) {
         windowChanged_ = true;
     }
 }
@@ -1159,8 +1160,7 @@ void SheetPresentationPattern::TranslateTo(float height)
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->OnTransformTranslateUpdate(
-        {0.0f, height, 0.0f });
+    context->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
 }
 
 void SheetPresentationPattern::ScrollTo(float height)
