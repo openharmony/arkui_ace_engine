@@ -264,6 +264,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     touchPoints_[event.id].y = event.y;
     touchPoints_[event.id].sourceType = event.sourceType;
     touchPoints_[event.id].sourceTool = event.sourceTool;
+    lastTouchEvent_ = touchPoints_[event.id];
     time_ = event.time;
     if (refereeState_ == RefereeState::DETECTING || refereeState_ == RefereeState::SUCCEED) {
         if (event.pinchAxisScale != 0.0) {
