@@ -93,6 +93,7 @@ private:
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void Update();
+    void UpdatePanelRenderContext();
     // Init LayoutProperties
     void InitializeLayoutProps();
 

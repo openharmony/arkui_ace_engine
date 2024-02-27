@@ -1603,6 +1603,8 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
     auto defaultDisplay = DMManager.GetDefaultDisplay();
     if (pipeline && defaultDisplay) {
         Rosen::DMError ret = defaultDisplay->GetAvailableArea(availableArea);
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "DisplayAvailableRect info: %{public}d, %{public}d, %{public}d, %{public}d",
+            availableArea.posX_, availableArea.posX_, availableArea.width_, availableArea.height_);
         if (ret == Rosen::DMError::DM_OK) {
             pipeline->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
         }
