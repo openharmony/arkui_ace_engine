@@ -395,6 +395,7 @@ void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
 {
     if (!arrowPlacement_.has_value()) {
         delayShow_ = true;
+        finish_ = finish;
         return;
     }
     if (IsOnShow()) {
@@ -406,7 +407,11 @@ void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
     }
 
     StartOffsetEnteringAnimation();
-    StartAlphaEnteringAnimation(finish);
+    if (finish) {
+        StartAlphaEnteringAnimation(finish);
+    } else {
+        StartAlphaEnteringAnimation(finish_);
+    }
 }
 
 void BubblePattern::StartOffsetEnteringAnimation()
