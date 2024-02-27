@@ -115,7 +115,7 @@ public:
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
     void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();
-    void HidePixelMap(bool startDrag = false, double x = 0, double y = 0);
+    void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
     void BindClickEvent(const RefPtr<FrameNode>& columnNode);
     void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, bool hasContextMenu);
