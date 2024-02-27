@@ -2657,8 +2657,7 @@ void CustomPaintPaintMethod::SaveLayer()
 {
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
-    auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-    RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
+    RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
     rsCanvas_->SaveLayer(slo);
 }
 
