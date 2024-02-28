@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 {
-    if (itemIndex < itemInfos_.size()) {
+    if (static_cast<size_t>(itemIndex) < itemInfos_.size()) {
         return itemInfos_[itemIndex].crossIdx;
     }
     for (const auto& crossItems : items_[GetSegment(itemIndex)]) {
@@ -112,7 +112,7 @@ float WaterFlowLayoutInfo::GetContentHeight() const
 
 float WaterFlowLayoutInfo::GetMainHeight(int32_t crossIndex, int32_t itemIndex) const
 {
-    if (itemIndex < itemInfos_.size() && itemInfos_[itemIndex].crossIdx == crossIndex) {
+    if (static_cast<size_t>(itemIndex) < itemInfos_.size() && itemInfos_[itemIndex].crossIdx == crossIndex) {
         return itemInfos_[itemIndex].mainOffset + itemInfos_[itemIndex].mainSize;
     }
     auto seg = GetSegment(itemIndex);
@@ -132,7 +132,7 @@ float WaterFlowLayoutInfo::GetMainHeight(int32_t crossIndex, int32_t itemIndex) 
 
 float WaterFlowLayoutInfo::GetStartMainPos(int32_t crossIndex, int32_t itemIndex) const
 {
-    if (itemIndex < itemInfos_.size() && itemInfos_[itemIndex].crossIdx == crossIndex) {
+    if (static_cast<size_t>(itemIndex) < itemInfos_.size() && itemInfos_[itemIndex].crossIdx == crossIndex) {
         return itemInfos_[itemIndex].mainOffset;
     }
     float result = 0.0f;
@@ -251,7 +251,7 @@ int32_t WaterFlowLayoutInfo::GetMainCount() const
 
 void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
 {
-    auto segment = GetSegment(currentIndex);
+    size_t segment = GetSegment(currentIndex);
     for (auto& crossItems : items_[segment]) {
         if (crossItems.second.empty()) {
             continue;
@@ -262,13 +262,13 @@ void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
             });
         crossItems.second.erase(clearFrom, crossItems.second.end());
     }
-    for (int32_t i = segment + 1; i < items_.size(); ++i) {
+    for (size_t i = segment + 1; i < items_.size(); ++i) {
         for (auto& col : items_[i]) {
             col.second.clear();
         }
     }
 
-    if (currentIndex + 1 < itemInfos_.size()) {
+    if (static_cast<size_t>(currentIndex + 1) < itemInfos_.size()) {
         itemInfos_.resize(currentIndex + 1);
     }
     if (segment + 1 < segmentStartPos_.size()) {
@@ -307,7 +307,7 @@ int32_t WaterFlowLayoutInfo::GetSegment(int32_t itemIdx) const
 
     auto it = std::lower_bound(segmentTails_.begin(), segmentTails_.end(), itemIdx);
     if (it == segmentTails_.end()) {
-        return segmentTails_.size() - 1;
+        return static_cast<int32_t>(segmentTails_.size()) - 1;
     }
     int32_t idx = it - segmentTails_.begin();
     segmentCache_[itemIdx] = idx;
@@ -334,14 +334,14 @@ int32_t WaterFlowLayoutInfo::FastSolveEndIndex(float mainSize) const
         [](const ItemInfo& info, float value) { return LessNotEqual(info.mainOffset, value); });
 
     if (it == itemInfos_.end()) {
-        return itemInfos_.size() - 1;
+        return static_cast<int32_t>(itemInfos_.size()) - 1;
     }
     return std::distance(itemInfos_.begin(), it) - 1;
 }
 
 void WaterFlowLayoutInfo::RecordItem(int32_t idx, const FlowItemPosition& pos, float height)
 {
-    if (itemInfos_.size() != idx) {
+    if (itemInfos_.size() != static_cast<size_t>(idx)) {
         return;
     }
     items_[GetSegment(idx)][pos.crossIndex][idx] = { pos.startMainPos, height };
@@ -357,7 +357,7 @@ void WaterFlowLayoutInfo::RecordItem(int32_t idx, const FlowItemPosition& pos, f
 
 void WaterFlowLayoutInfo::SetNextSegmentStartPos(int32_t itemIdx)
 {
-    int32_t segment = GetSegment(itemIdx);
+    size_t segment = GetSegment(itemIdx);
     if (segmentStartPos_.size() > segment + 1) {
         return;
     }
@@ -409,13 +409,13 @@ void WaterFlowLayoutInfo::InitSegments(const std::vector<WaterFlowSections::Sect
     }
 
     segmentCache_.clear();
-    if (start < segmentStartPos_.size()) {
+    if (static_cast<size_t>(start) < segmentStartPos_.size()) {
         segmentStartPos_.resize(start);
         // startPos of next segment can only be determined after margins_ is reinitialized.
     }
 
     int32_t lastValidItem = (start > 0) ? segmentTails_[start - 1] : -1;
-    if (lastValidItem + 1 < itemInfos_.size()) {
+    if (static_cast<size_t>(lastValidItem + 1) < itemInfos_.size()) {
         itemInfos_.resize(lastValidItem + 1);
     }
 

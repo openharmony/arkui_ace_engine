@@ -144,23 +144,26 @@ bool JSWaterFlowSections::ParseSectionOptions(
 
     ParseGaps(obj, section);
 
-    if (obj->HasProperty("onGetItemMainSizeByIndex")) {
-        auto getSizeByIndex = obj->GetProperty("onGetItemMainSizeByIndex");
-        if (getSizeByIndex->IsFunction()) {
-            auto onGetItemMainSizeByIndex = [execCtx = args.GetExecutionContext(),
-                                                func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
-                                                    JSRef<JSFunc>::Cast(getSizeByIndex))](int32_t index) {
-                JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
-                auto result = func->ExecuteJS(1, &itemIndex);
-                if (!result->IsNumber()) {
-                    return 0.0f;
-                }
-
-                return result->ToNumber<float>();
-            };
-            section.onGetItemMainSizeByIndex = std::move(onGetItemMainSizeByIndex);
-        }
+    if (!obj->HasProperty("onGetItemMainSizeByIndex")) {
+        return true;
     }
+    auto getSizeByIndex = obj->GetProperty("onGetItemMainSizeByIndex");
+    if (!getSizeByIndex->IsFunction()) {
+        return true;
+    }
+
+    auto onGetItemMainSizeByIndex = [execCtx = args.GetExecutionContext(),
+                                        func = AceType::MakeRefPtr<JsFunction>(
+                                            JSRef<JSObject>(), JSRef<JSFunc>::Cast(getSizeByIndex))](int32_t index) {
+        JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
+        auto result = func->ExecuteJS(1, &itemIndex);
+        if (!result->IsNumber()) {
+            return 0.0f;
+        }
+
+        return result->ToNumber<float>();
+    };
+    section.onGetItemMainSizeByIndex = std::move(onGetItemMainSizeByIndex);
     return true;
 }
 } // namespace OHOS::Ace::Framework

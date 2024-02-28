@@ -22,7 +22,7 @@ void WaterFlowSections::ChangeData(
     TAG_LOGI(AceLogTag::ACE_WATERFLOW,
         "section changed, start:%{public}d, deleteCount:%{public}d, newSections:%{public}zu", start, deleteCount,
         newSections.size());
-    if (start < sections_.size()) {
+    if (static_cast<size_t>(start) < sections_.size()) {
         auto it = sections_.begin() + start;
         sections_.erase(it, it + deleteCount);
         sections_.insert(it, newSections.begin(), newSections.end());

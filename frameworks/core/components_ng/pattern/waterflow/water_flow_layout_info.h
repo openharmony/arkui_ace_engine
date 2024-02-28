@@ -21,7 +21,6 @@
 #include <optional>
 #include <sstream>
 
-#include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_ng/property/measure_property.h"
