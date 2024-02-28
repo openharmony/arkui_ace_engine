@@ -1348,6 +1348,64 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateCurrentOffset003
+ * @tc.desc: Test whether the isAnimateOverScroll_ can be set right.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, UpdateCurrentOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll model with spring edgeEffect.
+     */
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+    pattern_->isAnimationStop_ = false;
+
+    /**
+     * @tc.steps: step2. Make animateCanOverScroll_ true, UpdateCurrentOffset to a position where over the boundary.
+     * @tc.expected: pattern_->isAnimateOverScroll_ can be set to true.
+     */
+    pattern_->animateCanOverScroll_ = true;
+    pattern_->isAnimateOverScroll_ = false;
+    pattern_->UpdateCurrentOffset(100, SCROLL_FROM_ANIMATION_CONTROLLER);
+    EXPECT_EQ(pattern_->isAnimateOverScroll_, true);
+
+    /**
+     * @tc.steps: step3. Make animateCanOverScroll_ false, UpdateCurrentOffset to a position where over the boundary.
+     * @tc.expected: pattern_->isAnimateOverScroll_ can't be set to true.
+     */
+    pattern_->animateCanOverScroll_ = false;
+    pattern_->isAnimateOverScroll_ = false;
+    pattern_->UpdateCurrentOffset(100, SCROLL_FROM_ANIMATION_CONTROLLER);
+    EXPECT_EQ(pattern_->isAnimateOverScroll_, false);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset004
+ * @tc.desc: Test return value of UpdateCurrentOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, UpdateCurrentOffset004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll model with spring edgeEffect.
+     */
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+    /**
+     * @tc.steps: step2. Make animateCanOverScroll_ true, UpdateCurrentOffset to a position where over the boundary.
+     * @tc.expected: the return value of UpdateCurrentOffset is true.
+     */
+    pattern_->animateCanOverScroll_ = true;
+    EXPECT_EQ(pattern_->UpdateCurrentOffset(100, SCROLL_FROM_ANIMATION_CONTROLLER), true);
+
+    /**
+     * @tc.steps: step3. Make animateCanOverScroll_ false, UpdateCurrentOffset to a position where over the boundary.
+     * @tc.expected: the return value of UpdateCurrentOffset is false.
+     */
+    pattern_->animateCanOverScroll_ = false;
+    EXPECT_EQ(pattern_->UpdateCurrentOffset(100, SCROLL_FROM_ANIMATION_CONTROLLER), false);
+}
+
+/**
  * @tc.name: ScrollFadeEffect001
  * @tc.desc: Test the correlation function in ScrollFadeEffect under different conditions.
  * @tc.type: FUNC
@@ -3459,18 +3517,10 @@ HWTEST_F(ScrollTestNg, AnimateTo002, TestSize.Level1)
     CreateWithContent([](ScrollModelNG model) {});
     auto smooth = false;
     auto canOverScroll = false;
-    pattern_->isAnimationStop_ = false;
-
-    pattern_->AnimateTo(-100, 1.f, Curves::LINEAR, smooth, canOverScroll);
-    EXPECT_EQ(pattern_->animateCanOverScroll_, false);
-    EXPECT_FALSE(pattern_->isAnimationStop_);
-
+    pattern_->animateCanOverScroll_ = true;
+    pattern_->AnimateTo(100, 1.f, Curves::LINEAR, smooth, canOverScroll);
     pattern_->StopAnimate();
-    canOverScroll = true;
-    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
-    pattern_->AnimateTo(-100, 1.f, Curves::LINEAR, smooth, canOverScroll);
     EXPECT_EQ(pattern_->animateCanOverScroll_, false);
-    EXPECT_NE(pattern_->curveAnimation_, nullptr);
 }
 
 /**
