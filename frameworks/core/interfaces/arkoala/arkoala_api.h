@@ -1053,6 +1053,10 @@ struct ArkUITextModifier {
     void (*resetTextLetterSpacing)(ArkUINodeHandle node);
     void (*setTextFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
     void (*resetTextFont)(ArkUINodeHandle node);
+    void (*setWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
+    void (*resetWordBreak)(ArkUINodeHandle node);
+    void (*setEllipsisMode)(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode);
+    void (*resetEllipsisMode)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {

@@ -45,6 +45,7 @@ const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::ST
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
+const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 
 FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
 {
@@ -466,6 +467,23 @@ void ResetWordBreak(NodeHandle node)
     TextModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[2]); // 2 is the default value of WordBreak::BREAK_WORD
 }
 
+void SetEllipsisMode(NodeHandle node, uint32_t ellipsisMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (ellipsisMode < 0 || ellipsisMode >= ELLIPSIS_MODALS.size()) {
+        ellipsisMode = 2; // 2 is the default value of EllipsisMode::TAIL
+    }
+    TextModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[ellipsisMode]);
+}
+
+void ResetEllipsisMode(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[2]); // 2 is the default value of EllipsisMode::TAIL
+}
+
 ArkUITextModifierAPI GetTextModifier()
 {
     static const ArkUITextModifierAPI modifier = { SetFontWeight, ResetFontWeight, SetFontStyle, ResetFontStyle,
@@ -476,7 +494,8 @@ ArkUITextModifierAPI GetTextModifier()
         SetTextFontFamily, ResetTextFontFamily, SetTextCopyOption, ResetTextCopyOption, SetTextTextShadow,
         ResetTextTextShadow, SetTextHeightAdaptivePolicy, ResetTextHeightAdaptivePolicy, SetTextTextIndent,
         ResetTextTextIndent, SetTextBaselineOffset, ResetTextBaselineOffset, SetTextLetterSpacing,
-        ResetTextLetterSpacing, SetTextFont, ResetTextFont, SetWordBreak, ResetWordBreak };
+        ResetTextLetterSpacing, SetTextFont, ResetTextFont, SetWordBreak, ResetWordBreak, SetEllipsisMode,
+        ResetEllipsisMode };
 
     return modifier;
 }
