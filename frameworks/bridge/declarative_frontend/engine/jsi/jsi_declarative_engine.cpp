@@ -95,9 +95,9 @@ namespace {
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_debugger.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_debugger.z.so";
 #endif
 const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
@@ -483,7 +483,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     if (!arkRuntime->InitializeFromExistVM(vm)) {
         return;
     }
-    arkRuntime->SetNativeEngine(nativeArkEngine);
     LocalScope scope(vm);
     {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
@@ -2241,7 +2240,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     }
 
     // preload js views
-    JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList);
+    JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, false, runtime);
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     PreloadAceConsole(arkRuntime, global);

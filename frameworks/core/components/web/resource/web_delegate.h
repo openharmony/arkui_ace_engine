@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -185,12 +185,12 @@ class FileSelectorResultOhos : public FileSelectorResult {
     DECLARE_ACE_TYPE(FileSelectorResultOhos, FileSelectorResult)
 
 public:
-    FileSelectorResultOhos(std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback) : callback_(callback) {}
+    FileSelectorResultOhos(std::shared_ptr<OHOS::NWeb::NWebStringVectorValueCallback> callback) : callback_(callback) {}
 
     void HandleFileList(std::vector<std::string>& result) override;
 
 private:
-    std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback_;
+    std::shared_ptr<OHOS::NWeb::NWebStringVectorValueCallback> callback_;
 };
 
 class ContextMenuParamOhos : public WebContextMenuParam {
@@ -377,6 +377,43 @@ class WebPattern;
 
 class RenderWeb;
 
+class NWebTouchPointInfoImpl : public OHOS::NWeb::NWebTouchPointInfo {
+public:
+    NWebTouchPointInfoImpl(int id, double x, double y) : id_(id), x_(x), y_(y) {}
+    ~NWebTouchPointInfoImpl() = default;
+
+    int GetId() override
+    {
+        return id_;
+    }
+
+    double GetX() override
+    {
+        return x_;
+    }
+
+    double GetY() override
+    {
+        return y_;
+    }
+
+private:
+    int id_ = 0;
+    double x_ = 0;
+    double y_ = 0;
+};
+
+class NWebScreenLockCallbackImpl : public OHOS::NWeb::NWebScreenLockCallback {
+public:
+    NWebScreenLockCallbackImpl(const WeakPtr<PipelineBase>& context);
+    ~NWebScreenLockCallbackImpl() = default;
+
+    void Handle(bool key) override;
+
+private:
+    WeakPtr<PipelineBase> context_;
+};
+
 class WebDelegateObserver : public virtual AceType {
 DECLARE_ACE_TYPE(WebDelegateObserver, AceType);
 public:
@@ -487,6 +524,7 @@ public:
     void UpdateWebStandardFont(const std::string& standardFontFamily);
     void UpdateDefaultFixedFontSize(int32_t size);
     void UpdateDefaultFontSize(int32_t defaultFontSize);
+    void UpdateDefaultTextEncodingFormat(const std::string& textEncodingFormat);
     void UpdateMinFontSize(int32_t minFontSize);
     void UpdateMinLogicalFontSize(int32_t minLogicalFontSize);
     void UpdateBlockNetwork(bool isNetworkBlocked);
@@ -505,7 +543,8 @@ public:
     void HandleTouchDown(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
     void HandleTouchUp(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
     void HandleTouchMove(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
-    void HandleTouchMove(const std::list<OHOS::NWeb::TouchPointInfo>& touchPointInfoList, bool fromOverlay = false);
+    void HandleTouchMove(const std::vector<std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo>> &touch_point_infos,
+                         bool fromOverlay = false);
     void HandleTouchCancel();
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
@@ -566,7 +605,7 @@ public:
     void OnResizeNotWork();
     void OnDateTimeChooserPopup(
         const NWeb::DateTimeChooser& chooser,
-        const std::vector<OHOS::NWeb::DateTimeSuggestion>& suggestions,
+        const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
     void OnRequestFocus();
@@ -627,8 +666,8 @@ public:
     void OnScrollState(bool scrollState);
     void OnRootLayerChanged(int width, int height);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
-    void OnNativeEmbedLifecycleChange(const NWeb::NativeEmbedDataInfo& dataInfo);
-    void OnNativeEmbedGestureEvent(const NWeb::NativeEmbedTouchEvent& event);
+    void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
+    void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     bool RequestFocus();
     void SetDrawSize(const Size& drawSize);
@@ -643,7 +682,8 @@ public:
     void JavaScriptOnDocumentStart();
     void JavaScriptOnDocumentEnd();
     void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
-    void SetTouchEventInfo(const OHOS::NWeb::NativeEmbedTouchEvent& touchEvent, TouchEventInfo& touchEventInfo);
+    void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
+        TouchEventInfo& touchEventInfo);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -672,11 +712,11 @@ public:
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
     void ExecuteAction(int64_t accessibilityId, AceAction action);
-    bool GetFocusedAccessibilityNodeInfo(
-        int64_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
-    bool GetAccessibilityNodeInfoById(int64_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
-    bool GetAccessibilityNodeInfoByFocusMove(
-        int64_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
+        int64_t accessibilityId, bool isAccessibilityFocus);
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoById(int64_t accessibilityId);
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoByFocusMove(
+        int64_t accessibilityId, int32_t direction);
     void SetAccessibilityState(bool state);
     void UpdateAccessibilityState(bool state);
     OHOS::NWeb::NWebPreference::CopyOptionMode GetCopyOptionMode() const;
@@ -758,6 +798,8 @@ private:
     void SurfaceOcclusionCallback(float visibleRatio);
     void RegisterSurfaceOcclusionChangeFun();
     void ratioStrToFloat(const std::string& str);
+    // Return canonical encoding name according to the encoding alias name.
+    std::string GetCanonicalEncodingName(const std::string& alias_name) const;
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -779,7 +821,7 @@ private:
     State state_ { State::WAITINGFORSIZE };
 #ifdef OHOS_STANDARD_SYSTEM
     std::shared_ptr<OHOS::NWeb::NWeb> nweb_;
-    OHOS::NWeb::NWebCookieManager* cookieManager_ = nullptr;
+    std::shared_ptr<OHOS::NWeb::NWebCookieManager> cookieManager_;
     sptr<Rosen::Window> window_;
     bool isCreateWebView_ = false;
     int32_t callbackId_ = 0;

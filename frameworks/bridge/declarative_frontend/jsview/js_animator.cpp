@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,14 @@ void AddFrameListener(const RefPtr<AnimatorInfo>& animatorInfo, const RefPtr<Key
     }
     auto frameEvent = animatorInfo->GetFrameEvent();
     if (frameEvent) {
-        animation->AddListener([frameEvent](const float& progress) { frameEvent(progress); });
+        animation->AddListener(
+            [frameEvent, weakInfo = WeakPtr<AnimatorInfo>(animatorInfo)](const float& progress) {
+                auto animatorInfo = weakInfo.Upgrade();
+                CHECK_NULL_VOID(animatorInfo);
+                ACE_SCOPED_TRACE("animator component onframe. duration:%d, curve:%s", animatorInfo->GetDuration(),
+                    animatorInfo->GetCurve() ? animatorInfo->GetCurve()->ToString().c_str() : "");
+                frameEvent(progress);
+            });
     }
 }
 

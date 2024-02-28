@@ -831,7 +831,8 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 
 bool UIExtensionPattern::IsCurrentFocus() const

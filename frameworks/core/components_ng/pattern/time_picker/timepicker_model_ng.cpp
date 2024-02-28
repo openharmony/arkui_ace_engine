@@ -132,6 +132,79 @@ RefPtr<FrameNode> TimePickerModelNG::CreateButtonNode()
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
 }
 
+RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
+{
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TIME_PICKER_ETS_TAG, nodeId);
+    auto timePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::TIME_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
+
+    uint32_t showCount = BUFFER_NODE_NUMBER + 1;
+    auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, timePickerNode);
+    timePickerRowPattern->SetShowCount(showCount);
+    timePickerRowPattern->SetPickerTag(true);
+    auto hasHourNode = timePickerRowPattern->HasHourNode();
+    auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
+    auto hourId = timePickerRowPattern->GetHourId();
+    auto minuteId = timePickerRowPattern->GetMinuteId();
+
+    auto hourColumnNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, hourId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+    CHECK_NULL_RETURN(hourColumnNode, timePickerNode);
+    if (!hasHourNode) {
+        for (uint32_t index = 0; index < showCount; index++) {
+            auto textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_RETURN(textNode, timePickerNode);
+            textNode->MountToParent(hourColumnNode);
+        }
+        hourColumnNode->MarkModifyDone();
+        timePickerRowPattern->SetColumn(hourColumnNode);
+    }
+
+    auto minuteColumnNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, minuteId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+    CHECK_NULL_RETURN(minuteColumnNode, timePickerNode);
+    if (!hasMinuteNode) {
+        for (uint32_t index = 0; index < showCount; index++) {
+            auto textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_RETURN(textNode, timePickerNode);
+            textNode->MountToParent(minuteColumnNode);
+        }
+        minuteColumnNode->MarkModifyDone();
+        timePickerRowPattern->SetColumn(minuteColumnNode);
+    }
+    if (!hasHourNode) {
+        auto stackHourNode = CreateStackNode();
+        auto columnBlendNode = CreateColumnNode();
+        auto buttonYearNode = CreateButtonNode();
+        buttonYearNode->MountToParent(stackHourNode);
+        hourColumnNode->MountToParent(columnBlendNode);
+        columnBlendNode->MountToParent(stackHourNode);
+        auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
+        stackHourNode->MountToParent(timePickerNode);
+        hourColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
+    }
+    if (!hasMinuteNode) {
+        auto stackMinuteNode = CreateStackNode();
+        auto columnBlendNode = CreateColumnNode();
+        auto buttonYearNode = CreateButtonNode();
+        buttonYearNode->MountToParent(stackMinuteNode);
+        minuteColumnNode->MountToParent(columnBlendNode);
+        columnBlendNode->MountToParent(stackMinuteNode);
+        auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
+        stackMinuteNode->MountToParent(timePickerNode);
+        minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
+    }
+    timePickerRowPattern->SetHasSecond(false);
+    return timePickerNode;
+}
+
 void TimePickerModelNG::SetSelectedTime(const PickerTime& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -247,7 +320,8 @@ void TimePickerModelNG::SetChangeEvent(TimeChangeEvent&& onChange)
 
 void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDialog,
     NG::TimePickerSettingData& settingData, std::function<void()>&& onCancel,
-    std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange)
+    std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
+    TimePickerDialogEvent& timePickerDialogEvent)
 {
     auto container = Container::Current();
     if (!container) {
@@ -276,6 +350,11 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
         }
     };
     dialogCancelEvent["cancelId"] = func;
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
+    dialogLifeCycleEvent["didAppearId"] = timePickerDialogEvent.onDidAppear;
+    dialogLifeCycleEvent["didDisappearId"] = timePickerDialogEvent.onDidDisappear;
+    dialogLifeCycleEvent["willAppearId"] = timePickerDialogEvent.onWillAppear;
+    dialogLifeCycleEvent["willDisappearId"] = timePickerDialogEvent.onWillDisappear;
     DialogProperties properties;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
@@ -297,15 +376,6 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-    } else {
-        if (properties.alignment == DialogAlignment::DEFAULT) {
-            if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-                properties.alignment = DialogAlignment::BOTTOM;
-                properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-            } else {
-                properties.alignment = DialogAlignment::CENTER;
-            }
-        }
     }
     if (pickerDialog.offset.has_value()) {
         properties.offset = pickerDialog.offset.value();
@@ -320,11 +390,12 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
+        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTimeDialog(
+                properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
         },
         TaskExecutor::TaskType::UI);
 }
@@ -419,4 +490,84 @@ void TimePickerModelNG::SetHour24(FrameNode* frameNode, bool isUseMilitaryTime)
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     timePickerRowPattern->ClearOptionsHour();
 }
+
+PickerTextStyle TimePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
+{
+    PickerTextStyle pickerTextStyle;
+    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, pickerTextStyle);
+    auto style = theme->GetDisappearOptionStyle();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, DisappearFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, DisappearColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, DisappearWeight, pickerTextStyle.fontWeight, frameNode, style.GetFontWeight());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, DisappearFontFamily,
+        pickerTextStyle.fontFamily, frameNode, style.GetFontFamilies());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, DisappearFontStyle,
+        pickerTextStyle.fontStyle, frameNode, style.GetFontStyle());
+    return pickerTextStyle;
+}
+
+PickerTextStyle TimePickerModelNG::getNormalTextStyle(FrameNode* frameNode)
+{
+    PickerTextStyle pickerTextStyle;
+    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, pickerTextStyle);
+    auto style = theme->GetOptionStyle(false, false);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, Color, pickerTextStyle.textColor, frameNode, style.GetTextColor());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, Weight, pickerTextStyle.fontWeight, frameNode, style.GetFontWeight());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, FontFamily,
+        pickerTextStyle.fontFamily, frameNode, style.GetFontFamilies());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, FontStyle,
+        pickerTextStyle.fontStyle, frameNode, style.GetFontStyle());
+    return pickerTextStyle;
+}
+
+PickerTextStyle TimePickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
+{
+    PickerTextStyle pickerTextStyle;
+    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, pickerTextStyle);
+    auto style = theme->GetOptionStyle(true, false);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, SelectedColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TimePickerLayoutProperty, SelectedWeight, pickerTextStyle.fontWeight, frameNode, style.GetFontWeight());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, SelectedFontFamily,
+        pickerTextStyle.fontFamily, frameNode, style.GetFontFamilies());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, SelectedFontStyle,
+        pickerTextStyle.fontStyle, frameNode, style.GetFontStyle());
+    return pickerTextStyle;
+}
+
+PickerTime TimePickerModelNG::getTimepickerSelected(FrameNode* frameNode)
+{
+    PickerTime pickerTime;
+    CHECK_NULL_RETURN(frameNode, pickerTime);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    return timePickerRowPattern->GetSelectedTime();
+}
+
+uint32_t TimePickerModelNG::getTimepickerBackgroundColor(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, 0);
+    return timePickerRowPattern->GetBackgroundColor().GetValue();
+}
+
+int32_t TimePickerModelNG::getTimepickerUseMilitaryTime(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return frameNode->GetLayoutProperty<TimePickerLayoutProperty>()->GetIsUseMilitaryTimeValue(false);
+}
+
 } // namespace OHOS::Ace::NG

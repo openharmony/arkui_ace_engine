@@ -14,6 +14,8 @@
  */
 #include "core/interfaces/native/node/node_image_modifier.h"
 
+#include <cstdint>
+
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/image/image_component.h"
@@ -51,6 +53,7 @@ constexpr int32_t IMAGE_OBJECT_FIT_AUTO_INDEX = 2;
 constexpr int32_t IMAGE_OBJECT_FIT_FILL_INDEX = 3;
 constexpr int32_t IMAGE_OBJECT_FIT_SCALE_DOWN_INDEX = 4;
 constexpr int32_t IMAGE_OBJECT_FIT_NONE_INDEX = 5;
+std::string g_strValue;
 
 void SetImageSrc(ArkUINodeHandle node, const char* value)
 {
@@ -58,6 +61,14 @@ void SetImageSrc(ArkUINodeHandle node, const char* value)
     CHECK_NULL_VOID(frameNode);
     std::string src(value);
     ImageModelNG::InitImage(frameNode, src);
+}
+
+const char* GetImageSrc(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = ImageModelNG::GetSrc(frameNode).GetSrc();
+    return g_strValue.c_str();
 }
 
 void SetCopyOption(ArkUINodeHandle node, ArkUI_Int32 copyOption)
@@ -85,6 +96,13 @@ void SetAutoResize(ArkUINodeHandle node, ArkUI_Bool autoResize)
     ImageModelNG::SetAutoResize(frameNode, autoResize);
 }
 
+int32_t GetAutoResize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_IMAGE_AUTORESIZE);
+    return ImageModelNG::GetAutoResize(frameNode);
+}
+
 void ResetAutoResize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -101,6 +119,14 @@ void SetObjectRepeat(ArkUINodeHandle node, ArkUI_Int32 imageRepeat)
         repeat = ImageRepeat::NO_REPEAT;
     }
     ImageModelNG::SetImageRepeat(frameNode, repeat);
+}
+
+int32_t GetObjectRepeat(ArkUINodeHandle node)
+{
+    int32_t defaultObjectRepeat = static_cast<int32_t>(ImageRepeat::NO_REPEAT);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultObjectRepeat);
+    return static_cast<int32_t>(ImageModelNG::GetObjectRepeat(frameNode));
 }
 
 void ResetObjectRepeat(ArkUINodeHandle node)
@@ -172,6 +198,14 @@ void SetObjectFit(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber)
         objectFitValue = ImageFit::COVER;
     }
     ImageModelNG::SetImageFit(frameNode, objectFitValue);
+}
+
+int32_t GetObjectFit(ArkUINodeHandle node)
+{
+    int32_t defaultObjectFit = static_cast<int32_t>(ImageFit::COVER);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultObjectFit);
+    return static_cast<int32_t>(ImageModelNG::GetObjectFit(frameNode));
 }
 
 void ResetObjectFit(ArkUINodeHandle node)
@@ -254,6 +288,14 @@ void SetAlt(ArkUINodeHandle node, const char* src, const char* bundleName, const
     ImageModelNG::SetAlt(frameNode, ImageSourceInfo { src, bundleName, moduleName });
 }
 
+const char* GetAlt(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = ImageModelNG::GetAlt(frameNode).GetSrc();
+    return g_strValue.c_str();
+}
+
 void ResetAlt(ArkUINodeHandle node)
 {
     return;
@@ -268,6 +310,14 @@ void SetImageInterpolation(ArkUINodeHandle node, ArkUI_Int32 value)
         interpolation = Ace::ImageInterpolation::NONE;
     }
     ImageModelNG::SetImageInterpolation(frameNode, interpolation);
+}
+
+int32_t GetImageInterpolation(ArkUINodeHandle node)
+{
+    int32_t defaultInterpolation = static_cast<int32_t>(ImageInterpolation::NONE);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultInterpolation);
+    return static_cast<int32_t>(ImageModelNG::GetInterpolation(frameNode));
 }
 
 void ResetImageInterpolation(ArkUINodeHandle node)
@@ -286,6 +336,21 @@ void SetColorFilter(ArkUINodeHandle node, const ArkUI_Float32* array, int length
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetColorFilterMatrix(frameNode, std::vector<float>(array, array + length));
+}
+
+ArkUIFilterColorType GetColorFilter(ArkUINodeHandle node)
+{
+    ArkUIFilterColorType colorFilter = { nullptr, 0 };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, colorFilter);
+    auto filterFloatArray = ImageModelNG::GetColorFilter(frameNode);
+    std::vector<int32_t> filterArray;
+    for (size_t i = 0; i < filterFloatArray.size(); i++) {
+        filterArray.emplace_back(static_cast<int32_t>(filterFloatArray[i]));
+    }
+    colorFilter.filterArray = filterArray.size() > 0 ? &filterArray[0] : nullptr;
+    colorFilter.filterSize = filterArray.size();
+    return colorFilter;
 }
 
 void ResetColorFilter(ArkUINodeHandle node)
@@ -419,9 +484,9 @@ const ArkUIImageModifier* GetImageModifier()
         SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
         SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
         ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
-        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius,
-        SetImageBorder, ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing,
-        ResetEdgeAntialiasing };
+        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
+        ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, GetImageSrc,
+        GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt };
     return &modifier;
 }
 

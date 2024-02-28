@@ -64,6 +64,8 @@ public:
     virtual void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
     virtual void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
     virtual void DeleteHotAreas(int32_t overlayId) {};
+    virtual void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
+    virtual void DeletePopupHotAreas(int32_t overlayId) {};
 	
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;

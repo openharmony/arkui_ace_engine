@@ -65,6 +65,11 @@ void ScrollPattern::OnModifyDone()
         SetAxis(axis);
         ResetPosition();
     }
+    if (!isInitialized_) {
+        auto initialOffset = layoutProperty->GetInitialOffset().value_or(OffsetT(Dimension(0.f), Dimension(0.f)));
+        currentOffset_ = axis == Axis::VERTICAL ? -initialOffset.GetY().ConvertToPx() :
+                                                  -initialOffset.GetX().ConvertToPx();
+    }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
         RegisterScrollEventTask();
@@ -983,5 +988,10 @@ float ScrollPattern::GetPagingDelta(float dragDistance, float velocity, float pa
         return GreatNotEqual(dragDistance, 0.f) ? pageLength : -pageLength;
     }
     return 0.f;
+}
+
+void ScrollPattern::TriggerModifyDone()
+{
+    OnModifyDone();
 }
 } // namespace OHOS::Ace::NG

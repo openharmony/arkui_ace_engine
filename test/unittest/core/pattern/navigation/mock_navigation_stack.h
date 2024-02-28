@@ -15,6 +15,9 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_NAVIGATION_STACK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_NAVIGATION_STACK_H
+
+#include "gmock/gmock.h"
+
 #define protected public
 #define private public
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -39,7 +42,21 @@ public:
         return false;
     }
 
+    void SetOnStateChangedCallback(std::function<void()> callback) override
+    {
+        onStateChangedCallback_ = callback;
+    }
+
+    std::function<void()> GetOnStateChangedCallback() const
+    {
+        return onStateChangedCallback_;
+    }
+
+    MOCK_METHOD1(OnAttachToParent, void(OHOS::Ace::RefPtr<OHOS::Ace::NG::NavigationStack>));
+    MOCK_METHOD0(OnDetachFromParent, void());
+
 private:
+    std::function<void()> onStateChangedCallback_;
     MockReplace *mockReplace_ = new MockReplace();
 };
 #endif

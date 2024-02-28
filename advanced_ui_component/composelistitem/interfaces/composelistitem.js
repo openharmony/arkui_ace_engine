@@ -35,7 +35,8 @@ var ItemHeight;
 const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
 const TEXT_COLUMN_SPACE = 4;
-const TEXT_SAFE_MARGIN = 8;
+const TEXT_SAFE_MARGIN = 12;
+const LISTITEM_PADDING = 12;
 const BADGE_SIZE = 8;
 const SMALL_ICON_SIZE = 16;
 const SYSTEM_ICON_SIZE = 24;
@@ -271,6 +272,7 @@ class ContentItemStruct extends ViewPU {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Row.create({ space: this.itemRowSpace });
       Row.margin({ right: 16 });
+      Row.padding({ left: 12 });
       Row.width("calc(66% - 16vp)");
       Row.flexShrink(1);
       t || Row.pop();
@@ -439,6 +441,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Button.createWithChild();
+      Button.margin({ right: 12 });
       Button.hitTestBehavior(HitTestMode.Block);
       Button.fontSize({
         id: -1,
@@ -561,6 +564,7 @@ class OperateItemStruct extends ViewPU {
       Image.height(48);
       Image.width(48);
       Image.draggable(!1);
+      Image.margin({ right: 12 });
       o || Image.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }))
@@ -597,6 +601,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((t, o) => {
       ViewStackProcessor.StartGetAccessRecordingFor(t);
       Button.createWithChild({ type: ButtonType.Normal });
+      Button.margin({ right: 12 });
       Button.hitTestBehavior(HitTestMode.Block);
       Button.backgroundColor(Color.Transparent);
       Button.height(24);
@@ -644,6 +649,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((t, o) => {
       ViewStackProcessor.StartGetAccessRecordingFor(t);
       Radio.create({ value: null, group: null });
+      Radio.margin({ right: 12 });
       Radio.checked(this.radioState);
       Radio.onChange(e.onChange);
       Radio.height(24);
@@ -673,6 +679,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((t, o) => {
       ViewStackProcessor.StartGetAccessRecordingFor(t);
       Checkbox.create();
+      Checkbox.margin({ right: 12 });
       Checkbox.select(this.checkBoxState);
       Checkbox.onChange(e.onChange);
       Checkbox.height(24);
@@ -703,6 +710,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Row.create();
+      Row.margin({ right: 6 });
       Row.height(48);
       Row.width(48);
       Row.justifyContent(FlexAlign.Center);
@@ -776,7 +784,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Row.create({ space: 4 });
-      Row.padding({ left: 8, right: 8 });
+      Row.padding({ left: 12, right: 12 });
       t || Row.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -799,7 +807,7 @@ class OperateItemStruct extends ViewPU {
       });
       Text.focusable(!0);
       Text.draggable(!1);
-      Text.constraintSize({ maxWidth: 'calc(100% - 12vp)' });
+      Text.constraintSize({ maxWidth: 'calc(100% - 24vp)' });
       o || Text.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));

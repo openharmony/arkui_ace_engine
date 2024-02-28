@@ -148,6 +148,17 @@ public:
     int32_t start_;
 
     int32_t end_;
+
+    void reset()
+    {
+        start_ = -1;
+        end_ = -1;
+    }
+
+    bool operator==(const SelectionRangeInfo& rhs) const
+    {
+        return start_ == rhs.start_ && end_ == rhs.end_;
+    }
 };
 
 struct ParagraphInfo {

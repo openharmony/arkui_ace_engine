@@ -298,6 +298,8 @@ public:
         return !snapOffsets_.empty() && GetScrollSnapAlign() != ScrollSnapAlign::NONE;
     }
 
+    void TriggerModifyDone();
+    
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 

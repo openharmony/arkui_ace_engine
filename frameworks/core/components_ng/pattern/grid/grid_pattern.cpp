@@ -1277,12 +1277,12 @@ void GridPattern::OnAnimateStop()
     // AccessibilityEventType::SCROLL_END
 }
 
-void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
+void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
 {
     if (!isConfigScrollable_) {
         return;
     }
-    ScrollablePattern::AnimateTo(position, duration, curve, smooth);
+    ScrollablePattern::AnimateTo(position, duration, curve, smooth, canOverScroll);
 }
 
 void GridPattern::ScrollTo(float position)
@@ -1784,6 +1784,29 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
     isSmoothScrolling_ = true;
     AnimateTo(targetPos, -1, nullptr, true);
     return true;
+}
+
+std::vector<RefPtr<FrameNode>> GridPattern::GetVisibleSelectedItems()
+{
+    std::vector<RefPtr<FrameNode>> children;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, children);
+    for (int32_t index = gridLayoutInfo_.startIndex_; index <= gridLayoutInfo_.endIndex_; ++index) {
+        auto item = host->GetChildByIndex(index);
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
+        if (!itemPattern) {
+            continue;
+        }
+        if (!itemPattern->IsSelected()) {
+            continue;
+        }
+        children.emplace_back(itemFrameNode);
+    }
+    return children;
 }
 
 } // namespace OHOS::Ace::NG

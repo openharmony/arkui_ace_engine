@@ -53,6 +53,7 @@ public:
     void SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) override {};
     void SetEnablePaging(bool enablePaging) override {};
+    void SetInitialOffset(const NG::OffsetT<Dimension>& offset) override {};
 };
 
 } // namespace OHOS::Ace::Framework

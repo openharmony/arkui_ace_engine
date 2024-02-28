@@ -60,6 +60,8 @@ private:
 
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group);
 
+    void SetPlaceholder(LayoutWrapper* layoutWrapper);
+
     std::string SpansToString()
     {
         std::stringstream ss;
@@ -73,6 +75,7 @@ private:
     }
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
+    std::list<RefPtr<SpanItem>> allSpans_;
     ParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
     RectF richTextRect_;

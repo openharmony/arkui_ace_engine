@@ -181,9 +181,9 @@ public:
         dynamicPageSizeCallback_ = std::move(dynamicPageSizeCallback);
     }
 
-    void SetDisappearCallback(std::function<void()>&& callback)
+    void SetOnHiddenChange(std::function<void(bool)>&& onHiddenChange)
     {
-        disappearCallback_ = std::move(callback);
+        onHiddenChange_ = std::move(onHiddenChange);
     }
 
 private:
@@ -210,9 +210,9 @@ private:
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;
     std::function<bool()> onBackPressed_;
-    std::function<void()> disappearCallback_;
     std::function<void()> pageTransitionFunc_;
     std::function<void()> firstBuildCallback_;
+    std::function<void(bool)> onHiddenChange_;
     DynamicPageSizeCallback dynamicPageSizeCallback_;
     std::shared_ptr<std::function<void()>> pageTransitionFinish_;
     std::list<RefPtr<PageTransitionEffect>> pageTransitionEffects_;

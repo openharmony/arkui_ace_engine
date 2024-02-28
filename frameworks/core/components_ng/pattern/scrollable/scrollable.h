@@ -474,6 +474,7 @@ private:
     bool available_ = true;
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
+    bool isFadingAway_ = false;
     int32_t nodeId_ = 0;
     double slipFactor_ = 0.0;
     static std::optional<double> sFriction_;

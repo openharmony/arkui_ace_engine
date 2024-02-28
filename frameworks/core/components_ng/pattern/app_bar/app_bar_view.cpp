@@ -74,19 +74,26 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
 
 void AppBarView::iniBehavior()
 {
+    auto atom_ = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom_);
-    auto titleBar = AceType::DynamicCast<FrameNode>(atom_->GetFirstChild());
-    CHECK_NULL_VOID(titleBar);
     auto content = AceType::DynamicCast<FrameNode>(atom_->GetChildAtIndex(1));
     CHECK_NULL_VOID(content);
     auto stagePattern = content->GetPattern<StagePattern>();
     CHECK_NULL_VOID(stagePattern);
-    stagePattern->SetOnRebuildFrameCallback([titleBar, content, this]() {
+    stagePattern->SetOnRebuildFrameCallback([weak = WeakClaim(this)]() {
+        auto appBarView = weak.Upgrade();
+        CHECK_NULL_VOID(appBarView);
+        auto atom = appBarView->atomicService_.Upgrade();
+        CHECK_NULL_VOID(atom);
+        auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
+        CHECK_NULL_VOID(titleBar);
+        auto content = AceType::DynamicCast<FrameNode>(atom->GetChildAtIndex(1));
+        CHECK_NULL_VOID(content);
         auto backButton = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
         CHECK_NULL_VOID(backButton);
         if (content->GetChildren().size() > 1) {
             backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-            if (!isVisibleSetted) {
+            if (!appBarView->isVisibleSetted) {
                 titleBar->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
             }
             return;
@@ -179,20 +186,24 @@ RefPtr<FrameNode> AppBarView::BuildFaButton()
     renderContext->UpdatePosition(OffsetT<Dimension>());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-    auto clickCallback = [pipeline, appBarTheme, buttonNode](GestureEvent& info) {
+    auto clickCallback = [weakPipeline = WeakClaim(RawPtr(pipeline)), weakButtonNode = WeakClaim(RawPtr(buttonNode))](
+                             GestureEvent& info) {
 #ifdef PREVIEW
         LOGW("[Engine Log] Unable to show the SharePanel in the Previewer. Perform this operation on the "
              "emulator or a real device instead.");
 #else
-        if (!pipeline || !appBarTheme) {
-            return;
-        }
+        auto pipeline = weakPipeline.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+        CHECK_NULL_VOID(appBarTheme);
+
         if (SystemProperties::GetExtSurfaceEnabled()) {
             LOGI("start panel bundleName is %{public}s, abilityName is %{public}s",
                 appBarTheme->GetBundleName().c_str(), appBarTheme->GetAbilityName().c_str());
             pipeline->FireSharePanelCallback(appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
         } else {
+            auto buttonNode = weakButtonNode.Upgrade();
+            CHECK_NULL_VOID(buttonNode);
             BindContentCover(buttonNode);
         }
 #endif
@@ -317,6 +328,7 @@ void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
 
 void AppBarView::SetVisible(bool visible)
 {
+    auto atom_ = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom_);
     auto uiRow = atom_->GetFirstChild();
     CHECK_NULL_VOID(uiRow);
@@ -329,6 +341,7 @@ void AppBarView::SetVisible(bool visible)
 
 void AppBarView::SetRowColor(const std::optional<Color>& color)
 {
+    auto atom_ = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom_);
     auto uiRow = atom_->GetFirstChild();
     CHECK_NULL_VOID(uiRow);
@@ -348,6 +361,7 @@ void AppBarView::SetRowColor(const std::optional<Color>& color)
 
 void AppBarView::SetContent(const std::string& content)
 {
+    auto atom_ = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom_);
     auto uiRow = atom_->GetFirstChild();
     CHECK_NULL_VOID(uiRow);
@@ -361,6 +375,7 @@ void AppBarView::SetContent(const std::string& content)
 
 void AppBarView::SetFontStyle(Ace::FontStyle fontStyle)
 {
+    auto atom_ = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom_);
     auto uiRow = atom_->GetFirstChild();
     CHECK_NULL_VOID(uiRow);
@@ -374,6 +389,7 @@ void AppBarView::SetFontStyle(Ace::FontStyle fontStyle)
 
 void AppBarView::SetIconColor(const std::optional<Color>& color)
 {
+    auto atom_ = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom_);
     auto row = atom_->GetFirstChild();
     CHECK_NULL_VOID(row);
@@ -430,6 +446,7 @@ void AppBarView::SetEachIconColor(
 
 void AppBarView::IniColor()
 {
+    auto atom_ = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -454,6 +471,7 @@ void AppBarView::IniColor()
 RefPtr<FrameNode> AppBarView::GetFaButton()
 {
 #ifndef IS_EMULATOR
+    auto atom_ = atomicService_.Upgrade();
     CHECK_NULL_RETURN(atom_, nullptr);
     return AceType::DynamicCast<FrameNode>(atom_->GetLastChild());
 #endif
@@ -462,6 +480,7 @@ RefPtr<FrameNode> AppBarView::GetFaButton()
 
 RefPtr<FrameNode> AppBarView::GetBackButton()
 {
+    auto atom_ = atomicService_.Upgrade();
     CHECK_NULL_RETURN(atom_, nullptr);
     auto row = atom_->GetFirstChild();
     CHECK_NULL_RETURN(row, nullptr);
@@ -501,6 +520,7 @@ void AppBarView::UpdateRowLayout()
     if (isRtlSetted == isRtl) {
         return;
     }
+    auto atom_ = atomicService_.Upgrade();
     CHECK_NULL_VOID(atom_);
     auto row = atom_->GetFirstChild();
     auto label = AceType::DynamicCast<FrameNode>(row->GetChildAtIndex(1));

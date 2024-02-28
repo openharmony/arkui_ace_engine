@@ -206,6 +206,7 @@ public:
         std::function<void(bool)>&& onStatusChanged) override;
     void ShowDialogInner(DialogProperties& dialogProperties, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks);
+    void RemoveCustomDialog() override;
     void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) override;
     void CloseCustomDialog(const int32_t dialogId) override;
 
@@ -385,6 +386,7 @@ private:
     void LoadReplacePage(int32_t pageId, const PageTarget& url, const std::string& params);
 
     void ReplacePageInSubStage(const RefPtr<JsAcePage>& page, const std::string& url);
+    std::optional<int32_t> GetEffectiveContainerId();
 
     uint64_t GetSystemRealTime();
 

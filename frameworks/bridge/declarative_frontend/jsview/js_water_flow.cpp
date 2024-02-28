@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,17 @@
 
 #include "bridge/declarative_frontend/jsview/js_water_flow.h"
 
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include <cstdint>
+#include <vector>
+
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/js_water_flow_sections.h"
 #include "bridge/declarative_frontend/jsview/models/water_flow_model_impl.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<WaterFlowModel> WaterFlowModel::instance_ = nullptr;
@@ -51,6 +54,50 @@ namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDirection::COLUMN,
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
+
+namespace {
+void ParseChanges(const JSCallbackInfo& args, const JSRef<JSArray>& changeArray)
+{
+    auto waterFlowSections = WaterFlowModel::GetInstance()->GetOrCreateWaterFlowSections();
+    CHECK_NULL_VOID(waterFlowSections);
+    auto length = changeArray->Length();
+    for (size_t i = 0; i < length; ++i) {
+        auto change = changeArray->GetValueAt(i);
+        auto changeObject = JSRef<JSObject>::Cast(change);
+        auto sectionValue = changeObject->GetProperty("sections");
+        auto sectionArray = JSRef<JSArray>::Cast(sectionValue);
+        auto sectionsCount = sectionArray->Length();
+        std::vector<NG::WaterFlowSections::Section> newSections;
+        for (size_t j = 0; j < sectionsCount; ++j) {
+            NG::WaterFlowSections::Section section;
+            auto newSection = sectionArray->GetValueAt(j);
+            if (JSWaterFlowSections::ParseSectionOptions(args, newSection, section)) {
+                newSections.emplace_back(section);
+            }
+        }
+        waterFlowSections->ChangeData(changeObject->GetProperty("start")->ToNumber<int32_t>(),
+            changeObject->GetProperty("deleteCount")->ToNumber<int32_t>(), newSections);
+    }
+}
+} // namespace
+
+void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sections)
+{
+    auto sectionsObject = JSRef<JSObject>::Cast(sections);
+    auto changes = sectionsObject->GetProperty("changeArray");
+    if (!changes->IsArray()) {
+        return;
+    }
+    auto changeArray = JSRef<JSArray>::Cast(changes);
+    ParseChanges(args, changeArray);
+
+    auto clearFunc = sectionsObject->GetProperty("clearChanges");
+    if (!clearFunc->IsFunction()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(clearFunc);
+    JSRef<JSVal>::Cast(func->Call(sectionsObject));
+}
 } // namespace
 
 void JSWaterFlow::Create(const JSCallbackInfo& args)
@@ -68,12 +115,7 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
             return;
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-        auto footerObject = obj->GetProperty("footer");
-        if (footerObject->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
-            auto footerAction = [builderFunc]() { builderFunc->Execute(); };
-            WaterFlowModel::GetInstance()->SetFooter(footerAction);
-        }
+
         auto scroller = obj->GetProperty("scroller");
         if (scroller->IsObject()) {
             auto* jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();
@@ -89,6 +131,16 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
                 jsScroller->SetScrollBarProxy(proxy);
             }
             WaterFlowModel::GetInstance()->SetScroller(positionController, proxy);
+        }
+        auto sections = obj->GetProperty("sections");
+        auto footerObject = obj->GetProperty("footer");
+        if (sections->IsObject()) {
+            UpdateWaterFlowSections(args, sections);
+        } else if (footerObject->IsFunction()) {
+            // ignore footer if sections are present
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
+            auto footerAction = [builderFunc]() { builderFunc->Execute(); };
+            WaterFlowModel::GetInstance()->SetFooter(footerAction);
         }
     }
 }

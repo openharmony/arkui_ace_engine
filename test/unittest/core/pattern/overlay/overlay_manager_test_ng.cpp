@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
@@ -978,6 +979,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto targetId1 = targetNodes[0]->GetId();
     auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
     overlayManager->ShowPopup(targetId1, popups[0]);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     overlayManager->ShowPopup(targetId2, popups[1]);
@@ -1158,7 +1160,6 @@ HWTEST_F(OverlayManagerTestNg, MenuTest002, TestSize.Level1)
      * @tc.steps: step5. call HideAllMenus.
      * @tc.expected: function exits normally
      */
-    overlayManager->HideAllMenus();
     overlayManager->CleanMenuInSubWindow();
     overlayManager->FocusOverlayNode(menuNode, false);
     EXPECT_FALSE(overlayManager->menuMap_.empty());
@@ -1789,12 +1790,19 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
+    auto lifeCycleFunc = []() {};
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
+    dialogLifeCycleEvent["didAppearId"] = lifeCycleFunc;
+    dialogLifeCycleEvent["didDisappearId"] = lifeCycleFunc;
+    dialogLifeCycleEvent["willAppearId"] = lifeCycleFunc;
+    dialogLifeCycleEvent["willDisappearId"] = lifeCycleFunc;
     /**
      * @tc.steps: step2. create overlayManager and call ShowDateDialog.
      * @tc.expected: dateDialogNode is created successfully
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowDateDialog(dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent);
+    overlayManager->ShowDateDialog(
+        dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
 
     /**
@@ -1808,8 +1816,8 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
     std::map<std::string, PickerTime> timePickerProperty;
     timePickerProperty["selected"] = PickerTime(1, 1, 1);
 
-    overlayManager->ShowTimeDialog(
-        dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
+        dialogCancelEvent, dialogLifeCycleEvent);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
 
     /**
@@ -1823,13 +1831,13 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
      * @tc.steps: step5. ShowTimeDialog again and call RemoveOverlay with isBackPressed
      * @tc.expected: remove  successfully
      */
-    overlayManager->ShowTimeDialog(
-        dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
+        dialogCancelEvent, dialogLifeCycleEvent);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
-    overlayManager->ShowTimeDialog(
-        dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
+        dialogCancelEvent, dialogLifeCycleEvent);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
 }
 

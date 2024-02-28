@@ -992,6 +992,11 @@ public:
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
+    void DismissDialog() override
+    {
+        ViewAbstract::DismissDialog();
+    }
+
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
 
     void BindMenuGesture(

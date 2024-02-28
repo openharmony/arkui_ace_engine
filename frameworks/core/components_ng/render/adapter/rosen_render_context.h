@@ -344,6 +344,7 @@ public:
     void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void ResetSurface() override;
+    void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

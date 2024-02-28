@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,13 +39,23 @@ public:
         changeEvent_ = std::move(changeEvent);
     }
 
-    void FireChangeEvent(bool isVisible) const
+    void FireChangeEvent(bool isVisible)
     {
-        if (changeEvent_) {
-            auto json = JsonUtil::Create(true);
-            json->Put("isVisible", isVisible);
-            changeEvent_(json->ToString());
-        }
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weak = WeakClaim(this), isVisible]() {
+                auto bubbleEvent = weak.Upgrade();
+                CHECK_NULL_VOID(bubbleEvent);
+                if (bubbleEvent->changeEvent_) {
+                    auto json = JsonUtil::Create(true);
+                    json->Put("isVisible", isVisible);
+                    bubbleEvent->changeEvent_(json->ToString());
+                }
+            },
+            TaskExecutor::TaskType::UI);
     }
 
 private:

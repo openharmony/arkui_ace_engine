@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -351,6 +351,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebStandardFont, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DefaultFixedFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DefaultFontSize, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DefaultTextEncodingFormat, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MinFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MinLogicalFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlockNetwork, bool);
@@ -373,6 +374,15 @@ public:
     }
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
+    void QuickMenuIsNeedNewAvoid(
+        SelectOverlayInfo& selectInfo,
+        std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle);
+    RectF ComputeClippedSelectionBounds(
+        std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle);
     void OnQuickMenuDismissed();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
@@ -384,7 +394,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
     void OnDateTimeChooserPopup(
         const NWeb::DateTimeChooser& chooser,
-        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
     void UpdateTouchHandleForOverlay();
@@ -497,6 +507,7 @@ private:
     void OnWebStandardFontUpdate(const std::string& value);
     void OnDefaultFixedFontSizeUpdate(int32_t value);
     void OnDefaultFontSizeUpdate(int32_t value);
+    void OnDefaultTextEncodingFormatUpdate(const std::string& value);
     void OnMinFontSizeUpdate(int32_t value);
     void OnMinLogicalFontSizeUpdate(int32_t value);
     void OnBlockNetworkUpdate(bool value);
@@ -590,7 +601,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
     OffsetF GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds);
-    void SetSelfAsParentOfWebCoreNode(NWeb::NWebAccessibilityNodeInfo& info) const;
+    void SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const;
 
     struct TouchInfo {
         float x = -1.0f;
@@ -603,13 +614,13 @@ private:
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
     DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);
     bool ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
-        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     bool ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
-        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     bool ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
-        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+        const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task) const;
     void OfflineMode();

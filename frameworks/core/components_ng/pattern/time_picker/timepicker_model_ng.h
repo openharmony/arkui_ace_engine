@@ -46,6 +46,13 @@ public:
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetHour24(FrameNode* frameNode, bool isUseMilitaryTime);
     static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
+    static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
+    static PickerTextStyle getDisappearTextStyle(FrameNode* frameNode);
+    static PickerTime getTimepickerSelected(FrameNode* frameNode);
+    static uint32_t getTimepickerBackgroundColor(FrameNode* frameNode);
+    static int32_t getTimepickerUseMilitaryTime(FrameNode* frameNode);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
@@ -57,7 +64,7 @@ class ACE_EXPORT TimePickerDialogModelNG : public TimePickerDialogModel {
 public:
     void SetTimePickerDialogShow(PickerDialogInfo& pickerDialog, NG::TimePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange) override;
+        std::function<void(const std::string&)>&& onChange, TimePickerDialogEvent& timePickerDialogEvent) override;
 };
 } // namespace OHOS::Ace::NG
 

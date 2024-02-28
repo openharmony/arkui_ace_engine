@@ -406,6 +406,12 @@ RefPtr<FrameNode> SliderModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SLIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SliderPattern>(); });
+
+    SetMinLabel(AceType::RawPtr(frameNode), DEFAULT_MIN_VALUE);
+    SetMaxLabel(AceType::RawPtr(frameNode), DEFAULT_MAX_VALUE);
+    SetStep(AceType::RawPtr(frameNode), DEFAULT_STEP);
+    SetSliderValue(AceType::RawPtr(frameNode), DEFAULT_MIN_VALUE);
+
     return frameNode;
 }
 
@@ -546,4 +552,18 @@ float SliderModelNG::GetStep(FrameNode* frameNode)
     return value;
 }
 
+std::string SliderModelNG::GetBlockImageValue(FrameNode* frameNode)
+{
+    std::string value = "";
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, BlockImage, value, frameNode, value);
+    return value;
+}
+
+RefPtr<BasicShape> SliderModelNG::GetBlockShape(FrameNode* frameNode)
+{
+    RefPtr<BasicShape> value = AceType::MakeRefPtr<BasicShape>();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SliderPaintProperty, BlockShape, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG

@@ -341,12 +341,6 @@ bool TextFieldOverlayModifier::GetMagnifierRect(
     if (!pattern->GetTextBoxes().empty()) {
         textBoxesLeft = pattern->GetTextBoxes()[0].Left();
     }
-    startX = localOffsetX - magnifierWidth / 2.0f;
-    if ((pattern->GetCaretIndex() == pattern->GetContentWideTextLength() && localOffsetX >= cursorOffsetX) ||
-        (pattern->GetCaretIndex() == 0 && localOffsetX <= cursorOffsetX)) {
-        startX = cursorOffsetX - magnifierWidth / 2.0f;
-        localOffsetX = cursorOffsetX;
-    }
     auto firstHandleOffsetY = pattern->GetTextSelectController()->GetFirstHandleOffset().GetY();
     auto secondHandleOffsetY = pattern->GetTextSelectController()->GetSecondHandleOffset().GetY();
     if (pattern->IsSelected() && firstHandleOffsetY != secondHandleOffsetY &&
@@ -361,6 +355,13 @@ bool TextFieldOverlayModifier::GetMagnifierRect(
     startY = cursorOffsetY - magnifierHeight - magnifierOffsetY;
     if ((pattern->GetParentGlobalOffset().GetY() + startY) < DEFAULT_STATUS_BAR_HEIGHT.ConvertToPx()) {
         startY = cursorOffsetY + pattern->GetLineHeight() + magnifierHeight + magnifierOffsetY;
+    }
+    startX = localOffsetX - magnifierWidth / 2.0f;
+    if (((pattern->GetCaretIndex() == pattern->GetContentWideTextLength() && localOffsetX >= cursorOffsetX) ||
+            (pattern->GetCaretIndex() == 0 && localOffsetX <= cursorOffsetX)) &&
+        (cursorOffsetY == pattern->GetCaretOffset().GetY())) {
+        startX = cursorOffsetX - magnifierWidth / 2.0f;
+        localOffsetX = cursorOffsetX;
     }
     startX = std::max(startX, 0.0f);
     endX = startX + magnifierWidth;

@@ -664,6 +664,80 @@ void JSRichEditor::JsEnableDataDetector(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetTextDetectEnable(enable);
 }
 
+void JSRichEditor::SetPlaceholder(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    std::string placeholderValue;
+    auto tempValue = info[0];
+    if (tempValue->IsEmpty() || tempValue->ToString() == "" ||
+        !JSContainerBase::ParseJsString(tempValue, placeholderValue)) {
+        return;
+    }
+    PlaceholderOptions options;
+    options.value = placeholderValue;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[1]);
+        JSRef<JSObject> fontObject = object->GetProperty("font");
+        Font font;
+        ParseJsFont(fontObject, font);
+        options.fontSize = font.fontSize;
+        options.fontFamilies = font.fontFamilies;
+        options.fontWeight = font.fontWeight;
+        options.fontStyle = font.fontStyle;
+
+        JSRef<JSVal> colorVal = object->GetProperty("fontColor");
+        Color fontColor;
+        if (!colorVal->IsNull() && JSContainerBase::ParseJsColor(colorVal, fontColor)) {
+            options.fontColor = fontColor;
+        }
+    }
+    RichEditorModel::GetInstance()->SetPlaceholder(options);
+}
+
+void JSRichEditor::ParseJsFont(const JSRef<JSObject>& fontObject, Font& font)
+{
+    if (fontObject->IsUndefined()) {
+        return;
+    }
+    JSRef<JSVal> fontSize = fontObject->GetProperty("size");
+    CalcDimension size;
+    if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size) && !size.IsNegative() &&
+        size.Unit() != DimensionUnit::PERCENT) {
+        font.fontSize = size;
+    } else if (size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
+        auto theme = JSContainerBase::GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        size = theme->GetTextStyle().GetFontSize();
+        font.fontSize = size;
+    }
+
+    JSRef<JSVal> fontStyle = fontObject->GetProperty("style");
+    if (!fontStyle->IsNull() && fontStyle->IsNumber()) {
+        font.fontStyle = static_cast<FontStyle>(fontStyle->ToNumber<int32_t>());
+    }
+
+    JSRef<JSVal> fontWeight = fontObject->GetProperty("weight");
+    if (!fontWeight->IsNull()) {
+        std::string weight;
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            JSContainerBase::ParseJsString(fontWeight, weight);
+        }
+        font.fontWeight = ConvertStrToFontWeight(weight);
+    }
+
+    JSRef<JSVal> fontFamily = fontObject->GetProperty("family");
+    if (!fontFamily->IsNull()) {
+        std::vector<std::string> fontFamilies;
+        if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies)) {
+            font.fontFamilies = fontFamilies;
+        }
+    }
+}
+
 void JSRichEditor::JsDataDetectorConfig(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -706,6 +780,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onPaste", &JSRichEditor::SetOnPaste);
     JSClass<JSRichEditor>::StaticMethod("enableDataDetector", &JSRichEditor::JsEnableDataDetector);
     JSClass<JSRichEditor>::StaticMethod("dataDetectorConfig", &JSRichEditor::JsDataDetectorConfig);
+    JSClass<JSRichEditor>::StaticMethod("placeholder", &JSRichEditor::SetPlaceholder);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

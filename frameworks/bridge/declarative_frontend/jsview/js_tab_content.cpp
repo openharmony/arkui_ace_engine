@@ -17,6 +17,7 @@
 
 #include <optional>
 
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
@@ -519,6 +520,36 @@ void JSTabContent::SetBottomTabBarStyle(const JSRef<JSObject>& paramObject)
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, nullptr, false);
 }
 
+void JSTabContent::SetOnWillShow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto willShowHandler = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onWillShow = [executionContext = info.GetExecutionContext(), func = std::move(willShowHandler)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("TabContent.onWillShow");
+        func->Execute();
+    };
+    TabContentModel::GetInstance()->SetOnWillShow(std::move(onWillShow));
+}
+
+void JSTabContent::SetOnWillHide(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto willHideHandler = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onWillHide = [executionContext = info.GetExecutionContext(), func = std::move(willHideHandler)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("TabContent.onWillHide");
+        func->Execute();
+    };
+    TabContentModel::GetInstance()->SetOnWillHide(std::move(onWillHide));
+}
+
 void JSTabContent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTabContent>::Declare("TabContent");
@@ -535,6 +566,8 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::StaticMethod("width", &JSTabContent::SetTabContentWidth);
     JSClass<JSTabContent>::StaticMethod("height", &JSTabContent::SetTabContentHeight);
     JSClass<JSTabContent>::StaticMethod("size", &JSTabContent::SetTabContentSize);
+    JSClass<JSTabContent>::StaticMethod("onWillShow", &JSTabContent::SetOnWillShow);
+    JSClass<JSTabContent>::StaticMethod("onWillHide", &JSTabContent::SetOnWillHide);
     JSClass<JSTabContent>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabContent>::InheritAndBind<JSContainerBase>(globalObj);
 }

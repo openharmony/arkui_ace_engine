@@ -343,6 +343,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("scrollSnap", &JSScroll::SetScrollSnap);
     JSClass<JSScroll>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSScroll>::StaticMethod("enablePaging", &JSScroll::SetEnablePaging);
+    JSClass<JSScroll>::StaticMethod("initialOffset", &JSScroll::SetInitialOffset);
     JSClass<JSScroll>::InheritAndBind<JSScrollableBase>(globalObj);
 }
 
@@ -486,5 +487,23 @@ void JSScroll::SetEnablePaging(const JSCallbackInfo& args)
         return;
     }
     ScrollModel::GetInstance()->SetEnablePaging(args[0]->ToBoolean());
+}
+
+void JSScroll::SetInitialOffset(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    Dimension xOffset;
+    Dimension yOffset;
+    if (ConvertFromJSValue(obj->GetProperty("xOffset"), xOffset) && xOffset.Unit() == DimensionUnit::PERCENT) {
+        xOffset = 0.0_vp;
+    }
+    if (ConvertFromJSValue(obj->GetProperty("yOffset"), yOffset) && yOffset.Unit() == DimensionUnit::PERCENT) {
+        yOffset = 0.0_vp;
+    }
+    ScrollModel::GetInstance()->SetInitialOffset(NG::OffsetT(xOffset, yOffset));
 }
 } // namespace OHOS::Ace::Framework

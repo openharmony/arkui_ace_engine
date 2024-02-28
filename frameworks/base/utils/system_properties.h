@@ -262,6 +262,11 @@ public:
         return layoutTraceEnable_;
     }
 
+    static bool GetStateManagerEnabled()
+    {
+        return stateManagerEnable_;
+    }
+
     static bool GetBuildTraceEnabled()
     {
         return buildTraceEnable_;
@@ -420,6 +425,8 @@ public:
 
     static bool GetGridIrregularLayoutEnabled();
 
+    static bool WaterFlowUseSegmentedLayout();
+
     static bool GetSideBarContainerBlurEnable();
 
     static void AddWatchSystemParameter(void *context);
@@ -427,6 +434,13 @@ public:
     static void EnableSystemParameterCallback(const char *key, const char *value, void *context);
 
     static void RemoveWatchSystemParameter(void *context);
+
+    static float GetDefaultResolution();
+
+    static bool GetAcePerformanceMonitorEnabled()
+    {
+        return acePerformanceMonitorEnable_;
+    }
 
 private:
     static bool traceEnabled_;
@@ -475,6 +489,8 @@ private:
     static bool navigationBlurEnabled_;
     static bool gridCacheEnabled_;
     static bool sideBarContainerBlurEnable_;
+    static bool stateManagerEnable_;
+    static bool acePerformanceMonitorEnable_;
 };
 
 } // namespace OHOS::Ace

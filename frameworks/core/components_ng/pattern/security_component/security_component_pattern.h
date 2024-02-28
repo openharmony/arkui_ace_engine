@@ -26,6 +26,9 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_SECURITY_COMPONENT_CLICK_DISTANCE = 15;
+constexpr uint64_t MAX_REGISTER_WAITING_TIME = 3000; // 3000ms
+constexpr int32_t MAX_RETRY_TIMES = 3;
+constexpr int64_t REGISTER_RETRY_INTERVAL = 30; // 30ms
 
 static inline RefPtr<FrameNode> GetSecCompChildNode(RefPtr<FrameNode>& parent, const std::string& tag)
 {
@@ -75,7 +78,14 @@ public:
 
     FocusPattern GetFocusPattern() const override;
 
+    void OnWindowHide() override;
+    void OnWindowShow() override;
+
+    SecurityComponentRegisterStatus regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
+    std::timed_mutex regMutex_;
     int32_t scId_ = -1;
+    bool isAppear_ = true;
+
 protected:
     void InitOnTouch(RefPtr<FrameNode>& secCompNode);
     void InitOnKeyEvent(RefPtr<FrameNode>& secCompNode);
@@ -86,7 +96,6 @@ protected:
     void SetNodeHitTestMode(RefPtr<FrameNode>& node, HitTestMode mode);
     void InitOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
         RefPtr<FrameNode>& text, RefPtr<FrameNode>& button);
-    void UnregisterSecurityComponent();
     void InitAppearCallback(RefPtr<FrameNode>& frameNode);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void ToJsonValueRect(std::unique_ptr<JsonValue>& json) const;
@@ -96,7 +105,12 @@ private:
     void UpdateIconProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& iconNode);
     void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
-
+#ifdef SECURITY_COMPONENT_ENABLE
+    void RegisterSecurityComponentAsync();
+    void UnregisterSecurityComponent();
+    int32_t ReportSecurityComponentClickEvent(GestureEvent& event);
+    int32_t ReportSecurityComponentClickEvent(const KeyEvent& event);
+#endif
     std::unique_ptr<Offset> lastTouchOffset_;
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> onTouchListener_;

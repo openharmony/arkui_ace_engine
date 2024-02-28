@@ -426,9 +426,7 @@ void SubwindowOhos::HideWindow()
     }
 #endif
 
-    if (!window_->IsFocused()) {
-        ContainerModalUnFocus();
-    }
+    ContainerModalUnFocus();
 
     OHOS::Rosen::WMError ret = window_->Hide();
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -692,6 +690,39 @@ void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayI
         hotAreasMap_[overlayId] = hotAreas;
     }
 
+    window_->SetTouchHotAreas(hotAreas);
+}
+
+void SubwindowOhos::SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
+{
+    CHECK_NULL_VOID(window_);
+    std::vector<Rosen::Rect> hotAreas;
+    Rosen::Rect rosenRect {};
+    for (const auto& rect : rects) {
+        RectConverter(rect, rosenRect);
+        hotAreas.emplace_back(rosenRect);
+    }
+    if (overlayId >= 0) {
+        popupHotAreasMap_[overlayId] = hotAreas;
+    }
+    std::vector<Rosen::Rect> hotAreasNow;
+    for (auto it = popupHotAreasMap_.begin(); it != popupHotAreasMap_.end(); it++) {
+        for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+            hotAreasNow.emplace_back(*it2);
+        }
+    }
+    window_->SetTouchHotAreas(hotAreasNow);
+}
+
+void SubwindowOhos::DeletePopupHotAreas(int32_t overlayId)
+{
+    popupHotAreasMap_.erase(overlayId);
+    std::vector<Rosen::Rect> hotAreas;
+    for (auto it = popupHotAreasMap_.begin(); it != popupHotAreasMap_.end(); it++) {
+        for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+            hotAreas.emplace_back(*it2);
+        }
+    }
     window_->SetTouchHotAreas(hotAreas);
 }
 

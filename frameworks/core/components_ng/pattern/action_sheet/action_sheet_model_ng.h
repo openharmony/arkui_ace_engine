@@ -27,6 +27,8 @@ public:
     void SetCancel(std::function<void()>&& eventFunc, DialogProperties& arg) override;
     void SetConfirm(GestureEventFunc&& gestureEvent, std::function<void()>&& eventFunc,
         ButtonInfo& buttonInfo, DialogProperties& arg) override;
+    void SetOnWillDismiss(std::function<void(const int32_t& info)>&& onWillDismissFunc,
+        DialogProperties& arg) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ACTION_SHEET_ACTION_SHEET_MODEL_NG_H

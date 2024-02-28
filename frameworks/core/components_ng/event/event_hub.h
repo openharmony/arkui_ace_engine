@@ -245,7 +245,7 @@ public:
 
     bool HasOnDragStart() const
     {
-        return static_cast<bool>(onDragStart_);
+        return static_cast<bool>(onDragStart_) || static_cast<bool>(defaultOnDragStart_);
     }
 
     void SetOnDragEnter(OnDragFunc&& onDragEnter)
@@ -489,15 +489,7 @@ public:
         return customerOnDragEnd_;
     }
 
-    void ClearCustomerOnDragFunc()
-    {
-        onDragStart_ = nullptr;
-        customerOnDragEnter_ = nullptr;
-        customerOnDragLeave_ = nullptr;
-        customerOnDragMove_ = nullptr;
-        customerOnDrop_ = nullptr;
-        customerOnDragEnd_ = nullptr;
-    }
+    void ClearCustomerOnDragFunc();
 
     void FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OHOS::Ace::DragEvent>& info,
         const std::string& extraParams = "");
@@ -513,6 +505,68 @@ public:
     void ClearOnAreaChangedInnerCallbacks()
     {
         onAreaChangedInnerCallbacks_.clear();
+    }
+
+    void SetDefaultOnDragStart(OnDragStartFunc&& defaultOnDragStart)
+    {
+        defaultOnDragStart_ = std::move(defaultOnDragStart);
+    }
+
+    const OnDragStartFunc& GetDefaultOnDragStart() const
+    {
+        return defaultOnDragStart_;
+    }
+
+    bool HasDefaultOnDragStart() const
+    {
+        return static_cast<bool>(defaultOnDragStart_);
+    }
+
+    std::vector<double>& GetVisibleAreaRatios(bool isUser)
+    {
+        if (isUser) {
+            return visibleAreaUserRatios_;
+        } else {
+            return visibleAreaInnerRatios_;
+        }
+    }
+
+    VisibleCallbackInfo& GetVisibleAreaCallback(bool isUser)
+    {
+        if (isUser) {
+            return visibleAreaUserCallback_;
+        } else {
+            return visibleAreaInnerCallback_;
+        }
+    }
+
+    void SetVisibleAreaRatios(const std::vector<double>& ratio, bool isUser)
+    {
+        if (isUser) {
+            visibleAreaUserRatios_ = ratio;
+        } else {
+            visibleAreaInnerRatios_ = ratio;
+        }
+    }
+
+    void SetVisibleAreaCallback(const VisibleCallbackInfo& callback, bool isUser)
+    {
+        if (isUser) {
+            visibleAreaUserCallback_ = callback;
+        } else {
+            visibleAreaInnerCallback_ = callback;
+        }
+    }
+
+    void CleanVisibleAreaCallback(bool isUser)
+    {
+        if (isUser) {
+            visibleAreaUserRatios_.clear();
+            visibleAreaUserCallback_.callback = nullptr;
+        } else {
+            visibleAreaInnerRatios_.clear();
+            visibleAreaInnerCallback_.callback = nullptr;
+        }
     }
 
 protected:
@@ -537,6 +591,7 @@ private:
     OnDragFunc onDrop_;
     OnNewDragFunc onDragEnd_;
 
+    OnDragStartFunc defaultOnDragStart_;
     OnDragFunc customerOnDragEnter_;
     OnDragFunc customerOnDragLeave_;
     OnDragFunc customerOnDragMove_;
@@ -546,6 +601,11 @@ private:
     bool enabled_ { true };
     bool developerEnabled_ { true };
     std::vector<KeyboardShortcut> keyboardShortcut_;
+
+    std::vector<double> visibleAreaUserRatios_;
+    std::vector<double> visibleAreaInnerRatios_;
+    VisibleCallbackInfo visibleAreaUserCallback_;
+    VisibleCallbackInfo visibleAreaInnerCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };

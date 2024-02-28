@@ -441,11 +441,15 @@ RSRect SliderContentModifier::GetTrackRect()
     auto backEnd = backEnd_->Get();
     auto trackThickness = trackThickness_->Get();
     auto direction = static_cast<Axis>(directionAxis_->Get());
+    auto stepSize = stepSize_->Get();
+    if (GreatNotEqual(stepSize, trackThickness)) {
+        stepSize = trackThickness;
+    }
     RSRect rect;
     if (direction == Axis::HORIZONTAL) {
         if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)) {
-            rect.SetLeft(backStart.GetX());
-            rect.SetRight(backEnd.GetX());
+            rect.SetLeft(backStart.GetX() - stepSize * HALF);
+            rect.SetRight(backEnd.GetX() + stepSize * HALF);
         } else {
             rect.SetLeft(backStart.GetX() - trackThickness * HALF);
             rect.SetRight(backEnd.GetX() + trackThickness * HALF);
@@ -456,8 +460,8 @@ RSRect SliderContentModifier::GetTrackRect()
         rect.SetLeft(backStart.GetX() - trackThickness * HALF);
         rect.SetRight(backEnd.GetX() + trackThickness * HALF);
         if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)) {
-            rect.SetTop(backStart.GetY());
-            rect.SetBottom(backEnd.GetY());
+            rect.SetTop(backStart.GetY() - stepSize * HALF);
+            rect.SetBottom(backEnd.GetY() + stepSize * HALF);
         } else {
             rect.SetTop(backStart.GetY() - trackThickness * HALF);
             rect.SetBottom(backEnd.GetY() + trackThickness * HALF);

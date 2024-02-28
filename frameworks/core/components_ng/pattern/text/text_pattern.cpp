@@ -62,6 +62,8 @@ constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 const std::u16string SYMBOL_TRANS = u"\uF0001";
+const std::string NEWLINE = "\n";
+const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 }; // namespace
 
 void TextPattern::OnAttachToFrameNode()
@@ -128,7 +130,10 @@ void TextPattern::ResetSelection()
 void TextPattern::InitSelection(const Offset& pos)
 {
     CHECK_NULL_VOID(paragraph_);
-    int32_t extend = paragraph_->GetGlyphIndexByCoordinate(pos);
+    int32_t extend = paragraph_->GetGlyphIndexByCoordinate(pos, true);
+    if (IsLineBreakOrEndOfParagraph(extend)) {
+        extend--;
+    }
     int32_t start = 0;
     int32_t end = 0;
     if (!paragraph_->GetWordBoundary(extend, start, end)) {
@@ -137,6 +142,14 @@ void TextPattern::InitSelection(const Offset& pos)
             extend + GetGraphemeClusterLength(GetWideText(), extend));
     }
     HandleSelectionChange(start, end);
+}
+
+bool TextPattern::IsLineBreakOrEndOfParagraph(int32_t pos) const
+{
+    CHECK_NULL_RETURN(pos < static_cast<int32_t>(GetWideText().length() + placeholderCount_), true);
+    auto data = GetWideText();
+    CHECK_NULL_RETURN(data[pos] == WIDE_NEWLINE[0], false);
+    return true;
 }
 
 void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
@@ -1381,9 +1394,7 @@ void TextPattern::InitDragEvent()
             return pattern->OnDragStart(event, extraParams);
         }
     };
-    if (!eventHub->HasOnDragStart()) {
-        eventHub->SetOnDragStart(std::move(onDragStart));
-    }
+    eventHub->SetDefaultOnDragStart(std::move(onDragStart));
     auto onDragMove = [weakPtr = WeakClaim(this)](
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
@@ -1814,6 +1825,11 @@ void TextPattern::OnAfterModifyDone()
 
 void TextPattern::ActSetSelection(int32_t start, int32_t end)
 {
+    if (start == -1 && end == -1) {
+        ResetSelection();
+        CloseSelectOverlay();
+        return;
+    }
     int32_t min = 0;
     int32_t textSize = static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     start = start < min ? min : start;
@@ -1872,28 +1888,9 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, boo
     }
 }
 
-void TextPattern::RedisplaySelectOverlay()
-{
-    if (!isShowMenu_) {
-        TAG_LOGD(AceLogTag::ACE_TEXT, "Do not redisplaySelectOverlay when drag failed");
-        isShowMenu_ = true;
-        return;
-    }
-    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-        CalculateHandleOffsetAndShowOverlay();
-        if (selectOverlayProxy_->IsMenuShow()) {
-            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-        } else {
-            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-            selectOverlayProxy_->ShowOrHiddenMenu(true);
-        }
-    }
-}
-
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
-        RedisplaySelectOverlay();
         return false;
     }
 
@@ -1908,8 +1905,6 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
     paragraph_ = paragraph;
-    // The handle calculation needs to be after the paragraph is assigned.
-    RedisplaySelectOverlay();
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
@@ -2634,7 +2629,8 @@ bool TextPattern::IsSelectedBindSelectionMenu()
 void TextPattern::UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd)
 {
     UpdateSelectionType(GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT));
-    if (selectedType_ == TextSpanType::NONE && !textSelector_.StartEqualToDest()) {
+    if ((selectedType_ == TextSpanType::NONE && !textSelector_.StartEqualToDest()) ||
+        textSelector_.StartEqualToDest()) {
         selectedType_ = TextSpanType::TEXT;
     }
 }

@@ -2307,7 +2307,7 @@ HWTEST_F(ImageTestNg, ImageSetImageAnalyzerConfig0001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     frameNode->MarkModifyDone();
-    pattern->SetImageAnalyzerConfig(ImageAnalyzerConfig());
+    pattern->EnableAnalyzer(true);
     EXPECT_TRUE(pattern->loadingCtx_);
 }
 } // namespace OHOS::Ace::NG

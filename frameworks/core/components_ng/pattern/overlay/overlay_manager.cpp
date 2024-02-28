@@ -357,6 +357,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(theme);
     auto root = rootNodeWeak_.Upgrade();
     auto dialogPattern = node->GetPattern<DialogPattern>();
+    dialogPattern->CallDialogWillAppearCallback();
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         root = dialogPattern->GetDialogProperties().windowScene.Upgrade();
@@ -384,6 +385,8 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
             auto node = nodeWK.Upgrade();
             CHECK_NULL_VOID(overlayManager && node);
             overlayManager->FocusOverlayNode(node);
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            dialogPattern->CallDialogDidAppearCallback();
         });
     auto ctx = node->GetRenderContext();
     option.SetFinishCallbackType(dialogPattern->GetOpenAnimation().has_value()
@@ -423,6 +426,7 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     option.SetDuration(theme->GetAnimationDurationOut());
     // get customized animation params
     auto dialogPattern = node->GetPattern<DialogPattern>();
+    dialogPattern->CallDialogWillDisappearCallback();
     option = dialogPattern->GetCloseAnimation().value_or(option);
     option.SetIteration(1);
     option.SetAnimationDirection(AnimationDirection::NORMAL);
@@ -431,6 +435,10 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->PostDialogFinishEvent(nodeWk);
+        auto node = nodeWk.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto dialogPattern = node->GetPattern<DialogPattern>();
+        dialogPattern->CallDialogDidDisappearCallback();
     });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -776,6 +784,28 @@ void OverlayManager::ClearToast()
 
 void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo)
 {
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(rootNode);
+    if (frameNode && !frameNode->IsLayoutComplete()) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [targetId, popupInfo, weak = WeakClaim(this)]() {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->MountPopup(targetId, popupInfo);
+            },
+            TaskExecutor::TaskType::UI);
+    } else {
+        MountPopup(targetId, popupInfo);
+    }
+}
+
+void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo)
+{
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show popup enter");
     popupMap_[targetId] = popupInfo;
     if (!popupInfo.markNeedUpdate) {
@@ -900,6 +930,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
             if (isShowInSubWindow) {
                 auto subwindow = SubwindowManager::GetInstance();
                 CHECK_NULL_VOID(subwindow);
+                subwindow->DeletePopupHotAreas(popupNode->GetId(), popupPattern->GetContainerId());
                 subwindow->HideSubWindowNG();
             }
         });
@@ -1008,6 +1039,9 @@ void OverlayManager::HideCustomPopups()
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
+                auto subWindowMgr = SubwindowManager::GetInstance();
+                auto popupPattern = popupNode->GetPattern<BubblePattern>();
+                subWindowMgr->DeleteHotAreas(popupNode->GetId(), popupPattern->GetContainerId());
             } else {
                 HidePopup(targetNodeId, popupInfo);
             }
@@ -1033,6 +1067,9 @@ void OverlayManager::HideAllPopups()
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
+                auto subWindowMgr = SubwindowManager::GetInstance();
+                auto popupPattern = popupNode->GetPattern<BubblePattern>();
+                subWindowMgr->DeleteHotAreas(popupNode->GetId(), popupPattern->GetContainerId());
             } else {
                 HidePopup(targetNodeId, popupInfo);
             }
@@ -1336,6 +1373,10 @@ void OverlayManager::CleanPopupInSubWindow()
             auto removeNode = HidePopupWithoutAnimation(target, popupInfo);
             if (removeNode) {
                 removeNodes.emplace_back(removeNode);
+                auto popupPattern = removeNode->GetPattern<BubblePattern>();
+                auto subwindowMgr = SubwindowManager::GetInstance();
+                CHECK_NULL_VOID(subwindowMgr);
+                subwindowMgr->DeletePopupHotAreas(removeNode->GetId(), popupPattern->GetContainerId());
             }
             break;
         }
@@ -1461,34 +1502,61 @@ void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
     OpenDialogAnimation(customNode);
 }
 
+void RegisterDialogCallback(
+    const RefPtr<FrameNode>& node, std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
+{
+    CHECK_NULL_VOID(node);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(theme);
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    if (!dialogLifeCycleEvent.empty()) {
+        auto didAppearEvent = dialogLifeCycleEvent["didAppearId"];
+        auto didDisappearEvent = dialogLifeCycleEvent["didDisappearId"];
+        auto willAppearEvent = dialogLifeCycleEvent["willAppearId"];
+        auto willDisappearEvent = dialogLifeCycleEvent["willDisappearId"];
+        dialogPattern->RegisterDialogDidAppearCallback(std::move(didAppearEvent));
+        dialogPattern->RegisterDialogDidDisappearCallback(std::move(didDisappearEvent));
+        dialogPattern->RegisterDialogWillAppearCallback(std::move(willAppearEvent));
+        dialogPattern->RegisterDialogWillDisappearCallback(std::move(willDisappearEvent));
+    }
+}
+
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show date dialog enter");
     auto dialogNode = DatePickerDialogView::Show(
         dialogProps, std::move(settingData), std::move(dialogEvent), std::move(dialogCancelEvent));
+    RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
     std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show time dialog enter");
     auto dialogNode = TimePickerDialogView::Show(
         dialogProps, settingData, std::move(timePickerProperty), std::move(dialogEvent), std::move(dialogCancelEvent));
+    RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
     std::map<std::string, NG::DialogTextEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show text dialog enter");
     auto dialogNode =
         TextPickerDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
+    RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
@@ -1499,11 +1567,13 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
 }
 
 void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show calendar dialog enter");
     auto dialogNode =
         CalendarDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
+    RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
@@ -1698,6 +1768,13 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             }
         }
         if (InstanceOf<DialogPattern>(pattern)) {
+            auto dialogPattern = DynamicCast<DialogPattern>(pattern);
+            CHECK_NULL_RETURN(dialogPattern, false);
+            if (dialogPattern->ShouldDismiss()) {
+                dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
+                TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
+                return true;
+            }
             return RemoveDialog(overlay, isBackPressed, isPageRouter);
         }
         if (InstanceOf<BubblePattern>(pattern)) {
@@ -1912,6 +1989,13 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     // close dialog with animation
     auto pattern = overlay->GetPattern();
     if (InstanceOf<DialogPattern>(pattern)) {
+        auto dialogPattern = DynamicCast<DialogPattern>(pattern);
+        CHECK_NULL_RETURN(dialogPattern, false);
+        if (dialogPattern->ShouldDismiss()) {
+            dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
+            return true;
+        }
         return RemoveDialog(overlay, false, false);
     }
     if (InstanceOf<BubblePattern>(pattern)) {
@@ -1927,6 +2011,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
                 if (rootNode->GetChildren().empty()) {
                     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(popupPattern->GetContainerId());
                     CHECK_NULL_RETURN(subwindow, false);
+                    subwindow->DeletePopupHotAreas(overlay->GetId());
                     subwindow->HideSubWindowNG();
                 }
                 return true;
@@ -2625,6 +2710,7 @@ void OverlayManager::PlaySheetTransition(
     option.SetFillMode(FillMode::FORWARDS);
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
+    context->UpdateRenderGroup(true, true, true);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
@@ -2648,6 +2734,13 @@ void OverlayManager::PlaySheetTransition(
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
+        option.SetOnFinishEvent([sheetWK = WeakClaim(RawPtr(sheetNode))] {
+            auto sheetNode = sheetWK.Upgrade();
+            CHECK_NULL_VOID(sheetNode);
+            auto context = sheetNode->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            context->UpdateRenderGroup(false, true, true);
+        });
         sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         AnimationUtils::Animate(
             option,

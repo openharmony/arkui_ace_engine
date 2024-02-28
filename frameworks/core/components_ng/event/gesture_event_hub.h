@@ -386,15 +386,6 @@ public:
     void CombineIntoExclusiveRecognizer(
         const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId);
 
-    bool IsResponseRegion() const
-    {
-        return isResponseRegion_;
-    }
-    void MarkResponseRegion(bool isResponseRegion)
-    {
-        isResponseRegion_ = isResponseRegion;
-    }
-
     const std::vector<DimensionRect>& GetResponseRegion() const
     {
         return responseRegion_;
@@ -594,6 +585,13 @@ public:
 
     int32_t RegisterCoordinationListener(const RefPtr<PipelineBase>& context);
 
+    bool IsTextCategoryComponent(const std::string& frameTag);
+
+    DragDropInfo GetDragDropInfo(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
+        DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+
+    RefPtr<UnifiedData> GetUnifiedData(DragDropInfo& dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
@@ -607,7 +605,7 @@ private:
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
-        const DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+        DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

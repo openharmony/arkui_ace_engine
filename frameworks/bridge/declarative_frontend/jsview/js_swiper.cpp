@@ -1010,6 +1010,7 @@ void JSSwiperController::JSBind(BindingTarget globalObj)
     JSClass<JSSwiperController>::CustomMethod("showPrevious", &JSSwiperController::ShowPrevious);
     JSClass<JSSwiperController>::CustomMethod("changeIndex", &JSSwiperController::ChangeIndex);
     JSClass<JSSwiperController>::CustomMethod("finishAnimation", &JSSwiperController::FinishAnimation);
+    JSClass<JSSwiperController>::CustomMethod("preloadItems", &JSSwiperController::PreloadItems);
     JSClass<JSSwiperController>::Bind(globalObj, JSSwiperController::Constructor, JSSwiperController::Destructor);
 }
 
@@ -1068,6 +1069,38 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
     }
 
     controller_->FinishAnimation();
+}
+
+void JSSwiperController::PreloadItems(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (!controller_) {
+        return;
+    }
+
+    if (args.Length() != 2 || !args[0]->IsArray() || !args[1]->IsFunction()) {
+        return;
+    }
+
+    auto indexArray = JSRef<JSArray>::Cast(args[0]);
+    size_t size = indexArray->Length();
+    std::set<int32_t> indexSet;
+    for (size_t i = 0; i < size; i++) {
+        int32_t index = -1;
+        JSViewAbstract::ParseJsInt32(indexArray->GetValueAt(i), index);
+        indexSet.emplace(index);
+    }
+
+    RefPtr<JsSwiperFunction> jsFunc = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(args[1]));
+    auto onPreloadFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t errorCode) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Swiper.preloadItems");
+        TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperController preloadItems callback execute.");
+        func->Execute(errorCode);
+    };
+
+    controller_->SetPreloadFinishCallback(onPreloadFinish);
+    controller_->PreloadItems(indexSet);
 }
 
 void JSSwiper::SetNestedScroll(const JSCallbackInfo& args)

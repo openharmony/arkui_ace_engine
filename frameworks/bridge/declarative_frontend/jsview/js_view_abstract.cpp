@@ -143,6 +143,7 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+constexpr uint32_t ON_WILL_DISMISS_FIELD_COUNT = 2;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
@@ -2153,6 +2154,7 @@ void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
         if (info[0]->IsNull() || info[0]->IsUndefined()) {
             // undefined use default value.
             ViewAbstractModel::GetInstance()->ResetFlexShrink();
+            return;
         } else {
             return;
         }
@@ -3948,7 +3950,7 @@ bool JSViewAbstract::ParseDollarResource(const JSRef<JSVal>& jsValue, std::strin
     if (isParseType && !ConvertResourceType(results[2], resType)) {
         return false;
     }
-    resName = results[3];
+    resName = resPath;
     return true;
 }
 
@@ -5253,6 +5255,32 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     }
 }
 #endif
+
+void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,
+    std::function<void(const int32_t& info)>& onWillDismiss)
+{
+    auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
+    if (onWillDismissFunc->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
+        onWillDismiss = [func = std::move(jsFunc)](const int32_t& info) {
+            JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+            objectTemplate->SetInternalFieldCount(ON_WILL_DISMISS_FIELD_COUNT);
+            JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
+            dismissObj->SetPropertyObject(
+                "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissDialog));
+            dismissObj->SetProperty<int32_t>("reason", info);
+            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            func->ExecuteJS(1, &newJSVal);
+        };
+    }
+}
+
+panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ViewAbstractModel::GetInstance()->DismissDialog();
+    return JSValueRef::Undefined(runtimeCallInfo->GetVM());
+}
 
 void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
 {
@@ -7900,91 +7928,5 @@ void JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::stri
             moduleName = module->ToString();
         }
     }
-}
-
-void JSViewAbstract::ParseImageAnalyzerSubjectOptions(const JSRef<JSVal>& optionVal,
-    ImageAnalyzerConfig& analyzerConfig)
-{
-    ImageAnalyzerSubjectOptions subjectOptions;
-    auto obj = JSRef<JSObject>::Cast(optionVal);
-    JSRef<JSVal> onAnalyzedVal = obj->GetProperty("onAnalyzed");
-    if (onAnalyzedVal->IsFunction()) {
-        RefPtr<JsFunction> jsOnAnalyzedFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
-            JSRef<JSFunc>::Cast(onAnalyzedVal));
-        onSubcjectAnalyzedFunc onAnalyzedCallback =
-            [func = std::move(jsOnAnalyzedFunc)](std::string tag, std::vector<uint8_t> data) {
-            JSRef<JSVal> params[2];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
-            JSRef<JSArray> indexArray = JSRef<JSArray>::New();
-            for (uint32_t i = 0; i < data.size(); i++) {
-                indexArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(data[i])));
-            }
-            params[1] = JSRef<JSVal>::Cast(indexArray);
-            func->ExecuteJS(2, params);
-        };
-        subjectOptions.onAnalyzedCallback = std::move(onAnalyzedCallback);
-    }
-
-    JSRef<JSVal> dataVal = obj->GetProperty("analyzedData");
-    if (dataVal->IsArray()) {
-        JSRef<JSArray> dataArray  = JSRef<JSArray>::Cast(dataVal);
-        std::vector<uint8_t> analyzedData;
-        for (size_t i = 0; i < dataArray->Length(); ++i) {
-            JSRef<JSVal> value = dataArray->GetValueAt(i);
-            if (value->IsNumber()) {
-                analyzedData.emplace_back(value->ToNumber<uint8_t>());
-            }
-        }
-        subjectOptions.analyzedData = std::move(analyzedData);
-    }
-
-#if defined(PIXEL_MAP_SUPPORTED)
-    auto pixmapVal = obj->GetProperty("sourcePixelmap");
-    RefPtr<PixelMap> pixmap = CreatePixelMapFromNapiValue(pixmapVal);
-    if (pixmap != nullptr) {
-        subjectOptions.sourcePixelmap = ConvertPixmapNapi(pixmap);
-    }
-#endif
-    analyzerConfig.subjectOptions_ = std::move(subjectOptions);
-}
-
-void JSViewAbstract::ParseImageAnalyzerTextOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig)
-{
-    ImageAnalyzerTextOptions textOptions;
-    auto obj = JSRef<JSObject>::Cast(optionVal);
-    JSRef<JSVal> onAnalyzedVal = obj->GetProperty("onAnalyzed");
-    if (onAnalyzedVal->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAnalyzedVal));
-        onTextAnalyzedFunc onAnalyzedCallback = [func = std::move(jsFunc)] (
-            std::string tag, std::string data) {
-            JSRef<JSVal> params[2];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
-            params[1] = JSRef<JSVal>::Make(ToJSValue(data));
-            func->ExecuteJS(2, params);
-        };
-        textOptions.onAnalyzedCallback = std::move(onAnalyzedCallback);
-    }
-
-    JSRef<JSVal> onTextSelected = obj->GetProperty("onTextSelected");
-    if (onTextSelected->IsFunction()) {
-        RefPtr<JsFunction> jsOnTextSelectedFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
-        JSRef<JSFunc>::Cast(onTextSelected));
-        onTextSelectedFunc onTextSelectedCallback =
-            [func = std::move(jsOnTextSelectedFunc)] (std::string tag, std::string data) {
-            JSRef<JSVal> params[2];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
-            params[1] = JSRef<JSVal>::Make(ToJSValue(data));
-            func->ExecuteJS(2, params);
-        };
-        textOptions.onTextSelected = std::move(onTextSelectedCallback);
-    }
-
-    JSRef<JSVal> dataVal = obj->GetProperty("analyzedData");
-    if (dataVal->IsArray()) {
-        std::string analyzedData = dataVal->ToString();
-        textOptions.analyzedData = std::move(analyzedData);
-    }
-    analyzerConfig.textOptions = std::move(textOptions);
 }
 } // namespace OHOS::Ace::Framework

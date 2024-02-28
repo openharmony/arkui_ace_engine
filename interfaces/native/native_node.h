@@ -453,18 +453,17 @@ typedef enum {
      *
      * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
      * .value[0].f32： 线性渐变的起始角度。0点方向顺时针旋转为正向角度，默认值：180； \n
-     * .value[1].i32：线性渐变的方向，设置angle后不生效。取值("left","top","right","bottom","left-top","left-bottom","right-top", \n
-     *                "right-bottom","none", 默认值 "bottom")； \n
-     * .value[2].u32： 为渐变的颜色重复着色，默认值 false；如 "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5;;left;true" 。 \n
+     * .value[1].i32：线性渐变的方向，设置angle后不生效。数据类型{@link ArkUI_LinearGradientDirection} \n
+     * .value[2].i32： 为渐变的颜色重复着色，默认值 false。 \n
      * .object: 指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
      * colors：渐变色颜色颜色。 \n
      * stops：渐变位置。 \n
      * size：颜色个数。 \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32： 线性渐变的起始角度。0点方向顺时针旋转为正向角度，默认值：180；\n
+     * .value[0].f32： 线性渐变的起始角度。\n
      * .value[1].i32：线性渐变的方向，设置angle后不生效。\n
-     * .value[0].u32： 为渐变的颜色重复着色，默认值 false；\n
+     * .value[0].i32： 为渐变的颜色重复着色。\n
      * .object: 指定某百分比位置处的渐变色颜色，设置非法颜色直接跳过： \n
      * colors：渐变色颜色颜色。 \n
      * stops：渐变位置。 \n
@@ -474,7 +473,7 @@ typedef enum {
      * float stops[] = { 0.0, 0.5 };
      * ArkUIColorStop colorStop = { colors, stops, 2 };
      * ArkUI_ColorStop* ptr = &colorStop;
-     * ArkUI_NumberValue value[] = {{ .f32 = 60 } ,  { .i32 = left } , { .i32 = true }};
+     * ArkUI_NumberValue value[] = {{ .f32 = 60 } ,  { .i32 = ARKUI_LINEAR_GRADIENT_DIRECTION_LEFT } , { .i32 = true }};
      * ArkUI_AttributeItem item =
      * { value, sizeof(value)/sizeof(ArkUI_NumberValue), .object = reinterpret_cast<void*>(ptr) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_LINEAR_GRADIENT, &item);
@@ -4081,14 +4080,14 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[1].u32: selected year. \n
-     * .value[2].u32: selected month. \n
-     * .value[3].u32: selected day. \n
+     * .value[0].u32: selected year. \n
+     * .value[1].u32: selected month. \n
+     * .value[2].u32: selected day. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[1].u32: selected year. \n
-     * .value[2].u32: selected month. \n
-     * .value[3].u32: selected day. \n
+     * .value[0].u32: selected year. \n
+     * .value[1].u32: selected month. \n
+     * .value[2].u32: selected day. \n
      *
      * @code {.cpp}
      * ArkUI_NumberValue value[] = { { .u32 = 2028 }, { .u32 = 1 }, { .u32 = 1 } };
@@ -4574,7 +4573,7 @@ typedef enum {
      * .value[0].i32: scroll direction. The parameter type is {@link ArkUI_Axis}. \n
      *
      * @code {.cpp}
-     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_AXIS_VERTICAL } };
+     * ArkUI_NumberValue value[] = { { .i32 = 0 } };
      * ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_DIRECTION, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SCROLL_SCROLL_DIRECTION);
@@ -4944,10 +4943,10 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: interval for automatic playback, in milliseconds. \n
+     * .value[0].f32: interval for automatic playback, in milliseconds. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: interval for automatic playback, in milliseconds. \n
+     * .value[0].f32: interval for automatic playback, in milliseconds. \n
      *
      * @code {.cpp}
      * ArkUI_NativeNodeAPI_1* nativeNodeApi =
@@ -4956,7 +4955,7 @@ typedef enum {
      * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
      * nativeNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INTERVAL, &item);
      * auto item = nativeNodeApi->getAttribute(nodeHandle, NODE_SWIPER_INTERVAL);
-     * auto nodeSwiperInterval = item->value[0].i32;
+     * auto nodeSwiperInterval = item->value[0].f32;
      * @endcode
      *
      */
@@ -5220,6 +5219,122 @@ typedef enum {
      * @endcode
      */
     NODE_LIST_ITEM_GROUP_SET_DIVIDER,
+
+    /**
+     * @brief 设置Column子组件在水平方向上的对齐格式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：子组件在水平方向上的对齐格式，数据类型{@link ArkUI_HorizontalAlignment}， \n
+     * 默认值ARKUI_HORIZONTAL_ALIGNMENT_CENTER。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：子组件在水平方向上的对齐格式，数据类型{@link ArkUI_HorizontalAlignment}。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_HORIZONTAL_ALIGNMENT_START } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_COLUMN_ALIGN_ITEMS, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_COLUMN_ALIGN_ITEMS);
+     * auto nodeColumnAlignItems = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_COLUMN_ALIGN_ITEMS = MAX_NODE_SCOPE_NUM * ARKUI_NODE_COLUMN,
+    /**
+     * @brief 设置Column子组件在垂直方向上的对齐格式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：子组件在垂直方向上的对齐格式，数据类型{@link ArkUI_FlexAlign}， \n
+     * 默认值ARKUI_FLEX_ALIGN_START。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：子组件在垂直方向上的对齐格式，数据类型{@link ArkUI_FlexAlign}。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_FLEX_ALIGN_END } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_COLUMN_JUSTIFY_CONTENT, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_COLUMN_JUSTIFY_CONTENT);
+     * auto nodeColumnJustifyContent = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_COLUMN_JUSTIFY_CONTENT,
+
+    /**
+     * @brief 设置Row子组件在垂直方向上的对齐格式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：子组件在垂直方向上的对齐格式，数据类型{@link ArkUI_VerticalAlignment}， \n
+     * 默认值ARKUI_VERTICAL_ALIGNMENT_CENTER。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：子组件在垂直方向上的对齐格式，数据类型{@link ArkUI_VerticalAlignment}。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_VERTICAL_ALIGNMENT_TOP } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ROW_ALIGN_ITEMS, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_ROW_ALIGN_ITEMS);
+     * auto nodeRowAlignItems = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_ROW_ALIGN_ITEMS = MAX_NODE_SCOPE_NUM * ARKUI_NODE_ROW,
+    /**
+     * @brief 设置Row子组件在水平方向上的对齐格式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：子组件在水平方向上的对齐格式，数据类型{@link ArkUI_FlexAlign}， \n
+     * 默认值ARKUI_FLEX_ALIGN_START。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：子组件在水平方向上的对齐格式，数据类型{@link ArkUI_FlexAlign}。 \n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { { .i32 = ARKUI_VERTICAL_ALIGNMENT_TOP } };
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ROW_JUSTIFY_CONTENT, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_ROW_JUSTIFY_CONTENT);
+     * auto nodeRowAlignItems = item->value[0].i32;
+     * @endcode
+     *
+     */
+    NODE_ROW_JUSTIFY_CONTENT,
+
+    /**
+     * @brief 设置Flex属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0]?.i32：子组件在Flex容器上排列的方向{@link ArkUI_FlexDirection}，默认值为ARKUI_FLEX_DIRECTION_ROW； \n
+     * .value[1]?.i32：排列规则{@link ArkUI_FlexWrap}，默认值为ARKUI_FLEX_WRAP_NO_WRAP； \n
+     * .value[2]?.i32：主轴上的对齐格式{@link ArkUI_FlexAlign}，默认值为ARKUI_FLEX_ALIGN_START； \n
+     * .value[3]?.i32：交叉轴上的对齐格式{@link ArkUI_ItemAlign}，默认值为ARKUI_ITEM_ALIGN_START； \n
+     * .value[4]?.i32：	交叉轴中有额外的空间时，多行内容的对齐方式{@link ArkUI_FlexAlign}，默认值为ARKUI_FLEX_ALIGN_START； \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0]?.i32：子组件在Flex容器上排列的方向的枚举值； \n
+     * .value[1]?.i32：排列规则的枚举值； \n
+     * .value[2]?.i32：主轴上的对齐格式的枚举值； \n
+     * .value[3]?.i32：交叉轴上的对齐格式的枚举值； \n
+     * .value[4]?.i32：	交叉轴中有额外的空间时，多行内容的对齐方式的枚举值； \n
+     *
+     * @code {.cpp}
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_FLEX_DIRECTION_COLUMN}, {.i32 = ARKUI_FLEX_WRAP_WRAP},
+     * {.i32 = ARKUI_FLEX_ALIGN_SPACE_BETWEEN}, {.i32 = ARKUI_ITEM_ALIGN_CENTER}, {.i32 = ARKUI_FLEX_ALIGN_END}};
+     * ARKUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FLEX_OPTION, &item);
+     * auto item = basicNodeApi=>getAttribute(nodeHandle, NODE_FLEX_OPTION);
+     * auto nodeFlexDirection = item->value[1].i32;
+     * auto nodeFlexWrap = item->value[2].i32;
+     * auto nodeFlexJustifyContent = item->value[3].i32;
+     * auto nodeFlexAlignItems = item->value[4].i32;
+     * auto nodeFlexAlignContent = item->value[5].i32;
+     *
+     * @endcode
+     *
+     */
+    NODE_FLEX_OPTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_FLEX,
 
     /**
      * @brief 设置组件是否正在刷新，支持属性设置，属性获取。

@@ -47,6 +47,22 @@ bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 
 bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
 {
+    if (point.type == TouchType::DOWN && !firstInputTime_.has_value()) {
+        firstInputTime_ = point.time;
+    }
+    if (point.type == TouchType::UP) {
+        int64_t overTime = GetSysTimestamp();
+        int64_t inputTime = overTime;
+        if (firstInputTime_.has_value()) {
+            inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+        }
+        if (SystemProperties::GetLayoutTraceEnabled()) {
+            ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:TouchEvent",
+                static_cast<long long>(inputTime), static_cast<long long>(overTime));
+        }
+        firstInputTime_.reset();
+    }
+
     if (touchEvents_.empty() && !userCallback_ && !onTouchEventCallback_) {
         return true;
     }

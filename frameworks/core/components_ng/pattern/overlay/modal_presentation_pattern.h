@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/ace_application_info.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
@@ -98,8 +100,20 @@ public:
 
     bool AvoidBottom() const override
     {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            // ModalPage will not avoid bottom in any scenes.
+            return false;
+        }
         // If UIExtensionComponent uses ModalPage, ModalPage will not avoid bottom.
         return !isUIExtension_;
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            return MakeRefPtr<ModalPresentationLayoutAlgorithm>();
+        }
+        return MakeRefPtr<BoxLayoutAlgorithm>();
     }
 
 private:

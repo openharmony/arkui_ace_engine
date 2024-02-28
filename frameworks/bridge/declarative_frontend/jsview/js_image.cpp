@@ -26,6 +26,7 @@
 #include "base/image/pixel_map.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -653,15 +654,18 @@ void JSImage::AnalyzerConfig(const JSCallbackInfo &info)
     if (configParams->IsNull() || !configParams->IsObject()) {
         return;
     }
-    
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    panda::Local<JsiValue> value = configParams.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    ImageModel::GetInstance()->SetImageAnalyzerConfig(nativeValue);
+
+    // As an example, the function is not in effect.
     auto paramObject = JSRef<JSObject>::Cast(configParams);
     JSRef<JSVal> typeVal = paramObject->GetProperty("types");
-    JSRef<JSVal> showButtonVal = paramObject->GetProperty("showAIButton");
-    JSRef<JSVal> marginVal = paramObject->GetProperty("aiButtonOffset");
-    JSRef<JSVal> textOpVal = paramObject->GetProperty("textOptions");
-    JSRef<JSVal> subjectOpVal = paramObject->GetProperty("subjectOptions");
-    JSRef<JSVal> tagVal = paramObject->GetProperty("tag");
-
     ImageAnalyzerConfig analyzerConfig;
     if (typeVal->IsArray()) {
         auto array = JSRef<JSArray>::Cast(typeVal);
@@ -678,27 +682,6 @@ void JSImage::AnalyzerConfig(const JSCallbackInfo &info)
             types.insert(type);
         }
         analyzerConfig.types = std::move(types);
-    }
-    if (showButtonVal->IsBoolean()) {
-        analyzerConfig.isShowAIButton = showButtonVal->ToBoolean();
-    }
-    if (!marginVal->IsNull() && marginVal->IsObject()) {
-        auto marginValue = JSRef<JSObject>::Cast(marginVal);
-        std::optional<CalcDimension> top;
-        std::optional<CalcDimension> bottom;
-        std::optional<CalcDimension> left;
-        std::optional<CalcDimension> right;
-        ParseMarginOrPaddingCorner(marginValue, top, bottom, left, right);
-        analyzerConfig.aiButtonMargin = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
-    }
-    if (subjectOpVal->IsObject()) {
-        ParseImageAnalyzerSubjectOptions(subjectOpVal, analyzerConfig);
-    }
-    if (textOpVal->IsObject()) {
-        ParseImageAnalyzerTextOptions(textOpVal, analyzerConfig);
-    }
-    if (tagVal->IsString()) {
-        analyzerConfig.tag = tagVal->ToString();
     }
     ImageModel::GetInstance()->SetImageAnalyzerConfig(analyzerConfig);
 }

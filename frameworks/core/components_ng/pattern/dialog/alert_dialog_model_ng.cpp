@@ -18,6 +18,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +33,12 @@ void AlertDialogModelNG::SetParseButtonObj(
 void AlertDialogModelNG::SetOnCancel(std::function<void()>&& eventFunc, DialogProperties& arg)
 {
     arg.onCancel = eventFunc;
+}
+
+void AlertDialogModelNG::SetOnWillDismiss(std::function<void(const int32_t& info)>&& onWillDismissFunc,
+    DialogProperties& arg)
+{
+    arg.onWillDismiss = std::move(onWillDismissFunc);
 }
 
 void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
@@ -64,6 +71,7 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
                     DialogProperties Maskarg;
                     Maskarg.isMask = true;
                     Maskarg.autoCancel = arg.autoCancel;
+                    Maskarg.onWillDismiss = arg.onWillDismiss;
                     auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                     overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
                     CHECK_NULL_VOID(mask);
@@ -74,6 +82,9 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
             }
             auto hub = dialog->GetEventHub<NG::DialogEventHub>();
             hub->SetOnCancel(arg.onCancel);
+            auto pattern = dialog->GetPattern<DialogPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetOnWillDismiss(arg.onWillDismiss);
         },
         TaskExecutor::TaskType::UI);
 }

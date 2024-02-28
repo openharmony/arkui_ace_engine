@@ -56,20 +56,31 @@ public:
     void SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) override;
     void SetEnablePaging(bool enablePaging) override;
+    void SetInitialOffset(const OffsetT<Dimension>& offset) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetScrollController(
         FrameNode* frameNode, const RefPtr<ScrollControllerBase>& scroller, const RefPtr<ScrollProxy>& proxy);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
+    static float GetFriction(FrameNode* frameNode);
     static void SetFriction(FrameNode* frameNode, double friction);
+    static int32_t GetScrollSnap(FrameNode* frameNode);
     static void SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
+    static int32_t GetScrollBar(FrameNode* frameNode);
     static void SetScrollBar(FrameNode* frameNode, DisplayMode barState);
+    static int32_t GetAxis(FrameNode* frameNode);
     static void SetAxis(FrameNode* frameNode, Axis axis);
+    static uint32_t GetScrollBarColor(FrameNode* frameNode);
     static void SetScrollBarColor(FrameNode* frameNode, const Color& color);
+    static float GetScrollBarWidth(FrameNode* frameNode);
     static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension);
+    static int32_t GetEdgeEffect(FrameNode* frameNode);
+    static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
     static void SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled);
+    static int32_t GetEnablePaging(FrameNode* frameNode);
     static void SetEnablePaging(FrameNode* frameNode, bool enablePaging);
     static void SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& event);

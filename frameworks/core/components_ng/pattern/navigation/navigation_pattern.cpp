@@ -219,10 +219,33 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     if (!needSyncWithJsStack_) {
         return;
     }
-
+    CHECK_NULL_VOID(navigationStack_);
     needSyncWithJsStack_ = false;
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack");
+    preTopNavPath_ = navigationStack_->GetPreTopNavPath();
+    preStackSize_ = navigationStack_->PreSize();
+    if (preTopNavPath_.has_value()) {
+        auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            hostNode->GetNavDestinationNode(preTopNavPath_->second));
+        if (preDestination) {
+            auto pattern = AceType::DynamicCast<NavDestinationPattern>(preDestination->GetPattern());
+            preContext_ = pattern->GetNavDestinationContext();
+        }
+    } else {
+        preContext_ = nullptr;
+    }
     UpdateNavPathList();
+    auto newTopNavPath = navigationStack_->GetTopNavPath();
+    auto replaceValue = navigationStack_->GetReplaceValue();
+    if (preTopNavPath_ != newTopNavPath || replaceValue == 1) {
+        FireInterceptionEvent(true, newTopNavPath);
+        if (needSyncWithJsStack_) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack in before interception");
+            UpdateNavPathList();
+            needSyncWithJsStack_ = false;
+        }
+    }
     RefreshNavDestination();
 }
 
@@ -230,11 +253,8 @@ void NavigationPattern::UpdateNavPathList()
 {
     CHECK_NULL_VOID(navigationStack_);
     navigationStack_->UpdateRemovedNavPathList(); // Delete Removed NavPathList
-    auto preTopNavPath = navigationStack_->GetPreTopNavPath();
     auto pathNames = navigationStack_->GetAllPathName();
     auto cacheNodes = navigationStack_->GetAllCacheNodes();
-    preTopNavPath_ = preTopNavPath;
-    preStackSize_ = navigationStack_->PreSize();
     NavPathList navPathList;
     auto replaceValue = navigationStack_->GetReplaceValue();
     for (size_t i = 0; i < pathNames.size(); ++i) {
@@ -770,6 +790,8 @@ void NavigationPattern::OnNavigationModeChange(bool modeChange)
     auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireNavigationModeChangeEvent(navigationMode_);
+    // fire navigation stack navigation mode change event
+    navigationStack_->FireNavigationModeChange(navigationMode_);
 }
 
 bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -777,11 +799,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto navigationLayoutAlgorithm =
-        DynamicCast<NavigationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(navigationLayoutAlgorithm, false);
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, false);
     auto context = PipelineContext::GetCurrentContext();
@@ -812,8 +829,11 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     pattern->UpdateContextRect(curTopNavDestination, navigationGroupNode);
                     if (pattern->isChanged_ && curTopNavDestination) {
                         pattern->NotifyDialogChange(true, true);
-                        pattern->isChanged_ = false;
                     }
+                }
+                if (pattern->isChanged_) {
+                    pattern->FireInterceptionEvent(false, curTopNavPath);
+                    pattern->isChanged_ = false;
                 }
                 // considering navBar visibility
                 auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
@@ -1130,7 +1150,6 @@ void NavigationPattern::AddDividerHotZoneRect()
     DimensionRect responseRect(Dimension(dragRect_.Width(), DimensionUnit::PX),
         Dimension(dragRect_.Height(), DimensionUnit::PX), responseOffset);
     responseRegion.emplace_back(responseRect);
-    dividerGestureHub->MarkResponseRegion(true);
     dividerGestureHub->SetResponseRegion(responseRegion);
 }
 
@@ -1195,7 +1214,7 @@ void NavigationPattern::NotifyDialogChange(bool isShow, bool isNavigationChanged
         }
     } else {
         for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1;
-         index >= 0 && index >= standardIndex; index--) {
+            index >= 0 && index >= standardIndex; index--) {
             const auto& curPath = navDestinationNodes[index];
             auto curDestination =
                 AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetNavDestinationNode(curPath.second));
@@ -1558,4 +1577,71 @@ void NavigationPattern::DealTransitionVisibility(const RefPtr<FrameNode>& node, 
     });
 }
 
+void NavigationPattern::AddToDumpManager()
+{
+    auto node = GetHost();
+    auto context = PipelineContext::GetCurrentContext();
+    if (!node || !context) {
+        return;
+    }
+    auto mgr = context->GetNavigationDumpManager();
+    if (!mgr) {
+        return;
+    }
+    auto callback = [weakPattern = WeakClaim(this)](int depth) {
+        auto pattern = weakPattern.Upgrade();
+        if (!pattern) {
+            return;
+        }
+        const auto& stack = pattern->GetNavigationStack();
+        if (!stack) {
+            return;
+        }
+        auto infos = stack->DumpStackInfo();
+        for (const auto& info : infos) {
+            DumpLog::GetInstance().Print(depth, info);
+        }
+    };
+    mgr->AddNavigationDumpCallback(node->GetId(), node->GetDepth(), callback);
+}
+
+void NavigationPattern::RemoveFromDumpManager()
+{
+    auto node = GetHost();
+    auto context = PipelineContext::GetCurrentContext();
+    if (!node || !context) {
+        return;
+    }
+    auto mgr = context->GetNavigationDumpManager();
+    if (mgr) {
+        mgr->RemoveNavigationDumpCallback(node->GetId(), node->GetDepth());
+    }
+}
+
+void NavigationPattern::FireInterceptionEvent(bool isBefore,
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopPath)
+{
+    auto size = navigationStack_->Size();
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    RefPtr<NavDestinationContext> to;
+    if (newTopPath.has_value()) {
+        auto topDestination =
+            AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetNavDestinationNode(newTopPath->second));
+        if (topDestination) {
+            auto pattern = AceType::DynamicCast<NavDestinationPattern>(topDestination->GetPattern());
+            to = pattern->GetNavDestinationContext();
+        }
+    }
+    NavigationOperation operation;
+    auto replaceValue = navigationStack_->GetReplaceValue();
+    if (replaceValue == 1) {
+        operation = NavigationOperation::REPLACE;
+    } else {
+        operation = preStackSize_ > size ? NavigationOperation::POP : NavigationOperation::PUSH;
+    }
+    bool disableAllAnimation = navigationStack_->GetDisableAnimation();
+    bool animated = navigationStack_->GetAnimatedValue();
+    navigationStack_->FireNavigationInterception(isBefore, preContext_, to, operation,
+        !disableAllAnimation || animated);
+}
 } // namespace OHOS::Ace::NG

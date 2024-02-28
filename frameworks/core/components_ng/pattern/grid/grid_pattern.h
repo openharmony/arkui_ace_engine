@@ -174,7 +174,8 @@ public:
 
     void OnAnimateStop() override;
 
-    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
+    void AnimateTo(
+        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false) override;
     void ScrollTo(float position) override;
 
     void ScrollBy(float offset);
@@ -215,6 +216,8 @@ public:
     {
         predictLayoutParam_ = param;
     }
+
+    std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
 
 private:
     float GetEndOffset();

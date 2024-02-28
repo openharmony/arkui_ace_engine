@@ -374,7 +374,8 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
         }
         auto children = node->GetChildren();
         if (children.size() != 1) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "router map is invalid, child size is more than one");
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+                "router map is invalid, child size is not one: %{public}zu", children.size());
         }
         node = children.front();
     }
@@ -655,5 +656,79 @@ bool JSNavigationStack::GetFlagByIndex(int32_t index) const
         return res->ToBoolean();
     }
     return false;
+}
+
+std::vector<std::string> JSNavigationStack::DumpStackInfo() const
+{
+    std::vector<std::string> dumpInfos;
+    for (size_t i = 0; i < navPathList_.size(); ++i) {
+        const auto& name = navPathList_[i].first;
+        std::string info = "[" + std::to_string(i) + "]{ name: \"" + name + "\"";
+        std::string param = ConvertParamToString(GetParamByIndex(i));
+        if (param.length() > 0) {
+            info += ", param: " + param;
+        }
+        info += " }";
+        dumpInfos.push_back(std::move(info));
+    }
+    return dumpInfos;
+}
+
+void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
+    const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated)
+{
+    std::string targetName = isBefore ? "willShow" : "didShow";
+    JSRef<JSFunc> targetFunc;
+    if (!CheckAndGetInterceptionFunc(targetName, targetFunc)) {
+        return;
+    }
+    const uint8_t argsNum = 4;
+    JSRef<JSVal> params[argsNum];
+    auto preDestination = AceType::DynamicCast<JSNavDestinationContext>(from);
+    if (preDestination) {
+        params[0] = preDestination->CreateJSObject();
+    } else {
+        params[0] = JSRef<JSVal>::Make(ToJSValue("NavBar"));
+    }
+    auto topDestination = AceType::DynamicCast<JSNavDestinationContext>(to);
+    if (topDestination) {
+        params[1] = topDestination->CreateJSObject();
+    } else {
+        params[1] = JSRef<JSVal>::Make(ToJSValue("NavBar"));
+    }
+    const uint8_t operationIndex = 2;
+    params[operationIndex] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(operation)));
+    const uint8_t animatedIndex = 3;
+    params[animatedIndex] = JSRef<JSVal>::Make(ToJSValue(isAnimated));
+    targetFunc->Call(JSRef<JSObject>(), argsNum, params);
+}
+
+void JSNavigationStack::FireNavigationModeChange(NG::NavigationMode mode)
+{
+    JSRef<JSFunc> modeFunc;
+    if (!CheckAndGetInterceptionFunc("modeChange", modeFunc)) {
+        return;
+    }
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(mode)));
+    modeFunc->Call(JSRef<JSObject>(), 1, params);
+}
+
+bool JSNavigationStack::CheckAndGetInterceptionFunc(const std::string& name, JSRef<JSFunc>& func)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    JSRef<JSVal> delegateProp = dataSourceObj_->GetProperty("interception");
+    if (!delegateProp->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> delegate = JSRef<JSObject>::Cast(delegateProp);
+    JSRef<JSVal> funcProp = delegate->GetProperty(name.c_str());
+    if (!funcProp->IsFunction()) {
+        return false;
+    }
+    func = JSRef<JSFunc>::Cast(funcProp);
+    return true;
 }
 } // namespace OHOS::Ace::Framework

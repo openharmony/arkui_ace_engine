@@ -96,6 +96,11 @@ public:
         needCallBack_ = needCallBack;
     }
 
+    bool IsInHoverMode() const
+    {
+        return hasInHoverMode_;
+    }
+
     void SetLayoutBeforeAnimation(const RefPtr<FolderStackGroupNode>& hostNode);
 
 private:

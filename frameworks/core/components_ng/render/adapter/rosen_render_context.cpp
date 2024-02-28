@@ -3503,7 +3503,15 @@ void RosenRenderContext::PaintClipMask(const std::unique_ptr<ClipProperty>& clip
     }
 #else
     auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
-    auto maskPath = Rosen::RSMask::CreatePathMask(rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape));
+
+    RSColor rsStrokeColor;
+    rsStrokeColor.SetColorQuad(basicShape->GetStrokeColor());
+    RSPen pen;
+    pen.SetColor(rsStrokeColor);
+    pen.SetWidth(basicShape->GetStrokeWidth());
+
+    auto maskPath =
+        Rosen::RSMask::CreatePathMask(rsPath, pen, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape));
     if (!clipMaskModifier_) {
         auto prop = std::make_shared<RSProperty<std::shared_ptr<RSMask>>>(maskPath);
         clipMaskModifier_ = std::make_shared<Rosen::RSMaskModifier>(prop);
@@ -4708,6 +4716,12 @@ void RosenRenderContext::OnRenderGroupUpdate(bool isRenderGroup)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->MarkNodeGroup(isRenderGroup);
+}
+
+void RosenRenderContext::UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkNodeGroup(isRenderGroup, isForced, includeProperty);
 }
 
 void RosenRenderContext::OnSuggestedRenderGroupUpdate(bool isRenderGroup)

@@ -683,6 +683,7 @@ protected:
     Axis direction_ = Axis::NONE;
     RefPtr<NG::TargetComponent> targetComponent_;
     bool isPostEventResult_ = false;
+    std::optional<TimeStamp> firstInputTime_;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;

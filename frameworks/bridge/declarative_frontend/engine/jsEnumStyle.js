@@ -963,6 +963,13 @@ var MenuPreviewMode;
   MenuPreviewMode[MenuPreviewMode["IMAGE"] = 1] = "IMAGE";
 })(MenuPreviewMode || (MenuPreviewMode = {}));
 
+var DismissReason;
+(function (DismissReason) {
+DismissReason[DismissReason["PRESS_BACK"] = 0] = "PRESSBACK"
+DismissReason[DismissReason["TOUCH_OUTSIDE"] = 1] = "TOUCH_OUTSIDE";
+DismissReason[DismissReason["CLOSE_BUTTON"] = 2] = "CLOSE_BUTTON";
+})(DismissReason || (DismissReason = {}));
+
 var HoverEffect;
 (function (HoverEffect) {
   HoverEffect[HoverEffect["Auto"] = 4] = "Auto";
@@ -1121,6 +1128,8 @@ var FileSelectorMode;
 var ProtectedResourceType;
 (function (ProtectedResourceType) {
   ProtectedResourceType["MidiSysex"] = "TYPE_MIDI_SYSEX";
+  ProtectedResourceType["VIDEO_CAPTURE"] = "TYPE_VIDEO_CAPTURE";
+  ProtectedResourceType["AUDIO_CAPTURE"] = "TYPE_AUDIO_CAPTURE";
 })(ProtectedResourceType || (ProtectedResourceType = {}));
 
 var ProgressType;
@@ -1722,6 +1731,7 @@ class NavPathStack {
     this.parentStack = undefined;
     // Array of remove destination indexes
     this.removeArray = [];
+    this.interception = undefined;
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
@@ -2093,9 +2103,76 @@ class NavPathStack {
   disableAnimation(disableAnimation) {
     this.disableAllAnimation = disableAnimation;
   }
+  setInterception(interception) {
+    this.interception = interception;
+  }
 }
 
 globalThis.NavPathStack = NavPathStack;
+
+class WaterFlowSections {
+  constructor() {
+    this.sectionArray = []
+    // indicate class has changed.
+    this.changeFlag = true
+    this.changeArray = []
+  }
+
+  // splice(start: number, deleteCount?: number, sections?: Array<SectionOptions>): boolean;
+  splice(start, deleteCount, sections) {
+    if(!deleteCount && !sections) {
+        return false
+    }
+    if(sections) {
+      const iterator = sections.values()
+      for (const section of iterator) {
+        if(!Number.isInteger(section.itemsCount) || section.itemsCount <= 0) {
+          return false
+        }
+      }
+      this.sectionArray.splice(start, deleteCount, ...sections)
+    } else {
+      this.sectionArray.splice(start, deleteCount)
+    }
+    this.changeArray.push({start: start, deleteCount: deleteCount ? deleteCount : 0, 
+      sections: sections ? sections : []})
+    this.changeFlag = !this.changeFlag
+    return true
+  }
+
+  push(section) {
+    if(!Number.isInteger(section.itemsCount) || section.itemsCount <= 0) {
+        return false
+    }
+    let oldLength = this.sectionArray.length
+    this.sectionArray.push(section)
+    this.changeArray.push({start: oldLength, deleteCount: 0, sections: [section]})
+    this.changeFlag = !this.changeFlag
+    return true
+  }
+
+  update(sectionIndex, section) {
+    if(!Number.isInteger(section.itemsCount) || section.itemsCount <= 0) {
+        return false
+    }
+    this.sectionArray.splice(sectionIndex, 1, section)
+    this.changeArray.push({start: sectionIndex, deleteCount: 1, sections: [section]})
+    this.changeFlag = !this.changeFlag
+    return true
+  }
+
+  values() {
+    return this.sectionArray
+  }
+
+  length() {
+    return this.sectionArray.length
+  }
+
+  clearChanges() {
+    this.changeArray = []
+  }
+}
 
 var ImageSpanAlignment;
 (function (ImageSpanAlignment) {

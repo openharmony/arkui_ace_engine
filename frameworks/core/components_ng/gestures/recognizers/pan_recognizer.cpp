@@ -112,6 +112,16 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
 
 void PanRecognizer::OnAccepted()
 {
+    int64_t acceptTime = GetSysTimestamp();
+    int64_t inputTime = acceptTime;
+    if (firstInputTime_.has_value()) {
+        inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+    }
+    if (SystemProperties::GetLayoutTraceEnabled()) {
+        ACE_SCOPED_TRACE("UserEvent InputTime:%lld AcceptTime:%lld InputType:PanGesture",
+            static_cast<long long>(inputTime), static_cast<long long>(acceptTime));
+    }
+    
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture has been accepted, node tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
@@ -126,6 +136,7 @@ void PanRecognizer::OnRejected()
     if (refereeState_ != RefereeState::SUCCEED) {
         refereeState_ = RefereeState::FAIL;
     }
+    firstInputTime_.reset();
 }
 
 void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end)
@@ -141,6 +152,10 @@ void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& event, b
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    if (!firstInputTime_.has_value()) {
+        firstInputTime_ = event.time;
+    }
+
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer receives %{public}d touch down event, begin to detect pan event",
         event.id);
     fingers_ = newFingers_;
@@ -190,6 +205,9 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    if (!firstInputTime_.has_value()) {
+        firstInputTime_ = event.time;
+    }
     if (event.isRotationEvent) {
         return;
     }
@@ -260,6 +278,16 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
             averageDistance_.Reset();
+            int64_t overTime = GetSysTimestamp();
+            int64_t inputTime = overTime;
+            if (firstInputTime_.has_value()) {
+                inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+            }
+            if (SystemProperties::GetLayoutTraceEnabled()) {
+                ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PanGesture",
+                    static_cast<long long>(inputTime), static_cast<long long>(overTime));
+            }
+            firstInputTime_.reset();
         }
     }
 
@@ -289,6 +317,16 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (refereeState_ == RefereeState::SUCCEED) {
         // AxisEvent is single one.
         SendCallbackMsg(onActionEnd_);
+        int64_t overTime = GetSysTimestamp();
+        int64_t inputTime = overTime;
+        if (firstInputTime_.has_value()) {
+            inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+        }
+        if (SystemProperties::GetLayoutTraceEnabled()) {
+            ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PanGesture",
+                static_cast<long long>(inputTime), static_cast<long long>(overTime));
+        }
+        firstInputTime_.reset();
     }
 }
 

@@ -244,9 +244,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.setCardId(parent.getCardId());
       // Call below will set this.parent_ to parent as well
       parent.addChild(this);
-    } else if (localStorage) {
+    }
+    if (localStorage) {
       this.localStorage_ = localStorage;
-      stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry.`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry or view instance creation.`);
     }
     this.isCompFreezeAllowed = this.isCompFreezeAllowed || (this.parent_ && this.parent_.isCompFreezeAllowed);
 
@@ -846,13 +847,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // ascending order ensures parent nodes will be updated before their children
       // prior cleanup ensure no already deleted Elements have their update func executed
       const dirtElmtIdsFromRootNode= Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
-      this.dirtDescendantElementIds_= new Set<number>();
       dirtElmtIdsFromRootNode.forEach(elmtId => {
         if (this.hasRecycleManager()) {
           this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
         } else {
           this.UpdateElement(elmtId);
         }
+        this.dirtDescendantElementIds_.delete(elmtId);
       });
 
       if (this.dirtDescendantElementIds_.size) {
@@ -953,6 +954,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       if (!isFirstRender) {
         _popFunc();
+      }
+
+      let node = this.getNodeById(elmtId);
+      if (node !== undefined) {
+        node.cleanStageValue();
       }
 
       if (ConfigureStateMgmt.instance.needsV3Observe()) {
@@ -1056,13 +1062,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
         this.aboutToReuse(params);
       }
     }, "aboutToReuse", this.constructor.name);
-    this.updateDirtyElements();
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child && !child.hasBeenRecycled_) {
         child.aboutToReuseInternal();
       }
     });
+    this.updateDirtyElements();
     this.runReuse_ = false;
   }
 
@@ -1296,6 +1302,15 @@ abstract class ViewPU extends NativeViewPartialUpdate
       nodeInfo = builder();
       entry.setNode(nodeInfo);
     }
+    return nodeInfo;
+  }
+
+  public getNodeById(elmtId: number): object {
+    const entry = this.updateFuncByElmtId.get(elmtId);
+    if (entry === undefined) {
+        throw new Error(`${this.debugInfo__()} fail to get node, elmtId is illegal`);
+    }
+    let nodeInfo = entry.getNode();
     return nodeInfo;
   }
 

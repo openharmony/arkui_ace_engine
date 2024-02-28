@@ -27,7 +27,9 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
+constexpr int CONVERSION_RADIX = 10;
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
+constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 
 ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -63,8 +65,12 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
 
     if (threeArg->IsString() || threeArg->IsNumber()) {
         if (threeArg->IsString()) {
-            auto weightStr = threeArg->ToString(vm)->ToString();
-            value.fontWeight = std::stoi(weightStr);
+            auto strPtr = threeArg->ToString(vm)->ToString().c_str();
+            char* end;
+            value.fontWeight = strtol(strPtr, &end, CONVERSION_RADIX);
+            if (end == strPtr || *end != '\0' || errno == ERANGE) {
+                value.fontWeight = static_cast<ArkUI_Int32>(DEFAULT_FONT_WEIGHT);
+            }
         }
 
         if (threeArg->IsNumber()) {
@@ -350,8 +356,12 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
 
     if (threeArg->IsString() || threeArg->IsNumber()) {
         if (threeArg->IsString()) {
-            auto weightStr = threeArg->ToString(vm)->ToString();
-            value.fontWeight = std::stoi(weightStr);
+            auto strPtr = threeArg->ToString(vm)->ToString().c_str();
+            char* end;
+            value.fontWeight = strtol(strPtr, &end, CONVERSION_RADIX);
+            if (end == strPtr || *end != '\0' || errno == ERANGE) {
+                value.fontWeight = static_cast<ArkUI_Int32>(DEFAULT_FONT_WEIGHT);
+            }
         }
 
         if (threeArg->IsNumber()) {

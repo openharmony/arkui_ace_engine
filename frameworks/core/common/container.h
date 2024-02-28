@@ -449,6 +449,16 @@ public:
                PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
     }
 
+    static bool LessThanAPITargetVersion(PlatformVersion version)
+    {
+        return AceApplicationInfo::GetInstance().GetApiTargetVersion() < static_cast<int32_t>(version);
+    }
+
+    static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
+    {
+        return AceApplicationInfo::GetInstance().GetApiTargetVersion() >= static_cast<int32_t>(version);
+    }
+
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar)
     {
         appBar_ = appBar;
