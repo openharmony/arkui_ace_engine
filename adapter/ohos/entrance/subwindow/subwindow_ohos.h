@@ -129,6 +129,8 @@ public:
     }
     void ResizeWindowForFoldStatus() override;
     void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
+    void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
+    void DeletePopupHotAreas(int32_t overlayId) override;
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -179,6 +181,7 @@ private:
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
     std::unordered_map<int32_t, std::vector<Rosen::Rect>> hotAreasMap_;
+    std::unordered_map<int32_t, std::vector<Rosen::Rect>> popupHotAreasMap_;
 
     sptr<OHOS::Rosen::Window> dialogWindow_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;

@@ -930,6 +930,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
             if (isShowInSubWindow) {
                 auto subwindow = SubwindowManager::GetInstance();
                 CHECK_NULL_VOID(subwindow);
+                subwindow->DeletePopupHotAreas(popupNode->GetId(), popupPattern->GetContainerId());
                 subwindow->HideSubWindowNG();
             }
         });
@@ -1038,6 +1039,9 @@ void OverlayManager::HideCustomPopups()
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
+                auto subWindowMgr = SubwindowManager::GetInstance();
+                auto popupPattern = popupNode->GetPattern<BubblePattern>();
+                subWindowMgr->DeleteHotAreas(popupNode->GetId(), popupPattern->GetContainerId());
             } else {
                 HidePopup(targetNodeId, popupInfo);
             }
@@ -1063,6 +1067,9 @@ void OverlayManager::HideAllPopups()
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
+                auto subWindowMgr = SubwindowManager::GetInstance();
+                auto popupPattern = popupNode->GetPattern<BubblePattern>();
+                subWindowMgr->DeleteHotAreas(popupNode->GetId(), popupPattern->GetContainerId());
             } else {
                 HidePopup(targetNodeId, popupInfo);
             }
@@ -1366,6 +1373,10 @@ void OverlayManager::CleanPopupInSubWindow()
             auto removeNode = HidePopupWithoutAnimation(target, popupInfo);
             if (removeNode) {
                 removeNodes.emplace_back(removeNode);
+                auto popupPattern = removeNode->GetPattern<BubblePattern>();
+                auto subwindowMgr = SubwindowManager::GetInstance();
+                CHECK_NULL_VOID(subwindowMgr);
+                subwindowMgr->DeletePopupHotAreas(removeNode->GetId(), popupPattern->GetContainerId());
             }
             break;
         }
@@ -2000,6 +2011,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
                 if (rootNode->GetChildren().empty()) {
                     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(popupPattern->GetContainerId());
                     CHECK_NULL_RETURN(subwindow, false);
+                    subwindow->DeletePopupHotAreas(overlay->GetId());
                     subwindow->HideSubWindowNG();
                 }
                 return true;
