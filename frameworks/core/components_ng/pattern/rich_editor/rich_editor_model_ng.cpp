@@ -150,7 +150,7 @@ void RichEditorModelNG::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& f
 
 void RichEditorModelNG::SetPlaceholder(PlaceholderOptions& options)
 {
-    if (options.value.has_value() && !options.value.value().empty()) {
+    if (options.value.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Placeholder, options.value.value());
     }
     if (options.fontSize.has_value()) {
