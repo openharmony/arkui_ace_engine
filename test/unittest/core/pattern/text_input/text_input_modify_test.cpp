@@ -291,6 +291,112 @@ HWTEST_F(TextFieldModifyTest, CheckBlurReason001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleClickEvent001
+ * @tc.desc: Test the clickevent for handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, HandleClickEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    GestureEvent gestureEvent;
+    gestureEvent.SetLocalLocation(Offset(0.0f, 0.0f));
+    gestureEvent.SetSourceDevice(SourceType::TOUCH);
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    gestureEvent.SetTimeStamp(timeStampAce);
+
+    /**
+     * @tc.steps: step2. Set single clickevent. Call function HandleSingleClickEvent.
+     * @tc.expected: Check if return true.
+     */
+    pattern_->OnAfterModifyDone();
+    pattern_->HandleSingleClickEvent(gestureEvent);
+    EXPECT_TRUE(pattern_->isSingleHandle_);
+}
+
+/**
+ * @tc.name: OnCursorTwinkling001
+ * @tc.desc: Test the cursor twinkling for handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnCursorTwinkling001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    pattern_->OnCursorTwinkling();
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Set single clickevent. Call function OnCursorTwinkling.
+     * @tc.expected: Check if return true.
+     */
+    pattern_->obscureTickCountDown_ = 1;
+    pattern_->OnCursorTwinkling();
+    pattern_->OnAfterModifyDone();
+    EXPECT_TRUE(pattern_->isSingleHandle_);
+}
+
+/**
+ * @tc.name: UpdatSecondHandleInfo001
+ * @tc.desc: Test the update for handleinfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, UpdateSecondHandleInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Set secondhandle. Call function UpdateSelectOverlaySecondHandle.
+     * @tc.expected: Check if return true.
+     */
+    pattern_->ProcessOverlay(true, true, true);
+    pattern_->HandleSetSelection(5, 10, false);
+    pattern_->UpdateSelectOverlaySecondHandle(true);
+    EXPECT_NE(pattern_->GetSelectOverlayProxy(), nullptr);
+
+    pattern_->UpdateSelectOverlayDoubleHandle(true, true);
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    pattern_->UpdateSelectOverlayDoubleHandle(true, true);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
+}
+
+/**
+ * @tc.name: UpdatSecondHandleInfo001
+ * @tc.desc: Test get Select HandleInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, UpdateSecondHandleInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    OffsetF localOffset(1.0f, 1.0f);
+
+    /**
+     * @tc.steps: step2. Set secondhandle. Call function GetSelectHandleInfo.
+     * @tc.expected: Check if return true.
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    pattern_->UpdateSelectOverlaySecondHandle(true);
+    EXPECT_EQ(pattern_->GetSelectHandleInfo(localOffset).paintRect, RectF(1.0f, 1.0f, 1.5f, 50.0f));
+}
+
+/**
  * @tc.name: DoCallback001
  * @tc.desc: Test function OnModifyDone.
  * @tc.type: FUNC
