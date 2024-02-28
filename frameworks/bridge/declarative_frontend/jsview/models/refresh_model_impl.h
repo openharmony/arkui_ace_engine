@@ -47,6 +47,7 @@ public:
     void SetOnRefreshing(std::function<void()>&& refreshing) override;
     void SetChangeEvent(std::function<void(const std::string)>&& changeEvent) override;
     void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) override;
+    void SetLoadingText(const std::string& loadingText) override;
 private:
     static RefPtr<RefreshComponent> GetComponent();
 };
