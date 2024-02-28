@@ -608,7 +608,12 @@ bool SystemProperties::GetGridCacheEnabled()
 
 bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
-    return (system::GetParameter("persist.ace.grid.irregular.enabled", "0") == "1");
+    return system::GetBoolParameter("persist.ace.grid.irregular.enabled", false);
+}
+
+bool SystemProperties::WaterFlowUseSegmentedLayout()
+{
+    return system::GetBoolParameter("persist.ace.water.flow.segmented", false);
 }
 
 bool SystemProperties::GetSideBarContainerBlurEnable()

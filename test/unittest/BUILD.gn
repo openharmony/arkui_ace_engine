@@ -995,6 +995,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_sections.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_segmented_layout.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_controller_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.cpp",

@@ -17,9 +17,16 @@
 
 #include <algorithm>
 
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
+
 namespace OHOS::Ace::NG {
 int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 {
+    if (static_cast<size_t>(itemIndex) < itemInfos_.size()) {
+        return itemInfos_[itemIndex].crossIdx;
+    }
     for (const auto& crossItems : items_[GetSegment(itemIndex)]) {
         auto iter = crossItems.second.find(itemIndex);
         if (iter != crossItems.second.end()) {
@@ -31,6 +38,10 @@ int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 
 void WaterFlowLayoutInfo::UpdateStartIndex()
 {
+    if (!itemInfos_.empty()) {
+        // don't use in new segmented layout
+        return;
+    }
     auto nextPosition = GetCrossIndexForNextItem(GetSegment(endIndex_));
     auto mainHeight = GetMainHeight(nextPosition.crossIndex, nextPosition.lastItemIndex);
     // need more items for currentOffset_
@@ -101,6 +112,9 @@ float WaterFlowLayoutInfo::GetContentHeight() const
 
 float WaterFlowLayoutInfo::GetMainHeight(int32_t crossIndex, int32_t itemIndex) const
 {
+    if (static_cast<size_t>(itemIndex) < itemInfos_.size() && itemInfos_[itemIndex].crossIdx == crossIndex) {
+        return itemInfos_[itemIndex].mainOffset + itemInfos_[itemIndex].mainSize;
+    }
     auto seg = GetSegment(itemIndex);
     float result = segmentStartPos_[seg];
 
@@ -118,6 +132,9 @@ float WaterFlowLayoutInfo::GetMainHeight(int32_t crossIndex, int32_t itemIndex) 
 
 float WaterFlowLayoutInfo::GetStartMainPos(int32_t crossIndex, int32_t itemIndex) const
 {
+    if (static_cast<size_t>(itemIndex) < itemInfos_.size() && itemInfos_[itemIndex].crossIdx == crossIndex) {
+        return itemInfos_[itemIndex].mainOffset;
+    }
     float result = 0.0f;
     auto cross = items_[GetSegment(itemIndex)].find(crossIndex);
     if (cross == items_[GetSegment(itemIndex)].end()) {
@@ -194,9 +211,13 @@ void WaterFlowLayoutInfo::Reset()
     startIndex_ = 0;
     endIndex_ = -1;
     targetIndex_.reset();
-    for (auto& map : items_) {
-        map.clear();
-    }
+    items_ = { ItemMap() };
+    itemInfos_.clear();
+    endPosArray_.clear();
+    segmentTails_.clear();
+    margins_.clear();
+    segmentStartPos_ = { 0.0f };
+    segmentCache_.clear();
 }
 
 void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
@@ -230,7 +251,8 @@ int32_t WaterFlowLayoutInfo::GetMainCount() const
 
 void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
 {
-    for (auto& crossItems : items_[GetSegment(currentIndex)]) {
+    size_t segment = GetSegment(currentIndex);
+    for (auto& crossItems : items_[segment]) {
         if (crossItems.second.empty()) {
             continue;
         }
@@ -240,9 +262,22 @@ void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
             });
         crossItems.second.erase(clearFrom, crossItems.second.end());
     }
-    for (int32_t i = GetSegment(currentIndex) + 1; i < items_.size(); ++i) {
-        items_[i].clear();
+    for (size_t i = segment + 1; i < items_.size(); ++i) {
+        for (auto& col : items_[i]) {
+            col.second.clear();
+        }
     }
+
+    if (static_cast<size_t>(currentIndex + 1) < itemInfos_.size()) {
+        itemInfos_.resize(currentIndex + 1);
+    }
+    if (segment + 1 < segmentStartPos_.size()) {
+        segmentStartPos_.resize(segment + 1);
+    }
+
+    auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), currentIndex,
+        [](int32_t index, const std::pair<float, int32_t>& pos) { return index < pos.second; });
+    endPosArray_.erase(it, endPosArray_.end());
 }
 
 bool WaterFlowLayoutInfo::ReachStart(float prevOffset, bool firstLayout) const
@@ -272,7 +307,7 @@ int32_t WaterFlowLayoutInfo::GetSegment(int32_t itemIdx) const
 
     auto it = std::lower_bound(segmentTails_.begin(), segmentTails_.end(), itemIdx);
     if (it == segmentTails_.end()) {
-        return segmentTails_.size() - 1;
+        return static_cast<int32_t>(segmentTails_.size()) - 1;
     }
     int32_t idx = it - segmentTails_.begin();
     segmentCache_[itemIdx] = idx;
@@ -282,7 +317,7 @@ int32_t WaterFlowLayoutInfo::GetSegment(int32_t itemIdx) const
 int32_t WaterFlowLayoutInfo::FastSolveStartIndex() const
 {
     auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), -currentOffset_,
-        [](float value, const std::pair<float, int32_t>& info) { return value < info.first; });
+        [](float value, const std::pair<float, int32_t>& info) { return LessNotEqual(value, info.first); });
     if (it == endPosArray_.end()) {
         return 0;
     }
@@ -296,28 +331,33 @@ int32_t WaterFlowLayoutInfo::FastSolveEndIndex(float mainSize) const
     }
 
     auto it = std::lower_bound(itemInfos_.begin(), itemInfos_.end(), mainSize - currentOffset_,
-        [](const ItemInfo& info, float value) { return info.mainOffset < value; });
+        [](const ItemInfo& info, float value) { return LessNotEqual(info.mainOffset, value); });
+
     if (it == itemInfos_.end()) {
-        return itemInfos_.size() - 1;
+        return static_cast<int32_t>(itemInfos_.size()) - 1;
     }
     return std::distance(itemInfos_.begin(), it) - 1;
 }
 
-void WaterFlowLayoutInfo::RecordItem(int32_t idx, int32_t crossIdx, float startPos, float height)
+void WaterFlowLayoutInfo::RecordItem(int32_t idx, const FlowItemPosition& pos, float height)
 {
-    if (itemInfos_.size() != idx) {
+    if (itemInfos_.size() != static_cast<size_t>(idx)) {
         return;
     }
-    items_[GetSegment(idx)][crossIdx][idx] = { startPos, height };
-    itemInfos_.emplace_back(crossIdx, startPos, height);
-    if (endPosArray_.empty() || LessNotEqual(endPosArray_.back().first, startPos + height)) {
-        endPosArray_.emplace_back(startPos + height, idx);
+    items_[GetSegment(idx)][pos.crossIndex][idx] = { pos.startMainPos, height };
+    itemInfos_.emplace_back(pos.crossIndex, pos.startMainPos, height);
+    if (endPosArray_.empty() || LessNotEqual(endPosArray_.back().first, pos.startMainPos + height)) {
+        endPosArray_.emplace_back(pos.startMainPos + height, idx);
+    }
+
+    if (idx == segmentTails_[GetSegment(idx)]) {
+        SetNextSegmentStartPos(idx);
     }
 }
 
-void WaterFlowLayoutInfo::SetNextSegmentStartPos(const std::vector<PaddingPropertyF>& margins, int32_t itemIdx)
+void WaterFlowLayoutInfo::SetNextSegmentStartPos(int32_t itemIdx)
 {
-    int32_t segment = GetSegment(itemIdx);
+    size_t segment = GetSegment(itemIdx);
     if (segmentStartPos_.size() > segment + 1) {
         return;
     }
@@ -325,17 +365,26 @@ void WaterFlowLayoutInfo::SetNextSegmentStartPos(const std::vector<PaddingProper
     float nextStartPos = endPosArray_.back().first;
     while (segment < segmentTails_.size() - 1 && itemIdx == segmentTails_[segment]) {
         // use while loop to skip empty segments
-        nextStartPos += margins[segment].bottom.value_or(0.0f) + margins[segment + 1].top.value_or(0.0f);
+        if (axis_ == Axis::VERTICAL) {
+            nextStartPos += margins_[segment].bottom.value_or(0.0f) + margins_[segment + 1].top.value_or(0.0f);
+        } else {
+            nextStartPos += margins_[segment].right.value_or(0.0f) + margins_[segment + 1].left.value_or(0.0f);
+        }
         segmentStartPos_.push_back(nextStartPos);
         ++segment;
     }
 }
 
-void WaterFlowLayoutInfo::Sync(float mainSize, float bottomMargin, bool overScroll)
+void WaterFlowLayoutInfo::Sync(float mainSize, bool overScroll)
 {
     endIndex_ = FastSolveEndIndex(mainSize);
 
-    maxHeight_ = GetMaxMainHeight() + bottomMargin;
+    maxHeight_ = GetMaxMainHeight();
+    if (axis_ == Axis::VERTICAL) {
+        maxHeight_ += margins_.back().bottom.value_or(0.0f);
+    } else {
+        maxHeight_ += margins_.back().right.value_or(0.0f);
+    }
 
     itemStart_ = GreatOrEqual(currentOffset_, 0.0f);
     itemEnd_ = endIndex_ >= 0 && endIndex_ == childrenCount_ - 1;
@@ -346,5 +395,83 @@ void WaterFlowLayoutInfo::Sync(float mainSize, float bottomMargin, bool overScro
     }
 
     startIndex_ = FastSolveStartIndex();
+}
+
+void WaterFlowLayoutInfo::InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start)
+{
+    size_t n = sections.size();
+    if (n == 0) {
+        return;
+    }
+    segmentTails_ = { sections[0].itemsCount - 1 };
+    for (size_t i = 1; i < n; ++i) {
+        segmentTails_.push_back(segmentTails_[i - 1] + sections[i].itemsCount);
+    }
+
+    segmentCache_.clear();
+    if (static_cast<size_t>(start) < segmentStartPos_.size()) {
+        segmentStartPos_.resize(start);
+        // startPos of next segment can only be determined after margins_ is reinitialized.
+    }
+
+    int32_t lastValidItem = (start > 0) ? segmentTails_[start - 1] : -1;
+    if (static_cast<size_t>(lastValidItem + 1) < itemInfos_.size()) {
+        itemInfos_.resize(lastValidItem + 1);
+    }
+
+    auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), lastValidItem,
+        [](int32_t index, const std::pair<float, int32_t>& pos) { return index < pos.second; });
+    endPosArray_.erase(it, endPosArray_.end());
+    items_.resize(n);
+    for (size_t i = start; i < n; ++i) {
+        items_[i].clear();
+        for (int32_t j = 0; j < sections[i].crossCount; ++j) {
+            items_[i][j] = {};
+        }
+    }
+}
+
+void WaterFlowLayoutInfo::InitMargins(
+    const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth)
+{
+    size_t n = sections.size();
+    margins_.resize(n);
+    for (size_t i = 0; i < n; ++i) {
+        if (sections[i].margin) {
+            margins_[i] = ConvertToMarginPropertyF(*sections[i].margin, scale, percentWidth);
+        }
+    }
+    if (segmentStartPos_.size() <= 1) {
+        ResetSegmentStartPos();
+    }
+    int32_t lastItem = itemInfos_.size() - 1;
+    if (segmentTails_[GetSegment(lastItem)] == lastItem) {
+        SetNextSegmentStartPos(itemInfos_.size() - 1);
+    }
+}
+
+void WaterFlowLayoutInfo::ResetSegmentStartPos()
+{
+    if (margins_.empty()) {
+        segmentStartPos_ = { 0.0f };
+    } else {
+        segmentStartPos_ = { (axis_ == Axis::VERTICAL ? margins_[0].top : margins_[0].left).value_or(0.0f) };
+    }
+}
+
+void WaterFlowLayoutInfo::PrintWaterFlowItems() const
+{
+    for (const auto& [key1, map1] : items_[0]) {
+        std::stringstream ss;
+        ss << key1 << ": {";
+        for (const auto& [key2, pair] : map1) {
+            ss << key2 << ": (" << pair.first << ", " << pair.second << ")";
+            if (&pair != &map1.rbegin()->second) {
+                ss << ", ";
+            }
+        }
+        ss << "}";
+        LOGI("%{public}s", ss.str().c_str());
+    }
 }
 } // namespace OHOS::Ace::NG

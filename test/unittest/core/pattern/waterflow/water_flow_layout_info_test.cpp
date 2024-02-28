@@ -173,33 +173,64 @@ HWTEST_F(WaterFlowLayoutInfoTest, SetNextSegmentStartPos001, TestSize.Level1)
     info.segmentTails_ = { 3, 5, 5, 10 };
     info.segmentStartPos_ = { 5.0f };
 
-    std::vector<PaddingPropertyF> margins = { PaddingPropertyF { .top = 5.0f, .bottom = 1.0f },
+    info.margins_ = { PaddingPropertyF { .top = 5.0f, .bottom = 1.0f },
         PaddingPropertyF { .top = 10.0f, .bottom = 5.0f }, PaddingPropertyF { .top = 1.0f, .bottom = 5.0f },
         PaddingPropertyF { .bottom = 5.0f } };
 
     info.endPosArray_ = { { 100.0f, 0 } };
-    info.SetNextSegmentStartPos(margins, 2);
+    info.SetNextSegmentStartPos(2);
     const std::vector<float> CMP_0 = { 5.0f };
     EXPECT_EQ(info.segmentStartPos_, CMP_0);
 
     info.endPosArray_ = { { 100.0f, 0 }, { 120.0f, 3 } };
     const std::vector<float> CMP_1 = { 5.0f, 131.0f };
     for (int i = 0; i <= 1; ++i) {
-        info.SetNextSegmentStartPos(margins, 3);
+        info.SetNextSegmentStartPos(3);
         EXPECT_EQ(info.segmentStartPos_, CMP_1);
     }
 
     info.endPosArray_ = { { 100.0f, 0 }, { 120.0f, 3 }, { 150.0f, 4 } };
     const std::vector<float> CMP_2 = { 5.0f, 131.0f, 156.0f, 161.0f };
     for (int i = 0; i <= 1; ++i) {
-        info.SetNextSegmentStartPos(margins, 5);
+        info.SetNextSegmentStartPos(5);
         EXPECT_EQ(info.segmentStartPos_, CMP_2);
     }
 
-    info.SetNextSegmentStartPos(margins, 6);
+    info.SetNextSegmentStartPos(6);
     EXPECT_EQ(info.segmentStartPos_, CMP_2);
 
-    info.SetNextSegmentStartPos(margins, 10);
+    info.SetNextSegmentStartPos(10);
     EXPECT_EQ(info.segmentStartPos_, CMP_2);
+}
+
+/**
+ * @tc.name: InitSegments
+ * @tc.desc: Test InitSegments
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, InitSegments001, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+    info.InitSegments(SECTION_7, 0);
+    for (int i = 0; i < 2; ++i) {
+        info.itemInfos_.resize(37);
+        info.segmentStartPos_.resize(3);
+
+        auto modSec = SECTION_7;
+        modSec[i] = ADD_SECTION_6[0];
+        info.InitSegments(modSec, i);
+        EXPECT_EQ(info.segmentStartPos_.size(), i);
+        if (i == 0) {
+            EXPECT_TRUE(info.itemInfos_.empty());
+        } else {
+            EXPECT_EQ(info.itemInfos_.size(), info.segmentTails_[i - 1] + 1);
+        }
+        EXPECT_EQ(info.items_[i].size(), 2);
+    }
+    auto mod = SECTION_7;
+    mod.push_back(ADD_SECTION_6[0]);
+    info.InitSegments(mod, 2);
+    EXPECT_EQ(info.items_.size(), 4);
+    EXPECT_EQ(info.items_[1].size(), 2);
 }
 } // namespace OHOS::Ace::NG

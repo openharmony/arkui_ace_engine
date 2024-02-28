@@ -21,8 +21,8 @@
 #include <optional>
 #include <sstream>
 
-#include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
@@ -66,9 +66,42 @@ public:
     bool ReachStart(float prevOffset, bool firstLayout) const;
     bool ReachEnd(float prevOffset) const;
 
+    /**
+     * @brief Get the Segment index of a FlowItem
+     *
+     * @param itemIdx
+     * @return segment index.
+     */
     int32_t GetSegment(int32_t itemIdx) const;
 
-    void RecordItem(int32_t idx, int32_t crossIdx, float startPos, float height);
+    /**
+     * @brief Init data structures based on new WaterFlow Sections.
+     *
+     * @param sections vector of Sections info.
+     * @param start index of the first modified section, all sections prior to [start] remain the same.
+     */
+    void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start);
+
+    /**
+     * @brief Initialize margin of each section, along with segmentStartPos_, which depends on margin_.
+     *
+     * @param sections vector of Sections info.
+     * @param scale for calculating margins in PX.
+     * @param percentWidth for calculating margins in PX.
+     */
+    void InitMargins(
+        const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth);
+
+    void ResetSegmentStartPos();
+
+    /**
+     * @brief Record a new FlowItem in ItemMap and update related data structures.
+     *
+     * @param idx index of FlowItem.
+     * @param pos position of this FlowItem
+     * @param height FlowItem height.
+     */
+    void RecordItem(int32_t idx, const FlowItemPosition& pos, float height);
 
     /**
      * @brief FInd the first item inside viewport in log_n time using endPosReverseMap_.
@@ -88,20 +121,19 @@ public:
     /**
      * @brief Calculate and set the start position of next segment after filling the tail item of the current segment.
      *
-     * @param margins margin of each segment.
      * @param itemIdx index of the current flow item.
      */
-    void SetNextSegmentStartPos(const std::vector<PaddingPropertyF>& margins, int32_t itemIdx);
+    void SetNextSegmentStartPos(int32_t itemIdx);
 
     /**
      * @brief Update member variables after measure.
      *
      * @param mainSize waterFlow length on the main axis.
-     * @param bottomMargin of the last FlowItem segment.
      * @param overScroll whether overScroll is allowed. Might adjust offset if not.
      */
-    void Sync(float mainSize, float bottomMargin, bool overScroll);
+    void Sync(float mainSize, bool overScroll);
 
+    Axis axis_ = Axis::VERTICAL;
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
@@ -147,39 +179,29 @@ public:
     // Stores the tail item index of each segment.
     std::vector<int32_t> segmentTails_;
 
+    // margin of each segment
+    std::vector<PaddingPropertyF> margins_;
+
     // Stores the start position of each segment.
     std::vector<float> segmentStartPos_ = { 0.0f };
 
     // K: item index; V: corresponding segment index
     mutable std::unordered_map<int32_t, int32_t> segmentCache_;
 
-    void PrintWaterFlowItems() const
-    {
-        for (const auto& [key1, map1] : items_[0]) {
-            std::stringstream ss;
-            ss << key1 << ": {";
-            for (const auto& [key2, pair] : map1) {
-                ss << key2 << ": (" << pair.first << ", " << pair.second << ")";
-                if (&pair != &map1.rbegin()->second) {
-                    ss << ", ";
-                }
-            }
-            ss << "}";
-            LOGI("%{public}s", ss.str().c_str());
-        }
-    }
+    void PrintWaterFlowItems() const;
 };
 
 struct WaterFlowLayoutInfo::ItemInfo {
+    ItemInfo() = default;
     ItemInfo(int32_t cross, float offset, float size) : crossIdx(cross), mainOffset(offset), mainSize(size) {}
     bool operator==(const ItemInfo& other) const
     {
         return crossIdx == other.crossIdx && mainOffset == other.mainOffset && mainSize == other.mainSize;
     }
 
-    int32_t crossIdx;
-    float mainOffset;
-    float mainSize;
+    int32_t crossIdx = 0;
+    float mainOffset = 0.0f;
+    float mainSize = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG
