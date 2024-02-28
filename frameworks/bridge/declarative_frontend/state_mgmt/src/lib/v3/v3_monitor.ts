@@ -93,14 +93,14 @@ class MonitorV3 {
 /**
  * @monitor("variable.path.expression") function decorator
  */
-/*
+
  const monitor = function (key) {
   return function (target, _, descriptor) {
     let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + target.constructor.name)
     target[watchProp] ? target[watchProp][key] = descriptor.value : target[watchProp] = { [key]: descriptor.value }
   }
 }
-*/
+
 
 // Performance Improvement
 class AsyncAddMonitorV3 {
