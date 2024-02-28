@@ -50,6 +50,7 @@ ohos_shared_library("ace_ndk") {
     "native_interface_xcomponent.cpp",
     "node/event_converter.cpp",
     "node/native_impl.cpp",
+    "node/native_node_napi.cpp",
     "node/node_model.cpp",
     "node/style_modifier.cpp",
   ]
@@ -61,7 +62,10 @@ ohos_shared_library("ace_ndk") {
   if (target_os == "ohos") {
     sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
     deps += [ ":libace_ndk" ]
-    external_deps = [ "hilog:libhilog" ]
+    external_deps = [
+      "hilog:libhilog",
+      "napi:ace_napi",
+    ]
     version_script =
         get_label_info(":libace_ndk", "target_gen_dir") + "/" +
         get_label_info(":libace_ndk", "name") + version_script_suffix
