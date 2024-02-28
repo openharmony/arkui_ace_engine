@@ -27,6 +27,7 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void OnTerminated(const JSCallbackInfo& info);
     static void OnError(const JSCallbackInfo& info);
+    static void JsConstraintSize(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
