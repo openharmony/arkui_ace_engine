@@ -30,7 +30,7 @@ void RemoveChild(void* parentNode, void* childNode);
 
 void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode);
 
-void RegisterCompanion(void* node, ExtensionCompanionNode* companion);
+void RegisterCompanion(void* node, int peerId, ArkUI_Int32 flags);
 
 ExtensionCompanionNode* GetCompanion(void* nodePtr);
 

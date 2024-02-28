@@ -596,9 +596,6 @@ void SetWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI
     } else {
         ViewAbstract::SetWidth(frameNode, CalcLength(value, unitEnum));
     }
-    auto* companion = ViewModel::GetCompanion(node);
-    companion->dimensionWidth.value = value;
-    companion->dimensionWidth.unit = unit;
 }
 
 void ResetWidth(ArkUINodeHandle node)
@@ -617,9 +614,6 @@ void SetHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkU
     } else {
         ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
     }
-    auto* companion = ViewModel::GetCompanion(node);
-    companion->dimensionHeight.value = value;
-    companion->dimensionHeight.unit = unit;
 }
 void ResetHeight(ArkUINodeHandle node)
 {
@@ -941,6 +935,7 @@ void SetAlign(ArkUINodeHandle node, ArkUI_Int32 align)
     Alignment alignment = ParseAlignment(align);
     ViewAbstract::SetAlign(frameNode, alignment);
     auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
     companion->alignment = align;
 }
 

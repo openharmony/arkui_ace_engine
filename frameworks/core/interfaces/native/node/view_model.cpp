@@ -55,7 +55,7 @@
 
 
 namespace OHOS::Ace::NG::ViewModel {
-std::map<void*, ExtensionCompanionNode*> registeredNodes;
+std::map<void*, std::shared_ptr<ExtensionCompanionNode>> registeredNodes;
 ArkUIAPICallbackMethod* callbacks = nullptr;
 
 void* createTextNode(ArkUI_Int32 nodeId)
@@ -358,8 +358,8 @@ void AddChild(void* parentNode, void* childNode)
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
 
-    auto companionNodeParent = registeredNodes[parentNode];
-    auto companionNodeChild = registeredNodes[childNode];
+    auto* companionNodeParent = GetCompanion(parentNode);
+    auto* companionNodeChild = GetCompanion(childNode);
     CHECK_NULL_VOID(companionNodeParent);
     CHECK_NULL_VOID(companionNodeChild);
     companionNodeParent->addChild(companionNodeChild);
@@ -378,8 +378,8 @@ void RemoveChild(void* parentNode, void* childNode)
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
 
-    auto companionNodeParent = registeredNodes[parentNode];
-    auto companionNodeChild = registeredNodes[childNode];
+    auto* companionNodeParent = GetCompanion(parentNode);
+    auto* companionNodeChild = GetCompanion(childNode);
     CHECK_NULL_VOID(companionNodeParent);
     CHECK_NULL_VOID(companionNodeChild);
     companionNodeParent->removeChild(companionNodeChild);
@@ -394,9 +394,9 @@ void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode)
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
 
-    auto companionNodeParent = registeredNodes[parentNode];
-    auto companionNodeChild = registeredNodes[childNode];
-    auto companionNodeSibling = registeredNodes[siblingNode];
+    auto* companionNodeParent = GetCompanion(parentNode);
+    auto* companionNodeChild = GetCompanion(childNode);
+    auto* companionNodeSibling = GetCompanion(siblingNode);
     CHECK_NULL_VOID(companionNodeParent);
     CHECK_NULL_VOID(companionNodeChild);
     companionNodeParent->insertChildAfter(companionNodeChild, companionNodeSibling);
@@ -420,20 +420,26 @@ void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode)
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void RegisterCompanion(void* node, ExtensionCompanionNode* companion)
+void RegisterCompanion(void* node, int peerId, ArkUI_Int32 flags)
 {
-    registeredNodes[node] = companion;
+    auto companion = std::make_shared<ExtensionCompanionNode>(peerId, flags);
     companion->peer = node;
+    registeredNodes[node] = std::move(companion);
 }
 
 ExtensionCompanionNode* GetCompanion(void* nodePtr)
 {
-    return registeredNodes[nodePtr];
+    auto it = registeredNodes.find(nodePtr);
+    if (it != registeredNodes.end()) {
+        return it->second.get();
+    }
+    return nullptr;
 }
 
 void SetCustomCallback(void* nodePtr, ArkUI_Int32 callback)
 {
-    auto* node = registeredNodes[nodePtr];
+    auto* node = GetCompanion(nodePtr);
+    CHECK_NULL_VOID(node);
     node->setCallbackId(callback);
 }
 
@@ -449,19 +455,22 @@ ArkUIAPICallbackMethod* GetCallbackMethod()
 
 ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
 {
-    auto* node = registeredNodes[nodePtr];
+    auto node = GetCompanion(nodePtr);
+    CHECK_NULL_RETURN(node, 0);
     return node->layout(context, data, callbacks);
 }
 
 ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
 {
-    auto* node = registeredNodes[nodePtr];
+    auto node = GetCompanion(nodePtr);
+    CHECK_NULL_RETURN(node, 0);
     return node->layout(context, data, callbacks);
 }
 
 ArkUI_Int32 DrawNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
 {
-    auto* node = registeredNodes[nodePtr];
+    auto node = GetCompanion(nodePtr);
+    CHECK_NULL_RETURN(node, 0);
     return node->layout(context, data, callbacks);
 }
 

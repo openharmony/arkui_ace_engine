@@ -105,8 +105,7 @@ void SetCustomCallback(ArkUINodeHandle node, ArkUI_Int32 callback)
 ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
 {
     auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
-    auto companion = new ExtensionCompanionNode(peerId, flags);
-    ViewModel::RegisterCompanion(node, companion);
+    ViewModel::RegisterCompanion(node, peerId, flags);
     return node;
 }
 
@@ -407,7 +406,7 @@ ArkUI_Int32 DrawNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float
 ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootPtr)
 {
     auto* root = reinterpret_cast<FrameNode*>(rootPtr);
-    float scale = (float)OHOS::Ace::SystemProperties::GetResolution();
+    float scale = static_cast<float>(OHOS::Ace::SystemProperties::GetResolution());
     float width = root->GetGeometryNode()->GetFrameSize().Width() / scale;
     float height = root->GetGeometryNode()->GetFrameSize().Height() / scale;
     // measure
@@ -426,48 +425,56 @@ ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootP
 void SetMeasureWidth(ArkUINodeHandle node, ArkUI_Float32 value)
 {
     auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
     companion->setMeasureWidthValue(value);
 }
 
 ArkUI_Float32 GetMeasureWidth(ArkUINodeHandle node)
 {
     auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_RETURN(companion, 0);
     return companion->getMeasureWidthValue();
 }
 
 void SetMeasureHeight(ArkUINodeHandle node, ArkUI_Float32 value)
 {
     auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
     companion->setMeasureHeightValue(value);
 }
 
 ArkUI_Float32 GetMeasureHeight(ArkUINodeHandle node)
 {
     auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_RETURN(companion, 0);
     return companion->getMeasureHeightValue();
 }
 
 void SetX(ArkUINodeHandle node, ArkUI_Float32 value)
 {
     auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
     companion->setXValue(value);
 }
 
 void SetY(ArkUINodeHandle node, ArkUI_Float32 value)
 {
     auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
     companion->setYValue(value);
 }
 
 void SetAlignment(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
     companion->alignment = value;
 }
 
 ArkUI_Int32 GetAlignment(ArkUINodeHandle node)
 {
     auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_RETURN(companion, 0);
     return companion->alignment;
 }
 
