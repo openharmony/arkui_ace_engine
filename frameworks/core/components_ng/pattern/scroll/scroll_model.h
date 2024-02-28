@@ -63,6 +63,7 @@ public:
     virtual void SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) = 0;
     virtual void SetEnablePaging(bool enablePaging) = 0;
+    virtual void SetInitialOffset(const NG::OffsetT<Dimension>& offset) = 0;
 
 private:
     static std::unique_ptr<ScrollModel> instance_;
