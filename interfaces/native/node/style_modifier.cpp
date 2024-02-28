@@ -431,9 +431,9 @@ bool CheckAttributeIsCheckboxShape(int32_t value)
 
 bool CheckAttributeIsAccessibilityLevel(int32_t value)
 {
-    int32_t minEnumValue = static_cast<int32_t>(ArkUI_AccessibilityLevel::ARKUI_ACCESSIBILITY_LEVEL_AUTO);
+    int32_t minEnumValue = static_cast<int32_t>(ArkUI_AccessibilityMode::ARKUI_ACCESSIBILITY_MODE_AUTO);
     int32_t maxEnumValue =
-        static_cast<int32_t>(ArkUI_AccessibilityLevel::ARKUI_ACCESSIBILITY_LEVEL_NO_HIDE_DESCENDANTS);
+        static_cast<int32_t>(ArkUI_AccessibilityMode::ARKUI_ACCESSIBILITY_MODE_DISABLED_FOR_DESCENDANTS);
     return value >= minEnumValue && value <= maxEnumValue;
 }
 
@@ -1242,7 +1242,7 @@ const ArkUI_AttributeItem* GetClipShape(ArkUI_NodeHandle node)
     ArkUIClipShapeOptions options;
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getClipShape(node->uiNodeHandle, &options);
     g_numberValues[NUM_0].i32 = options.type;
-    if (g_numberValues[NUM_0].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_RECT) {
+    if (g_numberValues[NUM_0].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_RECTANGLE) {
         g_numberValues[NUM_1].f32 = options.width;
         g_numberValues[NUM_2].f32 = options.height;
         g_numberValues[NUM_3].f32 = options.radiusWidth;
@@ -2003,8 +2003,8 @@ int32_t SetAlignSelf(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[0].i32 < ArkUI_ItemAlign::ARKUI_ITEM_ALIGN_AUTO ||
-        item->value[0].i32 > ArkUI_ItemAlign::ARKUI_ITEM_ALIGN_BASELINE) {
+    if (item->value[0].i32 < ArkUI_ItemAlignment::ARKUI_ITEM_ALIGNMENT_AUTO ||
+        item->value[0].i32 > ArkUI_ItemAlignment::ARKUI_ITEM_ALIGNMENT_BASELINE) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -3624,8 +3624,8 @@ void ResetProgressColor(ArkUI_NodeHandle node)
 int32_t SetProgressType(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || !InRegion(static_cast<int32_t>(ARKUI_PROGRESS_LINEAR),
-        static_cast<int32_t>(ARKUI_PROGRESS_CAPSULE), item->value[NUM_0].i32)) {
+    if (actualSize < 0 || !InRegion(static_cast<int32_t>(ARKUI_PROGRESS_TYPE_LINEAR),
+        static_cast<int32_t>(ARKUI_PROGRESS_TYPE_CAPSULE), item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -7363,7 +7363,7 @@ const ArkUI_AttributeItem* GetSliderBlockStyle(ArkUI_NodeHandle node)
             g_numberValues[3].f32 = values[2];
             g_attributeItem.size = NUM_3;
             ArkUI_ShapeType shapeType = static_cast<ArkUI_ShapeType>(values[0]);
-            if (shapeType == ArkUI_ShapeType::ARKUI_SHAPE_TYPE_RECT) {
+            if (shapeType == ArkUI_ShapeType::ARKUI_SHAPE_TYPE_RECTANGLE) {
                 //index 4 width
                 g_numberValues[4].f32 = values[3];
                 //index 5 height
