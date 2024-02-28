@@ -60,6 +60,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
+    ContainerScope scope(Container::CurrentIdSafely());
     if (args.Length() < 2 || !args[0]->IsString() || args[1]->IsUndefined() || args[1]->IsNull()) {
         return;
     }
@@ -91,6 +92,7 @@ void JSPersistent::Get(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
+    ContainerScope scope(Container::CurrentIdSafely());
     if (args.Length() < 1 || !args[0]->IsString()) {
         return;
     }
@@ -117,6 +119,7 @@ void JSPersistent::Delete(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
+    ContainerScope scope(Container::CurrentIdSafely());
     if (args.Length() < 1 || !args[0]->IsString()) {
         return;
     }
@@ -136,6 +139,7 @@ void JSPersistent::Clear(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
+    ContainerScope scope(Container::CurrentIdSafely());
     auto container = Container::Current();
     if (!container) {
         return;
