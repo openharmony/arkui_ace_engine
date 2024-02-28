@@ -202,4 +202,35 @@ HWTEST_F(WaterFlowLayoutInfoTest, SetNextSegmentStartPos001, TestSize.Level1)
     info.SetNextSegmentStartPos(10);
     EXPECT_EQ(info.segmentStartPos_, CMP_2);
 }
+
+/**
+ * @tc.name: InitSegments
+ * @tc.desc: Test InitSegments
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, InitSegments001, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+    info.InitSegments(SECTION_7, 0);
+    for (int i = 0; i < 2; ++i) {
+        info.itemInfos_.resize(37);
+        info.segmentStartPos_.resize(3);
+
+        auto modSec = SECTION_7;
+        modSec[i] = ADD_SECTION_6[0];
+        info.InitSegments(modSec, i);
+        EXPECT_EQ(info.segmentStartPos_.size(), i);
+        if (i == 0) {
+            EXPECT_TRUE(info.itemInfos_.empty());
+        } else {
+            EXPECT_EQ(info.itemInfos_.size(), info.segmentTails_[i - 1] + 1);
+        }
+        EXPECT_EQ(info.items_[i].size(), 2);
+    }
+    auto mod = SECTION_7;
+    mod.push_back(ADD_SECTION_6[0]);
+    info.InitSegments(mod, 2);
+    EXPECT_EQ(info.items_.size(), 4);
+    EXPECT_EQ(info.items_[1].size(), 2);
+}
 } // namespace OHOS::Ace::NG

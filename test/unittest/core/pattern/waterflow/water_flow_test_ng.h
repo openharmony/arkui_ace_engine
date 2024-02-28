@@ -53,6 +53,8 @@ protected:
     void MouseSelectRelease();
     static std::function<void()> GetDefaultHeaderBuilder();
 
+    void AddItems(int32_t number);
+
     AssertionResult IsEqualTotalOffset(float expectOffset);
 
     RefPtr<FrameNode> frameNode_;
