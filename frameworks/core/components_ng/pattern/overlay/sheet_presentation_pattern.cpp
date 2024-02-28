@@ -1148,7 +1148,8 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
         }
         TranslateTo(height_);
     }
-    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::UNDEFINED) {
+    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::UNDEFINED ||
+        type == WindowSizeChangeReason::DRAG) {
         windowChanged_ = true;
     }
 }
