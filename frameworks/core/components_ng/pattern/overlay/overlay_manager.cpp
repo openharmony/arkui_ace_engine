@@ -3431,7 +3431,9 @@ void OverlayManager::RemoveFilterAnimation()
     option.SetOnFinishEvent([weak = WeakClaim(this)] {
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->RemoveFilter();
+        if (!overlayManager->hasFilterActived) {
+            overlayManager->RemoveFilter();
+        }
     });
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
