@@ -26,13 +26,13 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 68
+#define ARKUI_FULL_API_VERSION 69
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 68
+#define ARKUI_NODE_API_VERSION 69
 
 #define ARKUI_BASIC_API_VERSION 5
-#define ARKUI_EXTENDED_API_VERSION 4
+#define ARKUI_EXTENDED_API_VERSION 5
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 6
 #define ARKUI_AUTO_GENERATE_NODE_ID -2
@@ -115,14 +115,14 @@ enum ArkUISourceType {
 
 struct ArkUITouchPoint {
     /**
-     * Pointer identifier
-     */
-    ArkUI_Int32 id;
-
-    /**
      * Time stamp when touch is pressed
      */
     ArkUI_Int64 pressedTime;
+
+    /**
+     * Pointer identifier
+     */
+    ArkUI_Int32 id;
 
     /**
      * X coordinate of the touch position on the screen
@@ -239,27 +239,26 @@ enum ArkUITouchEventAction {
 };
 
 struct ArkUIHistoricalTouchPoint {
+    /** Time stamp of the historical event. */
+    ArkUI_Int64 timeStamp;
     /**
      * Touch action
      */
     ArkUITouchEventAction action;
-    /** Time stamp of the historical event. */
-    ArkUI_Int64 timeStamp;
     /** touch point info of the historical event. */
     ArkUITouchPoint actionTouch;
     ArkUISourceType sourceType;
 };
 
 struct ArkUITouchEvent {
+    /** Time stamp of the current event. */
+    ArkUI_Int64 timeStamp;
+
     /**
      * Touch action
      *
      */
     ArkUITouchEventAction action;
-
-    /** Time stamp of the current event. */
-    ArkUI_Int64 timeStamp;
-
     /**
      * curent action touch point info.
      */
@@ -842,10 +841,9 @@ struct ArkUIAPIEventGestureAsyncEvent {
 };
 
 struct ArkUINodeEvent {
-    ArkUI_Int32 kind; // Actually ArkUIAsyncEventKind, but use int for fixed binary layout.
-    ArkUI_Int32 eventId;
+    ArkUI_Int32 kind; // Actually ArkUIAsyncEventKind.
     ArkUI_Int32 nodeId;
-    void* extraParam;
+    ArkUI_Int64 extraParam;
     union {
         ArkUIAPIEventSinglePointer singlePointer;
         ArkUIAPIEventMultiPointer multiPointer;
@@ -3112,7 +3110,7 @@ struct ArkUIBasicAPI {
      * notify the node to send node event back
      */
     void (*registerNodeAsyncEvent)(
-        ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId, void* extraParam);
+        ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId, ArkUI_Int64 extraParam);
     void (*unRegisterNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind);
     /* registerNodeAsyncEventReceiver() must be redesigned */
     void (*registerNodeAsyncEventReceiver)(void (*eventReceiver)(ArkUINodeEvent* event));
@@ -3149,6 +3147,8 @@ struct ArkUIExtendedNodeAPI {
     ArkUI_Float32 (*getMeasureHeight)(ArkUINodeHandle node);
     void (*setX)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*setY)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setAlignment)(ArkUINodeHandle node, ArkUI_Int32 value);
+    ArkUI_Int32 (*getAlignment)(ArkUINodeHandle node);
     ArkUI_Int32 (*indexerChecker)(ArkUIVMContext context, ArkUINodeHandle node);
     void (*setRangeUpdater)(ArkUINodeHandle node, ArkUI_Int32 updaterId);
     void (*setLazyItemIndexer)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 indexerId);
