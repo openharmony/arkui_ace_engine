@@ -3762,7 +3762,13 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
         AutoScrollByEdgeDetection(param, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()),
             EdgeDetectionStrategy::OUT_BOUNDARY);
     }
-
+    if (textSelector_.SelectNothing()) {
+        if (!caretTwinkling_) {
+            StartTwinkling();
+        }
+    } else {
+        StopTwinkling();
+    }
     isMouseSelect_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
