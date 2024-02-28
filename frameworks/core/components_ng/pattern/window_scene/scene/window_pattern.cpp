@@ -210,18 +210,19 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
         } else {
             sourceInfo = ImageSourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePathFromAce());
         }
-
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto imageCache = pipelineContext->GetImageCache();
-        CHECK_NULL_VOID(imageCache);
-        auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
-        imageCache->ClearCacheImage(
-            ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second)));
-        imageCache->ClearCacheImage(
-            ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.second, snapshotSize.first)));
-        imageCache->ClearCacheImage(sourceInfo.GetKey());
+        if (!Rosen::ScenePersistence::IsAstcEnabled()) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto imageCache = pipelineContext->GetImageCache();
+            CHECK_NULL_VOID(imageCache);
+            auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
+            imageCache->ClearCacheImage(
+                ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second)));
+            imageCache->ClearCacheImage(
+                ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.second, snapshotSize.first)));
+            imageCache->ClearCacheImage(sourceInfo.GetKey());
+        }
     }
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     snapshotNode_->MarkModifyDone();
