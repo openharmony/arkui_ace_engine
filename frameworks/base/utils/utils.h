@@ -50,6 +50,13 @@
         }                            \
     } while (0)                      \
 
+#define CHECK_EQUAL_RETURN(var, value, ret) \
+    do {                                    \
+        if ((var) == (value)) {             \
+            return ret;                     \
+        }                                   \
+    } while (0)                             \
+
 #define PRIMITIVE_CAT(x, y) x##y
 #define CAT(x, y) PRIMITIVE_CAT(x, y)
 

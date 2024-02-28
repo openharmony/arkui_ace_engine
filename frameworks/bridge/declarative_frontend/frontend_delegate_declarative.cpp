@@ -950,6 +950,9 @@ void FrontendDelegateDeclarative::Clear()
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->Clear();
         return;
     }
@@ -968,6 +971,9 @@ int32_t FrontendDelegateDeclarative::GetStackSize() const
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_RETURN(pageRouterManager_, 0);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_RETURN(currentId.has_value(), false, 0);
+        ContainerScope scope(currentId.value());
         return pageRouterManager_->GetStackSize();
     }
     std::lock_guard<std::mutex> lock(mutex_);
@@ -978,6 +984,9 @@ void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, st
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_VOID(currentId.has_value(), false);
+        ContainerScope scope(currentId.value());
         pageRouterManager_->GetState(index, name, path);
         return;
     }
@@ -1006,6 +1015,9 @@ std::string FrontendDelegateDeclarative::GetParams()
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_RETURN(pageRouterManager_, "");
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_RETURN(currentId.has_value(), false, "");
+        ContainerScope scope(currentId.value());
         return pageRouterManager_->GetParams();
     }
     if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {
@@ -1018,6 +1030,9 @@ int32_t FrontendDelegateDeclarative::GetIndexByUrl(const std::string& url)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_RETURN(pageRouterManager_, INVALID_PAGE_ID);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_RETURN(currentId.has_value(), false, 0);
+        ContainerScope scope(currentId.value());
         return pageRouterManager_->GetIndexByUrl(url);
     }
     std::lock_guard<std::mutex> lock(mutex_);
@@ -2591,7 +2606,7 @@ void FrontendDelegateDeclarative::ReplacePageInSubStage(const RefPtr<JsAcePage>&
         TaskExecutor::TaskType::UI);
 }
 
-std::optional<int32_t> FrontendDelegateDeclarative::GetEffectiveContainerId()
+std::optional<int32_t> FrontendDelegateDeclarative::GetEffectiveContainerId() const
 {
     std::optional<int32_t> id;
     auto currentId = Container::CurrentId();
