@@ -181,7 +181,11 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
     auto monthId = datePickerPattern->GetMonthId();
     auto dayId = datePickerPattern->GetDayId();
 
-    uint32_t showCount = BUFFER_NODE_NUMBER + 1;
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, dateNode);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, dateNode);
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     datePickerPattern->SetShowCount(showCount);
 
     auto yearColumnNode = FrameNode::GetOrCreateFrameNode(
