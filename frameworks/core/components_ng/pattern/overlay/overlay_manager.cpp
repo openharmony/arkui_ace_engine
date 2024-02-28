@@ -1924,6 +1924,7 @@ bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
     CHECK_NULL_RETURN(rootNode, true);
     auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
     CHECK_NULL_RETURN(builder, false);
+    topModalNode->GetPattern<ModalPresentationPattern>()->OnWillDisappear();
     auto modalTransition = topModalNode->GetPattern<ModalPresentationPattern>()->GetType();
     if (builder->GetRenderContext()->HasDisappearTransition()) {
         if (!topModalNode->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
@@ -1953,6 +1954,7 @@ bool OverlayManager::SheetPageExitProcess(const RefPtr<FrameNode>& topModalNode)
 {
     auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetLastChild());
     CHECK_NULL_RETURN(builder, false);
+    topModalNode->GetPattern<SheetPresentationPattern>()->OnWillDisappear();
     if (builder->GetRenderContext()->HasDisappearTransition()) {
         if (!topModalNode->GetPattern<SheetPresentationPattern>()->IsExecuteOnDisappear()) {
             topModalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
@@ -2208,7 +2210,8 @@ RefPtr<FrameNode> OverlayManager::GetModalNodeInStack(std::stack<WeakPtr<FrameNo
 
 void OverlayManager::BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
-    std::function<void()>&& onDisappear, const RefPtr<FrameNode>& targetNode, int32_t sessionId)
+    std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    const RefPtr<FrameNode>& targetNode, int32_t sessionId)
 {
     int32_t targetId = targetNode ? targetNode->GetId() : sessionId;
     auto rootNode = FindWindowScene(targetNode);
@@ -2227,10 +2230,16 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
                         topModalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
                     }
                     topModalNode->GetPattern<ModalPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
+                    topModalNode->GetPattern<ModalPresentationPattern>()->UpdateOnWillDisappear(
+                        std::move(onWillDisappear));
+                    topModalNode->GetPattern<ModalPresentationPattern>()->UpdateOnAppear(std::move(onAppear));
                     topModalNode->GetPattern<ModalPresentationPattern>()->SetType(modalTransition.value());
                     return;
                 }
             }
+        }
+        if (onWillAppear) {
+            onWillAppear();
         }
         // builder content
         auto builder = AceType::DynamicCast<FrameNode>(buildNodeFunc());
@@ -2247,6 +2256,8 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         auto modalPagePattern = modalNode->GetPattern<ModalPresentationPattern>();
         CHECK_NULL_VOID(modalPagePattern);
         modalPagePattern->UpdateOnDisappear(std::move(onDisappear));
+        modalPagePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
+        modalPagePattern->UpdateOnAppear(std::move(onAppear));
         modalPagePattern->UpdateUIExtensionMode(modalStyle.isUIExtension);
         modalStack_.push(WeakClaim(RawPtr(modalNode)));
         modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
@@ -2255,7 +2266,8 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         modalNode->AddChild(builder);
         FireModalPageShow();
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        if (onAppear != nullptr) {
+        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+            onAppear) {
             onAppear();
         }
         // Fire hidden event of navdestination under the appeared modal
@@ -2274,6 +2286,9 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         CHECK_NULL_VOID(topModalNode);
         if (topModalNode->GetTag() != V2::SHEET_PAGE_TAG && topModalNode->GetTag() != V2::MODAL_PAGE_TAG) {
             return;
+        }
+        if (onWillDisappear) {
+            onWillDisappear();
         }
         if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG ||
             topModalNode->GetPattern<ModalPresentationPattern>()->GetTargetId() != targetId) {
@@ -2385,11 +2400,19 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
 
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, showHeight, 0.0f });
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            option.SetOnFinishEvent(
+                [modalWK = WeakClaim(RawPtr(modalNode))] {
+                    auto modal = modalWK.Upgrade();
+                    CHECK_NULL_VOID(modal);
+                    modal->GetPattern<ModalPresentationPattern>()->OnAppear();
+                });
+        }
         AnimationUtils::Animate(option, [context]() {
             if (context) {
                 context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
             }
-        });
+        }, option.GetOnFinishEvent());
     } else {
         auto lastModalNode = lastModalNode_.Upgrade();
         CHECK_NULL_VOID(lastModalNode);
@@ -2441,7 +2464,14 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
         // last page animation
         lastModalContext->OpacityAnimation(option, 1, 0);
         lastModalContext->UpdateOpacity(0);
-
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            option.SetOnFinishEvent(
+                [modalWK = WeakClaim(RawPtr(modalNode))] {
+                    auto modal = modalWK.Upgrade();
+                    CHECK_NULL_VOID(modal);
+                    modal->GetPattern<ModalPresentationPattern>()->OnAppear();
+                });
+        }
         // current modal page animation
         context->OpacityAnimation(option, 0, 1);
     } else {
@@ -2473,7 +2503,8 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
 void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-    std::function<void()>&& shouldDismiss, const RefPtr<FrameNode>& targetNode)
+    std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
+    std::function<void()>&& onWillDisappear, const RefPtr<FrameNode>& targetNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -2481,11 +2512,13 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
                              buildNodeFunc = std::move(buildNodeFunc),
                              buildtitleNodeFunc = std::move(buildtitleNodeFunc), sheetStyle,
                              onAppear = std::move(onAppear), onDisappear = std::move(onDisappear),
-                             shouldDismiss = std::move(shouldDismiss), targetNode]() mutable {
+                             shouldDismiss = std::move(shouldDismiss), onWillAppear = std::move(onWillAppear),
+                             onWillDisappear = std::move(onWillDisappear), targetNode]() mutable {
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->OnBindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildtitleNodeFunc),
-            sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), targetNode);
+            sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillAppear),
+            std::move(onWillDisappear), targetNode);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
@@ -2496,7 +2529,8 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
 void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-    std::function<void()>&& shouldDismiss, const RefPtr<FrameNode>& targetNode)
+    std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
+    std::function<void()>&& onWillDisappear, const RefPtr<FrameNode>& targetNode)
 {
     int32_t targetId = targetNode->GetId();
     auto rootNode = FindWindowScene(targetNode);
@@ -2528,6 +2562,8 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             }
             topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
             topModalNode->GetPattern<SheetPresentationPattern>()->UpdateShouldDismiss(std::move(shouldDismiss));
+            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnWillDisappear(std::move(onWillDisappear));
+            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnAppear(std::move(onAppear));
             auto layoutProperty = topModalNode->GetLayoutProperty<SheetPresentationProperty>();
             layoutProperty->UpdateSheetStyle(sheetStyle);
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2561,6 +2597,8 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     }
     sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
     sheetNode->GetPattern<SheetPresentationPattern>()->UpdateShouldDismiss(std::move(shouldDismiss));
+    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnWillDisappear(std::move(onWillDisappear));
+    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnAppear(std::move(onAppear));
     sheetMap_[targetId] = WeakClaim(RawPtr(sheetNode));
     modalStack_.push(WeakClaim(RawPtr(sheetNode)));
     SaveLastModalNode();
@@ -2596,8 +2634,8 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     }
     maskNode->MountToParent(rootNode);
     PlaySheetMaskTransition(maskNode, true, static_cast<bool>(callback));
-    auto columnNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto columnNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(columnNode);
     auto columnLayoutProps = columnNode->GetLayoutProperty();
     CHECK_NULL_VOID(columnLayoutProps);
@@ -2610,7 +2648,10 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
     ComputeSheetOffset(sheetStyle, sheetNode);
-    if (onAppear != nullptr) {
+    if (onWillAppear) {
+        onWillAppear();
+    }
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) && onAppear) {
         onAppear();
     }
 
@@ -2638,6 +2679,7 @@ void OverlayManager::CloseSheet(int32_t targetId)
     CHECK_NULL_VOID(scrollNode);
     auto builder = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(builder);
+    sheetNode->GetPattern<SheetPresentationPattern>()->OnWillDisappear();
     if (builder->GetRenderContext()->HasDisappearTransition()) {
         if (!sheetNode->GetPattern<SheetPresentationPattern>()->IsExecuteOnDisappear()) {
             sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
@@ -2740,6 +2782,9 @@ void OverlayManager::PlaySheetTransition(
             auto context = sheetNode->GetRenderContext();
             CHECK_NULL_VOID(context);
             context->UpdateRenderGroup(false, true, true);
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                sheetNode->GetPattern<SheetPresentationPattern>()->OnAppear();
+            }
         });
         sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         AnimationUtils::Animate(
@@ -2748,11 +2793,11 @@ void OverlayManager::PlaySheetTransition(
                 if (context) {
                     context->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
                 }
-            });
+            },
+            option.GetOnFinishEvent());
     } else {
         option.SetOnFinishEvent(
-            [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)),
-                    weakOverlayManager = WeakClaim(this)] {
+            [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), weakOverlayManager = WeakClaim(this)] {
                 auto sheet = sheetWK.Upgrade();
                 auto overlayManager = weakOverlayManager.Upgrade();
                 CHECK_NULL_VOID(sheet && overlayManager);
@@ -2795,6 +2840,9 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
             auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
             CHECK_NULL_VOID(sheetPattern);
             sheetPattern->ProcessColumnRect();
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                sheetPattern->OnAppear();
+            }
         });
     } else {
         sheetPattern->StartOffsetExitingAnimation();
@@ -3505,7 +3553,8 @@ int32_t OverlayManager::CreateModalUIExtension(
         modalStyle.modalTransition = NG::ModalTransition::NONE;
         modalStyle.isUIExtension = true;
         // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
-        BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, -(sessionId));
+        BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, nullptr,
+            nullptr, -(sessionId));
     } else {
         auto bindModalCallback = [weak = WeakClaim(this), buildNodeFunc, sessionId, id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -3514,8 +3563,8 @@ int32_t OverlayManager::CreateModalUIExtension(
             ModalStyle modalStyle;
             modalStyle.modalTransition = NG::ModalTransition::NONE;
             modalStyle.isUIExtension = true;
-            overlayManager->BindContentCover(
-                true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, -(sessionId));
+            overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr,
+                nullptr, nullptr, nullptr, -(sessionId));
         };
         ModalUIExtension::SetBindModalCallback(uiExtNode, std::move(bindModalCallback));
         uiExtNodes_[sessionId] = WeakClaim(RawPtr(uiExtNode));
@@ -3534,7 +3583,7 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
     }
     ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
-    BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr, -(sessionId));
+    BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr, nullptr, nullptr, -(sessionId));
 }
 
 RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,

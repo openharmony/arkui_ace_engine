@@ -111,6 +111,31 @@ public:
         }
     }
 
+    void UpdateOnWillDisappear(std::function<void()>&& onWillDisappear)
+    {
+        onWillDisappear_ = std::move(onWillDisappear);
+    }
+
+    void OnWillDisappear()
+    {
+        if (onWillDisappear_) {
+            onWillDisappear_();
+        }
+    }
+
+    void UpdateOnAppear(std::function<void()>&& onAppear)
+    {
+        onAppear_ = std::move(onAppear);
+    }
+
+    void OnAppear()
+    {
+        if (onAppear_) {
+            onAppear_();
+        }
+    }
+
+
     void CallShouldDismiss()
     {
         if (shouldDismiss_) {
@@ -339,7 +364,9 @@ private:
     std::string targetTag_;
     std::function<void(const std::string&)> callback_;
     std::function<void()> onDisappear_;
+    std::function<void()> onWillDisappear_;
     std::function<void()> shouldDismiss_;
+    std::function<void()> onAppear_;
     RefPtr<PanEvent> panEvent_;
     float currentOffset_ = 0.0f;
 
