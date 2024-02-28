@@ -24,6 +24,9 @@
 namespace OHOS::Ace::NG {
 int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 {
+    if (itemIndex < itemInfos_.size()) {
+        return itemInfos_[itemIndex].crossIdx;
+    }
     for (const auto& crossItems : items_[GetSegment(itemIndex)]) {
         auto iter = crossItems.second.find(itemIndex);
         if (iter != crossItems.second.end()) {
@@ -109,6 +112,9 @@ float WaterFlowLayoutInfo::GetContentHeight() const
 
 float WaterFlowLayoutInfo::GetMainHeight(int32_t crossIndex, int32_t itemIndex) const
 {
+    if (itemIndex < itemInfos_.size() && itemInfos_[itemIndex].crossIdx == crossIndex) {
+        return itemInfos_[itemIndex].mainOffset + itemInfos_[itemIndex].mainSize;
+    }
     auto seg = GetSegment(itemIndex);
     float result = segmentStartPos_[seg];
 
@@ -126,6 +132,9 @@ float WaterFlowLayoutInfo::GetMainHeight(int32_t crossIndex, int32_t itemIndex) 
 
 float WaterFlowLayoutInfo::GetStartMainPos(int32_t crossIndex, int32_t itemIndex) const
 {
+    if (itemIndex < itemInfos_.size() && itemInfos_[itemIndex].crossIdx == crossIndex) {
+        return itemInfos_[itemIndex].mainOffset;
+    }
     float result = 0.0f;
     auto cross = items_[GetSegment(itemIndex)].find(crossIndex);
     if (cross == items_[GetSegment(itemIndex)].end()) {
@@ -254,7 +263,9 @@ void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
         crossItems.second.erase(clearFrom, crossItems.second.end());
     }
     for (int32_t i = segment + 1; i < items_.size(); ++i) {
-        items_[i].clear();
+        for (auto& col : items_[i]) {
+            col.second.clear();
+        }
     }
 
     if (currentIndex + 1 < itemInfos_.size()) {
@@ -432,7 +443,9 @@ void WaterFlowLayoutInfo::InitMargins(
     }
     if (segmentStartPos_.size() <= 1) {
         ResetSegmentStartPos();
-    } else {
+    }
+    int32_t lastItem = itemInfos_.size() - 1;
+    if (segmentTails_[GetSegment(lastItem)] == lastItem) {
         SetNextSegmentStartPos(itemInfos_.size() - 1);
     }
 }

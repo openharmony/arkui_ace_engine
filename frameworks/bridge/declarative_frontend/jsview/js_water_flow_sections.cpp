@@ -82,6 +82,36 @@ void ParseMargin(const JSRef<JSVal>& jsValue, NG::MarginProperty& margin)
     }
 }
 
+namespace {
+void ParseGaps(const JSRef<JSObject>& obj, NG::WaterFlowSections::Section& section)
+{
+    if (obj->HasProperty("columnsGap")) {
+        auto columnsGap = obj->GetProperty("columnsGap");
+        CalcDimension colGap;
+        if (!JSViewAbstract::ParseJsDimensionVp(columnsGap, colGap) || colGap.Value() < 0) {
+            colGap.SetValue(0.0);
+        }
+        section.columnsGap = colGap;
+    }
+
+    if (obj->HasProperty("rowsGap")) {
+        auto rowsGap = obj->GetProperty("rowsGap");
+        CalcDimension rowGap;
+        if (!JSViewAbstract::ParseJsDimensionVp(rowsGap, rowGap) || rowGap.Value() < 0) {
+            rowGap.SetValue(0.0);
+        }
+        section.rowsGap = rowGap;
+    }
+
+    if (obj->HasProperty("margin")) {
+        auto margin = obj->GetProperty("margin");
+        NG::MarginProperty marginProperty;
+        ParseMargin(margin, marginProperty);
+        section.margin = marginProperty;
+    }
+}
+} // namespace
+
 bool JSWaterFlowSections::ParseSectionOptions(
     const JSCallbackInfo& args, const JSRef<JSVal>& jsValue, NG::WaterFlowSections::Section& section)
 {
@@ -112,30 +142,7 @@ bool JSWaterFlowSections::ParseSectionOptions(
         section.crossCount = crossCountValue;
     }
 
-    if (obj->HasProperty("columnsGap")) {
-        auto columnsGap = obj->GetProperty("columnsGap");
-        CalcDimension colGap;
-        if (!JSViewAbstract::ParseJsDimensionVp(columnsGap, colGap) || colGap.Value() < 0) {
-            colGap.SetValue(0.0);
-        }
-        section.columnsGap = colGap;
-    }
-
-    if (obj->HasProperty("rowsGap")) {
-        auto rowsGap = obj->GetProperty("rowsGap");
-        CalcDimension rowGap;
-        if (!JSViewAbstract::ParseJsDimensionVp(rowsGap, rowGap) || rowGap.Value() < 0) {
-            rowGap.SetValue(0.0);
-        }
-        section.rowsGap = rowGap;
-    }
-
-    if (obj->HasProperty("margin")) {
-        auto margin = obj->GetProperty("margin");
-        NG::MarginProperty marginProperty;
-        ParseMargin(margin, marginProperty);
-        section.margin = marginProperty;
-    }
+    ParseGaps(obj, section);
 
     if (obj->HasProperty("onGetItemMainSizeByIndex")) {
         auto getSizeByIndex = obj->GetProperty("onGetItemMainSizeByIndex");
@@ -154,7 +161,6 @@ bool JSWaterFlowSections::ParseSectionOptions(
             section.onGetItemMainSizeByIndex = std::move(onGetItemMainSizeByIndex);
         }
     }
-
     return true;
 }
 } // namespace OHOS::Ace::Framework

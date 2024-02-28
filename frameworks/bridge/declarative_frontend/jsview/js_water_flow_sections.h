@@ -25,7 +25,8 @@ class JSWaterFlowSections : public Referenced {
 public:
     JSWaterFlowSections() = default;
     ~JSWaterFlowSections() override = default;
-    static bool ParseSectionOptions(const JSCallbackInfo& args, const JSRef<JSVal>& jsValue, NG::WaterFlowSections::Section& section);
+    static bool ParseSectionOptions(
+        const JSCallbackInfo& args, const JSRef<JSVal>& jsValue, NG::WaterFlowSections::Section& section);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSWaterFlowSections);

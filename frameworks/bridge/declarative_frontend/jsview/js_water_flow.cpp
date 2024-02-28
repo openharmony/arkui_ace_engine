@@ -14,6 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_water_flow.h"
+
 #include <cstdint>
 #include <vector>
 
@@ -54,36 +55,42 @@ namespace {
 const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDirection::COLUMN,
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
 
-void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sections)
+namespace {
+void ParseChanges(const JSCallbackInfo& args, const JSRef<JSArray>& changeArray)
 {
     auto waterFlowSections = WaterFlowModel::GetInstance()->GetOrCreateWaterFlowSections();
     CHECK_NULL_VOID(waterFlowSections);
+    auto length = changeArray->Length();
+    for (size_t i = 0; i < length; ++i) {
+        auto change = changeArray->GetValueAt(i);
+        auto changeObject = JSRef<JSObject>::Cast(change);
+        auto sectionValue = changeObject->GetProperty("sections");
+        auto sectionArray = JSRef<JSArray>::Cast(sectionValue);
+        auto sectionsCount = sectionArray->Length();
+        std::vector<NG::WaterFlowSections::Section> newSections;
+        for (size_t j = 0; j < sectionsCount; ++j) {
+            NG::WaterFlowSections::Section section;
+            auto newSection = sectionArray->GetValueAt(j);
+            if (JSWaterFlowSections::ParseSectionOptions(args, newSection, section)) {
+                newSections.emplace_back(section);
+            }
+        }
+        waterFlowSections->ChangeData(changeObject->GetProperty("start")->ToNumber<int32_t>(),
+            changeObject->GetProperty("deleteCount")->ToNumber<int32_t>(), newSections);
+    }
+}
+} // namespace
+
+void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sections)
+{
     auto sectionsObject = JSRef<JSObject>::Cast(sections);
     auto changes = sectionsObject->GetProperty("changeArray");
-    if (changes->IsArray()) {
-        auto changeArray = JSRef<JSArray>::Cast(changes);
-        auto length = changeArray->Length();
-        if (length == 0) {
-            return;
-        }
-        for (size_t i = 0; i < length; ++i) {
-            auto change = changeArray->GetValueAt(i);
-            auto changeObject = JSRef<JSObject>::Cast(change);
-            auto sectionValue = changeObject->GetProperty("sections");
-            auto sectionArray = JSRef<JSArray>::Cast(sectionValue);
-            auto sectionsCount = sectionArray->Length();
-            std::vector<NG::WaterFlowSections::Section> newSections;
-            for (size_t j = 0; j < sectionsCount; ++j) {
-                NG::WaterFlowSections::Section section;
-                auto newSection = sectionArray->GetValueAt(j);
-                if (JSWaterFlowSections::ParseSectionOptions(args, newSection, section)) {
-                    newSections.emplace_back(section);
-                }
-            }
-            waterFlowSections->ChangeData(changeObject->GetProperty("start")->ToNumber<int32_t>(),
-                changeObject->GetProperty("deleteCount")->ToNumber<int32_t>(), newSections);
-        }
+    if (!changes->IsArray()) {
+        return;
     }
+    auto changeArray = JSRef<JSArray>::Cast(changes);
+    ParseChanges(args, changeArray);
+
     auto clearFunc = sectionsObject->GetProperty("clearChanges");
     if (!clearFunc->IsFunction()) {
         return;
@@ -108,7 +115,7 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
             return;
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-        
+
         auto scroller = obj->GetProperty("scroller");
         if (scroller->IsObject()) {
             auto* jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();

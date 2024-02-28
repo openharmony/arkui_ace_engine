@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -254,6 +255,9 @@ void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
 void WaterFlowSegmentedLayout::InitFooter(float crossSize)
 {
     if (info_.footerIndex_ == 0) {
+        // re-insert at the end
+        auto footer = wrapper_->GetOrCreateChildByIndex(info_.footerIndex_);
+        auto waterFlow = wrapper_->GetHostNode();
         waterFlow->RemoveChildAtIndex(info_.footerIndex_);
         footer->GetHostNode()->MountToParent(waterFlow);
         footer->SetActive(false);
@@ -264,37 +268,6 @@ void WaterFlowSegmentedLayout::InitFooter(float crossSize)
 
     mainGaps_.push_back(0.0f);
     itemsCrossSize_.push_back({ crossSize });
-
-    size_t sectionCnt = mainGaps_.size();
-    if (info_.items_.size() == sectionCnt - 1) {
-        info_.items_.emplace_back();
-        info_.items_.back().try_emplace(0);
-    }
-    if (info_.segmentTails_.size() == sectionCnt - 1) {
-        info_.segmentTails_.push_back(info_.childrenCount_ - 1);
-    }
-    if (info_.margins_.size() == sectionCnt - 1) {
-        info_.margins_.emplace_back();
-    }
-}
-
-void WaterFlowSegmentedLayout::CheckReset(const RefPtr<WaterFlowSections>& secObj)
-{
-    if (secObj && info_.segmentTails_.empty()) {
-        // empty segmentTails_ implies a segment change
-        const auto& sections = secObj->GetSectionInfo();
-        auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
-        if (info_.endIndex_ > -1) {
-            postJumpOffset_ = ResetAndJump(info_);
-        }
-        info_.InitSegments(sections, constraint->scaleProperty, constraint->percentReference.Width());
-        return;
-    }
-
-    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
-        postJumpOffset_ = ResetAndJump(info_);
-        return;
-    }
 
     size_t sectionCnt = mainGaps_.size();
     if (info_.items_.size() == sectionCnt - 1) {
@@ -336,6 +309,20 @@ void WaterFlowSegmentedLayout::CheckReset(const RefPtr<WaterFlowSections>& secOb
     }
 }
 
+namespace {
+// use user-defined mainSize
+void UpdateChildSize(const RefPtr<LayoutWrapper>& child, float mainSize, Axis axis)
+{
+    auto geo = child->GetGeometryNode();
+    auto size = geo->GetMarginFrameSize();
+    size.SetMainSize(mainSize, axis);
+    if (geo->GetMargin()) {
+        MinusPaddingToSize(*geo->GetMargin(), size);
+    }
+    geo->SetFrameSize(size);
+}
+} // namespace
+
 void WaterFlowSegmentedLayout::MeasureOnOffset()
 {
     bool forward = LessOrEqual(info_.currentOffset_ - info_.prevOffset_, 0.0f) || info_.endIndex_ == -1;
@@ -350,7 +337,8 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
         // measure appearing items when scrolling upwards
         auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
         for (int32_t i = info_.startIndex_; i < oldStart; ++i) {
-            MeasureItem(props, i, info_.itemInfos_[i].crossIdx);
+            auto item = MeasureItem(props, i, info_.itemInfos_[i].crossIdx);
+            UpdateChildSize(item, info_.itemInfos_[i].mainSize, axis_);
         }
     }
 }
@@ -377,7 +365,8 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     // only if range [startIndex, jumpIdx) isn't measured (used user-defined size)
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     for (int32_t i = info_.startIndex_; i < jumpIdx; ++i) {
-        MeasureItem(props, i, info_.itemInfos_[i].crossIdx);
+        auto item = MeasureItem(props, i, info_.itemInfos_[i].crossIdx);
+        UpdateChildSize(item, info_.itemInfos_[i].mainSize, axis_);
     }
 }
 
@@ -469,6 +458,7 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
             }
             info_.RecordItem(i, position, itemHeight);
         }
+        UpdateChildSize(item, info_.itemInfos_[i].mainSize, axis_);
     }
 }
 

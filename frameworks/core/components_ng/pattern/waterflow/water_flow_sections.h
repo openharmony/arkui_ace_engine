@@ -33,13 +33,7 @@ public:
 
     WaterFlowSections() = default;
     ~WaterFlowSections() override = default;
-    // void Push(WaterFlowSections::Section&& section);
-    // void Update(int32_t index, WaterFlowSections::Section&& section);
-    // void Splice(int32_t start, int32_t deleteCount, std::vector<WaterFlowSections::Section>& newSections);
-    // std::vector<WaterFlowSections::Section>& Values();
-    using OnSectionDataChange =
-        std::function<void(int32_t start, int32_t deleteCount, const std::vector<Section>& newSections)>;
-    void SetOnDataChange(OnSectionDataChange&& func)
+    void SetOnDataChange(std::function<void(int32_t start)>&& func)
     {
         onSectionDataChange_ = func;
     }
@@ -53,7 +47,7 @@ public:
 
 private:
     std::vector<Section> sections_;
-    OnSectionDataChange onSectionDataChange_;
+    std::function<void(int32_t start)> onSectionDataChange_;
 };
 
 struct WaterFlowSections::Section {

@@ -71,10 +71,7 @@ public:
         footer->SetActive(false);
     }
 
-    void ResetLayoutInfo()
-    {
-        layoutInfo_.Reset();
-    }
+    void ResetLayoutInfo();
 
     int32_t GetBeginIndex() const
     {
@@ -132,7 +129,12 @@ public:
         return sections_;
     }
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections();
-    void OnSectionChanged(int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections);
+    /**
+     * @brief Callback function when Sections data has changed.
+     *
+     * @param start the index of the first modified section.
+     */
+    void OnSectionChanged(int32_t start);
 
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override

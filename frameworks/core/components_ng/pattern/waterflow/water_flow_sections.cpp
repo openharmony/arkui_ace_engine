@@ -19,15 +19,22 @@ namespace OHOS::Ace::NG {
 void WaterFlowSections::ChangeData(
     int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections)
 {
-    auto it = sections_.begin() + start;
-    sections_.erase(it, it + deleteCount);
-    sections_.insert(it, newSections.begin(), newSections.end());
+    TAG_LOGI(AceLogTag::ACE_WATERFLOW,
+        "section changed, start:%{public}d, deleteCount:%{public}d, newSections:%{public}zu", start, deleteCount,
+        newSections.size());
+    if (start < sections_.size()) {
+        auto it = sections_.begin() + start;
+        sections_.erase(it, it + deleteCount);
+        sections_.insert(it, newSections.begin(), newSections.end());
+    } else {
+        sections_.insert(sections_.end(), newSections.begin(), newSections.end());
+    }
 
     if (onSectionDataChange_) {
         // push: start, 0, newSection
         // update: start, 0, newSection
         // splice: start, deleteCount, newSections
-        onSectionDataChange_(start, deleteCount, newSections);
+        onSectionDataChange_(start);
     }
 }
 } // namespace OHOS::Ace::NG
