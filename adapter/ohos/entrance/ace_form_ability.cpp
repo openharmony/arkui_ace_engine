@@ -151,9 +151,10 @@ AppExecFwk::FormState AceFormAbility::OnAcquireFormState(const OHOS::AAFwk::Want
     }
 }
 
-void AceFormAbility::OnUpdate(const int64_t formId)
+void AceFormAbility::OnUpdate(const int64_t formId, const std::map<std::string, std::string>& formParamsMap)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "AceFormAbility OnUpdate called: %{public}s", std::to_string(formId).c_str());
+    TAG_LOGI(AceLogTag::ACE_FORM, "AceFormAbility OnUpdate called: %{public}s, formParamsMap: %{public}lu", 
+        std::to_string(formId).c_str(), formParamsMap.size());
     Platform::PaContainer::OnUpdate(instanceId_, formId);
 }
 
