@@ -169,7 +169,7 @@ constexpr int32_t MAX_ATTRIBUTE_ITEM_LEN = 12;
 ArkUI_NumberValue g_numberValues[MAX_ATTRIBUTE_ITEM_LEN] = { 0 };
 ArkUI_AttributeItem g_attributeItem = { g_numberValues, MAX_ATTRIBUTE_ITEM_LEN, nullptr, nullptr };
 
-constexpr uint32_t DEFAULT_COLOR = 0xFFFFFFFF;
+constexpr uint32_t DEFAULT_COLOR = 0xFF000000; // Black
 constexpr uint32_t DEFAULT_FIll_COLOR = 0x00000000;
 constexpr int32_t DEFAULT_X = 0;
 constexpr int32_t DEFAULT_Y = 0;
@@ -2690,7 +2690,7 @@ void ResetTextInputPlaceholderFont(ArkUI_NodeHandle node)
 int32_t SetEnableKeybordOnFocus(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || item->value[NUM_0].i32 < 0) {
+    if (actualSize < 0 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     // already check in entry point.
@@ -2748,7 +2748,7 @@ void ResetSelectedBackgroundColor(ArkUI_NodeHandle node)
 int32_t SetShowPasswordIcon(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || item->value[NUM_0].i32 < 0) {
+    if (actualSize < 0 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     // already check in entry point.
@@ -2767,7 +2767,7 @@ void ResetShowPasswordIcon(ArkUI_NodeHandle node)
 int32_t StopTextInputEditing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || item->value[NUM_0].i32 < 0) {
+    if (actualSize < 0 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     // already check in entry point.
@@ -2789,7 +2789,7 @@ int32_t SetTextInputCancelButton(ArkUI_NodeHandle node, const ArkUI_AttributeIte
     if (item->size > NUM_1) {
         size.value = item->value[NUM_1].f32;
     }
-    uint32_t color = 0;
+    uint32_t color = DEFAULT_COLOR;
     if (item->size > NUM_2) {
         color = item->value[NUM_2].u32;
     }
@@ -3543,7 +3543,7 @@ void ResetTextAreaText(ArkUI_NodeHandle node)
 int32_t StopTextAreaEditing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || item->value[NUM_0].i32 < 0) {
+    if (actualSize < 0 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     // already check in entry point.
