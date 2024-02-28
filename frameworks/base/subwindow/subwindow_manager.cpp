@@ -472,6 +472,33 @@ void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
     return subwindow->CloseDialogNG(dialogNode);
 }
 
+void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show customDialog ng enter");
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        CHECK_NULL_VOID(subwindow);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    return subwindow->OpenCustomDialogNG(dialogProps, std::move(callback));
+}
+
+void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
+    auto iter = subwindowMap_.begin();
+    while (iter != subwindowMap_.end()) {
+        auto overlay = iter->second->GetOverlayManager();
+        if (overlay->GetDialogMap().find(dialogId) != overlay->GetDialogMap().end()) {
+            return overlay->CloseCustomDialog(dialogId);
+        }
+        iter++;
+    }
+}
+
 void SubwindowManager::HideDialogSubWindow(int32_t instanceId)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide dialog subwindow enter");
