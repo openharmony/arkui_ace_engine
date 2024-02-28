@@ -2471,6 +2471,38 @@ HWTEST_F(OverlayManagerTestNg, DialogTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DialogTest006
+ * @tc.desc: Test DismissDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DialogTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create root node and dialogProperties.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+    DialogProperties dialogProperties;
+    /**
+     * @tc.steps: step2. Create overlayManager and call ShowDialog.
+     */
+    auto overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
+    auto dialogMapSize = overlayManager->dialogMap_.size();
+    /**
+     * @tc.steps4: Call DismissDialog function.
+     * @tc.expected: DismissDialog function is called.
+     */
+    ViewAbstract::DismissDialog();
+    EXPECT_EQ(overlayManager->dialogMap_.size(), dialogMapSize - 1);
+}
+
+/**
  * @tc.name: SheetPresentationPattern2
  * @tc.desc: Test SheetPresentationPattern::CheckSheetHeightChange().
  * @tc.type: FUNC
