@@ -34,8 +34,6 @@ std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedRouterPageListeners_;
 std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::infos_;
 
-std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
-    UIObserver::abilityContextDensityListeners_;
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedDensityListeners_;
 
@@ -345,31 +343,6 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_
     }
 }
 
-// UIObserver.on(type: "densityUpdate", UIAbilityContext, callback)
-// register a listener on current page
-void UIObserver::RegisterDensityCallback(
-    napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener)
-{
-    NG::AbilityContextInfo info;
-    GetAbilityInfos(env, uiAbilityContext, info);
-    for (auto listenerPair : abilityContextDensityListeners_) {
-        auto ref = listenerPair.first;
-        auto localInfo = infos_[ref];
-        if (info.IsEqual(localInfo)) {
-            auto& holder = abilityContextDensityListeners_[ref];
-            if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
-                return;
-            }
-            holder.emplace_back(listener);
-            return;
-        }
-    }
-    napi_ref newRef = nullptr;
-    napi_create_reference(env, uiAbilityContext, 1, &newRef);
-    abilityContextDensityListeners_[newRef] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
-    infos_[newRef] = info;
-}
-
 // UIObserver.on(type: "densityUpdate", uiContext | null, callback)
 // register a listener on current page
 void UIObserver::RegisterDensityCallback(
@@ -388,35 +361,6 @@ void UIObserver::RegisterDensityCallback(
         return;
     }
     holder.emplace_back(listener);
-}
-
-// UIObserver.off(type: "densityUpdate", uiAbilityContext, callback)
-void UIObserver::UnRegisterDensityCallback(napi_env env, napi_value uiAbilityContext, napi_value callback)
-{
-    NG::AbilityContextInfo info;
-    GetAbilityInfos(env, uiAbilityContext, info);
-    for (auto listenerPair : abilityContextDensityListeners_) {
-        auto ref = listenerPair.first;
-        auto localInfo = infos_[ref];
-        if (!info.IsEqual(localInfo)) {
-            continue;
-        }
-        auto& holder = abilityContextDensityListeners_[listenerPair.first];
-        if (callback == nullptr) {
-            holder.clear();
-        } else {
-            auto getRemovedListener = [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
-                return registeredListener->NapiEqual(callback);
-            };
-            holder.erase(std::remove_if(holder.begin(), holder.end(), getRemovedListener), holder.end());
-        }
-        if (holder.empty()) {
-            infos_.erase(ref);
-            abilityContextDensityListeners_.erase(ref);
-            napi_delete_reference(env, ref);
-        }
-        break;
-    }
 }
 
 // UIObserver.off(type: "densityUpdate", uiContext | null, callback)
@@ -445,22 +389,6 @@ void UIObserver::UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_val
 
 void UIObserver::HandleDensityChange(NG::AbilityContextInfo& info, double density)
 {
-    for (auto listenerPair : abilityContextDensityListeners_) {
-        auto ref = listenerPair.first;
-        auto localInfo = infos_[ref];
-        if (info.IsEqual(localInfo)) {
-            auto env = GetCurrentNapiEnv();
-            napi_value abilityContext = nullptr;
-            napi_get_reference_value(env, ref, &abilityContext);
-
-            auto& holder = abilityContextDensityListeners_[ref];
-            for (const auto& listener : holder) {
-                listener->OnDensityChange(density);
-            }
-            break;
-        }
-    }
-
     auto currentId = Container::CurrentId();
     if (specifiedDensityListeners_.find(currentId) == specifiedDensityListeners_.end()) {
         return;

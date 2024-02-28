@@ -55,6 +55,11 @@ static constexpr uint32_t ON_PAGE_SHOW = 2;
 static constexpr uint32_t ON_PAGE_HIDE = 3;
 static constexpr uint32_t ON_BACK_PRESS = 4;
 
+constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
+constexpr char ROUTERPAGE_UPDATE[] = "routerPageUpdate";
+constexpr char SCROLL_EVENT[] = "scrollEvent";
+constexpr char DENSITY_UPDATE[] = "densityUpdate";
+
 bool IsUIAbilityContext(napi_env env, napi_value context)
 {
     napi_value abilityInfo = nullptr;
@@ -353,12 +358,8 @@ napi_value ObserverProcess::ProcessDensityRegister(napi_env env, napi_callback_i
         auto context = argv[1];
         if (context) {
             auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
-            if (IsUIAbilityContext(env, context)) {
-                UIObserver::RegisterDensityCallback(env, context, listener);
-            } else {
-                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
-                UIObserver::RegisterDensityCallback(uiContextInstanceId, listener);
-            }
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::RegisterDensityCallback(uiContextInstanceId, listener);
         }
     }
 
@@ -375,6 +376,14 @@ napi_value ObserverProcess::ProcessDensityUnRegister(napi_env env, napi_callback
         UIObserver::UnRegisterDensityCallback(instanceId, nullptr);
     }
 
+    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
+        napi_value context = argv[1];
+        if (context) {
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::UnRegisterDensityCallback(uiContextInstanceId, nullptr);
+        }
+    }
+
     if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
         int32_t instanceId = ContainerScope::CurrentId();
         UIObserver::UnRegisterDensityCallback(instanceId, argv[1]);
@@ -383,12 +392,8 @@ napi_value ObserverProcess::ProcessDensityUnRegister(napi_env env, napi_callback
     if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
         napi_value context = argv[1];
         if (context) {
-            if (IsUIAbilityContext(env, context)) {
-                UIObserver::UnRegisterDensityCallback(env, context, argv[2]);
-            } else {
-                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
-                UIObserver::UnRegisterDensityCallback(uiContextInstanceId, argv[2]);
-            }
+            auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+            UIObserver::UnRegisterDensityCallback(uiContextInstanceId, argv[2]);
         }
     }
 

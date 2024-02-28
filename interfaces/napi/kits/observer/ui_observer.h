@@ -56,10 +56,7 @@ public:
         const std::string& name, const std::string& path, NG::RouterPageState state);
     
     static void RegisterDensityCallback(
-        napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener);
-    static void RegisterDensityCallback(
         int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
-    static void UnRegisterDensityCallback(napi_env env, napi_value uiAbilityContext, napi_value callback);
     static void UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_value callback);
     static void HandleDensityChange(NG::AbilityContextInfo& info, double density);
 
@@ -80,7 +77,6 @@ private:
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedRouterPageListeners_;
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> infos_;
-    static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>> abilityContextDensityListeners_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedDensityListeners_;
 };

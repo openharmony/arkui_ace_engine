@@ -24,11 +24,6 @@
 #include "napi/native_node_api.h"
 
 namespace OHOS::Ace::Napi {
-const std::string NAVDESTINATION_UPDATE = "navDestinationUpdate";
-const std::string ROUTERPAGE_UPDATE = "routerPageUpdate";
-const std::string SCROLL_EVENT = "scrollEvent";
-const std::string DENSITY_UPDATE = "densityUpdate";
-
 class ObserverProcess {
 public:
     ObserverProcess();
