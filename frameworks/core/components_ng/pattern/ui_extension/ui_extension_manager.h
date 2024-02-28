@@ -61,7 +61,6 @@ public:
     bool OnBackPressed();
     const RefPtr<FrameNode> GetFocusUiExtensionNode();
     bool IsWrapExtensionAbilityId(int64_t elementId);
-    bool IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pipeline);
     bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
         int64_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline);
     std::pair<int64_t, int64_t> UnWrapExtensionAbilityId(int64_t extensionOffset, int64_t elementId);

@@ -131,7 +131,6 @@ public:
     int32_t GetUiExtensionId() override;
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
-    bool IsEmbeddedComponentType();
     void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     RefPtr<OHOS::Ace::WantWrap> GetWantWrap();
 
@@ -192,9 +191,6 @@ private:
     void DispatchDisplayArea(bool isForce = false);
 
     void RegisterVisibleAreaChange();
-    void UpdateTextFieldManager(const Offset& offset, float height);
-    bool IsCurrentFocus() const;
-    bool CheckCascadeStatus();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

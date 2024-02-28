@@ -2515,7 +2515,7 @@ var FoldStatus;
 
 var EmbeddedType;
 (function (EmbeddedType) {
-  EmbeddedType[EmbeddedType["UIEXTENSION"] = 0] = "UIEXTENSION";
+  EmbeddedType[EmbeddedType["EMBEDDED_UI_EXTENSION"] = 0] = "EMBEDDED_UI_EXTENSION";
 })(EmbeddedType || (EmbeddedType = {}));
 
 var OutlineStyle;
