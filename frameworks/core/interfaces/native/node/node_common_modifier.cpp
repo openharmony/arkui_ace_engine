@@ -4084,6 +4084,7 @@ void GetClipShape(ArkUINodeHandle node, ArkUIClipShapeOptions* options)
         case BasicShapeType::PATH: {
             auto path = AceType::DynamicCast<Path>(basicShape.value());
             options->commands = path->GetValue().c_str();
+            break;
         }
         case BasicShapeType::RECT: {
             auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape.value());
@@ -4310,8 +4311,7 @@ void SetOnAppear(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
     auto onAppear = [frameNode, eventId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = ON_APPEAR;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
     };
@@ -4325,8 +4325,7 @@ void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
     auto onEvent = [node, eventId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = ON_FOCUS;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
@@ -4339,8 +4338,7 @@ void SetOnBlur(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
     auto onEvent = [node, eventId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = ON_BLUR;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
@@ -4354,8 +4352,7 @@ void SetOnAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
                              const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
         ArkUINodeEvent event;
         event.kind = ON_AREA_CHANGE;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         auto oldLocalOffset = oldRect.GetOffset();
         event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Width());
@@ -4394,8 +4391,7 @@ void SetOnClick(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
     auto onEvent = [node, eventId, extraParam](GestureEvent& info) {
         ArkUINodeEvent event;
         event.kind = ON_CLICK;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
 
         Offset globalOffset = info.GetGlobalLocation();
         Offset localOffset = info.GetLocalLocation();
@@ -4430,8 +4426,7 @@ void SetOnTouch(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
         globalEventInfo = eventInfo;
         ArkUINodeEvent event;
         event.kind = ON_TOUCH;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         const std::list<TouchLocationInfo>& changeTouch = eventInfo.GetChangedTouches();
         if (changeTouch.size() > 0) {
             TouchLocationInfo front = changeTouch.front();

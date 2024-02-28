@@ -289,8 +289,7 @@ void SetCalendarPickerOnChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* 
     auto onEvent = [node, eventId, extraParam](const std::string& dateStr) {
         ArkUINodeEvent event;
         event.kind = ON_CALENDAR_PICKER_CHANGE;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         ArkUISelectedDateType selectedDate;
         ParseDateByStr(dateStr, selectedDate);
         event.componentAsyncEvent.data[NUM_0].u32 = selectedDate.year;
