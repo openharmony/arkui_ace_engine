@@ -194,15 +194,15 @@ int32_t ParseAlignmentToIndex(Alignment align)
  * ...
  * @param colorsLength colors length
  */
-void SetGradientColors(NG::Gradient& gradient, const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
         return;
     }
     for (int32_t index = 0; index < colorsLength; index += NUM_3) {
-        auto colorValue = colors[index];
-        auto colorHasDimension = colors[index + NUM_1];
-        auto colorDimension = colors[index + NUM_2];
+        auto colorValue = colors[index].u32;
+        auto colorHasDimension = colors[index + NUM_1].i32;
+        auto colorDimension = colors[index + NUM_2].f32;
         auto color = static_cast<uint32_t>(colorValue);
         auto hasDimension = static_cast<bool>(colorHasDimension);
         auto dimension = colorDimension;
@@ -836,13 +836,13 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
  * shadows[4] : ShadowType, shadows[5] : Color, shadows[6] : IsFilled
  * @param length shadows length
  */
-void SetBackShadow(ArkUINodeHandle node, const ArkUI_Float32* shadows, ArkUI_Int32 length)
+void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (length == NUM_1) {
         Shadow shadow;
-        auto shadowStyle = static_cast<ShadowStyle>(shadows[NUM_0]);
+        auto shadowStyle = static_cast<ShadowStyle>(shadows[NUM_0].i32);
         auto style = static_cast<ShadowStyle>(shadowStyle);
         if (GetShadowFromTheme(style, shadow)) {
             ViewAbstract::SetBackShadow(frameNode, shadow);
@@ -851,13 +851,13 @@ void SetBackShadow(ArkUINodeHandle node, const ArkUI_Float32* shadows, ArkUI_Int
     if (length != NUM_7) {
         return;
     }
-    auto blurRadius = shadows[NUM_0];                          // BlurRadius
-    auto hasColorValue = static_cast<int32_t>(shadows[NUM_1]); // 1: has ColorStrategy; 2: has Color
-    auto offsetX = shadows[NUM_2];                             // OffsetX
-    auto offsetY = shadows[NUM_3];                             // OffsetY
-    auto shadowType = static_cast<uint32_t>(shadows[NUM_4]);   // ShadowType
-    auto color = static_cast<uint32_t>(shadows[NUM_5]);        // Color
-    auto isFilled = static_cast<uint32_t>(shadows[NUM_6]);     // IsFilled
+    auto blurRadius = shadows[NUM_0].f32;                          // BlurRadius
+    auto hasColorValue = static_cast<int32_t>(shadows[NUM_1].i32); // 1: has ColorStrategy; 2: has Color
+    auto offsetX = shadows[NUM_2].f32;                             // OffsetX
+    auto offsetY = shadows[NUM_3].f32;                             // OffsetY
+    auto shadowType = shadows[NUM_4].i32;                          // ShadowType
+    auto color = static_cast<uint32_t>(shadows[NUM_5].u32);        // Color
+    auto isFilled = static_cast<uint32_t>(shadows[NUM_6].i32);     // IsFilled
     Shadow shadow;
     shadow.SetBlurRadius(blurRadius);
     shadow.SetOffsetX(offsetX);
@@ -1144,7 +1144,7 @@ void ResetBlur(ArkUINodeHandle node)
  * @param colorsLength colors length
  */
 void SetLinearGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
-    const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1183,7 +1183,7 @@ void ResetLinearGradient(ArkUINodeHandle node)
  * @param colorsLength colors length
  */
 void SetSweepGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
-    const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1220,7 +1220,7 @@ void ResetSweepGradient(ArkUINodeHandle node)
  * @param colorsLength colors length
  */
 void SetRadialGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
-    const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1363,7 +1363,7 @@ void ResetBorderImage(ArkUINodeHandle node)
 }
 
 void SetBorderImageGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
-    const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

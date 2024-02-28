@@ -844,11 +844,11 @@ int32_t SetLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     auto* fullImpl = GetFullImpl();
     const ArkUI_ColorStop* colorStop = reinterpret_cast<ArkUI_ColorStop*>(item->object);
     int size = colorStop->size;
-    ArkUI_Float32 colors[size * NUM_3];
+    ArkUIInt32orFloat32 colors[size * NUM_3];
     for (int i = 0; i < size; i++) {
-        colors[i * NUM_3 + NUM_0] = colorStop->colors[i];
-        colors[i * NUM_3 + NUM_1] = true;
-        colors[i * NUM_3 + NUM_2] = colorStop->stops[i];
+        colors[i * NUM_3 + NUM_0].u32 = colorStop->colors[i];
+        colors[i * NUM_3 + NUM_1].i32 = true;
+        colors[i * NUM_3 + NUM_2].f32 = colorStop->stops[i];
     }
 
     ArkUI_Float32 values[NUM_4] = { false, DEFAULT_ANGLE, NUM_3, false };
@@ -1361,8 +1361,8 @@ int32_t SetShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    ArkUI_Float32 shadows[NUM_1] = { ArkUI_ShadowStyle::ARKUI_SHADOW_STYLE_OUTER_DEFAULT_XS };
-    shadows[NUM_0] = item->value[0].i32;
+    ArkUIInt32orFloat32 shadows[NUM_1] = { {.i32 = ArkUI_ShadowStyle::ARKUI_SHADOW_STYLE_OUTER_DEFAULT_XS} };
+    shadows[NUM_0].i32 = item->value[0].i32;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_1);
     return ERROR_CODE_NO_ERROR;
 }
@@ -1386,48 +1386,46 @@ int32_t SetCustomShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    ArkUI_Float32 shadows[ALLOW_SIZE_7] = { 0, NUM_2, 0, 0, 0, StringToColorInt("#FFFFFFFF", 0), 0 };
+    ArkUIInt32orFloat32 shadows[ALLOW_SIZE_7] = { 0, { .i32 = NUM_2 }, 0, 0, { .i32 = 0 }, { .u32 = 0 }, { .i32 = 0 } };
     int length = item->size;
     if (length > NUM_0) {
         if (LessNotEqual(item->value[NUM_0].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        shadows[NUM_0] = item->value[NUM_0].f32; // radius
+        shadows[NUM_0].f32 = item->value[NUM_0].f32; // radius
     }
     if (length > NUM_2) {
         if (LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        shadows[NUM_2] = item->value[NUM_2].f32; // OffsetX
+        shadows[NUM_2].f32 = item->value[NUM_2].f32; // OffsetX
     }
     if (length > NUM_3) {
         if (LessNotEqual(item->value[NUM_3].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        shadows[NUM_3] = item->value[NUM_3].f32; // OffsetY
+        shadows[NUM_3].f32 = item->value[NUM_3].f32; // OffsetY
     }
     if (length > NUM_4) {
-        if (item->value[NUM_3].i32 < ArkUI_ShadowType::ARKUI_SHADOW_TYPE_COLOR ||
-            item->value[NUM_3].i32 > ArkUI_ShadowType::ARKUI_SHADOW_TYPE_BLUR) {
+        if (!InRegion(NUM_0, NUM_1, item->value[NUM_4].i32)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        shadows[NUM_4] = item->value[NUM_4].i32;
+        shadows[NUM_4].i32 = item->value[NUM_4].i32;
     }
     if (length > NUM_5) {
         if (item->value[NUM_1].i32) {
-            if (item->value[NUM_5].i32 < ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_INVERT ||
-                item->value[NUM_5].i32 > ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_PRIMARY) {
+            if (!InRegion(NUM_0, NUM_2, item->value[NUM_5].i32)) {
                 return ERROR_CODE_PARAM_INVALID;
             }
-            shadows[NUM_1] = COLOR_STRATEGY_STYLE;
-            shadows[NUM_5] = item->value[NUM_5].i32;
+            shadows[NUM_1].i32 = COLOR_STRATEGY_STYLE;
+            shadows[NUM_5].i32 = item->value[NUM_5].i32;
         } else {
-            shadows[NUM_1] = COLOR_STYLE;
-            shadows[NUM_5] = item->value[NUM_5].u32;
+            shadows[NUM_1].i32 = COLOR_STYLE;
+            shadows[NUM_5].u32 = item->value[NUM_5].u32;
         }
     }
     if (length > NUM_6) {
-        shadows[NUM_6] = item->value[NUM_6].i32;
+        shadows[NUM_6].i32 = item->value[NUM_6].i32;
     }
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_7);
     return ERROR_CODE_NO_ERROR;
@@ -1729,11 +1727,11 @@ int32_t SetSweepGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     const ArkUI_ColorStop* colorStop = reinterpret_cast<ArkUI_ColorStop*>(item->object);
     int size = colorStop->size;
-    ArkUI_Float32 colors[size * NUM_3];
+    ArkUIInt32orFloat32 colors[size * NUM_3];
     for (int i = 0; i < size; i++) {
-        colors[i * NUM_3 + NUM_0] = colorStop->colors[i];
-        colors[i * NUM_3 + NUM_1] = true;
-        colors[i * NUM_3 + NUM_2] = colorStop->stops[i];
+        colors[i * NUM_3 + NUM_0].u32 = colorStop->colors[i];
+        colors[i * NUM_3 + NUM_1].i32 = true;
+        colors[i * NUM_3 + NUM_2].f32 = colorStop->stops[i];
     }
     ArkUI_Float32 values[NUM_13] = { false, DEFAULT_X, UNIT_VP, false, DEFAULT_Y, UNIT_VP, false, NUM_0, false, NUM_0,
         false, NUM_0, false };
@@ -1803,11 +1801,11 @@ int32_t SetRadialGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     auto* fullImpl = GetFullImpl();
     const ArkUI_ColorStop* colorStop = reinterpret_cast<ArkUI_ColorStop*>(item->object);
     int size = colorStop->size;
-    ArkUI_Float32 colors[size * NUM_3];
+    ArkUIInt32orFloat32 colors[size * NUM_3];
     for (int i = 0; i < size; i++) {
-        colors[i * NUM_3 + NUM_0] = colorStop->colors[i];
-        colors[i * NUM_3 + NUM_1] = true;
-        colors[i * NUM_3 + NUM_2] = colorStop->stops[i];
+        colors[i * NUM_3 + NUM_0].u32 = colorStop->colors[i];
+        colors[i * NUM_3 + NUM_1].i32 = true;
+        colors[i * NUM_3 + NUM_2].f32 = colorStop->stops[i];
     }
 
     ArkUI_Float32 values[NUM_10] = { false, DEFAULT_X, UNIT_VP, false, DEFAULT_Y, UNIT_VP, false, NUM_0, UNIT_VP,
