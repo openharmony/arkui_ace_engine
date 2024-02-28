@@ -5751,7 +5751,7 @@ void TextFieldPattern::StopEditing()
         return;
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (GetImeAttached() || isCustomKeyboardAttached_) {
+    if (HasConnection() || isCustomKeyboardAttached_) {
 #else
     if (isCustomKeyboardAttached_) {
 #endif
