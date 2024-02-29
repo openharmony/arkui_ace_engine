@@ -26,6 +26,7 @@
 namespace OHOS::Ace::Napi {
 const std::string NAVDESTINATION_UPDATE = "navDestinationUpdate";
 const std::string ROUTERPAGE_UPDATE = "routerPageUpdate";
+const std::string SCROLL_EVENT = "scrollEvent";
 
 class ObserverProcess {
 public:
@@ -37,6 +38,8 @@ public:
 private:
     napi_value ProcessNavigationRegister(napi_env env, napi_callback_info info);
     napi_value ProcessNavigationUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessScrollEventRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessScrollEventUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessRouterPageRegister(napi_env env, napi_callback_info info);
     napi_value ProcessRouterPageUnRegister(napi_env env, napi_callback_info info);
     using Func = napi_value(ObserverProcess::*)(napi_env, napi_callback_info);

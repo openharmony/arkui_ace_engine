@@ -41,6 +41,21 @@ struct NavDestinationInfo {
     {}
 };
 
+enum class ScrollEventType {
+    SCROLL_START = 0,
+    SCROLL_STOP = 1,
+};
+
+struct ScrollEventInfo {
+    std::string id;
+    ScrollEventType scrollEvent;
+    float offset;
+
+    ScrollEventInfo(std::string id, ScrollEventType scrollEvent, float offset)
+        : id(std::move(id)), scrollEvent(scrollEvent), offset(offset)
+    {}
+};
+
 struct RouterPageInfoNG {
     napi_value context;
     int32_t index;
@@ -79,16 +94,21 @@ public:
     ~UIObserverHandler() = default;
     static UIObserverHandler& GetInstance();
     void NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
+    void NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType scrollEvent);
     void NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state);
     std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
+    std::shared_ptr<ScrollEventInfo> GetScrollEventState(const RefPtr<AceType>& node);
     std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
     using NavigationHandleFunc = void (*)(const std::string&, const std::string&, NavDestinationState);
+    using ScrollEventHandleFunc = void (*)(const std::string&, ScrollEventType, float);
     using RouterPageHandleFunc = void (*)(
         AbilityContextInfo&, napi_value, int32_t, const std::string&, const std::string&, RouterPageState);
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
+    void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
+    ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
     napi_value GetUIContextValue();
 };
