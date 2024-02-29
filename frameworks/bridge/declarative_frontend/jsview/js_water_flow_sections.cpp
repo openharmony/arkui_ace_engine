@@ -133,11 +133,10 @@ bool JSWaterFlowSections::ParseSectionOptions(
 
     if (obj->HasProperty("crossCount")) {
         auto crossCount = obj->GetProperty("crossCount");
-        int32_t crossCountValue = 0;
+        int32_t crossCountValue = 1;
         JSViewAbstract::ParseJsInteger(crossCount, crossCountValue);
         if (crossCountValue <= 0) {
-            LOGW("crossCount can not be less or equal 0");
-            return false;
+            crossCountValue = 1;
         }
         section.crossCount = crossCountValue;
     }
