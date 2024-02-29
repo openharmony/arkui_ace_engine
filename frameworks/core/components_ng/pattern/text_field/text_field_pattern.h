@@ -50,7 +50,6 @@
 #include "core/components_ng/pattern/text_area/text_area_layout_algorithm.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/content_controller.h"
-#include "core/components_ng/pattern/text_field/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
@@ -63,6 +62,8 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -145,8 +146,10 @@ class TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
                          public TextInputClient,
-                         public TextBase {
-    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase);
+                         public TextBase,
+                         public Magnifier {
+    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase,
+        Magnifier);
 
 public:
     TextFieldPattern();
@@ -316,9 +319,19 @@ public:
         return contentController_->GetWideText();
     }
 
-    int32_t GetCaretIndex() const
+    int32_t GetCaretIndex() const override
     {
         return selectController_->GetCaretIndex();
+    }
+
+    OffsetF GetFirstHandleOffset() const override
+    {
+        return selectController_->GetFirstHandleOffset();
+    }
+
+    OffsetF GetSecondHandleOffset() const override
+    {
+        return selectController_->GetSecondHandleOffset();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
@@ -355,7 +368,7 @@ public:
         return rightClickOffset_;
     }
 
-    OffsetF GetCaretOffset() const
+    OffsetF GetCaretOffset() const override
     {
         return selectController_->GetCaretRect().GetOffset();
     }
@@ -440,11 +453,6 @@ public:
     void SetTextRect(const RectF& textRect)
     {
         textRect_ = textRect;
-    }
-
-    const RectF& GetContentRect() const
-    {
-        return contentRect_;
     }
 
     const RectF& GetFrameRect() const
@@ -1023,38 +1031,9 @@ public:
 
     bool HandleSpaceEvent();
 
-    RefPtr<PixelMap> GetPixelMap();
-
-    void UpdateShowMagnifier(bool isShowMagnifier = false)
-    {
-        isShowMagnifier_ = isShowMagnifier;
-        if (isShowMagnifier_) {
-            magnifierController_->OpenMagnifier();
-        } else {
-            magnifierController_->CloseMagnifier();
-        }
-    }
-
-    bool GetShowMagnifier() const
-    {
-        return isShowMagnifier_;
-    }
-
     virtual void InitBackGroundColorAndBorderRadius();
 
-    void SetLocalOffset(OffsetF localOffset)
-    {
-        localOffset_.SetX(localOffset.GetX());
-        localOffset_.SetY(localOffset.GetY());
-        UpdateShowMagnifier(true);
-    }
-
-    OffsetF GetLocalOffset() const
-    {
-        return localOffset_;
-    }
-
-    int32_t GetContentWideTextLength()
+    int32_t GetContentWideTextLength() override
     {
         return static_cast<int32_t>(contentController_->GetWideText().length());
     }
@@ -1089,22 +1068,7 @@ public:
 
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
-    void SetMagnifierRect(MagnifierRect magnifierRect)
-    {
-        magnifierRect_ = magnifierRect;
-    }
-
-    MagnifierRect GetMagnifierRect()
-    {
-        return magnifierRect_;
-    }
-
-    OffsetF GetTextPaintOffset() const;
-
-    const RefPtr<MagnifierController>& GetMagnifierController()
-    {
-        return magnifierController_;
-    }
+    OffsetF GetTextPaintOffset() const override;
 
     void NeedRequestKeyboard()
     {
@@ -1282,7 +1246,6 @@ private:
     void UpdateOverlaySelectArea();
 
     RectF frameRect_;
-    RectF contentRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
@@ -1432,16 +1395,12 @@ private:
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
-    bool isShowMagnifier_ = false;
-    OffsetF localOffset_;
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
     bool initTextRect_ = false;
     bool colorModeChange_ = false;
     Offset clickLocation_;
-    MagnifierRect magnifierRect_;
-    RefPtr<MagnifierController> magnifierController_;
     bool isKeyboardClosedByUser_ = false;
     bool lockRecord_ = false;
 };

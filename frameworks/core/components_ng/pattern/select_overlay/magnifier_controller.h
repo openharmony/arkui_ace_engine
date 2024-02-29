@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_PATTERN_MAGNIFIER_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_PATTERN_MAGNIFIER_CONTROLLER_H
 
+#include "base/memory/type_info_base.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/image/pixel_map.h"
@@ -51,10 +52,44 @@ public:
     void OpenMagnifier();
     void CloseMagnifier();
 
+    RefPtr<PixelMap> GetPixelMap();
+
+    void UpdateShowMagnifier(bool isShowMagnifier = false);
+
+    bool GetShowMagnifier() const
+    {
+        return isShowMagnifier_;
+    }
+
+    void SetMagnifierRect(MagnifierRect magnifierRect)
+    {
+        magnifierRect_ = magnifierRect;
+    }
+
+    MagnifierRect GetMagnifierRect()
+    {
+        return magnifierRect_;
+    }
+
+    void SetLocalOffset(OffsetF localOffset)
+    {
+        localOffset_.SetX(localOffset.GetX());
+        localOffset_.SetY(localOffset.GetY());
+        UpdateShowMagnifier(true);
+    }
+
+    OffsetF GetLocalOffset() const
+    {
+        return localOffset_;
+    }
+
 private:
     void CreateMagnifierChildNode();
     void SetMagnifierRect(const RefPtr<Pattern>& childPattern);
 
+    bool isShowMagnifier_ = false;
+    MagnifierRect magnifierRect_;
+    OffsetF localOffset_;
     WeakPtr<Pattern> pattern_;
     RefPtr<FrameNode> magnifierFrameNode_ = nullptr;
 };

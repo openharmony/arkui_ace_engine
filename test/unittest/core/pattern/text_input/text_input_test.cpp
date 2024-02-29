@@ -2644,7 +2644,9 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
      * @tc.steps: step2. Move handle
      */
     OffsetF localOffset(1.0f, 1.0f);
-    pattern_->SetLocalOffset(localOffset);
+    auto controller = pattern_->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->SetLocalOffset(localOffset);
     RectF handleRect;
     pattern_->OnHandleMove(handleRect, false);
 
@@ -2652,7 +2654,7 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
      * @tc.steps: step3. Test magnifier open or close
      * @tc.expected: magnifier is open
      */
-    auto ret = pattern_->GetShowMagnifier();
+    auto ret = controller->GetShowMagnifier();
     EXPECT_TRUE(ret);
 
     /**
@@ -2686,7 +2688,7 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
      * @tc.steps: step8. Test magnifier open or close
      * @tc.expected: magnifier is close
      */
-    ret = pattern_->GetShowMagnifier();
+    ret = controller->GetShowMagnifier();
     EXPECT_FALSE(ret);
 }
 
