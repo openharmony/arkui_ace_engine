@@ -768,7 +768,7 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddActionEventHandle([weak = WeakClaim(this), instanceID](const std::string& action) {
         ContainerScope scope(instanceID);
-        TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}s", action.c_str());
+        TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}zu", action.length());
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         formPattern->OnActionEvent(action);
