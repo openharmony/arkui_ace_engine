@@ -257,11 +257,11 @@ void DisplaySync::RegisterOnFrameCallback(napi_value cb, napi_ref& onFrameRef,
     });
 }
 
-void DisplaySync::UnRegisterOnFrameCallback(napi_env env, size_t argc, napi_ref& onFrameRef)
+void DisplaySync::UnregisterOnFrameCallback(napi_env env, size_t argc, napi_ref& onFrameRef)
 {
     if (argc >= 1) {
         napi_delete_reference(env, onFrameRef);
-        GetUIDisplaySync()->UnRegisterOnFrame();
+        GetUIDisplaySync()->UnregisterOnFrame();
     }
     return;
 }
@@ -307,7 +307,7 @@ napi_value JSOnFrame_Off(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     if (callbackType == CallbackType::ONFRAME) {
-        displaySync->UnRegisterOnFrameCallback(env, argc, displaySync->onFrameRef_);
+        displaySync->UnregisterOnFrameCallback(env, argc, displaySync->onFrameRef_);
     }
     return NapiGetUndefined(env);
 }

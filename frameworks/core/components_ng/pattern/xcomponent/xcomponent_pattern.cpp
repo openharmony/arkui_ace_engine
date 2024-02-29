@@ -881,7 +881,7 @@ void XComponentPattern::HandleUnregisterOnFrameEvent()
     CHECK_NULL_VOID(nativeXComponent_);
     CHECK_NULL_VOID(nativeXComponentImpl_);
     CHECK_NULL_VOID(displaySync_);
-    displaySync_->UnRegisterOnFrame();
+    displaySync_->UnregisterOnFrame();
     displaySync_->DelFromPipelineOnContainer();
 }
 
