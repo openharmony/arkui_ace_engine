@@ -18,6 +18,8 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
@@ -463,7 +465,7 @@ void SideBarContainerLayoutAlgorithm::MeasureDivider(const RefPtr<SideBarContain
     auto constraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
     auto scaleProperty = constraint->scaleProperty;
-    auto dividerIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+    auto dividerIdealSize = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) ?
     CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT() :
     CreateIdealSize(
