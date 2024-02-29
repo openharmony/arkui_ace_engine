@@ -127,4 +127,15 @@ bool UIExtensionManager::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::Occupied
     auto sessionWrapper = sessionWrapper_.Upgrade();
     return sessionWrapper && sessionWrapper->NotifyOccupiedAreaChangeInfo(info);
 }
+
+void UIExtensionManager::OnSizeChanged(WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->OnSizeChanged(type, rsTransaction);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

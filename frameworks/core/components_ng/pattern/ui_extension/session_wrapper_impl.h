@@ -79,6 +79,8 @@ public:
     // The interface to control the display area
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode() const override;
     void RefreshDisplayArea(const RectF& displayArea) override;
+    void OnSizeChanged(WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
 
     // The interface to send the data for ArkTS
     void SendDataAsync(const AAFwk::WantParams& params) const override;

@@ -91,6 +91,8 @@ public:
 
     bool NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info);
 
+    void OnSizeChanged(WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
+
 private:
     class UIExtensionIdUtility {
     public:

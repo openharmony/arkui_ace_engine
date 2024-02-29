@@ -49,6 +49,7 @@ class ModalUIExtensionProxy;
 
 namespace OHOS::Rosen {
 class AvoidArea;
+class RSTransaction;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
@@ -122,6 +123,8 @@ public:
     void SetBindModalCallback(const std::function<void()>&& callback);
     void FireBindModalCallback();
 
+    void OnSizeChanged(WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     void NotifyForeground();
     void NotifyBackground();
     void NotifyDestroy();
