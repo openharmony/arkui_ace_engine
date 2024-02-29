@@ -48,19 +48,19 @@ void WebLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     int rootLayerWidth = pattern->GetRootLayerWidth();
     int rootLayerHeight = pattern->GetRootLayerHeight();
-    auto type = pattern->GetWebType();
-    if (pattern->GetLayoutMode() == WebLayoutMode::FIT_CONTENT && IsValidRootLayer(rootLayerWidth, type) &&
-        IsValidRootLayer(rootLayerHeight, type)) {
+    auto renderMode = pattern->GetRenderMode();
+    if (pattern->GetLayoutMode() == WebLayoutMode::FIT_CONTENT && IsValidRootLayer(rootLayerWidth, renderMode) &&
+        IsValidRootLayer(rootLayerHeight, renderMode)) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(rootLayerWidth, rootLayerHeight));
     } else {
         BoxLayoutAlgorithm::Measure(layoutWrapper);
     }
 }
 
-bool WebLayoutAlgorithm::IsValidRootLayer(int32_t x, WebType type)
+bool WebLayoutAlgorithm::IsValidRootLayer(int32_t x, RenderMode renderMode)
 {
     int32_t maxSize = 0;
-    if (type == WebType::TEXTURE) {
+    if (renderMode == RenderMode::SYNC_RENDER) {
         maxSize = MAX_TEXTURE_SIZE;
     } else {
         maxSize = MAX_SURFACE_SIZE;

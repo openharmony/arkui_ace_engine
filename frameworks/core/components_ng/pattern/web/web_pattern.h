@@ -87,10 +87,10 @@ public:
     using OnControllerAttachedCallback = std::function<void()>;
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
-    WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, WebType type = WebType::SURFACE,
-               bool incognitoMode = false);
-    WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, WebType type = WebType::SURFACE,
-               bool incognitoMode = false);
+    WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
+               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+    WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback,
+               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
 
     ~WebPattern() override;
 
@@ -102,7 +102,7 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        if (type_ == WebType::TEXTURE) {
+        if (renderMode_ == RenderMode::SYNC_RENDER) {
             return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
         } else {
             return RenderContext::ContextParam { RenderContext::ContextType::HARDWARE_SURFACE, "RosenWeb" };
@@ -215,14 +215,14 @@ public:
         return permissionClipboardCallback_;
     }
 
-    void SetWebType(WebType type)
+    void SetRenderMode(RenderMode renderMode)
     {
-        type_ = type;
+        renderMode_ = renderMode;
     }
 
-    WebType GetWebType()
+    RenderMode GetRenderMode()
     {
-        return type_;
+        return renderMode_;
     }
 
     void SetIncognitoMode(bool incognitoMode)
@@ -631,7 +631,7 @@ private:
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
-    WebType type_;
+    RenderMode renderMode_;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;

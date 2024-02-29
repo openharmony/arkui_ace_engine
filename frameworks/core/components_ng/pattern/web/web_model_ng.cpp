@@ -30,15 +30,15 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& webController, WebType type,
+void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& webController, RenderMode renderMode,
                         bool incognitoMode)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::WEB_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
-        [src, webController, type, incognitoMode]() {
-            return AceType::MakeRefPtr<WebPattern>(src, webController, type,
+        [src, webController, renderMode, incognitoMode]() {
+            return AceType::MakeRefPtr<WebPattern>(src, webController, renderMode,
                 incognitoMode);
         });
     stack->Push(frameNode);
@@ -47,7 +47,7 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
     CHECK_NULL_VOID(webPattern);
     webPattern->SetWebSrc(src);
     webPattern->SetWebController(webController);
-    webPattern->SetWebType(type);
+    webPattern->SetRenderMode(renderMode);
     webPattern->SetIncognitoMode(incognitoMode);
 
     auto pipeline = NG::PipelineContext::GetCurrentContext();
@@ -58,14 +58,14 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
 }
 
 void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
-    std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup, WebType type,
-    bool incognitoMode)
+    std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup,
+    RenderMode renderMode, bool incognitoMode)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
-        [src, setWebIdCallback, type, incognitoMode]() {
-            return AceType::MakeRefPtr<WebPattern>(src, std::move(setWebIdCallback), type, incognitoMode);
+        [src, setWebIdCallback, renderMode, incognitoMode]() {
+            return AceType::MakeRefPtr<WebPattern>(src, std::move(setWebIdCallback), renderMode, incognitoMode);
         });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
@@ -75,7 +75,7 @@ void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& s
     webPattern->SetSetWebIdCallback(std::move(setWebIdCallback));
     webPattern->SetSetHapPathCallback(std::move(setHapPathCallback));
     webPattern->SetParentNWebId(parentWebId);
-    webPattern->SetWebType(type);
+    webPattern->SetRenderMode(renderMode);
     webPattern->SetIncognitoMode(incognitoMode);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

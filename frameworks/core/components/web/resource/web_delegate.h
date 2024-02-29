@@ -707,7 +707,7 @@ public:
     }
 #endif
     void SetToken();
-    void SetWebType(WebType type);
+    void SetRenderMode(RenderMode renderMode);
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
@@ -856,7 +856,7 @@ private:
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
 
-    int32_t webType_;
+    int32_t renderMode_;
     std::string bundlePath_;
     std::string bundleDataPath_;
     std::string hapPath_;
