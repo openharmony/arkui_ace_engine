@@ -31,6 +31,7 @@ const float PICKER_HEIGHT_HALF = 3.5f;
 const float ITEM_HEIGHT_HALF = 2.0f;
 const int32_t MAX_HALF_DISPLAY_COUNT = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
+const float DOUBLE_VALUE = 2.0f;
 constexpr double PERCENT_100 = 100.0;
 
 GradientColor CreatePercentGradientColor(float percent, Color color)
@@ -110,7 +111,28 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(layoutChildConstraint);
     }
     MeasureText(layoutWrapper, frameSize);
-    auto gradientPercent = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()) / frameSize.Height();
+    float gradientPercent = 0.0f;
+    bool isGradientHeight = layoutProperty->HasGradientHeight();
+    if (LessNotEqual(textPickerPattern->GetGradientHeight().ConvertToPx(), 0.0)) {
+        isGradientHeight = false;
+    }
+    if (isGradientHeight) {
+        auto gradientheight = textPickerPattern->GetGradientHeight();
+        float gradientheightValue = 0.0f;
+        if (gradientheight.Unit() == DimensionUnit::PERCENT) {
+            gradientheightValue = frameSize.Height() * gradientheight.Value() / DOUBLE_VALUE;
+        } else {
+            gradientheightValue = gradientheight.ConvertToPx();
+        }
+        if ((frameSize.Height() / DOUBLE_VALUE) < gradientheightValue) {
+            gradientPercent = static_cast<float>
+                (pickerTheme->GetGradientHeight().ConvertToPx()) / frameSize.Height();
+        } else {
+            gradientPercent = gradientheightValue / frameSize.Height();
+        }
+    } else {
+        gradientPercent = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()) / frameSize.Height();
+    }
     InitGradient(gradientPercent, blendNode, columnNode);
 }
 
