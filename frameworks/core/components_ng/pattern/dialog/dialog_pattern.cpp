@@ -990,12 +990,10 @@ void DialogPattern::UpdateWrapperBackgroundStyle(const RefPtr<FrameNode>& host, 
     CHECK_NULL_VOID(col);
     auto colRenderContext = col->GetRenderContext();
     CHECK_NULL_VOID(colRenderContext);
-    if (!GetDialogProperties().customStyle) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !colRenderContext->IsUniRenderEnabled()) {
-            colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
-        } else if (!GetDialogProperties().isSysBlurStyle) {
-            colRenderContext->UpdateBackBlurStyle(colRenderContext->GetBackBlurStyle());
-        }
+    if (!dialogProperties_.customStyle && !dialogProperties_.backgroundColor.has_value() &&
+        (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !colRenderContext->IsUniRenderEnabled() ||
+            !dialogProperties_.isSysBlurStyle)) {
+        colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
     }
     if (colRenderContext->GetBackBlurStyle().has_value()) {
         colRenderContext->UpdateBackBlurStyle(colRenderContext->GetBackBlurStyle());
