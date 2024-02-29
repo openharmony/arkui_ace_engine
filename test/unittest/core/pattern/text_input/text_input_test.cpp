@@ -332,6 +332,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition001, TestSize.Level1)
      * @tc.steps: Create Text filed node with default text and placeholder
      */
     CreateTextField(DEFAULT_TEXT);
+    GetFocus();
 
     /**
      * @tc.expected: Current caret position is end of text
@@ -455,6 +456,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition006, TestSize.Level1)
      * @tc.steps: Initialize text input and get select controller, update caret position and insert value
      */
     CreateTextField(DEFAULT_TEXT);
+    GetFocus();
 
     auto controller = pattern_->GetTextSelectController();
     controller->UpdateCaretIndex(2);
@@ -630,6 +632,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition004, TestSize.Le
      * @tc.steps: Initialize insert text and expected values when 'IsSelected() = false'
      */
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+    GetFocus();
     pattern_->InsertValue("abc");
     FlushLayoutTask(frameNode_);
 

@@ -529,4 +529,31 @@ HWTEST_F(TextFieldUXTest, InitSurfacePositionChangedCallback001, TestSize.Level1
     EXPECT_NE(pattern_->surfacePositionChangedCallbackId_, std::nullopt);
     EXPECT_TRUE(pattern_->HasSurfacePositionChangedCallback());
 }
+
+/**
+ * @tc.name: OnHandleMove004
+ * @tc.desc: Test get Select HandleInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnHandleMove004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Create selectOverlayProxy.
+     */
+    pattern_->ProcessOverlay(true, true, true);
+
+    /**
+     * @tc.steps: step2. set two handle and call OnHandleMove
+     * tc.expected: step2. Check if the value is created.
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    pattern_->isSingleHandle_ = false;
+    RectF handleRect;
+    pattern_->OnHandleMove(handleRect, true);
+}
 }
