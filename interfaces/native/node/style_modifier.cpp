@@ -58,6 +58,8 @@ constexpr int NUM_11 = 11;
 constexpr int NUM_12 = 12;
 constexpr int NUM_13 = 13;
 constexpr int NUM_16 = 16;
+constexpr int NUM_23 = 23;
+constexpr int NUM_59 = 59;
 constexpr int DEFAULT_UNIT = 1;
 const int ALLOW_SIZE_1(1);
 const int ALLOW_SIZE_2(2);
@@ -4563,12 +4565,14 @@ int32_t SetTimePickerSelected(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     std::vector<std::string> time;
     StringUtils::StringSplitter(item->string, '-', time);
     if (time.size() != NUM_2) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "time is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
 
     auto hour = StringToInt(time[NUM_0].c_str());
     auto minute = StringToInt(time[NUM_1].c_str());
+    if (!InRegion(NUM_0, NUM_23, hour) || !InRegion(NUM_0, NUM_59, minute)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerSelected(node->uiNodeHandle, hour, minute);
 
     return ERROR_CODE_NO_ERROR;
