@@ -15,7 +15,6 @@
 
 #include "adapter/ohos/entrance/utils.h"
 
-#include <cstdint>
 #include <cstdio>
 #include <regex>
 #include <sstream>
