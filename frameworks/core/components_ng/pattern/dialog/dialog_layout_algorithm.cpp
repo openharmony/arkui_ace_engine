@@ -290,6 +290,12 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
         } else {
             deviceColumns = 8;
         }
+    } else if (deviceType == DeviceType::TABLET) {
+        if (type == GridSizeType::SM) {
+            deviceColumns = 2;
+        } else {
+            deviceColumns = 4;
+        }
     } else {
         if (type == GridSizeType::SM) {
             deviceColumns = 2;
