@@ -137,7 +137,7 @@ void UIObserver::RegisterScrollEventCallback(const std::shared_ptr<UIObserverLis
 // UIObserver.on(type: "scrollEvent", options, callback)
 // register a listener on a specified scrollEvent
 void UIObserver::RegisterScrollEventCallback(
-    std::string id, const std::shared_ptr<UIObserverListener>& listener)
+    const std::string& id, const std::shared_ptr<UIObserverListener>& listener)
 {
     if (specifiedScrollEventListeners_.find(id) == specifiedScrollEventListeners_.end()) {
         specifiedScrollEventListeners_[id] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
@@ -170,12 +170,13 @@ void UIObserver::UnRegisterScrollEventCallback(napi_value cb)
 }
 
 // UIObserver.off(type: "scrollEvent", options, callback)
-void UIObserver::UnRegisterScrollEventCallback(std::string id, napi_value cb)
+void UIObserver::UnRegisterScrollEventCallback(const std::string& id, napi_value cb)
 {
-    if (specifiedScrollEventListeners_.find(id) == specifiedScrollEventListeners_.end()) {
+    auto iter = specifiedScrollEventListeners_.find(id);
+    if (iter == specifiedScrollEventListeners_.end()) {
         return;
     }
-    auto& holder = specifiedScrollEventListeners_[id];
+    auto& holder = iter->second;
     if (cb == nullptr) {
         holder.clear();
         return;
@@ -197,12 +198,12 @@ void UIObserver::HandleScrollEventStateChange(const std::string& id, NG::ScrollE
         listener->OnScrollEventStateChange(id, eventType, offset);
     }
 
-    if (specifiedScrollEventListeners_.find(id) ==
-        specifiedScrollEventListeners_.end()) {
+    auto iter = specifiedScrollEventListeners_.find(id);
+    if (iter == specifiedScrollEventListeners_.end()) {
         return;
     }
 
-    auto& holder = specifiedScrollEventListeners_[id];
+    auto& holder = iter->second;
 
     for (const auto& listener : holder) {
         listener->OnScrollEventStateChange(id, eventType, offset);
