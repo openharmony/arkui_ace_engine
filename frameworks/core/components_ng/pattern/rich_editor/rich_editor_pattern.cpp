@@ -3785,6 +3785,9 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    if (textSelector_.baseOffset != textSelector_.destinationOffset) {
+        ResetSelection();
+    }
     int32_t extend = paragraphs_.GetIndex(textOffset);
     textSelector_.Update(extend);
     leftMousePress_ = true;
