@@ -841,7 +841,6 @@ private:
         leftCaptureId_ = std::nullopt;
         swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetRightCaptureId()));
         rightCaptureId_ = std::nullopt;
-        firstGetPixelMap_ = true;
     }
     RefPtr<FrameNode> GetLeftCaptureNode()
     {
@@ -859,8 +858,8 @@ private:
     {
         return hasCachedCapture_ && GetLeftCaptureNode() && GetRightCaptureNode();
     }
-    void UpdateTaregtCapture();
-    void CreateCaptureCallback(int32_t targetCaptureIndex, int32_t captureId);
+    void UpdateTargetCapture(bool forceUpdate);
+    void CreateCaptureCallback(int32_t targetCaptureIndex, int32_t captureId, bool forceUpdate);
     void UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId);
     // capture node end
     WeakPtr<NestableScrollContainer> parent_;
@@ -1014,7 +1013,6 @@ private:
     std::optional<int32_t> leftCaptureIndex_;
     std::optional<int32_t> rightCaptureIndex_;
     bool hasCachedCapture_ = false;
-    bool firstGetPixelMap_ = true;
     bool isCaptureReverse_ = false;
     OffsetF captureFinalOffset_;
 };
