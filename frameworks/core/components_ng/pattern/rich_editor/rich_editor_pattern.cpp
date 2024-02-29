@@ -3568,6 +3568,10 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     spanResult.SetValue(spanItem->content);
     spanResult.SetOffsetInSpan(currentPosition - contentStartPosition);
     spanResult.SetEraseLength(eraseLength);
+    if (!spanItem->GetTextStyle().has_value()) {
+        TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "SpanItem text style is empty.");
+        return eraseLength;
+    }
     spanResult.SetFontColor(spanItem->GetTextStyle()->GetTextColor().ColorToString());
     spanResult.SetFontSize(spanItem->GetTextStyle()->GetFontSize().Value());
     spanResult.SetFontStyle(spanItem->GetTextStyle()->GetFontStyle());
