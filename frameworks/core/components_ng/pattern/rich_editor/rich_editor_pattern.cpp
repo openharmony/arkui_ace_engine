@@ -1968,7 +1968,7 @@ void RichEditorPattern::InitDragDropEvent()
         pattern->showSelect_ = false;
         return pattern->OnDragStart(event, extraParams);
     };
-    eventHub->SetOnDragStart(std::move(onDragStart));
+    eventHub->SetDefaultOnDragStart(std::move(onDragStart));
     auto onDragMove = [weakPtr = WeakClaim(this)](
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
