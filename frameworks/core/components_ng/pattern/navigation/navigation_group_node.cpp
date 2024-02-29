@@ -416,6 +416,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
     }
 
     /* create animation finish callback */
+    CleanPopAnimations();
     AnimationFinishCallback callback = [weakPreNode = WeakPtr<NavDestinationGroupNode>(preNavDestination),
         weakPreTitle = WeakPtr<TitleBarNode>(preTitleNode),
         weakPreBackIcon = WeakPtr<FrameNode>(preBackIcon),
@@ -426,6 +427,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             if (navigation) {
                 navigation->isOnAnimation_ = false;
                 navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+                navigation->CleanPopAnimations();
             }
             auto preNavDesNode = weakPreNode.Upgrade();
             CHECK_NULL_VOID(preNavDesNode);
@@ -483,7 +485,8 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
     /* start transition animation */
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         callback);
-    AnimationUtils::Animate(option, [preNode, preTitleNode, preFrameSize, curNode, curTitleNode]() {
+    auto newPopAnimation = AnimationUtils::StartAnimation(option, [
+        preNode, preTitleNode, preFrameSize, curNode, curTitleNode]() {
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start");
         /* preNode */
@@ -499,18 +502,31 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             curTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         }
     }, option.GetOnFinishEvent());
+    if (newPopAnimation) {
+        popAnimations_.emplace_back(newPopAnimation);
+    }
 
     /* opacity for title and backIcon */
-    TitleOpacityAnimation(preTitleNode, true);
-    BackButtonAnimation(preBackIcon, false);
+    auto titleOpacityAnimation = TitleOpacityAnimation(preTitleNode, true);
+    if (titleOpacityAnimation) {
+        popAnimations_.emplace_back(titleOpacityAnimation);
+    }
+    auto backButtonAnimation = BackButtonAnimation(preBackIcon, false);
+    if (backButtonAnimation) {
+        popAnimations_.emplace_back(backButtonAnimation);
+    }
 
     /* mask animation */
+    std::shared_ptr<AnimationUtils::Animation> maskAnimation;
     if (curNode) {
         AnimationOption maskOption = CreateAnimationOption(Curves::FRICTION, FillMode::FORWARDS, MASK_DURATION,
             nullptr);
         curNode->GetRenderContext()->SetActualForegroundColor(MASK_COLOR);
-        AnimationUtils::Animate(
+        maskAnimation = AnimationUtils::StartAnimation(
             maskOption, [curNode]() { curNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT); });
+    }
+    if (maskAnimation) {
+        popAnimations_.emplace_back(maskAnimation);
     }
 
     // clear this flag for navBar layout only
@@ -549,6 +565,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     auto curFrameSize = curNode->GetGeometryNode()->GetFrameSize();
 
     /* Create animation callback */
+    CleanPushAnimations();
     AnimationFinishCallback callback = [weakPreNode = WeakPtr<FrameNode>(preNode),
         weakPreTitle = WeakPtr<FrameNode>(preTitleNode),
         weakNavigation = WeakClaim(this),
@@ -595,11 +612,15 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             auto curNode = weakCurNode.Upgrade();
             CHECK_NULL_VOID(curNode);
+            auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+            CHECK_NULL_VOID(curNavDestination);
+            curNavDestination->SetIsOnAnimation(false);
             if (AceType::DynamicCast<NavDestinationGroupNode>(curNode)->GetTransitionType() !=
                 PageTransitionType::ENTER_PUSH) {
                 return;
             }
             navigation->isOnAnimation_ = false;
+            navigation->CleanPushAnimations();
             curNode->GetRenderContext()->ClipWithRRect(
                 RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
         };
@@ -614,12 +635,13 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         RadiusF(EdgeF(0.0f, 0.0f)));
     curNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF, 0.0f });
     curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF, 0.0f });
+    curNavDestination->SetIsOnAnimation(true);
 
     /* start transition animation */
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         callback);
-    AnimationUtils::Animate(option, [preNode, preTitleNode, curNode, curTitleNode, preFrameSize, curFrameSize,
-        mode]() {
+    auto newPushAnimation = AnimationUtils::StartAnimation(option, [
+        preNode, preTitleNode, curNode, curTitleNode, preFrameSize, curFrameSize, mode]() {
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation start");
         // preNode
@@ -631,71 +653,98 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         curNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         curTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     }, option.GetOnFinishEvent());
-    MaskAnimation(preNode->GetRenderContext());
+    if (newPushAnimation) {
+        pushAnimations_.emplace_back(newPushAnimation);
+    }
+    auto maskAnimation = MaskAnimation(preNode->GetRenderContext());
+    if (maskAnimation) {
+        pushAnimations_.emplace_back(maskAnimation);
+    }
 
     // title opacity
-    TitleOpacityAnimation(curTitleNode, false);
+    auto titleOpacityAnimation = TitleOpacityAnimation(curTitleNode, false);
+    if (titleOpacityAnimation) {
+        pushAnimations_.emplace_back(titleOpacityAnimation);
+    }
     // backIcon opacity
     auto backIcon = AceType::DynamicCast<FrameNode>(curTitleNode->GetBackButton());
-    BackButtonAnimation(backIcon, true);
+    auto backButtonAnimation = BackButtonAnimation(backIcon, true);
+    if (backButtonAnimation) {
+        pushAnimations_.emplace_back(backButtonAnimation);
+    }
     isOnAnimation_ = true;
 }
 
-void NavigationGroupNode::BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn)
+std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::BackButtonAnimation(
+    const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn)
 {
-    CHECK_NULL_VOID(backButtonNode);
+    CHECK_NULL_RETURN(backButtonNode, nullptr);
     AnimationOption transitionOption;
     transitionOption.SetCurve(Curves::SHARP);
     auto backButtonNodeContext = backButtonNode->GetRenderContext();
-    CHECK_NULL_VOID(backButtonNodeContext);
+    CHECK_NULL_RETURN(backButtonNodeContext, nullptr);
     if (isTransitionIn) {
         transitionOption.SetDelay(OPACITY_BACKBUTTON_IN_DELAY);
         transitionOption.SetDuration(OPACITY_BACKBUTTON_IN_DURATION);
-        backButtonNodeContext->OpacityAnimation(transitionOption, 0.0, 1.0);
-    } else {
-        transitionOption.SetDuration(OPACITY_BACKBUTTON_OUT_DURATION);
-        // recover after transition animation.
-        transitionOption.SetOnFinishEvent([backButtonNodeContext]() {
-            backButtonNodeContext->UpdateOpacity(1.0);
+        backButtonNodeContext->SetOpacity(0.0f);
+        return AnimationUtils::StartAnimation(transitionOption, [backButtonNodeContext]() {
+            CHECK_NULL_VOID(backButtonNodeContext);
             backButtonNodeContext->SetOpacity(1.0f);
         });
-        backButtonNodeContext->OpacityAnimation(transitionOption, 1.0, 0.0);
     }
+    transitionOption.SetDuration(OPACITY_BACKBUTTON_OUT_DURATION);
+    // recover after transition animation.
+    backButtonNodeContext->SetOpacity(1.0f);
+    return AnimationUtils::StartAnimation(transitionOption, [backButtonNodeContext]() {
+        CHECK_NULL_VOID(backButtonNodeContext);
+        backButtonNodeContext->SetOpacity(0.0f);
+    }, [backButtonNodeContext]() {
+        backButtonNodeContext->UpdateOpacity(1.0);
+        backButtonNodeContext->SetOpacity(1.0f);
+    });
 }
 
-void NavigationGroupNode::MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext)
+std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::MaskAnimation(
+    const RefPtr<RenderContext>& transitionOutNodeContext)
 {
     AnimationOption maskOption;
     maskOption.SetCurve(Curves::FRICTION);
     maskOption.SetDuration(MASK_DURATION);
     maskOption.SetFillMode(FillMode::FORWARDS);
     transitionOutNodeContext->SetActualForegroundColor(Color::TRANSPARENT);
-    AnimationUtils::Animate(
+    return AnimationUtils::StartAnimation(
         maskOption, [transitionOutNodeContext]() { transitionOutNodeContext->SetActualForegroundColor(MASK_COLOR); },
         maskOption.GetOnFinishEvent());
 }
 
-void NavigationGroupNode::TitleOpacityAnimation(const RefPtr<FrameNode>& node, bool isTransitionOut)
+std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::TitleOpacityAnimation(
+    const RefPtr<FrameNode>& node, bool isTransitionOut)
 {
     auto titleNode = AceType::DynamicCast<TitleBarNode>(node);
-    CHECK_NULL_VOID(titleNode);
+    CHECK_NULL_RETURN(titleNode, nullptr);
     auto titleRenderContext = titleNode->GetRenderContext();
-    CHECK_NULL_VOID(titleRenderContext);
+    CHECK_NULL_RETURN(titleRenderContext, nullptr);
     AnimationOption opacityOption;
     opacityOption.SetCurve(Curves::SHARP);
     opacityOption.SetDuration(OPACITY_TITLE_DURATION);
     if (isTransitionOut) {
         opacityOption.SetDelay(OPACITY_TITLE_OUT_DELAY);
         // recover after transition animation.
-        opacityOption.SetOnFinishEvent([titleRenderContext]() {
+        titleRenderContext->SetOpacity(1.0f);
+        return AnimationUtils::StartAnimation(opacityOption, [titleRenderContext]() {
+            CHECK_NULL_VOID(titleRenderContext);
+            titleRenderContext->SetOpacity(0.0f);
+        }, [titleRenderContext]() {
             titleRenderContext->UpdateOpacity(1.0);
             titleRenderContext->SetOpacity(1.0f);
         });
-        titleRenderContext->OpacityAnimation(opacityOption, 1.0, 0.0);
-    } else {
-        opacityOption.SetDelay(OPACITY_TITLE_IN_DELAY);
-        titleRenderContext->OpacityAnimation(opacityOption, 0.0, 1.0);
     }
+    opacityOption.SetDelay(OPACITY_TITLE_IN_DELAY);
+    titleRenderContext->SetOpacity(0.0f);
+    return AnimationUtils::StartAnimation(opacityOption, [titleRenderContext]() {
+        CHECK_NULL_VOID(titleRenderContext);
+        titleRenderContext->SetOpacity(1.0f);
+    });
 }
 
 void NavigationGroupNode::TransitionWithReplace(
