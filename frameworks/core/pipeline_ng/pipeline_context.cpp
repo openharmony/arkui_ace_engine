@@ -864,13 +864,9 @@ void PipelineContext::FlushAnimationClosure()
     taskScheduler_->FlushTask();
 
     decltype(animationClosuresList_) temp(std::move(animationClosuresList_));
-    auto scheduler = std::move(taskScheduler_);
-    taskScheduler_ = std::make_unique<UITaskScheduler>();
     for (const auto& animation : temp) {
         animation();
-        taskScheduler_->CleanUp();
     }
-    taskScheduler_ = std::move(scheduler);
     window_->Unlock();
 }
 
