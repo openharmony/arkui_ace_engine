@@ -81,7 +81,6 @@ public:
      * @brief Called to notify the form provider to update a specified form.
      *
      * @param formId Indicates the ID of the form to update.
-     * @param formParamsMap Indicates the Record of form to update.
      * @return none.
      */
     void OnUpdate(const int64_t formId) override;
