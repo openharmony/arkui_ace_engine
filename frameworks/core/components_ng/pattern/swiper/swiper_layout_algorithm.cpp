@@ -226,23 +226,37 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
-    if (hasCachedCapture_) {
-        auto hostNode = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(hostNode);
-        auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
-        CHECK_NULL_VOID(swiperPattern);
-        auto captureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_LEFT_CAPTURE_ETS_TAG);
-        if (captureWrapper) {
-            captureWrapper->Measure(childLayoutConstraint);
-        }
-        captureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_RIGHT_CAPTURE_ETS_TAG);
-        if (captureWrapper) {
-            captureWrapper->Measure(childLayoutConstraint);
-        }
-    }
+    CaptureMeasure(layoutWrapper, childLayoutConstraint);
 
     if (swiperLayoutProperty->GetFlexItemProperty()) {
         measured_ = true;
+    }
+}
+
+void SwiperLayoutAlgorithm::CaptureMeasure(LayoutWrapper* layoutWrapper, const LayoutConstraintF& childLayoutConstraint)
+{
+    if (!hasCachedCapture_) {
+        return;
+    }
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto captureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_LEFT_CAPTURE_ETS_TAG);
+    if (captureWrapper) {
+        auto geometryNode = captureWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto oldSize = geometryNode->GetMarginFrameSize();
+        captureWrapper->Measure(childLayoutConstraint);
+        geometryNode = captureWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        if (oldSize != geometryNode->GetMarginFrameSize()) {
+            isNeedUpdateCapture_ = true;
+        }
+    }
+    captureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_RIGHT_CAPTURE_ETS_TAG);
+    if (captureWrapper) {
+        captureWrapper->Measure(childLayoutConstraint);
     }
 }
 

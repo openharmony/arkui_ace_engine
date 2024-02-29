@@ -64,6 +64,7 @@ constexpr int32_t DEFAULT_INTERVAL = 3000;
 constexpr int32_t DEFAULT_DURATION = 400;
 constexpr float DRAG_SPEED = 500.0f;
 constexpr float DRAG_OFFSET_X = 50.0f;
+constexpr float CAPTURE_MARGIN_SIZE = 15.0f;
 
 class SwiperTestNg : public TestNG {
 public:
@@ -86,6 +87,7 @@ public:
         RefPtr<FrameNode>& arrowNode, RefPtr<LayoutWrapperNode>& arrowLayoutWrapper);
     void AddArrowChild(const RefPtr<FrameNode>& arrowNode, const RefPtr<LayoutWrapperNode>& arrowLayoutWrapper);
     void CreateSwiperLayoutWrapper(const RefPtr<FrameNode>& frameNode_, RefPtr<LayoutWrapperNode>& swiperLayoutWrapper);
+    void InitCaptureTest();
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<SwiperPattern> pattern_;

@@ -234,7 +234,7 @@ void SwiperPattern::InitCapture()
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     bool hasCachedCapture = SwiperUtils::IsStretch(layoutProperty) && layoutProperty->GetLoop().value_or(true) &&
-                            GetDisplayCount() == TotalCount() - 1 &&
+                            !IsSwipeByGroup() && GetDisplayCount() == TotalCount() - 1 &&
                             (Positive(layoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx()) ||
                                 Positive(layoutProperty->GetNextMarginValue(0.0_px).ConvertToPx()));
     if (hasCachedCapture) {
@@ -272,6 +272,7 @@ void SwiperPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
+    // Screenshots need to be added first for display under other special nodes
     InitCapture();
     InitIndicator();
     InitArrow();
@@ -420,7 +421,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     }
 }
 
-void SwiperPattern::UpdateTaregtCapture()
+void SwiperPattern::UpdateTargetCapture(bool forceUpdate)
 {
     if (itemPosition_.empty()) {
         return;
@@ -431,17 +432,17 @@ void SwiperPattern::UpdateTaregtCapture()
         leftTargetIndex = GetLoopIndex(itemPosition_.begin()->first);
         rightTargetIndex = GetLoopIndex(itemPosition_.rbegin()->first);
     }
-    if (!leftCaptureIndex_.has_value() || leftCaptureIndex_.value() != leftTargetIndex) {
-        CreateCaptureCallback(leftTargetIndex, GetLeftCaptureId());
+    if (forceUpdate || !leftCaptureIndex_.has_value() || leftCaptureIndex_.value() != leftTargetIndex) {
+        CreateCaptureCallback(leftTargetIndex, GetLeftCaptureId(), forceUpdate);
         leftCaptureIndex_ = leftTargetIndex;
     }
-    if (!rightCaptureIndex_.has_value() || rightCaptureIndex_.value() != rightTargetIndex) {
-        CreateCaptureCallback(rightTargetIndex, GetRightCaptureId());
+    if (forceUpdate || !rightCaptureIndex_.has_value() || rightCaptureIndex_.value() != rightTargetIndex) {
+        CreateCaptureCallback(rightTargetIndex, GetRightCaptureId(), forceUpdate);
         rightCaptureIndex_ = rightTargetIndex;
     }
 }
 
-void SwiperPattern::CreateCaptureCallback(int32_t targetCaptureIndex, int32_t captureId)
+void SwiperPattern::CreateCaptureCallback(int32_t targetCaptureIndex, int32_t captureId, bool forceUpdate)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -454,7 +455,8 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetCaptureIndex, int32_t ca
         CHECK_NULL_VOID(swiper);
         swiper->UpdateCaptureSource(pixelMap, captureId);
     };
-    if (firstGetPixelMap_) {
+    if (forceUpdate) {
+        // The size changes caused by layout need to wait for rendering before taking a screenshot
         auto piplineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(piplineContext);
         auto taskExecutor = piplineContext->GetTaskExecutor();
@@ -469,9 +471,6 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetCaptureIndex, int32_t ca
 
 void SwiperPattern::UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId)
 {
-    if (pixelMap) {
-        firstGetPixelMap_ = false;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto captureNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(captureId)));
@@ -791,7 +790,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     if (hasCachedCapture_) {
         isCaptureReverse_ = swiperLayoutAlgorithm->GetIsCaptureReverse();
-        UpdateTaregtCapture();
+        UpdateTargetCapture(swiperLayoutAlgorithm->GetIsNeedUpdateCapture());
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -3135,7 +3134,7 @@ int32_t SwiperPattern::RealTotalCount() const
     CHECK_NULL_RETURN(host, 0);
     // last child is swiper indicator
     int num = 0;
-    if (HasIndicatorNode()) {
+    if (IsShowIndicator() && HasIndicatorNode()) {
         num += 1;
     }
     if (HasLeftButtonNode()) {

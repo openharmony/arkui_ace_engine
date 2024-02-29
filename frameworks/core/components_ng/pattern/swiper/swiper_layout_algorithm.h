@@ -256,6 +256,11 @@ public:
         return isCaptureReverse_;
     }
 
+    bool GetIsNeedUpdateCapture() const
+    {
+        return isNeedUpdateCapture_;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void MeasureCustomAnimation(LayoutWrapper* layoutWrapper);
@@ -277,6 +282,7 @@ private:
     bool HasCustomIndicatorOffset(const RefPtr<LayoutWrapper>& indicatorWrapper);
     const OffsetF CalculateCustomOffset(
         const RefPtr<LayoutWrapper>& indicatorWrapper, const OffsetF& currentOffset);
+    void CaptureMeasure(LayoutWrapper* layoutWrapper, const LayoutConstraintF& childLayoutConstraint);
     void CaptureLayout(LayoutWrapper* layoutWrapper);
     bool IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) const;
 
@@ -323,6 +329,7 @@ private:
     bool useCustomIndicatorOffset = false;
     bool hasCachedCapture_ = false;
     bool isCaptureReverse_ = false;
+    bool isNeedUpdateCapture_ = false;
 };
 
 } // namespace OHOS::Ace::NG
