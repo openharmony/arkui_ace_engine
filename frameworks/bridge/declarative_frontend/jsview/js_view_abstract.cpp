@@ -126,6 +126,7 @@ constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
 constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
+constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
 constexpr double FULL_DIMENSION = 100.0;
@@ -3952,8 +3953,8 @@ bool JSViewAbstract::ParseJsDimensionNG(
     if (!resId->IsNumber()) {
         return false;
     }
-    auto type = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
-    if (type == UNKNOWN_RESOURCE_TYPE) {
+    auto resType = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+    if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
 
@@ -3963,7 +3964,7 @@ bool JSViewAbstract::ParseJsDimensionNG(
         return false;
     }
 
-    uint32_t resType = resourceObject->GetType();
+    auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
