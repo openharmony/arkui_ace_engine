@@ -245,30 +245,28 @@ void TextClockPattern::UpdateTimeText(bool isTimeChange)
     if (!isStart_ || !isSetVisible_ || !isInVisibleArea_ || !isFormVisible_) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textNode = GetTextNode();
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-
+    RequestUpdateForNextSecond();
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty()) {
         return;
     }
-
-    textLayoutProperty->UpdateContent(currentTime); // update time text.
-    auto textContext = textNode->GetRenderContext();
-    CHECK_NULL_VOID(textContext);
-    textContext->SetClipToFrame(false);
-    textContext->UpdateClipEdge(false);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    textNode->MarkModifyDone();
-    RequestUpdateForNextSecond();
     if (currentTime != prevTime_ || isTimeChange) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto textNode = GetTextNode();
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateContent(currentTime); // update time text.
+        auto textContext = textNode->GetRenderContext();
+        CHECK_NULL_VOID(textContext);
+        textContext->SetClipToFrame(false);
+        textContext->UpdateClipEdge(false);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        textNode->MarkModifyDone();
+        prevTime_ = currentTime;
         FireChangeEvent();
     }
-    prevTime_ = currentTime;
 }
 
 void TextClockPattern::RequestUpdateForNextSecond()
