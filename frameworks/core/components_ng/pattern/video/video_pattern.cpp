@@ -196,7 +196,7 @@ void VideoPattern::ResetMediaPlayer()
 
     RegisterMediaPlayerEvent();
     PrepareSurface();
-    if (mediaPlayer_->PrepareAsync() != 0) {
+    if (mediaPlayer_ && mediaPlayer_->PrepareAsync() != 0) {
         TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
     }
 }
