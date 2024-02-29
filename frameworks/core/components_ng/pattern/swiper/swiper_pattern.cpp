@@ -343,7 +343,7 @@ void SwiperPattern::OnAfterModifyDone()
     CHECK_NULL_VOID(host);
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
-        Recorder::NodeDataCache::Get().PutInt(inspectorId, CurrentIndex());
+        Recorder::NodeDataCache::Get().PutInt(host, inspectorId, CurrentIndex());
     }
 }
 

@@ -26,14 +26,14 @@ class ExposureProcessor : public AceType {
     DECLARE_ACE_TYPE(ExposureProcessor, AceType)
 
 public:
-    explicit ExposureProcessor(const std::string& inspectorId);
+    explicit ExposureProcessor(const std::string& pageUrl, const std::string& inspectorId);
     ~ExposureProcessor() = default;
 
     bool IsNeedRecord() const;
 
     double GetRatio() const;
 
-    void OnVisibleChange(bool isVisible);
+    void OnVisibleChange(bool isVisible, const std::string& param = "");
 
 private:
     ExposureCfg cfg_ = { "", 0.0, 0 };

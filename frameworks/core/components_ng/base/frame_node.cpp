@@ -29,6 +29,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_scene_status.h"
@@ -3101,16 +3102,24 @@ void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
     if (exposureProcessor_) {
         return;
     }
-    exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(inspectorId);
+    auto pageUrl = Recorder::GetPageUrlByNode(Claim(this));
+    exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(pageUrl, inspectorId);
     if (!exposureProcessor_->IsNeedRecord()) {
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto callback = [weak = WeakClaim(RawPtr(exposureProcessor_))](bool visible, double ratio) {
+    auto callback = [weak = WeakClaim(RawPtr(exposureProcessor_)), weakNode = WeakClaim(this)](
+                        bool visible, double ratio) {
         auto processor = weak.Upgrade();
         CHECK_NULL_VOID(processor);
-        processor->OnVisibleChange(visible);
+        if (!visible) {
+            auto host = weakNode.Upgrade();
+            auto param = host ? host->GetAutoEventParamValue("") : "";
+            processor->OnVisibleChange(false, param);
+        } else {
+            processor->OnVisibleChange(visible);
+        }
     };
     std::vector<double> ratios = {exposureProcessor_->GetRatio()};
     pipeline->AddVisibleAreaChangeNode(Claim(this), ratios, callback, false);

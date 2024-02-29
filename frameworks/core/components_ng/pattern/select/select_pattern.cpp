@@ -95,7 +95,7 @@ void SelectPattern::OnAfterModifyDone()
     if (inspectorId.empty()) {
         return;
     }
-    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, selectValue_, selected_);
+    Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, selectValue_, selected_);
 }
 
 void SelectPattern::ShowSelectMenu()
@@ -313,7 +313,7 @@ void SelectPattern::CreateSelectedCallback()
                 .SetDescription(host->GetAutoEventParamValue(""));
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
             if (!inspectorId.empty()) {
-                Recorder::NodeDataCache::Get().PutMultiple(inspectorId, value, index);
+                Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, value, index);
             }
         }
     };

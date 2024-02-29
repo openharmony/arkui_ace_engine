@@ -77,7 +77,7 @@ void InitHandler()
     TAG_LOGI(AceLogTag::ACE_UIEVENT, "report ace loaded");
     auto handle = dlopen(HA_CLIENT_SO_PATH, RTLD_LAZY);
     if (handle == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "Failed to open shared library %{public}s, reason: %{public}sn",
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "Failed to open shared library %{public}s, reason: %{public}sn",
             HA_CLIENT_SO_PATH, dlerror());
         return;
     }

@@ -1819,7 +1819,7 @@ void TextPattern::OnAfterModifyDone()
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
         auto prop = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        Recorder::NodeDataCache::Get().PutString(inspectorId, prop->GetText());
+        Recorder::NodeDataCache::Get().PutString(host, inspectorId, prop->GetText());
     }
 }
 
@@ -1980,7 +1980,7 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
             if (item->inspectId.empty()) {
                 continue;
             }
-            Recorder::NodeDataCache::Get().PutString(item->inspectId, item->content);
+            Recorder::NodeDataCache::Get().PutString(host, item->inspectId, item->content);
         }
         CloseSelectOverlay();
         ResetSelection();

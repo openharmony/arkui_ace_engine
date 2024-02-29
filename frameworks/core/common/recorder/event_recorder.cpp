@@ -25,6 +25,11 @@
 namespace OHOS::Ace::Recorder {
 constexpr char IGNORE_WINDOW_NAME[] = "$HA_FLOAT_WINDOW$";
 
+bool IsCacheAvaliable()
+{
+    return NodeDataCache::Get().ShouldCollectData() || EventRecorder::Get().IsComponentRecordEnable();
+}
+
 EventParamsBuilder::EventParamsBuilder()
 {
     params_ = std::make_shared<std::unordered_map<std::string, std::string>>();
@@ -207,6 +212,7 @@ void EventRecorder::SetContainerInfo(const std::string& windowName, int32_t id, 
 
 void EventRecorder::SetFocusContainerInfo(const std::string& windowName, int32_t id)
 {
+    isFocusContainerChanged_ = focusContainerId_ != id;
     if (windowName == IGNORE_WINDOW_NAME) {
         return;
     }
@@ -223,7 +229,7 @@ int32_t EventRecorder::GetContainerId()
 
 const std::string& EventRecorder::GetPageUrl()
 {
-    if (pageUrl_.empty()) {
+    if (pageUrl_.empty() || isFocusContainerChanged_) {
         pageUrl_ = GetCurrentPageUrl();
     }
     return pageUrl_;

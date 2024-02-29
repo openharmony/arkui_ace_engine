@@ -185,7 +185,7 @@ void MenuItemPattern::OnAfterModifyDone()
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
     auto content = itemProperty->GetContent().value_or("");
-    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, content, isSelected_);
+    Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, content, isSelected_);
 }
 
 void MenuItemPattern::RecordChangeEvent() const
@@ -206,7 +206,7 @@ void MenuItemPattern::RecordChangeEvent() const
         .SetText(content)
         .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnChange(std::move(builder));
-    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, content, isSelected_);
+    Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, content, isSelected_);
 }
 
 RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()

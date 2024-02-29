@@ -200,7 +200,7 @@ void SwitchPattern::OnAfterModifyDone()
     CHECK_NULL_VOID(host);
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
-        Recorder::NodeDataCache::Get().PutBool(inspectorId, isOn_.value_or(false));
+        Recorder::NodeDataCache::Get().PutBool(host, inspectorId, isOn_.value_or(false));
     }
 }
 
