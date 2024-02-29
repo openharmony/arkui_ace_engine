@@ -392,6 +392,8 @@ public:
 
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
 
+    virtual void Fling(double flingVelocity);
+
     void SetPositionController(RefPtr<ScrollableController> control)
     {
         positionController_ = control;

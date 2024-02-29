@@ -86,6 +86,13 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smoo
     }
 }
 
+void ScrollableController::Fling(double flingVelocity)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->Fling(flingVelocity);
+}
+
 void ScrollableController::ScrollPage(bool reverse, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
