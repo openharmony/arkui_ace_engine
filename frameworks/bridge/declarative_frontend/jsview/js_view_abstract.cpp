@@ -1664,8 +1664,10 @@ void JSViewAbstract::JsMouseResponseRegion(const JSCallbackInfo& info)
 
 bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result)
 {
+    result.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    result.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
     if (!jsValue->IsObject()) {
-        return false;
+        return true;
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
