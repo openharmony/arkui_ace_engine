@@ -160,7 +160,12 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     if (targetIndex_.has_value()) {
         layoutInfo_.targetIndex_ = targetIndex_;
     }
-    auto algorithm = AceType::MakeRefPtr<WaterFlowLayoutAlgorithm>(layoutInfo_);
+    RefPtr<WaterFlowLayoutBase> algorithm;
+    if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
+        algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(layoutInfo_);
+    } else {
+        algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(layoutInfo_);
+    }
     algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     return algorithm;
 }
@@ -423,6 +428,35 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
+RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
+{
+    if (sections_) {
+        return sections_;
+    }
+    sections_ = AceType::MakeRefPtr<WaterFlowSections>();
+    auto callback = [weakPattern = WeakClaim(this)](int32_t start) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->AddBuildFinishCallBack([weakPattern, start]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnSectionChanged(start);
+        });
+        context->RequestFrame();
+    };
+    sections_->SetOnDataChange(callback);
+    return sections_;
+}
+
+void WaterFlowPattern::OnSectionChanged(int32_t start)
+{
+    layoutInfo_.InitSegments(sections_->GetSectionInfo(), start);
+    layoutInfo_.margins_.clear();
+    MarkDirtyNodeSelf();
+}
+
 void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
@@ -515,5 +549,13 @@ bool WaterFlowPattern::NeedRender()
     CHECK_NULL_RETURN(host, false);
     needRender = property->GetPaddingProperty() != nullptr || needRender;
     return needRender;
+}
+
+void WaterFlowPattern::ResetLayoutInfo()
+{
+    layoutInfo_.Reset();
+    if (sections_) {
+        layoutInfo_.InitSegments(sections_->GetSectionInfo(), 0);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -239,6 +239,15 @@ void WaterFlowModelNG::SetScrollBarWidth(const std::string& value)
     ScrollableModelNG::SetScrollBarWidth(value);
 }
 
+RefPtr<WaterFlowSections> WaterFlowModelNG::GetOrCreateWaterFlowSections()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetOrCreateWaterFlowSections();
+}
+
 void WaterFlowModelNG::SetColumnsTemplate(FrameNode* frameNode, const std::string& value)
 {
     CHECK_NULL_VOID(frameNode);

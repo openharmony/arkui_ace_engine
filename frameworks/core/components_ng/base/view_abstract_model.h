@@ -290,11 +290,12 @@ public:
         std::function<void()>& previewBuildFunc) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear) = 0;
+        std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear) = 0;
     virtual void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
-        std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-        std::function<void()>&& shouldDismiss) = 0;
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear) = 0;
     virtual void DismissSheet() = 0;
     virtual void DismissDialog() {};
 

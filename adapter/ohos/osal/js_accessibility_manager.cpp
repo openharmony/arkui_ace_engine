@@ -1901,17 +1901,8 @@ static void DumpCommonPropertyNG(const AccessibilityElementInfo& nodeInfo)
 
 bool IsExtensionSendAccessibilitySyncEvent()
 {
-    bool isEnabled = false;
-#ifdef WINDOW_SCENE_SUPPORTED
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(ngPipeline, isEnabled);
-    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
-    CHECK_NULL_RETURN(uiExtensionManager, isEnabled);
-    if (uiExtensionManager->IsWindowTypeUIExtension(ngPipeline)) {
-        isEnabled = true;
-    }
-#endif
-    return isEnabled;
+    auto container = Container::Current();
+    return container && container->IsUIExtensionWindow();
 }
 
 void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo& eventInfo)
@@ -2055,7 +2046,7 @@ bool JsAccessibilityManager::SendExtensionAccessibilitySyncEvent(
     auto ngPipeline = NG::PipelineContext::GetCurrentContext();
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_RETURN(uiExtensionManager, false);
-    if (uiExtensionManager->IsWindowTypeUIExtension(ngPipeline)) {
+    if (IsExtensionSendAccessibilitySyncEvent()) {
         return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, NG::UI_EXTENSION_UNKNOW_ID, ngPipeline);
     }
 #endif
@@ -2103,12 +2094,12 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
 
     auto pipeline = context_.Upgrade();
     CHECK_NULL_RETURN(pipeline, false);
-    RefPtr<NG::PipelineContext> ngPipeline;
-    ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    RefPtr<NG::PipelineContext> ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     CHECK_NULL_RETURN(ngPipeline, false);
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_RETURN(uiExtensionManager, false);
-    if (uiExtensionManager->IsWindowTypeUIExtension(pipeline)) {
+    auto container = Container::GetContainer(ngPipeline->GetInstanceId());
+    if (container && container->IsUIExtensionWindow()) {
         return uiExtensionManager->SendAccessibilityEventInfo(eventInfo,
             uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR, pipeline);
     }

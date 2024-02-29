@@ -526,5 +526,9 @@ ScrollEdgeType ScrollModelNG::GetOnScrollEdge(FrameNode* frameNode)
     return ScrollEdgeType::SCROLL_NONE;
 }
 
+void ScrollModelNG::SetInitialOffset(const OffsetT<Dimension>& offset)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, InitialOffset, offset);
+}
 
 } // namespace OHOS::Ace::NG

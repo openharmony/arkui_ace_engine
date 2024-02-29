@@ -590,7 +590,8 @@ public:
     DragDropInfo GetDragDropInfo(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
         DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
 
-    RefPtr<UnifiedData> GetUnifiedData(DragDropInfo& dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    RefPtr<UnifiedData> GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
+        const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,

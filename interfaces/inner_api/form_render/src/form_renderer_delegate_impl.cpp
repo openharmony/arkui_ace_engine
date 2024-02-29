@@ -43,9 +43,9 @@ int32_t FormRendererDelegateImpl::OnSurfaceCreate(const std::shared_ptr<Rosen::R
 
 int32_t FormRendererDelegateImpl::OnActionEvent(const std::string& action)
 {
-    HILOG_INFO("OnActionEvent %{public}s", action.c_str());
+    HILOG_INFO("OnActionEvent %{public}zu", action.length());
     if (!actionEventHandler_) {
-        HILOG_ERROR("actionEventHandler_ is null,  %{public}s", action.c_str());
+        HILOG_ERROR("actionEventHandler_ is null,  %{public}zu", action.length());
         return ERR_INVALID_DATA;
     }
 

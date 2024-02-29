@@ -125,6 +125,7 @@ private:
     bool GetFlagByIndex(int32_t index) const;
     void SaveNodeToPreBuildList(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
     RefPtr<NG::UINode> GetNodeFromPreBuildList(const std::string& name, const JSRef<JSVal>& param);
+    bool CheckAndGetInterceptionFunc(const std::string& name, JSRef<JSFunc>& func);
 
 private:
     std::vector<NavPathInfoUINode> preBuildNodeList_;

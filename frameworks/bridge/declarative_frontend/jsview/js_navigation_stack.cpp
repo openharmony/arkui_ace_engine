@@ -677,19 +677,9 @@ std::vector<std::string> JSNavigationStack::DumpStackInfo() const
 void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
     const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated)
 {
-    if (dataSourceObj_->IsEmpty()) {
-        return;
-    }
-    auto delegate = JSRef<JSObject>::Cast(dataSourceObj_->GetProperty("interception"));
-    if (delegate->IsEmpty()) {
-        return;
-    }
-    std::string targetFunc = isBefore ? "willShow" : "didShow";
-    if (!delegate->HasProperty(targetFunc.c_str())) {
-        return;
-    }
-    auto func = JSRef<JSFunc>::Cast(delegate->GetProperty(targetFunc.c_str()));
-    if (func->IsEmpty()) {
+    std::string targetName = isBefore ? "willShow" : "didShow";
+    JSRef<JSFunc> targetFunc;
+    if (!CheckAndGetInterceptionFunc(targetName, targetFunc)) {
         return;
     }
     const uint8_t argsNum = 4;
@@ -710,27 +700,35 @@ void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<N
     params[operationIndex] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(operation)));
     const uint8_t animatedIndex = 3;
     params[animatedIndex] = JSRef<JSVal>::Make(ToJSValue(isAnimated));
-    func->Call(JSRef<JSObject>(), argsNum, params);
+    targetFunc->Call(JSRef<JSObject>(), argsNum, params);
 }
 
 void JSNavigationStack::FireNavigationModeChange(NG::NavigationMode mode)
 {
-    if (dataSourceObj_->IsEmpty()) {
-        return;
-    }
-    auto delegate = JSRef<JSObject>::Cast(dataSourceObj_->GetProperty("interception"));
-    if (delegate->IsEmpty()) {
-        return;
-    }
-    if (!delegate->HasProperty("modeChange")) {
-        return;
-    }
-    auto modeFunc = JSRef<JSFunc>::Cast(delegate->GetProperty("modeChange"));
-    if (modeFunc->IsEmpty()) {
+    JSRef<JSFunc> modeFunc;
+    if (!CheckAndGetInterceptionFunc("modeChange", modeFunc)) {
         return;
     }
     JSRef<JSVal> params[1];
     params[0] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(mode)));
     modeFunc->Call(JSRef<JSObject>(), 1, params);
+}
+
+bool JSNavigationStack::CheckAndGetInterceptionFunc(const std::string& name, JSRef<JSFunc>& func)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    JSRef<JSVal> delegateProp = dataSourceObj_->GetProperty("interception");
+    if (!delegateProp->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> delegate = JSRef<JSObject>::Cast(delegateProp);
+    JSRef<JSVal> funcProp = delegate->GetProperty(name.c_str());
+    if (!funcProp->IsFunction()) {
+        return false;
+    }
+    func = JSRef<JSFunc>::Cast(funcProp);
+    return true;
 }
 } // namespace OHOS::Ace::Framework

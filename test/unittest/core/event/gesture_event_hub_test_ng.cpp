@@ -2400,7 +2400,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData001, TestSize.Level1)
      * @tc.expected: unifiedData is not null, extraInfo is not empty.
      */
     DragDropInfo dragDropInfo;
-    gestureEventHub->GetUnifiedData(dragDropInfo, dragEvent);
+    gestureEventHub->GetUnifiedData("", dragDropInfo, dragEvent);
     EXPECT_TRUE(dragEvent->GetData());
     EXPECT_EQ(dragDropInfo.extraInfo, "default extraInfo");
 
@@ -2412,7 +2412,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData001, TestSize.Level1)
     dragEvent->SetData(nullptr);
     dragDropInfo.extraInfo = "";
     eventHub->SetDefaultOnDragStart(nullptr);
-    gestureEventHub->GetUnifiedData(dragDropInfo, dragEvent);
+    gestureEventHub->GetUnifiedData("", dragDropInfo, dragEvent);
     EXPECT_EQ(dragEvent->GetData(), nullptr);
     EXPECT_EQ(dragDropInfo.extraInfo, "");
 }
@@ -2455,7 +2455,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData002, TestSize.Level1)
      * @tc.expected: unifiedData is not null, extraInfo is not empty.
      */
     DragDropInfo dragDropInfo;
-    gestureEventHub->GetUnifiedData(dragDropInfo, dragEvent);
+    gestureEventHub->GetUnifiedData("", dragDropInfo, dragEvent);
     EXPECT_TRUE(dragEvent->GetData());
     EXPECT_EQ(dragDropInfo.extraInfo, "default extraInfo");
 
@@ -2474,7 +2474,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData002, TestSize.Level1)
      *            case: user set unifiedData and extraInfo
      * @tc.expected: unifiedData is not null, extraInfo is not empty.
      */
-    gestureEventHub->GetUnifiedData(dragDropInfo, dragEvent);
+    gestureEventHub->GetUnifiedData("", dragDropInfo, dragEvent);
     EXPECT_TRUE(dragEvent->GetData());
     EXPECT_EQ(dragDropInfo.extraInfo, "user set extraInfo");
 }

@@ -1664,8 +1664,10 @@ void JSViewAbstract::JsMouseResponseRegion(const JSCallbackInfo& info)
 
 bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result)
 {
+    result.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    result.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
     if (!jsValue->IsObject()) {
-        return false;
+        return true;
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
@@ -6134,9 +6136,11 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     modalStyle.modalTransition = NG::ModalTransition::DEFAULT;
     std::function<void()> onShowCallback;
     std::function<void()> onDismissCallback;
+    std::function<void()> onWillShowCallback;
+    std::function<void()> onWillDismissCallback;
     if (info.Length() == 3) {
         if (info[2]->IsObject()) {
-            ParseOverlayCallback(info[2], onShowCallback, onDismissCallback);
+            ParseOverlayCallback(info[2], onShowCallback, onDismissCallback, onWillShowCallback, onWillDismissCallback);
             ParseModalStyle(info[2], modalStyle);
         } else if (info[2]->IsNumber()) {
             auto transitionNumber = info[2]->ToNumber<int32_t>();
@@ -6146,7 +6150,8 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
         }
     }
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), modalStyle,
-        std::move(onShowCallback), std::move(onDismissCallback));
+        std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
+        std::move(onWillDismissCallback));
 }
 
 void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle)
@@ -6205,18 +6210,21 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     sheetStyle.showCloseIcon = true;
     std::function<void()> onShowCallback;
     std::function<void()> onDismissCallback;
+    std::function<void()> onWillShowCallback;
+    std::function<void()> onWillDismissCallback;
     std::function<void()> shouldDismissFunc;
     std::function<void()> titleBuilderFunction;
     if (info.Length() == 3) {
         if (info[2]->IsObject()) {
-            ParseSheetCallback(info[2], onShowCallback, onDismissCallback, shouldDismissFunc);
+            ParseSheetCallback(info[2], onShowCallback, onDismissCallback, shouldDismissFunc, onWillShowCallback,
+                onWillDismissCallback);
             ParseSheetStyle(info[2], sheetStyle);
             ParseSheetTitle(info[2], sheetStyle, titleBuilderFunction);
         }
     }
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
         std::move(titleBuilderFunction), sheetStyle, std::move(onShowCallback), std::move(onDismissCallback),
-        std::move(shouldDismissFunc));
+        std::move(shouldDismissFunc), std::move(onWillShowCallback), std::move(onWillDismissCallback));
 }
 
 void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
@@ -6398,11 +6406,14 @@ bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, Blu
 }
 
 void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-    std::function<void()>& onDisappear, std::function<void()>& shouldDismiss)
+    std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
+    std::function<void()>& onWillDisappear)
 {
     auto showCallback = paramObj->GetProperty("onAppear");
     auto dismissCallback = paramObj->GetProperty("onDisappear");
     auto shouldDismissFunc = paramObj->GetProperty("shouldDismiss");
+    auto willShowCallback = paramObj->GetProperty("onWillAppear");
+    auto willDismissCallback = paramObj->GetProperty("onWillDisappear");
     if (showCallback->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(showCallback));
@@ -6425,6 +6436,16 @@ void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::fu
             JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
             func->ExecuteJS(1, &newJSVal);
         };
+    }
+    if (willShowCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willShowCallback));
+        onWillAppear = [func = std::move(jsFunc)]() { func->Execute(); };
+    }
+    if (willDismissCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willDismissCallback));
+        onWillDisappear = [func = std::move(jsFunc)]() { func->Execute(); };
     }
 }
 
@@ -6463,10 +6484,13 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissSheet(panda::JsiRuntime
 }
 
 void JSViewAbstract::ParseOverlayCallback(
-    const JSRef<JSObject>& paramObj, std::function<void()>& onAppear, std::function<void()>& onDisappear)
+    const JSRef<JSObject>& paramObj, std::function<void()>& onAppear, std::function<void()>& onDisappear,
+    std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear)
 {
     auto showCallback = paramObj->GetProperty("onAppear");
     auto dismissCallback = paramObj->GetProperty("onDisappear");
+    auto willShowCallback = paramObj->GetProperty("onWillAppear");
+    auto willDismissCallback = paramObj->GetProperty("onWillDisappear");
     WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (showCallback->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
@@ -6483,6 +6507,16 @@ void JSViewAbstract::ParseOverlayCallback(
             PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
+    }
+    if (willShowCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willShowCallback));
+        onWillAppear = [func = std::move(jsFunc)]() { func->Execute(); };
+    }
+    if (willDismissCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willDismissCallback));
+        onWillDisappear = [func = std::move(jsFunc)]() { func->Execute(); };
     }
 }
 

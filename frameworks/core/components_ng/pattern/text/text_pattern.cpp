@@ -1188,6 +1188,17 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     if (dragResultObjects_.empty() || !gestureHub->GetIsTextDraggable()) {
         return itemInfo;
     }
+    auto data = event->GetData();
+    if (!data) {
+        AddUdmfData(event);
+    }
+    CloseOperate();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return itemInfo;
+}
+
+void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
+{
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     auto resultProcessor = [unifiedData, weak = WeakClaim(this)](const ResultObject& result) {
         auto pattern = weak.Upgrade();
@@ -1217,9 +1228,6 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
         resultProcessor(resultObj);
     }
     event->SetData(unifiedData);
-    CloseOperate();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    return itemInfo;
 }
 
 void TextPattern::CloseOperate()
@@ -1888,28 +1896,9 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, boo
     }
 }
 
-void TextPattern::RedisplaySelectOverlay()
-{
-    if (!isShowMenu_) {
-        TAG_LOGD(AceLogTag::ACE_TEXT, "Do not redisplaySelectOverlay when drag failed");
-        isShowMenu_ = true;
-        return;
-    }
-    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-        CalculateHandleOffsetAndShowOverlay();
-        if (selectOverlayProxy_->IsMenuShow()) {
-            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-        } else {
-            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-            selectOverlayProxy_->ShowOrHiddenMenu(true);
-        }
-    }
-}
-
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
-        RedisplaySelectOverlay();
         return false;
     }
 
@@ -1924,8 +1913,6 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
     paragraph_ = paragraph;
-    // The handle calculation needs to be after the paragraph is assigned.
-    RedisplaySelectOverlay();
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();

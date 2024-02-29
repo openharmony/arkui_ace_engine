@@ -425,6 +425,8 @@ public:
 
     static bool GetGridIrregularLayoutEnabled();
 
+    static bool WaterFlowUseSegmentedLayout();
+
     static bool GetSideBarContainerBlurEnable();
 
     static void AddWatchSystemParameter(void *context);

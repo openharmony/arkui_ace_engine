@@ -1010,11 +1010,13 @@ public:
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear) override;
+        std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear) override;
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss) override;
+        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear) override;
     void DismissSheet() override;
 
     void SetAccessibilityGroup(bool accessible) override;

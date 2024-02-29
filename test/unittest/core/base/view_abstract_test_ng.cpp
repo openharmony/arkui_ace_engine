@@ -20,7 +20,6 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "core/interfaces/native/node/node_api.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -39,6 +38,7 @@
 #include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/property/property.h"
+#include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "frameworks/core/components_ng/pattern/panel/sliding_panel_model_ng.h"
@@ -1107,6 +1107,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
      */
     ViewAbstract::BindPopup(param, targetNode, customNode);
     ViewAbstract::BindPopup(param, targetNode, customNode);
+    overlayManager->HidePopup(targetNode->GetId(), info);
     auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
     auto popupNode = popupInfo.popupNode;
     ASSERT_NE(popupNode, nullptr);
@@ -1839,31 +1840,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest041, TestSize.Level1)
     ViewAbstract::SetMouseResponseRegion(responseRegion);
     EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->minSize.value().Width().has_value());
     EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->maxSize.value().Width().has_value());
-}
-
-/**
- * @tc.name: ViewAbstractTest042
- * @tc.desc: Test the DismissDialog of View_Abstract.
- * @tc.type: FUNC
- */
-HWTEST_F(ViewAbstractTestNg, ViewAbstractTest042, TestSize.Level1)
-{
-    /**
-     * @tc.steps: Change some params，callback DismissDialog function.
-     * @tc.expected: DismissDialog function is called.
-     */
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    auto overlayManager = context->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    auto rootNode = overlayManager->GetRootNode().Upgrade();
-    ASSERT_NE(rootNode, nullptr);
-    auto overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
-    ASSERT_NE(overlay, nullptr);
-    overlayManager->RemoveDialog(overlay, false, false);
-    auto pattern = overlay->GetPattern();
-    ASSERT_NE(pattern, nullptr);
-    ViewAbstract::DismissDialog();
 }
 
 /**

@@ -81,6 +81,11 @@ void RefreshModelNG::SetProgressColor(const Color& progressColor)
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ProgressColor, progressColor);
 }
 
+void RefreshModelNG::SetLoadingText(const std::string& loadingText)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, loadingText);
+}
+
 void RefreshModelNG::SetOnStateChange(StateChangeEvent&& stateChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

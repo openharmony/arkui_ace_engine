@@ -28,7 +28,7 @@ public:
  * @tc.desc: Test Tabs controller
  * @tc.type: FUNC
  */
-HWTEST_F(TabsEventTestNg, DISABLED_TabsController001, TestSize.Level1)
+HWTEST_F(TabsEventTestNg, TabsController001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set SetAnimationDuration to zero for avoid animation

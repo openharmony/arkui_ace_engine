@@ -276,6 +276,11 @@ bool SystemProperties::GetGridIrregularLayoutEnabled()
     return false;
 }
 
+bool SystemProperties::WaterFlowUseSegmentedLayout()
+{
+    return false;
+}
+
 bool SystemProperties::GetSideBarContainerBlurEnable()
 {
     return sideBarContainerBlurEnable_;

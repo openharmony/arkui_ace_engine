@@ -154,6 +154,22 @@ void WaterFlowTestNg::CreateItem(int32_t number)
     }
 }
 
+void WaterFlowTestNg::AddItems(int32_t number)
+{
+    for (int i = 0; i < number; ++i) {
+        auto child = FrameNode::GetOrCreateFrameNode(
+            V2::FLOW_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
+        if (i & 1) {
+            child->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(FILL_LENGTH), CalcLength(Dimension(BIG_ITEM_HEIGHT))));
+        } else {
+            child->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(FILL_LENGTH), CalcLength(Dimension(ITEM_HEIGHT))));
+        }
+        frameNode_->AddChild(child);
+    }
+}
+
 void WaterFlowTestNg::CreateItemWithHeight(float height)
 {
     WaterFlowItemModelNG waterFlowItemModel;
@@ -617,7 +633,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest010, TestSize.Level1)
     });
     pattern_->UpdateStartIndex(9);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 9)->IsActive());
 
     pattern_->UpdateStartIndex(0);

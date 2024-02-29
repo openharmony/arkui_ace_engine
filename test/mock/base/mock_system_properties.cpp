@@ -133,6 +133,11 @@ bool SystemProperties::GetGridIrregularLayoutEnabled()
     return false;
 }
 
+bool SystemProperties::WaterFlowUseSegmentedLayout()
+{
+    return true;
+}
+
 bool SystemProperties::GetSideBarContainerBlurEnable()
 {
     return sideBarContainerBlurEnable_;

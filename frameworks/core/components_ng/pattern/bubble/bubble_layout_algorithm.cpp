@@ -448,7 +448,7 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         buttonRowOffset_ = buttonRow->GetGeometryNode()->GetMarginFrameOffset() + childOffset_;
     }
     // If bubble displayed in subwindow, set the hotarea of subwindow.
-    if (showInSubWindow) {
+    if (showInSubWindow && bubblePattern->IsOnShow()) {
         std::vector<Rect> rects;
         if (!bubbleProp->GetBlockEventValue(true)) {
             auto rect = Rect(childOffset_.GetX(), childOffset_.GetY(), childSize_.Width(), childSize_.Height());
@@ -459,7 +459,8 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             rects.emplace_back(parentWindowRect);
             rects.emplace_back(rect);
         }
-        SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId(), bubblePattern->GetContainerId());
+        auto subWindowMgr = SubwindowManager::GetInstance();
+        subWindowMgr->SetPopupHotAreas(rects, frameNode->GetId(), bubblePattern->GetContainerId());
     }
     targetOffsetForPaint_ = targetOffset_;
     childOffsetForPaint_ = childOffset_;

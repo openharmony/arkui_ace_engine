@@ -23,16 +23,21 @@ RefPtr<ImagePacker> ImagePacker::Create()
 
 uint32_t ImagePackerPreview::AddImage(PixelMap& pixelMap)
 {
-    return 0;
+    return 1;
 }
 
 uint32_t ImagePackerPreview::StartPacking(uint8_t* data, uint32_t maxSize, const PackOption& option)
 {
-    return 0;
+    return 1;
+}
+
+uint32_t ImagePackerPreview::StartPacking(const std::string& filePath, const PackOption& option)
+{
+    return 1;
 }
 
 uint32_t ImagePackerPreview::FinalizePacking(int64_t& packedSize)
 {
-    return 0;
+    return 1;
 }
 } // namespace OHOS::Ace

@@ -43,7 +43,8 @@ public:
     static RefPtr<ImagePacker> Create();
 
     virtual uint32_t StartPacking(uint8_t* data, uint32_t maxSize, const PackOption& option) = 0;
-    virtual uint32_t AddImage(PixelMap& pixelMap)  = 0;
+    virtual uint32_t StartPacking(const std::string& filePath, const PackOption& option) = 0;
+    virtual uint32_t AddImage(PixelMap& pixelMap) = 0;
     virtual uint32_t FinalizePacking(int64_t& packedSize) = 0;
 };
 } // namespace OHOS::Ace

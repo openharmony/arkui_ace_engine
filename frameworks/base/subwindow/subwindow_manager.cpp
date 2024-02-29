@@ -400,6 +400,37 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overl
         subwindow->SetHotAreas(rects, overlayId);
     }
 }
+
+void SubwindowManager::SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+
+    if (subwindow) {
+        subwindow->SetPopupHotAreas(rects, overlayId);
+    }
+}
+
+void SubwindowManager::DeletePopupHotAreas(int32_t overlayId, int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+
+    if (subwindow) {
+        subwindow->DeletePopupHotAreas(overlayId);
+    }
+}
+
 void SubwindowManager::SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set dialog hot areas enter");
@@ -439,6 +470,33 @@ void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
         return;
     }
     return subwindow->CloseDialogNG(dialogNode);
+}
+
+void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show customDialog ng enter");
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        CHECK_NULL_VOID(subwindow);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    return subwindow->OpenCustomDialogNG(dialogProps, std::move(callback));
+}
+
+void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
+    auto iter = subwindowMap_.begin();
+    while (iter != subwindowMap_.end()) {
+        auto overlay = iter->second->GetOverlayManager();
+        if (overlay->GetDialogMap().find(dialogId) != overlay->GetDialogMap().end()) {
+            return overlay->CloseCustomDialog(dialogId);
+        }
+        iter++;
+    }
 }
 
 void SubwindowManager::HideDialogSubWindow(int32_t instanceId)

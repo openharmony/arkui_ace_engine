@@ -104,6 +104,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     auto refreshing = paramObject->GetProperty("refreshing");
     auto jsOffset = paramObject->GetProperty("offset");
     auto friction = paramObject->GetProperty("friction");
+    auto promptText = paramObject->GetProperty("promptText");
     RefreshModel::GetInstance()->Create();
     RefreshModel::GetInstance()->SetProgressColor(theme->GetProgressColor());
 
@@ -124,12 +125,17 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     }
     ParsFrictionData(friction);
     ParseCustomBuilder(info);
+
+    std::string loadingStr = "";
+    if (ParseJsString(promptText, loadingStr)) {
+        RefreshModel::GetInstance()->SetLoadingText(loadingStr);
+    }
 }
 
-void JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
+bool JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
-        return;
+        return false;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto builder = paramObject->GetProperty("builder");
@@ -142,8 +148,10 @@ void JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
             customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }
         RefreshModel::GetInstance()->SetCustomBuilder(customNode);
+        return true;
     } else {
         RefreshModel::GetInstance()->SetCustomBuilder(customNode);
+        return false;
     }
 }
 

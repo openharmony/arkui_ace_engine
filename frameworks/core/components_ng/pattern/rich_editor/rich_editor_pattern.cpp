@@ -96,7 +96,6 @@ constexpr float TIME_UNIT = 1000.0f;
 constexpr float DOUBLE_CLICK_INTERVAL_MS = 300.0f;
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
-constexpr Color DEFAULT_PLACEHOLDER_COLOR = Color(0x99000000);
 
 const std::wstring lineSeparator = L"\n";
 // hen do ai anaylsis, we should limit the left an right limit of the string
@@ -1969,7 +1968,7 @@ void RichEditorPattern::InitDragDropEvent()
         pattern->showSelect_ = false;
         return pattern->OnDragStart(event, extraParams);
     };
-    eventHub->SetOnDragStart(std::move(onDragStart));
+    eventHub->SetDefaultOnDragStart(std::move(onDragStart));
     auto onDragMove = [weakPtr = WeakClaim(this)](
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
@@ -3569,6 +3568,10 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     spanResult.SetValue(spanItem->content);
     spanResult.SetOffsetInSpan(currentPosition - contentStartPosition);
     spanResult.SetEraseLength(eraseLength);
+    if (!spanItem->GetTextStyle().has_value()) {
+        TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "SpanItem text style is empty.");
+        return eraseLength;
+    }
     spanResult.SetFontColor(spanItem->GetTextStyle()->GetTextColor().ColorToString());
     spanResult.SetFontSize(spanItem->GetTextStyle()->GetFontSize().Value());
     spanResult.SetFontStyle(spanItem->GetTextStyle()->GetFontStyle());
@@ -3763,7 +3766,13 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
         AutoScrollByEdgeDetection(param, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()),
             EdgeDetectionStrategy::OUT_BOUNDARY);
     }
-
+    if (textSelector_.SelectNothing()) {
+        if (!caretTwinkling_) {
+            StartTwinkling();
+        }
+    } else {
+        StopTwinkling();
+    }
     isMouseSelect_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5597,13 +5606,10 @@ void RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->HasPlaceholder() || layoutProperty->GetPlaceholder().value().empty()) {
+        isShowPlaceholder_ = false;
         return;
     }
     auto placeholderValue = layoutProperty->GetPlaceholder().value();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<RichEditorTheme>();
-    CHECK_NULL_VOID(theme);
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
@@ -5621,8 +5627,9 @@ void RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
     if (layoutProperty->HasPlaceholderItalicFontStyle()) {
         placeholderNode->UpdateItalicFontStyle(layoutProperty->GetPlaceholderItalicFontStyle().value());
     }
-    placeholderNode->UpdateTextColor(
-        layoutProperty->GetPlaceholderTextColorValue(theme ? theme->GetPlaceholderColor() : DEFAULT_PLACEHOLDER_COLOR));
+    if (layoutProperty->HasPlaceholderTextColor()) {
+        placeholderNode->UpdateTextColor(layoutProperty->GetPlaceholderTextColor().value());
+    }
 
     auto spanItem = placeholderNode->GetSpanItem();
     CHECK_NULL_VOID(spanItem);
