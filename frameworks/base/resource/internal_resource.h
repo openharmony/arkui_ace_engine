@@ -100,6 +100,8 @@ public:
         INPUT_SEARCH_SVG,
         APP_BAR_BACK_SVG,
         APP_BAR_FA_SVG,
+        APP_BAR_MENU_SVG,
+        APP_BAR_CLOSE_SVG,
         MENU_OK_SVG,
         SPINNER_DISABLE,
         LOCATION_BUTTON_FILLED_SVG,
