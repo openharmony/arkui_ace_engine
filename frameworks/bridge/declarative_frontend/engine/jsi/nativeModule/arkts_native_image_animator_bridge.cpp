@@ -237,9 +237,9 @@ ArkUINativeModuleValue ImageAnimatorBridge::SetImages(ArkUIRuntimeCallInfo* runt
     for (int32_t i = 0; i < arrayLength; i++) {
         images[i].src = srcArray[i].c_str();
         for (int32_t j = 0; j < IMAGESIZE; j++) {
-            images[i].number[j] = calcDimension[arrayLength * i + j].Value();
-            images[i].unit[j] = static_cast<int8_t>(calcDimension[arrayLength * i + j].Unit());
-            images[i].calc[j] = const_cast<char*>(calcDimension[arrayLength * i + j].CalcValue().c_str());
+            images[i].number[j] = calcDimension[arrayLength * j + i].Value();
+            images[i].unit[j] = static_cast<int8_t>(calcDimension[arrayLength * j + i].Unit());
+            images[i].calc[j] = const_cast<char*>(calcDimension[arrayLength * j + i].CalcValue().c_str());
         }
         images[i].duration = *(durationArray.get() + i);
     }
