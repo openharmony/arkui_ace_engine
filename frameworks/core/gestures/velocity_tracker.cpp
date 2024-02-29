@@ -103,6 +103,14 @@ double UpdateAxisVelocity(LeastSquareImpl& axis)
     }
     return velocity;
 }
+
+inline void DumpHistoryTrack(const std::vector<double>& vals)
+{
+    LOGI("Dump when velocity is zero.");
+    for (double val : vals) {
+        LOGI("History position of zero velocity track:%{public}f", val);
+    }
+}
 } // namespace
 
 void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
@@ -181,6 +189,12 @@ void VelocityTracker::UpdateVelocity()
     double yVelocity = UpdateAxisVelocity(yAxis_);
     velocity_.SetOffsetPerSecond({ xVelocity, yVelocity });
     isVelocityDone_ = true;
+
+    if (mainAxis_ == Axis::HORIZONTAL && NearZero(xVelocity)) {
+        DumpHistoryTrack(xAxis_.GetYVals());
+    } else if (mainAxis_ == Axis::VERTICAL && NearZero(yVelocity)) {
+        DumpHistoryTrack(yAxis_.GetYVals());
+    }
 }
 
 } // namespace OHOS::Ace

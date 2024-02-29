@@ -2082,6 +2082,14 @@ void PipelineContext::FlushTouchEvents()
         if (needInterpolation) {
             auto targetTimeStamp = resampleTimeStamp_;
             for (const auto& idIter : idToTouchPoints) {
+                auto stamp =
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(idIter.second.time.time_since_epoch()).count();
+                if (targetTimeStamp > static_cast<uint64_t>(stamp)) {
+                    LOGI("Skip interpolation when there is no touch event after interpolation time point. "
+                         "(last stamp:%{public}" PRIu64 ", target stamp:%{public}" PRIu64 ")",
+                        static_cast<uint64_t>(stamp), targetTimeStamp);
+                    continue;
+                }
                 TouchEvent newTouchEvent =
                     GetResampleTouchEvent(historyPointsById_[idIter.first], idIter.second.history, targetTimeStamp);
                 if (newTouchEvent.x != 0 && newTouchEvent.y != 0) {
