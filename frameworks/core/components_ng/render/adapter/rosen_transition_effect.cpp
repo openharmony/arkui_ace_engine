@@ -528,7 +528,6 @@ void RosenRotation3DTransitionEffect::SetRotateEffect(const RotateOptions& optio
     std::get<InternalRotationYEffect>(effects_).SetActiveValue(-options.angle * options.yDirection / norm);
     std::get<InternalRotationZEffect>(effects_).SetActiveValue(options.angle * options.zDirection / norm);
     std::get<RosenPivotTransitionEffect>(effects_).SetPivot(options.centerX, options.centerY, options.centerZ);
-    std::get<InternalCameraDistanceEffect>(effects_).SetActiveValue(options.perspective);
 }
 
 RosenScaleTransitionEffect::RosenScaleTransitionEffect(const ScaleOptions& options)
@@ -568,10 +567,6 @@ InternalTranslateZEffect::PropertyTransitionEffectTemplate() : identityValue_(0.
 
 template<>
 InternalScaleEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f, 1.0f), activeValue_(1.0f, 1.0f)
-{}
-
-template<>
-InternalCameraDistanceEffect::PropertyTransitionEffectTemplate() : identityValue_(0.0f), activeValue_(0.0f)
 {}
 
 RefPtr<RosenTransitionEffect> RosenTransitionEffect::CreateDefaultRosenTransitionEffect()
