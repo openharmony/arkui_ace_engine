@@ -258,7 +258,6 @@ void MenuItemPattern::ShowSubMenu()
     if (!buildFunc || isSubMenuShowed_) {
         return;
     }
-
     // Hide SubMenu of parent Menu node
     auto parentMenu = GetMenu();
     CHECK_NULL_VOID(parentMenu);
@@ -280,9 +279,7 @@ void MenuItemPattern::ShowSubMenu()
             parentMenuPattern->HideSubMenu();
         }
     }
-
     isSubMenuShowed_ = true;
-
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
@@ -291,33 +288,44 @@ void MenuItemPattern::ShowSubMenu()
     auto layoutProps = focusMenu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     param.isShowInSubWindow = layoutProps->GetShowInSubWindowValue(false);
+    auto focusMenuRenderContext = focusMenu->GetRenderContext();
+    CHECK_NULL_VOID(focusMenuRenderContext);
+    if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
+        auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
+        param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
+    }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);
+    ShowSubMenuHelper(subMenu);
+    parentMenuPattern->SetShowedSubMenu(subMenu);
+}
+
+void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool isSelectOverlayMenu = IsSelectOverlayMenu();
     auto menuPattern = subMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetParentMenuItem(host);
     subMenuId_ = subMenu->GetId();
     AddSelfHoverRegion(host);
-
     auto menuWrapper = GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapper);
     subMenu->MountToParent(menuWrapper);
-
     OffsetF offset = GetSubMenuPostion(host);
     auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuProps);
     menuProps->UpdateMenuOffset(offset);
     menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     RegisterWrapperMouseEvent();
-
     // select overlay menu no need focus
     if (!isSelectOverlayMenu) {
         auto focusHub = subMenu->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->RequestFocusWithDefaultFocusFirstly();
     }
-    parentMenuPattern->SetShowedSubMenu(subMenu);
 }
 
 void MenuItemPattern::CloseMenu()

@@ -196,6 +196,7 @@ private:
     RefPtr<FrameNode> GetMenuWrapper();
 
     void ShowSubMenu();
+    void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
 
     OffsetF GetSubMenuPostion(const RefPtr<FrameNode>& targetNode);
 
