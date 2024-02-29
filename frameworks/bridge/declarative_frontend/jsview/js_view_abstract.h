@@ -325,6 +325,7 @@ public:
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
 
     static void JsObscured(const JSCallbackInfo& info);
+    static void JsPrivacySensitive(const JSCallbackInfo& info);
 
     static void JsAccessibilityGroup(bool accessible);
     static void JsAccessibilityText(const std::string& text);
