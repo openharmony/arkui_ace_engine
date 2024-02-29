@@ -454,7 +454,7 @@ void NavigationPattern::CheckTopNavPathChange(
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d",
         disableAllAnimation, animated, isPopPage);
-    if (isDialog) {
+    if (isDialog && !isCustomAnimation_) {
         // dialog navDestination no need transition animation.
         TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, isShow);
         hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
