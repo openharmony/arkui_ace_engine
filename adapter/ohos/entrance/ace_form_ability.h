@@ -84,7 +84,7 @@ public:
      * @param formParamsMap Indicates the Record of form to update.
      * @return none.
      */
-    void OnUpdate(const int64_t formId, const std::map<std::string, std::string>& formParamsMap) override;
+    void OnUpdate(const int64_t formId) override;
 
     /**
      * @brief Called when the form provider is notified that a temporary form is successfully converted to
