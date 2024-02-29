@@ -144,26 +144,7 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
             ringColor = LinearColor::WHITE;
         }
         // draw ring background
-        ringColor.BlendOpacity(RING_ALPHA_DARK_BACKGROUNG / FULL_OPACITY);
-        pen.SetColor(ToRSColor(ringColor));
-
-        RSFilter filter;
-#ifndef USE_ROSEN_DRAWING
-        filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(
-            ringParam.darkBackgroundRadius, ringParam.darkBackgroundRadius, RSTileMode::DECAL, nullptr));
-#else
-        filter.SetImageFilter(RSRecordingImageFilter::CreateBlurImageFilter(
-            ringParam.darkBackgroundRadius, ringParam.darkBackgroundRadius, RSTileMode::DECAL, nullptr));
-#endif
-        pen.SetFilter(filter);
-        pen.SetWidth(ringParam.darkBackgroundWidth);
-        pen.SetAntiAlias(true);
-        canvas.AttachPen(pen);
-        canvas.DrawCircle({ offset_->Get().GetX() + contentSize_->Get().Width() * HALF,
-                              offset_->Get().GetY() + contentSize_->Get().Height() * HALF + ringParam.movement },
-            ringParam.radius);
-        canvas.DetachPen();
-        canvas.Restore();
+        DrawRingBackground(context, ringParam, ringColor);
 
         ringColor.BlendOpacity(RING_ALPHA_DARK / FULL_OPACITY);
         pen.SetColor(ToRSColor(ringColor));
@@ -188,6 +169,35 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     canvas.DrawCircle(
         { offset_->Get().GetX() + contentSize_->Get().Width() * HALF,
             offset_->Get().GetY() + contentSize_->Get().Height() * HALF + ringParam.movement },
+        ringParam.radius);
+    canvas.DetachPen();
+    canvas.Restore();
+}
+
+void LoadingProgressModifier::DrawRingBackground(
+    DrawingContext& context, const RingParam& ringParam, LinearColor& ringColor)
+{
+    auto& canvas = context.canvas;
+    canvas.Save();
+    RSPen pen;
+
+    ringColor.BlendOpacity(RING_ALPHA_DARK_BACKGROUNG / FULL_OPACITY);
+    pen.SetColor(ToRSColor(ringColor));
+
+    RSFilter filter;
+#ifndef USE_ROSEN_DRAWING
+    filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(
+        ringParam.darkBackgroundRadius, ringParam.darkBackgroundRadius, RSTileMode::DECAL, nullptr));
+#else
+    filter.SetImageFilter(RSRecordingImageFilter::CreateBlurImageFilter(
+        ringParam.darkBackgroundRadius, ringParam.darkBackgroundRadius, RSTileMode::DECAL, nullptr));
+#endif
+    pen.SetFilter(filter);
+    pen.SetWidth(ringParam.darkBackgroundWidth);
+    pen.SetAntiAlias(true);
+    canvas.AttachPen(pen);
+    canvas.DrawCircle({ offset_->Get().GetX() + contentSize_->Get().Width() * HALF,
+                          offset_->Get().GetY() + contentSize_->Get().Height() * HALF + ringParam.movement },
         ringParam.radius);
     canvas.DetachPen();
     canvas.Restore();
