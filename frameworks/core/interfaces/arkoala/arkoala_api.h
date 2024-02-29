@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 68
+#define ARKUI_FULL_API_VERSION 69
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 68
+#define ARKUI_NODE_API_VERSION 69
 
 #define ARKUI_BASIC_API_VERSION 5
 #define ARKUI_EXTENDED_API_VERSION 4
@@ -1346,13 +1346,17 @@ struct ArkUITextModifier {
     void (*resetEllipsisMode)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextContent)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextLineHeight)(ArkUINodeHandle node);
-    ArkUITextDecorationType (*getTextDecoration)(ArkUINodeHandle node);
+    void (*getTextDecoration)(ArkUINodeHandle node, ArkUITextDecorationType* decoration);
     ArkUI_Int32 (*getTextTextCase)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextLetterSpacing)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextMaxLines)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextAlign)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextTextOverflow)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextTextIndent)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getFontColor)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextBaselineOffset)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextShadowsCount)(ArkUINodeHandle node);
+    void (*getTextShadows)(ArkUINodeHandle node, ArkUITextShadowStruct* textShadow, ArkUI_Uint32 size);
 };
 
 struct ArkUIButtonModifier {
@@ -2598,7 +2602,7 @@ struct ArkUISpanModifier {
     void (*resetSpanFont)(ArkUINodeHandle node);
     void (*setSpanFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr value);
     ArkUI_CharPtr (*getSpanContent)(ArkUINodeHandle node);
-    ArkUITextDecorationType (*getSpanDecoration)(ArkUINodeHandle node);
+    void (*getSpanDecoration)(ArkUINodeHandle node, ArkUITextDecorationType* decorationType);
     ArkUI_Uint32 (*getSpanFontColor)(ArkUINodeHandle node);
     ArkUI_Float32 (*getSpanFontSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSpanFontStyle)(ArkUINodeHandle node);

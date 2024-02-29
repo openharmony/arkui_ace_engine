@@ -205,13 +205,13 @@ void SetSpanDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint3
     SpanModelNG::SetTextDecorationColor(uiNode, Color(color));
 }
 
-ArkUITextDecorationType GetSpanDecoration(ArkUINodeHandle node)
+void GetSpanDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration)
 {
-    ArkUITextDecorationType decorationType = { 0, 0xff000000 };
+    CHECK_NULL_VOID(decoration);
     auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_RETURN(uiNode, decorationType);
-    // todo
-    return decorationType;
+    CHECK_NULL_VOID(uiNode);
+    decoration->decorationType = static_cast<int32_t>(SpanModelNG::GetTextDecoration(uiNode));
+    decoration->color = SpanModelNG::GetTextDecorationColor(uiNode).GetValue();
 }
 
 void ResetSpanDecoration(ArkUINodeHandle node)

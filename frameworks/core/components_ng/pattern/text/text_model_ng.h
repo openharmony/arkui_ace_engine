@@ -108,6 +108,7 @@ public:
     static std::string GetContent(FrameNode* frameNode);
     static float GetLineHeight(FrameNode* frameNode);
     static TextDecoration GetDecoration(FrameNode* frameNode);
+    static Color GetTextDecorationColor(FrameNode* frameNode);
     static TextCase GetTextCase(FrameNode* frameNode);
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);
@@ -118,7 +119,10 @@ public:
     static Dimension GetFontSize(FrameNode* frameNode);
     static Ace::FontWeight GetFontWeight(FrameNode* frameNode);
     static Ace::FontStyle GetItalicFontStyle(FrameNode* frameNode);
-
+    static Color GetDefaultColor();
+    static Color GetFontColor(FrameNode* frameNode);
+    static Dimension GetTextBaselineOffset(FrameNode* frameNode);
+    static std::vector<Shadow> GetTextShadow(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

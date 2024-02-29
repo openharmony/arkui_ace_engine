@@ -3533,7 +3533,7 @@ void ResetXComponentSurfaceSize(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getXComponentModifier()->setXComponentSurfaceSize(node->uiNodeHandle, 0, 0);
 }
 
-int32_t SetTextBaselineOffset(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+int32_t SetTextBaseLineOffset(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == NUM_0) {
         return ERROR_CODE_PARAM_INVALID;
@@ -4250,6 +4250,28 @@ const ArkUI_AttributeItem* GetTextCopyOption(ArkUI_NodeHandle node)
 {
     auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getCopyOption(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetTextBaseLineOffset(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getTextModifier()->getTextBaselineOffset(node->uiNodeHandle);
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetTextShadow(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUITextShadowStruct shadowArray[NUM_1];
+    fullImpl->getNodeModifiers()->getTextModifier()->
+        getTextShadows(node->uiNodeHandle, &shadowArray[0], NUM_1);
+    g_numberValues[NUM_0].f32 = shadowArray[0].radius;
+    g_numberValues[NUM_1].i32 = static_cast<int32_t>(shadowArray[0].type);
+    g_numberValues[NUM_2].u32 = shadowArray[0].color;
+    g_numberValues[NUM_3].f32 = shadowArray[0].offsetX;
+    g_numberValues[NUM_4].f32 = shadowArray[0].offsetY;
+    g_attributeItem.size = REQUIRED_FIVE_PARAM;
     return &g_attributeItem;
 }
 
@@ -6287,6 +6309,85 @@ const ArkUI_AttributeItem* GetTextContent(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+const ArkUI_AttributeItem* GetFontColor(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_TEXT:
+            g_numberValues[0].u32 = fullImpl->getNodeModifiers()->getTextModifier()->
+                getFontColor(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        case ARKUI_NODE_SPAN:
+            g_numberValues[0].u32 = fullImpl->getNodeModifiers()->getSpanModifier()->
+                getSpanFontColor(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        default:
+            break;
+    }
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetFontSize(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_TEXT:
+            g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getTextModifier()->
+                getFontSize(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        case ARKUI_NODE_SPAN:
+            g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getSpanModifier()->
+                getSpanFontSize(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        default:
+            break;
+    }
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetFontStyle(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_TEXT:
+            g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextModifier()->
+                getItalicFontStyle(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        case ARKUI_NODE_SPAN:
+            g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getSpanModifier()->
+                getSpanFontStyle(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        default:
+            break;
+    }
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetFontWeight(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    switch (node->type) {
+        case ARKUI_NODE_TEXT:
+            g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextModifier()->getFontWeight(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        case ARKUI_NODE_SPAN:
+            g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getSpanModifier()->
+                getSpanFontWeight(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        default:
+            break;
+    }
+    return &g_attributeItem;
+}
+
 const ArkUI_AttributeItem* GetLineHeight(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
@@ -6312,15 +6413,15 @@ const ArkUI_AttributeItem* GetDecoration(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     switch (node->type) {
         case ARKUI_NODE_SPAN: {
-            auto spanDecorationType =
-                fullImpl->getNodeModifiers()->getSpanModifier()->getSpanDecoration(node->uiNodeHandle);
+            ArkUITextDecorationType spanDecorationType = { 0, Color::BLACK.GetValue()};
+            fullImpl->getNodeModifiers()->getSpanModifier()->getSpanDecoration(node->uiNodeHandle, &spanDecorationType);
             g_numberValues[0].i32 = spanDecorationType.decorationType;
             g_numberValues[DECORATION_COLOR_INDEX].u32 = spanDecorationType.color;
             break;
         }
         case ARKUI_NODE_TEXT: {
-            auto textDecorationType =
-                fullImpl->getNodeModifiers()->getTextModifier()->getTextDecoration(node->uiNodeHandle);
+            ArkUITextDecorationType textDecorationType = { 0, Color::BLACK.GetValue()};
+            fullImpl->getNodeModifiers()->getTextModifier()->getTextDecoration(node->uiNodeHandle, &textDecorationType);
             g_numberValues[0].i32 = textDecorationType.decorationType;
             g_numberValues[DECORATION_COLOR_INDEX].u32 = textDecorationType.color;
             break;
@@ -7234,7 +7335,7 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
 {
     static Setter* setters[] = { SetTextContent, SetFontColor, SetFontSize, SetFontStyle, SetFontWeight, SetLineHeight,
         SetDecoration, SetTextCase, SetLetterSpacing, SetMaxLines, SetTextAlign, SetTextOverflow, SetTextFontFamily,
-        SetTextCopyOption, SetTextBaselineOffset, SetTextShadow, SetTextMinFontSize, SetTextMaxFontSize, SetTextFont,
+        SetTextCopyOption, SetTextBaseLineOffset, SetTextShadow, SetTextMinFontSize, SetTextMaxFontSize, SetTextFont,
         SetTextHeightAdaptivePolicy, SetTextIndent };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -7245,10 +7346,10 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
 
 const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetTextContent, nullptr, nullptr, nullptr, nullptr, GetLineHeight, GetDecoration,
-        GetTextCase, GetLetterSpacing, GetMaxLines, GetTextAlign, GetTextOverflow, GetTextFontFamily, GetTextCopyOption,
-        nullptr, nullptr, GetTextMinFontSize, GetTextMaxFontSize, GetTextFont, GetTextHeightAdaptivePolicy,
-        GetTextIndent };
+    static Getter* getters[] = { GetTextContent, GetFontColor, GetFontSize, GetFontStyle, GetFontWeight,
+        GetLineHeight, GetDecoration, GetTextCase, GetLetterSpacing, GetMaxLines, GetTextAlign, GetTextOverflow,
+        GetTextFontFamily, GetTextCopyOption, GetTextBaseLineOffset, GetTextShadow, GetTextMinFontSize,
+        GetTextMaxFontSize, GetTextFont, GetTextHeightAdaptivePolicy, GetTextIndent };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
