@@ -48,22 +48,22 @@ bool GeometryTransition::IsRunning(const WeakPtr<FrameNode>& frameNode) const
 {
     auto node = frameNode.Upgrade();
     CHECK_NULL_RETURN(node && IsInAndOutValid(), false);
-    return (node == inNode_ || node == outNode_) && node->GetLayoutPriority() != 0;
+    return node->GetLayoutPriority() != 0 && (node == inNode_ || node == outNode_);
 }
 
 bool GeometryTransition::IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const
 {
-    return IsInAndOutValid() && hasInAnim_ && frameNode.Upgrade() == inNode_ && state_ == State::ACTIVE;
+    return state_ == State::ACTIVE && hasInAnim_ && frameNode.Upgrade() == inNode_ && IsInAndOutValid();
 }
 
 bool GeometryTransition::IsNodeInAndIdentity(const WeakPtr<FrameNode>& frameNode) const
 {
-    return IsInAndOutValid() && hasInAnim_ && frameNode.Upgrade() == inNode_ && state_ == State::IDENTITY;
+    return state_ == State::IDENTITY && hasInAnim_ && frameNode.Upgrade() == inNode_ && IsInAndOutValid();
 }
 
 bool GeometryTransition::IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const
 {
-    return IsInAndOutValid() && hasOutAnim_ && frameNode.Upgrade() == outNode_;
+    return hasOutAnim_ && frameNode.Upgrade() == outNode_ && IsInAndOutValid();
 }
 
 void GeometryTransition::SwapInAndOut(bool condition)
@@ -116,7 +116,7 @@ void GeometryTransition::MarkLayoutDirty(const RefPtr<FrameNode>& node, int32_t 
 void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn)
 {
     state_ = State::IDLE;
-    outNodeTargetAbsRect_ = std::nullopt;
+    outNodeTargetAbsRect_.reset();
     isSynced_ = false;
     if (IsInAndOutEmpty()) {
         hasInAnim_ = false;
@@ -124,10 +124,9 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
     }
     auto node = frameNode.Upgrade();
     CHECK_NULL_VOID(node && node->GetRenderContext() && !id_.empty());
-    std::string id = node->GetInspectorId().value_or("");
-    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "build node: %{public}d, direction: %{public}d, onTree: %{public}d, "
+    TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "build node: %{public}d, direction: %{public}d, onTree: %{public}d, "
         "removing: %{public}d, compid: %{public}s .", node->GetId(), isNodeIn, node->IsOnMainTree(),
-        node->IsRemoving(), id.c_str());
+        node->IsRemoving(), node->GetInspectorId().value_or("").c_str());
     if (!isNodeIn && (frameNode == inNode_ || frameNode == outNode_)) {
         SwapInAndOut(frameNode == inNode_);
         RecordOutNodeFrame();
@@ -135,21 +134,20 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
     }
     if (isNodeIn && (frameNode != inNode_)) {
         auto inNode = inNode_.Upgrade();
-        bool replace = inNode && !inNode->IsRemoving() && inNode->IsOnMainTree() &&
-            (id.empty() || id != inNode->GetInspectorId().value_or("")) ? false : true;
+        bool replace = true;
+        if (inNode && !inNode->IsRemoving() && inNode->IsOnMainTree()) {
+            std::string id = node->GetInspectorId().value_or("");
+            replace = !id.empty() && id == inNode->GetInspectorId().value_or("");
+        }
         SwapInAndOut(!replace);
         inNode_ = frameNode;
         bool isInAnimating = inNode && inNode->GetRenderContext() && inNode->GetRenderContext()->HasSandBox();
         CHECK_NULL_VOID(!(replace && isInAnimating));
         hasInAnim_ = true;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    if (pipeline && pipeline->GetSyncAnimationOption().IsValid()) {
-        implicitAnimationOption_ = pipeline->GetSyncAnimationOption();
-    }
     auto inNode = inNode_.Upgrade();
     auto outNode = outNode_.Upgrade();
-    CHECK_NULL_VOID(IsInAndOutValid() && (inNode != outNode));
+    CHECK_NULL_VOID(inNode && outNode && (inNode != outNode));
 
     bool isImplicitAnimationOpen = AnimationUtils::IsImplicitAnimationOpen();
     bool follow = false;
@@ -177,7 +175,7 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
         }
     }
 
-    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "inAnim: %{public}d, outAnim: %{public}d, follow: %{public}d, "
+    TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "inAnim: %{public}d, outAnim: %{public}d, follow: %{public}d, "
         "inNode: %{public}d, %{public}s, outNode: %{public}d, %{public}s", hasInAnim_, hasOutAnim_, follow,
         inNode->GetId(), inNode->GetTag().c_str(), outNode->GetId(), outNode->GetTag().c_str());
 }
@@ -200,15 +198,16 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
 // impact self and children's measure and layout.
 void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    if (!layoutWrapper->IsRootMeasureNode()) {
-        return;
-    }
+    CHECK_NULL_VOID(layoutWrapper && layoutWrapper->IsRootMeasureNode());
     auto hostNode = layoutWrapper->GetHostNode();
     if (IsNodeInAndActive(hostNode)) {
         layoutPropertyIn_ = hostNode->GetLayoutProperty()->Clone();
         ModifyLayoutConstraint(layoutWrapper, true);
     } else if (IsNodeOutAndActive(hostNode)) {
+        if (hasInAnim_) {
+            MarkLayoutDirty(hostNode);
+            return;
+        }
         layoutPropertyOut_ = hostNode->GetLayoutProperty()->Clone();
         ModifyLayoutConstraint(layoutWrapper, false);
     }
@@ -221,7 +220,7 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto node = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(node);
     bool isRoot = layoutWrapper->IsRootMeasureNode();
-    std::optional<bool> direction = std::nullopt;
+    std::optional<bool> direction;
 
     if (isRoot && IsNodeInAndActive(node)) {
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d in and active", node->GetId());
@@ -239,7 +238,7 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
         direction = true;
         hasInAnim_ = false;
     } else if (isRoot && IsNodeOutAndActive(node)) {
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d out and active, dependency check: %{public}d",
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d out and active, dependency check: %{public}d",
             node->GetId(), !hasInAnim_);
         hasOutAnim_ = false;
         CHECK_NULL_VOID(!hasInAnim_);
@@ -247,7 +246,7 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     }
 
     if (direction.has_value()) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterLayoutTask([weak = WeakClaim(this), isNodeIn = direction.value()]() {
             auto geometryTransition = weak.Upgrade();
@@ -269,14 +268,13 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     // outNode's frame is the target frame for active inNode to match,
     // inNode's frame is the target frame for active outNode to match.
     auto [self, target] = GetMatchedPair(isNodeIn);
-    CHECK_NULL_VOID(self);
-    CHECK_NULL_VOID(target);
+    CHECK_NULL_VOID(self && target && layoutWrapper);
     // target's geometry is ensured ready to use because layout nodes are sorted to respect dependency,
     // the order is active inNode, normal layout, active outNode.
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
     auto targetGeometryNode = target->GetGeometryNode();
-    CHECK_NULL_VOID(targetGeometryNode);
     auto targetRenderContext = target->GetRenderContext();
-    CHECK_NULL_VOID(targetRenderContext);
+    CHECK_NULL_VOID(targetRenderContext && targetGeometryNode && layoutProperty);
     SizeF size;
     if (isNodeIn) {
         staticNodeAbsRect_ =
@@ -289,8 +287,6 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
             (inNodeAbsRect_ ? inNodeAbsRect_->GetSize() : targetGeometryNode->GetFrameSize());
     }
     auto targetSize = CalcSize(NG::CalcLength(size.Width()), NG::CalcLength(size.Height()));
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateUserDefinedIdealSize(targetSize);
     TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d modify size to: %{public}s",
         self->GetId(), targetSize.ToString().c_str());
@@ -331,7 +327,7 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     } else {
         outNodeTargetAbsRect_ = targetRect;
         if (staticNodeAbsRect_ && targetRenderContext->HasSandBox()) {
-            staticNodeAbsRect_ = std::nullopt;
+            staticNodeAbsRect_.reset();
             targetRenderContext->RegisterSharedTransition(renderContext);
         }
         if (taskExecutor) {
@@ -365,23 +361,21 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         auto renderContext = node->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetSandBox(std::nullopt);
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d animation completed", node->GetId());
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d animation completed", node->GetId());
     };
-    bool isCurrentOptionValid = AnimationUtils::IsImplicitAnimationOpen();
     if (!isNodeIn && inNodeAbsRect_) {
         AnimationUtils::Animate(animationOption_, propertyCallback, finishCallback);
-        inNodeAbsRect_ = std::nullopt;
+        inNodeAbsRect_.reset();
         animationOption_ = AnimationOption();
-    } else if (isCurrentOptionValid) {
-        AnimationUtils::AnimateWithCurrentOptions(propertyCallback, finishCallback, false);
     } else {
-        AnimationUtils::Animate(implicitAnimationOption_, propertyCallback, finishCallback);
+        AnimationUtils::AnimateWithCurrentOptions(propertyCallback, finishCallback, false);
     }
 
-    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d, parent: %{public}s, target: %{public}s, "
+    TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d, parent: %{public}s, target: %{public}s, "
         "active frame: %{public}s, identity frame: %{public}s, option: %{public}d",
         self->GetId(), parentPos.ToString().c_str(), targetPos.ToString().c_str(), activeFrameRect.ToString().c_str(),
-        isNodeIn ? geometryNode->GetFrameRect().ToString().c_str() : "no log", isCurrentOptionValid);
+        isNodeIn ? geometryNode->GetFrameRect().ToString().c_str() : "no log",
+        AnimationUtils::IsImplicitAnimationOpen());
 }
 
 RefPtr<FrameNode> CreateHolderNode(const RefPtr<FrameNode>& node)
@@ -414,8 +408,8 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         inRenderContext->UnregisterSharedTransition(outRenderContext);
         hasOutAnim_ = false;
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow cancelled, node %{public}d to %{public}d",
-            holder_->GetId(), outNode->GetId());
+        followWithoutTransition_ = false;
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow cancelled");
         holder_ = nullptr;
         return false;
     }
@@ -432,8 +426,7 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         parent->AddDisappearingChild(outNode, idx);
         MarkLayoutDirty(outNode, -1);
         hasOutAnim_ = true;
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow started, node %{public}d to %{public}d",
-            outNode->GetId(), holder_->GetId());
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow started");
     } else {
         auto inNode = inNode_.Upgrade();
         CHECK_NULL_RETURN(inNode && inNode->GetGeometryNode() && holder_, false);
@@ -441,12 +434,13 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         CHECK_NULL_RETURN(parent, false);
         parent->ReplaceChild(holder_, inNode);
         parent->RemoveDisappearingChild(inNode);
-        inNode->SetLayoutPriority(0);
-        inNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        inNode->GetGeometryNode()->SetFrameSize(SizeF());
-        hasInAnim_ = false;
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow ended, node %{public}d to %{public}d",
-            holder_->GetId(), inNode->GetId());
+        state_ = State::ACTIVE;
+        MarkLayoutDirty(inNode, 1);
+        if (auto inNodeParent = inNode->GetAncestorNodeOfFrame()) {
+            MarkLayoutDirty(inNodeParent);
+        }
+        hasInAnim_ = true;
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow ended");
         holder_ = nullptr;
     }
     return true;
@@ -534,7 +528,7 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
             animationOption_ = animOption;
         }
     }, nullptr);
-    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "outNode: %{public}d %{public}s resyncs to inNode: %{public}d "
+    TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "outNode: %{public}d %{public}s resyncs to inNode: %{public}d "
         "%{public}s, option: %{public}d, hasScales: %{public}d", outNode->GetId(), inNodeAbsRectOld.ToString().c_str(),
         inNode->GetId(), inNodeAbsRect.ToString().c_str(), animOption.GetDuration(), inNodeParentHasScales);
 }
