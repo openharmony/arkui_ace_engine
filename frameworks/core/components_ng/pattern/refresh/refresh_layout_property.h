@@ -70,6 +70,7 @@ public:
 
         json->Put("offset", propIndicatorOffset_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("friction", propFriction_.value_or(1));
+        json->Put("promptText", propLoadingText_.value_or(std::string()).c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsRefreshing, bool, PROPERTY_UPDATE_LAYOUT);
