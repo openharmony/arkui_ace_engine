@@ -171,11 +171,11 @@ void ImageFileCache::WriteCacheFile(
     unsigned int magicVal = static_cast<const uint8_t*>(data)[0] + (static_cast<const uint8_t*>(data)[1] << 8) +
         (static_cast<const uint8_t*>(data)[2] << 16) + (static_cast<const uint8_t*>(data)[3] << 24);
     if (SystemProperties::IsImageFileCacheConvertAstcEnabled() && suffix == "" && magicVal != ASTC_MAGIC_ID) {
-        if (!ConvertToAstcAndWriteToFile(data, size, fileCacheKey, astcSize)) {
-            return;
+        if (ConvertToAstcAndWriteToFile(data, size, fileCacheKey, astcSize)) {
+            convertToAstc = true;
         }
-        convertToAstc = true;
-    } else {
+    }
+    if (!convertToAstc) {
         // 2. if not in dist, write file into disk.
         std::string writeFilePath = ConstructCacheFilePath(fileCacheKey + suffix);
 #ifdef WINDOWS_PLATFORM
