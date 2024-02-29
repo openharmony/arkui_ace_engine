@@ -31,6 +31,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
@@ -665,6 +666,10 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         HandleNotallowDrag(info);
         return;
     }
+    if (GetTextDraggable() && !GetIsTextDraggable()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, forbidden drag");
+        return;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto eventManager = pipeline->GetEventManager();
@@ -773,13 +778,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (eventRet == DragRet::DRAG_FAIL || eventRet == DragRet::DRAG_CANCEL) {
         return;
     }
-    if (GetTextDraggable() && !GetIsTextDraggable()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, forbidden drag");
-        return;
-    }
     std::string udKey;
     int32_t recordsSize = 1;
-    auto unifiedData = GetUnifiedData(dragDropInfo, dragEvent);
+    auto unifiedData = GetUnifiedData(frameNode->GetTag(), dragDropInfo, dragEvent);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -1322,7 +1323,8 @@ void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
 bool GestureEventHub::IsTextCategoryComponent(const std::string& frameTag)
 {
     return frameTag == V2::TEXTAREA_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
-           frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG;
+           frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG ||
+           frameTag == V2::RICH_EDITOR_ETS_TAG;
 }
 
 DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
@@ -1340,6 +1342,8 @@ DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const Re
 
     auto frameTag = frameNode->GetTag();
     if (GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Get drag drop info, pixelmap and customNode are set to null "
+            "when frameTag is %{public}s", frameTag.c_str());
         dragDropInfo.pixelMap = nullptr;
         dragDropInfo.customNode = nullptr;
     } else {
@@ -1348,18 +1352,24 @@ DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const Re
     return dragDropInfo;
 }
 
-RefPtr<UnifiedData> GestureEventHub::GetUnifiedData(
-    DragDropInfo& dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
+RefPtr<UnifiedData> GestureEventHub::GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
+    const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto unifiedData = dragEvent->GetData();
+    bool hasData = static_cast<bool>(unifiedData);
     if (!unifiedData && eventHub->HasDefaultOnDragStart()) {
         auto defaultDropInfo = eventHub->GetDefaultOnDragStart()(dragEvent, "");
         if (dragDropInfo.extraInfo.empty()) {
             dragDropInfo.extraInfo = defaultDropInfo.extraInfo;
         }
         unifiedData = dragEvent->GetData();
+    }
+    auto defaultOnDragStart = eventHub->GetDefaultOnDragStart();
+    CHECK_NULL_RETURN(defaultOnDragStart, unifiedData);
+    if (hasData && frameTag == V2::RICH_EDITOR_ETS_TAG) {
+        defaultOnDragStart(dragEvent, "");
     }
     return unifiedData;
 }

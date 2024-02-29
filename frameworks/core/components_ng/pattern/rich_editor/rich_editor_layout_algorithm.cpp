@@ -229,15 +229,6 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
         style.leadingMargin->pixmap = lineStyle->propLeadingMargin->pixmap;
     }
 
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, style);
-    auto pattern = host->GetPattern<RichEditorPattern>();
-    CHECK_NULL_RETURN(pattern, style);
-    if (pattern->IsShowPlaceholder()) {
-        style.textOverflow = TextOverflow::ELLIPSIS;
-        style.ellipsisMode = EllipsisMode::TAIL;
-        style.maxLines = 1;
-    }
     return style;
 }
 

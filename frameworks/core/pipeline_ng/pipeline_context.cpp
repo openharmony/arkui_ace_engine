@@ -864,13 +864,9 @@ void PipelineContext::FlushAnimationClosure()
     taskScheduler_->FlushTask();
 
     decltype(animationClosuresList_) temp(std::move(animationClosuresList_));
-    auto scheduler = std::move(taskScheduler_);
-    taskScheduler_ = std::make_unique<UITaskScheduler>();
     for (const auto& animation : temp) {
         animation();
-        taskScheduler_->CleanUp();
     }
-    taskScheduler_ = std::move(scheduler);
     window_->Unlock();
 }
 
@@ -1070,6 +1066,8 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
 
     FlushWindowSizeChangeCallback(width, height, type);
+
+    UpdateSizeChangeReason(type, rsTransaction);
 
 #ifdef ENABLE_ROSEN_BACKEND
     StartWindowSizeChangeAnimate(width, height, type, rsTransaction);
@@ -1315,6 +1313,15 @@ void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, u
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(uiExtensionManager_);
     uiExtensionManager_->TransferOriginAvoidArea(avoidArea, type);
+#endif
+}
+
+void PipelineContext::UpdateSizeChangeReason(
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    CHECK_NULL_VOID(uiExtensionManager_);
+    uiExtensionManager_->OnSizeChanged(type, rsTransaction);
 #endif
 }
 
@@ -2075,6 +2082,14 @@ void PipelineContext::FlushTouchEvents()
         if (needInterpolation) {
             auto targetTimeStamp = resampleTimeStamp_;
             for (const auto& idIter : idToTouchPoints) {
+                auto stamp =
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(idIter.second.time.time_since_epoch()).count();
+                if (targetTimeStamp > static_cast<uint64_t>(stamp)) {
+                    LOGI("Skip interpolation when there is no touch event after interpolation time point. "
+                         "(last stamp:%{public}" PRIu64 ", target stamp:%{public}" PRIu64 ")",
+                        static_cast<uint64_t>(stamp), targetTimeStamp);
+                    continue;
+                }
                 TouchEvent newTouchEvent =
                     GetResampleTouchEvent(historyPointsById_[idIter.first], idIter.second.history, targetTimeStamp);
                 if (newTouchEvent.x != 0 && newTouchEvent.y != 0) {

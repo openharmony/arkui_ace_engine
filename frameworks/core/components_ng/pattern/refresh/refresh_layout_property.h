@@ -50,6 +50,7 @@ public:
         value->propIndicatorOffset_ = CloneIndicatorOffset();
         value->propFriction_ = CloneFriction();
         value->propProgressColor_ = CloneProgressColor();
+        value->propLoadingText_ = CloneLoadingText();
         return value;
     }
 
@@ -60,6 +61,7 @@ public:
         ResetIndicatorOffset();
         ResetFriction();
         ResetProgressColor();
+        ResetLoadingText();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -68,12 +70,14 @@ public:
 
         json->Put("offset", propIndicatorOffset_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
         json->Put("friction", propFriction_.value_or(1));
+        json->Put("promptText", propLoadingText_.value_or(std::string()).c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsRefreshing, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorOffset, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Friction, int32_t, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ProgressColor, Color, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LoadingText, std::string, PROPERTY_UPDATE_LAYOUT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RefreshLayoutProperty);

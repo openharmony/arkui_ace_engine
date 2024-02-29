@@ -291,6 +291,112 @@ HWTEST_F(TextFieldModifyTest, CheckBlurReason001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleClickEvent001
+ * @tc.desc: Test the clickevent for handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, HandleClickEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    GestureEvent gestureEvent;
+    gestureEvent.SetLocalLocation(Offset(0.0f, 0.0f));
+    gestureEvent.SetSourceDevice(SourceType::TOUCH);
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    gestureEvent.SetTimeStamp(timeStampAce);
+
+    /**
+     * @tc.steps: step2. Set single clickevent. Call function HandleSingleClickEvent.
+     * @tc.expected: Check if return true.
+     */
+    pattern_->OnAfterModifyDone();
+    pattern_->HandleSingleClickEvent(gestureEvent);
+    EXPECT_TRUE(pattern_->isSingleHandle_);
+}
+
+/**
+ * @tc.name: OnCursorTwinkling001
+ * @tc.desc: Test the cursor twinkling for handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnCursorTwinkling001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    pattern_->OnCursorTwinkling();
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Set single clickevent. Call function OnCursorTwinkling.
+     * @tc.expected: Check if return true.
+     */
+    pattern_->obscureTickCountDown_ = 1;
+    pattern_->OnCursorTwinkling();
+    pattern_->OnAfterModifyDone();
+    EXPECT_TRUE(pattern_->isSingleHandle_);
+}
+
+/**
+ * @tc.name: UpdatSecondHandleInfo001
+ * @tc.desc: Test the update for handleinfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, UpdateSecondHandleInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Set secondhandle. Call function UpdateSelectOverlaySecondHandle.
+     * @tc.expected: Check if return true.
+     */
+    pattern_->ProcessOverlay(true, true, true);
+    pattern_->HandleSetSelection(5, 10, false);
+    pattern_->UpdateSelectOverlaySecondHandle(true);
+    EXPECT_NE(pattern_->GetSelectOverlayProxy(), nullptr);
+
+    pattern_->UpdateSelectOverlayDoubleHandle(true, true);
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    pattern_->UpdateSelectOverlayDoubleHandle(true, true);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
+}
+
+/**
+ * @tc.name: UpdatSecondHandleInfo001
+ * @tc.desc: Test get Select HandleInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, UpdateSecondHandleInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    OffsetF localOffset(1.0f, 1.0f);
+
+    /**
+     * @tc.steps: step2. Set secondhandle. Call function GetSelectHandleInfo.
+     * @tc.expected: Check if return true.
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    pattern_->UpdateSelectOverlaySecondHandle(true);
+    EXPECT_EQ(pattern_->GetSelectHandleInfo(localOffset).paintRect, RectF(1.0f, 1.0f, 1.5f, 50.0f));
+}
+
+/**
  * @tc.name: DoCallback001
  * @tc.desc: Test function OnModifyDone.
  * @tc.type: FUNC
@@ -426,6 +532,59 @@ HWTEST_F(TextFieldModifyTest, DoCallback004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DoCallback005
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the InitDragDrop in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+
+    /**
+     * @tc.steps: step3. mock drag start.
+     */
+    pattern_->OnDragStart().operator()(dragEvent, "");
+    EXPECT_TRUE(pattern_->cursorVisible_);
+}
+
+/**
+ * @tc.name: DoCallback006
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. callback the InitDragDrop in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    pattern_->ShowSelectAfterDragEvent();
+
+    /**
+     * @tc.steps: step3. mock show Select After DragEvent.
+     */
+    pattern_->processOverlayDelayTask_.operator()();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleRect(),
+        RectF(0.0f, 0.0f, 0.0f, 0.0f));
+}
+
+/**
  * @tc.name: OnVirtualKeyboardAreaChanged001
  * @tc.desc: Test function OnVirtualKeyboardAreaChanged.
  * @tc.type: FUNC
@@ -446,4 +605,56 @@ HWTEST_F(TextFieldModifyTest, OnVirtualKeyboardAreaChanged001, TestSize.Level1)
         firstHandleInfo_.rect, RectF(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
+/**
+ * @tc.name: CreateNodePaintMethod004
+ * @tc.desc: Test textfield to create paint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, CreateNodePaintMethod004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+
+    auto scrollBar = pattern_->GetScrollBar();
+    scrollBar->SetPositionMode(PositionMode::BOTTOM);
+
+    pattern_->UpdateScrollBarOffset();
+    auto paint = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
+    pattern_->OnScrollEndCallback();
+    EXPECT_NE(pattern_->textFieldContentModifier_, nullptr);
+}
+
+/**
+ * @tc.name: StripNextLine001
+ * @tc.desc: Test function OnVirtualKeyboardAreaChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, StripNextLine001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Call OnScrollEndCallback.
+     */
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    std::string ori = "12345";
+    std::wstring value = StringUtils::ToWstring(ori);
+    pattern_->StripNextLine(value);
+    EXPECT_EQ(ori, StringUtils::ToString(value));
+}
 } // namespace OHOS::Ace::NG

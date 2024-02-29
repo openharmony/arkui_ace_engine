@@ -120,7 +120,7 @@ struct PasswordModeStyle {
     MarginProperty margin;
 };
 
-struct PreInlineState {
+struct PreState {
     Color textColor;
     Color bgColor;
     BorderRadiusProperty radius;
@@ -130,7 +130,7 @@ struct PreInlineState {
     MarginProperty margin;
     RectF frameRect;
     bool setHeight = false;
-    bool saveInlineState = false;
+    bool saveState = false;
     bool hasBorderColor = false;
 };
 
@@ -1033,6 +1033,8 @@ public:
 
     virtual void InitBackGroundColorAndBorderRadius();
 
+    void SavePreUnderLineState();
+
     int32_t GetContentWideTextLength() override
     {
         return static_cast<int32_t>(contentController_->GetWideText().length());
@@ -1188,8 +1190,9 @@ private:
 
     void UpdateCopyAllStatus();
     void SaveInlineStates();
-    void ApplyInlineStates(bool focusStatus);
+    void ApplyInlineStates();
     void RestorePreInlineStates();
+    void RestoreUnderlineStates();
     void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
@@ -1304,7 +1307,8 @@ private:
     float previewWidth_ = 0.0f;
     float lastTextRectY_ = 0.0f;
     std::optional<DisplayMode> barState_;
-    InputStyle preInputStyle_ = InputStyle::DEFAULT;
+    bool preInline = false;
+    bool preUnderline = false;
     bool preErrorState_ = false;
     float preErrorMargin_ = 0.0f;
     bool restoreMarginState_ = false;
@@ -1355,8 +1359,9 @@ private:
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
     bool needApplyInlineSize_ = false;
-    PreInlineState inlineState_;
+    PreState inlineState_;
     // inline --end
+    PreState preUnderlineState_;
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;

@@ -33,7 +33,7 @@ public:
     {
         containerCurrentId_ = Container::CurrentId();
     };
-    ~JSNavPathStack() = default;
+    ~JSNavPathStack() override = default;
 
     static void JSBind(BindingTarget globalObj);
 

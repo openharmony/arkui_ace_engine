@@ -1188,6 +1188,17 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     if (dragResultObjects_.empty() || !gestureHub->GetIsTextDraggable()) {
         return itemInfo;
     }
+    auto data = event->GetData();
+    if (!data) {
+        AddUdmfData(event);
+    }
+    CloseOperate();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return itemInfo;
+}
+
+void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
+{
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     auto resultProcessor = [unifiedData, weak = WeakClaim(this)](const ResultObject& result) {
         auto pattern = weak.Upgrade();
@@ -1217,9 +1228,6 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
         resultProcessor(resultObj);
     }
     event->SetData(unifiedData);
-    CloseOperate();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    return itemInfo;
 }
 
 void TextPattern::CloseOperate()

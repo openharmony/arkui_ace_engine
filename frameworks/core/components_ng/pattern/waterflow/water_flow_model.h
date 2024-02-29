@@ -22,6 +22,7 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
 namespace OHOS::Ace {
 class WaterFlowModel {
@@ -78,6 +79,10 @@ public:
     virtual void SetScrollBarMode(DisplayMode value) = 0;
     virtual void SetScrollBarColor(const std::string& value) = 0;
     virtual void SetScrollBarWidth(const std::string& value) = 0;
+    virtual RefPtr<NG::WaterFlowSections> GetOrCreateWaterFlowSections()
+    {
+        return nullptr;
+    }
 
 private:
     static std::unique_ptr<WaterFlowModel> instance_;

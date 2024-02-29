@@ -171,11 +171,11 @@ void ImageFileCache::WriteCacheFile(
     unsigned int magicVal = static_cast<const uint8_t*>(data)[0] + (static_cast<const uint8_t*>(data)[1] << 8) +
         (static_cast<const uint8_t*>(data)[2] << 16) + (static_cast<const uint8_t*>(data)[3] << 24);
     if (SystemProperties::IsImageFileCacheConvertAstcEnabled() && suffix == "" && magicVal != ASTC_MAGIC_ID) {
-        if (!ConvertToAstcAndWriteToFile(data, size, fileCacheKey, astcSize)) {
-            return;
+        if (ConvertToAstcAndWriteToFile(data, size, fileCacheKey, astcSize)) {
+            convertToAstc = true;
         }
-        convertToAstc = true;
-    } else {
+    }
+    if (!convertToAstc) {
         // 2. if not in dist, write file into disk.
         std::string writeFilePath = ConstructCacheFilePath(fileCacheKey + suffix);
 #ifdef WINDOWS_PLATFORM
@@ -212,37 +212,15 @@ bool ImageFileCache::ConvertToAstcAndWriteToFile(const void* const data, size_t 
     PackOption option;
     option.format = CONVERT_ASTC_FORMAT;
     auto pixelMap = imageSource->CreatePixelMap({-1, -1});
-    auto maxPackSize = static_cast<uint32_t>(pixelMap->GetByteCount());
-    auto packBuffer = new (std::nothrow) uint8_t [maxPackSize];
-    if (packBuffer == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "create buffer failed. %{public}s", fileCacheKey.c_str());
-        return false;
-    }
 
-    imagePacker->StartPacking(packBuffer, maxPackSize, option);
+    imagePacker->StartPacking(astcFilePath, option);
     imagePacker->AddImage(*pixelMap);
     int64_t packedSize = 0;
     if (imagePacker->FinalizePacking(packedSize)) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "convert to astc failed. %{public}s", fileCacheKey.c_str());
-        delete [] packBuffer;
-        packBuffer = nullptr;
         return false;
     }
 
-#ifdef WINDOWS_PLATFORM
-    std::ofstream outFile(astcFilePath, std::ios::binary);
-#else
-    std::ofstream outFile(astcFilePath, std::fstream::out);
-#endif
-    if (!outFile.is_open()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "open cache file failed, cannot write. %{public}s", fileCacheKey.c_str());
-        delete [] packBuffer;
-        packBuffer = nullptr;
-        return false;
-    }
-    outFile.write(reinterpret_cast<const char*>(packBuffer), packedSize);
-    delete [] packBuffer;
-    packBuffer = nullptr;
     astcSize = packedSize;
     return true;
 }

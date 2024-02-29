@@ -330,3 +330,6 @@ frameworks/core/components_ng/components.gni  @sunfei2021
 [Test source]
 test/mock/  @liyujie43
 test/unittest/  @liyujie43
+
+[Native Node Module]
+frameworks/core/interfaces/arkoala/ @nikolay-igotti
