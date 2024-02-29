@@ -3553,6 +3553,7 @@ void RosenRenderContext::PaintProgressMask()
         progress->SetValue(moonProgressModifier_->GetMaxValue());
     }
     moonProgressModifier_->SetValue(progress->GetValue());
+    moonProgressModifier_->SetEnableBreathe(progress->GetEnableBreathe());
 }
 
 void RosenRenderContext::SetClipBoundsWithCommands(const std::string& commands)

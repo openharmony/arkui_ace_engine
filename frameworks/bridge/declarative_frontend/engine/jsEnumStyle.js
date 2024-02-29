@@ -1457,6 +1457,11 @@ class ProgressMask {
     this.color = arg;
     return this;
   }
+
+  enableBreathe(arg) {
+    this.breathe = arg;
+    return this;
+  }
 }
 
 class BottomTabBarStyle {

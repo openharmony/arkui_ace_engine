@@ -41,6 +41,9 @@ constexpr float DOUBLE = 2.0f;
 constexpr int32_t SKEWY = 3;
 constexpr int32_t SCALEY = 4;
 constexpr float RING_ALPHA = 200 / 255.0f;
+constexpr int32_t RING_ALPHA_DARK = 255;
+constexpr int32_t RING_ALPHA_DARK_BACKGROUNG = 150;
+constexpr Color DEFAULT_COLOR_DARK = Color(0x99FFFFFF);
 constexpr int32_t TOTAL_POINTS_COUNT = 20;
 constexpr int32_t TAIL_ANIAMTION_DURATION = 400;
 constexpr int32_t TRANS_DURATION = 100;
@@ -107,6 +110,9 @@ void LoadingProgressModifier::onDraw(DrawingContext& context)
     ringParam.radius = LoadingProgressUtill::GetRingRadius(diameter) * sizeScale_->Get();
     ringParam.movement =
         (ringParam.radius * DOUBLE + ringParam.strokeWidth) * centerDeviation_->Get() * sizeScale_->Get();
+    ringParam.darkRingRadius = LoadingProgressUtill::GetRingDarkRadius(diameter) * sizeScale_->Get();
+    ringParam.darkBackgroundWidth = LoadingProgressUtill::GetRingDarkBackgroundWidth(diameter) * sizeScale_->Get();
+    ringParam.darkBackgroundRadius = LoadingProgressUtill::GetRingDarkBackgroundRadius(diameter) * sizeScale_->Get();
 
     CometParam cometParam;
     cometParam.radius = LoadingProgressUtill::GetCometRadius(diameter) * sizeScale_->Get();
@@ -133,6 +139,44 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     auto ringColor = color_->Get();
     ringColor.BlendOpacity(RING_ALPHA);
     pen.SetColor(ToRSColor(ringColor));
+    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        if (ringColor.GetValue() == DEFAULT_COLOR_DARK.GetValue()) {
+            ringColor = LinearColor::WHITE;
+        }
+        // draw ring background
+        ringColor.BlendOpacity(RING_ALPHA_DARK_BACKGROUNG / FULL_OPACITY);
+        pen.SetColor(ToRSColor(ringColor));
+
+        RSFilter filter;
+#ifndef USE_ROSEN_DRAWING
+        filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(
+            ringParam.darkBackgroundRadius, ringParam.darkBackgroundRadius, RSTileMode::DECAL, nullptr));
+#else
+        filter.SetImageFilter(RSRecordingImageFilter::CreateBlurImageFilter(
+            ringParam.darkBackgroundRadius, ringParam.darkBackgroundRadius, RSTileMode::DECAL, nullptr));
+#endif
+        pen.SetFilter(filter);
+        pen.SetWidth(ringParam.darkBackgroundWidth);
+        pen.SetAntiAlias(true);
+        canvas.AttachPen(pen);
+        canvas.DrawCircle({ offset_->Get().GetX() + contentSize_->Get().Width() * HALF,
+                              offset_->Get().GetY() + contentSize_->Get().Height() * HALF + ringParam.movement },
+            ringParam.radius);
+        canvas.DetachPen();
+        canvas.Restore();
+
+        ringColor.BlendOpacity(RING_ALPHA_DARK / FULL_OPACITY);
+        pen.SetColor(ToRSColor(ringColor));
+
+#ifndef USE_ROSEN_DRAWING
+        filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(
+            ringParam.darkRingRadius, ringParam.darkRingRadius, RSTileMode::DECAL, nullptr));
+#else
+        filter.SetImageFilter(RSRecordingImageFilter::CreateBlurImageFilter(
+            ringParam.darkRingRadius, ringParam.darkRingRadius, RSTileMode::DECAL, nullptr));
+#endif
+        pen.SetFilter(filter);
+    }
     if (loadingProgressOwner_ == LoadingProgressOwner::REFRESH && SystemProperties::GetColorMode() == ColorMode::DARK) {
         filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
             RSBlurType::NORMAL, PipelineBase::GetCurrentDensity() * REFRESH_DARK_MODE_RING_BLUR_RADIUS));
@@ -178,6 +222,9 @@ void LoadingProgressModifier::DrawOrbit(
     matrix.MapPoints(distPoints, points, points.size());
     auto cometColor = color_->Get();
     float colorAlpha = cometColor.GetAlpha() / FULL_OPACITY;
+    if (SystemProperties::GetColorMode() == ColorMode::DARK && cometColor.GetValue() == DEFAULT_COLOR_DARK.GetValue()) {
+        colorAlpha = OPACITY3;
+    }
     auto baseAlpha = colorAlpha * cometParam.alphaScale;
     for (uint32_t i = 0; i < distPoints.size(); i++) {
         RSPoint pointCenter = distPoints[i];
