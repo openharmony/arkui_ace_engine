@@ -96,7 +96,6 @@ constexpr float TIME_UNIT = 1000.0f;
 constexpr float DOUBLE_CLICK_INTERVAL_MS = 300.0f;
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
-constexpr Color DEFAULT_PLACEHOLDER_COLOR = Color(0x99000000);
 
 const std::wstring lineSeparator = L"\n";
 // hen do ai anaylsis, we should limit the left an right limit of the string
@@ -5597,13 +5596,10 @@ void RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->HasPlaceholder() || layoutProperty->GetPlaceholder().value().empty()) {
+        isShowPlaceholder_ = false;
         return;
     }
     auto placeholderValue = layoutProperty->GetPlaceholder().value();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<RichEditorTheme>();
-    CHECK_NULL_VOID(theme);
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
@@ -5621,8 +5617,9 @@ void RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
     if (layoutProperty->HasPlaceholderItalicFontStyle()) {
         placeholderNode->UpdateItalicFontStyle(layoutProperty->GetPlaceholderItalicFontStyle().value());
     }
-    placeholderNode->UpdateTextColor(
-        layoutProperty->GetPlaceholderTextColorValue(theme ? theme->GetPlaceholderColor() : DEFAULT_PLACEHOLDER_COLOR));
+    if (layoutProperty->HasPlaceholderTextColor()) {
+        placeholderNode->UpdateTextColor(layoutProperty->GetPlaceholderTextColor().value());
+    }
 
     auto spanItem = placeholderNode->GetSpanItem();
     CHECK_NULL_VOID(spanItem);
