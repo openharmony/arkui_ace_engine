@@ -474,6 +474,15 @@ public:
 
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
+    void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
+    {
+        isScrollToSafeAreaHelper_ = isScrollToSafeAreaHelper;
+    }
+
+    bool IsScrollToSafeAreaHelper() const
+    {
+        return isScrollToSafeAreaHelper_;
+    }
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
@@ -666,6 +675,7 @@ private:
     bool animateOverScroll_ = false;
     bool isAnimateOverScroll_ = false;
     bool animateCanOverScroll_ = false;
+    bool isScrollToSafeAreaHelper_ = true;
 
     NestedScrollOptions nestedScroll_ = {
         .forward = NestedScrollMode::SELF_ONLY,
