@@ -19,6 +19,7 @@
 #include <functional>
 #include <string>
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace::NG {
@@ -96,6 +97,7 @@ public:
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetFont(FrameNode* frameNode, const Font& value);
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
+    static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
 };
 } // namespace OHOS::Ace::NG
 

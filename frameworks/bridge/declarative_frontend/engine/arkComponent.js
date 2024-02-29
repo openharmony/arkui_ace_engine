@@ -6908,6 +6908,25 @@ class TextWordBreakModifier extends ModifierWithKey {
   }
 }
 TextWordBreakModifier.identity = Symbol('textWordBreak');
+
+class TextEllipsisModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetEllipsisMode(node);
+    }
+    else {
+      getUINativeModule().text.setEllipsisMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextEllipsisModeModifier.identity = Symbol('textEllipsisMode');
+
 class TextMinFontSizeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7355,7 +7374,8 @@ class ArkTextComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   ellipsisMode(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextEllipsisModeModifier.identity, TextEllipsisModeModifier, value);
+    return this;
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, TextClipModifier.identity, TextClipModifier, value);

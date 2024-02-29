@@ -455,6 +455,8 @@ struct ArkUITextModifierAPI {
     void (*ResetTextFont)(NodeHandle node);
     void (*SetWordBreak)(NodeHandle node, const uint32_t wordBreak);
     void (*ResetWordBreak)(NodeHandle node);
+    void (*setEllipsisMode)(NodeHandle node, const uint32_t ellipsisMode);
+    void (*resetEllipsisMode)(NodeHandle node);
 };
 
 struct ArkUIButtonModifierAPI {
