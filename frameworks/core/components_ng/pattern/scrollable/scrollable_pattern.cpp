@@ -1959,9 +1959,9 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
 
 void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
 {
-    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
-        ScrollEventType::SCROLL_STOP);
     if (scrollStop_) {
+        UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
+            ScrollEventType::SCROLL_STOP);
         if (!GetScrollAbort()) {
             auto host = GetHost();
             if (host != nullptr) {
