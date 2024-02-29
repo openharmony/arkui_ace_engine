@@ -49,6 +49,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_animatable_arithmetic.h"
@@ -5201,6 +5202,25 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged));
 }
 
+void JSViewAbstract::JsOnSizeChange(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
+    if (!CheckJSCallbackInfo("JsOnSizeChange", info, checkList)) {
+        return;
+    }
+    auto jsOnSizeChangeFunction = AceType::MakeRefPtr<JsOnSizeChangeFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onSizeChanged = [execCtx = info.GetExecutionContext(), func = std::move(jsOnSizeChangeFunction),
+                            node = frameNode](const NG::RectF& oldRect, const NG::RectF& rect) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onSizeChange");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(oldRect, rect);
+    };
+    ViewAbstractModel::GetInstance()->SetOnSizeChanged(std::move(onSizeChanged));
+}
+
 #ifndef WEARABLE_PRODUCT
 void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
 {
@@ -6826,6 +6846,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
     JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
+    JSClass<JSViewAbstract>::StaticMethod("onSizeChange", &JSViewAbstract::JsOnSizeChange);
     JSClass<JSViewAbstract>::StaticMethod("touchable", &JSInteractableView::JsTouchable);
     JSClass<JSViewAbstract>::StaticMethod("monopolizeEvents", &JSInteractableView::JsMonopolizeEvents);
 

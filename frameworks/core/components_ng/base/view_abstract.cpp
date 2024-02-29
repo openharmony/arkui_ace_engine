@@ -950,6 +950,15 @@ void ViewAbstract::SetOnAreaChanged(std::function<void(const RectF &oldRect, con
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
 }
 
+void ViewAbstract::SetOnSizeChanged(std::function<void(const RectF &oldRect, const RectF &rect)> &&onSizeChanged)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
+}
+
 void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
     const std::vector<double> &ratioList)
 {
