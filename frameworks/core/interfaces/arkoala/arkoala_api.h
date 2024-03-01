@@ -1383,6 +1383,7 @@ struct ArkUIButtonModifier {
     void (*setButtonSize)(ArkUINodeHandle node, ArkUI_CharPtr widthValue, ArkUI_Int32 widthUnit,
         ArkUI_CharPtr heightValue, ArkUI_Int32 heightUnit);
     void (*resetButtonSize)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getButtonLabel)(ArkUINodeHandle node);
 };
 
 struct ArkUIImageModifier {
@@ -1931,6 +1932,11 @@ struct ArkUIProgressModifier {
     void (*setProgressTotal)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*setProgressType)(ArkUINodeHandle node, ArkUI_Int32 type);
     void (*resetProgressType)(ArkUINodeHandle node);
+
+    ArkUI_Float32 (*getProgressValue)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getProgressTotal)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getProgressType)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getProgressColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIPluginModifier {
@@ -1991,6 +1997,14 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
     void (*setTextAreaPlaceholderFontEnum)(ArkUINodeHandle node, const struct ArkUIResourceLength* size,
         ArkUI_Int32 weight, ArkUI_CharPtr family, ArkUI_Int32 style);
+
+    ArkUI_CharPtr (*getTextAreaPlaceholder)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getTextAreaText)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextAreaCaretColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextAreaMaxLength)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextAreaPlaceholderColor)(ArkUINodeHandle node);
+    void (*getTextAreaPlaceholderFont)(ArkUINodeHandle node, ArkUITextFont* font);
+    ArkUI_Bool (*getTextAreaEditing)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2051,6 +2065,25 @@ struct ArkUITextInputModifier {
     void (*setTextInputCancelButton)(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
         ArkUI_Uint32 color, ArkUI_CharPtr src);
     void (*resetTextinputCancelButton)(ArkUINodeHandle node);
+
+    ArkUI_CharPtr (*getTextInputPlaceholder)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getTextInputText)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextInputCaretColor)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextInputCaretStyle)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextInputShowUnderline)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextInputMaxLength)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputEnterKeyType)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextInputPlaceholderColor)(ArkUINodeHandle node);
+    void (*getTextInputPlaceholderFont)(ArkUINodeHandle node, ArkUITextFont* font);
+    ArkUI_Bool (*getTextInputRequestKeyboardOnFocus)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputType)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextInputSelectedBackgroundColor)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextInputShowPasswordIcon)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextInputEditing)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextInputShowCancelButton)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextInputCancelIconSize)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getTextInputTextCanacelIconSrc)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextInputTextCanacelIconColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2859,6 +2892,10 @@ struct ArkUIXComponentModifier {
     void (*setXComponentId)(ArkUINodeHandle node, ArkUI_CharPtr id);
     void (*setXComponentType)(ArkUINodeHandle node, ArkUI_Uint32 type);
     void (*setXComponentSurfaceSize)(ArkUINodeHandle node, ArkUI_Uint32 width, ArkUI_Uint32 height);
+    ArkUI_CharPtr (*getXComponentId)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getXComponentType)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getXComponentSurfaceWidth)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getXComponentSurfaceHeight)(ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {

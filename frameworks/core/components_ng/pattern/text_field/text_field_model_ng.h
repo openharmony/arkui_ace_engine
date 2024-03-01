@@ -137,6 +137,24 @@ public:
     static void SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize);
     static void SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& iconColor);
+    static std::string GetPlaceholderText(FrameNode* frameNode);
+    static std::string GetTextFieldText(FrameNode* frameNode);
+    static Color GetCaretColor(FrameNode* frameNode);
+    static Dimension GetCaretStyle(FrameNode* frameNode);
+    static bool GetShowUnderline(FrameNode* frameNode);
+    static uint32_t GetMaxLength(FrameNode* frameNode);
+    static TextInputAction GetEnterKeyType(FrameNode* frameNode);
+    static Color GetPlaceholderColor(FrameNode* frameNode);
+    static Font GetPlaceholderFont(FrameNode* frameNode);
+    static bool GetRequestKeyboardOnFocus(FrameNode* frameNode);
+    static TextInputType GetType(FrameNode* frameNode);
+    static Color GetSelectedBackgroundColor(FrameNode* frameNode);
+    static bool GetShowPasswordIcon(FrameNode* frameNode);
+    static bool GetTextFieldEditing(FrameNode* frameNode);
+    static bool GetShowCancelButton(FrameNode* frameNode);
+    static CalcDimension GetCancelIconSize(FrameNode* frameNode);
+    static std::string GetCanacelIconSrc(FrameNode* frameNode);
+    static Color GetCancelIconColor(FrameNode* frameNode);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

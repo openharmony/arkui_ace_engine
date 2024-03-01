@@ -46,6 +46,10 @@ public:
     static void SetXComponentId(FrameNode* frameNode, const std::string& id);
     static void SetXComponentType(FrameNode* frameNode, XComponentType type);
     static void SetXComponentSurfaceSize(FrameNode* frameNode, uint32_t width, uint32_t height);
+    static std::string GetXComponentId(FrameNode* frameNode);
+    static XComponentType GetXComponentType(FrameNode* frameNode);
+    static uint32_t GetXComponentSurfaceWidth(FrameNode* frameNode);
+    static uint32_t GetXComponentSurfaceHeight(FrameNode* frameNode);
 
 private:
     XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);
