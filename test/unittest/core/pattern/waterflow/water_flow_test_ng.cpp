@@ -1496,6 +1496,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest005, TestSize.Level1)
     float maxMainHeight = pattern_->layoutInfo_.GetMaxMainHeight();
     int32_t crossIndex = pattern_->layoutInfo_.items_[0].rbegin()->first;
     pattern_->layoutInfo_.items_[0][crossIndex + 1][0] = std::pair<float, float>(1.0f, maxMainHeight);
+    pattern_->layoutInfo_.itemInfos_.clear();
+    pattern_->layoutInfo_.endPosArray_.clear();
     EXPECT_EQ(pattern_->layoutInfo_.GetMaxMainHeight(), maxMainHeight + 1.0f);
 
     /**
