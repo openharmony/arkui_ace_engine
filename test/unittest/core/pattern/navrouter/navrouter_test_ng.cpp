@@ -237,6 +237,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg004, TestSize.Level1)
     ASSERT_NE(navRouterGroupNode, nullptr);
 
     auto navigationPattern = AceType::MakeRefPtr<NavigationPattern>();
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
     auto parentNode = AceType::MakeRefPtr<NavigationGroupNode>("NavigationGroupNode", 11, navigationPattern);
     navRouterGroupNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
     ASSERT_NE(navRouterGroupNode->GetParent(), nullptr);
@@ -561,6 +563,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0015, TestSize.Level1)
 
     auto contentNode = NavigationGroupNode::GetOrCreateGroupNode(
         "contentNode", 33, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    contentNode->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     auto child = NavDestinationGroupNode::GetOrCreateGroupNode(
         "child", 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     contentNode->children_.push_back(child);
@@ -857,6 +861,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0023, TestSize.Level1)
     ASSERT_NE(navRouterGroupNode, nullptr);
     auto parent = NavigationGroupNode::GetOrCreateGroupNode(
         "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    parent->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
