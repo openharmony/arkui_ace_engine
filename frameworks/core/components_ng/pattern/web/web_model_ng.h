@@ -60,6 +60,7 @@ public:
     void SetOnInterceptRequest(std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnUrlLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnContextMenuShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;

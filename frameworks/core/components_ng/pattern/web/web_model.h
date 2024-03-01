@@ -159,6 +159,7 @@ public:
 
     virtual void SetCopyOptionMode(CopyOptions mode) {};
     virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
+    virtual void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

@@ -4765,6 +4765,34 @@ bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRe
     return result;
 }
 
+bool WebDelegate::OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), request, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webRequest = AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
+            request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect());
+        auto param = std::make_shared<LoadOverrideEvent>(webRequest);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnOverrideUrlLoadingEvent = webEventHub->GetOnOverrideUrlLoadingEvent();
+            CHECK_NULL_VOID(propOnOverrideUrlLoadingEvent);
+            result = propOnOverrideUrlLoadingEvent(param);
+        }
+        auto webCom = delegate->webComponent_.Upgrade();
+        CHECK_NULL_VOID(webCom);
+        result = webCom->OnOverrideUrlLoading(param.get());
+    });
+    return result;
+}
+
 void WebDelegate::OnResourceLoad(const std::string& url)
 {
     if (onResourceLoadV2_) {

@@ -903,4 +903,17 @@ bool WebClientImpl::FilterScrollEvent(const float x, const float y, const float 
     return delegate->FilterScrollEvent(x, y, xVelocity, yVelocity);
 }
 
+bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+
+    bool result = delegate->OnHandleOverrideLoading(request);
+    
+    return result;
+}
+
 } // namespace OHOS::Ace

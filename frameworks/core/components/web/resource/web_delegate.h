@@ -628,6 +628,7 @@ public:
     void OnContextMenuHide(const std::string& info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
     bool OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
+    bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);
     void OnScroll(double xOffset, double yOffset);

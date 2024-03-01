@@ -597,4 +597,11 @@ void WebModelImpl::SetNativeEmbedGestureEventId(std::function<void(const BaseEve
     webComponent->SetNativeEmbedGestureEventId(eventMarker);
 }
 
+void WebModelImpl::SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOnOverrideUrlLoading(std::move(jsCallback));
+}
+
 } // namespace OHOS::Ace::Framework

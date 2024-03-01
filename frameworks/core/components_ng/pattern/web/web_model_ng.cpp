@@ -299,6 +299,15 @@ void WebModelNG::SetOnLoadIntercept(std::function<bool(const BaseEventInfo* info
     webEventHub->SetOnLoadInterceptEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) -> bool { return func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnOverrideUrlLoadingEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetOnInterceptRequest(std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;

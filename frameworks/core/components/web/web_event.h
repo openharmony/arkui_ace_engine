@@ -773,6 +773,23 @@ private:
     RefPtr<WebRequest> request_;
 };
 
+class ACE_EXPORT LoadOverrideEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadOverrideEvent, BaseEventInfo);
+
+public:
+    explicit LoadOverrideEvent(const RefPtr<WebRequest>& request) :
+        BaseEventInfo("LoadOverrideEvent"), request_(request) {}
+    ~LoadOverrideEvent() = default;
+
+    const RefPtr<WebRequest>& GetRequest() const
+    {
+        return request_;
+    }
+
+private:
+    RefPtr<WebRequest> request_;
+};
+
 class ACE_EXPORT LoadWebGeolocationHideEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebGeolocationHideEvent, BaseEventInfo);
 
