@@ -211,7 +211,7 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
     // already check in entry point.
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->registerNodeAsyncEvent(
-        nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), eventId, nodePtr);
+        nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), reinterpret_cast<intptr_t>(nodePtr));
     return ERROR_CODE_NO_ERROR;
 }
 
