@@ -443,6 +443,8 @@ ArkUIExtendedNodeAPI impl_extended = {
     nullptr, // getMeasureHeight
     nullptr, // setX
     nullptr, // setY
+    nullptr, // setAlignment
+    nullptr, // getAlignment
     nullptr, // indexerChecker
     nullptr, // setRangeUpdater
     nullptr, // setLazyItemIndexer
