@@ -34,6 +34,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_DURATION = 200;
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+constexpr double NUMBER_TWO = 2.0;
 } // namespace
 void SwitchPattern::OnAttachToFrameNode()
 {
@@ -420,7 +421,22 @@ void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto height = height_ + focusPaintPadding * 2;
     auto width = width_ + focusPaintPadding * 2;
     auto radio = height / 2.0;
-    auto Rect = RectF(offset_.GetX() - focusPaintPadding, offset_.GetY() - focusPaintPadding, width, height);
+    auto offsetX = offset_.GetX() - focusPaintPadding;
+    auto offsetY = offset_.GetY() - focusPaintPadding;
+    auto trackRadius = switchModifier_->GetTrackRadius();
+    auto pointRadius = switchModifier_->GetPointRadius();
+    if (pointRadius * NUMBER_TWO > height_) {
+        width = width_ - height_ + pointRadius * NUMBER_TWO + focusPaintPadding * NUMBER_TWO;
+        height = pointRadius * NUMBER_TWO + focusPaintPadding * NUMBER_TWO;
+        radio = pointRadius + focusPaintPadding;
+        offsetX = offset_.GetX() - focusPaintPadding - (pointRadius - height_ / NUMBER_TWO);
+        offsetY = offset_.GetY() - focusPaintPadding - (pointRadius - height_ / NUMBER_TWO);
+    } else {
+        if (SWITCH_ERROR_RADIUS != trackRadius) {
+            radio = trackRadius + focusPaintPadding;
+        }
+    }
+    auto Rect = RectF(offsetX, offsetY, width, height);
 
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, radio, radio);
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, radio, radio);

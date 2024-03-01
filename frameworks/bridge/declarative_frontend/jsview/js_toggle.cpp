@@ -71,6 +71,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("backgroundColor", &JSToggle::SetBackgroundColor);
     JSClass<JSToggle>::StaticMethod("hoverEffect", &JSToggle::JsHoverEffect);
     JSClass<JSToggle>::StaticMethod("pop", &JSToggle::Pop);
+    JSClass<JSToggle>::StaticMethod("switchStyle", &JSToggle::SwitchStyle);
 
     JSClass<JSToggle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSToggle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -412,5 +413,52 @@ void JSToggle::JsHoverEffect(const JSCallbackInfo& info)
 void JSToggle::Pop()
 {
     ToggleModel::GetInstance()->Pop();
+}
+
+void JSToggle::SwitchStyle(const JSCallbackInfo& info)
+{
+    if ((info.Length() < 1) || !info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+
+    CalcDimension pointRadius;
+    if (jsObj->HasProperty("pointRadius") && ParseJsDimensionVp(jsObj->GetProperty("pointRadius"), pointRadius) &&
+        !pointRadius.IsNegative()) {
+        ToggleModel::GetInstance()->SetPointRadius(pointRadius);
+    } else {
+        ToggleModel::GetInstance()->ResetPointRadius();
+    }
+
+    Color unselectedColor;
+    if (jsObj->HasProperty("unselectedColor") &&
+        ParseJsColor(jsObj->GetProperty("unselectedColor"), unselectedColor)) {
+        ToggleModel::GetInstance()->SetUnselectedColor(unselectedColor);
+    } else {
+        auto theme = GetTheme<SwitchTheme>();
+        if (theme) {
+            unselectedColor = theme->GetInactiveColor();
+        }
+        ToggleModel::GetInstance()->SetUnselectedColor(unselectedColor);
+    }
+
+    Color pointColor;
+    if (jsObj->HasProperty("pointColor") && ParseJsColor(jsObj->GetProperty("pointColor"), pointColor)) {
+        ToggleModel::GetInstance()->SetSwitchPointColor(pointColor);
+    } else {
+        auto theme = GetTheme<SwitchTheme>();
+        if (theme) {
+            pointColor = theme->GetPointColor();
+        }
+        ToggleModel::GetInstance()->SetSwitchPointColor(pointColor);
+    }
+
+    CalcDimension trackRadius;
+    if (jsObj->HasProperty("trackBorderRadius") &&
+        ParseJsDimensionVp(jsObj->GetProperty("trackBorderRadius"), trackRadius) && !trackRadius.IsNegative()) {
+        ToggleModel::GetInstance()->SetTrackBorderRadius(trackRadius);
+    } else {
+        ToggleModel::GetInstance()->ResetTrackBorderRadius();
+    }
 }
 } // namespace OHOS::Ace::Framework
