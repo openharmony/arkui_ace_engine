@@ -48,23 +48,18 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutProperty = AceType::DynamicCast<ScrollLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_CONTENT);
-
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, idealSize);
-
     // Calculate child layout constraint.
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateChildConstraint(axis, idealSize, childLayoutConstraint);
-
     // Measure child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     if (childWrapper) {
         childWrapper->Measure(childLayoutConstraint);
-
         // Use child size when self idea size of scroll is not setted.
         auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
         if (!idealSize.Width()) {
@@ -74,11 +69,9 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             idealSize.SetHeight(childSize.Height());
         }
     }
-    
     AddPaddingToSize(padding, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();
     selfSize.Constrain(constraint->minSize, constraint->maxSize);
-    
     auto scrollNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(scrollNode);
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
@@ -86,8 +79,20 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto selectScrollWidth = scrollPattern->GetSelectScrollWidth();
         selfSize.SetWidth(selectScrollWidth);
     }
-    
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
+    //set initial offset
+    if (!scrollPattern->IsInitialized()) {
+        auto initialOffset = scrollPattern->GetInitialOffset();
+        if (axis == Axis::VERTICAL) {
+            auto offset = initialOffset.GetY();
+            currentOffset_ = offset.Unit() == DimensionUnit::PERCENT ?
+                             -offset.Value() * selfSize.Height() : -offset.ConvertToPx();
+        } else {
+            auto offset = initialOffset.GetX();
+            currentOffset_ = offset.Unit() == DimensionUnit::PERCENT ?
+                             -offset.Value() * selfSize.Width() : -offset.ConvertToPx();
+        }
+    }
 }
 
 void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

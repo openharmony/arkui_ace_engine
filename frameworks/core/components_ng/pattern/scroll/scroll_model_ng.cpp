@@ -526,9 +526,13 @@ ScrollEdgeType ScrollModelNG::GetOnScrollEdge(FrameNode* frameNode)
     return ScrollEdgeType::SCROLL_NONE;
 }
 
-void ScrollModelNG::SetInitialOffset(const OffsetT<Dimension>& offset)
+void ScrollModelNG::SetInitialOffset(const OffsetT<CalcDimension>& offset)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, InitialOffset, offset);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetInitialOffset(offset);
 }
 
 } // namespace OHOS::Ace::NG

@@ -41,7 +41,6 @@ public:
         value->propScrollEnabled_ = CloneScrollEnabled();
         value->propScrollSnapAlign_ = CloneScrollSnapAlign();
         value->propScrollContentEndOffset_ = CloneScrollContentEndOffset();
-        value->propInitialOffset_ = CloneInitialOffset();
         return value;
     }
 
@@ -51,7 +50,6 @@ public:
         ResetAxis();
         ResetScrollEnabled();
         ResetScrollContentEndOffset();
-        ResetInitialOffset();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -76,7 +74,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapAlign, ScrollSnapAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollWidth, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollContentEndOffset, float, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InitialOffset, OffsetT<Dimension>, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG
