@@ -55,6 +55,9 @@
 
 
 namespace OHOS::Ace::NG::ViewModel {
+std::map<void*, std::shared_ptr<ExtensionCompanionNode>> registeredNodes;
+ArkUIAPICallbackMethod* callbacks = nullptr;
+
 void* createTextNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextModelNG::CreateFrameNode(nodeId, "");
@@ -271,6 +274,13 @@ void* createCalendarPickerNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createCustomNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = StackModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -319,6 +329,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createTextPickerNode,
         createCalendarPickerNode,
         nullptr, // GridItem
+        createCustomNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
@@ -336,6 +347,8 @@ void DisposeNode(void* nativePtr)
     CHECK_NULL_VOID(nativePtr);
     auto* frameNode = reinterpret_cast<UINode*>(nativePtr);
     frameNode->DecRefCount();
+
+    registeredNodes.erase(nativePtr);
 }
 
 void AddChild(void* parentNode, void* childNode)
@@ -344,6 +357,13 @@ void AddChild(void* parentNode, void* childNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
+
+    auto* companionNodeParent = GetCompanion(parentNode);
+    auto* companionNodeChild = GetCompanion(childNode);
+    CHECK_NULL_VOID(companionNodeParent);
+    CHECK_NULL_VOID(companionNodeChild);
+    companionNodeParent->addChild(companionNodeChild);
+
     parent->AddChild(AceType::Claim(child));
     auto* frameNode = AceType::DynamicCast<FrameNode>(child);
     if (frameNode) {
@@ -357,6 +377,13 @@ void RemoveChild(void* parentNode, void* childNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
+
+    auto* companionNodeParent = GetCompanion(parentNode);
+    auto* companionNodeChild = GetCompanion(childNode);
+    CHECK_NULL_VOID(companionNodeParent);
+    CHECK_NULL_VOID(companionNodeChild);
+    companionNodeParent->removeChild(companionNodeChild);
+
     parent->RemoveChild(AceType::Claim(child));
 }
 
@@ -366,6 +393,13 @@ void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
+
+    auto* companionNodeParent = GetCompanion(parentNode);
+    auto* companionNodeChild = GetCompanion(childNode);
+    auto* companionNodeSibling = GetCompanion(siblingNode);
+    CHECK_NULL_VOID(companionNodeParent);
+    CHECK_NULL_VOID(companionNodeChild);
+    companionNodeParent->insertChildAfter(companionNodeChild, companionNodeSibling);
 
     if (AceType::InstanceOf<GroupNode>(parent)) {
         auto* groupNode = AceType::DynamicCast<GroupNode>(parent);
@@ -384,6 +418,60 @@ void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode)
         frameNode->OnMountToParentDone();
     }
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void RegisterCompanion(void* node, int peerId, ArkUI_Int32 flags)
+{
+    auto companion = std::make_shared<ExtensionCompanionNode>(peerId, flags);
+    companion->peer = node;
+    registeredNodes[node] = std::move(companion);
+}
+
+ExtensionCompanionNode* GetCompanion(void* nodePtr)
+{
+    auto it = registeredNodes.find(nodePtr);
+    if (it != registeredNodes.end()) {
+        return it->second.get();
+    }
+    return nullptr;
+}
+
+void SetCustomCallback(void* nodePtr, ArkUI_Int32 callback)
+{
+    auto* node = GetCompanion(nodePtr);
+    CHECK_NULL_VOID(node);
+    node->setCallbackId(callback);
+}
+
+void SetCallbackMethod(ArkUIAPICallbackMethod* method)
+{
+    callbacks = method;
+}
+
+ArkUIAPICallbackMethod* GetCallbackMethod()
+{
+    return callbacks;
+}
+
+ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
+{
+    auto node = GetCompanion(nodePtr);
+    CHECK_NULL_RETURN(node, 0);
+    return node->layout(context, data, callbacks);
+}
+
+ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
+{
+    auto node = GetCompanion(nodePtr);
+    CHECK_NULL_RETURN(node, 0);
+    return node->layout(context, data, callbacks);
+}
+
+ArkUI_Int32 DrawNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
+{
+    auto node = GetCompanion(nodePtr);
+    CHECK_NULL_RETURN(node, 0);
+    return node->layout(context, data, callbacks);
 }
 
 } // namespace OHOS::Ace::NG::ViewModel

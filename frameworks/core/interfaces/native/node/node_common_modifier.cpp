@@ -41,6 +41,8 @@
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/view_model.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -932,6 +934,9 @@ void SetAlign(ArkUINodeHandle node, ArkUI_Int32 align)
     CHECK_NULL_VOID(frameNode);
     Alignment alignment = ParseAlignment(align);
     ViewAbstract::SetAlign(frameNode, alignment);
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
+    companion->alignment = align;
 }
 
 void ResetAlign(ArkUINodeHandle node)
