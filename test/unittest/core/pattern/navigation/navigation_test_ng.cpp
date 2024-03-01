@@ -103,6 +103,7 @@ public:
     static void TearDownTestSuite();
     void MockPipelineContextGetTheme();
     static void RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& layoutWrapper, float width = DEFAULT_ROOT_WIDTH);
+    static RefPtr<NavDestinationGroupNode> CreateDestination(const std::string name);
 };
 
 void NavigationTestNg::SetUpTestSuite()
@@ -134,6 +135,25 @@ void NavigationTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+}
+
+RefPtr<NavDestinationGroupNode> NavigationTestNg::CreateDestination(const std::string name)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    // navDestination node
+    int32_t nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
+    auto frameNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetName(name);
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    pathInfo->name_ = name;
+    context->SetNavPathInfo(pathInfo);
+    return frameNode;
 }
 
 struct TestProperty {
@@ -3443,5 +3463,335 @@ HWTEST_F(NavigationTestNg, NestedNavigationTest001, TestSize.Level1)
      * @tc.expected: check number of NavigationStack's OnAttachToParent function calls
      */
     ViewStackProcessor::GetInstance()->Pop();
+}
+
+/**
+ * @tc.name: NavigationInterceptionTest001
+ * @tc.desc: Test navigation interception
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationInterceptionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation, set NavigationStack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
+        return AceType::MakeRefPtr<MockNavigationStack>();
+    };
+    auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
+        navigationModel.SetNavigationStackProvided(false);
+        auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);
+        ASSERT_NE(mockStack, nullptr);
+    };
+    navigationModel.SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+
+    /**
+     * @tc.steps: step2.set navigation before and after interception during destination transition
+     */
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(
+            ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+    auto mockStack = AceType::DynamicCast<MockNavigationStack>(navigationPattern->GetNavigationStack());
+    EXPECT_NE(mockStack, nullptr);
+    mockStack->SetInterceptionBeforeCallback([stack = WeakPtr<MockNavigationStack>(mockStack)]
+        (const RefPtr<NavDestinationContext>& from,
+        const RefPtr<NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) {
+        ASSERT_EQ(from, nullptr);
+        ASSERT_NE(to, nullptr);
+        auto info = to->GetNavPathInfo();
+        ASSERT_NE(info, nullptr);
+        ASSERT_EQ(info->GetName(), "A");
+        ASSERT_EQ(operation, NavigationOperation::PUSH);
+        ASSERT_EQ(isAnimated, true);
+        auto navigationStack = stack.Upgrade();
+        ASSERT_NE(navigationStack, nullptr);
+        navigationStack->Remove();
+        RefPtr<FrameNode> frameNode = NavigationTestNg::CreateDestination("B");
+        navigationStack->Add("B", frameNode);
+        navigationStack->UpdateReplaceValue(true);
+        navigationStack->UpdateAnimatedValue(true);
+    });
+
+    mockStack->SetInterceptionAfterCallback([](const RefPtr<NavDestinationContext>& from,
+        const RefPtr<NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) {
+        EXPECT_EQ(from, nullptr);
+        EXPECT_NE(to, nullptr);
+        auto info = to->GetNavPathInfo();
+        ASSERT_NE(info->GetName(), "B");
+        ASSERT_EQ(operation, NavigationOperation::REPLACE);
+        ASSERT_EQ(isAnimated, false);
+    });
+
+    /**
+     * @tc.steps: step3. sync navigation stack
+     * @tc.expected: step3. trigger navigation interception before and after callback
+     */
+    auto frameNode = NavigationTestNg::CreateDestination("A");
+    mockStack->Add("A", frameNode);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+}
+
+/**
+ * @tc.name: NavigationInterceptionTest002
+ * @tc.desc: Test navigation interception
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationInterceptionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation, set NavigationStack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
+        return AceType::MakeRefPtr<MockNavigationStack>();
+    };
+    auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
+        navigationModel.SetNavigationStackProvided(false);
+        auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);
+        ASSERT_NE(mockStack, nullptr);
+    };
+    navigationModel.SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+
+    /**
+     * @tc.steps: step2. push A to navigation stack
+     */
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(
+            ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+    auto mockStack = AceType::DynamicCast<MockNavigationStack>(navigationPattern->GetNavigationStack());
+    EXPECT_NE(mockStack, nullptr);
+    auto frameNode = NavigationTestNg::CreateDestination("A");
+    mockStack->Add("A", frameNode);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+
+    /**
+     * @tc.steps: step2.set navigation before and after interception during destination transition
+     */
+    mockStack->SetInterceptionBeforeCallback([stack = WeakPtr<NavigationStack>(mockStack)](
+        const RefPtr<NavDestinationContext>& from,
+        const RefPtr<NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) {
+        ASSERT_EQ(to, nullptr);
+        ASSERT_NE(from, nullptr);
+        auto info = from->GetNavPathInfo();
+        ASSERT_EQ(info->name_, "A");
+        ASSERT_EQ(operation, NavigationOperation::POP);
+        ASSERT_EQ(isAnimated, true);
+        auto navigationStack = stack.Upgrade();
+        ASSERT_NE(navigationStack, nullptr);
+        auto frameNode = NavigationTestNg::CreateDestination("B");
+        ASSERT_NE(frameNode, nullptr);
+        navigationStack->Add("B", frameNode);
+    });
+
+    mockStack->SetInterceptionAfterCallback([](const RefPtr<NavDestinationContext>& from,
+        const RefPtr<NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) {
+        EXPECT_NE(from, nullptr);
+        EXPECT_NE(to, nullptr);
+        auto fromInfo = from->GetNavPathInfo();
+        ASSERT_NE(fromInfo, nullptr);
+        ASSERT_EQ(fromInfo->GetName(), "A");
+        auto toInfo = to->GetNavPathInfo();
+        ASSERT_NE(toInfo, nullptr);
+        ASSERT_EQ(toInfo->name_, "A");
+        ASSERT_EQ(operation, NavigationOperation::PUSH);
+        ASSERT_EQ(isAnimated, false);
+    });
+
+    /**
+     * @tc.steps: step3. sync navigation stack
+     * @tc.expected: step3. trigger navigation interception before and after callback
+     */
+    mockStack->Remove();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+}
+
+/**
+ * @tc.name: NavigationInterceptionTest003
+ * @tc.desc: Test navigation interception
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationInterceptionTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation, set NavigationStack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
+        return AceType::MakeRefPtr<MockNavigationStack>();
+    };
+    auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
+        navigationModel.SetNavigationStackProvided(false);
+        auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);
+        ASSERT_NE(mockStack, nullptr);
+    };
+    navigationModel.SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+
+    /**
+     * @tc.steps: step2. push A to navigation stack
+     */
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(
+            ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+    auto mockStack = AceType::DynamicCast<MockNavigationStack>(navigationPattern->GetNavigationStack());
+    EXPECT_NE(mockStack, nullptr);
+    auto frameNode = NavigationTestNg::CreateDestination("A");
+    mockStack->Add("A", frameNode);
+    mockStack->UpdateReplaceValue(true);
+
+    /**
+     * @tc.steps: step2.set navigation before and after interception during destination transition
+     */
+    mockStack->SetInterceptionBeforeCallback([](const RefPtr<NavDestinationContext>& from,
+        const RefPtr<NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) {
+        ASSERT_EQ(to, nullptr);
+        ASSERT_NE(from, nullptr);
+        auto info = from->GetNavPathInfo();
+        ASSERT_EQ(info->name_, "A");
+        ASSERT_EQ(operation, NavigationOperation::REPLACE);
+        ASSERT_EQ(isAnimated, true);
+    });
+
+    mockStack->SetInterceptionAfterCallback([](const RefPtr<NavDestinationContext>& from,
+        const RefPtr<NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) {
+        ASSERT_EQ(to, nullptr);
+        ASSERT_NE(from, nullptr);
+        auto info = from->GetNavPathInfo();
+        ASSERT_EQ(info->name_, "A");
+        ASSERT_EQ(operation, NavigationOperation::REPLACE);
+        ASSERT_EQ(isAnimated, true);
+    });
+
+    /**
+     * @tc.steps: step3. sync navigation stack.
+     * @tc.expected: step3. trigger navigation before and after callback.
+     */
+    navigationPattern->MarkNeedSyncWithJsStack();
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+}
+
+/**
+ * @tc.name: NavigationInterceptionTest004
+ * @tc.desc: Test navigation interception
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationInterceptionTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation, set NavigationStack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
+        return AceType::MakeRefPtr<MockNavigationStack>();
+    };
+    auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
+        navigationModel.SetNavigationStackProvided(false);
+        auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);
+        ASSERT_NE(mockStack, nullptr);
+    };
+    navigationModel.SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+
+    /**
+     * @tc.steps: step2.set navigation before and after interception during destination transition.
+     *            Remove top Destination during interception before callback.
+     * @tc.expected: trigger before interception and not trigger after interception.
+     */
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(
+            ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+    auto mockStack = AceType::DynamicCast<MockNavigationStack>(navigationPattern->GetNavigationStack());
+    EXPECT_NE(mockStack, nullptr);
+    mockStack->SetInterceptionBeforeCallback([stack = WeakPtr<NavigationStack>(mockStack)]
+        (const RefPtr<NavDestinationContext>& from,
+        const RefPtr<NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) {
+        ASSERT_EQ(to, nullptr);
+        ASSERT_NE(from, nullptr);
+        auto info = from->GetNavPathInfo();
+        ASSERT_EQ(info->name_, "A");
+        ASSERT_EQ(operation, NavigationOperation::REPLACE);
+        ASSERT_EQ(isAnimated, true);
+        auto navigationStack = stack.Upgrade();
+        EXPECT_NE(navigationStack, nullptr);
+        navigationStack->Remove();
+    });
+
+    uint32_t times = 0;
+    mockStack->SetInterceptionAfterCallback([time = &times](const RefPtr<NavDestinationContext>& from,
+        const RefPtr<NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) {
+        (*time)++;
+    });
+
+    /**
+     * @tc.steps: step3. push destination A and sync navigation stack.
+     * @tc.expected: step3. don't trigger interception after callback.times is 0.
+     */
+    auto frameNode = NavigationTestNg::CreateDestination("A");
+    mockStack->Add("A", frameNode);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    EXPECT_EQ(times, 0);
+}
+
+/**
+ * @tc.name: NavigationInterceptionTest005
+ * @tc.desc: Test navigation interception
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationInterceptionTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation, set NavigationStack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
+        return AceType::MakeRefPtr<MockNavigationStack>();
+    };
+    auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
+        navigationModel.SetNavigationStackProvided(false);
+        auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);
+        ASSERT_NE(mockStack, nullptr);
+    };
+    navigationModel.SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+
+    /**
+     * @tc.steps: step2.set navigation mode change callback and set navigation width 700
+     * @tc.expected: step2. trigger navigation mode callback and current mode is split
+     */
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(
+            ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+    auto mockStack = AceType::DynamicCast<MockNavigationStack>(navigationPattern->GetNavigationStack());
+    EXPECT_NE(mockStack, nullptr);
+    
+    mockStack->SetInterceptionModeCallback([](NavigationMode mode) {
+        EXPECT_EQ(mode, NavigationMode::SPLIT);
+    });
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    const int32_t maxWidth = 700;
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper, maxWidth);
+
+    /**
+     * @tc.steps:step3. set navigation mode callback and set navigation width is 500
+     * @tc.expected: step3.trigger current navigation mode is stack
+     */
+    mockStack->SetInterceptionModeCallback([](NavigationMode mode) {
+        EXPECT_EQ(mode, NavigationMode::STACK);
+    });
+    const int32_t stackWidth = 500;
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper, stackWidth);
 }
 } // namespace OHOS::Ace::NG

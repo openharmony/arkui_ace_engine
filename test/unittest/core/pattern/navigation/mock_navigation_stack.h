@@ -24,6 +24,8 @@
 struct MockReplace {
     int32_t isReplace_ = 0;
 };
+using NavigationInterceptionEvent = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::NG::NavDestinationContext>,
+    const OHOS::Ace::RefPtr<OHOS::Ace::NG::NavDestinationContext>, OHOS::Ace::NG::NavigationOperation, bool)>;
 class MockNavigationStack : public OHOS::Ace::NG::NavigationStack {
     DECLARE_ACE_TYPE(MockNavigationStack, NavigationStack);
 public:
@@ -52,11 +54,51 @@ public:
         return onStateChangedCallback_;
     }
 
+        void SetInterceptionBeforeCallback(NavigationInterceptionEvent callback)
+    {
+        beforeCallback_ = callback;
+    }
+
+    void SetInterceptionAfterCallback(NavigationInterceptionEvent afterCallback)
+    {
+        afterCallback_ = afterCallback;
+    }
+
+    void SetInterceptionModeCallback(std::function<void(OHOS::Ace::NG::NavigationMode)> modeCallback)
+    {
+        modeCallback_ = modeCallback;
+    }
+
+    void FireNavigationModeChange(OHOS::Ace::NG::NavigationMode mode) override
+    {
+        if (modeCallback_) {
+            modeCallback_(mode);
+        }
+    }
+
+    void FireNavigationInterception(bool isBefore, const OHOS::Ace::RefPtr<OHOS::Ace::NG::NavDestinationContext>& from,
+        const OHOS::Ace::RefPtr<OHOS::Ace::NG::NavDestinationContext>& to, OHOS::Ace::NG::NavigationOperation operation,
+        bool isAnimated) override
+    {
+        if (isBefore) {
+            if (beforeCallback_) {
+                beforeCallback_(from, to, operation, isAnimated);
+            }
+        } else {
+            if (afterCallback_) {
+                afterCallback_(from, to, operation, isAnimated);
+            }
+        }
+    }
+
     MOCK_METHOD1(OnAttachToParent, void(OHOS::Ace::RefPtr<OHOS::Ace::NG::NavigationStack>));
     MOCK_METHOD0(OnDetachFromParent, void());
 
 private:
     std::function<void()> onStateChangedCallback_;
+    NavigationInterceptionEvent beforeCallback_;
+    NavigationInterceptionEvent afterCallback_;
+    std::function<void(OHOS::Ace::NG::NavigationMode)> modeCallback_;
     MockReplace *mockReplace_ = new MockReplace();
 };
 #endif
