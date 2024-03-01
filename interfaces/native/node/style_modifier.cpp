@@ -2177,7 +2177,7 @@ void ResetGrayscale(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetGrayscale(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
-    g_numberValues[0].f32 = modifier->getGrayscale(node->uiNodeHandle);
+    g_numberValues[0].f32 = modifier->getGrayScale(node->uiNodeHandle);
     return &g_attributeItem;
 }
 

@@ -1202,7 +1202,7 @@ struct ArkUICommonModifier {
     ArkUI_Float32 (*getFlexShrink)(ArkUINodeHandle node);
     ArkUI_Float32 (*getFlexBasis)(ArkUINodeHandle node);
     void (*getConstraintSize)(ArkUINodeHandle node, ArkUIConstraintSizeOptions* options);
-    ArkUI_Float32 (*getGrayscale)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getGrayScale)(ArkUINodeHandle node);
     ArkUI_Float32 (*getInvert)(ArkUINodeHandle node);
     ArkUI_Float32 (*getSepia)(ArkUINodeHandle node);
     ArkUI_Float32 (*getContrast)(ArkUINodeHandle node);

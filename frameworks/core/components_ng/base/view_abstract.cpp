@@ -3063,4 +3063,154 @@ FlexAlign ViewAbstract::GetAlignSelf(FrameNode* frameNode)
     const auto& flexItemProperty = frameNode->GetLayoutProperty()->GetFlexItemProperty();
     return flexItemProperty->GetAlignSelf().value_or(FlexAlign::AUTO);
 }
+
+float ViewAbstract::GetFlexGrow(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_RETURN(property, value);
+    auto getValue = property->GetFlexGrow();
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
+}
+
+float ViewAbstract::GetFlexShrink(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_RETURN(property, value);
+    auto getValue = property->GetFlexShrink();
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
+}
+
+Dimension ViewAbstract::GetFlexBasis(FrameNode* frameNode)
+{
+    Dimension value;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_RETURN(property, value);
+    auto getValue = property->GetFlexBasis();
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
+}
+
+float ViewAbstract::GetMinWidth(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(property, value);
+    auto size = property->minSize;
+    if (size.has_value()) {
+        auto width = size->Width();
+        if (width.has_value()) {
+            value = width.value().GetDimension().Value();
+        }
+    }
+    return value;
+}
+
+float ViewAbstract::GetMaxWidth(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(property, value);
+    auto size = property->maxSize;
+    if (size.has_value()) {
+        auto width = size->Width();
+        if (width.has_value()) {
+            value = width.value().GetDimension().Value();
+        }
+    }
+    return value;
+}
+
+float ViewAbstract::GetMinHeight(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(property, value);
+    auto size = property->minSize;
+    if (size.has_value()) {
+        auto height = size->Height();
+        if (height.has_value()) {
+            value = height.value().GetDimension().Value();
+        }
+    }
+    return value;
+}
+
+float ViewAbstract::GetMaxHeight(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(property, value);
+    auto size = property->maxSize;
+    if (size.has_value()) {
+        auto height = size->Height();
+        if (height.has_value()) {
+            value = height.value().GetDimension().Value();
+        }
+    }
+    return value;
+}
+
+Dimension ViewAbstract::GetGrayScale(FrameNode* frameNode)
+{
+    Dimension value;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetFrontGrayScaleValue(value);
+}
+
+InvertVariant ViewAbstract::GetInvert(FrameNode* frameNode)
+{
+    InvertVariant value = 0.0f;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetFrontInvertValue(value);
+}
+
+Dimension ViewAbstract::GetSepia(FrameNode* frameNode)
+{
+    Dimension value;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetFrontSepiaValue(value);
+}
+
+Dimension ViewAbstract::GetContrast(FrameNode* frameNode)
+{
+    Dimension value;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetFrontContrastValue(value);
+}
+
+Color ViewAbstract::GetForegroundColor(FrameNode* frameNode)
+{
+    Color value;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetForegroundColorValue(value);
+}
 } // namespace OHOS::Ace::NG
