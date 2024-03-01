@@ -39,6 +39,7 @@ using BeginListFlingFunc = void (*)();
 using EndListFlingFunc = void (*)();
 using FlushBeginFunc = void (*)();
 using FlushEndFunc = void (*)();
+using SetFrameParamFunc = void(*)(int, int, int, int);
 
 class ACE_EXPORT FrameReport final {
 public:
@@ -61,6 +62,7 @@ public:
     void EndListFling();
     void FlushBegin();
     void FlushEnd();
+    void SetFrameParam(int requestId, int load, int schedFrameNum, int value);
 
 private:
     FrameReport();
@@ -90,6 +92,7 @@ private:
     ACE_EXPORT EndListFlingFunc endListFlingFunc_ = nullptr;
     ACE_EXPORT FlushBeginFunc flushBeginFunc_ = nullptr;
     ACE_EXPORT FlushEndFunc flushEndFunc_ = nullptr;
+    ACE_EXPORT SetFrameParamFunc setFrameParamFunc_ = nullptr;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_FRAME_REPORT_H
