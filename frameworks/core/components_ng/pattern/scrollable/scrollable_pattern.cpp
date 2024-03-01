@@ -1044,7 +1044,6 @@ void ScrollablePattern::PlayCurveAnimation(
 {
     AnimationOption option;
     InitOption(option, duration, curve);
-    SetAnimateCanOverScroll(canOverScroll);
     if (!curveOffsetProperty_) {
         InitCurveOffsetProperty(position);
     }
@@ -1054,6 +1053,7 @@ void ScrollablePattern::PlayCurveAnimation(
         return pattern->GetCurrentVelocity();
     });
     isAnimationStop_ = false;
+    SetAnimateCanOverScroll(canOverScroll);
     curveOffsetProperty_->Set(GetTotalOffset());
     curveAnimation_ = AnimationUtils::StartAnimation(
         option,
@@ -1066,7 +1066,6 @@ void ScrollablePattern::PlayCurveAnimation(
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->SetAnimateCanOverScroll(false);
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(), SceneStatus::END);
             ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         });
@@ -1174,6 +1173,7 @@ void ScrollablePattern::InitOption(AnimationOption &option, float duration, cons
 
 void ScrollablePattern::StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation)
 {
+    SetAnimateCanOverScroll(false);
     isAnimationStop_ = true;
     currentVelocity_ = 0.0;
     if (!animation) {
@@ -1185,6 +1185,7 @@ void ScrollablePattern::StopAnimation(std::shared_ptr<AnimationUtils::Animation>
 
 void ScrollablePattern::PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation)
 {
+    SetAnimateCanOverScroll(false);
     isAnimationStop_ = true;
     currentVelocity_ = 0.0;
     if (!animation) {
