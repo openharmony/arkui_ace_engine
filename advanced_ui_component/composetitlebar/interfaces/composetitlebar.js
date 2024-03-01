@@ -127,7 +127,7 @@ export class ComposeTitleBar extends ViewPU {
           value: {
             id: -1,
             type: 2e4,
-            params: ["sys.media.ohos_ic_back"],
+            params: ['sys.media.ohos_ic_back'],
             bundleName: "",
             moduleName: ""
           },
@@ -750,7 +750,7 @@ class ImageMenuItem extends ViewPU {
       Image.fillColor({
         id: -1,
         type: 10001,
-        params: ["sys.color.ohos_id_color_text_primary"],
+        params: ['sys.color.ohos_id_color_text_primary'],
         bundleName: "",
         moduleName: ""
       });
