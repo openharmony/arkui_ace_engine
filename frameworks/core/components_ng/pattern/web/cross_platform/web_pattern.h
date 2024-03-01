@@ -316,6 +316,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebStandardFont, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DefaultFixedFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DefaultFontSize, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DefaultTextEncodingFormat, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MinFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MinLogicalFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlockNetwork, bool);
@@ -418,6 +419,7 @@ private:
     void OnWebStandardFontUpdate(const std::string& value);
     void OnDefaultFixedFontSizeUpdate(int32_t value);
     void OnDefaultFontSizeUpdate(int32_t value);
+    void OnDefaultTextEncodingFormatUpdate(const std::string& value);
     void OnMinFontSizeUpdate(int32_t value);
     void OnMinLogicalFontSizeUpdate(int32_t value);
     void OnBlockNetworkUpdate(bool value);

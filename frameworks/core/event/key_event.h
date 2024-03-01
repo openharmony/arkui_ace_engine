@@ -583,6 +583,7 @@ struct KeyEvent final {
     bool enableCapsLock = false;
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
+    std::string msg = "";
 };
 
 class ACE_EXPORT KeyEventInfo : public BaseEventInfo {
@@ -599,6 +600,7 @@ public:
         metaKey_ = event.metaKey;
         SetDeviceId(event.deviceId);
         SetTimeStamp(event.timeStamp);
+        keyMsg_ = event.msg;
     };
     ~KeyEventInfo() override = default;
 
@@ -638,6 +640,7 @@ private:
     int32_t metaKey_ = 0;
     SourceType keySource_ = SourceType::NONE;
     KeyIntention keyIntention_ = KeyIntention::INTENTION_UNKNOWN;
+    std::string keyMsg_ = "";
 };
 
 enum class BlurReason : int32_t {
