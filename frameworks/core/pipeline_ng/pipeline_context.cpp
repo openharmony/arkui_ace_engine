@@ -2889,11 +2889,13 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         manager->OnDragMoveOut(pointerEvent);
         manager->ClearSummary();
         manager->ClearExtraInfo();
+        manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         return;
     }
 
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->RequireSummary();
+        manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
     }
     extraInfo = manager->GetExtraInfo();
     if (action == DragEventAction::DRAG_EVENT_END) {
