@@ -986,6 +986,11 @@ public:
         ViewAbstract::SetObscured(reasons);
     }
 
+    void SetPrivacySensitive(bool flag) override
+    {
+        ViewAbstract::SetPrivacySensitive(flag);
+    }
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
