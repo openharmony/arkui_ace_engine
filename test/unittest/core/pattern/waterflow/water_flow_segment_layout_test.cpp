@@ -204,6 +204,95 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MeasureFooter001
+ * @tc.desc: Test SegmentedLayout with changing footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, MeasureFooter001, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsGap(Dimension(5.0f));
+        model.SetRowsGap(Dimension(1.0f));
+        model.SetFooter(GetDefaultHeaderBuilder());
+        CreateItem(10);
+        ViewStackProcessor::GetInstance()->Pop();
+    });
+
+    auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info.childrenCount_, 11);
+    EXPECT_EQ(info.footerIndex_, 10);
+    auto footer = FrameNode::GetOrCreateFrameNode(
+        V2::FLOW_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
+    footer->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(100.0f), CalcLength(Dimension(200.0f))));
+    pattern_->AddFooter(footer);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 11);
+    AddItems(2);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 13);
+    frameNode_->ChildrenUpdatedFrom(10);
+
+    pattern_->MarkDirtyNodeSelf();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildFrameNode(frameNode_, info.footerIndex_), footer);
+    UpdateCurrentOffset(-1000.0f);
+    EXPECT_EQ(info.items_.size(), 2);
+    EXPECT_EQ(info.items_[1][0].size(), 1);
+    EXPECT_EQ(info.childrenCount_, 13);
+    EXPECT_EQ(info.endIndex_, 12);
+    EXPECT_EQ(info.segmentTails_[0], 11);
+    EXPECT_EQ(info.segmentTails_[1], 12);
+    EXPECT_EQ(info.footerIndex_, 12);
+    EXPECT_EQ(info.itemInfos_[12].mainOffset, 503.0f);
+    EXPECT_EQ(info.itemInfos_[12].mainSize, 200.0f);
+}
+
+/**
+ * @tc.name: MeasureFooter002
+ * @tc.desc: Test SegmentedLayout with changing footer and delete items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, MeasureFooter002, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsGap(Dimension(5.0f));
+        model.SetRowsGap(Dimension(1.0f));
+        model.SetFooter(GetDefaultHeaderBuilder());
+        CreateItem(10);
+        ViewStackProcessor::GetInstance()->Pop();
+    });
+
+    auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info.childrenCount_, 11);
+    EXPECT_EQ(info.footerIndex_, 10);
+    auto footer = FrameNode::GetOrCreateFrameNode(
+        V2::FLOW_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
+    footer->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(100.0f), CalcLength(Dimension(200.0f))));
+    pattern_->AddFooter(footer);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 11);
+    for (int i = 0; i < 2; ++i) {
+        frameNode_->RemoveChildAtIndex(8);
+    }
+    frameNode_->ChildrenUpdatedFrom(8);
+
+    pattern_->MarkDirtyNodeSelf();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildFrameNode(frameNode_, info.footerIndex_), footer);
+    UpdateCurrentOffset(-1000.0f);
+    EXPECT_EQ(info.items_.size(), 2);
+    EXPECT_EQ(info.items_[1][0].size(), 1);
+    EXPECT_EQ(info.childrenCount_, 9);
+    EXPECT_EQ(info.endIndex_, 8);
+    EXPECT_EQ(info.segmentTails_[0], 7);
+    EXPECT_EQ(info.segmentTails_[1], 8);
+    EXPECT_EQ(info.footerIndex_, 8);
+    EXPECT_EQ(info.itemInfos_[8].mainOffset, 401.0f);
+    EXPECT_EQ(info.itemInfos_[8].mainSize, 200.0f);
+}
+
+/**
  * @tc.name: Layout001
  * @tc.desc: Test SegmentedLayout::Layout.
  * @tc.type: FUNC
@@ -1300,5 +1389,30 @@ HWTEST_F(WaterFlowSegmentTest, Replace001, TestSize.Level1)
     EXPECT_EQ(info.currentOffset_, -507.0f);
     EXPECT_EQ(info.startIndex_, 4);
     EXPECT_EQ(info.endIndex_, 13);
+}
+
+/**
+ * @tc.name: Illegal001
+ * @tc.desc: Layout WaterFlow with empty sections.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Illegal001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(37);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, {});
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->layoutInfo_;
+
+    UpdateCurrentOffset(-205.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, -1);
 }
 } // namespace OHOS::Ace::NG
