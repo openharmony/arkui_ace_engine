@@ -1115,7 +1115,8 @@ void CompleteResourceObjectFromParams(
     }
 }
 
-void CompleteResourceObjectFromId(JSRef<JSObject>& jsObj, ResourceType& resType, const std::string& resName)
+void CompleteResourceObjectFromId(
+    JSRef<JSVal>& type, JSRef<JSObject>& jsObj, ResourceType& resType, const std::string& resName)
 {
     JSRef<JSVal> args = jsObj->GetProperty("params");
     if (!args->IsArray()) {
@@ -1132,9 +1133,8 @@ void CompleteResourceObjectFromId(JSRef<JSObject>& jsObj, ResourceType& resType,
         }
         params->SetValueAt(0, name);
         uint32_t paramIndex = 1;
-        auto firstParam = jsObj->GetProperty("type");
-        if (!firstParam->IsEmpty()) {
-            params->SetValueAt(paramIndex, firstParam);
+        if (!type->IsEmpty()) {
+            params->SetValueAt(paramIndex, type);
             paramIndex++;
         }
         for (auto tmpParam : tmpParams) {
@@ -3987,12 +3987,13 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
         if (!ParseDollarResource(resId, targetModule, resType, resName, typeNum == UNKNOWN_RESOURCE_TYPE)) {
             return;
         }
+        CompleteResourceObjectFromId(type, jsObj, resType, resName);
     } else if (resId->IsNumber()) {
         int32_t resIdValue = resId->ToNumber<int32_t>();
-        CompleteResourceObjectFromParams(resIdValue, jsObj, targetModule, resType, resName);
-        return;
+        if (resIdValue == -1) {
+            CompleteResourceObjectFromParams(resIdValue, jsObj, targetModule, resType, resName);
+        }
     }
-    CompleteResourceObjectFromId(jsObj, resType, resName);
 }
 
 bool JSViewAbstract::ParseJsDimensionNG(
