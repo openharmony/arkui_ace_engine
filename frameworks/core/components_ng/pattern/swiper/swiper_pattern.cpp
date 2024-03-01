@@ -2230,35 +2230,36 @@ int32_t SwiperPattern::ComputeSwipePageNextIndex(float velocity, bool onlyDistan
         return currentIndex_;
     }
 
-    auto iter = itemPosition_.find(currentIndex_);
+    auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
+    auto firstIndex = firstItemInfoInVisibleArea.first;
+    auto displayCount = GetDisplayCount();
+    auto endIndex = SwiperUtils::ComputePageEndIndex(firstIndex, displayCount);
+    auto iter = itemPosition_.find(endIndex);
     if (iter == itemPosition_.end()) {
         return currentIndex_;
     }
 
-    auto currentOffset = iter->second.startPos;
-    auto direction = GreatNotEqual(velocity, 0.0);
-    auto dragThresholdFlag = direction ? currentOffset > swiperWidth / 2 : -currentOffset > swiperWidth / 2;
+    auto dragDistance = iter->second.endPos;
+    auto dragForward = currentIndex_ > firstIndex;
+    auto dragThresholdFlag = dragForward ? dragDistance > swiperWidth / 2 : dragDistance < swiperWidth / 2;
     auto nextIndex = currentIndex_;
-    auto displayCount = GetDisplayCount();
-
-    if (!IsLoop()) {
-        if (GetLoopIndex(currentIndex_) == 0 && direction) {
-            return nextIndex;
-        }
-
-        auto currentPageIndex = SwiperUtils::ComputePageIndex(currentIndex_, displayCount);
-        auto endPageIndex = SwiperUtils::ComputePageIndex(TotalCount() - 1, displayCount);
-        if (!direction && currentPageIndex == endPageIndex) {
-            return nextIndex;
-        }
+    if (dragThresholdFlag) {
+        nextIndex = dragForward ? currentIndex_ - displayCount : currentIndex_ + displayCount;
     }
 
-    if ((!onlyDistance && std::abs(velocity) > NEW_MIN_TURN_PAGE_VELOCITY) || dragThresholdFlag) {
-        nextIndex = direction ? currentIndex_ - displayCount : currentIndex_ + displayCount;
+    if (!onlyDistance && std::abs(velocity) > NEW_MIN_TURN_PAGE_VELOCITY && velocity != 0.0f) {
+        auto direction = GreatNotEqual(velocity, 0.0f);
+        if (dragForward != direction || !dragThresholdFlag) {
+            nextIndex = velocity > 0.0f ? nextIndex - displayCount : nextIndex + displayCount;
+        }
     }
 
     if (!IsAutoLinear() && nextIndex > currentIndex_ + displayCount) {
         nextIndex = currentIndex_ + displayCount;
+    }
+
+    if (!IsLoop()) {
+        nextIndex = std::clamp(nextIndex, 0, std::max(0, TotalCount() - displayCount));
     }
 
     return nextIndex;
