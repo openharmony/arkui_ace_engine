@@ -124,6 +124,11 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    bool AvoidBottom() const override
+    {
+        return false;
+    }
+
 private:
     bool AvoidKeyboard() const override
     {

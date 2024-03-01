@@ -71,8 +71,9 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     customSize_ = dialogProp->GetUseCustomStyle().value_or(false);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
+    UpdateSafeArea();
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
-    auto parentIdealSize = UpdateHeightWithSafeArea(layoutConstraint->parentIdealSize.ConvertToSizeT());
+    const auto& parentIdealSize = layoutConstraint->parentIdealSize;
     OptionalSizeF realSize;
     // dialog size fit screen.
     realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
@@ -83,9 +84,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // constraint child size unless developer is using customStyle
     if (!customSize_) {
-        auto inset = pipeline->GetSafeArea();
-        auto maxSize = UpdateHeightWithSafeArea(layoutConstraint->maxSize);
-        maxSize.MinusPadding(0, 0, inset.top_.Length(), 0);
+        auto maxSize = layoutConstraint->maxSize;
+        maxSize.MinusPadding(0, 0, safeAreaInsets_.top_.Length(), 0);
         childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
         ComputeInnerLayoutParam(childLayoutConstraint);
     }
@@ -458,7 +458,8 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     auto dialogOffsetY =
         ConvertToPx(CalcLength(dialogOffset_.GetY()), layoutConstraint->scaleProperty, selfSize.Height());
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
-    auto maxSize = UpdateHeightWithSafeArea(layoutConstraint->maxSize);
+    auto maxSize = layoutConstraint->maxSize;
+    maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
     }
@@ -558,9 +559,8 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
-    auto systemInset = pipelineContext->GetSafeArea();
-    if (!customSize_ && topLeftPoint.GetY() < systemInset.top_.end) {
-        topLeftPoint.SetY(systemInset.top_.end);
+    if (!customSize_ && topLeftPoint.GetY() < safeAreaInsets_.top_.end) {
+        topLeftPoint.SetY(safeAreaInsets_.top_.end);
     }
     auto childOffset = topLeftPoint + dialogOffset;
 
@@ -574,22 +574,20 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     return childOffset;
 }
 
-SizeF DialogLayoutAlgorithm::UpdateHeightWithSafeArea(SizeF size)
+void DialogLayoutAlgorithm::UpdateSafeArea()
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
-    CHECK_NULL_RETURN(container, size);
+    CHECK_NULL_VOID(container);
     if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
         ContainerScope scope(currentId);
-        auto pipelineContext = container->GetPipelineContext();
-        CHECK_NULL_RETURN(pipelineContext, size);
-        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-        CHECK_NULL_RETURN(context, size);
-        auto safeArea = context->GetSafeArea();
-        size.MinusHeight(safeArea.bottom_.Length());
     }
-    return size;
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    safeAreaInsets_ = context->GetSafeAreaWithoutProcess();
 }
 } // namespace OHOS::Ace::NG

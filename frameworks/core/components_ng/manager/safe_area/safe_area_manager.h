@@ -147,6 +147,8 @@ public:
 
     OffsetF GetWindowWrapperOffset();
 
+    SafeAreaInsets GetSafeAreaWithoutProcess() const;
+
     bool SetIsFullScreen(bool value);
     bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);

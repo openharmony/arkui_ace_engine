@@ -419,6 +419,11 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
     return SafeAreaInsets({}, { 0, 1 }, {}, {});
 }
 
+SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
+{
+    return SafeAreaInsets({}, { 0, 1 }, {}, {});
+}
+
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
 
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node) {}
