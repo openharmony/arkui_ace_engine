@@ -100,6 +100,12 @@ enum class CleanNodeStyle {
     INPUT,
 };
 
+enum class MenuPolicy { DEFAULT = 0, NEVER, ALWAYS };
+
+struct SelectionOptions {
+    MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
+};
+
 class ACE_EXPORT TextFieldControllerBase : public AceType {
     DECLARE_ACE_TYPE(TextFieldControllerBase, AceType);
 
@@ -119,7 +125,8 @@ public:
     {
         return {};
     }
-    virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) {}
+    virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt) {}
     virtual Rect GetTextContentRect()
     {
         return {};
