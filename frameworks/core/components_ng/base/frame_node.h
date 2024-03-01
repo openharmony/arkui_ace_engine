@@ -196,6 +196,10 @@ public:
 
     void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
 
+    void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
+
+    void TriggerOnSizeChangeCallback();
+
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
     const RefPtr<RenderContext>& GetRenderContext() const
@@ -807,6 +811,7 @@ private:
     std::function<RefPtr<UINode>()> builderFunc_;
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
+    std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;

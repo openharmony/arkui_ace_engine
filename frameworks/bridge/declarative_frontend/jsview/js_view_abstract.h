@@ -287,6 +287,7 @@ public:
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
     static void JsOnAreaChange(const JSCallbackInfo& info);
+    static void JsOnSizeChange(const JSCallbackInfo& info);
 
     static void JsLinearGradient(const JSCallbackInfo& info);
     static void JsRadialGradient(const JSCallbackInfo& info);

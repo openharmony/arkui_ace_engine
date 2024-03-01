@@ -884,6 +884,12 @@ public:
         ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
     }
 
+    void SetOnSizeChanged(
+        std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged) override
+    {
+        ViewAbstract::SetOnSizeChanged(std::move(onSizeChanged));
+    }
+
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override
     {
         ViewAbstract::SetOnDrop(std::move(onDrop));

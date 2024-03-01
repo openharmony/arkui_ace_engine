@@ -961,6 +961,28 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
     pattern_->OnAreaChangedInner();
 }
 
+void FrameNode::SetOnSizeChangeCallback(OnSizeChangedFunc&& callback)
+{
+    if (!lastFrameNodeRect_) {
+        lastFrameNodeRect_ = std::make_unique<RectF>();
+    }
+    eventHub_->SetOnSizeChanged(std::move(callback));
+}
+
+void FrameNode::TriggerOnSizeChangeCallback()
+{
+    if (!IsActive()) {
+        return;
+    }
+    if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {
+        auto currFrameRect = geometryNode_->GetFrameRect();
+        if (currFrameRect != *lastFrameNodeRect_) {
+            eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            *lastFrameNodeRect_ = currFrameRect;
+        }
+    }
+}
+
 void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
 {
     auto context = PipelineContext::GetCurrentContext();
@@ -2865,6 +2887,7 @@ void FrameNode::SyncGeometryNode(bool needSkipSync)
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         isLayoutComplete_ = true;
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
+        TriggerOnSizeChangeCallback();
     }
 
     DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
