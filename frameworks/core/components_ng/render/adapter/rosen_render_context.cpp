@@ -765,14 +765,14 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
         if (bgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
             return;
         }
+        if (bgBlurStyle->blurOption.grayscale.size() > 1) {
+            rsNode_->SetGreyCoef1(bgBlurStyle->blurOption.grayscale[0]);
+            rsNode_->SetGreyCoef2(bgBlurStyle->blurOption.grayscale[1]);
+        }
     } else {
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
     SetBackBlurFilter();
-    if (bgBlurStyle->blurOption.grayscale.size() > 1) {
-        rsNode_->SetGreyCoef1(bgBlurStyle->blurOption.grayscale[0]);
-        rsNode_->SetGreyCoef2(bgBlurStyle->blurOption.grayscale[1]);
-    }
 }
 
 void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
@@ -819,14 +819,14 @@ void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOptio
         if (fgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
             return;
         }
+        if (fgBlurStyle->blurOption.grayscale.size() > 1) {
+            rsNode_->SetGreyCoef1(fgBlurStyle->blurOption.grayscale[0]);
+            rsNode_->SetGreyCoef2(fgBlurStyle->blurOption.grayscale[1]);
+        }
     } else {
         groupProperty->propBlurStyleOption = fgBlurStyle;
     }
     SetFrontBlurFilter();
-    if (fgBlurStyle->blurOption.grayscale.size() > 1) {
-        rsNode_->SetGreyCoef1(fgBlurStyle->blurOption.grayscale[0]);
-        rsNode_->SetGreyCoef2(fgBlurStyle->blurOption.grayscale[1]);
-    }
 }
 
 void RosenRenderContext::ResetBackBlurStyle()
