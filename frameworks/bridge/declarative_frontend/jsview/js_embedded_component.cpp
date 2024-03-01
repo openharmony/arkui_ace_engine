@@ -51,6 +51,11 @@ void JSEmbeddedComponent::JSBind(BindingTarget globalObj)
     JSClass<JSEmbeddedComponent>::StaticMethod("onTerminated", &JSEmbeddedComponent::OnTerminated);
     JSClass<JSEmbeddedComponent>::StaticMethod("onError", &JSEmbeddedComponent::OnError);
     JSClass<JSEmbeddedComponent>::StaticMethod("constraintSize", &JSEmbeddedComponent::JsConstraintSize);
+    JSClass<JSEmbeddedComponent>::StaticMethod("aspectRatio", &JSEmbeddedComponent::JsAspectRatio);
+    JSClass<JSEmbeddedComponent>::StaticMethod("layoutWeight", &JSEmbeddedComponent::JsLayoutWeight);
+    JSClass<JSEmbeddedComponent>::StaticMethod("flexBasis", &JSEmbeddedComponent::JsFlexBasis);
+    JSClass<JSEmbeddedComponent>::StaticMethod("flexGrow", &JSEmbeddedComponent::JsFlexGrow);
+    JSClass<JSEmbeddedComponent>::StaticMethod("flexShrink", &JSEmbeddedComponent::JsFlexShrink);
     JSClass<JSEmbeddedComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -73,6 +78,8 @@ void JSEmbeddedComponent::Create(const JSCallbackInfo& info)
     }
 
     UIExtensionModel::GetInstance()->Create(want, embeddedType);
+    ViewAbstractModel::GetInstance()->SetWidth(EMBEDDED_COMPONENT_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetHeight(EMBEDDED_COMPONENT_MIN_HEIGHT);
     ViewAbstractModel::GetInstance()->SetMinWidth(EMBEDDED_COMPONENT_MIN_WIDTH);
     ViewAbstractModel::GetInstance()->SetMinHeight(EMBEDDED_COMPONENT_MIN_HEIGHT);
 }
@@ -134,10 +141,5 @@ void JSEmbeddedComponent::OnError(const JSCallbackInfo& info)
             func->ExecuteJS(FUNC_ARGC_1, &returnValue);
         };
     UIExtensionModel::GetInstance()->SetOnError(std::move(onError));
-}
-
-void JSEmbeddedComponent::JsConstraintSize(const JSCallbackInfo& info)
-{
-    return;
 }
 } // namespace OHOS::Ace::Framework

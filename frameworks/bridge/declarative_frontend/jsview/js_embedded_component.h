@@ -27,7 +27,12 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void OnTerminated(const JSCallbackInfo& info);
     static void OnError(const JSCallbackInfo& info);
-    static void JsConstraintSize(const JSCallbackInfo& info);
+    static void JsConstraintSize(const JSCallbackInfo& /* info */) {};
+    static void JsAspectRatio(const JSCallbackInfo& /* info */) {};
+    static void JsLayoutWeight(const JSCallbackInfo& /* info */) {};
+    static void JsFlexBasis(const JSCallbackInfo& /* info */) {};
+    static void JsFlexGrow(const JSCallbackInfo& /* info */) {};
+    static void JsFlexShrink(const JSCallbackInfo& /* info */) {};
 };
 
 } // namespace OHOS::Ace::Framework
