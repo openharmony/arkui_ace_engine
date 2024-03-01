@@ -244,6 +244,7 @@ struct GridLayoutInfo {
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
+    float lastCrossSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
 
     // additional padding to accommodate navigation bar when SafeArea is expanded

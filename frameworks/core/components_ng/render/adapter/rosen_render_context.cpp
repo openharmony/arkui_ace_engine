@@ -444,7 +444,11 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto paintRect = AdjustPaintRect();
-    RoundToPixelGrid(isRound, flag);
+    if (isRound && flag == 0) {
+        RoundToPixelGrid(); // call RoundToPixelGrid without param to improve performance
+    } else {
+        RoundToPixelGrid(isRound, flag);
+    }
     paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
     SyncGeometryProperties(paintRect);
     host->OnPixelRoundFinish(geometryNode->GetPixelGridRoundSize());
@@ -2335,6 +2339,11 @@ RectF RosenRenderContext::AdjustPaintRect()
             return rect;
         }
     }
+    bool hasPosition = HasPosition() && IsUsingPosition(frameNode);
+    if (!HasAnchor() && !HasOffset() && !hasPosition) {
+        geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
+        return rect;
+    }
     const auto& layoutConstraint = frameNode->GetGeometryNode()->GetParentLayoutConstraint();
     auto widthPercentReference = layoutConstraint.has_value() ? layoutConstraint->percentReference.Width()
                                                               : PipelineContext::GetCurrentRootWidth();
@@ -2351,7 +2360,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     Dimension parentPaddingTop;
     GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
     // Position properties take precedence over offset locations.
-    if (HasPosition() && IsUsingPosition(frameNode)) {
+    if (hasPosition) {
         CombineMarginAndPosition(
             resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
         rect.SetLeft(resultX.ConvertToPx() - anchorX.value_or(0));
@@ -2378,6 +2387,21 @@ RectF RosenRenderContext::AdjustPaintRect()
     return rect;
 }
 
+float RosenRenderContext::RoundValueToPixelGrid(float value)
+{
+    float fractials = fmod(value, 1.0f);
+    if (fractials < 0.0f) {
+        ++fractials;
+    }
+    if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.75f)) {
+        return (value - fractials + 1.0f);
+    } else if (NearEqual(fractials, 0.0f) || !GreatOrEqual(fractials, 0.25f)) {
+        return (value - fractials);
+    } else {
+        return (value - fractials + 0.5f);
+    }
+}
+
 float RosenRenderContext::RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
 {
     float fractials = fmod(value, 1.0f);
@@ -2398,6 +2422,46 @@ float RosenRenderContext::RoundValueToPixelGrid(float value, bool isRound, bool 
         }
     }
     return value;
+}
+
+void RosenRenderContext::RoundToPixelGrid()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    float relativeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
+    float relativeTop = geometryNode->GetPixelGridRoundOffset().GetY();
+    float nodeWidth = geometryNode->GetFrameSize().Width();
+    float nodeHeight = geometryNode->GetFrameSize().Height();
+    float absoluteRight = relativeLeft + nodeWidth;
+    float absoluteBottom = relativeTop + nodeHeight;
+    // round node
+    float nodeLeftI = RoundValueToPixelGrid(relativeLeft);
+    float nodeTopI = RoundValueToPixelGrid(relativeTop);
+    geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
+    float nodeWidthI = RoundValueToPixelGrid(absoluteRight) - nodeLeftI;
+    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom) - nodeTopI;
+    geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+    if (borderWidth_ != Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f)) {
+        // round inner
+        float innerLeft = relativeLeft + borderWidth_[0];
+        float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
+        float innerTop = relativeTop + borderWidth_[1];
+        float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
+        float innerWidthI = RoundValueToPixelGrid(innerRight) - RoundValueToPixelGrid(innerLeft);
+        float innerHeightI = RoundValueToPixelGrid(innerBottom) - RoundValueToPixelGrid(innerTop);
+        // update border
+        float borderLeftI = RoundValueToPixelGrid(borderWidth_[0]);
+        float borderTopI = RoundValueToPixelGrid(borderWidth_[1]);
+        float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
+        float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
+        BorderWidthPropertyF borderWidthPropertyF;
+        borderWidthPropertyF.leftDimen = borderLeftI;
+        borderWidthPropertyF.topDimen = borderTopI;
+        borderWidthPropertyF.rightDimen = borderRightI;
+        borderWidthPropertyF.bottomDimen = borderBottomI;
+        UpdateBorderWidthF(borderWidthPropertyF);
+    }
 }
 
 void RosenRenderContext::RoundToPixelGrid(bool isRound, uint8_t flag)
@@ -2424,31 +2488,31 @@ void RosenRenderContext::RoundToPixelGrid(bool isRound, uint8_t flag)
     float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, ceilLeft, floorLeft);
     float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, ceilTop, floorTop);
     geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
-    float nodeWidthI = RoundValueToPixelGrid(absoluteRight, isRound, ceilRight, floorRight) -
-        RoundValueToPixelGrid(relativeLeft, isRound, ceilLeft, floorLeft);
-    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom, isRound, ceilBottom, floorBottom) -
-        RoundValueToPixelGrid(relativeTop, isRound, ceilTop, floorTop);
+    float nodeWidthI = RoundValueToPixelGrid(absoluteRight, isRound, ceilRight, floorRight) - nodeLeftI;
+    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom, isRound, ceilBottom, floorBottom) - nodeTopI;
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
-    // round inner
-    float innerLeft = relativeLeft + borderWidth_[0];
-    float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
-    float innerTop = relativeTop + borderWidth_[1];
-    float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
-    float innerWidthI = RoundValueToPixelGrid(innerRight, isRound, ceilRight, floorRight) -
-        RoundValueToPixelGrid(innerLeft, isRound, ceilLeft, floorLeft);
-    float innerHeightI = RoundValueToPixelGrid(innerBottom, isRound, ceilBottom, floorBottom) -
-        RoundValueToPixelGrid(innerTop, isRound, ceilTop, floorTop);
-    // update border
-    float borderLeftI = RoundValueToPixelGrid(borderWidth_[0], isRound, ceilLeft, floorLeft);
-    float borderTopI = RoundValueToPixelGrid(borderWidth_[1], isRound, ceilTop, floorTop);
-    float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
-    float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
-    BorderWidthPropertyF borderWidthPropertyF;
-    borderWidthPropertyF.leftDimen = borderLeftI;
-    borderWidthPropertyF.topDimen = borderTopI;
-    borderWidthPropertyF.rightDimen = borderRightI;
-    borderWidthPropertyF.bottomDimen = borderBottomI;
-    UpdateBorderWidthF(borderWidthPropertyF);
+    if (borderWidth_ != Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f)) {
+        // round inner
+        float innerLeft = relativeLeft + borderWidth_[0];
+        float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
+        float innerTop = relativeTop + borderWidth_[1];
+        float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
+        float innerWidthI = RoundValueToPixelGrid(innerRight, isRound, ceilRight, floorRight) -
+            RoundValueToPixelGrid(innerLeft, isRound, ceilLeft, floorLeft);
+        float innerHeightI = RoundValueToPixelGrid(innerBottom, isRound, ceilBottom, floorBottom) -
+            RoundValueToPixelGrid(innerTop, isRound, ceilTop, floorTop);
+        // update border
+        float borderLeftI = RoundValueToPixelGrid(borderWidth_[0], isRound, ceilLeft, floorLeft);
+        float borderTopI = RoundValueToPixelGrid(borderWidth_[1], isRound, ceilTop, floorTop);
+        float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
+        float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
+        BorderWidthPropertyF borderWidthPropertyF;
+        borderWidthPropertyF.leftDimen = borderLeftI;
+        borderWidthPropertyF.topDimen = borderTopI;
+        borderWidthPropertyF.rightDimen = borderRightI;
+        borderWidthPropertyF.bottomDimen = borderBottomI;
+        UpdateBorderWidthF(borderWidthPropertyF);
+    }
 }
 
 void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension& resultY,

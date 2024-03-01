@@ -325,6 +325,11 @@ public:
         return childLayoutConstraint_;
     }
 
+    const LayoutConstraintF& GetLayoutConstraint() const
+    {
+        return childLayoutConstraint_;
+    }
+
     void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index);
 
 protected:
@@ -361,9 +366,11 @@ protected:
         int32_t& startIndex, float crossSize);
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
     ListItemInfo GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
+    bool IsConstraintChanged(LayoutWrapper* layoutWrapper) const;
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
+    bool constraintChanged_ = true;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
     void CheckJumpToIndex();
