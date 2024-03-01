@@ -1597,6 +1597,10 @@ void OverlayManager::PopModalDialog(int32_t maskId)
     for (auto it = DialogMap.begin(); it != DialogMap.end(); it++) {
         auto dialogProp = DynamicCast<DialogLayoutProperty>(it->second->GetLayoutProperty());
         if (dialogId == it->first) {
+            auto hub = it->second->GetEventHub<DialogEventHub>();
+            if (hub) {
+                hub->FireCancelEvent();
+            }
             subOverlayManager->CloseDialog(it->second);
         }
     }
