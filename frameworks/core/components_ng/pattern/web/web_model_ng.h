@@ -153,6 +153,7 @@ public:
     void SetAudioExclusive(bool audioExclusive) override;
     void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) override;
+    void RegisterNativeEmbedRule(const std::string& tag, const std::string& type) override;
     void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetLayoutMode(WebLayoutMode mode) override;

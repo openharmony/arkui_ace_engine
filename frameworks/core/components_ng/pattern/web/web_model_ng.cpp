@@ -844,6 +844,14 @@ void WebModelNG::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
     webPattern->UpdateNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
+void WebModelNG::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateNativeEmbedRuleTag(tag);
+    webPattern->UpdateNativeEmbedRuleType(type);
+}
+
 void WebModelNG::SetOnControllerAttached(std::function<void()>&& callback)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

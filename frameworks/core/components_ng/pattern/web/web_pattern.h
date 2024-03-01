@@ -365,6 +365,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -521,6 +523,8 @@ private:
     void OnOverScrollModeUpdate(const int32_t value);
     void OnCopyOptionModeUpdate(const int32_t value);
     void OnNativeEmbedModeEnabledUpdate(bool value);
+    void OnNativeEmbedRuleTagUpdate(const std::string& tag);
+    void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     int GetWebId();
 
     void InitEvent();

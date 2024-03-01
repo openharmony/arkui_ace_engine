@@ -136,6 +136,7 @@ public:
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void OverScrollMode(int overScrollMode);
     static void EnableNativeEmbedMode(bool isEmbedModeEnabled);
+    static void RegisterNativeEmbedRule(const std::string& tag, const std::string& type);
     static void OnNativeEmbedLifecycleChange(const JSCallbackInfo& args);
     static void OnNativeEmbedGestureEvent(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);

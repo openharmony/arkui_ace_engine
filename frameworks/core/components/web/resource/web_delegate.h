@@ -533,6 +533,8 @@ public:
     void UpdateScrollBarColor(const std::string& colorValue);
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
+    void UpdateNativeEmbedRuleTag(const std::string& tag);
+    void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
@@ -894,6 +896,8 @@ private:
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;
     bool isEmbedModeEnabled_ = false;
+    std::string tag_;
+    std::string tag_type_;
 #endif
 };
 

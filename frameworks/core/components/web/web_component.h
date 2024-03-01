@@ -632,6 +632,12 @@ public:
         isNativeEmbedMode_ = isEnabled;
     }
 
+    void RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
+    {
+        tag_ = tag;
+        tag_type_ = type;
+    }
+
     using OnCommonDialogImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType) const
     {
@@ -1063,6 +1069,8 @@ private:
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
+    std::string tag_;
+    std::string tag_type_;
     OnDragFunc onDragStartId_;
     OnDropFunc onDragEnterId_;
     OnDropFunc onDragMoveId_;

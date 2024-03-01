@@ -1507,6 +1507,20 @@ void WebPattern::OnNativeEmbedModeEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
+{
+    if (delegate_) {
+        delegate_->UpdateNativeEmbedRuleTag(tag);
+    }
+}
+
+void WebPattern::OnNativeEmbedRuleTypeUpdate(const std::string& type)
+{
+    if (delegate_) {
+        delegate_->UpdateNativeEmbedRuleType(type);
+    }
+}
+
 bool WebPattern::IsRootNeedExportTexture()
 {
     auto host = GetHost();
