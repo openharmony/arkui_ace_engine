@@ -918,11 +918,10 @@ void PipelineContext::SetupRootElement()
 
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
-    auto atomicService = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
+    RefPtr<AppBarView> appBar = AceType::MakeRefPtr<AppBarView>();
+    auto atomicService = installationFree_ ? appBar->Create(stageNode) : nullptr;
     auto container = Container::Current();
-    if (container && atomicService) {
-        auto appBar = Referenced::MakeRefPtr<AppBarView>(atomicService);
-        appBar->iniBehavior();
+    if (container) {
         container->SetAppBar(appBar);
     }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
