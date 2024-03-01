@@ -655,8 +655,7 @@ void SetSliderChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
     auto onEvent = [node, eventId, extraParam](float value, int32_t mode) {
         ArkUINodeEvent event;
         event.kind = ON_SLIDER_CHANGE;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.data[0].f32 = value;
         event.componentAsyncEvent.data[1].i32 = mode;
         SendArkUIAsyncEvent(&event);

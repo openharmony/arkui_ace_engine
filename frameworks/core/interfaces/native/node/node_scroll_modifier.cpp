@@ -458,8 +458,7 @@ void SetOnScroll(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
     auto onScroll = [node, eventId, extraParam](Dimension scrollX, Dimension scrollY) {
         ArkUINodeEvent event;
         event.kind = ON_SCROLL;
-        event.eventId = eventId;
-        event.extraParam= extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(scrollX.Value());
         event.componentAsyncEvent.data[1].f32 = static_cast<float>(scrollY.Value());
         SendArkUIAsyncEvent(&event);
@@ -477,8 +476,7 @@ void SetOnScrollFrameBegin(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extr
         ScrollFrameResult scrollRes { .offset = offset };
         ArkUINodeEvent event;
         event.kind = ON_SCROLL_FRAME_BEGIN;
-        event.eventId = eventId;
-        event.extraParam= extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
         SendArkUIAsyncEvent(&event);
@@ -496,8 +494,7 @@ void SetOnScrollStart(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraPara
     auto onScrollStart = [nodeId, node, eventId, extraParam]() -> void {
         ArkUINodeEvent event;
         event.kind = ON_SCROLL_START;
-        event.eventId = eventId;
-        event.extraParam= extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         SendArkUIAsyncEvent(&event);
     };
     ScrollModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
@@ -511,8 +508,7 @@ void SetOnScrollStop(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
     auto onScrollStop = [nodeId, node, eventId, extraParam]() -> void {
         ArkUINodeEvent event;
         event.kind = ON_SCROLL_STOP;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         SendArkUIAsyncEvent(&event);
     };
     ScrollModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
@@ -525,8 +521,7 @@ void SetOnScrollEdge(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
     auto onScroll = [node, eventId, extraParam](ScrollEdge edge) {
         ArkUINodeEvent event;
         event.kind = ON_SCROLL_EDGE;
-        event.eventId = eventId;
-        event.extraParam= extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(edge);
         SendArkUIAsyncEvent(&event);
     };

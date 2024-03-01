@@ -57,8 +57,7 @@ void SetRefreshOnStateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* ex
     auto onEvent = [node, eventId, extraParam](const int32_t value) {
         ArkUINodeEvent event;
         event.kind = ON_REFRESH_STATE_CHANGE;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.data[0].i32 = value;
         SendArkUIAsyncEvent(&event);
     };
@@ -72,8 +71,7 @@ void SetOnRefreshing(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
     auto onEvent = [node, eventId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = ON_REFRESH_REFRESHING;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         SendArkUIAsyncEvent(&event);
     };
     RefreshModelNG::SetOnRefreshing(frameNode, std::move(onEvent));
