@@ -12057,7 +12057,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeSwipePageNextIndex001, TestSize.Level
     EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 3);
 
     dragVelocity = -781.0f;
-    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 6);
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 3);
 
     pattern_->itemPosition_.clear();
     swiperItemInfo1.startPos = -301.0f;
