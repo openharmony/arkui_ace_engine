@@ -2920,6 +2920,21 @@ struct ArkUIRenderNodeModifier {
         ArkUI_Uint32 strokeColor, ArkUI_Float32 strokeWidth);
 };
 
+struct ArkUIFrameNodeModifier {
+    ArkUI_Bool (*isModifiable)(ArkUINodeHandle node);
+    void (*appendChild)(ArkUINodeHandle node, ArkUINodeHandle child);
+    void (*insertChildAfter)(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling);
+    void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);
+    void (*clearChildren)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getChildrenNumber)(ArkUINodeHandle node);
+    ArkUINodeHandle (*getChild)(ArkUINodeHandle node, ArkUI_Int32 index);
+    ArkUINodeHandle (*getFirst)(ArkUINodeHandle node);
+    ArkUINodeHandle (*getNextSibling)(ArkUINodeHandle node);
+    ArkUINodeHandle (*getPreviousSibling)(ArkUINodeHandle node);
+    ArkUINodeHandle (*getParent)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getIdByNodePtr)(ArkUINodeHandle node);
+};
+
 struct ArkUIAnimation {
     ArkUI_Int32 (*startAnimation)(const ArkUIAPIAnimationSpec* spec, ArkUI_Int32 callbackId);
     void (*openImplicitAnimation)(
@@ -3064,6 +3079,7 @@ struct ArkUINodeModifiers {
     const ArkUITextClockModifier* (*getTextClockModifier)();
     const ArkUITextTimerModifier* (*getTextTimerModifier)();
     const ArkUIRenderNodeModifier* (*getRenderNodeModifier)();
+    const ArkUIFrameNodeModifier* (*getFrameNodeModifier)();
     const ArkUIPluginModifier* (*getPluginModifier)();
     const ArkUIXComponentModifier* (*getXComponentModifier)();
     const ArkUIStateModifier* (*getUIStateModifier)();

@@ -39,6 +39,7 @@ template("ace_core_interfaces_native_node") {
       "node/divider_modifier.cpp",
       "node/extension_companion_node.cpp",
       "node/flex_modifier.cpp",
+      "node/frame_node_modifier.cpp",
       "node/gauge_modifier.cpp",
       "node/grid_col_modifier.cpp",
       "node/grid_item_modifier.cpp",

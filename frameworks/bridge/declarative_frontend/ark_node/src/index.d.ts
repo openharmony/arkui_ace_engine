@@ -89,6 +89,8 @@ declare interface RegisterParams {
 }
 
 declare class FinalizationRegistry {
-  constructor(fun: (arg0: RegisterParams) => void);
-  register(target: BuilderNode, heldValue: RegisterParams): undefined;
+  constructor(fun: (arg0: RegisterParams | number) => void);
+  register(target: BuilderNode | FrameNode, heldValue: RegisterParams | number): undefined;
 }
+
+declare function getUINativeModule(): any;
