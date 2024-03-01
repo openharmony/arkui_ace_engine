@@ -32,7 +32,7 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
 
 private:
-    bool IsValidRootLayer(int32_t x, WebType type);
+    bool IsValidRootLayer(int32_t x, RenderMode renderMode);
     ACE_DISALLOW_COPY_AND_MOVE(WebLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

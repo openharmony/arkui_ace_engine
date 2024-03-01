@@ -79,10 +79,10 @@ public:
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
     WebPattern();
-    WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, WebType type = WebType::SURFACE,
-               bool incognitoMode = false);
-    WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, WebType type = WebType::SURFACE,
-               bool incognitoMode = false);
+    WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
+                RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+    WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback,
+                RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
 
     ~WebPattern() override;
 
@@ -94,7 +94,7 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        if (type_ == WebType::TEXTURE) {
+        if (renderMode_ == RenderMode::SYNC_RENDER) {
             return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
         } else {
         return RenderContext::ContextParam { RenderContext::ContextType::SURFACE, "RosenWeb" };
@@ -194,14 +194,14 @@ public:
         return setWebIdCallback_;
     }
 
-    void SetWebType(WebType type)
+    void SetRenderMode(RenderMode renderMode)
     {
-        type_ = type;
+        renderMode_ = renderMode;
     }
 
-    WebType GetWebType()
+    RenderMode GetRenderMode()
     {
-        return type_;
+        return renderMode_;
     }
 
     void SetIncognitoMode(bool incognitoMode)
@@ -487,7 +487,7 @@ private:
     std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
-    WebType type_;
+    RenderMode renderMode_;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;

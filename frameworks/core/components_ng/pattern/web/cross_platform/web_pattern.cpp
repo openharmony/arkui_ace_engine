@@ -58,17 +58,17 @@ WebPattern::WebPattern() = default;
 
 WebPattern::WebPattern(const std::string& webSrc,
                        const RefPtr<WebController>& webController,
-                       WebType type,
+                       RenderMode renderMode,
                        bool incognitoMode)
-    : webSrc_(std::move(webSrc)), webController_(webController), type_(type),
+    : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode),
       incognitoMode_(incognitoMode)
 {}
 
 WebPattern::WebPattern(const std::string& webSrc,
                        const SetWebIdCallback& setWebIdCallback,
-                       WebType type,
+                       RenderMode renderMode,
                        bool incognitoMode)
-    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), type_(type),
+    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), renderMode_(renderMode),
       incognitoMode_(incognitoMode) {}
 
 WebPattern::~WebPattern()
@@ -788,7 +788,7 @@ void WebPattern::OnModifyDone()
         observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
         CHECK_NULL_VOID(observer_);
         delegate_->SetObserver(observer_);
-        delegate_->SetWebType(type_);
+        delegate_->SetRenderMode(renderMode_);
         InitEnhanceSurfaceFlag();
         delegate_->SetNGWebPattern(Claim(this));
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
@@ -804,7 +804,7 @@ void WebPattern::OnModifyDone()
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
             renderSurface_->SetRenderContext(host->GetRenderContext());
-            if (type_ == WebType::TEXTURE) {
+            if (renderMode_ == RenderMode::SYNC_RENDER) {
                 renderSurface_->SetIsTexture(true);
                 renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
                 renderSurface_->SetSurfaceQueueSize(SURFACE_QUEUE_SIZE);
@@ -867,7 +867,7 @@ void WebPattern::OnModifyDone()
     InitEvent();
 
     // Initialize scrollupdate listener
-    if (type_ == WebType::TEXTURE) {
+    if (renderMode_ == RenderMode::SYNC_RENDER) {
         auto task = [this]() {
             InitScrollUpdateListener();
         };
