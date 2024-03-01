@@ -33,6 +33,9 @@ namespace OHOS::Ace::NG {
 namespace {
 bool IsDataValid(const WaterFlowLayoutInfo& info)
 {
+    if (info.segmentTails_.empty()) {
+        return false;
+    }
     if (info.childrenCount_ - 1 != info.segmentTails_.back()) {
         TAG_LOGW(AceLogTag::ACE_WATERFLOW,
             "Children count = %{public}d and doesn't match the number provided in Sections, which is %{public}d.",
