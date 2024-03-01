@@ -61,6 +61,16 @@ RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
+void RefreshModelNG::SetPullToRefresh(bool pullToRefresh)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullToRefresh, pullToRefresh);
+}
+
+void RefreshModelNG::SetRefreshOffset(const Dimension& offset)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset);
+}
+
 void RefreshModelNG::SetRefreshing(bool isRefreshing)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefreshing, isRefreshing);
