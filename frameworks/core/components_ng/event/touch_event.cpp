@@ -56,7 +56,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         if (firstInputTime_.has_value()) {
             inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
         }
-        if (SystemProperties::GetLayoutTraceEnabled()) {
+        if (SystemProperties::GetTraceInputEventEnabled()) {
             ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:TouchEvent",
                 static_cast<long long>(inputTime), static_cast<long long>(overTime));
         }

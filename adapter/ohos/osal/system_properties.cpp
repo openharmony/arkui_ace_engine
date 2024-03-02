@@ -99,6 +99,11 @@ bool IsLayoutTraceEnabled()
     return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
 }
 
+bool IsTraceInputEventEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.inputevent.enabled", "false") == "true");
+}
+
 bool IsStateManagerEnable()
 {
     return (system::GetParameter("persist.ace.debug.statemgr.enabled", "false") == "true");
@@ -277,6 +282,7 @@ bool IsAcePerformanceMonitorEnabled()
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
+bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && IsDeveloperModeOn();
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
@@ -433,6 +439,7 @@ void SystemProperties::InitDeviceInfo(
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
+    traceInputEventEnable_ = IsTraceInputEventEnabled() && IsDeveloperModeOn();
     stateManagerEnable_ = IsStateManagerEnable();
     buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
     accessibilityEnabled_ = IsAccessibilityEnabled();

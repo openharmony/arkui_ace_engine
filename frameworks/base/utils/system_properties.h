@@ -262,6 +262,11 @@ public:
         return layoutTraceEnable_;
     }
 
+    static bool GetTraceInputEventEnabled()
+    {
+        return traceInputEventEnable_;
+    }
+
     static bool GetStateManagerEnabled()
     {
         return stateManagerEnable_;
@@ -446,6 +451,7 @@ private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
     static bool layoutTraceEnable_;
+    static bool traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
