@@ -72,6 +72,7 @@ struct AxisEvent final {
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    int32_t touchEventId;
 
     AxisEvent CreateScaleEvent(float scale) const
     {

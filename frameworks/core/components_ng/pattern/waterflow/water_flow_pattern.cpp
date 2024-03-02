@@ -558,4 +558,19 @@ void WaterFlowPattern::ResetLayoutInfo()
         layoutInfo_.InitSegments(sections_->GetSectionInfo(), 0);
     }
 }
+
+void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
+{
+    // assume this is always before other children are modified, because it's called during State update.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (layoutInfo_.footerIndex_ < 0) {
+        layoutInfo_.footerIndex_ = 0;
+        host->AddChild(footer);
+    } else {
+        auto oldChild = host->GetChildAtIndex(layoutInfo_.footerIndex_);
+        host->ReplaceChild(oldChild, footer);
+    }
+    footer->SetActive(false);
+}
 } // namespace OHOS::Ace::NG

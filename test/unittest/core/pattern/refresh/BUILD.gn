@@ -18,5 +18,6 @@ ace_unittest("refresh_test_ng") {
   sources = [
     "refresh_test_ng.cpp",
     "refresh_version_eleven_test_ng.cpp",
+    "refresh_version_twelve_test_ng.cpp",
   ]
 }

@@ -78,17 +78,41 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& re
     RefreshModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
 }
 
+void JSRefresh::SetPullToRefresh(bool value)
+{
+    RefreshModel::GetInstance()->SetPullToRefresh(value);
+}
+
 void JSRefresh::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRefresh>::Declare("Refresh");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSRefresh>::StaticMethod("create", &JSRefresh::Create, opt);
+    JSClass<JSRefresh>::StaticMethod("refreshOffset", &JSRefresh::JsRefreshOffset);
+    JSClass<JSRefresh>::StaticMethod("pullToRefresh", &JSRefresh::SetPullToRefresh, opt);
     JSClass<JSRefresh>::StaticMethod("onStateChange", &JSRefresh::OnStateChange);
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
     JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRefresh>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRefresh>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRefresh>::InheritAndBind<JSContainerBase>(globalObj);
+}
+
+void JSRefresh::JsRefreshOffset(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    JsRefreshOffset(info[0]);
+}
+
+void JSRefresh::JsRefreshOffset(const JSRef<JSVal>& jsVal)
+{
+    CalcDimension value(0.0f);
+    if (!ParseJsDimensionVpNG(jsVal, value)) {
+        value.SetValue(0.0f);
+    }
+    RefreshModel::GetInstance()->SetRefreshOffset(value);
 }
 
 void JSRefresh::Create(const JSCallbackInfo& info)

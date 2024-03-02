@@ -153,6 +153,8 @@ void NavBarTestNg::InitializationParameters(TestParameters& testParameters)
     ASSERT_NE(testParameters.navigationGroupNode, nullptr);
     auto navigationPattern = testParameters.navigationGroupNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
     navigationPattern->SetNavigationMode(NavigationMode::AUTO);
     navBarNode_->SetParent(testParameters.navigationGroupNode);
     testParameters.menuItem.action = []() {};

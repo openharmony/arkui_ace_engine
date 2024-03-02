@@ -6845,6 +6845,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
     JSClass<JSViewAbstract>::StaticMethod("obscured", &JSViewAbstract::JsObscured);
+    JSClass<JSViewAbstract>::StaticMethod("privacySensitive", &JSViewAbstract::JsPrivacySensitive);
     JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
     JSClass<JSViewAbstract>::StaticMethod("dragPreview", &JSViewAbstract::JsDragPreview);
 
@@ -7894,6 +7895,7 @@ bool JSViewAbstract::CheckLength(
     return true;
 }
 
+// obscured means that the developer calls the component to be private style.
 void JSViewAbstract::JsObscured(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined()) {
@@ -7917,6 +7919,21 @@ void JSViewAbstract::JsObscured(const JSCallbackInfo& info)
     }
 
     ViewAbstractModel::GetInstance()->SetObscured(reasons);
+}
+
+// PrivacySensitive means that the component will change style when system calls the app to be privated.
+void JSViewAbstract::JsPrivacySensitive(const JSCallbackInfo& info)
+{
+    auto sensitiveInfo = info[0];
+    if (sensitiveInfo->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->SetPrivacySensitive(false);
+        return;
+    }
+    bool sensitive = false;
+    if (sensitiveInfo->IsBoolean()) {
+        sensitive = sensitiveInfo->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetPrivacySensitive(sensitive);
 }
 
 void JSViewAbstract::JSRenderGroup(const JSCallbackInfo& info)

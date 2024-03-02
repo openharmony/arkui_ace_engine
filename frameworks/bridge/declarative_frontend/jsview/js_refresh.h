@@ -28,6 +28,11 @@ public:
     static void OnStateChange(const JSCallbackInfo& args);
     static void OnRefreshing(const JSCallbackInfo& args);
     static void ParsFrictionData(const JsiRef<JsiValue>& value);
+
+private:
+    static void JsRefreshOffset(const JSCallbackInfo& info);
+    static void JsRefreshOffset(const JSRef<JSVal>& jsValue);
+    static void SetPullToRefresh(bool value);
 };
 
 } // namespace OHOS::Ace::Framework

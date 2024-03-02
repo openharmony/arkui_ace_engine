@@ -58,18 +58,7 @@ public:
 
     bool UpdateStartIndex(int32_t index);
 
-    void AddFooter(const RefPtr<NG::UINode>& footer)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        if (layoutInfo_.footerIndex_ < 0) {
-            layoutInfo_.footerIndex_ = 0;
-            host->AddChild(footer);
-        } else {
-            host->ReplaceChild(host->GetChildAtIndex(layoutInfo_.footerIndex_), footer);
-        }
-        footer->SetActive(false);
-    }
+    void AddFooter(const RefPtr<NG::UINode>& footer);
 
     void ResetLayoutInfo();
 

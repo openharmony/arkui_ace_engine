@@ -2105,6 +2105,16 @@ void ViewAbstract::SetObscured(const std::vector<ObscuredReasons> &reasons)
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void ViewAbstract::SetPrivacySensitive(bool flag)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(flag);
+}
+
 void ViewAbstract::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts &opts)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

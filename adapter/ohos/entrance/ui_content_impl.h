@@ -93,6 +93,8 @@ public:
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
 
+    void ChangeSensitiveNodes(bool isSensitive) override;
+
     // Window color
     uint32_t GetBackgroundColor() override;
     void SetBackgroundColor(uint32_t color) override;

@@ -153,6 +153,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest001, TestSize.Level1)
 
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetTitle("navigationModel", false);
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -278,6 +279,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest005, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetTitle("navigationModel", false);
 
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -300,13 +302,15 @@ HWTEST_F(NavigationTestNg, NavigationTestNg001, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetTitle("NavigationTestNg", false);
     int32_t nodeId = TEST_DATA;
-    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>();
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
     NavigationGroupNode navigationGroupNode(TEST_TAG, nodeId, patternCreator);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationGroupNode.GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     auto res = navigationGroupNode.GetFrameNode(TEST_TAG, nodeId);
     EXPECT_EQ(res, nullptr);
-    navigationGroupNode.GetOrCreateGroupNode(TEST_TAG, nodeId, nullptr);
 }
 
 /**
@@ -318,10 +322,13 @@ HWTEST_F(NavigationTestNg, NavigationTestNg002, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetTitle("NavigationTestNg", false);
     int32_t nodeId = TEST_DATA;
-    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>();
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
     NavigationGroupNode navigationGroupNode(TEST_TAG, nodeId, patternCreator);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationGroupNode.GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
     json->isRoot_ = true;
     ASSERT_NE(json, nullptr);
@@ -340,14 +347,17 @@ HWTEST_F(NavigationTestNg, NavigationTestNg003, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetTitle("NavigationTestNg", false);
     int32_t nodeId = TEST_DATA;
-    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>();
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
     NavigationGroupNode navigationGroupNode(TEST_TAG, nodeId, patternCreator);
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
     navigationGroupNode.pattern_ = pattern;
     ASSERT_NE(AceType::DynamicCast<NavigationPattern>(navigationGroupNode.GetPattern()), nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationGroupNode.GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
     navigationGroupNode.SetNavBarNode(navBarNode);
     auto navBar = AceType::DynamicCast<OHOS::Ace::NG::NavBarNode>(navigationGroupNode.GetNavBarNode());
@@ -369,6 +379,7 @@ HWTEST_F(NavigationTestNg, NavigationModelTest001, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetTitle("navigationModel", false);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_NE(frameNode, nullptr);
@@ -396,6 +407,7 @@ HWTEST_F(NavigationTestNg, NavigationModelTest002, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetTitle("navigationModel", false);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_NE(frameNode, nullptr);
@@ -725,6 +737,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_011, TestSize.Level1)
      */
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetUsrNavigationMode(NavigationMode::AUTO);
     RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -751,6 +764,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_012, TestSize.Level1)
      */
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -954,6 +968,7 @@ HWTEST_F(NavigationTestNg, NavigationLayoutTest_001, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
     navigationModel.SetNavBarPosition(NavBarPosition::START);
     RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1046,6 +1061,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNGTest001, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
 
     // ParseCommonTitle, Expect has Subtitle and Title or not
     navigationModel.ParseCommonTitle(true, true, "navigationModel", "navigationModel");
@@ -1074,6 +1090,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNGTest002, TestSize.Level1)
     std::vector<NG::BarItem> toolBarItems;
     toolBarItems.push_back(bar);
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetTitleHeight(SPLIT_WIDTH);
     navigationModel.SetSubtitle("navigationModel");
     navigationModel.SetHideNavBar(true);
@@ -1116,6 +1133,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNGTest003, TestSize.Level1)
     bool isSelected = true;
     auto onChange = [&isSelected](bool select) { isSelected = select; };
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     RefPtr<AceType> customNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     ASSERT_NE(customNode, nullptr);
     navigationModel.SetCustomMenu(customNode);
@@ -1337,6 +1355,8 @@ HWTEST_F(NavigationTestNg, NavigationModelNG001, TestSize.Level1)
 {
     auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto navBarNode =
@@ -1548,6 +1568,7 @@ HWTEST_F(NavigationTestNg, NavigationToolbarTest001, TestSize.Level1)
     std::vector<NG::BarItem> toolBarItems;
     toolBarItems.push_back(bar);
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetToolBarItems(std::move(toolBarItems));
 
     /**
@@ -1611,6 +1632,7 @@ HWTEST_F(NavigationTestNg, NavigationToolbarConfigurationTest001, TestSize.Level
         toolBarItems.push_back(bar);
     }
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
 
     /**
@@ -1663,6 +1685,7 @@ HWTEST_F(NavigationTestNg, NavigationToolbarConfigurationTest002, TestSize.Level
     toolBarItems.push_back(disableBar);
 
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
 
     /**
@@ -1726,6 +1749,7 @@ HWTEST_F(NavigationTestNg, NavigationToolbarConfigurationTest003, TestSize.Level
     std::vector<NG::BarItem> toolBarItems;
     toolBarItems.push_back(bar);
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
 
     /**
@@ -1857,6 +1881,7 @@ HWTEST_F(NavigationTestNg, NavigationToolbarConfigurationTest005, TestSize.Level
         toolBarItems.push_back(bar);
     }
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
 
     /**
@@ -1936,6 +1961,7 @@ HWTEST_F(NavigationTestNg, NavigationToolbarConfigurationTest006, TestSize.Level
     std::vector<NG::BarItem> toolBarItems;
     toolBarItems.push_back(bar);
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
 
     /**
@@ -2243,6 +2269,8 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0013, TestSize.Level1)
      */
     auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
         "navigation", 120, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     auto layoutWrapper = navigation->CreateLayoutWrapper();
 
     auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
@@ -2497,7 +2525,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0018, TestSize.Level1)
 
     auto pattern7 = navDestination7->GetPattern<NavDestinationPattern>();
     pattern7->customNode_ = AceType::RawPtr(temp);
-    navDestination7->eventHub_ = nullptr;
 
     ASSERT_NE(navDestination7->GetPattern<NavDestinationPattern>()->GetCustomNode(), nullptr);
     /**
@@ -2512,7 +2539,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0018, TestSize.Level1)
     navigationContentNode->children_.push_back(child8);
 
     navigation->UpdateNavDestinationNodeWithoutMarkDirty(temp);
-    ASSERT_EQ(navDestination7->eventHub_, nullptr);
 }
 
 /**
@@ -3028,6 +3054,7 @@ HWTEST_F(NavigationTestNg, NavigationFocusTest001, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     navigationModel.SetTitle("navigationModel", false);
     auto frameNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);

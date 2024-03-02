@@ -33,6 +33,9 @@ namespace OHOS::Ace::NG {
 namespace {
 bool IsDataValid(const WaterFlowLayoutInfo& info)
 {
+    if (info.segmentTails_.empty()) {
+        return false;
+    }
     if (info.childrenCount_ - 1 != info.segmentTails_.back()) {
         TAG_LOGW(AceLogTag::ACE_WATERFLOW,
             "Children count = %{public}d and doesn't match the number provided in Sections, which is %{public}d.",
@@ -254,15 +257,16 @@ void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
 
 void WaterFlowSegmentedLayout::InitFooter(float crossSize)
 {
-    if (info_.footerIndex_ == 0) {
+    if (info_.footerIndex_ != info_.childrenCount_ - 1) {
+        info_.footerIndex_ = std::min(info_.footerIndex_, info_.childrenCount_ - 1);
+        info_.ClearCacheAfterIndex(info_.footerIndex_ - 1);
         // re-insert at the end
         auto footer = wrapper_->GetOrCreateChildByIndex(info_.footerIndex_);
         auto waterFlow = wrapper_->GetHostNode();
         waterFlow->RemoveChildAtIndex(info_.footerIndex_);
         footer->GetHostNode()->MountToParent(waterFlow);
         footer->SetActive(false);
-    }
-    if (info_.footerIndex_ != info_.childrenCount_ - 1) {
+        info_.segmentCache_.erase(info_.footerIndex_);
         info_.footerIndex_ = info_.childrenCount_ - 1;
     }
 

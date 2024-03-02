@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,15 @@
 
 #include "gtest/gtest.h"
 
+#define protected public
+#define private public
+#include "core/common/recorder/event_recorder.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/navigator/navigator_model.h"
 #include "core/components_ng/pattern/navigator/navigator_model_ng.h"
+#include "core/components_ng/pattern/pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -33,6 +38,7 @@ public:
 
 namespace OHOS::Ace::NG {
 namespace {
+const int32_t NAVIGATOR_TYPE_OUTSIDE_DEFINE = 1001;
 } // namespace
 
 /**
@@ -92,6 +98,20 @@ HWTEST_F(NavigatorEventHubTestNg, GetNavigatorType004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetNavigatorType005
+ * @tc.desc: Test GetNavigatorType and enter switch default.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigatorEventHubTestNg, GetNavigatorType005, TestSize.Level1)
+{
+    NavigatorEventHub navigatorEventHub;
+    navigatorEventHub.SetType(NavigatorType(NAVIGATOR_TYPE_OUTSIDE_DEFINE));
+    std::string ret = navigatorEventHub.GetNavigatorType();
+
+    EXPECT_EQ(ret, "NavigationType.Push");
+}
+
+/**
  * @tc.name: NavigatePage001
  * @tc.desc: Test NavigatePage.
  * @tc.type: FUNC
@@ -145,5 +165,69 @@ HWTEST_F(NavigatorEventHubTestNg, NavigatePage004, TestSize.Level1)
     navigatorEventHub.NavigatePage();
 
     EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: NavigatePage005
+ * @tc.desc: Test NavigatePage and don't enter IsComponentRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigatorEventHubTestNg, NavigatePage005, TestSize.Level1)
+{
+    NavigatorEventHub navigatorEventHub;
+    navigatorEventHub.SetType(NavigatorType::PUSH);
+    // Make IsComponentRecordEnable return false.
+    Recorder::EventRecorder::Get().componentEnable_ = false;
+    Recorder::EventSwitch eventSwitch;
+    eventSwitch.componentEnable = false;
+    Recorder::EventRecorder::Get().UpdateEventSwitch(eventSwitch);
+    navigatorEventHub.NavigatePage();
+
+    EXPECT_FALSE(Recorder::EventRecorder::Get().IsComponentRecordEnable());
+}
+
+/**
+ * @tc.name: NavigatePage006
+ * @tc.desc: Test NavigatePage, enter IsComponentRecordEnable and don't enter host.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigatorEventHubTestNg, NavigatePage006, TestSize.Level1)
+{
+    NavigatorEventHub navigatorEventHub;
+    navigatorEventHub.SetType(NavigatorType::PUSH);
+    // Make IsComponentRecordEnable return true.
+    Recorder::EventRecorder::Get().componentEnable_ = true;
+    Recorder::EventSwitch eventSwitch;
+    eventSwitch.componentEnable = true;
+    Recorder::EventRecorder::Get().UpdateEventSwitch(eventSwitch);
+    // Make host NULL.
+    navigatorEventHub.AttachHost(nullptr);
+    navigatorEventHub.NavigatePage();
+
+    EXPECT_TRUE(Recorder::EventRecorder::Get().IsComponentRecordEnable());
+    EXPECT_EQ(navigatorEventHub.GetFrameNode(), nullptr);
+}
+
+/**
+ * @tc.name: NavigatePage007
+ * @tc.desc: Test NavigatePage, enter IsComponentRecordEnable and enter host.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigatorEventHubTestNg, NavigatePage007, TestSize.Level1)
+{
+    NavigatorEventHub navigatorEventHub;
+    navigatorEventHub.SetType(NavigatorType::PUSH);
+    // Make IsComponentRecordEnable return true.
+    Recorder::EventRecorder::Get().componentEnable_ = true;
+    Recorder::EventSwitch eventSwitch;
+    eventSwitch.componentEnable = true;
+    Recorder::EventRecorder::Get().UpdateEventSwitch(eventSwitch);
+    // Make host not NULL.
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    navigatorEventHub.AttachHost(frameNode);
+    navigatorEventHub.NavigatePage();
+
+    EXPECT_TRUE(Recorder::EventRecorder::Get().IsComponentRecordEnable());
+    EXPECT_NE(navigatorEventHub.GetFrameNode(), nullptr);
 }
 } // namespace OHOS::Ace::NG
