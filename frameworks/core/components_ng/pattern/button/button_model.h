@@ -52,6 +52,7 @@ public:
     virtual void SetRemoteMessage(RemoteCallback&& remoteCallback) {}
     virtual void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) {}
     virtual void SetControlSize(const std::optional<ControlSize>& controlSize) {}
+    virtual void SetRole(const std::optional<ButtonRole>& buttonRole) {}
 
 private:
     static std::unique_ptr<ButtonModel> instance_;

@@ -41,6 +41,7 @@ public:
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
     void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) override;
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
+    void SetRole(const std::optional<ButtonRole>& buttonRole) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const Ace::FontWeight& fontWeight);

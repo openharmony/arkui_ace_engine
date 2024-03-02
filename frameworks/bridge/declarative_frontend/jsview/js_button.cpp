@@ -148,6 +148,18 @@ void JSButton::SetControlSize(const JSCallbackInfo& info)
     ButtonModel::GetInstance()->SetControlSize(static_cast<ControlSize>(value));
 }
 
+void JSButton::SetRole(const JSCallbackInfo& info)
+{
+    int32_t value = static_cast<int32_t>(ButtonRole::NORMAL);
+    if (info[0]->IsNumber()) {
+        auto valueT = info[0]->ToNumber<int32_t>();
+        if (valueT >= static_cast<int32_t>(ButtonRole::NORMAL) && valueT <= static_cast<int32_t>(ButtonRole::ERROR)) {
+            value = valueT;
+        }
+    }
+    ButtonModel::GetInstance()->SetRole(static_cast<ButtonRole>(value));
+}
+
 void JSButton::SetStateEffect(const JSCallbackInfo& info)
 {
     bool value = info[0]->IsBoolean() ? info[0]->ToBoolean() : true;
@@ -329,6 +341,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("padding", &JSButton::JsPadding);
     JSClass<JSButton>::StaticMethod("buttonStyle", &JSButton::SetButtonStyle);
     JSClass<JSButton>::StaticMethod("controlSize", &JSButton::SetControlSize);
+    JSClass<JSButton>::StaticMethod("role", &JSButton::SetRole);
     JSClass<JSButton>::StaticMethod("createWithLabel", &JSButton::CreateWithLabel, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("createWithChild", &JSButton::CreateWithChild, MethodOptions::NONE);
     JSClass<JSButton>::InheritAndBind<JSContainerBase>(globalObj);
@@ -372,8 +385,8 @@ Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
         CalcDimension top = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension right = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension bottom = CalcDimension(0.0, DimensionUnit::VP);
-        if (jsObj->HasProperty("top") || jsObj->HasProperty("bottom")
-            || jsObj->HasProperty("left") || jsObj->HasProperty("right")) {
+        if (jsObj->HasProperty("top") || jsObj->HasProperty("bottom") || jsObj->HasProperty("left") ||
+            jsObj->HasProperty("right")) {
             ParseJsDimensionVp(jsObj->GetProperty("left"), left);
             ParseJsDimensionVp(jsObj->GetProperty("top"), top);
             ParseJsDimensionVp(jsObj->GetProperty("right"), right);
@@ -659,6 +672,21 @@ CreateWithPara JSButton::ParseCreatePara(const JSCallbackInfo& info, bool hasLab
             para.controlSize = static_cast<ControlSize>(controlSizeIntValue);
         }
     }
+    ParseButtonRole(optionObj, para);
     return para;
+}
+
+void JSButton::ParseButtonRole(const JSRef<JSObject>& optionObj, CreateWithPara& param)
+{
+    if (optionObj->HasProperty(JSButton::ROLE)) {
+        param.buttonRole = ButtonRole::NORMAL;
+    }
+    if (optionObj->GetProperty(JSButton::ROLE)->IsNumber()) {
+        auto buttonRoleIntValue = optionObj->GetProperty(JSButton::ROLE)->ToNumber<int32_t>();
+        if (buttonRoleIntValue >= static_cast<int32_t>(ButtonRole::NORMAL) &&
+            buttonRoleIntValue <= static_cast<int32_t>(ButtonRole::ERROR)) {
+            param.buttonRole = static_cast<ButtonRole>(buttonRoleIntValue);
+        }
+    }
 }
 } // namespace OHOS::Ace::Framework
