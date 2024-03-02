@@ -521,6 +521,7 @@ public:
     static const std::optional<RefPtr<ProgressMaskProperty>> GetMaskProgress(FrameNode* frameNode);
     static BlendMode GetBlendMode(FrameNode* frameNode);
     static TextDirection GetDirection(FrameNode* frameNode);
+    static std::map<AlignDirection, AlignRule> GetAlignRules(FrameNode* frameNode);
     static FlexAlign GetAlignSelf(FrameNode* frameNode);
 
     static float GetFlexGrow(FrameNode* frameNode);
@@ -538,6 +539,12 @@ public:
     static Dimension GetFrontBlur(FrameNode* frameNode);
     static NG::Gradient GetLinearGradient(FrameNode* frameNode);
     static Alignment GetAlign(FrameNode* frameNode);
+    static NG::VectorF GetScale(FrameNode* frameNode);
+    static NG::Vector5F GetRotate(FrameNode* frameNode);
+    static Dimension GetBrightness(FrameNode* frameNode);
+    static Dimension GetSaturate(FrameNode* frameNode);
+    static BackgroundImagePosition GetBackgroundImagePosition(FrameNode* frameNode);
+
 private:
     static void AddDragFrameNodeToManager();
 };
