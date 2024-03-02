@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
     
-const std::string DEFAULT_FORMAT = "hms";
+const std::string DEFAULT_FORMAT = "aa h:m:s";
 class ACE_EXPORT TextClockComponent : public TextComponentV2 {
     DECLARE_ACE_TYPE(TextClockComponent, TextComponentV2);
 

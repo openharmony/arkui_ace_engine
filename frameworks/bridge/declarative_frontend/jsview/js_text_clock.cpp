@@ -59,7 +59,7 @@ namespace OHOS::Ace::Framework {
 
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::string DEFAULT_FORMAT = "hms";
+const std::string DEFAULT_FORMAT = "aa h:m:s";
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
 constexpr float HOURS_WEST[] = { 9.5f, 3.5f, -3.5f, -4.5f, -5.5f, -5.75f, -6.5f, -9.5f, -10.5f, -12.75f };
@@ -254,7 +254,7 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
         std::regex pattern(
             R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
         if (!std::regex_match(value, pattern)) {
-            TextClockModel::GetInstance()->SetFormat("hms");
+            TextClockModel::GetInstance()->SetFormat("aa h:m:s");
             return;
         }
     }
