@@ -82,6 +82,7 @@ const Color BG_COLOR_VALUE = Color::FromRGB(100, 255, 100);
 const std::vector<SelectParam> CREATE_VALUE = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
     { OPTION_TEXT_3, INTERNAL_SOURCE } };
 constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
+constexpr int32_t PLATFORM_VERSION_TWELVE = 12;
 } // namespace
 struct TestProperty {
     std::optional<Dimension> FontSize = std::nullopt;
@@ -1828,5 +1829,37 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
     layoutWrapper->layoutWrapperBuilder_ = wrapperBuilder;
     layoutAlgorithm->Measure(layoutWrapper);
     EXPECT_NE(layoutWrapper->GetOrCreateChildByIndex(0), nullptr);
+}
+
+/**
+ * @tc.name: SelectControlSizeTest001
+ * @tc.desc: Test SelectPattern ControlSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectControlSizeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern.
+     * @tc.expected: Objects are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_TWELVE);
+    auto selectFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(selectFrameNode, nullptr);
+    auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get ControlSize, compare the set value with the ControlSize.
+     * @tc.expected: SelectPattern's default ControlSize and ControlSize::NORMAL are equal.
+     */
+    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::NORMAL);
+
+    /**
+     * @tc.steps: step3. Call SetControlSize and get ControlSize, compare the set value with the ControlSize.
+     * @tc.expected: SelectPattern's ControlSize and the set value are equal.
+     */
+    selectModelInstance.SetControlSize(ControlSize::SMALL);
+    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::SMALL);
 }
 } // namespace OHOS::Ace::NG
