@@ -1395,7 +1395,7 @@ void ViewAbstract::DismissDialog()
     CHECK_NULL_VOID(rootNode);
     auto overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
     CHECK_NULL_VOID(overlay);
-    overlayManager->RemoveDialog(overlay, false, false);
+    overlayManager->RemoveDialog(overlay, false);
     auto pattern = overlay->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (overlayManager->isMaskNode(pattern->GetHost()->GetId())) {

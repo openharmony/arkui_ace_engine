@@ -1479,6 +1479,7 @@ void OverlayManager::CloseCustomDialog(const int32_t dialogId)
             iter++;
         }
         if (tmpNode) {
+            DeleteDialogHotAreas(tmpNode);
             CloseDialogInner(tmpNode);
         } else {
             LOGE("not find dialog when no dialog id");
@@ -1490,6 +1491,7 @@ void OverlayManager::CloseCustomDialog(const int32_t dialogId)
             return;
         }
         RefPtr<FrameNode> tmpDialog = (*iter).second;
+        DeleteDialogHotAreas(tmpDialog);
         CloseDialogInner(tmpDialog);
     }
     return;
@@ -1647,14 +1649,8 @@ RefPtr<FrameNode> OverlayManager::GetDialog(int32_t dialogId)
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "close dialog enter");
+    DeleteDialogHotAreas(dialogNode);
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
-    CHECK_NULL_VOID(dialogLayoutProp);
-    if (dialogLayoutProp->GetShowInSubWindowValue(false)) {
-        SubwindowManager::GetInstance()->DeleteHotAreas(
-            SubwindowManager::GetInstance()->GetDialogSubWindowId(), dialogNode->GetId());
-        SubwindowManager::GetInstance()->HideDialogSubWindow(
-            SubwindowManager::GetInstance()->GetDialogSubWindowId());
-    }
     if (dialogLayoutProp->GetShowInSubWindowValue(false) && dialogLayoutProp->GetIsModal().value_or(true)) {
         auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
         CHECK_NULL_VOID(parentPipelineContext);
@@ -1667,6 +1663,18 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
         }
     }
     CloseDialogInner(dialogNode);
+}
+
+void OverlayManager::DeleteDialogHotAreas(const RefPtr<FrameNode>& dialogNode)
+{
+    auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
+    CHECK_NULL_VOID(dialogLayoutProp);
+    if (dialogLayoutProp->GetShowInSubWindowValue(false)) {
+        SubwindowManager::GetInstance()->DeleteHotAreas(
+            SubwindowManager::GetInstance()->GetDialogSubWindowId(), dialogNode->GetId());
+        SubwindowManager::GetInstance()->HideDialogSubWindow(
+            SubwindowManager::GetInstance()->GetDialogSubWindowId());
+    }
 }
 
 void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
@@ -1704,7 +1712,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     CallOnHideDialogCallback();
 }
 
-bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter)
+bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove dialog enter");
     if (overlay->IsRemoving()) {
@@ -1714,7 +1722,7 @@ bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackP
         return true;
     }
     auto hub = overlay->GetEventHub<DialogEventHub>();
-    if (!isPageRouter && hub) {
+    if (hub) {
         hub->FireCancelEvent();
     }
     CloseDialog(overlay);
@@ -1772,6 +1780,9 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             }
         }
         if (InstanceOf<DialogPattern>(pattern)) {
+            if (isPageRouter) {
+                return false;
+            }
             auto dialogPattern = DynamicCast<DialogPattern>(pattern);
             CHECK_NULL_RETURN(dialogPattern, false);
             if (dialogPattern->ShouldDismiss()) {
@@ -1779,7 +1790,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
                 TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
                 return true;
             }
-            return RemoveDialog(overlay, isBackPressed, isPageRouter);
+            return RemoveDialog(overlay, isBackPressed);
         }
         if (InstanceOf<BubblePattern>(pattern)) {
             return RemoveBubble(overlay);
@@ -2002,7 +2013,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
             return true;
         }
-        return RemoveDialog(overlay, false, false);
+        return RemoveDialog(overlay, false);
     }
     if (InstanceOf<BubblePattern>(pattern)) {
         auto popupPattern = DynamicCast<BubblePattern>(pattern);

@@ -1712,7 +1712,7 @@ void FrontendDelegateDeclarative::RemoveCustomDialog()
     CHECK_NULL_VOID(rootNode);
     auto overlay = AceType::DynamicCast<NG::FrameNode>(rootNode->GetLastChild());
     CHECK_NULL_VOID(overlay);
-    overlayManager->RemoveDialog(overlay, false, false);
+    overlayManager->RemoveDialog(overlay, false);
 }
 
 void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
