@@ -161,6 +161,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnSafeBrowsingCheckResult, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedLifecycleChange, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedGesture, void);
+    ACE_WEB_EVENT_PROPERTY(OnIntelligentTrackingPreventionResult, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;

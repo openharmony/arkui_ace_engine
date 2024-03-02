@@ -1724,6 +1724,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         OnNativeEmbedGestureEventV2_ = useNewPipe ? eventHub->GetOnNativeEmbedGestureEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetNativeEmbedGestureEventId(), oldContext);
+        onIntelligentTrackingPreventionResultV2_ = useNewPipe ?
+            eventHub->GetOnIntelligentTrackingPreventionResultEvent() : nullptr;
     }
     return true;
 }
@@ -5897,5 +5899,15 @@ void WebDelegate::UpdateDefaultTextEncodingFormat(const std::string& textEncodin
             }
         },
         TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnIntelligentTrackingPreventionResult(
+    const std::string& websiteHost, const std::string& trackerHost)
+{
+    if (onIntelligentTrackingPreventionResultV2_) {
+        onIntelligentTrackingPreventionResultV2_(
+            std::make_shared<IntelligentTrackingPreventionResultEvent>(
+                websiteHost, trackerHost));
+    }
 }
 } // namespace OHOS::Ace

@@ -903,4 +903,12 @@ bool WebClientImpl::FilterScrollEvent(const float x, const float y, const float 
     return delegate->FilterScrollEvent(x, y, xVelocity, yVelocity);
 }
 
+void WebClientImpl::OnIntelligentTrackingPreventionResult(
+    const std::string& websiteHost, const std::string& trackerHost)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnIntelligentTrackingPreventionResult(websiteHost, trackerHost);
+}
 } // namespace OHOS::Ace

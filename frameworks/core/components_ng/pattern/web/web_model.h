@@ -160,6 +160,9 @@ public:
 
     virtual void SetCopyOptionMode(CopyOptions mode) {};
     virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
+    virtual void SetIntelligentTrackingPreventionResultId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
+            intelligentTrackingPreventionResultId) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

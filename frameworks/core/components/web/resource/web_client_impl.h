@@ -217,6 +217,8 @@ public:
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity) override;
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo) override;
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event) override;
+    void OnIntelligentTrackingPreventionResult(
+        const std::string& websiteHost, const std::string& trackerHost) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

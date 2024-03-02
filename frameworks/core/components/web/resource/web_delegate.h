@@ -720,6 +720,8 @@ public:
     void SetAccessibilityState(bool state);
     void UpdateAccessibilityState(bool state);
     OHOS::NWeb::NWebPreference::CopyOptionMode GetCopyOptionMode() const;
+    void OnIntelligentTrackingPreventionResult(
+        const std::string& websiteHost, const std::string& trackerHost);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -855,6 +857,7 @@ private:
     EventCallbackV2 onSafeBrowsingCheckResultV2_;
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
+    EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
 
     int32_t renderMode_;
     std::string bundlePath_;
