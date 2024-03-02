@@ -1402,6 +1402,114 @@ HWTEST_F(OverlayTestNg, OnDialogCloseEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DialogTransitionTest001
+ * @tc.desc: Test OverlayManager::ShowDialog->Set no transition effect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogTransitionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and dialogProperties.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogProperties;
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowDialog.
+     * @tc.expected: DialogNode created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
+    ASSERT_NE(dialog, nullptr);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    /**
+     * @tc.steps: step3. get transitionEffect from dialog.
+     * @tc.expected: transitionEffect is nullptr.
+     */
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    auto transitionEffect = dialogPattern->GetDialogProperties().transitionEffect;
+    EXPECT_EQ(transitionEffect, nullptr);
+}
+
+/**
+ * @tc.name: DialogTransitionTest002
+ * @tc.desc: Test OverlayManager::ShowDialog->Set symmetry transition effect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogTransitionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and dialogProperties.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogProperties;
+    double opacity = 1.0;
+    auto opacityTransition = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+    auto scaleTransition = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    opacityTransition->SetNext(scaleTransition);
+    dialogProperties.transitionEffect = opacityTransition;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowDialog.
+     * @tc.expected: DialogNode created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
+    ASSERT_NE(dialog, nullptr);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    /**
+     * @tc.steps: step3. get transitionEffect from dialog.
+     * @tc.expected: transitionEffect value is not nullptr.
+     */
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    auto transitionEffect = dialogPattern->GetDialogProperties().transitionEffect;
+    ASSERT_NE(transitionEffect, nullptr);
+    auto dialogScaleTransition = transitionEffect->GetNext();
+    ASSERT_NE(dialogScaleTransition, nullptr);
+}
+
+/**
+ * @tc.name: DialogTransitionTest003
+ * @tc.desc: Test OverlayManager::ShowDialog->Set asymmetric transition effect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogTransitionTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and dialogProperties.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogProperties;
+    double opacity = 1.0;
+    auto appearOpacityTransition = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+    auto disappearScaleTransition = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    dialogProperties.transitionEffect = AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearOpacityTransition,
+        disappearScaleTransition);
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowDialog.
+     * @tc.expected: DialogNode created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
+    ASSERT_NE(dialog, nullptr);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    /**
+     * @tc.steps: step3. get transitionEffect from dialog.
+     * @tc.expected: transitionEffect value is not nullptr.
+     */
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    auto transitionEffect =
+        AceType::DynamicCast<NG::ChainedAsymmetricEffect>(dialogPattern->GetDialogProperties().transitionEffect);
+    ASSERT_NE(transitionEffect, nullptr);
+    auto appearTransition = transitionEffect->GetAppearEffect();
+    ASSERT_NE(appearTransition, nullptr);
+    auto disappearTransition = transitionEffect->GetDisappearEffect();
+    ASSERT_NE(disappearTransition, nullptr);
+}
+
+/**
  * @tc.name: DialogTest004
  * @tc.desc: Test OverlayManager::GetDialog.
  * @tc.type: FUNC
