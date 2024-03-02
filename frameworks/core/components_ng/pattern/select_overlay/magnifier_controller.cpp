@@ -120,9 +120,9 @@ void MagnifierController::CreateMagnifierChildNode()
 
 void MagnifierController::SetMagnifierRect(const RefPtr<Pattern>& childPattern)
 {
-    auto childTextFieldPattern = DynamicCast<TextFieldPattern>(childPattern);
-    CHECK_NULL_VOID(childTextFieldPattern);
-    auto childController = childTextFieldPattern->GetMagnifierController();
+    auto childMagnifier = DynamicCast<Magnifier>(childPattern);
+    CHECK_NULL_VOID(childMagnifier);
+    auto childController = childMagnifier->GetMagnifierController();
     CHECK_NULL_VOID(childController);
 
     auto textBasepattern = DynamicCast<TextBase>(pattern_.Upgrade());
