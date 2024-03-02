@@ -4251,6 +4251,71 @@ ArkUI_Int32 GetAlignSelf(ArkUINodeHandle node)
     return alignSelf;
 }
 
+ArkUI_Float32 GetFlexGrow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetFlexGrow(frameNode);
+}
+
+ArkUI_Float32 GetFlexShrink(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetFlexShrink(frameNode);
+}
+
+ArkUI_Float32 GetFlexBasis(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetFlexBasis(frameNode).Value();
+}
+
+void GetConstraintSize(ArkUINodeHandle node, ArkUIConstraintSizeOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    options->minWidth = ViewAbstract::GetMinWidth(frameNode);
+    options->maxWidth = ViewAbstract::GetMaxWidth(frameNode);
+    options->minHeight = ViewAbstract::GetMinHeight(frameNode);
+    options->maxHeight = ViewAbstract::GetMaxHeight(frameNode);
+}
+
+ArkUI_Float32 GetGrayScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetGrayScale(frameNode).Value();
+}
+
+ArkUI_Float32 GetInvert(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return std::get<float>(ViewAbstract::GetInvert(frameNode));
+}
+
+ArkUI_Float32 GetSepia(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetSepia(frameNode).Value();
+}
+
+ArkUI_Float32 GetContrast(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetContrast(frameNode).Value();
+}
+
+ArkUI_Uint32 GetForegroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetForegroundColor(frameNode).GetValue();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -4303,7 +4368,9 @@ const ArkUICommonModifier* GetCommonModifier()
         GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient,
         GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
         GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor,
-        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle };
+        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, GetFlexGrow,
+        GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale, GetInvert,
+        GetSepia, GetContrast, GetForegroundColor};
 
     return &modifier;
 }

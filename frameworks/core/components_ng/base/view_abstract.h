@@ -523,6 +523,19 @@ public:
     static TextDirection GetDirection(FrameNode* frameNode);
     static FlexAlign GetAlignSelf(FrameNode* frameNode);
 
+    static float GetFlexGrow(FrameNode* frameNode);
+    static float GetFlexShrink(FrameNode* frameNode);
+    static Dimension GetFlexBasis(FrameNode* frameNode);
+    static float GetMinWidth(FrameNode* frameNode);
+    static float GetMaxWidth(FrameNode* frameNode);
+    static float GetMinHeight(FrameNode* frameNode);
+    static float GetMaxHeight(FrameNode* frameNode);
+    static Dimension GetGrayScale(FrameNode* frameNode);
+    static InvertVariant GetInvert(FrameNode* frameNode);
+    static Dimension GetSepia(FrameNode* frameNode);
+    static Dimension GetContrast(FrameNode* frameNode);
+    static Color GetForegroundColor(FrameNode* frameNode);
+
 private:
     static void AddDragFrameNodeToManager();
 };
