@@ -73,6 +73,12 @@ void AceViewOhos::SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Wind
     CHECK_NULL_VOID(view);
 }
 
+void AceViewOhos::ChangeViewSize(AceViewOhos* view, int32_t width, int32_t height)
+{
+    CHECK_NULL_VOID(view);
+    view->ChangeSize(width, height);
+}
+
 void AceViewOhos::SurfaceChanged(AceViewOhos* view, int32_t width, int32_t height, int32_t orientation,
     WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {

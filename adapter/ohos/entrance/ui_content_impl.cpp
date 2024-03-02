@@ -2266,6 +2266,8 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    Platform::AceViewOhos::ChangeViewSize(aceView, width, height);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     ContainerScope scope(instanceId_);
