@@ -207,7 +207,6 @@ public:
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
-    void SetPrivacySensitive(bool flag) override {};
     void SetMonopolizeEvents(bool monopolizeEvents) override {};
 
     // Disable event.

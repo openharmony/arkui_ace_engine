@@ -233,8 +233,6 @@ public:
 
     virtual void OnMountToParentDone() {}
 
-    virtual void OnSensitiveStyleChange(bool isSensitive) {}
-
     virtual bool IsRootPattern() const
     {
         return false;
