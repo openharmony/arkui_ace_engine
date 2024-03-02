@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -25,7 +26,7 @@ void WaterFlowItemModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::FLOW_ITEM_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
+    auto frameNode = WaterFlowItemNode::GetOrCreateFlowItem(
         V2::FLOW_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
     stack->Push(frameNode);
 }

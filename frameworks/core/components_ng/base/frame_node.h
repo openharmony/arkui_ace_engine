@@ -55,14 +55,14 @@
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
-}
+} // namespace OHOS::Accessibility
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
 class Pattern;
 class StateModifyTask;
 class UITask;
-class FramePorxy;
+class FrameProxy;
 
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
@@ -422,7 +422,8 @@ public:
         customerSet_ = false;
     }
 
-    void SetCustomerDraggable(bool draggable) {
+    void SetCustomerDraggable(bool draggable)
+    {
         draggable_ = draggable;
         userSet_ = true;
         customerSet_ = true;
@@ -498,9 +499,8 @@ public:
 
     RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
-    void CreateAnimatablePropertyFloat(
-        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent,
-        const PropertyUnit& propertyType = PropertyUnit::UNKNOWN);
+    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent, const PropertyUnit& propertyType = PropertyUnit::UNKNOWN);
     void DeleteAnimatablePropertyFloat(const std::string& propertyName);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
     void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
@@ -574,6 +574,13 @@ public:
 
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) override;
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) override;
+    /**
+     * @brief Get the index of Child among all FrameNode children of [this]. Handles intermediate SyntaxNodes like LazyForEach.
+     *
+     * @param child pointer to the Child FrameNode.
+     * @return index of Child, or -1 if not found.
+     */
+    int32_t GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const;
     const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) override;
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
@@ -678,16 +685,16 @@ public:
 
     int32_t GetUiExtensionId();
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId);
-    void SearchExtensionElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
-        int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
-    void SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
-        int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
-    void FindFocusedExtensionElementInfoNG(int64_t elementId, int32_t focusType,
-        int64_t offset, Accessibility::AccessibilityElementInfo& output);
-    void FocusMoveSearchNG(int64_t elementId, int32_t direction,
-        int64_t offset, Accessibility::AccessibilityElementInfo& output);
-    bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t offset);
+    void SearchExtensionElementInfoByAccessibilityIdNG(
+        int64_t elementId, int32_t mode, int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void SearchElementInfosByTextNG(int64_t elementId, const std::string& text, int64_t offset,
+        std::list<Accessibility::AccessibilityElementInfo>& output);
+    void FindFocusedExtensionElementInfoNG(
+        int64_t elementId, int32_t focusType, int64_t offset, Accessibility::AccessibilityElementInfo& output);
+    void FocusMoveSearchNG(
+        int64_t elementId, int32_t direction, int64_t offset, Accessibility::AccessibilityElementInfo& output);
+    bool TransferExecuteAction(
+        int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset);
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
@@ -715,6 +722,12 @@ private:
     void UpdateLayoutPropertyFlag() override;
     void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
+    /**
+     * @brief try to mark Parent dirty with flag PROPERTY_UPDATE_BY_CHILD_REQUEST.
+     * 
+     * @return true if Parent is successfully marked dirty.
+     */
+    virtual bool RequestParentDirty();
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
@@ -802,7 +815,7 @@ private:
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
     RefPtr<GeometryNode> oldGeometryNode_;
     std::optional<bool> skipMeasureContent_;
-    std::unique_ptr<FramePorxy> frameProxy_;
+    std::unique_ptr<FrameProxy> frameProxy_;
     WeakPtr<TargetComponent> targetComponent_;
 
     bool needSyncRenderTree_ = false;
@@ -858,7 +871,6 @@ private:
     friend class Pattern;
 
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
-
 };
 } // namespace OHOS::Ace::NG
 

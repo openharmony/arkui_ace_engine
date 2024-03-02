@@ -60,7 +60,7 @@ const char FORM_COMPONENT_TAG[] = "FormComponent";
 } // namespace
 namespace OHOS::Ace::NG {
 
-class FramePorxy {
+class FrameProxy {
 public:
     struct FrameChildNode {
         RefPtr<UINode> node;
@@ -69,9 +69,9 @@ public:
     };
 
     struct RecursionGuard {
-        FramePorxy* proxy_;
+        FrameProxy* proxy_;
         bool inUse_;
-        explicit RecursionGuard(FramePorxy* proxy) : proxy_(proxy), inUse_(proxy->inUse_)
+        explicit RecursionGuard(FrameProxy* proxy) : proxy_(proxy), inUse_(proxy->inUse_)
         {
             proxy_->inUse_ = true;
         }
@@ -86,10 +86,10 @@ public:
 
     RecursionGuard GetGuard()
     {
-        return RecursionGuard{this};
+        return RecursionGuard { this };
     }
 
-    explicit FramePorxy(FrameNode* frameNode) : hostNode_(frameNode) {}
+    explicit FrameProxy(FrameNode* frameNode) : hostNode_(frameNode) {}
 
     void Build()
     {
@@ -189,6 +189,16 @@ public:
             return nullptr;
         }
         return itor->second;
+    }
+
+    int32_t GetChildIndex(const RefPtr<LayoutWrapper>& target) const
+    {
+        for (auto it : partFrameNodeChildren_) {
+            if (it.second == target) {
+                return it.first;
+            }
+        }
+        return -1;
     }
 
     void ResetChildren(bool needResetChild = false)
@@ -324,7 +334,7 @@ private:
 FrameNode::FrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, int32_t instanceId, bool isRoot)
     : UINode(tag, nodeId, instanceId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern),
-      frameProxy_(std::make_unique<FramePorxy>(this))
+      frameProxy_(std::make_unique<FrameProxy>(this))
 {
     renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam());
     paintProperty_ = pattern->CreatePaintProperty();
@@ -1458,6 +1468,14 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
     }
 }
 
+bool FrameNode::RequestParentDirty()
+{
+    auto parent = GetAncestorNodeOfFrame();
+    CHECK_NULL_RETURN(parent, false);
+    parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    return true;
+}
+
 void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag)
 {
     if (CheckNeedRender(extraFlag)) {
@@ -1475,9 +1493,7 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
 
     if (CheckNeedRequestMeasureAndLayout(layoutFlag)) {
         if (!isMeasureBoundary && IsNeedRequestParentMeasure()) {
-            auto parent = GetAncestorNodeOfFrame();
-            if (parent) {
-                parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            if (RequestParentDirty()) {
                 return;
             }
         }
@@ -2907,7 +2923,6 @@ void FrameNode::SyncGeometryNode(bool needSkipSync)
     layoutAlgorithm_.Reset();
 }
 
-
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
 {
     auto child = frameProxy_->GetFrameNodeByIndex(index, true);
@@ -2923,6 +2938,11 @@ RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool ad
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index)
 {
     return frameProxy_->GetFrameNodeByIndex(index, false);
+}
+
+int32_t FrameNode::GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const
+{
+    return frameProxy_->GetChildIndex(child);
 }
 
 const std::list<RefPtr<LayoutWrapper>>& FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
