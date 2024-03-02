@@ -437,4 +437,11 @@ void ButtonModelNG::SetSize(
         NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height.value()));
     }
 }
+
+std::string ButtonModelNG::GetLabel(FrameNode* frameNode)
+{
+    std::string value;
+    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Label, value, frameNode);
+    return value;
+}
 } // namespace OHOS::Ace::NG

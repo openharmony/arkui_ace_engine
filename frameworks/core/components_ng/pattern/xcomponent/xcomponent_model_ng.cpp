@@ -22,6 +22,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+const uint32_t DEFAULT_SURFACE_SIZE = 0;
 void XComponentModelNG::Create(const std::string& id, XComponentType type, const std::string& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController)
 {
@@ -203,5 +204,35 @@ void XComponentModelNG::SetXComponentSurfaceSize(FrameNode* frameNode, uint32_t 
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
     xcPattern->SetSurfaceSize(width, height);
+}
+
+std::string XComponentModelNG::GetXComponentId(FrameNode* frameNode)
+{
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, "");
+    return xcPattern->GetId();
+}
+
+XComponentType XComponentModelNG::GetXComponentType(FrameNode* frameNode)
+{
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, XComponentType::SURFACE);
+    return xcPattern->GetType();
+}
+
+uint32_t XComponentModelNG::GetXComponentSurfaceWidth(FrameNode* frameNode)
+{
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, DEFAULT_SURFACE_SIZE);
+    auto drawSize = xcPattern->GetDrawSize();
+    return drawSize.Width();
+}
+
+uint32_t XComponentModelNG::GetXComponentSurfaceHeight(FrameNode* frameNode)
+{
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, DEFAULT_SURFACE_SIZE);
+    auto drawSize = xcPattern->GetDrawSize();
+    return drawSize.Height();
 }
 } // namespace OHOS::Ace::NG

@@ -57,6 +57,7 @@ const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::F
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::string NONE_FONT_FAMILY = "NoneFontFamily";
+std::string g_strValue;
 
 const std::unordered_map<int, DimensionUnit> DIMENSION_UNIT_MAP = {
     { -2, DimensionUnit::INVALID },
@@ -487,6 +488,14 @@ void ResetButtonSize(ArkUINodeHandle node)
     ButtonModelNG::SetSize(frameNode, value, value);
 }
 
+ArkUI_CharPtr GetButtonLabel(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    g_strValue = ButtonModelNG::GetLabel(frameNode);
+    return g_strValue.c_str();
+}
+
 namespace NodeModifier {
 const ArkUIButtonModifier* GetButtonModifier()
 {
@@ -496,7 +505,7 @@ const ArkUIButtonModifier* GetButtonModifier()
         SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle, SetButtonFontFamily,
         ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle, SetButtonBackgroundColor,
         ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius, SetButtonFontWeightEnum,
-        SetButtonSize, ResetButtonSize };
+        SetButtonSize, ResetButtonSize, GetButtonLabel };
 
     return &modifier;
 }
