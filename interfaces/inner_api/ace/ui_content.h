@@ -153,8 +153,6 @@ public:
         return false;
     }
 
-    virtual void ChangeSensitiveNodes(bool isSensitive) {}
-
     virtual void SetOnWindowFocused(const std::function<void()>& callback) {};
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;

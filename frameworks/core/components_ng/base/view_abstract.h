@@ -273,7 +273,6 @@ public:
         std::function<void()> &&onKeyboardShortcutAction);
     // obscured
     static void SetObscured(const std::vector<ObscuredReasons> &reasons);
-    static void SetPrivacySensitive(bool flag);
 
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,

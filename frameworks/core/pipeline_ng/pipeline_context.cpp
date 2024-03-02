@@ -952,7 +952,6 @@ void PipelineContext::SetupRootElement()
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     postEventManager_ = MakeRefPtr<PostEventManager>();
     dragDropManager_ = MakeRefPtr<DragDropManager>();
-    privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
 

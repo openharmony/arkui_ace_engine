@@ -1122,8 +1122,6 @@ public:
 
     virtual void FlushSyncGeometryNodeTasks() {}
 
-    virtual void ChangeSensitiveNodes(bool flag) {}
-
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

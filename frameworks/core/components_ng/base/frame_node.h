@@ -299,18 +299,6 @@ public:
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     }
 
-    bool IsPrivacySensitive() const
-    {
-        return isPrivacySensitive_;
-    }
-
-    void SetPrivacySensitive(bool flag)
-    {
-        isPrivacySensitive_ = flag;
-    }
-
-    void ChangeSensitiveStyle(bool isSensitive);
-
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
@@ -858,7 +846,6 @@ private:
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
     bool needRestoreSafeArea_ = true;
-    bool isPrivacySensitive_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
