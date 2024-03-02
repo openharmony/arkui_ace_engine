@@ -211,6 +211,10 @@ public:
     {
         return predictLayoutParam_;
     }
+    const LayoutConstraintF& GetLayoutConstraint() const
+    {
+        return layoutConstraint_;
+    }
 
     void CloseAllSwipeActions(OnFinishFunc&&);
 
@@ -346,6 +350,7 @@ private:
 
     bool isScrollEnd_ = false;
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
+    LayoutConstraintF layoutConstraint_;
 
     bool isNeedToUpdateListDirection_ = false;
 

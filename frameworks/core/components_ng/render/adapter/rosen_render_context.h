@@ -518,7 +518,9 @@ private:
 
     void SetContentRectToFrame(RectF rect) override;
 
+    float RoundValueToPixelGrid(float value);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
+    void RoundToPixelGrid();
     void RoundToPixelGrid(bool isRound, uint8_t flag);
     Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
