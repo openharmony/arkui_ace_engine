@@ -3361,6 +3361,9 @@ void TextFieldPattern::UpdateObscure(const std::string& insertValue, bool hasIns
 
 void TextFieldPattern::InsertValue(const std::string& insertValue)
 {
+    if (!HasFocus()) {
+        return;
+    }
     if (focusIndex_ != FocuseIndex::TEXT && insertValue == " ") {
         HandleSpaceEvent();
         return;
