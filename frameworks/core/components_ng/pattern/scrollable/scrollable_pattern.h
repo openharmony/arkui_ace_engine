@@ -277,7 +277,7 @@ public:
 
     void SetMaxFlingVelocity(double max);
 
-    void StopAnimate();
+    virtual void StopAnimate();
     bool AnimateRunning() const
     {
         return (animator_ && animator_->IsRunning()) || !isAnimationStop_;
