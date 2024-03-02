@@ -79,8 +79,6 @@ public:
     void Create(const std::function<void(GridModelNG)>& callback = nullptr);
     static void CreateItem(int32_t itemNumber = 10, float width = NULL_VALUE, float height = NULL_VALUE,
         GridItemStyle gridItemStyle = GridItemStyle::NONE);
-    static void CreateColItem(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
-    static void CreateRowItem(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
     static void CreateFixedItem(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
     static void CreateBigItem(int32_t rowStart = NULL_VALUE, int32_t rowEnd = NULL_VALUE,
         int32_t colStart = NULL_VALUE, int32_t colEnd = NULL_VALUE, float width = NULL_VALUE,
