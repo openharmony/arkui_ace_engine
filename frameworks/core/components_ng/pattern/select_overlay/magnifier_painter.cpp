@@ -36,7 +36,7 @@ MagnifierPainter::MagnifierPainter(const WeakPtr<Pattern>& pattern) : pattern_(p
 
 void MagnifierPainter::PaintMagnifier(RSCanvas& canvas)
 {
-        auto pattern = DynamicCast<Magnifier>(pattern_.Upgrade());
+    auto pattern = DynamicCast<Magnifier>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
     auto controller = pattern->GetMagnifierController();
     CHECK_NULL_VOID(controller);
