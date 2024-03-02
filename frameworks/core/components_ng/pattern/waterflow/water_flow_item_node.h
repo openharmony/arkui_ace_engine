@@ -32,8 +32,9 @@ public:
 
 private:
     /**
-     * @brief Mark Parent (WaterFlow) dirty with flag PROPERTY_UPDATE_BY_CHILD_REQUEST, and also notify Parent the index of this child.
-     * 
+     * @brief Mark Parent (WaterFlow) dirty with flag PROPERTY_UPDATE_BY_CHILD_REQUEST,
+     * and also notify Parent the index of this child.
+     *
      * @return true if Parent is marked dirty successfully
      */
     bool RequestParentDirty() override;

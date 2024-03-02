@@ -575,7 +575,8 @@ public:
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) override;
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) override;
     /**
-     * @brief Get the index of Child among all FrameNode children of [this]. Handles intermediate SyntaxNodes like LazyForEach.
+     * @brief Get the index of Child among all FrameNode children of [this].
+     * Handles intermediate SyntaxNodes like LazyForEach.
      *
      * @param child pointer to the Child FrameNode.
      * @return index of Child, or -1 if not found.
@@ -685,16 +686,16 @@ public:
 
     int32_t GetUiExtensionId();
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId);
-    void SearchExtensionElementInfoByAccessibilityIdNG(
-        int64_t elementId, int32_t mode, int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
-    void SearchElementInfosByTextNG(int64_t elementId, const std::string& text, int64_t offset,
-        std::list<Accessibility::AccessibilityElementInfo>& output);
-    void FindFocusedExtensionElementInfoNG(
-        int64_t elementId, int32_t focusType, int64_t offset, Accessibility::AccessibilityElementInfo& output);
-    void FocusMoveSearchNG(
-        int64_t elementId, int32_t direction, int64_t offset, Accessibility::AccessibilityElementInfo& output);
-    bool TransferExecuteAction(
-        int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset);
+    void SearchExtensionElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
+        int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
+        int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void FindFocusedExtensionElementInfoNG(int64_t elementId, int32_t focusType,
+        int64_t offset, Accessibility::AccessibilityElementInfo& output);
+    void FocusMoveSearchNG(int64_t elementId, int32_t direction,
+        int64_t offset, Accessibility::AccessibilityElementInfo& output);
+    bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset);
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
@@ -724,7 +725,7 @@ private:
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
     /**
      * @brief try to mark Parent dirty with flag PROPERTY_UPDATE_BY_CHILD_REQUEST.
-     * 
+     *
      * @return true if Parent is successfully marked dirty.
      */
     virtual bool RequestParentDirty();

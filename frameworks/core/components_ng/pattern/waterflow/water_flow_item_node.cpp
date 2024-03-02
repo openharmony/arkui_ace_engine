@@ -38,7 +38,9 @@ bool WaterFlowItemNode::RequestParentDirty()
     CHECK_NULL_RETURN(parent, false);
     parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     auto idx = parent->GetChildTrueIndex(Claim(this));
-    parent->ChildrenUpdatedFrom(idx);
+    if (idx > -1) {
+        parent->ChildrenUpdatedFrom(idx);
+    }
     return true;
 }
 } // namespace OHOS::Ace::NG

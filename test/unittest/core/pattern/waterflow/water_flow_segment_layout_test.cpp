@@ -23,7 +23,8 @@
 #define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "frameworks/core/components_ng/pattern/waterflow/water_flow_segmented_layout.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
+#include "core/components_ng/pattern/waterflow/water_flow_segmented_layout.h"
 
 namespace OHOS::Ace::NG {
 class WaterFlowSegmentTest : public WaterFlowTestNg {
@@ -222,7 +223,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureFooter001, TestSize.Level1)
     auto& info = pattern_->layoutInfo_;
     EXPECT_EQ(info.childrenCount_, 11);
     EXPECT_EQ(info.footerIndex_, 10);
-    auto footer = FrameNode::GetOrCreateFrameNode(
+    auto footer = WaterFlowItemNode::GetOrCreateFlowItem(
         V2::FLOW_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
     footer->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(100.0f), CalcLength(Dimension(200.0f))));
@@ -266,7 +267,9 @@ HWTEST_F(WaterFlowSegmentTest, MeasureFooter002, TestSize.Level1)
     auto& info = pattern_->layoutInfo_;
     EXPECT_EQ(info.childrenCount_, 11);
     EXPECT_EQ(info.footerIndex_, 10);
-    auto footer = FrameNode::GetOrCreateFrameNode(
+    EXPECT_EQ(info.itemInfos_[8].mainOffset, 202.0f);
+
+    auto footer = WaterFlowItemNode::GetOrCreateFlowItem(
         V2::FLOW_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
     footer->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(100.0f), CalcLength(Dimension(200.0f))));
@@ -283,6 +286,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureFooter002, TestSize.Level1)
     UpdateCurrentOffset(-1000.0f);
     EXPECT_EQ(info.items_.size(), 2);
     EXPECT_EQ(info.items_[1][0].size(), 1);
+    EXPECT_EQ(info.segmentStartPos_[1], 401.0f);
     EXPECT_EQ(info.childrenCount_, 9);
     EXPECT_EQ(info.endIndex_, 8);
     EXPECT_EQ(info.segmentTails_[0], 7);
@@ -608,12 +612,12 @@ HWTEST_F(WaterFlowSegmentTest, Reset001, TestSize.Level1)
 
     // change crossCount, should jump back to index 75
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
+    info.Reset();
     algo->Measure(AceType::RawPtr(frameNode_));
-    EXPECT_EQ(info.startIndex_, 75);
-    EXPECT_EQ(info.endIndex_, 94);
-    EXPECT_EQ(info.currentOffset_, -3875.0f);
+    EXPECT_EQ(info.startIndex_, 45);
+    EXPECT_EQ(info.endIndex_, 64);
+    EXPECT_EQ(info.currentOffset_, -2370.0f);
     EXPECT_EQ(algo->itemsCrossSize_[0].size(), 3);
-    EXPECT_EQ(info.align_, ScrollAlign::START);
 }
 
 /**
@@ -653,6 +657,7 @@ HWTEST_F(WaterFlowSegmentTest, Reset002, TestSize.Level1)
 
     // child requires fresh layout, should jump back to index 75
     layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_BY_CHILD_REQUEST;
+    frameNode_->ChildrenUpdatedFrom(0);
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info.startIndex_, 25);
     EXPECT_EQ(info.endIndex_, 57);
@@ -725,6 +730,45 @@ HWTEST_F(WaterFlowSegmentTest, Reset003, TestSize.Level1)
     EXPECT_EQ(info.align_, ScrollAlign::START);
     // items should be cleared before jumping
     EXPECT_EQ(info.itemInfos_.size(), 58);
+}
+
+/**
+ * @tc.name: Reset004
+ * @tc.desc: Test Changing crossCount and deleting items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Reset004, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsGap(Dimension(5.0f));
+        model.SetRowsGap(Dimension(1.0f));
+        model.SetFooter(GetDefaultHeaderBuilder());
+        CreateItem(200);
+        ViewStackProcessor::GetInstance()->Pop();
+    });
+
+    UpdateCurrentOffset(-2000.0f);
+    auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info.footerIndex_, 200);
+    EXPECT_EQ(info.endIndex_, 75);
+    EXPECT_EQ(info.startIndex_, 49);
+    EXPECT_EQ(info.itemInfos_[info.startIndex_].mainOffset + info.currentOffset_, -188.0f);
+    auto footer = WaterFlowItemNode::GetOrCreateFlowItem(
+        V2::FLOW_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
+    footer->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(100.0f), CalcLength(Dimension(200.0f))));
+    pattern_->AddFooter(footer);
+    for (int i = 0; i < 2; ++i) {
+        frameNode_->RemoveChildAtIndex(80);
+    }
+    frameNode_->ChildrenUpdatedFrom(80);
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr");
+
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildFrameNode(frameNode_, info.footerIndex_), footer);
+    EXPECT_EQ(info.startIndex_, 25);
+    EXPECT_EQ(info.currentOffset_, -2000.0f);
 }
 
 /**

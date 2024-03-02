@@ -191,6 +191,12 @@ public:
         return itor->second;
     }
 
+    /**
+     * @brief Find child's index in parent's map. Only works on children that are already created and recorded.
+     *
+     * @param target child LayoutWrapper
+     * @return index of children
+     */
     int32_t GetChildIndex(const RefPtr<LayoutWrapper>& target) const
     {
         for (auto it : partFrameNodeChildren_) {
