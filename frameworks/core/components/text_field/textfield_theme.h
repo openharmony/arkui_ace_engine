@@ -361,6 +361,11 @@ public:
         return overCountBorderColor_;
     }
 
+    TextStyle GetTextStyle() const
+    {
+        return textStyle_;
+    }
+
     const TextStyle& GetErrorTextStyle() const
     {
         return errorTextStyle_;
@@ -500,6 +505,7 @@ private:
     Color passwordErrorInputColor_;
     Color passwordErrorBorderColor_;
     Color passwordErrorLableColor_;
+    TextStyle textStyle_;
     TextStyle errorTextStyle_;
     TextStyle countTextStyle_;
     TextStyle overCountStyle_;

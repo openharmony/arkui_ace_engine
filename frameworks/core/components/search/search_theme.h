@@ -234,6 +234,11 @@ public:
         return cancelButtonStyle_;
     }
 
+    TextStyle GetTextStyle() const
+    {
+        return textStyle_;
+    }
+
 protected:
     SearchTheme() = default;
 
@@ -266,6 +271,7 @@ private:
     Color searchButtonTextColor_;
     Color searchIconColor_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
+    TextStyle textStyle_;
 };
 
 } // namespace OHOS::Ace

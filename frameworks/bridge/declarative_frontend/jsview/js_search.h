@@ -58,6 +58,9 @@ public:
     static void SetCustomKeyboard(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetType(const JSCallbackInfo& info);
+    static void SetDecoration(const JSCallbackInfo& info);
+    static void SetLetterSpacing(const JSCallbackInfo& info);
+    static void SetLineHeight(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
 };
 
