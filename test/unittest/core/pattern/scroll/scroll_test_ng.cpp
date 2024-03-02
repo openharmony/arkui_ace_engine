@@ -3572,14 +3572,14 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create scroll and set enablePaging.
-     * @tc.expected: the value of GetEnablePaging() if VALID
+     * @tc.expected: the value of GetEnablePaging() is VALID
      */
     CreateWithContent([](ScrollModelNG model) { model.SetEnablePaging(true); });
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
 
     /**
      * @tc.steps: step2. Create scroll, first set enablePaging and than set snap.
-     * @tc.expected: the value of GetEnablePaging() if INVALID
+     * @tc.expected: the value of GetEnablePaging() is INVALID
      */
     Dimension intervalSize = Dimension(10.f);
     std::vector<Dimension> snapPaginations = {
@@ -3597,7 +3597,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
 
     /**
      * @tc.steps: step3. Create scroll, first set snap and than set enablePaging.
-     * @tc.expected: the value of GetEnablePaging() if INVALID
+     * @tc.expected: the value of GetEnablePaging() is INVALID
      */
     CreateWithContent([scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide](ScrollModelNG model) {
         model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
@@ -3607,7 +3607,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
 
     /**
      * @tc.steps: step4. Create scroll, set enablePaging true and than set enablePaging false.
-     * @tc.expected: the value of GetEnablePaging() if NONE
+     * @tc.expected: the value of GetEnablePaging() is NONE
      */
     CreateWithContent([](ScrollModelNG model) {
         model.SetEnablePaging(true);
@@ -3617,7 +3617,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Create scroll, set enablePaging false and than set enablePaging true.
-     * @tc.expected: the value of GetEnablePaging() if VALID
+     * @tc.expected: the value of GetEnablePaging() is VALID
      */
     CreateWithContent([](ScrollModelNG model) {
         model.SetEnablePaging(false);
@@ -4032,5 +4032,105 @@ HWTEST_F(ScrollTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1)
     EXPECT_TRUE(isDidScrollTrigger);
     EXPECT_EQ(willOffsetX.Value(), -ITEM_WIDTH * 2);
     EXPECT_EQ(didOffsetX.Value(), -ITEM_WIDTH * 2);
+}
+
+/**
+ * @tc.name: InitialOffset001
+ * @tc.desc: Test initialOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, InitialOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll.
+     * @tc.expected: the value of currentOffset_ is 0
+     */
+    CreateWithContent([](ScrollModelNG model) {});
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+
+    /**
+     * @tc.steps: step2. Create scroll and set initialOffset ITEM_HEIGHT.
+     * @tc.expected: the value of currentOffset_ is -ITEM_HEIGHT
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(ITEM_HEIGHT)));
+    });
+    EXPECT_EQ(pattern_->currentOffset_, -ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step3. Create scroll , set axis HORIZONTAL and set initialOffset ITEM_HEIGHT.
+     * @tc.expected: the value of currentOffset_ is -ITEM_WIDTH
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetInitialOffset(OffsetT(CalcDimension(ITEM_WIDTH), CalcDimension(0.f)));
+        model.SetAxis(Axis::HORIZONTAL);
+    });
+    EXPECT_EQ(pattern_->currentOffset_, - ITEM_WIDTH);
+
+    /**
+     * @tc.steps: step4. Create scroll , set initialOffset 10%.
+     * @tc.expected: the value of currentOffset_ is -ITEM_WIDTH
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        auto offset = Dimension(0.1, DimensionUnit::PERCENT);
+        model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(offset)));
+    });
+    EXPECT_EQ(pattern_->currentOffset_, - SCROLL_HEIGHT * 0.1f);
+
+    /**
+     * @tc.steps: step5. Create scroll , set axis HORIZONTAL and set initialOffset 10%.
+     * @tc.expected: the value of currentOffset_ is -ITEM_WIDTH
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        auto offset = Dimension(0.1, DimensionUnit::PERCENT);
+        model.SetInitialOffset(OffsetT(CalcDimension(offset), CalcDimension(0.f)));
+        model.SetAxis(Axis::HORIZONTAL);
+    });
+    EXPECT_EQ(pattern_->currentOffset_, - SCROLL_WIDTH * 0.1f);
+}
+
+/**
+ * @tc.name: InitialOffset002
+ * @tc.desc: Test initialOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, InitialOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll and set initialOffset 2*ITEM_HEIGHT.
+     * @tc.expected: the value of currentOffset_ is -2*ITEM_HEIGHT
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(2 * ITEM_HEIGHT)));
+    });
+    EXPECT_EQ(pattern_->currentOffset_, - 2 * ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step2. Create scroll and set initialOffset 3*ITEM_HEIGHT.
+     * @tc.expected: the value of currentOffset_ is -2*ITEM_HEIGHT
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(3 * ITEM_HEIGHT)));
+    });
+    EXPECT_EQ(pattern_->currentOffset_, - 2 * ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step3. Create scroll and set initialOffset -ITEM_HEIGHT.
+     * @tc.expected: the value of currentOffset_ is 0
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(- ITEM_HEIGHT)));
+    });
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+
+    /**
+     * @tc.steps: step4. Create scroll , set initialOffset 100%.
+     * @tc.expected: the value of currentOffset_ is -2*ITEM_WIDTH
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        auto offset = Dimension(100, DimensionUnit::PERCENT);
+        model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(offset)));
+    });
+    EXPECT_EQ(pattern_->currentOffset_, - 2 * ITEM_HEIGHT);
 }
 } // namespace OHOS::Ace::NG
