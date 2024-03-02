@@ -3618,8 +3618,7 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
             borderRadius.Reset();
         }
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
-    }
-    if (args->IsObject()) {
+    } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension topLeft;
         CalcDimension topRight;
@@ -3627,7 +3626,7 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
         CalcDimension bottomRight;
         ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
         ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
-    } 
+    }
 }
 
 void JSViewAbstract::ParseOuterBorderRadius(const JSRef<JSVal>& args)
