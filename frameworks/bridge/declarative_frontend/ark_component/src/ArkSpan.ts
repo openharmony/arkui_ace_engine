@@ -205,6 +205,16 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
   }
+
+  cleanStageValue(){
+    if (!this._modifiersWithKeys){
+      return;
+    }
+    this._modifiersWithKeys.forEach((value, key) => {
+        value.stageValue = undefined;
+    });
+  }
+
   applyModifierPatch(): void {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
