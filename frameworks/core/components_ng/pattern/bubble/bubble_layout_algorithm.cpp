@@ -269,6 +269,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(
     if (UseArrowOffset) {
         arrowPosition_.SetX(
             childPosition.GetX() + border_.TopLeftRadius().GetX().ConvertToPx() + BEZIER_WIDTH_HALF.ConvertToPx());
+        arrowPosition_.SetY(childPosition.GetY() - arrowHeight_);
     }
 
     if (GetErrorPositionType(childPosition, childSize) == ErrorPositionType::NORMAL) {
