@@ -43,6 +43,7 @@ public:
     void SetOnSeeked(VideoEventFunc&& onSeeked) override;
     void SetOnUpdate(VideoEventFunc&& onUpdate) override;
     void SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange) override;
+    void SetOnStop(VideoEventFunc&& onStop) override;
     static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
     static void SetControls(FrameNode* frameNode, bool controls);
     static void SetObjectFit(FrameNode* frameNode, ImageFit objectFit);

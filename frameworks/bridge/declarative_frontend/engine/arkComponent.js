@@ -8587,6 +8587,9 @@ class ArkVideoComponent extends ArkComponent {
   onError(callback) {
     throw new Error('Method not implemented.');
   }
+  onStop(callback) {
+    throw new Error('Method not implemented.');
+  }
 }
 // @ts-ignore
 globalThis.Video.attributeModifier = function (modifier) {

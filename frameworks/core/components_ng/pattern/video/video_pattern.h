@@ -314,6 +314,7 @@ private:
 #endif
 
     void RegisterRenderContextCallBack();
+    void ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status);
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
