@@ -3005,4 +3005,105 @@ HWTEST_F(SearchTestNg, SetProperty003, TestSize.Level1)
     searchModelInstance.SetRightIconSrcPath(frameNode, "");
     ASSERT_STREQ(cancelImageLayoutProperty->GetImageSourceInfo()->GetSrc().c_str(), "resource:///ohos_test_image.svg");
 }
+
+/**
+ * @tc.name: LetterSpacing001
+ * @tc.desc: test search letterSpacing
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, LetterSpacing001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.step: step2.  set letterSpacing 1.0 fp.
+     */
+    searchModelInstance.SetLetterSpacing(1.0_fp);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. test letterSpacing
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetLetterSpacing(), 1.0_fp);
+}
+
+/**
+ * @tc.name: LineHeight001
+ * @tc.desc: test search lineHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, LineHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.step: step2.  set lineHeight 2.0 fp.
+     */
+    searchModelInstance.SetLineHeight(2.0_fp);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. test lineHeight
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetLineHeight(), 2.0_fp);
+}
+
+/**
+ * @tc.name: TextDecoration001
+ * @tc.desc: test search decoration
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, TextDecoration001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.step: step2.  set decoration Ace::TextDecoration::UNDERLINE.
+     */
+    searchModelInstance.SetTextDecoration(Ace::TextDecoration::UNDERLINE);
+    frameNode->MarkModifyDone();
+
+    searchModelInstance.SetTextDecorationColor(Color::BLUE);
+    frameNode->MarkModifyDone();
+
+    searchModelInstance.SetTextDecorationStyle(Ace::TextDecorationStyle::DASHED);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. test decoration
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetTextDecoration(), Ace::TextDecoration::UNDERLINE);
+    EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationColor(), Color::BLUE);
+    EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationStyle(), Ace::TextDecorationStyle::DASHED);
+}
 } // namespace OHOS::Ace::NG

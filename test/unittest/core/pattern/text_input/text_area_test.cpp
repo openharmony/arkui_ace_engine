@@ -509,6 +509,121 @@ HWTEST_F(TextFieldUXTest, InitSurfaceChangedCallback001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextAreaLetterSpacing001
+ * @tc.desc: test TextArea letterSpacing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLetterSpacing001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLetterSpacing(1.0_fp);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetLetterSpacing(), 1.0_fp);
+}
+
+/**
+ * @tc.name: TextAreaLineHeight001
+ * @tc.desc: test TextArea lineHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLineHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLineHeight(2.0_fp);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetLineHeight(), 2.0_fp);
+}
+
+/**
+ * @tc.name: TextAreaTextDecoration001
+ * @tc.desc: test TextArea decoration001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaTextDecoration001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextDecoration(TextDecoration::LINE_THROUGH);
+        model.SetTextDecorationColor(Color::BLUE);
+        model.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
+}
+
+/**
  * @tc.name: InitSurfacePositionChangedCallback001
  * @tc.desc: Test init syrface Position change and callback.
  * @tc.type: FUNC
