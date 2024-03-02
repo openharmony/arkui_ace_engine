@@ -1809,4 +1809,10 @@ std::vector<RefPtr<FrameNode>> GridPattern::GetVisibleSelectedItems()
     return children;
 }
 
+void GridPattern::StopAnimate()
+{
+    ScrollablePattern::StopAnimate();
+    isSmoothScrolling_ = false;
+}
+
 } // namespace OHOS::Ace::NG
