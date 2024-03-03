@@ -44,7 +44,7 @@ build_component_ng("web_pattern_ng") {
   } else {
     sources = [
       "richtext_model_ng.cpp",
-      "scroll_update_listener.cpp",
+      "slide_update_listener.cpp",
       "web_accessibility_property.cpp",
       "web_content_modifier.cpp",
       "web_layout_algorithm.cpp",

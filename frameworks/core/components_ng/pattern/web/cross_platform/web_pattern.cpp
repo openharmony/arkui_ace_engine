@@ -46,7 +46,8 @@ constexpr double DEFAULT_DBCLICK_OFFSET = 2.0;
 constexpr double DEFAULT_AXIS_RATIO = -0.06;
 constexpr uint32_t DEFAULT_WEB_DRAW_HEIGHT = 4000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
-constexpr int32_t SURFACE_QUEUE_SIZE = 8;
+constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE = 3;
+constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
 constexpr int32_t SIZE_GAP = 2;
 // web feature params
 const std::string VISIBLE_ACTIVE_ENABLE = "persist.web.visible_active_enable";
@@ -807,12 +808,13 @@ void WebPattern::OnModifyDone()
             if (renderMode_ == RenderMode::SYNC_RENDER) {
                 renderSurface_->SetIsTexture(true);
                 renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
-                renderSurface_->SetSurfaceQueueSize(SURFACE_QUEUE_SIZE);
+                renderSurface_->SetSurfaceQueueSize(SYNC_SURFACE_QUEUE_SIZE);
             } else {
                 renderSurface_->SetIsTexture(false);
+                renderSurface_->SetSurfaceQueueSize(ASYNC_SURFACE_QUEUE_SIZE);
             }
             renderSurface_->InitSurface();
-            renderSurface_->UpdateXComponentConfig();
+            renderSurface_->UpdateSurfaceConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
         }
 #endif
@@ -869,7 +871,7 @@ void WebPattern::OnModifyDone()
     // Initialize scrollupdate listener
     if (renderMode_ == RenderMode::SYNC_RENDER) {
         auto task = [this]() {
-            InitScrollUpdateListener();
+            InitSlideUpdateListener();
         };
         PostTaskToUI(std::move(task));
     }
@@ -1175,18 +1177,17 @@ void WebPattern::OnOverScrollModeUpdate(int mode)
 }
 
 
-RefPtr<ScrollPattern> WebPattern::SearchParent()
-{
-    // cross platform is not support now;
-    return nullptr;
-}
-
-void WebPattern::InitScrollUpdateListener()
+void WebPattern::UpdateRelativeOffset();
 {
     // cross platform is not support now;
 }
 
-void WebPattern::UpdateScrollOffset(SizeF frameSize)
+void WebPattern::InitSlideUpdateListener()
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::UpdateSlideOffset(SizeF frameSize)
 {
    // cross platform is not support now;
 }

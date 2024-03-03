@@ -44,7 +44,7 @@ public:
 
     void InitSurface() override;
 
-    void UpdateXComponentConfig() override;
+    void UpdateSurfaceConfig() override;
 
     void* GetNativeWindow() override;
 
@@ -91,6 +91,16 @@ public:
         return patternType_;
     }
 
+    void SetWebSlideAxis(Axis axis) override
+    {
+        axis_ = axis;
+    }
+
+    void SetWebOffset(float webOffset) override
+    {
+        webOffset_ = webOffset;
+    }
+
     void SetSurfaceQueueSize(int32_t queueSize = SURFACE_QUEUE_SIZE) override
     {
         queueSize_ = queueSize;
@@ -112,13 +122,15 @@ public:
     void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) override;
 
 private:
-    void PostTaskToUI(const std::function<void()>&& task) const;
+    void PostRenderOnlyTaskToUI();
     void RegisterSurface() const;
 
     std::mutex surfaceNodeMutex_;
     OffsetF orgin_ { 0, 0 };
     std::string patternType_;
     int32_t queueSize_ = SURFACE_QUEUE_SIZE;
+    Axis axis_ = Axis::NONE;
+    float webOffset_ = 0.0;
 #ifdef OHOS_PLATFORM
     OHOS::sptr<OHOS::Surface> producerSurface_ = nullptr;
     OHOS::sptr<IConsumerSurface> consumerSurface_ = nullptr;

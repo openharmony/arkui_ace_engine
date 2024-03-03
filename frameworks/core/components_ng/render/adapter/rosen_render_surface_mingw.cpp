@@ -30,7 +30,7 @@ void RosenRenderSurface::InitSurface()
 {
 }
 
-void RosenRenderSurface::UpdateXComponentConfig()
+void RosenRenderSurface::UpdateSurfaceConfig()
 {
 }
 

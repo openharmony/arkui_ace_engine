@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_SCROLL_UPDATE_LISTENER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_SCROLL_UPDATE_LISTENER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_SLIDE_UPDATE_LISTENER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_SLIDE_UPDATE_LISTENER_H
 
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/web/iscroll_update_callback.h"
+#include "core/components_ng/pattern/web/islide_update_callback.h"
 
 namespace OHOS::Ace::NG {
-class ScrollUpdateListener : public IScrollUpdateCallback {
+class SlideUpdateListener : public ISlideUpdateCallback {
 public:
-    ScrollUpdateListener() = default;
-    ~ScrollUpdateListener() override = default;
-    void OnScrollUpdate(const SizeF& frameSize) override;
+    SlideUpdateListener() = default;
+    ~SlideUpdateListener() override = default;
+    void OnSlideUpdate(const SizeF& frameSize) override;
     void SetPatternToListener(WeakPtr<NG::Pattern> pattern)
     {
         pattern_ = pattern;
@@ -34,4 +34,4 @@ private:
     WeakPtr<NG::Pattern> pattern_;
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_SCROLL_UPDATE_LISTENER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_SLIDE_UPDATE_LISTENER_H

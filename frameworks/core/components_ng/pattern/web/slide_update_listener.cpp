@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/web/scroll_update_listener.h"
+#include "core/components_ng/pattern/web/slide_update_listener.h"
 
 namespace OHOS::Ace::NG {
-void ScrollUpdateListener::OnScrollUpdate(const SizeF& frameSize)
+void SlideUpdateListener::OnSlideUpdate(const SizeF& frameSize)
 {
-    pattern_.Upgrade()->UpdateScrollOffset(frameSize);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateSlideOffset(frameSize);
 }
 } // namespace OHOS::Ace::NG

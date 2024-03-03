@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <stdint.h>
 
+#include "base/geometry/axis.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/render/ext_surface_callback_interface.h"
@@ -37,7 +38,7 @@ public:
 
     virtual void InitSurface() {}
 
-    virtual void UpdateXComponentConfig() {}
+    virtual void UpdateSurfaceConfig() {}
 
     virtual void* GetNativeWindow()
     {
@@ -89,6 +90,10 @@ public:
     virtual void UpdateTextureImage(std::vector<float>& matrix) {}
 
     virtual void SetWebMessage(OffsetF offset) {}
+
+    virtual void SetWebSlideAxis(Axis axis) {}
+
+    virtual void SetWebOffset(float webOffset) {}
 
     virtual void SetPatternType(const std::string& type) {}
 

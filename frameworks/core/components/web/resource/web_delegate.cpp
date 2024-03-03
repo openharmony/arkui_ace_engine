@@ -1514,7 +1514,7 @@ void WebDelegate::CreatePluginResource(
 
         std::string param = paramStream.str();
         webDelegate->id_ = resRegister->CreateResource(WEB_CREATE, param);
-        if (webDelegate->id_ == INVALID_ID) {
+        if (webDelegate->id_ == WEB_INVALID_ID) {
             if (webDelegate->onError_) {
                 webDelegate->onError_(WEB_ERROR_CODE_CREATEFAIL, WEB_ERROR_MSG_CREATEFAIL);
             }
