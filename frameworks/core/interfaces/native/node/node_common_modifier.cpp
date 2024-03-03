@@ -4116,7 +4116,7 @@ void GetTransform(ArkUINodeHandle node, ArkUI_Float32* values)
 ArkUI_Int32 GetHitTestBehavior(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(ViewAbstract::GetHitTestBehavior(frameNode));
 }
 
@@ -4132,7 +4132,7 @@ void GetPosition(ArkUINodeHandle node, ArkUIPositionOptions* values)
 ArkUI_Int32 GetShadow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     int style = static_cast<ArkUI_Int32>(ViewAbstract::GetShadow(frameNode)->GetStyle());
     return style;
 }
@@ -4230,7 +4230,7 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
 ArkUI_Int32 GetBlendMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     int blendMode = static_cast<ArkUI_Int32>(ViewAbstract::GetBlendMode(frameNode));
     return blendMode;
 }
@@ -4238,7 +4238,7 @@ ArkUI_Int32 GetBlendMode(ArkUINodeHandle node)
 ArkUI_Int32 GetDirection(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     int direction = static_cast<ArkUI_Int32>(ViewAbstract::GetDirection(frameNode));
     return direction;
 }
@@ -4246,7 +4246,7 @@ ArkUI_Int32 GetDirection(ArkUINodeHandle node)
 ArkUI_Int32 GetAlignSelf(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     int alignSelf = static_cast<ArkUI_Int32>(ViewAbstract::GetAlignSelf(frameNode));
     return alignSelf;
 }

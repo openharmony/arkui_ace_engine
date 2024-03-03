@@ -5239,11 +5239,11 @@ const ArkUI_AttributeItem* GetAlignItems(ArkUI_NodeHandle node)
     switch (node->type) {
         case ARKUI_NODE_COLUMN:
             g_numberValues[0].i32 =
-                fullImpl->getNodeModifiers()->getColumnModifier()->getColumnAlignItems(node->uiNodeHandle);
+                fullImpl->getNodeModifiers()->getColumnModifier()->getColumnAlignItems(node->uiNodeHandle) - NUM_1;
             break;
         case ARKUI_NODE_ROW:
             g_numberValues[0].i32 =
-                fullImpl->getNodeModifiers()->getRowModifier()->getRowAlignItems(node->uiNodeHandle);
+                fullImpl->getNodeModifiers()->getRowModifier()->getRowAlignItems(node->uiNodeHandle) - NUM_1;
             break;
         default:
             break;
