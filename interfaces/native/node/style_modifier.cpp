@@ -876,11 +876,11 @@ int32_t SetLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 const ArkUI_AttributeItem* GetLinearGradient(ArkUI_NodeHandle node)
 {
     //default size 3
-    ArkUI_Float32 values[3];
+    ArkUI_Float32 values[NUM_3];
     //default size 10
-    ArkUI_Uint32 colors[10];
+    ArkUI_Uint32 colors[NUM_10];
     //default size 10
-    ArkUI_Float32 stops[10];
+    ArkUI_Float32 stops[NUM_10];
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getLinearGradient(
         node->uiNodeHandle, values, colors, stops);
     //angle
@@ -891,20 +891,21 @@ const ArkUI_AttributeItem* GetLinearGradient(ArkUI_NodeHandle node)
     g_numberValues[2].i32 = values[2];
     //size
     g_attributeItem.size = NUM_3;
-    if (resultValue < 1) {
+    if (resultValue < NUM_1) {
         return &g_attributeItem;
     }
-    static ArkUI_ColorStop* colorStop = new ArkUI_ColorStop;
-    static uint32_t* gradientColors = new uint32_t[resultValue];
-    static float* gradientStops = new float[resultValue];
+
+    static ArkUI_ColorStop colorStop;
+    static uint32_t gradientColors[NUM_10];
+    static float gradientStops[NUM_10];
     for (int i = 0; i < resultValue; i++) {
         gradientColors[i] = colors[i];
         gradientStops[i] = stops[i];
     }
-    colorStop->colors = gradientColors;
-    colorStop->stops = gradientStops;
-    colorStop->size = resultValue;
-    g_attributeItem.object = reinterpret_cast<void*>(colorStop);
+    colorStop.colors = gradientColors;
+    colorStop.stops = gradientStops;
+    colorStop.size = resultValue;
+    g_attributeItem.object = &colorStop;
     return &g_attributeItem;
 }
 
