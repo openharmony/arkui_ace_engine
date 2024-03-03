@@ -21,6 +21,8 @@
 namespace OHOS::Ace::NG {
 constexpr FlexAlign DEFAULT_ROW_JUSTIFY_CONTENT = FlexAlign::FLEX_START;
 constexpr FlexAlign DEFAULT_ROW_ALIGN_ITEMS = FlexAlign::CENTER;
+const int32_t ERROR_INT_CODE = -1;
+
 void SetRowJustifyContent(ArkUINodeHandle node, int32_t flexAlign)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -49,11 +51,25 @@ void ResetRowAlignItems(ArkUINodeHandle node)
     RowModelNG::SetAlignItems(frameNode, DEFAULT_ROW_ALIGN_ITEMS);
 }
 
+ArkUI_Int32 GetRowJustifyContent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(RowModelNG::GetJustifyContent(frameNode));
+}
+
+ArkUI_Int32 GetRowAlignItems(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(RowModelNG::GetAlignItems(frameNode));
+}
+
 namespace NodeModifier {
 const ArkUIRowModifier* GetRowModifier()
 {
     static const ArkUIRowModifier modifier = { SetRowJustifyContent, ResetRowJustifyContent, SetRowAlignItems,
-                                               ResetRowAlignItems };
+        ResetRowAlignItems, GetRowJustifyContent, GetRowAlignItems };
     return &modifier;
 }
 }

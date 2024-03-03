@@ -73,4 +73,18 @@ void ColumnModelNG::SetAlignItems(FrameNode* frameNode, FlexAlign flexAlign)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign, frameNode);
 }
+
+FlexAlign ColumnModelNG::GetJustifyContent(FrameNode* frameNode)
+{
+    FlexAlign value = FlexAlign::AUTO;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(LinearLayoutProperty, MainAxisAlign, value, frameNode, value);
+    return value;
+}
+
+FlexAlign ColumnModelNG::GetAlignItems(FrameNode* frameNode)
+{
+    FlexAlign value = FlexAlign::CENTER;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(LinearLayoutProperty, CrossAxisAlign, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG

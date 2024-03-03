@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr FlexAlign DEFAULT_JUSTIFY_CONTENT = FlexAlign::FLEX_START;
+const int32_t ERROR_INT_CODE = -1;
 
 void SetColumnJustifyContent(ArkUINodeHandle node, int32_t flexAlign)
 {
@@ -60,6 +61,20 @@ void ResetColumnAlignItems(ArkUINodeHandle node)
     ColumnModelNG::SetAlignItems(frameNode, FlexAlign::CENTER);
 }
 
+ArkUI_Int32 GetColumnJustifyContent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(ColumnModelNG::GetJustifyContent(frameNode));
+}
+
+ArkUI_Int32 GetColumnAlignItems(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(ColumnModelNG::GetAlignItems(frameNode));
+}
+
 namespace NodeModifier {
 const ArkUIColumnModifier* GetColumnModifier()
 {
@@ -67,7 +82,9 @@ const ArkUIColumnModifier* GetColumnModifier()
         SetColumnJustifyContent,
         ResetColumnJustifyContent,
         SetColumnAlignItems,
-        ResetColumnAlignItems
+        ResetColumnAlignItems,
+        GetColumnJustifyContent,
+        GetColumnAlignItems
     };
     return &modifier;
 }
