@@ -6098,7 +6098,7 @@ class ViewPU extends NativeViewPartialUpdate {
         else {
             // Create array of new ids.
             arr.forEach((item, index) => {
-                newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
+                newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item, index));
             });
         }
         // Set new array on C++ side.
