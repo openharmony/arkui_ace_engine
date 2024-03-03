@@ -102,5 +102,9 @@
     {
         "first_introduced": "11",
         "name": "OH_ArkUI_GetNativeAPI"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNodeHandleFromNapiValue"
     }
 ]
