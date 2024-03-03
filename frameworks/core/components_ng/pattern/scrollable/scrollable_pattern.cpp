@@ -793,7 +793,7 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
             if (!pattern || pattern->GetAxis() == Axis::NONE) {
                 return false;
             }
-            return pattern->UpdateCurrentOffset(offset, SCROLL_FROM_BAR);
+            return pattern->UpdateCurrentOffset(offset, source);
         }
         return true;
     };

@@ -78,7 +78,8 @@ void ScrollBarProxy::UnRegisterScrollBar(const WeakPtr<ScrollBarPattern>& scroll
     }
 }
 
-void ScrollBarProxy::NotifyScrollableNode(float distance, const WeakPtr<ScrollBarPattern>& weakScrollBar) const
+void ScrollBarProxy::NotifyScrollableNode(
+    float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar) const
 {
     auto scrollBar = weakScrollBar.Upgrade();
     CHECK_NULL_VOID(scrollBar);
@@ -93,7 +94,7 @@ void ScrollBarProxy::NotifyScrollableNode(float distance, const WeakPtr<ScrollBa
             continue;
         }
         float value = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, distance);
-        node.onPositionChanged(value, SCROLL_FROM_BAR);
+        node.onPositionChanged(value, source);
         if (node.scrollbarFRcallback) {
             node.scrollbarFRcallback(0, SceneStatus::RUNNING);
         }
