@@ -131,9 +131,7 @@ private:
     PanDirection direction_;
     double distance_ = 0.0;
     double mouseDistance_ = 0.0;
-    AxisEvent lastAxisEvent_ = {
-        .action = AxisAction::NONE,
-    };
+    AxisEvent lastAxisEvent_;
     Offset averageDistance_;
     std::map<int32_t, Offset> touchPointsDistance_;
     Offset delta_;

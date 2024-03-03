@@ -17,6 +17,8 @@
 
 #include "securec.h"
 
+#include "base/error/error_code.h"
+
 int32_t OH_NativeXComponent::GetXComponentId(char* id, uint64_t* size)
 {
     if (xcomponentImpl_ == nullptr) {
@@ -255,5 +257,15 @@ int32_t OH_NativeXComponent::DetachNativeRootNode(void* root)
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
     }
     xcomponentImpl_->DetachContainer(root);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::RegisterUIAxisEventCallback(
+    void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type))
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    xcomponentImpl_->SetUIAxisEventCallback(callback);
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }

@@ -15,8 +15,11 @@
 
 #include "native_interface_xcomponent.h"
 
-#include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "node/node_model.h"
+#include "ui_input_event.h"
+
+#include "base/error/error_code.h"
+#include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -245,6 +248,19 @@ int32_t OH_NativeXComponent_DetachNativeRootNode(
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
     }
     return component->DetachNativeRootNode(root->uiNodeHandle);
+}
+
+int32_t OH_NativeXComponent_RegisterUIInputEventCallback(OH_NativeXComponent* component,
+    void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type),
+    ArkUI_UIInputEvent_Type type)
+{
+    if ((component == nullptr) || (callback == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (type == ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS) {
+        return component->RegisterUIAxisEventCallback(callback);
+    }
+    return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
 }
 
 #ifdef __cplusplus

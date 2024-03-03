@@ -1312,7 +1312,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest027, TestSize.Level1)
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
 
-    AxisEvent axisEvent { .x = 1, .y = 2, .sourceType = SourceType::TOUCH };
+    AxisEvent axisEvent;
+    axisEvent.x = 1;
+    axisEvent.y = 2;
+    axisEvent.sourceType = SourceType::TOUCH;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
     eventManager->AxisTest(axisEvent, frameNode);
