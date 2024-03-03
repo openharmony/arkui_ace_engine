@@ -34,25 +34,21 @@ HWTEST_F(TabsEventTestNg, TabsController001, TestSize.Level1)
      * @tc.steps: step1. Set SetAnimationDuration to zero for avoid animation
      * @tc.expected: Show first tabContent by default
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetAnimationDuration(0.f); // for SwipeToWithoutAnimation
-    });
+    CreateWithItem([](TabsModelNG model) {});
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 
     /**
      * @tc.steps: step2. SwipeTo second tabContent
      * @tc.expected: Show second tabContent
      */
-    swiperController_->SwipeToWithoutAnimation(1);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
-    FlushLayoutTask(frameNode_);
+    SwipeTo(1);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
 
     /**
      * @tc.steps: step3. SwipeTo same tabContent
      * @tc.expected: Show second tabContent
      */
-    swiperController_->SwipeToWithoutAnimation(1);
+    SwipeTo(1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
@@ -61,7 +57,7 @@ HWTEST_F(TabsEventTestNg, TabsController001, TestSize.Level1)
      * @tc.steps: step4. SwipeTo index that greater than maxIndex
      * @tc.expected: Show first tabContent
      */
-    swiperController_->SwipeToWithoutAnimation(TABCONTENT_NUMBER);
+    SwipeTo(TABCONTENT_NUMBER);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
@@ -70,7 +66,7 @@ HWTEST_F(TabsEventTestNg, TabsController001, TestSize.Level1)
      * @tc.steps: step5. SwipeTo index that less than zero
      * @tc.expected: Show first tabContent
      */
-    swiperController_->SwipeToWithoutAnimation(-1);
+    SwipeTo(-1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);

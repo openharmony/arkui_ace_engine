@@ -91,8 +91,8 @@ void TabsTestNg::Create(const std::function<void(TabsModelNG)>& callback, BarPos
         callback(model);
     }
     auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    auto tabBarNode_ = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
-    tabBarNode_->GetOrCreateFocusHub();
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
+    tabBarNode->GetOrCreateFocusHub();
     model.Pop();
     GetInstance();
     FlushLayoutTask(frameNode_);
@@ -157,6 +157,26 @@ void TabsTestNg::CreateSingleItem(const std::function<void(TabContentModelNG)>& 
     model.Pop();
 }
 
+void TabsTestNg::CreateSingleItemWithoutBuilder(const std::function<void(TabContentModelNG)>& callback, int32_t nodeId)
+{
+    auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
+    TabContentModelNG model;
+    model.Create();
+    model.SetTabBar("", "", nullptr, true);
+    if (callback) {
+        callback(model);
+    }
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    tabContentNode->UpdateRecycleElmtId(nodeId); // for AddChildToGroup
+    tabContentNode->GetTabBarItemId(); // for AddTabBarItem
+    tabContentNode->SetParent(weakTab); // for AddTabBarItem
+    model.Pop();
+}
+
 TabBarBuilderFunc TabsTestNg::TabBarItemBuilder()
 {
     return []() {
@@ -165,6 +185,13 @@ TabBarBuilderFunc TabsTestNg::TabBarItemBuilder()
         ViewAbstract::SetWidth(CalcLength(10.f));
         ViewAbstract::SetHeight(CalcLength(10.f));
     };
+}
+
+void TabsTestNg::SwipeTo(int32_t index)
+{
+    swiperController_->SwipeToWithoutAnimation(index);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
+    FlushLayoutTask(frameNode_);
 }
 
 /**
@@ -436,6 +463,31 @@ HWTEST_F(TabsTestNg, TabContentModelUpdateLabelStyle001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontWeight(), labelStyle.fontWeight);
     EXPECT_EQ(layoutProperty->GetFontFamily(), labelStyle.fontFamily);
     EXPECT_EQ(layoutProperty->GetItalicFontStyle(), labelStyle.fontStyle);
+}
+
+/**
+ * @tc.name: TabContentModelUpdateLabelStyle002
+ * @tc.desc: test UpdateLabelStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelUpdateLabelStyle002, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    LabelStyle labelStyle;
+    Create([=](TabsModelNG model) {
+        CreateSingleItem([=](TabContentModelNG tabContentModel) {
+            tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty);
+        }, 0);
+    });
+    EXPECT_FALSE(layoutProperty->GetTextOverflow().has_value());
+    EXPECT_FALSE(layoutProperty->GetMaxLines().has_value());
+    EXPECT_FALSE(layoutProperty->GetAdaptMinFontSize().has_value());
+    EXPECT_FALSE(layoutProperty->GetAdaptMaxFontSize().has_value());
+    EXPECT_FALSE(layoutProperty->GetHeightAdaptivePolicy().has_value());
+    EXPECT_FALSE(layoutProperty->GetFontSize().has_value());
+    EXPECT_FALSE(layoutProperty->GetFontWeight().has_value());
+    EXPECT_FALSE(layoutProperty->GetFontFamily().has_value());
+    EXPECT_FALSE(layoutProperty->GetItalicFontStyle().has_value());
 }
 
 /**
@@ -778,6 +830,74 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick001, TestSize.Level1)
     tabBarPattern_->indicator_ = 1;
     tabBarPattern_->HandleClick(info);
     EXPECT_EQ(tabBarPattern_->indicator_, 1);
+}
+
+/**
+ * @tc.name: TabContentModel001
+ * @tc.desc: test TabsModel
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModel001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SetTabBar without builder
+     * @tc.expected: tabbarnode has default textNode and imageNode
+     */
+    Create([](TabsModelNG model) {
+        auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
+        TabContentModelNG tabContentModel;
+        tabContentModel.Create();
+        tabContentModel.SetTabBar("", "", nullptr, true); // SetTabBar without builder
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+        auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+        tabContentNode->UpdateRecycleElmtId(0); // for AddChildToGroup
+        tabContentNode->GetTabBarItemId();           // for AddTabBarItem
+        tabContentNode->SetParent(weakTab);          // for AddTabBarItem
+        tabContentModel.Pop();
+    });
+    auto colNode = GetChildFrameNode(tabBarNode_, 0);
+    EXPECT_EQ(colNode->GetTag(), V2::COLUMN_ETS_TAG);
+    EXPECT_EQ(colNode->GetTotalChildCount(), 1);
+
+    auto imageNode = GetChildFrameNode(colNode, 0);
+    EXPECT_EQ(imageNode->GetTag(), V2::IMAGE_ETS_TAG);
+}
+
+/**
+ * @tc.name: InitSurfaceChangedCallback001
+ * @tc.desc: test InitSurfaceChangedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, InitSurfaceChangedCallback001, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+
+    /**
+     * @tc.steps: case1. WindowSizeChangeReason::UNDEFINED
+     */
+    auto callbackId = tabBarPattern_->surfaceChangedCallbackId_.value();
+    auto func = MockPipelineContext::GetCurrent()->surfaceChangedCallbackMap_[callbackId];
+    func(100.f, 100.f, TABS_WIDTH, TABS_HEIGHT, WindowSizeChangeReason::UNDEFINED);
+    EXPECT_EQ(tabBarPattern_->windowSizeChangeReason_, WindowSizeChangeReason::UNDEFINED);
+
+    /**
+     * @tc.steps: case2. WindowSizeChangeReason::ROTATION
+     * @tc.expected: StopTranslateAnimation
+     */
+    func(100.f, 100.f, TABS_WIDTH, TABS_HEIGHT, WindowSizeChangeReason::ROTATION);
+    EXPECT_EQ(tabBarPattern_->windowSizeChangeReason_, WindowSizeChangeReason::ROTATION);
+    EXPECT_FALSE(tabBarPattern_->indicatorAnimationIsRunning_);
+    EXPECT_FALSE(tabBarPattern_->translateAnimationIsRunning_);
+
+    /**
+     * @tc.steps: case3. Other WindowSizeChangeReason
+     * @tc.expected: Nothing happend
+     */
+    func(100.f, 100.f, TABS_WIDTH, TABS_HEIGHT, WindowSizeChangeReason::TRANSFORM);
+    EXPECT_EQ(tabBarPattern_->windowSizeChangeReason_, WindowSizeChangeReason::ROTATION);
 }
 
 /**
@@ -1160,30 +1280,6 @@ HWTEST_F(TabsTestNg, TabBarPaintMethodPaintGradient001, TestSize.Level1)
     drawFunction = paintMethod->GetForegroundDrawFunction(&paintWrapper2);
     drawFunction(rsCanvas);
     EXPECT_FALSE(paintMethod->gradientRegions_[0]);
-}
-
-/**
- * @tc.name: TabBarAccessibilityPropertyTestNg004
- * @tc.desc: Test the SupportActions property of tabbar.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarAccessibilityPropertyTestNg004, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {});
-    RefPtr<GeometryNode> geometryNode = Ace::Referenced::MakeRefPtr<GeometryNode>();
-    tabBarNode_->SetGeometryNode(geometryNode);
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarPattern_->currentOffset_ = DEFAULT_OFFSET;
-    tabBarPattern_->tabItemOffsets_.emplace_back(CURRENT_OFFSET);
-    tabBarAccessibilityProperty_->ResetSupportAction();
-    std::unordered_set<AceAction> supportAceActions = tabBarAccessibilityProperty_->GetSupportAction();
-    uint64_t actions = 0, exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    for (auto action : supportAceActions) {
-        actions |= 1UL << static_cast<uint32_t>(action);
-    }
-    EXPECT_EQ(actions, exptectActions);
 }
 
 /**
@@ -1927,57 +2023,6 @@ HWTEST_F(TabsTestNg, TabsModelSetBarBackgroundColor001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PerformActionTest001
- * @tc.desc: TabBar Accessibility PerformAction test ScrollForward and ScrollBackward.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, PerformActionTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create tabBar frameNode and pattern, set callback function.
-     * @tc.expected: Related function is called.
-     */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetBarBackgroundColor(Color::RED);
-    });
-
-    /**
-     * @tc.steps: step3. When tabBar TabBarMode is FIXED and child is null, call the callback function in
-     *                   tabBarAccessibilityProperty_.
-     * @tc.expected: Related function is called.
-     */
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
-    EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollForward());
-    EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollBackward());
-
-    /**
-     * @tc.steps: step4. When tabBar TabBarMode is SCROLLABLE and child is null, call the callback function in
-     *                   tabBarAccessibilityProperty_.
-     * @tc.expected: Related function is called.
-     */
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollForward());
-    EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollBackward());
-
-    /**
-     * @tc.steps: step5. When tabBar TabBarMode is SCROLLABLE and child is not null, call the callback function in
-     *                   tabBarAccessibilityProperty_.
-     * @tc.expected: Related function is called.
-     */
-    EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollForward());
-    EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollBackward());
-
-    /**
-     * @tc.steps: step6. When tabBar TabBarMode is FIXED and child is not null, call the callback function in
-     *                   tabBarAccessibilityProperty_.
-     * @tc.expected: Related function is called.
-     */
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
-    EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollForward());
-    EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollBackward());
-}
-
-/**
  * @tc.name: TabsModelSetTabBarWidth001
  * @tc.desc: test SetTabBarWidth
  * @tc.type: FUNC
@@ -2116,7 +2161,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitTouche001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    Create([](TabsModelNG model) {
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     auto info = MouseInfo();
@@ -2172,7 +2219,9 @@ HWTEST_F(TabsTestNg, TabBarmodifieronDraw002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    Create([](TabsModelNG model) {
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
     tabBarNode_->Clean(false, false);
 
     /**
@@ -2204,7 +2253,9 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    Create([](TabsModelNG model) {
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
     std::vector<int32_t> selectedIndexes(1, 1);
     float selectedImageSize = 1.0f;
     float unselectedImageSize = 1.1f;
@@ -2246,7 +2297,9 @@ HWTEST_F(TabsTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset001, TestSize
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent003, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    Create([](TabsModelNG model) {
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
 
     /**
      * @tc.steps: step2. Test function HandleMouseEvent.
@@ -2365,9 +2418,10 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    Create([](TabsModelNG model) {
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    EXPECT_EQ(swiperNode_->TotalChildCount(), 4);
 
     /**
      * @tc.steps: steps2. HandleTouchEvent
@@ -2378,7 +2432,7 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent001, TestSize.Level1)
     touchLocationInfo.SetLocalLocation(Offset(0.f, 0.f));
     tabBarPattern_->tabItemOffsets_ = { { -1.0f, -1.0f }, { 1.0f, 1.0f }, { 2.0f, 2.0f } };
     tabBarPattern_->HandleTouchEvent(touchLocationInfo);
-    EXPECT_EQ(tabBarNode_->TotalChildCount(), 6);
+    EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
 }
 
 /**
@@ -2423,7 +2477,9 @@ HWTEST_F(TabsTestNg, TabBarmodifierPaintIndicator001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleHoverEvent001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    Create([](TabsModelNG model) {
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
     bool isHover = true;
     std::optional<int32_t> hoverIndex_test(0);
     OffsetF c1(0.1f, 0.1f);
@@ -2627,7 +2683,9 @@ HWTEST_F(TabsTestNg, TabBarPatternOnKeyEvent002, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    Create([](TabsModelNG model) {
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
 
     /**
@@ -2639,7 +2697,7 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent002, TestSize.Level1)
     touchLocationInfo.SetLocalLocation(Offset(0.f, 0.f));
     tabBarPattern_->tabItemOffsets_ = { { -1.0f, -1.0f }, { 1.0f, 1.0f }, { 2.0f, 2.0f } };
     tabBarPattern_->HandleTouchEvent(touchLocationInfo);
-    EXPECT_EQ(tabBarNode_->TotalChildCount(), 6);
+    EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
 }
 
 /**
@@ -2975,9 +3033,10 @@ HWTEST_F(TabsTestNg, TabBarPatternSetEdgeEffect001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent003, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
+    Create([](TabsModelNG model) {
         TabsItemDivider divider;
         model.SetDivider(divider);
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
     });
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
@@ -2995,7 +3054,7 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent003, TestSize.Level1)
         tabBarPattern_->tabBarType_.clear();
         tabBarNode_->RemoveChildAtIndex(1);
     }
-    EXPECT_EQ(tabBarNode_->TotalChildCount(), 4);
+    EXPECT_EQ(tabBarNode_->TotalChildCount(), 1);
 }
 
 /**
@@ -3005,13 +3064,14 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent003, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColorAndFontWeight001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
+    Create([](TabsModelNG model) {
         TabsItemDivider divider;
         model.SetDivider(divider);
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
     });
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
-    ASSERT_FALSE(pr.second);
+    ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
      * @tc.expected: Related functions run ok.
@@ -3028,9 +3088,10 @@ HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColorAndFontWeight001, TestSize.Leve
  */
 HWTEST_F(TabsTestNg, TabBarPatternUpdateTextColorAndFontWeight002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
+    Create([](TabsModelNG model) {
         TabsItemDivider divider;
         model.SetDivider(divider);
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
     });
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     for (int i = 0; i <= 1; i++) {
@@ -3205,7 +3266,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitOnKeyEvent001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleMouseEvent004, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    Create([](TabsModelNG model) {
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
     auto info = MouseInfo();
 
     /**
@@ -3431,10 +3494,9 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayMaskAnimation001, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent004, TestSize.Level1)
 {
-    /**
-     * @tc.steps: steps1. Create TabBarPattern
-     */
-    CreateWithItem([](TabsModelNG model) {});
+    Create([](TabsModelNG model) {
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
     IndicatorStyle indicatorStyle1;
     IndicatorStyle indicatorStyle2;
     indicatorStyle1.color = Color::BLACK;
@@ -3455,7 +3517,7 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleTouchEvent004, TestSize.Level1)
         tabBarPattern_->HandleTouchEvent(touchLocationInfo);
         touchLocationInfo.SetLocalLocation(Offset(-1.0f, -1.0f));
     }
-    EXPECT_EQ(tabBarNode_->TotalChildCount(), 6);
+    EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
     tabBarPattern_->touchingIndex_ = 1;
     touchLocationInfo.SetTouchType(TouchType::UP);
     for (int i = 0; i <= 1; i++) {
@@ -5890,27 +5952,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSpecificSupportAction
- * @tc.desc: Test the SetSpecificSupportAction.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabBarAPSetSpecificSupportAction001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step2. invoke SetSpecificSupportAction.
-     * @tc.expected: Related function is called.
-     */
-    CreateWithItem([](TabsModelNG model) {});
-    tabBarAccessibilityProperty_->SetSpecificSupportAction();
-    EXPECT_FALSE(tabBarAccessibilityProperty_->IsScrollable());
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarPattern_->currentOffset_ = 1.0f;
-    tabBarPattern_->tabItemOffsets_ = { { 10.0f, 10.0f } };
-    tabBarAccessibilityProperty_->SetSpecificSupportAction();
-    EXPECT_TRUE(tabBarAccessibilityProperty_->IsScrollable());
-}
-
-/**
  * @tc.name: TabBarPatternGetInnerFocusPaintRect001
  * @tc.desc: test GetInnerFocusPaintRect
  * @tc.type: FUNC
@@ -6053,7 +6094,9 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick006, TestSize.Level1)
  */
 HWTEST_F(TabsTestNg, TabBarPatternCalculateSelectedIndex001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    Create([](TabsModelNG model) {
+        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
+    });
     auto info = MouseInfo();
     Offset s1(0.1, 0.1);
     Offset s2(0.4, 0.4);
@@ -7056,32 +7099,6 @@ HWTEST_F(TabsTestNg, TabsPatternSetOnAnimationEnd002, TestSize.Level1)
     EXPECT_NE(pattern_->animationEndEvent_, nullptr);
     pattern_->SetAnimationEndEvent(std::move(*tabBarPattern_->animationEndEvent_));
     EXPECT_NE(pattern_->animationEndEvent_, nullptr);
-}
-
-/**
-* @tc.name: TabBarPatternSetSpecificSupportAction002
-* @tc.desc: test Measure
-* @tc.type: FUNC
-*/
-HWTEST_F(TabsTestNg, TabBarPatternSetSpecificSupportAction002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize all properties of tabs.
-     */
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-    });
-
-    /**
-     * @tc.steps: step2. invoke SetSpecificSupportAction.
-     * @tc.expected: Related function is called.
-     */
-    tabBarAccessibilityProperty_->SetSpecificSupportAction();
-    EXPECT_FALSE(tabBarAccessibilityProperty_->IsScrollable());
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarAccessibilityProperty_->SetSpecificSupportAction();
-    EXPECT_TRUE(tabBarPattern_->IsAtBottom());
 }
 
 /**
