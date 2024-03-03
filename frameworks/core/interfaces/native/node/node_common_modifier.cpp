@@ -155,6 +155,38 @@ Alignment ParseAlignment(int32_t align)
     return alignment;
 }
 
+int32_t ConvertAlignmentToInt(Alignment alignment)
+{
+    if (alignment == Alignment::TOP_LEFT) {
+        return NUM_0;
+    }
+    if (alignment == Alignment::TOP_CENTER) {
+        return NUM_1;
+    }
+    if (alignment == Alignment::TOP_RIGHT) {
+        return NUM_2;
+    }
+    if (alignment == Alignment::CENTER_LEFT) {
+        return NUM_3;
+    }
+    if (alignment == Alignment::CENTER) {
+        return NUM_4;
+    }
+    if (alignment == Alignment::CENTER_RIGHT) {
+        return NUM_5;
+    }
+    if (alignment == Alignment::BOTTOM_LEFT) {
+        return NUM_6;
+    }
+    if (alignment == Alignment::BOTTOM_CENTER) {
+        return NUM_7;
+    }
+    if (alignment == Alignment::BOTTOM_RIGHT) {
+        return NUM_8;
+    }
+    return NUM_4;
+}
+
 int32_t ParseAlignmentToIndex(Alignment align)
 {
     if (align == Alignment::TOP_LEFT) {
@@ -253,6 +285,35 @@ void SetLinearGradientDirectionTo(std::shared_ptr<LinearGradient>& linearGradien
         default:
             break;
     }
+}
+
+GradientDirection convertToLinearGradientDirection(std::shared_ptr<LinearGradient> linearGradient)
+{
+    auto linearX = linearGradient->linearX;
+    auto linearY = linearGradient->linearY;
+    if (!linearX.has_value() && !linearY.has_value()) {
+        return GradientDirection::BOTTOM;
+    }
+    if (linearX.has_value() && !linearY.has_value()) {
+        return linearX.value();
+    }
+    if (!linearX.has_value() && linearY.has_value()) {
+        return linearY.value();
+    }
+
+    if (linearX.value() == NG::GradientDirection::LEFT && linearY.value() == NG::GradientDirection::TOP) {
+        return GradientDirection::LEFT_TOP;
+    }
+    if (linearX.value() == NG::GradientDirection::LEFT && linearY.value() == NG::GradientDirection::BOTTOM) {
+        return GradientDirection::LEFT_BOTTOM;
+    }
+    if (linearX.value() == NG::GradientDirection::RIGHT && linearY.value() == NG::GradientDirection::TOP) {
+        return GradientDirection::RIGHT_TOP;
+    }
+    if (linearX.value() == NG::GradientDirection::RIGHT && linearY.value() == NG::GradientDirection::BOTTOM) {
+        return GradientDirection::RIGHT_BOTTOM;
+    }
+    return GradientDirection::BOTTOM;
 }
 
 /**
@@ -4311,6 +4372,44 @@ ArkUI_Uint32 GetForegroundColor(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return ViewAbstract::GetForegroundColor(frameNode).GetValue();
 }
+
+ArkUI_Float32 GetBlur(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetFrontBlur(frameNode).Value();
+}
+
+ArkUI_Int32 GetLinearGradient(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Uint32* colors, ArkUI_Float32* stops)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto gradient = ViewAbstract::GetLinearGradient(frameNode);
+    auto angle = gradient.GetLinearGradient()->angle;
+    //0 angle
+    values[0] = angle.has_value() ? angle.value().Value() : 0.0f;
+    //1 Direction
+    values[1] = static_cast<int32_t>(convertToLinearGradientDirection(gradient.GetLinearGradient()));
+    //2 Repeat
+    values[2] = gradient.GetRepeat();
+
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    //0 start index
+    int index = 0;
+    for (auto& gradientColor : gradientColors) {
+        colors[index] = gradientColor.GetColor().GetValue();
+        stops[index] = gradientColor.GetDimension().Value();
+        index++;
+    }
+    return index;
+}
+
+ArkUI_Int32 GetAlign(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ConvertAlignmentToInt(ViewAbstract::GetAlign(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -4365,7 +4464,7 @@ const ArkUICommonModifier* GetCommonModifier()
         GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor,
         GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, GetFlexGrow,
         GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale, GetInvert,
-        GetSepia, GetContrast, GetForegroundColor};
+        GetSepia, GetContrast, GetForegroundColor, GetBlur, GetLinearGradient, GetAlign};
 
     return &modifier;
 }

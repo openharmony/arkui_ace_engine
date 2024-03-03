@@ -3213,4 +3213,40 @@ Color ViewAbstract::GetForegroundColor(FrameNode* frameNode)
     CHECK_NULL_RETURN(target, value);
     return target->GetForegroundColorValue(value);
 }
+
+Dimension ViewAbstract::GetFrontBlur(FrameNode* frameNode)
+{
+    Dimension value;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    auto& property = target->GetForeground();
+    auto getValue = property->propBlurRadius;
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
+}
+
+NG::Gradient ViewAbstract::GetLinearGradient(FrameNode *frameNode)
+{
+    NG::Gradient value;
+    value.CreateGradientWithType(NG::GradientType::LINEAR);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetLinearGradientValue(value);
+}
+
+Alignment ViewAbstract::GetAlign(FrameNode *frameNode)
+{
+    Alignment value = Alignment::CENTER;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetPositionProperty();
+    CHECK_NULL_RETURN(property, value);
+    auto getValue = property->GetAlignment();
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
+}
 } // namespace OHOS::Ace::NG

@@ -825,6 +825,13 @@ int32_t SetBlur(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     return ERROR_CODE_NO_ERROR;
 }
 
+const ArkUI_AttributeItem* GetBlur(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getBlur(node->uiNodeHandle);
+    g_numberValues[0].f32 = resultValue;
+    return &g_attributeItem;
+}
+
 void ResetBlur(ArkUI_NodeHandle node)
 {
     // already check in entry point.
@@ -866,6 +873,41 @@ int32_t SetLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     return ERROR_CODE_NO_ERROR;
 }
 
+const ArkUI_AttributeItem* GetLinearGradient(ArkUI_NodeHandle node)
+{
+    //default size 3
+    ArkUI_Float32 values[3];
+    //default size 10
+    ArkUI_Uint32 colors[10];
+    //default size 10
+    ArkUI_Float32 stops[10];
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getLinearGradient(
+        node->uiNodeHandle, values, colors, stops);
+    //angle
+    g_numberValues[0].f32 = values[0];
+    //direction
+    g_numberValues[1].i32 = values[1];
+    //repeated
+    g_numberValues[2].i32 = values[2];
+    //size
+    g_attributeItem.size = NUM_3;
+    if (resultValue < 1) {
+        return &g_attributeItem;
+    }
+    static ArkUI_ColorStop* colorStop = new ArkUI_ColorStop;
+    static uint32_t* gradientColors = new uint32_t[resultValue];
+    static float* gradientStops = new float[resultValue];
+    for (int i = 0; i < resultValue; i++) {
+        gradientColors[i] = colors[i];
+        gradientStops[i] = stops[i];
+    }
+    colorStop->colors = gradientColors;
+    colorStop->stops = gradientStops;
+    colorStop->size = resultValue;
+    g_attributeItem.object = reinterpret_cast<void*>(colorStop);
+    return &g_attributeItem;
+}
+
 void ResetLinearGradient(ArkUI_NodeHandle node)
 {
     // already check in entry point.
@@ -884,6 +926,13 @@ int32_t SetAlign(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto attrVal = item->value[NUM_0].i32;
     fullImpl->getNodeModifiers()->getCommonModifier()->setAlign(node->uiNodeHandle, attrVal);
     return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetAlign(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAlign(node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
 }
 
 void ResetAlign(ArkUI_NodeHandle node)
@@ -7663,9 +7712,9 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         nullptr,
         nullptr,
         nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
+        GetBlur,
+        GetLinearGradient,
+        GetAlign,
         GetOpacity,
         GetBorderWidth,
         GetBorderRadius,
