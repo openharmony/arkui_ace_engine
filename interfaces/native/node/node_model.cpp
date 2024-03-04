@@ -206,6 +206,8 @@ struct InnerExtraParam {
     ArkUI_NodeHandle nodePtr;
 };
 
+std::unordered_map<ArkUI_NodeHandle, std::unordered_map<ArkUI_NodeEventType, InnerExtraParam*>> eventMap_;
+
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId)
 {
     auto originEventType = ConvertOriginEventType(eventType);
@@ -216,6 +218,7 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
     // already check in entry point.
     auto* impl = GetFullImpl();
     auto* extraParam = new InnerExtraParam({eventId, nodePtr});
+    eventMap_[nodePtr][eventType] = extraParam;
     impl->getBasicAPI()->registerNodeAsyncEvent(
         nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), reinterpret_cast<int64_t>(extraParam));
     return ERROR_CODE_NO_ERROR;
@@ -223,7 +226,19 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
 
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType)
 {
-    // TODO.
+    auto nodeMap = eventMap_.find(nodePtr);
+    if (nodeMap == eventMap_.end()) {
+        return;
+    }
+    auto eventMap = nodeMap->second.find(eventType);
+    if (eventMap == nodeMap->second.end()) {
+        return;
+    }
+    delete eventMap->second;
+    nodeMap->second.erase(eventMap);
+    if (nodeMap->second.empty()) {
+        eventMap_.erase(nodeMap);
+    }
 }
 
 void (*g_eventReceiver)(ArkUI_NodeEvent* event) = nullptr;
@@ -243,7 +258,6 @@ void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event))
                     g_eventReceiver(&event);
                     ConvertEventResult(&event, origin);
                 }
-                delete extraParam;
             }
         };
         impl->getBasicAPI()->registerNodeAsyncEventReceiver(innerReceiver);
