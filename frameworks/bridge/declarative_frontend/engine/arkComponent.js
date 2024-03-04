@@ -142,7 +142,6 @@ class ModifierWithKey {
       this.value = this.stageValue;
       this.applyPeer(node, false);
     }
-    this.stageValue = undefined;
     return false;
   }
   applyPeer(node, reset) { }
@@ -2358,6 +2357,14 @@ class ArkComponent {
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
+  }
+  cleanStageValue(){
+    if (!this._modifiersWithKeys){
+      return;
+    }
+    this._modifiersWithKeys.forEach((value, key) => {
+        value.stageValue = undefined;
+    });
   }
   applyModifierPatch() {
     let expiringItems = [];
