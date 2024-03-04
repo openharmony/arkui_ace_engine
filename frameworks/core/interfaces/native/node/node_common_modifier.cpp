@@ -41,6 +41,8 @@
 #include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/view_model.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -155,6 +157,38 @@ Alignment ParseAlignment(int32_t align)
     return alignment;
 }
 
+int32_t ConvertAlignmentToInt(Alignment alignment)
+{
+    if (alignment == Alignment::TOP_LEFT) {
+        return NUM_0;
+    }
+    if (alignment == Alignment::TOP_CENTER) {
+        return NUM_1;
+    }
+    if (alignment == Alignment::TOP_RIGHT) {
+        return NUM_2;
+    }
+    if (alignment == Alignment::CENTER_LEFT) {
+        return NUM_3;
+    }
+    if (alignment == Alignment::CENTER) {
+        return NUM_4;
+    }
+    if (alignment == Alignment::CENTER_RIGHT) {
+        return NUM_5;
+    }
+    if (alignment == Alignment::BOTTOM_LEFT) {
+        return NUM_6;
+    }
+    if (alignment == Alignment::BOTTOM_CENTER) {
+        return NUM_7;
+    }
+    if (alignment == Alignment::BOTTOM_RIGHT) {
+        return NUM_8;
+    }
+    return NUM_4;
+}
+
 int32_t ParseAlignmentToIndex(Alignment align)
 {
     if (align == Alignment::TOP_LEFT) {
@@ -194,15 +228,15 @@ int32_t ParseAlignmentToIndex(Alignment align)
  * ...
  * @param colorsLength colors length
  */
-void SetGradientColors(NG::Gradient& gradient, const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
         return;
     }
     for (int32_t index = 0; index < colorsLength; index += NUM_3) {
-        auto colorValue = colors[index];
-        auto colorHasDimension = colors[index + NUM_1];
-        auto colorDimension = colors[index + NUM_2];
+        auto colorValue = colors[index].u32;
+        auto colorHasDimension = colors[index + NUM_1].i32;
+        auto colorDimension = colors[index + NUM_2].f32;
         auto color = static_cast<uint32_t>(colorValue);
         auto hasDimension = static_cast<bool>(colorHasDimension);
         auto dimension = colorDimension;
@@ -253,6 +287,35 @@ void SetLinearGradientDirectionTo(std::shared_ptr<LinearGradient>& linearGradien
         default:
             break;
     }
+}
+
+GradientDirection convertToLinearGradientDirection(std::shared_ptr<LinearGradient> linearGradient)
+{
+    auto linearX = linearGradient->linearX;
+    auto linearY = linearGradient->linearY;
+    if (!linearX.has_value() && !linearY.has_value()) {
+        return GradientDirection::BOTTOM;
+    }
+    if (linearX.has_value() && !linearY.has_value()) {
+        return linearX.value();
+    }
+    if (!linearX.has_value() && linearY.has_value()) {
+        return linearY.value();
+    }
+
+    if (linearX.value() == NG::GradientDirection::LEFT && linearY.value() == NG::GradientDirection::TOP) {
+        return GradientDirection::LEFT_TOP;
+    }
+    if (linearX.value() == NG::GradientDirection::LEFT && linearY.value() == NG::GradientDirection::BOTTOM) {
+        return GradientDirection::LEFT_BOTTOM;
+    }
+    if (linearX.value() == NG::GradientDirection::RIGHT && linearY.value() == NG::GradientDirection::TOP) {
+        return GradientDirection::RIGHT_TOP;
+    }
+    if (linearX.value() == NG::GradientDirection::RIGHT && linearY.value() == NG::GradientDirection::BOTTOM) {
+        return GradientDirection::RIGHT_BOTTOM;
+    }
+    return GradientDirection::BOTTOM;
 }
 
 /**
@@ -836,13 +899,13 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
  * shadows[4] : ShadowType, shadows[5] : Color, shadows[6] : IsFilled
  * @param length shadows length
  */
-void SetBackShadow(ArkUINodeHandle node, const ArkUI_Float32* shadows, ArkUI_Int32 length)
+void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (length == NUM_1) {
         Shadow shadow;
-        auto shadowStyle = static_cast<ShadowStyle>(shadows[NUM_0]);
+        auto shadowStyle = static_cast<ShadowStyle>(shadows[NUM_0].i32);
         auto style = static_cast<ShadowStyle>(shadowStyle);
         if (GetShadowFromTheme(style, shadow)) {
             ViewAbstract::SetBackShadow(frameNode, shadow);
@@ -851,13 +914,13 @@ void SetBackShadow(ArkUINodeHandle node, const ArkUI_Float32* shadows, ArkUI_Int
     if (length != NUM_7) {
         return;
     }
-    auto blurRadius = shadows[NUM_0];                          // BlurRadius
-    auto hasColorValue = static_cast<int32_t>(shadows[NUM_1]); // 1: has ColorStrategy; 2: has Color
-    auto offsetX = shadows[NUM_2];                             // OffsetX
-    auto offsetY = shadows[NUM_3];                             // OffsetY
-    auto shadowType = static_cast<uint32_t>(shadows[NUM_4]);   // ShadowType
-    auto color = static_cast<uint32_t>(shadows[NUM_5]);        // Color
-    auto isFilled = static_cast<uint32_t>(shadows[NUM_6]);     // IsFilled
+    auto blurRadius = shadows[NUM_0].f32;                          // BlurRadius
+    auto hasColorValue = static_cast<int32_t>(shadows[NUM_1].i32); // 1: has ColorStrategy; 2: has Color
+    auto offsetX = shadows[NUM_2].f32;                             // OffsetX
+    auto offsetY = shadows[NUM_3].f32;                             // OffsetY
+    auto shadowType = shadows[NUM_4].i32;                          // ShadowType
+    auto color = static_cast<uint32_t>(shadows[NUM_5].u32);        // Color
+    auto isFilled = static_cast<uint32_t>(shadows[NUM_6].i32);     // IsFilled
     Shadow shadow;
     shadow.SetBlurRadius(blurRadius);
     shadow.SetOffsetX(offsetX);
@@ -932,6 +995,9 @@ void SetAlign(ArkUINodeHandle node, ArkUI_Int32 align)
     CHECK_NULL_VOID(frameNode);
     Alignment alignment = ParseAlignment(align);
     ViewAbstract::SetAlign(frameNode, alignment);
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
+    companion->alignment = align;
 }
 
 void ResetAlign(ArkUINodeHandle node)
@@ -1144,7 +1210,7 @@ void ResetBlur(ArkUINodeHandle node)
  * @param colorsLength colors length
  */
 void SetLinearGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
-    const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1183,7 +1249,7 @@ void ResetLinearGradient(ArkUINodeHandle node)
  * @param colorsLength colors length
  */
 void SetSweepGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
-    const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1220,7 +1286,7 @@ void ResetSweepGradient(ArkUINodeHandle node)
  * @param colorsLength colors length
  */
 void SetRadialGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
-    const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1363,7 +1429,7 @@ void ResetBorderImage(ArkUINodeHandle node)
 }
 
 void SetBorderImageGradient(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
-    const ArkUI_Float32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4112,7 +4178,7 @@ void GetTransform(ArkUINodeHandle node, ArkUI_Float32* values)
 ArkUI_Int32 GetHitTestBehavior(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(ViewAbstract::GetHitTestBehavior(frameNode));
 }
 
@@ -4128,7 +4194,7 @@ void GetPosition(ArkUINodeHandle node, ArkUIPositionOptions* values)
 ArkUI_Int32 GetShadow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     int style = static_cast<ArkUI_Int32>(ViewAbstract::GetShadow(frameNode)->GetStyle());
     return style;
 }
@@ -4226,7 +4292,7 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
 ArkUI_Int32 GetBlendMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     int blendMode = static_cast<ArkUI_Int32>(ViewAbstract::GetBlendMode(frameNode));
     return blendMode;
 }
@@ -4234,7 +4300,7 @@ ArkUI_Int32 GetBlendMode(ArkUINodeHandle node)
 ArkUI_Int32 GetDirection(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     int direction = static_cast<ArkUI_Int32>(ViewAbstract::GetDirection(frameNode));
     return direction;
 }
@@ -4242,11 +4308,114 @@ ArkUI_Int32 GetDirection(ArkUINodeHandle node)
 ArkUI_Int32 GetAlignSelf(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     int alignSelf = static_cast<ArkUI_Int32>(ViewAbstract::GetAlignSelf(frameNode));
     return alignSelf;
 }
 
+ArkUI_Float32 GetFlexGrow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetFlexGrow(frameNode);
+}
+
+ArkUI_Float32 GetFlexShrink(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetFlexShrink(frameNode);
+}
+
+ArkUI_Float32 GetFlexBasis(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetFlexBasis(frameNode).Value();
+}
+
+void GetConstraintSize(ArkUINodeHandle node, ArkUIConstraintSizeOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    options->minWidth = ViewAbstract::GetMinWidth(frameNode);
+    options->maxWidth = ViewAbstract::GetMaxWidth(frameNode);
+    options->minHeight = ViewAbstract::GetMinHeight(frameNode);
+    options->maxHeight = ViewAbstract::GetMaxHeight(frameNode);
+}
+
+ArkUI_Float32 GetGrayScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetGrayScale(frameNode).Value();
+}
+
+ArkUI_Float32 GetInvert(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return std::get<float>(ViewAbstract::GetInvert(frameNode));
+}
+
+ArkUI_Float32 GetSepia(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetSepia(frameNode).Value();
+}
+
+ArkUI_Float32 GetContrast(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetContrast(frameNode).Value();
+}
+
+ArkUI_Uint32 GetForegroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetForegroundColor(frameNode).GetValue();
+}
+
+ArkUI_Float32 GetBlur(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetFrontBlur(frameNode).Value();
+}
+
+ArkUI_Int32 GetLinearGradient(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Uint32* colors, ArkUI_Float32* stops)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto gradient = ViewAbstract::GetLinearGradient(frameNode);
+    auto angle = gradient.GetLinearGradient()->angle;
+    //0 angle
+    values[0] = angle.has_value() ? angle.value().Value() : 0.0f;
+    //1 Direction
+    values[1] = static_cast<int32_t>(convertToLinearGradientDirection(gradient.GetLinearGradient()));
+    //2 Repeat
+    values[2] = gradient.GetRepeat();
+
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    //0 start index
+    int index = 0;
+    for (auto& gradientColor : gradientColors) {
+        colors[index] = gradientColor.GetColor().GetValue();
+        stops[index] = gradientColor.GetDimension().Value();
+        index++;
+    }
+    return index;
+}
+
+ArkUI_Int32 GetAlign(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ConvertAlignmentToInt(ViewAbstract::GetAlign(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -4299,7 +4468,9 @@ const ArkUICommonModifier* GetCommonModifier()
         GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient,
         GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
         GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor,
-        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle };
+        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, GetFlexGrow,
+        GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale, GetInvert,
+        GetSepia, GetContrast, GetForegroundColor, GetBlur, GetLinearGradient, GetAlign};
 
     return &modifier;
 }

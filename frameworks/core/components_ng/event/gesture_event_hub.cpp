@@ -878,7 +878,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             TAG_LOGW(AceLogTag::ACE_DRAG, "Register coordination listener failed, error is %{public}d", ret);
         }
     }
-    dragDropManager->UpdateDragStyle();
     dragDropManager->SetPreviewRect(Rect(pixelMapOffset.GetX(), pixelMapOffset.GetY(), width, height));
     dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
     auto eventManager = pipeline->GetEventManager();

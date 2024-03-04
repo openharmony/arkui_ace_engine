@@ -2620,7 +2620,7 @@ void WebDelegate::InitWebViewWithSurface()
     CHECK_NULL_VOID(window);
     rosenWindowId_ = window->GetWindowId();
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), context = context_, webType = webType_]() {
+        [weak = WeakClaim(this), context = context_, renderMode = renderMode_]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             std::shared_ptr<OHOS::NWeb::NWebEngineInitArgsImpl> initArgs =
@@ -2705,7 +2705,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->SetWindowId(window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
-            delegate->nweb_->SetDrawMode(webType);
+            delegate->nweb_->SetDrawMode(renderMode);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -5278,9 +5278,9 @@ std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::
     return result;
 }
 
-void WebDelegate::SetWebType(WebType type)
+void WebDelegate::SetRenderMode(RenderMode renderMode)
 {
-    webType_ = static_cast<int32_t>(type);
+    renderMode_ = static_cast<int32_t>(renderMode);
 }
 
 void WebDelegate::BindRouterBackMethod()

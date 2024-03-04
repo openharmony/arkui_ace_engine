@@ -1947,10 +1947,16 @@ void JSWeb::Create(const JSCallbackInfo& info)
     if (!controllerObj->IsObject()) {
         return;
     }
-    auto type = paramObject->GetProperty("type");
-    WebType webType = WebType::SURFACE;
+    JsiRef<JsiValue> type = JsiRef<JsiValue>::Make();
+    bool isHasType = paramObject->HasProperty("type");
+    if (isHasType) {
+        type = paramObject->GetProperty("type");
+    } else {
+        type = paramObject->GetProperty("renderMode");
+    }
+    RenderMode renderMode = RenderMode::ASYNC_RENDER;
     if (type->IsNumber() && (type->ToNumber<int32_t>() >= 0) && (type->ToNumber<int32_t>() <= 1)) {
-        webType = static_cast<WebType>(type->ToNumber<int32_t>());
+        renderMode = static_cast<RenderMode>(type->ToNumber<int32_t>());
     }
 
     bool incognitoMode = false;
@@ -1996,7 +2002,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
         WebModel::GetInstance()->Create(
             dstSrc.value(), std::move(setIdCallback),
-            std::move(setHapPathCallback), parentNWebId, isPopup, webType,
+            std::move(setHapPathCallback), parentNWebId, isPopup, renderMode,
             incognitoMode);
 
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
@@ -2018,7 +2024,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
     } else {
         auto* jsWebController = controller->Unwrap<JSWebController>();
         WebModel::GetInstance()->Create(dstSrc.value(),
-            jsWebController->GetController(), webType, incognitoMode);
+            jsWebController->GetController(), renderMode, incognitoMode);
     }
 
     WebModel::GetInstance()->SetFocusable(true);

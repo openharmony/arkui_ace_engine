@@ -45,6 +45,7 @@ private:
     static void RegisterNodeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRenderNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterFrameNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPathAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

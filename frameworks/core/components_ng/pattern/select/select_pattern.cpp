@@ -95,7 +95,7 @@ void SelectPattern::OnAfterModifyDone()
     if (inspectorId.empty()) {
         return;
     }
-    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, selectValue_, selected_);
+    Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, selectValue_, selected_);
 }
 
 void SelectPattern::ShowSelectMenu()
@@ -313,7 +313,7 @@ void SelectPattern::CreateSelectedCallback()
                 .SetDescription(host->GetAutoEventParamValue(""));
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
             if (!inspectorId.empty()) {
-                Recorder::NodeDataCache::Get().PutMultiple(inspectorId, value, index);
+                Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, value, index);
             }
         }
     };
@@ -962,12 +962,6 @@ bool SelectPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     SetSelectSize(geometryNode->GetFrameSize());
-    if (isColorConfigurationUpdate_ && GetSelected() >= 0) {
-        auto props = text_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(props, false);
-        props->UpdateContent(options_[GetSelected()]->GetPattern<OptionPattern>()->GetText());
-        isColorConfigurationUpdate_ = false;
-    }
     return false;
 }
 
@@ -1045,7 +1039,6 @@ void SelectPattern::OnRestoreInfo(const std::string& restoreInfo)
 
 void SelectPattern::OnColorConfigurationUpdate()
 {
-    isColorConfigurationUpdate_ = true;
     auto host = GetHost();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

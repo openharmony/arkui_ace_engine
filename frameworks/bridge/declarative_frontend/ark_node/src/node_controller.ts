@@ -12,15 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const arkUINativeModule = globalThis.getArkUINativeModule();
-function GetUINativeModule() {
-  if (arkUINativeModule) {
-    return arkUINativeModule;
-  }
-  return arkUINativeModule;
-}
-
 abstract class NodeController {
   nodeContainerId_: number;
   constructor() {
@@ -35,7 +26,7 @@ abstract class NodeController {
 
   rebuild() {
     if (this.nodeContainerId_ >= 0) {
-      GetUINativeModule().nodeContainer.rebuild(this.nodeContainerId_);
+      getUINativeModule().nodeContainer.rebuild(this.nodeContainerId_);
     }
   }
 }

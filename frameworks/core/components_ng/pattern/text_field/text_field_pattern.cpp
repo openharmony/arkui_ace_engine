@@ -2216,7 +2216,7 @@ void TextFieldPattern::OnAfterModifyDone()
                                               TextInputType::VISIBLE_PASSWORD
                                         : false;
         if (!isPwdType) {
-            Recorder::NodeDataCache::Get().PutString(inspectorId, contentController_->GetTextValue());
+            Recorder::NodeDataCache::Get().PutString(host, inspectorId, contentController_->GetTextValue());
         }
     }
 }

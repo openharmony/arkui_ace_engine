@@ -120,7 +120,10 @@ public:
     static void CreateItem(
         int32_t itemNumber, const std::function<void(TabContentModelNG, int32_t)>& callback = nullptr);
     static void CreateSingleItem(const std::function<void(TabContentModelNG)>& callback, int32_t nodeId);
+    static void CreateSingleItemWithoutBuilder(
+        const std::function<void(TabContentModelNG)>& callback, int32_t nodeId);
     static TabBarBuilderFunc TabBarItemBuilder();
+    void SwipeTo(int32_t index);
 
     RefPtr<TabsNode> frameNode_;
     RefPtr<TabsPattern> pattern_;

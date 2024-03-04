@@ -241,6 +241,7 @@ public:
         const OffsetF &origin)> &&onAreaChanged);
     static void SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
         const std::vector<double> &ratioList);
+    static void SetOnSizeChanged(std::function<void(const RectF &oldRect, const RectF &rect)> &&onSizeChanged);
     static void SetResponseRegion(const std::vector<DimensionRect> &responseRegion);
     static void SetMouseResponseRegion(const std::vector<DimensionRect> &mouseResponseRegion);
     static void SetTouchable(bool touchable);
@@ -272,7 +273,6 @@ public:
         std::function<void()> &&onKeyboardShortcutAction);
     // obscured
     static void SetObscured(const std::vector<ObscuredReasons> &reasons);
-    static void SetPrivacySensitive(bool flag);
 
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
@@ -523,6 +523,21 @@ public:
     static TextDirection GetDirection(FrameNode* frameNode);
     static FlexAlign GetAlignSelf(FrameNode* frameNode);
 
+    static float GetFlexGrow(FrameNode* frameNode);
+    static float GetFlexShrink(FrameNode* frameNode);
+    static Dimension GetFlexBasis(FrameNode* frameNode);
+    static float GetMinWidth(FrameNode* frameNode);
+    static float GetMaxWidth(FrameNode* frameNode);
+    static float GetMinHeight(FrameNode* frameNode);
+    static float GetMaxHeight(FrameNode* frameNode);
+    static Dimension GetGrayScale(FrameNode* frameNode);
+    static InvertVariant GetInvert(FrameNode* frameNode);
+    static Dimension GetSepia(FrameNode* frameNode);
+    static Dimension GetContrast(FrameNode* frameNode);
+    static Color GetForegroundColor(FrameNode* frameNode);
+    static Dimension GetFrontBlur(FrameNode* frameNode);
+    static NG::Gradient GetLinearGradient(FrameNode* frameNode);
+    static Alignment GetAlign(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager();
 };

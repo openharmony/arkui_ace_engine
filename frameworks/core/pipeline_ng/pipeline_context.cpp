@@ -918,11 +918,10 @@ void PipelineContext::SetupRootElement()
 
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
-    auto atomicService = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
+    RefPtr<AppBarView> appBar = AceType::MakeRefPtr<AppBarView>();
+    auto atomicService = installationFree_ ? appBar->Create(stageNode) : nullptr;
     auto container = Container::Current();
-    if (container && atomicService) {
-        auto appBar = Referenced::MakeRefPtr<AppBarView>(atomicService);
-        appBar->iniBehavior();
+    if (container) {
         container->SetAppBar(appBar);
     }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
@@ -953,7 +952,6 @@ void PipelineContext::SetupRootElement()
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     postEventManager_ = MakeRefPtr<PostEventManager>();
     dragDropManager_ = MakeRefPtr<DragDropManager>();
-    privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
 
@@ -2889,11 +2887,13 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         manager->OnDragMoveOut(pointerEvent);
         manager->ClearSummary();
         manager->ClearExtraInfo();
+        manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         return;
     }
 
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->RequireSummary();
+        manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
     }
     extraInfo = manager->GetExtraInfo();
     if (action == DragEventAction::DRAG_EVENT_END) {

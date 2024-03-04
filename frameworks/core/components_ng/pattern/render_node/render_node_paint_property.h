@@ -24,20 +24,20 @@ namespace OHOS::Ace::NG {
 class RenderNodePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(RenderNodePaintProperty, PaintProperty)
 private:
-    RefPtr<FrameNode> host_;
+    WeakPtr<FrameNode> host_;
 
 public:
     RenderNodePaintProperty() = default;
     ~RenderNodePaintProperty() override = default;
 
-    void SetHost(const RefPtr<FrameNode>& host)
+    void SetHost(const WeakPtr<FrameNode>& host)
     {
         host_ = host;
     }
 
     RefPtr<FrameNode> GetHost() const
     {
-        return host_;
+        return host_.Upgrade();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RenderNodeFlag, int32_t, PROPERTY_UPDATE_RENDER);

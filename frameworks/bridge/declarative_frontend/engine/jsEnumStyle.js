@@ -2609,3 +2609,9 @@ let NativeEmbedStatus;
   NativeEmbedStatus['UPDATE'] = 1;
   NativeEmbedStatus['DESTROY'] = 2;
 })(NativeEmbedStatus || (NativeEmbedStatus = {}));
+
+let RenderMode;
+(function (RenderMode) {
+  RenderMode['ASYNC_RENDER'] = 0;
+  RenderMode['SYNC_RENDER'] = 1;
+})(RenderMode || (RenderMode = {}));

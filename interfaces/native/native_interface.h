@@ -93,7 +93,8 @@ typedef enum {
  *     auto basicNodeApi = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(anyNativeAPI);
  * }
  * @endcode
- *
+ * @deprecated This API is deprecated since API version 12.
+ * You are advised to use {@link OH_ArkUI_QueryModuleInterface} instead.
  * @since 12
  */
 ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32_t version);
@@ -105,7 +106,7 @@ ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32
  * (API type related to UI components).
  * @param version Indicates the version of the native API structure, which is obtained through the version enums
  * supported by the structure. For example, the available version of ARKUI_NATIVE_NODE is
- * {@link ARKUI_NATIVE_NODE_VERSION_1}.
+ * {@link ArkUI_NativeNodeAPIVersion}.
  * @return Returns the pointer to the native API abstract object that carries the version.
  * @code {.cpp}
  * #include<arkui/native_interface.h>

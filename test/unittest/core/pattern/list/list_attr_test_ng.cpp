@@ -619,21 +619,21 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign001, TestSize.Level1)
      * @tc.steps: stpe2. Scroll delta less than half of ITEM_HEIGHT
      * @tc.expected: The item(index:0) align to start
      */
-    ScrollSnap(-49.f, 1200.f);
+    ScrollSnapForEqualHeightItem(-49.f, -1200.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 
     /**
      * @tc.steps: stpe3. Scroll delta greater than half of ITEM_HEIGHT
      * @tc.expected: The item(index:1) align to start
      */
-    ScrollSnap(-51.f, 1200.f);
+    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
 
     /**
-     * @tc.steps: stpe4. Scroll to bottom
+     * @tc.steps: stpe4. Scroll to over bottom
      * @tc.expected: The last item(index:9) align to end
      */
-    ScrollSnap(-220.f, 1200.f);
+    ScrollSnapForEqualHeightItem(-500.f, -1200.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance); // 220.f
 }
 
@@ -691,21 +691,21 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign003, TestSize.Level1)
      * @tc.steps: stpe2. Scroll delta less than half of ITEM_HEIGHT
      * @tc.expected: The fitst item(index:0) align to center
      */
-    ScrollSnap(-49.f, 1200.f);
+    ScrollSnapForEqualHeightItem(-49.f, -1200.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), -350.f);
 
     /**
      * @tc.steps: stpe3. Scroll delta greater than half of ITEM_HEIGHT
      * @tc.expected: The fitst item(index:1) align to center
      */
-    ScrollSnap(-51.f, 1200.f);
+    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), -250.f);
 
     /**
-     * @tc.steps: stpe4. Scroll to bottom
+     * @tc.steps: stpe4. Scroll to over bottom
      * @tc.expected: The last item(index:9) align to center
      */
-    ScrollSnap(-1000.f, 1200.f);
+    ScrollSnapForEqualHeightItem(-1000.f, -1200.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 550.f);
 }
 

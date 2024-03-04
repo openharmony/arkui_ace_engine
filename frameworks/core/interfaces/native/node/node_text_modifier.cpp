@@ -164,6 +164,13 @@ void ResetFontColor(ArkUINodeHandle node)
     TextModelNG::SetTextColor(frameNode, textColor);
 }
 
+uint32_t GetFontColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
+    return TextModelNG::GetFontColor(frameNode).GetValue();
+}
+
 void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -248,13 +255,13 @@ void SetTextDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint3
     TextModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
 }
 
-ArkUITextDecorationType GetTextDecoration(ArkUINodeHandle node)
+void GetTextDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration)
 {
-    ArkUITextDecorationType decorationType = { 0, Color::BLACK.GetValue() };
+    CHECK_NULL_VOID(decoration);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, decorationType);
-    // todo
-    return decorationType;
+    CHECK_NULL_VOID(frameNode);
+    decoration->decorationType = static_cast<int32_t>(TextModelNG::GetDecoration(frameNode));
+    decoration->color = TextModelNG::GetTextDecorationColor(frameNode).GetValue();
 }
 
 void ResetTextDecoration(ArkUINodeHandle node)
@@ -412,6 +419,32 @@ void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shado
     TextModelNG::SetTextShadow(frameNode, shadowList);
 }
 
+ArkUI_Uint32 GetTextShadowCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return TextModelNG::GetTextShadow(frameNode).size();
+}
+
+void GetTextShadow(ArkUINodeHandle node, ArkUITextShadowStruct* shadow, uint32_t size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<ArkUITextShadowStruct> shadowArray;
+    auto textShadowVector = TextModelNG::GetTextShadow(frameNode);
+    for (uint32_t i = 0; i < size; i++) {
+        if (i < textShadowVector.size()) {
+            *(shadow + i) = { static_cast<float>(textShadowVector[i].GetBlurRadius()),
+                static_cast<int32_t>(textShadowVector[i].GetShadowType()), textShadowVector[i].GetColor().GetValue(),
+                textShadowVector[i].GetOffset().GetX(), textShadowVector[i].GetOffset().GetY(),
+                textShadowVector[i].GetIsFilled()};
+        } else {
+            *(shadow + i) = { 0.0f, static_cast<int32_t>(ShadowType::COLOR),
+                Color::TRANSPARENT.GetValue(), 0.0f, 0.0f, 0 };
+        }
+    }
+}
+
 void ResetTextTextShadow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -481,6 +514,13 @@ void ResetTextBaselineOffset(ArkUINodeHandle node)
     TextModelNG::SetBaselineOffset(frameNode, DEFAULT_BASELINE_OFFSET);
 }
 
+ArkUI_Float32 GetTextBaselineOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetTextBaselineOffset(frameNode).ConvertToVp();
+}
+
 void SetTextLetterSpacing(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingStruct)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -501,7 +541,7 @@ void SetTextLetterSpacing(ArkUINodeHandle node, const struct ArkUIStringAndFloat
     TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
 }
 
-float GetTextLetterSpacing(ArkUINodeHandle node)
+ArkUI_Float32 GetTextLetterSpacing(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0.0f);
@@ -753,6 +793,10 @@ const ArkUITextModifier* GetTextModifier()
         GetTextAlign,
         GetTextTextOverflow,
         GetTextTextIndent,
+        GetFontColor,
+        GetTextBaselineOffset,
+        GetTextShadowCount,
+        GetTextShadow,
     };
 
     return &modifier;

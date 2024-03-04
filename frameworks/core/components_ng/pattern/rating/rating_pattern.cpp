@@ -374,7 +374,7 @@ void RatingPattern::FireChangeEvent() const
     if (inspectorId.empty()) {
         return;
     }
-    Recorder::NodeDataCache::Get().PutString(inspectorId, score);
+    Recorder::NodeDataCache::Get().PutString(host, inspectorId, score);
 }
 
 void RatingPattern::HandleDragEnd()

@@ -168,6 +168,11 @@ public:
         return previewRect_;
     }
 
+    void SetDragCursorStyleCore(DragCursorStyleCore dragCursorStyleCore)
+    {
+        dragCursorStyleCore_ = dragCursorStyleCore;
+    }
+
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
 

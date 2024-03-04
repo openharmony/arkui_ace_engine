@@ -1597,6 +1597,10 @@ void OverlayManager::PopModalDialog(int32_t maskId)
     for (auto it = DialogMap.begin(); it != DialogMap.end(); it++) {
         auto dialogProp = DynamicCast<DialogLayoutProperty>(it->second->GetLayoutProperty());
         if (dialogId == it->first) {
+            auto hub = it->second->GetEventHub<DialogEventHub>();
+            if (hub) {
+                hub->FireCancelEvent();
+            }
             subOverlayManager->CloseDialog(it->second);
         }
     }
@@ -2266,9 +2270,8 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         modalNode->AddChild(builder);
         FireModalPageShow();
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
-            onAppear) {
-            onAppear();
+        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            modalPagePattern->OnAppear();
         }
         // Fire hidden event of navdestination under the appeared modal
         FireNavigationStateChange(false);
@@ -2651,8 +2654,10 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     if (onWillAppear) {
         onWillAppear();
     }
-    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) && onAppear) {
-        onAppear();
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
+        sheetPattern->OnAppear();
     }
 
     // start transition animation

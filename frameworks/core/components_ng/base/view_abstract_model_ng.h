@@ -884,6 +884,12 @@ public:
         ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
     }
 
+    void SetOnSizeChanged(
+        std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged) override
+    {
+        ViewAbstract::SetOnSizeChanged(std::move(onSizeChanged));
+    }
+
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override
     {
         ViewAbstract::SetOnDrop(std::move(onDrop));
@@ -984,11 +990,6 @@ public:
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override
     {
         ViewAbstract::SetObscured(reasons);
-    }
-
-    void SetPrivacySensitive(bool flag) override
-    {
-        ViewAbstract::SetPrivacySensitive(flag);
     }
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override

@@ -58,6 +58,7 @@ public:
     static void SetFont(UINode* uiNode, const Font& value);
     static std::string GetContent(UINode* uiNode);
     static Ace::TextDecoration GetTextDecoration(UINode* uiNode);
+    static Color GetTextDecorationColor(UINode* uiNode);
     static Color GetFontColor(UINode* uiNode);
     static Dimension GetFontSize(UINode* uiNode);
     static Ace::FontStyle GetFontStyle(UINode* uiNode);

@@ -37,6 +37,9 @@ constexpr DisplayMode DEFAULT_BAR_STATE_VALUE = DisplayMode::AUTO;
 constexpr bool DEFAULT_KEY_BOARD_VALUE = true;
 constexpr char DEFAULT_FONT_FAMILY[] = "HarmonyOS Sans";
 constexpr uint32_t DEFAULT_CARET_COLOR = 0xFF007DFF;
+const uint32_t ERROR_UINT_CODE = -1;
+const int32_t ERROR_INT_CODE = -1;
+std::string g_strValue;
 
 void SetTextAreaStyle(ArkUINodeHandle node, ArkUI_Int32 style)
 {
@@ -428,6 +431,79 @@ void StopTextAreaTextEditing(ArkUINodeHandle node)
     TextFieldModelNG::StopTextFieldEditing(frameNode);
 }
 
+ArkUI_CharPtr GetTextAreaPlaceholder(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    g_strValue = TextFieldModelNG::GetPlaceholderText(frameNode);
+    return g_strValue.c_str();
+}
+
+ArkUI_CharPtr GetTextAreaText(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    g_strValue = TextFieldModelNG::GetTextFieldText(frameNode);
+    return g_strValue.c_str();
+}
+
+ArkUI_Uint32 GetTextAreaCaretColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return TextFieldModelNG::GetCaretColor(frameNode).GetValue();
+}
+
+ArkUI_Uint32 GetTextAreaMaxLength(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return TextFieldModelNG::GetMaxLength(frameNode);
+}
+
+ArkUI_Uint32 GetTextAreaPlaceholderColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return TextFieldModelNG::GetPlaceholderColor(frameNode).GetValue();
+}
+
+void GetTextAreaPlaceholderFont(ArkUINodeHandle node, ArkUITextFont* font)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Font value = TextFieldModelNG::GetPlaceholderFont(frameNode);
+    if (value.fontSize.has_value()) {
+        font->fontSize = value.fontSize.value().Value();
+    }
+    if (value.fontWeight.has_value()) {
+        font->fontWeight = static_cast<ArkUI_Int32>(value.fontWeight.value());
+    }
+    if (!value.fontFamilies.empty()) {
+        std::string families;
+        int index = 0;
+        for (auto& family : value.fontFamilies) {
+            families += family;
+            if (index != value.fontFamilies.size() - 1) {
+                families += ",";
+            }
+            index ++;
+        }
+        g_strValue = families;
+        font->fontFamilies = g_strValue.c_str();
+    }
+    if (value.fontStyle.has_value()) {
+        font->fontStyle = static_cast<ArkUI_Int32>(value.fontStyle.value());
+    }
+}
+
+ArkUI_Bool GetTextAreaEditing(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return TextFieldModelNG::GetTextFieldEditing(frameNode);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -474,6 +550,13 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         StopTextAreaTextEditing,
         SetTextAreaFontWeightStr,
         SetTextAreaPlaceholderFontEnum,
+        GetTextAreaPlaceholder,
+        GetTextAreaText,
+        GetTextAreaCaretColor,
+        GetTextAreaMaxLength,
+        GetTextAreaPlaceholderColor,
+        GetTextAreaPlaceholderFont,
+        GetTextAreaEditing,
     };
     return &modifier;
 }

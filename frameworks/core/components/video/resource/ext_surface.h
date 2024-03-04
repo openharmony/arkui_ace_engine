@@ -44,14 +44,22 @@ public:
     {
         onSurfaceChanged_ = std::move(callback);
     }
-    
+
+    void SetSurfaceDestroyed(std::function<void()>&& callback)
+    {
+        onSurfaceDestroyed_ = std::move(callback);
+    }
+
+    void* AttachNativeWindow();
 
 private:
     void OnSurfaceCreated();
     void OnSurfaceChanged(int32_t width, int32_t height);
+    void OnSurfaceDestroyed();
 
     std::function<void()> onSurfaceCreated_;
     std::function<void(int32_t, int32_t)> onSurfaceChanged_;
+    std::function<void()> onSurfaceDestroyed_;
 };
 
 } // namespace OHOS::Ace

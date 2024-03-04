@@ -241,6 +241,8 @@ public:
     virtual void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) = 0;
+    virtual void SetOnSizeChanged(
+        std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) = 0;
 
     // Disable event when the param is undefined.
     virtual void DisableOnClick() = 0;
@@ -278,7 +280,6 @@ public:
 
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
-    virtual void SetPrivacySensitive(bool flag) = 0;
 
     // background
     virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;

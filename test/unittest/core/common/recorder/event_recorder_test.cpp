@@ -23,6 +23,8 @@
 #include "core/common/recorder/event_config.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/pattern/stage/page_info.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
 
 using namespace testing;
@@ -69,6 +71,14 @@ void GetConfig(std::string& config)
         "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
 }
 
+RefPtr<NG::FrameNode> CreatePageNode(const std::string pageUrl)
+{
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    return NG::FrameNode::GetOrCreateFrameNode("page", pageNodeId, [pageUrl]() {
+        return AceType::MakeRefPtr<NG::PagePattern>(AceType::MakeRefPtr<NG::PageInfo>(1, pageUrl, pageUrl + ".js"));
+    });
+}
+
 /**
  * @tc.name: EventRecorderTest001
  * @tc.desc: Test register.
@@ -88,25 +98,25 @@ HWTEST_F(EventRecorderTest, EventRecorderTest001, TestSize.Level1)
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
 
     Recorder::ExposureCfg exposureCfg = { "", 0.0, 0 };
-    Recorder::NodeDataCache::Get().GetExposureCfg("btn_Grid", exposureCfg);
+    Recorder::NodeDataCache::Get().GetExposureCfg("pages/Index", "btn_Grid", exposureCfg);
     EXPECT_EQ(exposureCfg.id, "btn_Grid");
     EXPECT_EQ(exposureCfg.duration, 5000);
 
     exposureCfg = { "", 0.0, 0 };
-    Recorder::NodeDataCache::Get().GetExposureCfg("", exposureCfg);
+    Recorder::NodeDataCache::Get().GetExposureCfg("pages/Index", "", exposureCfg);
     EXPECT_EQ(exposureCfg.id, "");
 
     exposureCfg = { "", 0.0, 0 };
-    Recorder::NodeDataCache::Get().GetExposureCfg("xyz", exposureCfg);
+    Recorder::NodeDataCache::Get().GetExposureCfg("pages/Index", "xyz", exposureCfg);
     EXPECT_EQ(exposureCfg.id, "");
 
     Recorder::NodeDataCache::Get().OnPageShow("pages/ScrollPage");
     exposureCfg = { "", 0.0, 0 };
-    Recorder::NodeDataCache::Get().GetExposureCfg("btn_Grid", exposureCfg);
+    Recorder::NodeDataCache::Get().GetExposureCfg("pages/ScrollPage", "btn_Grid", exposureCfg);
     EXPECT_EQ(exposureCfg.id, "");
 
     exposureCfg = { "", 0.0, 0 };
-    Recorder::NodeDataCache::Get().GetExposureCfg("scroll_item_2", exposureCfg);
+    Recorder::NodeDataCache::Get().GetExposureCfg("pages/ScrollPage", "scroll_item_2", exposureCfg);
     EXPECT_EQ(exposureCfg.id, "scroll_item_2");
     EXPECT_NEAR(exposureCfg.ratio, 0.85, 0.00001f);
 
@@ -116,7 +126,7 @@ HWTEST_F(EventRecorderTest, EventRecorderTest001, TestSize.Level1)
      */
     Recorder::EventController::Get().Unregister(observer);
     exposureCfg = { "", 0.0, 0 };
-    Recorder::NodeDataCache::Get().GetExposureCfg("scroll_item_2", exposureCfg);
+    Recorder::NodeDataCache::Get().GetExposureCfg("pages/ScrollPage", "scroll_item_2", exposureCfg);
     EXPECT_EQ(exposureCfg.id, "");
 }
 
@@ -137,14 +147,15 @@ HWTEST_F(EventRecorderTest, EventRecorderTest002, TestSize.Level1)
      * @tc.expected: step1. get value success.
      */
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+    auto pageNode = CreatePageNode("pages/Index");
 
-    Recorder::NodeDataCache::Get().PutString("btn_TitleExpand", "abc");
-    Recorder::NodeDataCache::Get().PutInt("btn_OpenSelf", 2);
-    Recorder::NodeDataCache::Get().PutBool("btn_Screenshot", true);
-    Recorder::NodeDataCache::Get().PutMultiple("btn_inspect", "inspect", 11);
-    Recorder::NodeDataCache::Get().PutMultiple("btn_xxx", "xxx", true);
+    Recorder::NodeDataCache::Get().PutString(pageNode, "btn_TitleExpand", "abc");
+    Recorder::NodeDataCache::Get().PutInt(pageNode, "btn_OpenSelf", 2);
+    Recorder::NodeDataCache::Get().PutBool(pageNode, "btn_Screenshot", true);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "btn_inspect", "inspect", 11);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "btn_xxx", "xxx", true);
     std::vector<std::string> values = {"a", "b", "c"};
-    Recorder::NodeDataCache::Get().PutMultiple("hahaha", "xixi", values);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "hahaha", "xixi", values);
     auto nodeValues = std::unordered_map<std::string, std::string>();
     nodeValues.emplace("btn_TitleExpand", "");
     nodeValues.emplace("btn_OpenSelf", "");
@@ -196,23 +207,25 @@ HWTEST_F(EventRecorderTest, EventRecorderTest003, TestSize.Level1)
     Recorder::EventController::Get().Register(config, observer);
 
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+    auto pageNode = CreatePageNode("pages/Index");
 
-    Recorder::NodeDataCache::Get().PutString("btn_TitleExpand", "abc");
-    Recorder::NodeDataCache::Get().PutInt("btn_OpenSelf", 2);
-    Recorder::NodeDataCache::Get().PutBool("btn_Screenshot", true);
-    Recorder::NodeDataCache::Get().PutMultiple("btn_inspect", "inspect", 11);
-    Recorder::NodeDataCache::Get().PutMultiple("btn_xxx", "xxx", true);
+    Recorder::NodeDataCache::Get().PutString(pageNode, "btn_TitleExpand", "abc");
+    Recorder::NodeDataCache::Get().PutInt(pageNode, "btn_OpenSelf", 2);
+    Recorder::NodeDataCache::Get().PutBool(pageNode, "btn_Screenshot", true);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "btn_inspect", "inspect", 11);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "btn_xxx", "xxx", true);
     std::vector<std::string> values = {"a", "b", "c"};
-    Recorder::NodeDataCache::Get().PutMultiple("hahaha", "xixi", values);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "hahaha", "xixi", values);
 
     /**
      * @tc.steps: step1. test scroll page.
      * @tc.expected: step1. get value success.
      */
     Recorder::NodeDataCache::Get().OnPageShow("pages/ScrollPage");
+    auto pageNode2 = CreatePageNode("pages/ScrollPage");
 
     std::vector<std::string> values2 = {"x", "y", "z"};
-    Recorder::NodeDataCache::Get().PutStringArray("scroll_item_1", values2);
+    Recorder::NodeDataCache::Get().PutStringArray(pageNode2, "scroll_item_1", values2);
     auto nodeValues2 = std::unordered_map<std::string, std::string>();
     nodeValues2.emplace("btn_TitleExpand", "");
     nodeValues2.emplace("scroll_item_1", "");
@@ -240,19 +253,21 @@ HWTEST_F(EventRecorderTest, EventRecorderTest004, TestSize.Level1)
     Recorder::EventController::Get().Register(config, observer);
 
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+    auto pageNode = CreatePageNode("pages/Index");
 
-    Recorder::NodeDataCache::Get().PutString("btn_TitleExpand", "abc");
-    Recorder::NodeDataCache::Get().PutInt("btn_OpenSelf", 2);
-    Recorder::NodeDataCache::Get().PutBool("btn_Screenshot", true);
-    Recorder::NodeDataCache::Get().PutMultiple("btn_inspect", "inspect", 11);
-    Recorder::NodeDataCache::Get().PutMultiple("btn_xxx", "xxx", true);
+    Recorder::NodeDataCache::Get().PutString(pageNode, "btn_TitleExpand", "abc");
+    Recorder::NodeDataCache::Get().PutInt(pageNode, "btn_OpenSelf", 2);
+    Recorder::NodeDataCache::Get().PutBool(pageNode, "btn_Screenshot", true);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "btn_inspect", "inspect", 11);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "btn_xxx", "xxx", true);
     std::vector<std::string> values = {"a", "b", "c"};
-    Recorder::NodeDataCache::Get().PutMultiple("hahaha", "xixi", values);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "hahaha", "xixi", values);
 
     Recorder::NodeDataCache::Get().OnPageShow("pages/ScrollPage");
+    auto pageNode2 = CreatePageNode("pages/ScrollPage");
 
     std::vector<std::string> values2 = {"x", "y", "z"};
-    Recorder::NodeDataCache::Get().PutStringArray("scroll_item_1", values2);
+    Recorder::NodeDataCache::Get().PutStringArray(pageNode2, "scroll_item_1", values2);
 
     /**
      * @tc.steps: step1. test pop scroll page.
@@ -291,19 +306,21 @@ HWTEST_F(EventRecorderTest, EventRecorderTest005, TestSize.Level1)
      * @tc.expected: step1. get value success.
      */
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+    auto pageNode = CreatePageNode("pages/Index");
 
-    Recorder::NodeDataCache::Get().PutString("btn_TitleExpand", "abc");
-    Recorder::NodeDataCache::Get().PutInt("btn_OpenSelf", 2);
-    Recorder::NodeDataCache::Get().PutBool("btn_Screenshot", true);
-    Recorder::NodeDataCache::Get().PutMultiple("btn_inspect", "inspect", 11);
-    Recorder::NodeDataCache::Get().PutMultiple("btn_xxx", "xxx", true);
+    Recorder::NodeDataCache::Get().PutString(pageNode, "btn_TitleExpand", "abc");
+    Recorder::NodeDataCache::Get().PutInt(pageNode, "btn_OpenSelf", 2);
+    Recorder::NodeDataCache::Get().PutBool(pageNode, "btn_Screenshot", true);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "btn_inspect", "inspect", 11);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "btn_xxx", "xxx", true);
     std::vector<std::string> values = {"a", "b", "c"};
-    Recorder::NodeDataCache::Get().PutMultiple("hahaha", "xixi", values);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "hahaha", "xixi", values);
 
     Recorder::NodeDataCache::Get().OnPageShow("pages/ScrollPage");
+    auto pageNode2 = CreatePageNode("pages/ScrollPage");
 
     std::vector<std::string> values2 = {"x", "y", "z"};
-    Recorder::NodeDataCache::Get().PutStringArray("scroll_item_1", values2);
+    Recorder::NodeDataCache::Get().PutStringArray(pageNode2, "scroll_item_1", values2);
 
     Recorder::NodeDataCache::Get().OnBeforePagePop();
 
@@ -346,19 +363,21 @@ HWTEST_F(EventRecorderTest, EventRecorderTest006, TestSize.Level1)
      * @tc.expected: step1. get value success.
      */
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+    auto pageNode = CreatePageNode("pages/Index");
 
-    Recorder::NodeDataCache::Get().PutString("btn_TitleExpand", "abc");
-    Recorder::NodeDataCache::Get().PutInt("btn_OpenSelf", 2);
-    Recorder::NodeDataCache::Get().PutBool("btn_Screenshot", true);
-    Recorder::NodeDataCache::Get().PutMultiple("btn_inspect", "inspect", 11);
-    Recorder::NodeDataCache::Get().PutMultiple("btn_xxx", "xxx", true);
+    Recorder::NodeDataCache::Get().PutString(pageNode, "btn_TitleExpand", "abc");
+    Recorder::NodeDataCache::Get().PutInt(pageNode, "btn_OpenSelf", 2);
+    Recorder::NodeDataCache::Get().PutBool(pageNode, "btn_Screenshot", true);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "btn_inspect", "inspect", 11);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "btn_xxx", "xxx", true);
     std::vector<std::string> values = {"a", "b", "c"};
-    Recorder::NodeDataCache::Get().PutMultiple("hahaha", "xixi", values);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "hahaha", "xixi", values);
 
     Recorder::NodeDataCache::Get().OnPageShow("pages/ScrollPage");
+    auto pageNode2 = CreatePageNode("pages/ScrollPage");
 
     std::vector<std::string> values2 = {"x", "y", "z"};
-    Recorder::NodeDataCache::Get().PutStringArray("scroll_item_1", values2);
+    Recorder::NodeDataCache::Get().PutStringArray(pageNode2, "scroll_item_1", values2);
 
     Recorder::NodeDataCache::Get().OnBeforePagePop();
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
@@ -367,7 +386,7 @@ HWTEST_F(EventRecorderTest, EventRecorderTest006, TestSize.Level1)
      * @tc.steps: step1. test update value.
      * @tc.expected: step1. get value success.
      */
-    Recorder::NodeDataCache::Get().PutString("btn_TitleExpand", "hello");
+    Recorder::NodeDataCache::Get().PutString(pageNode, "btn_TitleExpand", "hello");
     auto nodeValues5 = std::unordered_map<std::string, std::string>();
     nodeValues5.emplace("btn_TitleExpand", "");
     Recorder::NodeDataCache::Get().GetNodeData("pages/Index", nodeValues5);
@@ -391,23 +410,25 @@ HWTEST_F(EventRecorderTest, EventRecorderTest007, TestSize.Level1)
     Recorder::EventController::Get().Register(config, observer);
 
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+    auto pageNode = CreatePageNode("pages/Index");
 
-    Recorder::NodeDataCache::Get().PutString("btn_TitleExpand", "abc");
-    Recorder::NodeDataCache::Get().PutInt("btn_OpenSelf", 2);
-    Recorder::NodeDataCache::Get().PutBool("btn_Screenshot", true);
-    Recorder::NodeDataCache::Get().PutMultiple("btn_inspect", "inspect", 11);
-    Recorder::NodeDataCache::Get().PutMultiple("btn_xxx", "xxx", true);
+    Recorder::NodeDataCache::Get().PutString(pageNode, "btn_TitleExpand", "abc");
+    Recorder::NodeDataCache::Get().PutInt(pageNode, "btn_OpenSelf", 2);
+    Recorder::NodeDataCache::Get().PutBool(pageNode, "btn_Screenshot", true);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "btn_inspect", "inspect", 11);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "btn_xxx", "xxx", true);
     std::vector<std::string> values = {"a", "b", "c"};
-    Recorder::NodeDataCache::Get().PutMultiple("hahaha", "xixi", values);
+    Recorder::NodeDataCache::Get().PutMultiple(pageNode, "hahaha", "xixi", values);
 
     Recorder::NodeDataCache::Get().OnPageShow("pages/ScrollPage");
+    auto pageNode2 = CreatePageNode("pages/ScrollPage");
 
     std::vector<std::string> values2 = {"x", "y", "z"};
-    Recorder::NodeDataCache::Get().PutStringArray("scroll_item_1", values2);
+    Recorder::NodeDataCache::Get().PutStringArray(pageNode2, "scroll_item_1", values2);
 
     Recorder::NodeDataCache::Get().OnBeforePagePop();
 
-    Recorder::NodeDataCache::Get().PutString("btn_TitleExpand", "hello");
+    Recorder::NodeDataCache::Get().PutString(pageNode, "btn_TitleExpand", "hello");
 
     /**
      * @tc.steps: step1. test clear.
@@ -434,7 +455,7 @@ HWTEST_F(EventRecorderTest, EventRecorderTest008, TestSize.Level1)
     auto observer = std::make_shared<DemoUIEventObserver>();
     Recorder::EventController::Get().Register(config, observer);
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
-    auto exposure = AceType::MakeRefPtr<Recorder::ExposureProcessor>("btn_TitleExpand");
+    auto exposure = AceType::MakeRefPtr<Recorder::ExposureProcessor>("pages/Index", "btn_TitleExpand");
     EXPECT_TRUE(exposure->IsNeedRecord());
     EXPECT_NEAR(exposure->GetRatio(), 0.9, 0.00001f);
     exposure->OnVisibleChange(true);

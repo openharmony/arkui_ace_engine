@@ -99,6 +99,19 @@ public:
     static void SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType);
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
+
+    static bool GetLoop(FrameNode* frameNode);
+    static bool GetAutoPlay(FrameNode* frameNode);
+    static int GetIndex(FrameNode* frameNode);
+    static Axis GetDirection(FrameNode* frameNode);
+    static uint32_t GetDuration(FrameNode* frameNode);
+    static int GetDisplayCount(FrameNode* frameNode);
+    static int GetAutoPlayInterval(FrameNode* frameNode);
+    static RefPtr<Curve> GetCurve(FrameNode* frameNode);
+    static bool GetDisableSwipe(FrameNode* frameNode);
+    static float GetItemSpace(FrameNode* frameNode);
+    static bool GetShowIndicator(FrameNode* frameNode);
+    static int GetShowDisplayArrow(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

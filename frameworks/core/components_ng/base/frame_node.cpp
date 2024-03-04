@@ -29,6 +29,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_scene_status.h"
@@ -961,6 +962,28 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
     pattern_->OnAreaChangedInner();
 }
 
+void FrameNode::SetOnSizeChangeCallback(OnSizeChangedFunc&& callback)
+{
+    if (!lastFrameNodeRect_) {
+        lastFrameNodeRect_ = std::make_unique<RectF>();
+    }
+    eventHub_->SetOnSizeChanged(std::move(callback));
+}
+
+void FrameNode::TriggerOnSizeChangeCallback()
+{
+    if (!IsActive()) {
+        return;
+    }
+    if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {
+        auto currFrameRect = geometryNode_->GetFrameRect();
+        if (currFrameRect != *lastFrameNodeRect_) {
+            eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            *lastFrameNodeRect_ = currFrameRect;
+        }
+    }
+}
+
 void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
 {
     auto context = PipelineContext::GetCurrentContext();
@@ -1349,18 +1372,9 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    if (pipeline) {
-        auto privacyManager = pipeline->GetPrivacySensitiveManager();
-        if (IsPrivacySensitive()) {
-            LOGI("store sensitive node, %{public}d", GetId());
-            privacyManager->StoreNode(AceType::WeakClaim(this));
-        } else {
-            privacyManager->RemoveNode(AceType::WeakClaim(this));
-        }
-    }
     if (!isRestoreInfoUsed_) {
         isRestoreInfoUsed_ = true;
+        auto pipeline = PipelineContext::GetCurrentContext();
         int32_t restoreId = GetRestoreId();
         if (pipeline && restoreId >= 0) {
             // store distribute node
@@ -2865,6 +2879,7 @@ void FrameNode::SyncGeometryNode(bool needSkipSync)
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         isLayoutComplete_ = true;
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
+        TriggerOnSizeChangeCallback();
     }
 
     DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
@@ -3110,16 +3125,24 @@ void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
     if (exposureProcessor_) {
         return;
     }
-    exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(inspectorId);
+    auto pageUrl = Recorder::GetPageUrlByNode(Claim(this));
+    exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(pageUrl, inspectorId);
     if (!exposureProcessor_->IsNeedRecord()) {
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto callback = [weak = WeakClaim(RawPtr(exposureProcessor_))](bool visible, double ratio) {
+    auto callback = [weak = WeakClaim(RawPtr(exposureProcessor_)), weakNode = WeakClaim(this)](
+                        bool visible, double ratio) {
         auto processor = weak.Upgrade();
         CHECK_NULL_VOID(processor);
-        processor->OnVisibleChange(visible);
+        if (!visible) {
+            auto host = weakNode.Upgrade();
+            auto param = host ? host->GetAutoEventParamValue("") : "";
+            processor->OnVisibleChange(false, param);
+        } else {
+            processor->OnVisibleChange(visible);
+        }
     };
     std::vector<double> ratios = {exposureProcessor_->GetRatio()};
     pipeline->AddVisibleAreaChangeNode(Claim(this), ratios, callback, false);
@@ -3381,10 +3404,5 @@ const std::pair<uint64_t, OffsetF>& FrameNode::GetCachedTransformRelativeOffset(
 void FrameNode::SetCachedTransformRelativeOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
 {
     cachedTransformRelativeOffset_ = timestampOffset;
-}
-
-void FrameNode::ChangeSensitiveStyle(bool isSensitive)
-{
-    pattern_->OnSensitiveStyleChange(isSensitive);
 }
 } // namespace OHOS::Ace::NG

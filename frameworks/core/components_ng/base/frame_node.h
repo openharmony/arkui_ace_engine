@@ -196,6 +196,10 @@ public:
 
     void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
 
+    void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
+
+    void TriggerOnSizeChangeCallback();
+
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
     const RefPtr<RenderContext>& GetRenderContext() const
@@ -294,18 +298,6 @@ public:
     {
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     }
-
-    bool IsPrivacySensitive() const
-    {
-        return isPrivacySensitive_;
-    }
-
-    void SetPrivacySensitive(bool flag)
-    {
-        isPrivacySensitive_ = flag;
-    }
-
-    void ChangeSensitiveStyle(bool isSensitive);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
@@ -807,6 +799,7 @@ private:
     std::function<RefPtr<UINode>()> builderFunc_;
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
+    std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
@@ -853,7 +846,6 @@ private:
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
     bool needRestoreSafeArea_ = true;
-    bool isPrivacySensitive_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

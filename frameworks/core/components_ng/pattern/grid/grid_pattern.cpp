@@ -531,7 +531,6 @@ void GridPattern::MarkDirtyNodeSelf()
 void GridPattern::OnScrollEndCallback()
 {
     isSmoothScrolling_ = false;
-    SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
@@ -1807,6 +1806,12 @@ std::vector<RefPtr<FrameNode>> GridPattern::GetVisibleSelectedItems()
         children.emplace_back(itemFrameNode);
     }
     return children;
+}
+
+void GridPattern::StopAnimate()
+{
+    ScrollablePattern::StopAnimate();
+    isSmoothScrolling_ = false;
 }
 
 } // namespace OHOS::Ace::NG

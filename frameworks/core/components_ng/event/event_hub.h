@@ -33,6 +33,8 @@ class FrameNode;
 using OnAreaChangedFunc =
     std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
 
+using OnSizeChangedFunc = std::function<void(const RectF& oldRect, const RectF& rect)>;
+
 struct KeyboardShortcut {
     std::string value;
     uint8_t keys = 0;
@@ -229,6 +231,10 @@ public:
     {
         return !onAreaChangedInnerCallbacks_.empty();
     }
+
+    void SetOnSizeChanged(OnSizeChangedFunc&& onSizeChanged);
+    void FireOnSizeChanged(const RectF& oldRect, const RectF& rect);
+    bool HasOnSizeChanged() const;
 
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
     using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
@@ -502,10 +508,7 @@ public:
 
     void AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback);
 
-    void ClearOnAreaChangedInnerCallbacks()
-    {
-        onAreaChangedInnerCallbacks_.clear();
-    }
+    void ClearOnAreaChangedInnerCallbacks();
 
     void SetDefaultOnDragStart(OnDragStartFunc&& defaultOnDragStart)
     {
@@ -583,6 +586,7 @@ private:
     std::function<void()> onDisappear_;
     OnAreaChangedFunc onAreaChanged_;
     std::unordered_map<int32_t, OnAreaChangedFunc> onAreaChangedInnerCallbacks_;
+    OnSizeChangedFunc onSizeChanged_;
 
     OnDragStartFunc onDragStart_;
     OnDragFunc onDragEnter_;

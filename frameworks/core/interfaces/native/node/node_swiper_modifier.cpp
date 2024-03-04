@@ -16,6 +16,7 @@
 
 #include <vector>
 
+#include "base/geometry/axis.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
@@ -73,11 +74,26 @@ constexpr int32_t DOT_INDICATOR_RIGHT = 10;
 constexpr int32_t DOT_INDICATOR_BOTTOM = 11;
 constexpr int32_t DOT_INDICATOR_INFO_SIZE = 11;
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
+const int32_t ERROR_INT_CODE = -1;
 
 const std::vector<SwiperDisplayMode> DISPLAY_MODE = { SwiperDisplayMode::STRETCH, SwiperDisplayMode::AUTO_LINEAR };
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
 const std::vector<SwiperIndicatorType> INDICATOR_TYPE = { SwiperIndicatorType::DOT, SwiperIndicatorType::DIGIT };
-
+const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
+    OHOS::Ace::Curves::LINEAR,
+    OHOS::Ace::Curves::EASE,
+    OHOS::Ace::Curves::EASE_IN,
+    OHOS::Ace::Curves::EASE_OUT,
+    OHOS::Ace::Curves::EASE_IN_OUT,
+    OHOS::Ace::Curves::FAST_OUT_SLOW_IN,
+    OHOS::Ace::Curves::LINEAR_OUT_SLOW_IN,
+    OHOS::Ace::Curves::FAST_OUT_LINEAR_IN,
+    OHOS::Ace::Curves::EXTREME_DECELERATION,
+    OHOS::Ace::Curves::SHARP,
+    OHOS::Ace::Curves::RHYTHM,
+    OHOS::Ace::Curves::SMOOTH,
+    OHOS::Ace::Curves::FRICTION,
+};
 void SetArrowBackgroundInfo(SwiperArrowParameters& swiperArrowParameters,
     RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme, const std::vector<std::string>& arrowInfo)
 {
@@ -659,6 +675,99 @@ void ResetSwiperEnabled(ArkUINodeHandle node)
     SwiperModelNG::SetEnabled(frameNode, false);
 }
 
+ArkUI_Int32 GetSwiperLoop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetLoop(frameNode));
+}
+
+ArkUI_Int32 GetSwiperAutoPlay(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetAutoPlay(frameNode));
+}
+
+ArkUI_Int32 GetSwiperIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetIndex(frameNode));
+}
+
+ArkUI_Int32 GetSwiperVertical(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetDirection(frameNode) == Axis::VERTICAL ? true : false);
+}
+
+ArkUI_Float32 GetSwiperDuration(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Float32>(SwiperModelNG::GetDuration(frameNode));
+}
+
+ArkUI_Int32 GetSwiperDisplayCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return SwiperModelNG::GetDisplayCount(frameNode);
+}
+
+ArkUI_Float32 GetSwiperInterval(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Float32>(SwiperModelNG::GetAutoPlayInterval(frameNode));
+}
+
+int32_t findCurveIndex(const RefPtr<Curve> curve)
+{
+    CHECK_NULL_RETURN(curve, 0);
+    auto iterator = std::find(CURVES.begin(), CURVES.end(), curve);
+    if (iterator == CURVES.end()) {
+        return 0;
+    }
+    return iterator - CURVES.begin();
+}
+
+ArkUI_Int32 GetSwiperCurve(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return findCurveIndex(SwiperModelNG::GetCurve(frameNode));
+}
+
+ArkUI_Int32 GetSwiperDisableSwipe(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetDisableSwipe(frameNode));
+}
+
+ArkUI_Float32 GetSwiperItemSpace(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return SwiperModelNG::GetItemSpace(frameNode);
+}
+
+ArkUI_Int32 GetSwiperShowIndicator(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetShowIndicator(frameNode));
+}
+
+ArkUI_Int32 GetSwiperShowDisplayArrow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetShowDisplayArrow(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -671,7 +780,9 @@ const ArkUISwiperModifier* GetSwiperModifier()
         ResetSwiperDisplayMode, SetSwiperItemSpace, ResetSwiperItemSpace, SetSwiperVertical, ResetSwiperVertical,
         SetSwiperLoop, ResetSwiperLoop, SetSwiperInterval, ResetSwiperInterval, SetSwiperAutoPlay, ResetSwiperAutoPlay,
         SetSwiperIndex, ResetSwiperIndex, SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration,
-        ResetSwiperDuration, SetSwiperEnabled, ResetSwiperEnabled };
+        ResetSwiperDuration, SetSwiperEnabled, ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex,
+        GetSwiperVertical, GetSwiperDuration, GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve,
+        GetSwiperDisableSwipe, GetSwiperItemSpace, GetSwiperShowIndicator, GetSwiperShowDisplayArrow };
     return &modifier;
 }
 } // namespace NodeModifier

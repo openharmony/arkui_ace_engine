@@ -533,6 +533,14 @@ TextDecoration TextModelNG::GetDecoration(FrameNode* frameNode)
     return layoutProperty->GetFontStyle()->GetTextDecoration().value_or(TextDecoration::NONE);
 }
 
+Color TextModelNG::GetTextDecorationColor(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, Color::BLACK);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Color::BLACK);
+    return layoutProperty->GetTextDecorationColor().value_or(Color::BLACK);
+}
+
 TextCase TextModelNG::GetTextCase(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, TextCase::NORMAL);
@@ -650,5 +658,41 @@ Ace::FontStyle TextModelNG::GetItalicFontStyle(FrameNode* frameNode)
     Ace::FontStyle value = Ace::FontStyle::NORMAL;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, ItalicFontStyle, value, frameNode, value);
     return value;
+}
+
+Color TextModelNG::GetDefaultColor()
+{
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, Color::BLACK);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, Color::BLACK);
+    return theme->GetTextStyle().GetTextColor();
+}
+
+Color TextModelNG::GetFontColor(FrameNode* frameNode)
+{
+    auto defaultColor = GetDefaultColor();
+    CHECK_NULL_RETURN(frameNode, defaultColor);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultColor);
+    return layoutProperty->GetTextColor().value_or(defaultColor);
+}
+
+Dimension TextModelNG::GetTextBaselineOffset(FrameNode* frameNode)
+{
+    Dimension defaultOffset(0);
+    CHECK_NULL_RETURN(frameNode, defaultOffset);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultOffset);
+    return layoutProperty->GetBaselineOffset().value_or(defaultOffset);
+}
+
+std::vector<Shadow> TextModelNG::GetTextShadow(FrameNode* frameNode)
+{
+    std::vector<Shadow> defaultShadow;
+    CHECK_NULL_RETURN(frameNode, defaultShadow);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultShadow);
+    return layoutProperty->GetTextShadow().value_or(defaultShadow);
 }
 } // namespace OHOS::Ace::NG

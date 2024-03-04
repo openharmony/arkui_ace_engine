@@ -74,6 +74,7 @@
 #include "core/interfaces/native/node/qrcode_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/render_node_modifier.h"
+#include "core/interfaces/native/node/frame_node_modifier.h"
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/text_clock_modifier.h"
@@ -177,6 +178,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetTextClockModifier,
     NodeModifier::GetTextTimerModifier,
     NodeModifier::GetRenderNodeModifier,
+    NodeModifier::GetFrameNodeModifier,
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     NodeModifier::GetPluginModifier,

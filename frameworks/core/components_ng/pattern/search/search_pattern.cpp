@@ -338,7 +338,7 @@ void SearchPattern::OnAfterModifyDone()
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
         CHECK_NULL_VOID(textFieldPattern);
         auto text = textFieldPattern->GetTextValue();
-        Recorder::NodeDataCache::Get().PutString(inspectorId, text);
+        Recorder::NodeDataCache::Get().PutString(host, inspectorId, text);
     }
 }
 

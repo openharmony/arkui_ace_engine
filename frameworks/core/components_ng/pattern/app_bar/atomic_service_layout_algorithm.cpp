@@ -22,11 +22,6 @@
 namespace OHOS::Ace::NG {
 void AtomicServiceLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto container = Container::Current();
-    auto appBar = container->GetAppBar();
-    Dimension rootWidthByPx(PipelineContext::GetCurrentRootWidth(), DimensionUnit::PX);
-    Dimension rootWidthByVp(rootWidthByPx.ConvertToVp(), DimensionUnit::VP);
-    appBar->SetRowWidth(rootWidthByVp);
     LinearLayoutAlgorithm::Layout(layoutWrapper);
 }
 } // namespace OHOS::Ace::NG

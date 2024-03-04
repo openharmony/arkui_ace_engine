@@ -186,6 +186,8 @@ public:
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) override;
+    void SetOnSizeChanged(
+        std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) override {};
 
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetEnabled(bool enabled) override;
@@ -205,7 +207,6 @@ public:
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
-    void SetPrivacySensitive(bool flag) override {};
     void SetMonopolizeEvents(bool monopolizeEvents) override {};
 
     // Disable event.
