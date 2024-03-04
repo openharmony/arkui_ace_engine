@@ -210,6 +210,42 @@ class TextFieldUXTest : public TextInputModifyBase {};
 class TextFieldModifyTest : public TextInputModifyBase {};
 
 /**
+ * @tc.name: TextinputCaretPositionOnHandleMove001
+ * @tc.desc: Test the caret position after handle move done in textinput.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, TextinputCaretPositionOnHandleMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+        model.SetShowUnderline(true);
+    });
+
+    GetFocus();
+    EXPECT_FALSE(pattern_->IsTextArea());
+
+    /**
+     * @tc.steps: step2. Create localoffset.
+     * tc.expected: step2. Check if the value is right.
+     */
+    OffsetF localOffset1(1.0f, 1.0f);
+    EXPECT_EQ(pattern_->UpdateCaretPositionOnHandleMove(localOffset1), 25);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    OffsetF localOffset2(720.0f, 1.0f);
+    EXPECT_EQ(pattern_->UpdateCaretPositionOnHandleMove(localOffset2), 26);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    OffsetF localOffset3(30.0f, 1.0f);
+    EXPECT_EQ(pattern_->UpdateCaretPositionOnHandleMove(localOffset3), 0);
+}
+
+/**
  * @tc.name: SetTextDraggable001
  * @tc.desc: Test the OnModifyDone.
  * @tc.type: FUNC
@@ -585,6 +621,135 @@ HWTEST_F(TextFieldModifyTest, DoCallback006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DoCallback007
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. callback the InitMouseEvent in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    bool isHover = true;
+
+    /**
+     * @tc.steps: step3. mock mouse hover.
+     */
+    pattern_->hoverEvent_->operator()(isHover);
+    EXPECT_TRUE(pattern_->isOnHover_);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step4. mock mouse not hover.
+     */
+    isHover = false;
+    pattern_->hoverEvent_->operator()(isHover);
+    EXPECT_FALSE(pattern_->isOnHover_);
+}
+
+/**
+ * @tc.name: MouseEvent001
+ * @tc.desc: Test mouse event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, MouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the functions in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    MouseInfo mouseInfo;
+    mouseInfo.SetButton(MouseButton::RIGHT_BUTTON);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
+    EXPECT_TRUE(pattern_->isUsingMouse_);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
+    EXPECT_TRUE(pattern_->isUsingMouse_);
+}
+
+/**
+ * @tc.name: MouseEvent002
+ * @tc.desc: Test mouse event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, MouseEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the functions in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    MouseInfo mouseInfo;
+    mouseInfo.SetButton(MouseButton::RIGHT_BUTTON);
+    mouseInfo.SetAction(MouseAction::MOVE);
+    pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
+    EXPECT_TRUE(pattern_->isUsingMouse_);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
+    mouseInfo.SetAction(MouseAction::MOVE);
+    pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
+    EXPECT_TRUE(pattern_->isUsingMouse_);
+}
+
+/**
+ * @tc.name: MouseEvent003
+ * @tc.desc: Test mouse event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, MouseEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the functions in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    MouseInfo mouseInfo;
+    mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
+    mouseInfo.SetAction(MouseAction::RELEASE);
+    pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
+    EXPECT_FALSE(pattern_->isUsingMouse_);
+}
+
+/**
  * @tc.name: OnVirtualKeyboardAreaChanged001
  * @tc.desc: Test function OnVirtualKeyboardAreaChanged.
  * @tc.type: FUNC
@@ -633,6 +798,37 @@ HWTEST_F(TextFieldModifyTest, CreateNodePaintMethod004, TestSize.Level1)
     auto paint = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
     pattern_->OnScrollEndCallback();
     EXPECT_NE(pattern_->textFieldContentModifier_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateCaretPositionOnHandleMove001
+ * @tc.desc: Test the caret position after handle move done in textarea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, UpdateCaretPositionOnHandleMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(HELLO_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create localoffset.
+     * tc.expected: step2. Check if the value is right.
+     */
+    OffsetF localOffset1(1.0f, 1.0f);
+    pattern_->UpdateCaretPositionOnHandleMove(localOffset1);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    OffsetF localOffset2(60.0f, 0.0f);
+    pattern_->UpdateCaretPositionOnHandleMove(localOffset2);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    OffsetF localOffset3(30.0f, 0.0f);
+    EXPECT_EQ(pattern_->UpdateCaretPositionOnHandleMove(localOffset3), 0);
 }
 
 /**
