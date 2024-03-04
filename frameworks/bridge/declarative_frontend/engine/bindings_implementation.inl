@@ -48,15 +48,13 @@ template<typename C, template<typename> typename ImplDetail>
 template<typename R, typename... Args>
 void JSClassImpl<C, ImplDetail>::StaticMethod(const char* name, R (*func)(Args...), MethodOptions options)
 {
-    functions_.emplace(nextFreeId_, new StaticFunctionBinding(name, options, func));
-    ImplDetail<C>::StaticMethod(name, func, nextFreeId_++);
+    ImplDetail<C>::StaticMethod(name, new StaticFunctionBinding(name, options, func));
 }
 
 template<typename C, template<typename> typename ImplDetail>
 void JSClassImpl<C, ImplDetail>::StaticMethod(const char* name, JSFunctionCallback func)
 {
-    functions_.emplace(nextFreeId_, new StaticFunctionBinding(name, MethodOptions::NONE, func));
-    ImplDetail<C>::StaticMethod(name, func, nextFreeId_++);
+    ImplDetail<C>::StaticMethod(name, new StaticFunctionBinding(name, MethodOptions::NONE, func));
 }
 
 template<typename C, template<typename> typename ImplDetail>
