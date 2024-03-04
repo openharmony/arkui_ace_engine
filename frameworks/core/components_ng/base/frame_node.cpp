@@ -462,6 +462,27 @@ void FrameNode::InitializePatternAndContext()
     }
 }
 
+void FrameNode::DumpSafeAreaInfo()
+{
+    if (layoutProperty_->GetSafeAreaExpandOpts()) {
+        DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaExpandOpts()->ToString());
+    }
+    if (layoutProperty_->GetSafeAreaInsets()) {
+        DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaInsets()->ToString());
+    }
+    CHECK_NULL_VOID(GetTag() == V2::PAGE_ETS_TAG);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    DumpLog::GetInstance().AddDesc(std::string("ignoreSafeArea: ")
+                                    .append(std::to_string(manager->IsIgnoreAsfeArea()))
+                                    .append(std::string(", isNeedAvoidWindow: ").c_str())
+                                    .append(std::to_string(manager->IsNeedAvoidWindow()))
+                                    .append(std::string(", isFullScreen: ").c_str())
+                                    .append(std::to_string(manager->IsFullScreen())));
+}
+
 void FrameNode::DumpCommonInfo()
 {
     if (!geometryNode_->GetFrameRect().ToString().compare(renderContext_->GetPaintRectWithoutTransform().ToString())) {
@@ -502,6 +523,7 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("Margin: ").append(layoutProperty_->GetMarginProperty()->ToString().c_str()));
     }
+    DumpSafeAreaInfo();
     if (layoutProperty_->GetCalcLayoutConstraint()) {
         DumpLog::GetInstance().AddDesc(std::string("User defined constraint: ")
                                            .append(layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()));

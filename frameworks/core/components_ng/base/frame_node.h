@@ -751,6 +751,7 @@ private:
     void DumpInfo() override;
     void DumpOverlayInfo();
     void DumpCommonInfo();
+    void DumpSafeAreaInfo();
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     bool CheckAutoSave() override;
