@@ -357,8 +357,8 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
-    if (!inlineState_.saveInlineState) {
-        inlineState_.saveInlineState = true;
+    if (!inlineState_.saveState) {
+        inlineState_.saveState = true;
         inlineState_.frameRect = frameRect_;
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
@@ -676,7 +676,7 @@ void TextFieldPattern::HandleFocusEvent()
         needSelectAll_ = true;
     }
     if (IsNormalInlineState()) {
-        ApplyInlineStates(true);
+        ApplyInlineStates();
         inlineFocusState_ = true;
         if (contentController_->IsEmpty()) {
             StartTwinkling();
@@ -2133,23 +2133,28 @@ void TextFieldPattern::OnModifyDone()
             setBorderFlag_ = false;
         }
         HandleCounterBorder();
-    }
-    UpdateCounterMargin();
-    if (!IsTextArea()) {
+    } else {
         isTextInput_ = true;
     }
-    auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
-    if (!inlineState_.saveInlineState || !HasFocus()) {
+    UpdateCounterMargin();
+    bool underline = layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
+        && (!IsNormalInlineState() || !HasFocus());
+    if (preUnderline && !underline) {
+        RestoreUnderlineStates();
+    }
+    if (!underline && !preUnderlineState_.saveState) {
+        SavePreUnderLineState();
+    }
+    if (!inlineState_.saveState || !HasFocus()) {
         SaveInlineStates();
     }
     if (HasFocus() && IsNormalInlineState()) {
-        ApplyInlineStates(preInputStyle_ == InputStyle::DEFAULT);
+        ApplyInlineStates();
     }
-    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
-        && (!IsNormalInlineState() || !HasFocus())) {
+    if (underline) {
         ApplyUnderlineStates();
     }
-    if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
+    if (preInline && !IsNormalInlineState()) {
         if (IsTextArea() && isTextInput_) {
             layoutProperty->UpdateMaxLines(1);
         }
@@ -2164,9 +2169,25 @@ void TextFieldPattern::OnModifyDone()
     auto maxlength = GetMaxLength();
     auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
     HandleInputCounterBorder(originLength, maxlength);
-    preInputStyle_ = inputStyle;
+    preInline = IsNormalInlineState();
+    preUnderline = underline;
     Register2DragDropManager();
     isModifyDone_ = true;
+}
+
+void TextFieldPattern::SavePreUnderLineState()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+    preUnderlineState_.saveState = true;
+    preUnderlineState_.bgColor = renderContext->GetBackgroundColor().value_or(theme->GetBgColor());
+    auto radius = theme->GetBorderRadius();
+    BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
+    preUnderlineState_.radius = renderContext->GetBorderRadius().value_or(borderRadius);
 }
 
 void TextFieldPattern::InitBackGroundColorAndBorderRadius()
@@ -5366,7 +5387,7 @@ void TextFieldPattern::SaveInlineStates()
         inlineState_.margin.bottom = CalcLength(0.0_vp);
         inlineState_.margin.right = CalcLength(0.0_vp);
     }
-    if (inlineState_.saveInlineState) {
+    if (inlineState_.saveState) {
         inlineState_.frameRect = frameRect_;
     }
 }
@@ -5435,7 +5456,7 @@ void TextFieldPattern::UpdateRectByTextAlign(RectF& rect)
     }
 }
 
-void TextFieldPattern::ApplyInlineStates(bool focusStatus)
+void TextFieldPattern::ApplyInlineStates()
 {
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -5528,6 +5549,32 @@ void TextFieldPattern::RestorePreInlineStates()
     if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         ApplyUnderlineStates();
     }
+}
+
+void TextFieldPattern::RestoreUnderlineStates()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (!preUnderlineState_.saveState) {
+        auto theme = GetTheme();
+        CHECK_NULL_VOID(theme);
+        renderContext->UpdateBackgroundColor(theme->GetBgColor());
+        auto radius = theme->GetBorderRadius();
+        BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
+        renderContext->UpdateBorderRadius(borderRadius);
+        return;
+    }
+
+    if (!paintProperty->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(preUnderlineState_.bgColor);
+    }
+    renderContext->UpdateBorderRadius(preUnderlineState_.radius);
+    preUnderlineState_.saveState = false;
 }
 
 bool TextFieldPattern::IsNormalInlineState() const
