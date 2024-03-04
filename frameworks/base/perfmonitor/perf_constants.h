@@ -74,6 +74,12 @@ public:
 
     // PC shoutcut exit app center
     static constexpr char PC_SHORTCUT_EXIT_APP_CENTER[] = "PC_SHORTCUT_EXIT_APP_CENTER";
+
+    // A app jump to another app
+    static constexpr char APP_TRANSITION_TO_OTHER_APP[] = "APP_TRANSITION_TO_OTHER_APP";
+
+    // another app jamps back to A app
+    static constexpr char APP_TRANSITION_FROM_OTHER_APP[] = "APP_TRANSITION_FROM_OTHER_APP";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H
