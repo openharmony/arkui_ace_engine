@@ -6035,8 +6035,8 @@ class ArkSpanComponent {
       this._modifiersWithKeys.delete(key);
     });
   }
-  cleanStageValue(){
-    if (!this._modifiersWithKeys){
+  cleanStageValue() {
+    if (!this._modifiersWithKeys) {
       return;
     }
     this._modifiersWithKeys.forEach((value, key) => {
