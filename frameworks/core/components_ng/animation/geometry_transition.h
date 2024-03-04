@@ -91,7 +91,6 @@ private:
     RefPtr<LayoutProperty> layoutPropertyIn_;
     RefPtr<LayoutProperty> layoutPropertyOut_;
     AnimationOption animationOption_;
-    AnimationOption implicitAnimationOption_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GeometryTransition);
 };
