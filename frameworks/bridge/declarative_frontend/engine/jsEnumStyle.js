@@ -1439,6 +1439,9 @@ class SubTabBarStyle {
   }
 }
 
+class DrawModifier {
+  invalidate() {}
+}
 
 class ProgressMask {
   constructor(value, total, color) {

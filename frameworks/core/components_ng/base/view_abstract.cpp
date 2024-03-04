@@ -1171,6 +1171,19 @@ void ViewAbstract::SetAllowDrop(const std::set<std::string> &allowDrop)
     frameNode->SetAllowDrop(allowDrop);
 }
 
+void ViewAbstract::SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDrawModifier(drawModifier);
+}
+
+void* ViewAbstract::GetFrameNode()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    return static_cast<void*>(AceType::RawPtr(frameNode));
+}
+
 void ViewAbstract::SetDragPreview(const NG::DragDropInfo& info)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

@@ -432,7 +432,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     auto paintProperty = node->GetPaintProperty<PaintProperty>();
     auto wrapper = node->CreatePaintWrapper();
     if (wrapper != nullptr) {
-        wrapper->FlushRender();
+        wrapper->FlushRender(node->drawModifier_);
     }
     paintProperty->CleanDirty();
     CHECK_NULL_VOID(pipeline);
@@ -1161,7 +1161,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         auto self = weak.Upgrade();
         ACE_SCOPED_TRACE("FrameNode[%s][id:%d]::RenderTask", self->GetTag().c_str(), self->GetId());
-        wrapper->FlushRender();
+        wrapper->FlushRender(self->drawModifier_);
         paintProperty->CleanDirty();
 
         if (self->GetInspectorId()) {
@@ -1314,6 +1314,14 @@ void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent,
     }
     auto layoutWrapper = CreateLayoutWrapper(forceMeasure, forceLayout);
     parent->AppendChild(layoutWrapper, layoutProperty_->IsOverlayNode());
+}
+
+RefPtr<ContentModifier> FrameNode::GetContentModifier()
+{
+    auto wrapper = CreatePaintWrapper();
+    auto paintMethod = pattern_->CreateNodePaintMethod();
+    auto contentModifier = DynamicCast<ContentModifier>(paintMethod->GetContentModifier(AceType::RawPtr(wrapper)));
+    return contentModifier;
 }
 
 RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()

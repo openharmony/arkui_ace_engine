@@ -38,6 +38,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
@@ -50,6 +51,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_animatable_arithmetic.h"
@@ -59,6 +61,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "canvas_napi/js_canvas.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
@@ -6870,8 +6873,92 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("expandSafeArea", &JSViewAbstract::JsExpandSafeArea);
 
+    JSClass<JSViewAbstract>::StaticMethod("drawModifier", &JSViewAbstract::JsDrawModifier);
+
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
+
+void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier)
+{
+    auto invalidate = [](panda::JsiRuntimeCallInfo *info) -> panda::Local<panda::JSValueRef> {
+        auto vm = info->GetVM();
+        Local<JSValueRef> thisObj = info->GetFunctionRef();
+        auto thisObjRef = panda::Local<panda::ObjectRef>(thisObj);
+        if (thisObjRef->GetNativePointerFieldCount() < 1) {
+            return panda::JSValueRef::Undefined(vm);
+        }
+        auto frameNode = static_cast<NG::FrameNode*>(thisObjRef->GetNativePointerField(0));
+        if (frameNode) {
+            auto contentModifier = frameNode->GetContentModifier();
+            if (contentModifier) {
+                contentModifier->SetContentChange();
+            } else {
+                frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+            }
+        }
+
+        return panda::JSValueRef::Undefined(vm);
+    };
+    auto jsInvalidate = JSRef<JSFunc>::New<FunctionCallback>(invalidate);
+    auto frameNode = ViewAbstractModel::GetInstance()->GetFrameNode();
+    jsInvalidate->GetHandle()->SetNativePointerFieldCount(jsInvalidate->GetEcmaVM(), 1);
+    jsInvalidate->GetHandle()->SetNativePointerField(jsInvalidate->GetEcmaVM(), 0, frameNode);
+    jsDrawModifier->SetPropertyObject("invalidate", jsInvalidate);
+}
+
+void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    auto jsDrawModifier = JSRef<JSObject>::Cast(info[0]);
+    RefPtr<NG::DrawModifier> drawModifier = AceType::MakeRefPtr<NG::DrawModifier>();
+    auto execCtx = info.GetExecutionContext();
+    auto getDrawModifierFunc = [execCtx, jsDrawModifier](const char* key) -> NG::DrawModifierFunc {
+        JSRef<JSVal> drawMethod = jsDrawModifier->GetProperty(key);
+        if (!drawMethod->IsFunction()) {
+            return nullptr;
+        }
+
+        auto jsDrawFunc = AceType::MakeRefPtr<JsFunction>(
+            JSRef<JSObject>(jsDrawModifier), JSRef<JSFunc>::Cast(drawMethod));
+        
+        return [execCtx, func = std::move(jsDrawFunc)](
+            NG::DrawingContext& context) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+
+                JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+                objectTemplate->SetInternalFieldCount(1);
+                JSRef<JSObject> contextObj = objectTemplate->NewInstance();
+                JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
+                sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
+                sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
+                contextObj->SetPropertyObject("size", sizeObj);
+
+                auto engine = EngineHelper::GetCurrentEngine();
+                CHECK_NULL_VOID(engine);
+                NativeEngine* nativeEngine = engine->GetNativeEngine();
+                napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+                ScopeRAII scope(env);
+
+                auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(
+                    env, &context.canvas, context.width, context.height);
+                JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
+                contextObj->SetPropertyObject("canvas", jsCanvasVal);
+                auto jsVal = JSRef<JSVal>::Cast(contextObj);
+                func->ExecuteJS(1, &jsVal);
+            };
+    };
+
+    drawModifier->jsDrawBehindFunc = getDrawModifierFunc("drawBehind");
+    drawModifier->jsDrawContentFunc = getDrawModifierFunc("drawContent");
+    drawModifier->jsDrawFrontFunc = getDrawModifierFunc("drawFront");
+
+    AddInvalidateFunc(jsDrawModifier);
+    ViewAbstractModel::GetInstance()->SetDrawModifier(drawModifier);
+}
+
 void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
 {
     std::set<std::string> allowDropSet;

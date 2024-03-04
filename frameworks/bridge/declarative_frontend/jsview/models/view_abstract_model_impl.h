@@ -248,6 +248,8 @@ public:
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
+    void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier) override {}
+    void* GetFrameNode() override { return nullptr; }
     void SetAllowDrop(const std::set<std::string>& allowDrop) override {}
     void SetDragPreview(const NG::DragDropInfo& info) override {}
 

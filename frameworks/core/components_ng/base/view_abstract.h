@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include "modifier.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -140,6 +141,8 @@ public:
     static void SetBorderStyle(const BorderStyleProperty &value);
     static void SetOpacity(double opacity);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);
+    static void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier);
+    static void* GetFrameNode();
     static void SetDragPreview(const NG::DragDropInfo& info);
 
     static void SetBorderImage(const RefPtr<BorderImage> &borderImage);
