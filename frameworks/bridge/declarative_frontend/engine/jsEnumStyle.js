@@ -2112,102 +2112,102 @@ globalThis.NavPathStack = NavPathStack;
 
 class WaterFlowSections {
   constructor() {
-    this.sectionArray = []
+    this.sectionArray = [];
     // indicate class has changed.
-    this.changeFlag = true
-    this.changeArray = []
+    this.changeFlag = true;
+    this.changeArray = [];
   }
 
   isNonNegativeInt32(input) {
-    return Number.isSafeInteger(input) && input > 0 && input <= 2147483647
+    return Number.isSafeInteger(input) && input > 0 && input <= 2147483647;
   }
 
   toArrayIndex(origin, limit) {
     // origin is truncated to an integer
-    let result = Math.trunc(origin)
+    let result = Math.trunc(origin);
     if (result < 0) {
       // Negative index counts back from the end of the sectionArray.
-      result += limit
+      result += limit;
       // If origin < -sectionArray.length, 0 is used.
       if (result < 0) {
-        result = 0
+        result = 0;
       }
     } else if (result > limit) {
-        result = limit
+      result = limit;
     }
-    return result
+    return result;
   }
 
   // splice(start: number, deleteCount?: number, sections?: Array<SectionOptions>): boolean;
   splice(start, deleteCount, sections) {
-    let oldLength = this.sectionArray.length
-    let paramCount = arguments.length
-    if (paramCount == 1) {
-      this.sectionArray.splice(start)
-    } else if (paramCount == 2) {
-      this.sectionArray.splice(start, deleteCount)
+    let oldLength = this.sectionArray.length;
+    let paramCount = arguments.length;
+    if (paramCount === 1) {
+      this.sectionArray.splice(start);
+    } else if (paramCount === 2) {
+      this.sectionArray.splice(start, deleteCount);
     } else {
-      const iterator = sections.values()
+      const iterator = sections.values();
       for (const section of iterator) {
-        if(!this.isNonNegativeInt32(section.itemsCount)) {
-          return false
+        if (!this.isNonNegativeInt32(section.itemsCount)) {
+          return false;
         }
       }
-      this.sectionArray.splice(start, deleteCount, ...sections)
+      this.sectionArray.splice(start, deleteCount, ...sections);
     }
 
-    let intStart = this.toArrayIndex(start, oldLength)
-    let intDeleteCount = 0
-    if (paramCount == 1) {
+    let intStart = this.toArrayIndex(start, oldLength);
+    let intDeleteCount = 0;
+    if (paramCount === 1) {
       // If deleteCount is omitted, then all the sections from start to the end of the sectionArray will be deleted.
-      intDeleteCount = oldLength - intStart
+      intDeleteCount = oldLength - intStart;
     } else {
-      intDeleteCount = Math.trunc(deleteCount)
+      intDeleteCount = Math.trunc(deleteCount);
       if (intDeleteCount > oldLength - intStart) {
-        intDeleteCount = oldLength - intStart
+        intDeleteCount = oldLength - intStart;
       }
     }
-    intDeleteCount = intDeleteCount < 0 ? 0 : intDeleteCount
+    intDeleteCount = intDeleteCount < 0 ? 0 : intDeleteCount;
 
-    this.changeArray.push({start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : []})
-    this.changeFlag = !this.changeFlag
-    return true
+    this.changeArray.push({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [] });
+    this.changeFlag = !this.changeFlag;
+    return true;
   }
 
   push(section) {
-    if(!this.isNonNegativeInt32(section.itemsCount)) {
-        return false
+    if (!this.isNonNegativeInt32(section.itemsCount)) {
+      return false;
     }
-    let oldLength = this.sectionArray.length
-    this.sectionArray.push(section)
-    this.changeArray.push({start: oldLength, deleteCount: 0, sections: [section]})
-    this.changeFlag = !this.changeFlag
-    return true
+    let oldLength = this.sectionArray.length;
+    this.sectionArray.push(section);
+    this.changeArray.push({ start: oldLength, deleteCount: 0, sections: [section] });
+    this.changeFlag = !this.changeFlag;
+    return true;
   }
 
   update(sectionIndex, section) {
-    if(!this.isNonNegativeInt32(section.itemsCount)) {
-        return false
+    if (!this.isNonNegativeInt32(section.itemsCount)) {
+      return false;
     }
-    let oldLength = this.sectionArray.length
-    this.sectionArray.splice(sectionIndex, 1, section)
+    let oldLength = this.sectionArray.length;
+    this.sectionArray.splice(sectionIndex, 1, section);
 
-    let intStart = this.toArrayIndex(sectionIndex, oldLength)
-    this.changeArray.push({start: intStart, deleteCount: 1, sections: [section]})
-    this.changeFlag = !this.changeFlag
-    return true
+    let intStart = this.toArrayIndex(sectionIndex, oldLength);
+    this.changeArray.push({ start: intStart, deleteCount: 1, sections: [section] });
+    this.changeFlag = !this.changeFlag;
+    return true;
   }
 
   values() {
-    return this.sectionArray
+    return this.sectionArray;
   }
 
   length() {
-    return this.sectionArray.length
+    return this.sectionArray.length;
   }
 
   clearChanges() {
-    this.changeArray = []
+    this.changeArray = [];
   }
 }
 
