@@ -411,7 +411,7 @@ public:
     void Handle(bool key) override;
 
 private:
-    WeakPtr<PipelineBase> context_;
+    WeakPtr<PipelineBase> context_ = nullptr;
 };
 
 class WebDelegateObserver : public virtual AceType {
@@ -821,7 +821,7 @@ private:
     State state_ { State::WAITINGFORSIZE };
 #ifdef OHOS_STANDARD_SYSTEM
     std::shared_ptr<OHOS::NWeb::NWeb> nweb_;
-    std::shared_ptr<OHOS::NWeb::NWebCookieManager> cookieManager_;
+    std::shared_ptr<OHOS::NWeb::NWebCookieManager> cookieManager_ = nullptr;
     sptr<Rosen::Window> window_;
     bool isCreateWebView_ = false;
     int32_t callbackId_ = 0;
