@@ -563,7 +563,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         bool isShowInSubWindow = menuLayoutProp->GetShowInSubWindowValue(true);
         if (((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) || (isShowInSubWindow && expandDisplay)) &&
             (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
-            SubwindowManager::GetInstance()->ClearMenuNG(id);
+            SubwindowManager::GetInstance()->ClearMenuNG(id, menuWrapperPattern->GetTargetId());
             overlayManager->ResetContextMenuDragHideFinished();
             return;
         }
@@ -1275,7 +1275,7 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     if (node->GetParent()) {
         auto id = Container::CurrentId();
         SubwindowManager::GetInstance()->ClearMenu();
-        SubwindowManager::GetInstance()->ClearMenuNG(id);
+        SubwindowManager::GetInstance()->ClearMenuNG(id, targetId);
     }
     menuMap_.erase(it);
 }
@@ -1320,27 +1320,20 @@ void OverlayManager::CleanPreviewInSubWindow()
     }
 }
 
-void OverlayManager::CleanMenuInSubWindow()
+void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "clean menu insubwindow enter");
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    for (const auto& child : rootNode->GetChildren()) {
-        auto node = DynamicCast<FrameNode>(child);
-        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            for (auto& childNode : node->GetChildren()) {
-                auto frameNode = DynamicCast<FrameNode>(childNode);
-                if (frameNode &&
-                    (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
-                    node->RemoveChild(frameNode);
-                    break;
-                }
-            }
-            rootNode->RemoveChild(node);
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            break;
-        }
-    }
+
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto node = overlayManager->GetMenuNode(targetId);
+    CHECK_NULL_VOID(node);
+    rootNode->RemoveChild(node);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);

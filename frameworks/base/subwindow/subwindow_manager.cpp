@@ -243,7 +243,7 @@ void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
     }
 }
 
-void SubwindowManager::ClearMenuNG(int32_t instanceId, bool inWindow, bool showAnimation)
+void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool inWindow, bool showAnimation)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menung enter");
     RefPtr<Subwindow> subwindow;
@@ -254,7 +254,7 @@ void SubwindowManager::ClearMenuNG(int32_t instanceId, bool inWindow, bool showA
         subwindow = GetCurrentWindow();
     }
     if (subwindow) {
-        subwindow->ClearMenuNG(inWindow, showAnimation);
+        subwindow->ClearMenuNG(targetId, inWindow, showAnimation);
     }
 }
 

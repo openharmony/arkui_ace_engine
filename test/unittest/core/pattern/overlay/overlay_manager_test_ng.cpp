@@ -1172,7 +1172,7 @@ HWTEST_F(OverlayManagerTestNg, MenuTest002, TestSize.Level1)
      * @tc.steps: step5. call HideAllMenus.
      * @tc.expected: function exits normally
      */
-    overlayManager->CleanMenuInSubWindow();
+    overlayManager->CleanMenuInSubWindow(targetId);
     overlayManager->FocusOverlayNode(menuNode, false);
     EXPECT_FALSE(overlayManager->menuMap_.empty());
     EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());

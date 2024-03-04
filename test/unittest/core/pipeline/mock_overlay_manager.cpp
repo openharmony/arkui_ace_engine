@@ -56,7 +56,7 @@ void OverlayManager::HideAllMenus() {}
 
 void OverlayManager::DeleteMenu(int32_t targetId) {}
 
-void OverlayManager::CleanMenuInSubWindow() {}
+void OverlayManager::CleanMenuInSubWindow(int32_t targetId) {}
 
 RefPtr<FrameNode> OverlayManager::ShowDialog(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
