@@ -40,6 +40,7 @@ void EventController::Register(const std::string& config, const std::shared_ptr<
     std::unique_lock<std::mutex> lock(cacheLock_);
     clientList_.emplace_back(std::move(client));
     NotifyConfigChange();
+    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Register config end");
 }
 
 void EventController::NotifyConfigChange()

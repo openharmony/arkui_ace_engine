@@ -382,7 +382,7 @@ void CheckBoxGroupPattern::OnAfterModifyDone()
             vec.push_back(eventHub->GetName());
         }
     }
-    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, eventHub->GetGroupName(), vec);
+    Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, eventHub->GetGroupName(), vec);
 }
 
 void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select)
