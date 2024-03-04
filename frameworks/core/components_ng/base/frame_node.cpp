@@ -1529,7 +1529,8 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     CHECK_NULL_VOID(context);
 
     if (CheckNeedRequestMeasureAndLayout(layoutFlag)) {
-        if (!isMeasureBoundary && IsNeedRequestParentMeasure()) {
+        auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+        if ((!isMeasureBoundary && IsNeedRequestParentMeasure()) || (opts && opts->ExpansiveToMark())) {
             if (RequestParentDirty()) {
                 return;
             }
@@ -2674,6 +2675,11 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 {
     ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+    
+    if (SelfOrParentExpansive() && needRestoreSafeArea_) {
+        RestoreGeoState();
+        needRestoreSafeArea_ = false;
+    }
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
@@ -2727,11 +2733,6 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         }
     }
 
-    if (SelfOrParentExpansive() && needRestoreSafeArea_) {
-        RestoreGeoState();
-        needRestoreSafeArea_ = false;
-    }
-
     auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
     if (size.has_value()) {
         geometryNode_->SetContentSize(size.value());
@@ -2761,11 +2762,15 @@ void FrameNode::Layout()
 {
     ACE_LAYOUT_SCOPED_TRACE("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
-    if (SelfOrParentExpansive() && needRestoreSafeArea_) {
-        // if safeArea not restored in measure because of constraint not changed and so on,
-        // restore this node
-        RestoreGeoState();
-        needRestoreSafeArea_ = false;
+    if (SelfOrParentExpansive()) {
+        if (IsRootMeasureNode() && !needRestoreSafeArea_ && SelfExpansive()) {
+            GetGeometryNode()->RestoreCache();
+        } else if (needRestoreSafeArea_) {
+            // if safeArea not restored in measure because of constraint not changed and so on,
+            // restore this node
+            RestoreGeoState();
+            needRestoreSafeArea_ = false;
+        }
     }
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();
