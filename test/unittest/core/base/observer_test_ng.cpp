@@ -56,6 +56,7 @@ HWTEST_F(ObserverTestNg, ObserverTestNg001, TestSize.Level1)
                                                                  NavDestinationState::ON_SHOWN);
     ASSERT_EQ(UIObserverHandler::GetInstance().navigationHandleFunc_, nullptr);
     auto pattern1 = navigation->GetPattern<NavigationPattern>();
+    pattern1->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(AceType::WeakClaim(Referenced::RawPtr(pattern1)),
                                                                  NavDestinationState::ON_SHOWN);
     ASSERT_EQ(UIObserverHandler::GetInstance().navigationHandleFunc_, nullptr);
@@ -70,6 +71,7 @@ HWTEST_F(ObserverTestNg, ObserverTestNg002, TestSize.Level1)
 {
     auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
         "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navigation->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
     auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto pattern = contentNode->GetPattern<NavDestinationPattern>();
