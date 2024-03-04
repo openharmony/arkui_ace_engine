@@ -66,9 +66,10 @@ public:
     static void CustomProperty(const char* name, JSMemberFunctionCallback<T> callback, int getterId, int setterId);
 
     template<typename R, typename... Args>
-    static void StaticMethod(const char* name, R (*func)(Args...), int id);
+    static void StaticMethod(const char* name, StaticFunctionBinding<R, Args...>* staticFunctionBinding);
 
-    static void StaticMethod(const char* name, JSFunctionCallback callback, int id);
+    static void StaticMethod(
+        const char* name, StaticFunctionBinding<void, const JSCallbackInfo&>* staticFunctionBinding);
 
     static void CustomStaticMethod(const char* name, FunctionCallback callback);
 
