@@ -204,7 +204,7 @@ const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttribu
 struct InnerExtraParam {
     int32_t eventId;
     ArkUI_NodeHandle nodePtr;
-}
+};
 
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId)
 {
