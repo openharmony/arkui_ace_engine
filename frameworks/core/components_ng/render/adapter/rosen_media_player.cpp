@@ -165,6 +165,7 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
     MediaFileInfo fileInfo;
     std::string videoFilePath = mediaPath.substr(mediaPath.find("resources/base"));
     auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
     if (!container->IsUseStageModel()) {
         videoFilePath = FA_RESOURCE_PREFIX + videoFilePath;
     }
@@ -173,7 +174,7 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
         LOGE("GetMediaFileInfo failed");
         return false;
     }
-    auto hapPath = Container::Current()->GetHapPath();
+    auto hapPath = container->GetHapPath();
     auto hapFd = open(hapPath.c_str(), O_RDONLY);
     if (hapFd < 0) {
         LOGE("Open hap file failed");
