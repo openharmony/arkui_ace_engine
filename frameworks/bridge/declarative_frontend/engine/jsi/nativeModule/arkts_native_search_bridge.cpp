@@ -63,7 +63,7 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
 
     if (threeArg->IsString() || threeArg->IsNumber()) {
         if (threeArg->IsString()) {
-            auto weightPtr = threeArg->ToString(vm)->ToString();
+            auto weightStr = threeArg->ToString(vm)->ToString();
             value.fontWeight = OHOS::Ace::StringUtils::StringToInt(weightStr);
         }
 
@@ -350,7 +350,7 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
 
     if (threeArg->IsString() || threeArg->IsNumber()) {
         if (threeArg->IsString()) {
-            auto weightPtr = threeArg->ToString(vm)->ToString();
+            auto weightStr = threeArg->ToString(vm)->ToString();
             value.fontWeight = OHOS::Ace::StringUtils::StringToInt(weightStr);
         }
 
