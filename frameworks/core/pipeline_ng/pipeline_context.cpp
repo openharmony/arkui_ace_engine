@@ -1642,10 +1642,11 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
     const auto& children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-        auto destinationNode = AceType::DynamicCast<NavDestinationGroupNode>(child);
-        if (destinationNode && destinationNode->GetLayoutProperty()) {
-            auto property = destinationNode->GetLayoutProperty<LayoutProperty>();
-            if (property->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        auto childNode = AceType::DynamicCast<FrameNode>(child);
+        if (childNode && childNode->GetLayoutProperty()) {
+            auto property = childNode->GetLayoutProperty();
+            if (property->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE ||
+                !childNode->IsActive()) {
                 continue;
             }
         }
