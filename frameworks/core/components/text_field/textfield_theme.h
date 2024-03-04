@@ -161,6 +161,8 @@ public:
             theme->draggable_ = StringUtils::StringToInt(draggable);
             // The default height is 48VP, of which 12VP is 12VP each for the upper and lower padding
             theme->height_ = pattern->GetAttr<Dimension>("textinput_default_height", 24.0_vp);
+            auto showPasswordDirectly = pattern->GetAttr<std::string>("show_password_directly", "0");
+            theme->showPasswordDirectly_ = StringUtils::StringToInt(showPasswordDirectly);
         }
     };
 
@@ -461,6 +463,11 @@ public:
         return passwordTypeHeight_;
     }
 
+    bool IsShowPasswordDirectly() const
+    {
+        return showPasswordDirectly_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -535,6 +542,7 @@ private:
 
     bool showEllipsis_ = true;
     bool draggable_ = false;
+    bool showPasswordDirectly_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;;
 };
 
