@@ -62,6 +62,8 @@ public:
     virtual void Rotate(float deg) {}
     virtual void Translate(float tx, float ty) {}
     virtual void DrawBitmap(const TestingBitmap& bitmap, const float px, const float py) {}
+    virtual void DrawImage(const TestingImage &image, const float px,
+                           const float py, const TestingSamplingOptions &sampling) {}
     virtual void DrawShadow(const TestingPath& path, const TestingPoint3& planeParams, const TestingPoint3& devLightPos,
         float lightRadius, TestingColor /* ambientColor */, TestingColor /* spotColor */, TestingShadowFlags flag)
     {}

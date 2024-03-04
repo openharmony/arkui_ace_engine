@@ -12296,7 +12296,7 @@ HWTEST_F(GesturesTestNg, PinchRecognizerPtrHandleTouchMoveEventTest002, TestSize
     pinchRecognizerPtr->distance_ = -1;
     pinchRecognizerPtr->initialDev_ = 1;
     pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(pinchRecognizerPtr->disposal_, GestureDisposal::NONE);
+    EXPECT_EQ(pinchRecognizerPtr->disposal_, GestureDisposal::REJECT);
 
     axisEvent.pinchAxisScale = 1.0;
     pinchRecognizerPtr->refereeState_ = RefereeState::DETECTING;
@@ -12607,5 +12607,133 @@ HWTEST_F(GesturesTestNg, TransformTest003, TestSize.Level1)
     NGGestureRecognizer::Transform(f1, WeakPtr<FrameNode>(FRAME_NODE_2));
     PointF f2(-531.471924, 1362.610352);
     EXPECT_EQ(f1, f2);
+}
+
+/**
+ * @tc.name: RotationRecognizerHandleTouchDownEventTest001
+ * @tc.desc: Test RotationRecognizer function with axis event input: Down
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerHandleAxisEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rotation recognizer and axis event.
+     */
+    AxisEvent event;
+    RefPtr<RotationRecognizer> recognizer =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    /**
+     * @tc.steps: step2. Test HandleTouchDownEvent
+     */
+    event.isRotationEvent = false;
+    recognizer->refereeState_ = RefereeState::READY;
+    recognizer->HandleTouchDownEvent(event);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::READY);
+
+    event.isRotationEvent = true;
+    recognizer->refereeState_ = RefereeState::READY;
+    recognizer->HandleTouchDownEvent(event);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::DETECTING);
+
+    event.isRotationEvent = true;
+    recognizer->refereeState_ = RefereeState::SUCCEED;
+    recognizer->HandleTouchDownEvent(event);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::SUCCEED);
+}
+/**
+ * @tc.name: RotationRecognizerHandleTouchDownEventTest002
+ * @tc.desc: Test RotationRecognizer function with axis event input: Up
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerHandleAxisEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rotation recognizer and axis event.
+     */
+    AxisEvent event;
+    RefPtr<RotationRecognizer> recognizer =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    /**
+     * @tc.steps: step2. Test HandleTouchUpEvent
+     */
+    recognizer->refereeState_ = RefereeState::READY;
+    recognizer->HandleTouchUpEvent(event);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::FAIL);
+
+    recognizer->refereeState_ = RefereeState::SUCCEED;
+    recognizer->HandleTouchUpEvent(event);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::SUCCEED);
+}
+/**
+ * @tc.name: RotationRecognizerHandleTouchDownEventTest003
+ * @tc.desc: Test RotationRecognizer function with axis event input: Move
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerHandleAxisEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rotation recognizer and axis event.
+     */
+    AxisEvent event;
+    RefPtr<RotationRecognizer> recognizer =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    /**
+     * @tc.steps: step2. Test HandleTouchMoveEvent
+     */
+    event.isRotationEvent = true;
+    recognizer->refereeState_ = RefereeState::DETECTING;
+    recognizer->HandleTouchMoveEvent(event);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::DETECTING);
+
+    event.isRotationEvent = true;
+    event.rotateAxisAngle = ROTATION_GESTURE_ANGLE;
+    recognizer->refereeState_ = RefereeState::DETECTING;
+    recognizer->HandleTouchMoveEvent(event);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::DETECTING);
+
+    event.isRotationEvent = true;
+    event.rotateAxisAngle = 2 * ROTATION_GESTURE_ANGLE;
+    recognizer->refereeState_ = RefereeState::DETECTING;
+    recognizer->HandleTouchMoveEvent(event);
+    EXPECT_NE(recognizer->refereeState_, RefereeState::DETECTING);
+
+    event.isRotationEvent = true;
+    recognizer->refereeState_ = RefereeState::SUCCEED;
+    recognizer->HandleTouchMoveEvent(event);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::SUCCEED);
+
+    event.isRotationEvent = true;
+    recognizer->refereeState_ = RefereeState::READY;
+    recognizer->HandleTouchMoveEvent(event);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::READY);
+
+    event.isRotationEvent = false;
+    recognizer->refereeState_ = RefereeState::READY;
+    recognizer->HandleTouchMoveEvent(event);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::READY);
+}
+/**
+ * @tc.name: RotationRecognizerHandleTouchDownEventTest004
+ * @tc.desc: Test RotationRecognizer function with axis event input: Cancel
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerHandleAxisEventTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rotation recognizer and axis event.
+     */
+    AxisEvent event;
+    RefPtr<RotationRecognizer> recognizer =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    /**
+     * @tc.steps: step2. Test HandleTouchCancelEvent
+     */
+    recognizer->refereeState_ = RefereeState::READY;
+    recognizer->HandleTouchCancelEvent(event);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::FAIL);
+
+    recognizer->refereeState_ = RefereeState::SUCCEED;
+    recognizer->HandleTouchCancelEvent(event);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::SUCCEED);
 }
 } // namespace OHOS::Ace::NG

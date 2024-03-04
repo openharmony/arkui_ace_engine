@@ -23,10 +23,11 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navrouter/navdestination_context.h"
 
 namespace OHOS::Ace::NG {
 using NavPathList = std::vector<std::pair<std::string, RefPtr<UINode>>>;
-
+class NavDestinationContext;
 class RouteInfo : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RouteInfo, AceType)
 public:
@@ -111,18 +112,21 @@ public:
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
+    void UpdateRemovedNavPathList();
     RefPtr<UINode> Get();
     RefPtr<UINode> Get(const std::string& name);
     RefPtr<UINode> GetFromPreBackup(const std::string& name);
     RefPtr<UINode> GetPre(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     virtual bool IsEmpty();
     virtual std::vector<std::string> GetAllPathName();
+    virtual std::vector<int32_t> GetRemoveArray();
     virtual void Pop();
     virtual void Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo = nullptr);
     virtual void Push(const std::string& name, int32_t index);
     virtual void RemoveName(const std::string& name);
     virtual void RemoveIndex(int32_t index);
     virtual void Clear();
+    virtual void ClearRemoveArray();
     virtual void UpdateReplaceValue(int32_t replaceValue) const;
     virtual int32_t GetReplaceValue() const;
     virtual RefPtr<UINode> CreateNodeByIndex(int32_t index);
@@ -145,11 +149,18 @@ public:
         return "";
     }
 
+    virtual void FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
+        const RefPtr<NG::NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) {}
+
+    virtual void FireNavigationModeChange(NavigationMode mode) {}
+
     virtual void OnAttachToParent(RefPtr<NavigationStack> parent) {}
     virtual void OnDetachFromParent() {}
     virtual void ClearPreBuildNodeList() {}
 
-private:
+    virtual std::vector<std::string> DumpStackInfo() const;
+
+protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);

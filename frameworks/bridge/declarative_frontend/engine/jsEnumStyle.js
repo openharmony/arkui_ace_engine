@@ -963,6 +963,13 @@ var MenuPreviewMode;
   MenuPreviewMode[MenuPreviewMode["IMAGE"] = 1] = "IMAGE";
 })(MenuPreviewMode || (MenuPreviewMode = {}));
 
+var DismissReason;
+(function (DismissReason) {
+DismissReason[DismissReason["PRESS_BACK"] = 0] = "PRESSBACK"
+DismissReason[DismissReason["TOUCH_OUTSIDE"] = 1] = "TOUCH_OUTSIDE";
+DismissReason[DismissReason["CLOSE_BUTTON"] = 2] = "CLOSE_BUTTON";
+})(DismissReason || (DismissReason = {}));
+
 var HoverEffect;
 (function (HoverEffect) {
   HoverEffect[HoverEffect["Auto"] = 4] = "Auto";
@@ -1121,6 +1128,8 @@ var FileSelectorMode;
 var ProtectedResourceType;
 (function (ProtectedResourceType) {
   ProtectedResourceType["MidiSysex"] = "TYPE_MIDI_SYSEX";
+  ProtectedResourceType["VIDEO_CAPTURE"] = "TYPE_VIDEO_CAPTURE";
+  ProtectedResourceType["AUDIO_CAPTURE"] = "TYPE_AUDIO_CAPTURE";
 })(ProtectedResourceType || (ProtectedResourceType = {}));
 
 var ProgressType;
@@ -1720,6 +1729,9 @@ class NavPathStack {
     this.nativeStack = undefined;
     // parent stack
     this.parentStack = undefined;
+    // Array of remove destination indexes
+    this.removeArray = [];
+    this.interception = undefined;
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
@@ -1777,7 +1789,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
-  
+
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
       this.pathArray.pop();
@@ -1982,8 +1994,16 @@ class NavPathStack {
       return 0;
     }
     let originLength = this.pathArray.length;
-    this.pathArray = this.pathArray.filter((item, index) => {
-      return item && !indexes.includes(index) });
+    let tempArray = this.pathArray.slice(0);
+    this.removeArray = [];
+    this.pathArray = [];
+    for (let index = 0 ; index < tempArray.length ; index++) {
+      if (tempArray[index] && !indexes.includes(index)) {
+        this.pathArray.push(tempArray[index]);
+      } else {
+        this.removeArray.push(index);
+      }
+    }
     let cnt = originLength - this.pathArray.length;
     if (cnt > 0) {
       this.changeFlag = this.changeFlag + 1;
@@ -1991,6 +2011,12 @@ class NavPathStack {
       this.nativeStack?.onStateChanged();
     }
     return cnt;
+  }
+  getRemoveArray() {
+    return this.removeArray;
+  }
+  clearRemoveArray() {
+    this.removeArray = [];
   }
   removeByName(name) {
     let originLength = this.pathArray.length;
@@ -2077,9 +2103,113 @@ class NavPathStack {
   disableAnimation(disableAnimation) {
     this.disableAllAnimation = disableAnimation;
   }
+  setInterception(interception) {
+    this.interception = interception;
+  }
 }
 
 globalThis.NavPathStack = NavPathStack;
+
+class WaterFlowSections {
+  constructor() {
+    this.sectionArray = []
+    // indicate class has changed.
+    this.changeFlag = true
+    this.changeArray = []
+  }
+
+  isNonNegativeInt32(input) {
+    return Number.isSafeInteger(input) && input > 0 && input <= 2147483647
+  }
+
+  toArrayIndex(origin, limit) {
+    // origin is truncated to an integer
+    let result = Math.trunc(origin)
+    if (result < 0) {
+      // Negative index counts back from the end of the sectionArray.
+      result += limit
+      // If origin < -sectionArray.length, 0 is used.
+      if (result < 0) {
+        result = 0
+      }
+    } else if (result > limit) {
+        result = limit
+    }
+    return result
+  }
+
+  // splice(start: number, deleteCount?: number, sections?: Array<SectionOptions>): boolean;
+  splice(start, deleteCount, sections) {
+    let oldLength = this.sectionArray.length
+    let paramCount = arguments.length
+    if (paramCount == 1) {
+      this.sectionArray.splice(start)
+    } else if (paramCount == 2) {
+      this.sectionArray.splice(start, deleteCount)
+    } else {
+      const iterator = sections.values()
+      for (const section of iterator) {
+        if(!this.isNonNegativeInt32(section.itemsCount)) {
+          return false
+        }
+      }
+      this.sectionArray.splice(start, deleteCount, ...sections)
+    }
+
+    let intStart = this.toArrayIndex(start, oldLength)
+    let intDeleteCount = 0
+    if (paramCount == 1) {
+      // If deleteCount is omitted, then all the sections from start to the end of the sectionArray will be deleted.
+      intDeleteCount = oldLength - intStart
+    } else {
+      intDeleteCount = Math.trunc(deleteCount)
+      if (intDeleteCount > oldLength - intStart) {
+        intDeleteCount = oldLength - intStart
+      }
+    }
+    intDeleteCount = intDeleteCount < 0 ? 0 : intDeleteCount
+
+    this.changeArray.push({start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : []})
+    this.changeFlag = !this.changeFlag
+    return true
+  }
+
+  push(section) {
+    if(!this.isNonNegativeInt32(section.itemsCount)) {
+        return false
+    }
+    let oldLength = this.sectionArray.length
+    this.sectionArray.push(section)
+    this.changeArray.push({start: oldLength, deleteCount: 0, sections: [section]})
+    this.changeFlag = !this.changeFlag
+    return true
+  }
+
+  update(sectionIndex, section) {
+    if(!this.isNonNegativeInt32(section.itemsCount)) {
+        return false
+    }
+    let oldLength = this.sectionArray.length
+    this.sectionArray.splice(sectionIndex, 1, section)
+
+    let intStart = this.toArrayIndex(sectionIndex, oldLength)
+    this.changeArray.push({start: intStart, deleteCount: 1, sections: [section]})
+    this.changeFlag = !this.changeFlag
+    return true
+  }
+
+  values() {
+    return this.sectionArray
+  }
+
+  length() {
+    return this.sectionArray.length
+  }
+
+  clearChanges() {
+    this.changeArray = []
+  }
+}
 
 var ImageSpanAlignment;
 (function (ImageSpanAlignment) {
@@ -2422,7 +2552,7 @@ var FoldStatus;
 
 var EmbeddedType;
 (function (EmbeddedType) {
-  EmbeddedType[EmbeddedType["UIEXTENSION"] = 0] = "UIEXTENSION";
+  EmbeddedType[EmbeddedType["EMBEDDED_UI_EXTENSION"] = 0] = "EMBEDDED_UI_EXTENSION";
 })(EmbeddedType || (EmbeddedType = {}));
 
 var OutlineStyle;
@@ -2479,3 +2609,9 @@ let NativeEmbedStatus;
   NativeEmbedStatus['UPDATE'] = 1;
   NativeEmbedStatus['DESTROY'] = 2;
 })(NativeEmbedStatus || (NativeEmbedStatus = {}));
+
+let RenderMode;
+(function (RenderMode) {
+  RenderMode['ASYNC_RENDER'] = 0;
+  RenderMode['SYNC_RENDER'] = 1;
+})(RenderMode || (RenderMode = {}));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,6 +154,7 @@ constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
 constexpr uint32_t DEFAULT_WEB_DRAW_HEIGHT = 4000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
+const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 8;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 // web feature params
@@ -166,17 +167,17 @@ WebPattern::WebPattern() = default;
 
 WebPattern::WebPattern(const std::string& webSrc,
                        const RefPtr<WebController>& webController,
-                       WebType type,
+                       RenderMode renderMode,
                        bool incognitoMode)
-    : webSrc_(std::move(webSrc)), webController_(webController), type_(type),
+    : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode),
       incognitoMode_(incognitoMode)
 {}
 
 WebPattern::WebPattern(const std::string& webSrc,
                        const SetWebIdCallback& setWebIdCallback,
-                       WebType type,
+                       RenderMode renderMode,
                        bool incognitoMode)
-    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), type_(type),
+    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), renderMode_(renderMode),
       incognitoMode_(incognitoMode) {}
 
 WebPattern::~WebPattern()
@@ -1531,6 +1532,13 @@ void WebPattern::OnScrollBarColorUpdate(const std::string& value)
     }
 }
 
+void WebPattern::OnDefaultTextEncodingFormatUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateDefaultTextEncodingFormat(value);
+    }
+}
+
 void WebPattern::RegistVirtualKeyBoardListener()
 {
     if (!needUpdateWeb_) {
@@ -1572,7 +1580,7 @@ void WebPattern::OnModifyDone()
         observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
         CHECK_NULL_VOID(observer_);
         delegate_->SetObserver(observer_);
-        delegate_->SetWebType(type_);
+        delegate_->SetRenderMode(renderMode_);
         InitEnhanceSurfaceFlag();
         delegate_->SetNGWebPattern(Claim(this));
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
@@ -1590,7 +1598,7 @@ void WebPattern::OnModifyDone()
             int32_t instanceId = Container::CurrentId();
             renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
-            if (type_ == WebType::TEXTURE) {
+            if (renderMode_ == RenderMode::SYNC_RENDER) {
                 renderSurface_->SetIsTexture(true);
                 renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
                 renderSurface_->SetSurfaceQueueSize(SURFACE_QUEUE_SIZE);
@@ -1642,6 +1650,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateWebStandardFont(GetWebStandardFontValue(DEFAULT_STANDARD_FONT_FAMILY));
         delegate_->UpdateDefaultFixedFontSize(GetDefaultFixedFontSizeValue(DEFAULT_FIXED_FONT_SIZE));
         delegate_->UpdateDefaultFontSize(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE));
+        delegate_->UpdateDefaultTextEncodingFormat(GetDefaultTextEncodingFormatValue(DEFAULT_WEB_TEXT_ENCODING_FORMAT));
         delegate_->UpdateMinFontSize(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE));
         delegate_->UpdateMinLogicalFontSize(GetMinLogicalFontSizeValue(DEFAULT_MINIMUM_LOGICAL_FONT_SIZE));
         delegate_->UpdateHorizontalScrollBarAccess(GetHorizontalScrollBarAccessEnabledValue(true));
@@ -1676,7 +1685,7 @@ void WebPattern::OnModifyDone()
     InitFeatureParam();
 
     // Initialize scrollupdate listener
-    if (type_ == WebType::TEXTURE) {
+    if (renderMode_ == RenderMode::SYNC_RENDER) {
         auto task = [this]() {
             InitScrollUpdateListener();
         };
@@ -1873,18 +1882,22 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
     }
     touchEventInfoList_.clear();
 
-    std::list<OHOS::NWeb::TouchPointInfo> touchPointInfoList {};
+    touchInfos.sort([](const TouchInfo &point1, const TouchInfo &point2) {
+        return point1.id < point2.id;
+    });
+
+    std::vector<std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo>> touch_point_infos;
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
         }
-        touchPointInfoList.emplace_back(OHOS::NWeb::TouchPointInfo{touchPoint.id, touchPoint.x, touchPoint.y});
+        std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo> touch_point_info =
+            std::make_shared<NWebTouchPointInfoImpl>(touchPoint.id, touchPoint.x, touchPoint.y);
+        touch_point_infos.emplace_back(touch_point_info);
     }
-    touchPointInfoList.sort([](const OHOS::NWeb::TouchPointInfo& point1, const OHOS::NWeb::TouchPointInfo& point2) {
-        return point1.id_ < point2.id_;
-    });
-    delegate_->HandleTouchMove(touchPointInfoList, fromOverlay);
+
+    delegate_->HandleTouchMove(touch_point_infos, fromOverlay);
 }
 
 void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
@@ -2122,16 +2135,76 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
         selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(beginTouchHandle);
         selectInfo.secondHandle.isShow = IsTouchHandleShow(endTouchHandle);
         selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endTouchHandle);
+        QuickMenuIsNeedNewAvoid(selectInfo, params, beginTouchHandle, endTouchHandle);
     }
     selectInfo.menuInfo.menuIsShow = true;
     RegisterSelectOverlayCallback(selectInfo, params, callback);
     RegisterSelectOverlayEvent(selectInfo);
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
+    if (selectInfo.isNewAvoid && selectOverlayProxy_) {
+        selectOverlayProxy_->ShowOrHiddenMenu(false);
+    }
     selectMenuInfo_ = selectInfo.menuInfo;
     insertHandle_ = insertTouchHandle;
     startSelectionHandle_ = beginTouchHandle;
     endSelectionHandle_ = endTouchHandle;
     return selectOverlayProxy_ ? true : false;
+}
+
+RectF WebPattern::ComputeClippedSelectionBounds(
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (!pipeline) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "ComputeClippedSelectionBounds pipeline is nullptr");
+        return RectF();
+    }
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    int32_t startY = static_cast<int32_t>(startHandle->GetY() / pipeline->GetDipScale());
+    int32_t endY = static_cast<int32_t>(endHandle->GetY() / pipeline->GetDipScale());
+    int32_t startEdgeHeight = static_cast<int32_t>(startHandle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
+    int32_t endEdgeHeight = static_cast<int32_t>(endHandle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
+    float selectX = 0;
+    float selectY = 0;
+    float selectWidth = params->GetSelectWidth();
+    float selectHeight = static_cast<float>((startHandle->GetEdgeHeight() + endHandle->GetEdgeHeight()) / 2);
+    if (endY < endEdgeHeight) {
+        selectY -= selectHeight;
+    } else if (startY >= startEdgeHeight &&
+        LessOrEqual(GetHostFrameSize().value_or(SizeF()).Height(), startHandle->GetY())) {
+        selectY += GetHostFrameSize().value_or(SizeF()).Height();
+    } else {
+        selectY -= selectHeight;
+    }
+    float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX()) / 2);
+    float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY()) / 2);
+    if (viewPortX) {
+        selectX += viewPortX;
+    }
+    if (viewPortY) {
+        selectY += viewPortY;
+    }
+    selectX = selectX + offset.GetX() + params->GetSelectX();
+    selectY += offset.GetY();
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "SelectionBounds selectX:%{publc}f, selectY:%{publc}f, selectWidth:%{publc}f, selectHeight:%{publc}f",
+        selectX, selectY, selectWidth, selectHeight);
+    return RectF(selectX, selectY, selectWidth, selectHeight);
+}
+
+void WebPattern::QuickMenuIsNeedNewAvoid(
+    SelectOverlayInfo& selectInfo,
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle)
+{
+    if (!selectInfo.firstHandle.isShow && !selectInfo.secondHandle.isShow) {
+        selectInfo.isNewAvoid = true;
+        selectInfo.selectArea =
+            ComputeClippedSelectionBounds(params, startHandle, endHandle);
+    }
 }
 
 void WebPattern::OnQuickMenuDismissed()
@@ -2289,9 +2362,9 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     CHECK_NULL_VOID(host);
     auto id = host->GetId();
     std::vector<SelectParam> selectParam;
-    for (auto& item : params->menuItems) {
+    for (auto& item : params->GetMenuItems()) {
         selectParam.push_back({
-            item.label, ""
+            item->GetLabel(), ""
         });
     }
     auto menu = MenuView::Create(selectParam, id, host->GetTag());
@@ -2322,13 +2395,13 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
         callback->Cancel();
         pattern->SetSelectPopupMenuShowing(false);
     });
-    auto offset = GetSelectPopupPostion(params->bounds);
+    auto offset = GetSelectPopupPostion(params->GetSelectMenuBound());
     selectPopupMenuShowing_ = true;
     overlayManager->ShowMenu(id, offset, menu);
 }
 
 void WebPattern::OnDateTimeChooserPopup(const NWeb::DateTimeChooser& chooser,
-    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
     bool result = false;
@@ -2358,7 +2431,7 @@ DialogProperties WebPattern::GetDialogProperties(const RefPtr<DialogTheme>& them
 }
 
 bool WebPattern::ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
-    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
     auto container = Container::Current();
@@ -2410,7 +2483,7 @@ bool WebPattern::ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
 }
 
 bool WebPattern::ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
-    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
     auto container = Container::Current();
@@ -2457,7 +2530,7 @@ bool WebPattern::ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
 }
 
 bool WebPattern::ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
-    const std::vector<NWeb::DateTimeSuggestion>& suggestions,
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
     auto container = Container::Current();
@@ -2477,9 +2550,9 @@ bool WebPattern::ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& choos
     }
     std::map<std::string, OHOS::NWeb::DateTime> suggestionMap;
     for (size_t i = 0; i < suggestions.size(); i++) {
-        settingData.rangeVector.push_back({ "", suggestions[i].localizedValue });
-        settingData.values.push_back(suggestions[i].localizedValue);
-        suggestionMap.emplace(std::make_pair(suggestions[i].localizedValue, suggestions[i].value));
+        settingData.rangeVector.push_back({ "", suggestions[i]->GetLocalizedValue() });
+        settingData.values.push_back(suggestions[i]->GetLocalizedValue());
+        suggestionMap.emplace(std::make_pair(suggestions[i]->GetLocalizedValue(), suggestions[i]->GetValue()));
     }
     settingData.columnKind = NG::TEXT;
     settingData.selected = chooser.suggestionIndex;
@@ -2534,7 +2607,7 @@ void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
                 continue;
             }
             hub->SetOnSelect(std::move(selectCallback));
-            optionPattern->SetFontSize(Dimension(params->itemFontSize * pipeline->GetDipScale()));
+            optionPattern->SetFontSize(Dimension(params->GetItemFontSize() * pipeline->GetDipScale()));
             optionNode->MarkModifyDone();
         }
     }
@@ -3003,8 +3076,9 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeById(int64_t access
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
-    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
-    if (!delegate_->GetAccessibilityNodeInfoById(accessibilityId, info)) {
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
+        delegate_->GetAccessibilityNodeInfoById(accessibilityId);
+    if (!info) {
         return nullptr;
     }
     SetSelfAsParentOfWebCoreNode(info);
@@ -3015,8 +3089,9 @@ RefPtr<WebAccessibilityNode> WebPattern::GetFocusedAccessibilityNode(int64_t acc
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
-    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
-    if (!delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus, info)) {
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
+        delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus);
+    if (!info) {
         return nullptr;
     }
     SetSelfAsParentOfWebCoreNode(info);
@@ -3027,8 +3102,9 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int64_t
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
-    auto& info = webAccessibilityNode_->GetAccessibilityNodeInfo();
-    if (!delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction, info)) {
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
+        delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
+    if (!info) {
         return nullptr;
     }
     SetSelfAsParentOfWebCoreNode(info);
@@ -3051,13 +3127,14 @@ void WebPattern::SetAccessibilityState(bool state)
     }
 }
 
-void WebPattern::SetSelfAsParentOfWebCoreNode(NWeb::NWebAccessibilityNodeInfo& info) const
+void WebPattern::SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (info.parentId == -1) { // root node of web core
-        info.parentId = host->GetAccessibilityId();
+    if (info->GetParentId() == -1) { // root node of web core
+        info->SetParentId(host->GetAccessibilityId());
     }
+    webAccessibilityNode_->SetAccessibilityNodeInfo(info);
 }
 
 void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,10 +33,11 @@ using setPermissionClipboardCallback = std::function<void(const std::shared_ptr<
 class ACE_EXPORT WebModelNG : public OHOS::Ace::WebModel {
 public:
     void Create(const std::string& src, const RefPtr<WebController>& webController,
-        WebType type = WebType::SURFACE, bool incognitoMode = false) override;
+        RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false) override;
     void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
         std::function<void(const std::string&)>&& setHapPathCallback,
-        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE, bool incognitoMode = false) override;
+        int32_t parentWebId, bool popup, RenderMode renderMode = RenderMode::ASYNC_RENDER,
+        bool incognitoMode = false) override;
     void SetCustomScheme(const std::string& cmdLine) override;
     void SetOnCommonDialog(std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType) override;
     void SetOnConsoleLog(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
@@ -119,6 +120,7 @@ public:
     void SetWebStandardFont(const std::string& standardFontFamily) override;
     void SetDefaultFixedFontSize(int32_t defaultFixedFontSize) override;
     void SetDefaultFontSize(int32_t defaultFontSize) override;
+    void SetDefaultTextEncodingFormat(const std::string& textEncodingFormat) override;
     void SetMinFontSize(int32_t minFontSize) override;
     void SetMinLogicalFontSize(int32_t minLogicalFontSize) override;
     void SetBlockNetwork(bool isNetworkBlocked) override;

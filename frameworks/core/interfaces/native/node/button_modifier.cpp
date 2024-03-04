@@ -57,6 +57,7 @@ const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::F
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::string NONE_FONT_FAMILY = "NoneFontFamily";
+std::string g_strValue;
 
 const std::unordered_map<int, DimensionUnit> DIMENSION_UNIT_MAP = {
     { -2, DimensionUnit::INVALID },
@@ -98,6 +99,20 @@ void SetOptionalBorderRadius(
             Dimension(values[offset + OFFSET_1], static_cast<OHOS::Ace::DimensionUnit>(values[offset + OFFSET_2]));
     }
     offset = offset + OFFSET_3;
+}
+
+void SetButtonLabel(ArkUINodeHandle node, ArkUI_CharPtr label)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetLabel(frameNode, label);
+}
+
+void ResetButtonLabel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetLabel(frameNode, "");
 }
 
 void SetButtonType(ArkUINodeHandle node, int type)
@@ -185,6 +200,13 @@ void SetButtonFontWeight(ArkUINodeHandle node, ArkUI_CharPtr fontWeight)
     CHECK_NULL_VOID(frameNode);
     std::string fontWeightStr = fontWeight;
     ButtonModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeightStr));
+}
+
+void SetButtonFontWeightEnum(ArkUINodeHandle node, int fontWeight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(fontWeight));
 }
 
 void ResetButtonFontWeight(ArkUINodeHandle node)
@@ -466,15 +488,24 @@ void ResetButtonSize(ArkUINodeHandle node)
     ButtonModelNG::SetSize(frameNode, value, value);
 }
 
+ArkUI_CharPtr GetButtonLabel(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    g_strValue = ButtonModelNG::GetLabel(frameNode);
+    return g_strValue.c_str();
+}
+
 namespace NodeModifier {
 const ArkUIButtonModifier* GetButtonModifier()
 {
-    static const ArkUIButtonModifier modifier = { nullptr, nullptr,
+    static const ArkUIButtonModifier modifier = { SetButtonLabel, ResetButtonLabel,
         SetButtonType, ResetButtonType, SetButtonStateEffect,
         ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize, ResetButtonFontSize,
         SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle, SetButtonFontFamily,
         ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle, SetButtonBackgroundColor,
-        ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius, SetButtonSize, ResetButtonSize };
+        ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius, SetButtonFontWeightEnum,
+        SetButtonSize, ResetButtonSize, GetButtonLabel };
 
     return &modifier;
 }

@@ -127,6 +127,8 @@ public:
     virtual void SetVerticalAlign(FlexAlign verticalAlign) = 0;
     virtual void SetSymmetricExtensible(bool isExtensible) = 0;
     virtual void SetId(const std::string& id) = 0;
+    virtual void SetOnWillShow(std::function<void()>&& onWillShow) {}
+    virtual void SetOnWillHide(std::function<void()>&& onWillHide) {}
 
 private:
     static std::unique_ptr<TabContentModel> instance_;

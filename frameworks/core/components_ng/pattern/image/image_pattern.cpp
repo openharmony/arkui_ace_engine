@@ -18,6 +18,7 @@
 
 #include <array>
 #include <cstdint>
+#include <memory>
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/matrix4.h"
@@ -37,26 +38,26 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#if defined(PIXEL_MAP_SUPPORTED)
-#include "foundation/multimedia/image_framework/interfaces/kits/js/common/include/pixel_map_napi.h"
-#endif
 #include "core/common/ace_engine_ext.h"
+#include "core/common/ai/image_analyzer_adapter.h"
+#include "core/common/container.h"
 #include "core/common/udmf/udmf_client.h"
 
 namespace OHOS::Ace::NG {
-napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
+ImagePattern::ImagePattern()
 {
-#if defined(PIXEL_MAP_SUPPORTED)
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, {});
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    auto* env = reinterpret_cast<napi_env>(nativeEngine);
-    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap->GetPixelMapSharedPtr());
-    return napiValue;
-#else
-    return nullptr;
-#endif
+    InitDefaultValue();
+    imageAnalyzerAdapter_ = std::shared_ptr<ImageAnalyzerAdapter>(CreateImageAnalyzerAdapter());
+}
+
+ImagePattern::~ImagePattern()
+{
+    if (!isEnableAnalyzer_) {
+        return;
+    }
+    if (IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
+        ImageAnalyzerMgr::GetInstance().Release(&overlayData_);
+    }
 }
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
@@ -155,7 +156,8 @@ void ImagePattern::RegisterVisibleAreaChange()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // add visibleAreaChangeNode(inner callback)
-    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 
 RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geometryNode)
@@ -185,6 +187,7 @@ RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geomet
 
 void ImagePattern::OnImageLoadSuccess()
 {
+    CHECK_NULL_VOID(loadingCtx_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
@@ -236,6 +239,7 @@ void ImagePattern::OnImageLoadSuccess()
 
 void ImagePattern::OnImageDataReady()
 {
+    CHECK_NULL_VOID(loadingCtx_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
@@ -297,14 +301,14 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
     if (image_) {
-        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_, interpolationDefault_);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_, interpolationDefault_);
     }
     CreateObscuredImage();
     if (obscuredImage_) {
-        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_);
+        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_, interpolationDefault_);
     }
     return nullptr;
 }
@@ -705,9 +709,7 @@ void ImagePattern::EnableDrag()
     };
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (!eventHub->HasOnDragStart()) {
-        eventHub->SetOnDragStart(std::move(dragStart));
-    }
+    eventHub->SetDefaultOnDragStart(std::move(dragStart));
 }
 
 bool ImagePattern::BetweenSelectedPosition(const Offset& globalOffset)
@@ -974,14 +976,23 @@ void ImagePattern::OnConfigurationUpdate()
     }
 }
 
-void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig& config)
+// As an example
+void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig &config)
 {
     if (!isEnableAnalyzer_) {
         return;
     }
-    analyzerConfig_ = config;
+}
+
+void ImagePattern::SetImageAnalyzerConfig(void* config)
+{
+    if (!isEnableAnalyzer_) {
+        return;
+    }
+    imageAnalyzerAdapter_->SetImageAnalyzerConfig(config);
+    auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     if (IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
-        ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, &analyzerConfig_);
+        ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, analyzerConfig);
     }
 }
 
@@ -993,7 +1004,7 @@ void ImagePattern::CreateAnalyzerOverlay()
 
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
+    auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
     auto frameNode = GetHost();
     auto overlayNode = frameNode->GetOverlayNode();
 
@@ -1002,8 +1013,9 @@ void ImagePattern::CreateAnalyzerOverlay()
     analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     auto buildNodeFunction = [this, &pixelmapNapiVal]() -> RefPtr<UINode> {
         ScopedViewStackProcessor builderViewStackProcessor;
+        auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
         ImageAnalyzerMgr::GetInstance().BuildNodeFunc(
-            pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_, &overlayData_);
+            pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_, &overlayData_);
         auto customNode = ViewStackProcessor::GetInstance()->Finish();
         return customNode;
     };
@@ -1040,10 +1052,11 @@ void ImagePattern::UpdateAnalyzerOverlay()
 
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
+    auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
     auto frameNode = GetHost();
     auto overlayNode = frameNode->GetOverlayNode();
-    ImageAnalyzerMgr::GetInstance().UpdateImage(&overlayData_, pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_);
+    auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
+    ImageAnalyzerMgr::GetInstance().UpdateImage(&overlayData_, pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_);
     overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1151,6 +1164,22 @@ void ImagePattern::UpdateAnalyzerOverlayLayout()
     auto renderContext = overlayNode->GetRenderContext();
     if (renderContext) {
         renderContext->SetRenderFrameOffset({-padding.Offset().GetX(), -padding.Offset().GetY()});
+    }
+}
+
+void ImagePattern::InitDefaultValue()
+{
+    // add API version protection
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        autoResizeDefault_ = false;
+        interpolationDefault_ = ImageInterpolation::LOW;
+    }
+    auto container = Container::Current();
+    // If the default value is set to false, the ScenceBoard memory increases.
+    // Therefore the default value is different in the ScenceBoard.
+    if (container && container->IsScenceBoardWindow()) {
+        autoResizeDefault_ = true;
+        interpolationDefault_ = ImageInterpolation::NONE;
     }
 }
 } // namespace OHOS::Ace::NG

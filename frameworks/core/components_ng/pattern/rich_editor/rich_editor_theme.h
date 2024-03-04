@@ -63,6 +63,7 @@ public:
             theme->draggable_ = StringUtils::StringToInt(draggable);
             theme->defaultCaretHeight_ = pattern->GetAttr<Dimension>("default_caret_height", 18.5_vp);
             theme->disabledAlpha_ = static_cast<float>(pattern->GetAttr<double>("text_color_disabled_alpha", 0.0));
+            theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color(0x99000000));
         }
     };
 
@@ -98,6 +99,11 @@ public:
         return insertCursorOffset_;
     }
 
+    const Color& GetPlaceholderColor() const
+    {
+        return placeholderColor_;
+    }
+
 protected:
     RichEditorTheme() = default;
 
@@ -110,6 +116,8 @@ private:
 
     // UX::insert cursor offset up by 8vp
     Dimension insertCursorOffset_ = 8.0_vp;
+
+    Color placeholderColor_ = Color(0x99000000);
 };
 } // namespace OHOS::Ace::NG
 

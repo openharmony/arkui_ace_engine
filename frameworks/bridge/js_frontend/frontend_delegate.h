@@ -35,6 +35,13 @@
 namespace OHOS::Ace::Framework {
 enum class AlertState { USER_CANCEL = 0, USER_CONFIRM, RECOVERY };
 
+typedef struct RouterStateInfo {
+    int32_t index = -1;
+    std::string name;
+    std::string path;
+    std::string params;
+} StateInfo;
+
 class JsAcePage;
 
 // A virtual interface which must be implemented as a backing for
@@ -78,6 +85,9 @@ public:
     {}
     // Back to specified page or the previous page if url not set.
     virtual void Back(const std::string& uri, const std::string& params = "") = 0;
+    // Back to specified page or the previous page if Index not set.
+    virtual void BackToIndex(int32_t index, const std::string& params = "")
+    {}
     // Postpone page transition after Begin called, usually to wait some async operation
     virtual void PostponePageTransition() = 0;
     // Begin page transition after Postpone called, usually to wait some async operation
@@ -88,6 +98,12 @@ public:
     virtual int32_t GetStackSize() const = 0;
     // Gets current page's states
     virtual void GetState(int32_t& index, std::string& name, std::string& path) = 0;
+    // Gets page's states by index.
+    virtual void GetRouterStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params)
+    {}
+    // Gets page's states by url.
+    virtual void GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray)
+    {}
     // Gets current page's components count
     virtual size_t GetComponentsCount() = 0;
     // Gets page's index by url
@@ -149,6 +165,7 @@ public:
     virtual void ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
         std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks,
         std::function<void(bool)>&& onStatusChanged) {};
+    virtual void RemoveCustomDialog() {};
     virtual void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) {};
     virtual void CloseCustomDialog(const int32_t dialogId) {};
 

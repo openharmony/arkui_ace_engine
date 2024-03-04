@@ -62,20 +62,42 @@ double ComputeAngle(double x, double y)
 
 void SwipeRecognizer::OnAccepted()
 {
+    int64_t acceptTime = GetSysTimestamp();
+    int64_t inputTime = acceptTime;
+    if (firstInputTime_.has_value()) {
+        inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+    }
+    if (SystemProperties::GetTraceInputEventEnabled()) {
+        ACE_SCOPED_TRACE("UserEvent InputTime:%lld AcceptTime:%lld InputType:SwipeGesture",
+            static_cast<long long>(inputTime), static_cast<long long>(acceptTime));
+    }
+    firstInputTime_.reset();
+
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe gesture has been accepted, node tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onAction_);
+    int64_t overTime = GetSysTimestamp();
+    if (SystemProperties::GetTraceInputEventEnabled()) {
+        ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:SwipeGesture",
+            static_cast<long long>(inputTime), static_cast<long long>(overTime));
+    }
+    firstInputTime_.reset();
 }
 
 void SwipeRecognizer::OnRejected()
 {
     refereeState_ = RefereeState::FAIL;
+    firstInputTime_.reset();
 }
 
 void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    if (!firstInputTime_.has_value()) {
+        firstInputTime_ = event.time;
+    }
+
     TAG_LOGI(AceLogTag::ACE_GESTURE,
         "Swipe recognizer receives %{public}d touch down event, begin to detect swipe event", event.id);
     if (fingers_ > MAX_SWIPE_FINGERS) {
@@ -106,6 +128,9 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void SwipeRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    if (!firstInputTime_.has_value()) {
+        firstInputTime_ = event.time;
+    }
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe recognizer receives axis down event, begin to detect swipe event");
     if (direction_.type == SwipeDirection::NONE) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);

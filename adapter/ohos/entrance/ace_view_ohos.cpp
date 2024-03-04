@@ -16,6 +16,9 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 
 #include <memory>
+
+#include "input_manager.h"
+
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/log/ace_trace.h"
@@ -111,8 +114,10 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
 
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
-        if (pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
-            pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
+        if ((pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
+            pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) ||
+            (pointerAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN &&
+            pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END)) {
             view->ProcessAxisEvent(pointerEvent, node);
         } else {
             view->ProcessDragEvent(pointerEvent);
@@ -154,16 +159,19 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
     int32_t pointerAction = pointerEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN
         || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN
-        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN) {
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN) {
         inputType = LAST_DOWN;
         isFirstMove = true;
     } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_UP
         || pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP
-        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_END
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_ROTATE_END) {
         inputType = LAST_UP;
         isFirstMove = false;
     } else if (isFirstMove && (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE
-        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE)) {
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE
+        || pointerAction == MMI::PointerEvent::POINTER_ACTION_ROTATE_UPDATE)) {
         inputType = FIRST_MOVE;
         isFirstMove = false;
     }
@@ -259,13 +267,13 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d", touchPoint.x,
             touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
     }
-    auto markProcess = [pointerEvent, finallyCallback = callback]() {
-        CHECK_NULL_VOID(pointerEvent);
-        if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+    auto markProcess = [touchPoint, finallyCallback = callback]() {
+        if (touchPoint.type != TouchType::MOVE) {
             TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "touchEvent markProcessed in ace_view, eventInfo: id:%{public}d",
-                pointerEvent->GetId());
+                touchPoint.touchEventId);
         }
-        pointerEvent->MarkProcessed();
+        MMI::InputManager::GetInstance()->MarkProcessed(touchPoint.touchEventId,
+            std::chrono::duration_cast<std::chrono::microseconds>(touchPoint.time.time_since_epoch()).count());
         if (finallyCallback) {
             finallyCallback();
         }
@@ -333,9 +341,9 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
         CHECK_NULL_VOID(container);
         ConvertMouseEvent(pointerEvent, event, container->IsScenceBoardWindow());
     }
-    auto markProcess = [pointerEvent]() {
-        CHECK_NULL_VOID(pointerEvent);
-        pointerEvent->MarkProcessed();
+    auto markProcess = [event]() {
+        MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
+            std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count());
     };
 
     CHECK_NULL_VOID(mouseEventCallback_);
@@ -352,10 +360,11 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
         return;
     }
 
-    auto markProcess = [pointerEvent]() {
-        pointerEvent->MarkProcessed();
-    };
     ConvertAxisEvent(pointerEvent, event);
+    auto markProcess = [event]() {
+        MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
+            std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count());
+    };
 
     /* The first step of axis event of mouse is equivalent to touch event START + UPDATE.
      * Create a fake UPDATE event here to adapt to axis event of mouse.

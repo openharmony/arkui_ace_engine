@@ -2346,6 +2346,7 @@ function modifierWithKey(modifiers, identity, modifierClass, value) {
   const item = modifiers.get(identity);
   if (item) {
     item.stageValue = value;
+    modifiers.set(identity, item);
   }
   else {
     modifiers.set(identity, new modifierClass(value));
@@ -2356,6 +2357,7 @@ class ArkComponent {
     this._modifiers = new Map();
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
+    this._changed = false;
   }
   applyModifierPatch() {
     let expiringItems = [];
@@ -6033,6 +6035,14 @@ class ArkSpanComponent {
       this._modifiersWithKeys.delete(key);
     });
   }
+  cleanStageValue(){
+    if (!this._modifiersWithKeys){
+      return;
+    }
+    this._modifiersWithKeys.forEach((value, key) => {
+        value.stageValue = undefined;
+    });
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -6908,6 +6918,24 @@ class TextWordBreakModifier extends ModifierWithKey {
   }
 }
 TextWordBreakModifier.identity = Symbol('textWordBreak');
+
+class TextEllipsisModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetEllipsisMode(node);
+    }
+    else {
+      getUINativeModule().text.setEllipsisMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextEllipsisModeModifier.identity = Symbol('textEllipsisMode');
 class TextMinFontSizeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7355,7 +7383,8 @@ class ArkTextComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   ellipsisMode(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextEllipsisModeModifier.identity, TextEllipsisModeModifier, value);
+    return this;
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, TextClipModifier.identity, TextClipModifier, value);
@@ -17981,7 +18010,7 @@ class ArkTabsComponent extends ArkComponent {
     return this;
   }
   divider(value) {
-    modifierWithKey(this._modifiersWithKeys, DividerModifier.identity, DividerModifier, value);
+    modifierWithKey(this._modifiersWithKeys, TabsDividerModifier.identity, TabsDividerModifier, value);
     return this;
   }
   barOverlap(value) {
@@ -18022,7 +18051,7 @@ class BarGridAlignModifier extends ModifierWithKey {
   }
 }
 BarGridAlignModifier.identity = Symbol('barGridAlign');
-class DividerModifier extends ModifierWithKey {
+class TabsDividerModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -18041,7 +18070,7 @@ class DividerModifier extends ModifierWithKey {
       this.stageValue.endMargin === this.value.endMargin);
   }
 }
-DividerModifier.identity = Symbol('Divider');
+TabsDividerModifier.identity = Symbol('tabsDivider');
 class BarWidthModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

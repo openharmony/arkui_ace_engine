@@ -189,6 +189,7 @@ void WindowSceneHelper::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
             frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
+            inputMethod->RequestHideInput();
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
         }
@@ -220,13 +221,20 @@ void WindowSceneHelper::InjectPointerEvent(const std::string& targetNodeName,
 {
     CHECK_NULL_VOID(pointerEvent);
     if (targetNodeName == "") {
+        pointerEvent->MarkProcessed();
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
+    if (!pipelineContext) {
+        pointerEvent->MarkProcessed();
+        return;
+    }
 
     auto rootNode = pipelineContext->GetRootElement();
-    CHECK_NULL_VOID(rootNode);
+    if (!rootNode) {
+        pointerEvent->MarkProcessed();
+        return;
+    }
     auto targetNode = FrameNode::FindChildByName(rootNode, targetNodeName);
     if (!targetNode && pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
@@ -239,11 +247,17 @@ void WindowSceneHelper::InjectPointerEvent(const std::string& targetNodeName,
 void WindowSceneHelper::InjectPointerEvent(RefPtr<FrameNode> node,
     const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    CHECK_NULL_VOID(node);
     CHECK_NULL_VOID(pointerEvent);
+    if (!node) {
+        pointerEvent->MarkProcessed();
+        return;
+    }
 
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
+    if (!container) {
+        pointerEvent->MarkProcessed();
+        return;
+    }
     CaculatePoint(node, pointerEvent);
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
@@ -256,7 +270,10 @@ void WindowSceneHelper::InjectPointerEvent(RefPtr<FrameNode> node,
             node->GetId(), node->GetTag().c_str(), node->GetInspectorIdValue("").c_str());
     }
     auto aceView = static_cast<OHOS::Ace::Platform::AceViewOhos*>(container->GetView());
-    CHECK_NULL_VOID(aceView);
+    if (!aceView) {
+        pointerEvent->MarkProcessed();
+        return;
+    }
     OHOS::Ace::Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, node);
 }
 

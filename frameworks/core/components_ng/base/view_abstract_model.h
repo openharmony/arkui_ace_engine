@@ -126,7 +126,7 @@ public:
 
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
-    virtual void SetLayoutWeight(int32_t value) = 0;
+    virtual void SetLayoutWeight(float value) = 0;
     virtual void SetPixelRound(uint8_t value) = 0;
     virtual void SetLayoutDirection(TextDirection value) = 0;
     virtual void SetAspectRatio(float ratio) = 0;
@@ -241,6 +241,8 @@ public:
     virtual void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) = 0;
+    virtual void SetOnSizeChanged(
+        std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) = 0;
 
     // Disable event when the param is undefined.
     virtual void DisableOnClick() = 0;
@@ -290,12 +292,14 @@ public:
         std::function<void()>& previewBuildFunc) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear) = 0;
+        std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear) = 0;
     virtual void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
-        std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-        std::function<void()>&& shouldDismiss) = 0;
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear) = 0;
     virtual void DismissSheet() = 0;
+    virtual void DismissDialog() {};
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;

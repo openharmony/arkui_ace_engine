@@ -3371,28 +3371,28 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest049, TestSize.Level1)
     frameNode->SetAllowDrop(allowDrop);
 
      /**
-     * @tc.steps: step3. call UpdateDragAllowDrop with frameNode and true.
+     * @tc.steps: step3. call UpdateDragAllowDrop with frameNode and copy.
      * @tc.expected: dragDropManager->summaryMap_.empty() return a true value.
      */
     dragDropManager->summaryMap_.clear();
-    dragDropManager->UpdateDragAllowDrop(frameNode, true);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY);
     EXPECT_TRUE(dragDropManager->summaryMap_.empty());
 
     /**
-     * @tc.steps: step4. call UpdateDragAllowDrop with frameNode and true.
+     * @tc.steps: step4. call UpdateDragAllowDrop with frameNode and copy.
      * @tc.expected: dragDropManager->summaryMap_.empty() return a false value.
      */
     dragDropManager->summaryMap_.insert(make_pair(NODE_TAG, frameNodeNullId));
-    dragDropManager->UpdateDragAllowDrop(frameNode, true);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY);
     EXPECT_FALSE(dragDropManager->summaryMap_.empty());
 
     /**
-     * @tc.steps: step5. call UpdateDragAllowDrop with frameNode and true.
+     * @tc.steps: step5. call UpdateDragAllowDrop with frameNode and copy.
      * @tc.expected: allowDrop.find(ROOT_ETS_TAG) is equal to allowDrop.end().
      */
     dragDropManager->summaryMap_.clear();
     dragDropManager->summaryMap_.insert(make_pair(ROOT_ETS_TAG, frameNodeNullId));
-    dragDropManager->UpdateDragAllowDrop(frameNode, true);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY);
     EXPECT_TRUE(allowDrop.find(ROOT_ETS_TAG) == allowDrop.end());
 }
 

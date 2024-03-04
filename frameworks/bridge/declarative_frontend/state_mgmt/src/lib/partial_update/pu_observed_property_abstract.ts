@@ -47,6 +47,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
     super(subscriber, viewName);
+    ConfigureStateMgmt.instance.intentUsingV2(`V2 Decorated variable`, this.debugInfo());
     Object.defineProperty(this, 'owningView_', {writable: true, enumerable: false});
     Object.defineProperty(this, 'subscriberRefs_',
       {writable: true, enumerable: false, value: new Set<IPropertySubscriber>()});
@@ -161,7 +162,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
 
   protected isPropSourceObservedPropertyFakeName(): string | false {
-    return this.info().endsWith("_prop_fake_state_source___")
+    return this.info() && this.info().endsWith("_prop_fake_state_source___")
       ? this.info().substring(0, this.info().length - "_prop_fake_state_source___".length)
       : false;
   }

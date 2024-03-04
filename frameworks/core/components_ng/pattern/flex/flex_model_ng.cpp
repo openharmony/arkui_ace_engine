@@ -166,4 +166,128 @@ void FlexModelNG::SetAlignContent(int32_t value)
     SetWrapAlignment(static_cast<WrapAlignment>(value));
 }
 
+void FlexModelNG::SetFlexRow(FrameNode* frameNode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, FlexDirection, FlexDirection::ROW, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAxisAlign, FlexAlign::FLEX_START, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, FlexAlign::FLEX_START, frameNode);
+
+    auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    pattern->SetIsWrap(false);
+}
+
+void FlexModelNG::SetFlexWrap(FrameNode* frameNode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, WrapDirection, WrapDirection::HORIZONTAL, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, WrapAlignment::START, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, WrapAlignment::START, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, WrapAlignment::START, frameNode);
+
+    auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    pattern->SetIsWrap(true);
+}
+
+void FlexModelNG::SetFlexDirection(FrameNode* frameNode, FlexDirection value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, FlexDirection, value, frameNode);
+}
+
+void FlexModelNG::SetFlexWrapDirection(FrameNode* frameNode, WrapDirection value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, WrapDirection, value, frameNode);
+}
+
+void FlexModelNG::SetFlexJustifyContent(FrameNode* frameNode, int32_t value)
+{
+    auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    if (!pattern->GetIsWrap()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAxisAlign, static_cast<FlexAlign>(value), frameNode);
+        return;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, static_cast<WrapAlignment>(value), frameNode);
+}
+
+void FlexModelNG::SetFlexAlignItems(FrameNode* frameNode, int32_t value)
+{
+    auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    if (!pattern->GetIsWrap()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, static_cast<FlexAlign>(value), frameNode);
+        return;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, static_cast<WrapAlignment>(value), frameNode);
+}
+
+void FlexModelNG::SetFlexAlignContent(FrameNode* frameNode, int32_t value)
+{
+    auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    if (!pattern->GetIsWrap()) {
+        return;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, static_cast<WrapAlignment>(value), frameNode);
+}
+
+int FlexModelNG::GetFlexWrap(FrameNode* frameNode)
+{
+    int value = 0;
+    auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    if (!pattern->GetIsWrap()) {
+        value = static_cast<int>(FlexWrap::NO_WRAP);
+    } else {
+        WrapDirection direction = WrapDirection::HORIZONTAL;
+        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+            FlexLayoutProperty, WrapDirection, direction, frameNode, direction);
+        int intDirection = static_cast<int>(direction);
+        if (intDirection == 0 || intDirection == 1) {
+            value = static_cast<int>(FlexWrap::WRAP);
+        } else {
+            value = static_cast<int>(FlexWrap::WRAP_REVERSE);
+        }
+    }
+    return value;
+}
+
+int FlexModelNG::GetFlexDirection(FrameNode* frameNode)
+{
+    FlexDirection value = FlexDirection::ROW;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(FlexLayoutProperty, FlexDirection, value, frameNode, value);
+    return static_cast<int>(value);
+}
+
+int FlexModelNG::GetFlexJustifyContent(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    if (!pattern->GetIsWrap()) {
+        FlexAlign value = FlexAlign::AUTO;
+        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(FlexLayoutProperty, MainAxisAlign, value, frameNode, value);
+        return static_cast<int>(value);
+    }
+    WrapAlignment value = WrapAlignment::START;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(FlexLayoutProperty, MainAlignment, value, frameNode, value);
+    return static_cast<int>(value);
+}
+
+int FlexModelNG::GetFlexAlignItems(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    if (!pattern->GetIsWrap()) {
+        FlexAlign value = FlexAlign::AUTO;
+        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(FlexLayoutProperty, CrossAxisAlign, value, frameNode, value);
+        return static_cast<int>(value);
+    }
+    WrapAlignment value = WrapAlignment::START;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(FlexLayoutProperty, CrossAlignment, value, frameNode, value);
+    return static_cast<int>(value);
+}
+
+int FlexModelNG::GetFlexAlignContent(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    if (!pattern->GetIsWrap()) {
+        return 0;
+    }
+    WrapAlignment value = WrapAlignment::START;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(FlexLayoutProperty, Alignment, value, frameNode, value);
+    return static_cast<int>(value);
+}
+
 } // namespace OHOS::Ace::NG

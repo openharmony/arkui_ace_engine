@@ -170,7 +170,8 @@ void JSViewStackProcessor::JsMoveDeletedElmtIds(const JSCallbackInfo& info)
  */
 bool JSViewStackProcessor::JsUsesNewPipeline()
 {
-    return Container::IsCurrentUseNewPipeline();
+    auto container = Container::Current();
+    return container ? container->IsUseNewPipeline() : true;
 }
 
 /**

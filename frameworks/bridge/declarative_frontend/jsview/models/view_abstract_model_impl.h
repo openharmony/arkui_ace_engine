@@ -84,7 +84,7 @@ public:
 
     void SetLayoutPriority(int32_t priority) override;
     void SetPixelRound(uint8_t value) override;
-    void SetLayoutWeight(int32_t value) override;
+    void SetLayoutWeight(float value) override;
     void SetLayoutDirection(TextDirection value) override;
     void SetAspectRatio(float ratio) override;
     void ResetAspectRatio() override {};
@@ -186,6 +186,8 @@ public:
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) override;
+    void SetOnSizeChanged(
+        std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) override {};
 
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetEnabled(bool enabled) override;
@@ -228,11 +230,13 @@ public:
         std::function<void()>& previewBuildFunc) override;
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear) override {}
+        std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear) override {}
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
         std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-        std::function<void()>&& shouldDismiss) override {}
+        std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear) override {}
     void DismissSheet() override {}
 
     void SetAccessibilityGroup(bool accessible) override;

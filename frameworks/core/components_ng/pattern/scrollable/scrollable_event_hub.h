@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,26 @@ public:
     const OnScrollEvent& GetOnScroll() const
     {
         return onScrollEvent_;
+    }
+
+    void SetOnWillScroll(OnScrollEvent&& onScroll)
+    {
+        onWillScrollEvent_ = std::move(onScroll);
+    }
+
+    const OnScrollEvent& GetOnWillScroll() const
+    {
+        return onWillScrollEvent_;
+    }
+
+    void SetOnDidScroll(OnScrollEvent&& onScroll)
+    {
+        onDidScrollEvent_ = std::move(onScroll);
+    }
+
+    const OnScrollEvent& GetOnDidScroll() const
+    {
+        return onDidScrollEvent_;
     }
 
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
@@ -88,6 +108,8 @@ public:
 
 private:
     OnScrollEvent onScrollEvent_;
+    OnScrollEvent onWillScrollEvent_;
+    OnScrollEvent onDidScrollEvent_;
     OnScrollStartEvent onScrollStartEvent_;
     OnScrollStopEvent onScrollStopEvent_;
     OnScrollFrameBeginEvent onScrollFrameBeginEvent_;

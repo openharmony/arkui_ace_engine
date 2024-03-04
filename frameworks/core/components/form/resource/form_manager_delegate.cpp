@@ -455,7 +455,13 @@ bool FormManagerDelegate::ParseAction(const std::string& action, const std::stri
         bundle = wantCache_.GetElement().GetBundleName();
     }
     if (ability.empty()) {
-        return false;
+        if (type != "router") {
+            return false;
+        }
+        auto uri = eventAction->GetValue("uri");
+        if (!uri->IsValid()) {
+            return false;
+        }
     }
 
     want.SetElementName(bundle, ability);
@@ -541,16 +547,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     if (!eventAction->IsValid()) {
         return;
     }
-    auto uri = eventAction->GetValue("uri");
-    auto abilityName = eventAction->GetValue("abilityName");
-    if (uri->IsValid() && !abilityName->IsValid()) {
-        CHECK_NULL_VOID(formUtils_);
-        auto context = context_.Upgrade();
-        CHECK_NULL_VOID(context);
-        auto instantId = context->GetInstanceId();
-        formUtils_->RouterEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
-        return;
-    }
+    
     auto actionType = eventAction->GetValue("action");
     if (!actionType->IsValid()) {
         return;
@@ -565,6 +562,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     if (type == "router") {
         AAFwk::Want want;
         if (!ParseAction(action, type, want)) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "action parse failed, detail action:%{public}s", action.c_str());
         } else {
             CHECK_NULL_VOID(formUtils_);
             auto context = context_.Upgrade();
@@ -576,6 +574,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     } else if (type == "call") {
         AAFwk::Want want;
         if (!ParseAction(action, type, want)) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "action parse failed, detail action:%{public}s", action.c_str());
         } else {
             CHECK_NULL_VOID(formUtils_);
             auto context = context_.Upgrade();
@@ -588,6 +587,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
 
     AAFwk::Want want;
     if (!ParseAction(action, type, want)) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "action parse failed, detail action:%{public}s", action.c_str());
         return;
     }
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, (int64_t)runningCardId_);

@@ -55,7 +55,7 @@ public:
                 auto id = host->GetInspectorIdValue("");
                 builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
                 if (!id.empty()) {
-                    Recorder::NodeDataCache::Get().PutMultiple(id, name_, select);
+                    Recorder::NodeDataCache::Get().PutMultiple(host, id, name_, select);
                 }
             }
             builder.SetChecked(select).SetText(name_);

@@ -17,6 +17,7 @@ ace_unittest("swiper_test_ng") {
   type = "new"
   sources = [
     "swiper_attr_test_ng.cpp",
+    "swiper_common_test_ng.cpp",
     "swiper_test_ng.cpp",
   ]
 }

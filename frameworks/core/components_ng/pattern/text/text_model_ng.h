@@ -19,6 +19,7 @@
 #include <functional>
 #include <string>
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace::NG {
@@ -96,6 +97,7 @@ public:
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetFont(FrameNode* frameNode, const Font& value);
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
+    static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
 
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
@@ -103,11 +105,24 @@ public:
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
     static Font GetFont(FrameNode* frameNode);
+    static std::string GetContent(FrameNode* frameNode);
+    static float GetLineHeight(FrameNode* frameNode);
+    static TextDecoration GetDecoration(FrameNode* frameNode);
+    static Color GetTextDecorationColor(FrameNode* frameNode);
+    static TextCase GetTextCase(FrameNode* frameNode);
+    static Dimension GetLetterSpacing(FrameNode* frameNode);
+    static uint32_t GetMaxLines(FrameNode* frameNode);
+    static TextAlign GetTextAlign(FrameNode* frameNode);
+    static TextOverflow GetTextOverflow(FrameNode* frameNode);
+    static Dimension GetTextIndent(FrameNode* frameNode);
 
     static Dimension GetFontSize(FrameNode* frameNode);
     static Ace::FontWeight GetFontWeight(FrameNode* frameNode);
     static Ace::FontStyle GetItalicFontStyle(FrameNode* frameNode);
-
+    static Color GetDefaultColor();
+    static Color GetFontColor(FrameNode* frameNode);
+    static Dimension GetTextBaselineOffset(FrameNode* frameNode);
+    static std::vector<Shadow> GetTextShadow(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

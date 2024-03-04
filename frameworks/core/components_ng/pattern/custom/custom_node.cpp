@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/custom/custom_node.h"
 
+#include "base/log/ace_performance_monitor.h"
 #include "base/log/dump_log.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -58,6 +59,7 @@ void CustomNode::Render()
             FireOnAppear();
         }
         {
+            COMPONENT_CREATION_DURATION();
             ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d]", GetJSViewName().c_str(), GetId(),
                 GetParent() ? GetParent()->GetId() : 0);
             // first create child node and wrapper.

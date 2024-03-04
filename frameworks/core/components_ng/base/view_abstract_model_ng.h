@@ -395,7 +395,7 @@ public:
 
     void SetLayoutPriority(int32_t priority) override {}
 
-    void SetLayoutWeight(int32_t value) override
+    void SetLayoutWeight(float value) override
     {
         ViewAbstract::SetLayoutWeight(value);
     }
@@ -884,6 +884,12 @@ public:
         ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
     }
 
+    void SetOnSizeChanged(
+        std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged) override
+    {
+        ViewAbstract::SetOnSizeChanged(std::move(onSizeChanged));
+    }
+
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override
     {
         ViewAbstract::SetOnDrop(std::move(onDrop));
@@ -992,6 +998,11 @@ public:
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
+    void DismissDialog() override
+    {
+        ViewAbstract::DismissDialog();
+    }
+
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
 
     void BindMenuGesture(
@@ -1005,11 +1016,13 @@ public:
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear) override;
+        std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear) override;
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss) override;
+        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear) override;
     void DismissSheet() override;
 
     void SetAccessibilityGroup(bool accessible) override;

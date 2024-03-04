@@ -832,7 +832,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     RegisterExtraViews(globalObj);
 }
 
-void RegisterAllFormModule(BindingTarget globalObj)
+void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
 {
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
@@ -843,7 +843,8 @@ void RegisterAllFormModule(BindingTarget globalObj)
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
-    JSRenderImage::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj, nativeEngine);
+    JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
     JSCanvasImageData::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
@@ -855,8 +856,16 @@ void RegisterAllFormModule(BindingTarget globalObj)
     RegisterExtraViews(globalObj);
 }
 
-void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module)
+void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module, void* nativeEngine)
 {
+    if (module == "ImageBitmap") {
+        JSRenderImage::JSBind(globalObj, nativeEngine);
+        return;
+    }
+    if (module == "OffscreenCanvas") {
+        JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
+        return;
+    }
     auto func = bindFuncs.find(module);
     if (func == bindFuncs.end()) {
         RegisterExtraViewByName(globalObj, module);
@@ -873,7 +882,7 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSCanvasGradient::JSBind(globalObj);
         JSCanvasImageData::JSBind(globalObj);
         JSMatrix2d::JSBind(globalObj);
-        JSRenderImage::JSBind(globalObj);
+        JSRenderImage::JSBind(globalObj, nativeEngine);
     }
 
     (*func).second(globalObj);
@@ -943,7 +952,7 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     }
 }
 
-void JsRegisterModules(BindingTarget globalObj, std::string modules)
+void JsRegisterModules(BindingTarget globalObj, std::string modules, void* nativeEngine)
 {
     std::stringstream input(modules);
     std::string moduleName;
@@ -955,13 +964,15 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
-    JSRenderImage::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj, nativeEngine);
+    JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
     JSCanvasImageData::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
 }
 
-void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload)
+void JsBindFormViews(
+    BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, void* nativeEngine, bool isReload)
 {
     if (!isReload) {
         JSViewAbstract::JSBind(globalObj);
@@ -994,10 +1005,10 @@ void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::stri
 
     if (!formModuleList.empty()) {
         for (const std::string& module : formModuleList) {
-            RegisterFormModuleByName(globalObj, module);
+            RegisterFormModuleByName(globalObj, module, nativeEngine);
         }
     } else {
-        RegisterAllFormModule(globalObj);
+        RegisterAllFormModule(globalObj, nativeEngine);
     }
 }
 
@@ -1033,7 +1044,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     auto delegate = JsGetFrontendDelegate();
     std::string jsModules;
     if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {
-        JsRegisterModules(globalObj, jsModules);
+        JsRegisterModules(globalObj, jsModules, nativeEngine);
     } else {
         RegisterAllModule(globalObj, nativeEngine);
     }

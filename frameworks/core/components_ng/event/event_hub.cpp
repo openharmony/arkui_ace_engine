@@ -220,4 +220,37 @@ void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& cal
     onAreaChangedInnerCallbacks_[id] = std::move(callback);
 }
 
+void EventHub::ClearCustomerOnDragFunc()
+{
+    onDragStart_ = nullptr;
+    customerOnDragEnter_ = nullptr;
+    customerOnDragLeave_ = nullptr;
+    customerOnDragMove_ = nullptr;
+    customerOnDrop_ = nullptr;
+    customerOnDragEnd_ = nullptr;
+}
+
+void EventHub::SetOnSizeChanged(OnSizeChangedFunc&& onSizeChanged)
+{
+    onSizeChanged_ = std::move(onSizeChanged);
+}
+
+void EventHub::FireOnSizeChanged(const RectF& oldRect, const RectF& rect)
+{
+    if (onSizeChanged_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onSizeChanged = onSizeChanged_;
+        onSizeChanged(oldRect, rect);
+    }
+}
+
+bool EventHub::HasOnSizeChanged() const
+{
+    return static_cast<bool>(onSizeChanged_);
+}
+
+void EventHub::ClearOnAreaChangedInnerCallbacks()
+{
+    onAreaChangedInnerCallbacks_.clear();
+}
 } // namespace OHOS::Ace::NG

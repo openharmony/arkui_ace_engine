@@ -83,6 +83,8 @@ constexpr char KEY_NAV_PAGE[] = "navPage";
 constexpr char KEY_NAV_PAGE_TYPE[] = "navType";
 constexpr char KEY_NAV_PAGE_PARAM[] = "navPageParam";
 
+bool IsCacheAvaliable();
+
 class EventParamsBuilder {
 public:
     EventParamsBuilder();
@@ -135,6 +137,11 @@ public:
     bool IsComponentRecordEnable() const;
     void UpdateEventSwitch(const EventSwitch& eventSwitch);
 
+    void SetContainerChanged()
+    {
+        isFocusContainerChanged_ = true;
+    }
+
     void SetContainerInfo(const std::string& windowName, int32_t id, bool foreground);
     void SetFocusContainerInfo(const std::string& windowName, int32_t id);
     int32_t GetContainerId();
@@ -168,6 +175,7 @@ private:
     std::string pageUrl_;
     std::string navDstName_;
     int64_t navShowTime_ = -1;
+    bool isFocusContainerChanged_ = false;
 
     RefPtr<TaskExecutor> taskExecutor_;
 

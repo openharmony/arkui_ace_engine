@@ -283,7 +283,7 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
     return currentId_ == id;
 }
 
-void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy)
+void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior)
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
@@ -296,7 +296,7 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
             return;
         }
     }
-    UpdateDragStyle(isCopy ? DragCursorStyleCore::COPY : DragCursorStyleCore::MOVE);
+    UpdateDragStyle(dragBehavior == DragBehavior::MOVE ? DragCursorStyleCore::MOVE : DragCursorStyleCore::COPY);
 }
 
 void DragDropManager::UpdateDragStyle(const DragCursorStyleCore& dragStyle)
@@ -561,11 +561,12 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager is dragCancel, finish drag. WindowId is %{public}d.",
             container->GetWindowId());
         InteractionInterface::GetInstance()->SetDragWindowVisible(false);
-        DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId() };
+        DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId(), DragBehavior::UNKNOWN };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);
         NotifyDragFrameNode(point, DragEventType::DROP, DragRet::DRAG_CANCEL);
         summaryMap_.clear();
         parentHitNodes_.clear();
+        dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
         ClearVelocityInfo();
         return;
     }
@@ -576,11 +577,13 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "DragDropManager onDragEnd, not find drop target, stop drag. WindowId is %{public}d.",
             container->GetWindowId());
-        DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, container->GetWindowId() };
+        DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, container->GetWindowId(),
+            DragBehavior::UNKNOWN };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);
         NotifyDragFrameNode(point, DragEventType::DROP, DragRet::DRAG_FAIL);
         summaryMap_.clear();
         parentHitNodes_.clear();
+        dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
         return;
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Current windowId is %{public}d, drag position is (%{public}f, %{public}f)."
@@ -606,20 +609,22 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     CHECK_NULL_VOID(pipeline);
     auto dragResult = event->GetResult();
     auto useCustomAnimation = event->IsUseCustomAnimation();
+    auto dragBehavior = event->GetDragBehavior();
     auto windowId = container->GetWindowId();
-    pipeline->AddAfterRenderTask([dragResult, useCustomAnimation, windowId]() {
+    pipeline->AddAfterRenderTask([dragResult, useCustomAnimation, windowId, dragBehavior]() {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "Stop drag, start do drop animation. UseCustomAnimation is %{public}d,"
             "WindowId is %{public}d.",
             useCustomAnimation, windowId);
         InteractionInterface::GetInstance()->SetDragWindowVisible(!useCustomAnimation);
-        DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId };
+        DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);
     });
     NotifyDragFrameNode(point, DragEventType::DROP, event->GetResult());
     dragFrameNode->MarkDirtyNode();
     summaryMap_.clear();
     parentHitNodes_.clear();
+    dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
 
 void DragDropManager::RequireSummary()
@@ -637,7 +642,6 @@ void DragDropManager::RequireSummary()
     previewRect_ = Rect(-1, -1, -1, -1);
     extraInfo_ = extraInfo;
     summaryMap_ = summary;
-    UpdateDragStyle();
 }
 
 void DragDropManager::ResetRecordSize(uint32_t recordSize)
@@ -750,15 +754,15 @@ void DragDropManager::FireOnDragEvent(
         return;
     }
     if (event->GetResult() == DragRet::ENABLE_DROP) {
-        if (event->IsCopy()) {
-            UpdateDragStyle(DragCursorStyleCore::COPY);
-        } else {
+        if (event->GetDragBehavior() == DragBehavior::MOVE) {
             UpdateDragStyle(DragCursorStyleCore::MOVE);
+        } else {
+            UpdateDragStyle(DragCursorStyleCore::COPY);
         }
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
         UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
     } else {
-        UpdateDragAllowDrop(frameNode, event->IsCopy());
+        UpdateDragAllowDrop(frameNode, event->GetDragBehavior());
     }
 }
 
@@ -1362,5 +1366,23 @@ void DragDropManager::SetDragResult(
     }
     CHECK_NULL_VOID(dragEvent);
     dragEvent->SetResult(result);
+}
+
+void DragDropManager::SetDragBehavior(
+    const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
+{
+    DragBehavior dragBehavior = DragBehavior::UNKNOWN;
+    switch (notifyMessage.dragBehavior) {
+        case DragBehavior::COPY:
+            dragBehavior = DragBehavior::COPY;
+            break;
+        case DragBehavior::MOVE:
+            dragBehavior = DragBehavior::MOVE;
+            break;
+        default:
+            break;
+    }
+    CHECK_NULL_VOID(dragEvent);
+    dragEvent->SetDragBehavior(dragBehavior);
 }
 } // namespace OHOS::Ace::NG

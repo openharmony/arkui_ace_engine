@@ -146,6 +146,9 @@ void JSRect::SetRadius(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    CalcDimension value(0.0f);
+    RectModel::GetInstance()->SetRadiusWidth(value);
+    RectModel::GetInstance()->SetRadiusHeight(value);
     if (info[0]->IsArray()) {
         SetRadiusWithArrayValue(nullptr, info[0]);
         info.SetReturnValue(info.This());

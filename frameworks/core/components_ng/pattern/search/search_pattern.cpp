@@ -177,9 +177,6 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
     cancelButtonLayoutProperty->UpdateLabel("");
     cancelButtonFrameNode->MarkModifyDone();
-
-    HandleEnabled();
-
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldValueChangeEvent();
@@ -192,6 +189,7 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+    HandleEnabled();
 }
 
 void SearchPattern::HandleBackgroundColor()
@@ -282,6 +280,8 @@ void SearchPattern::InitTextFieldDragEvent()
     auto textFieldEventHub = textFieldFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(textFieldEventHub);
 
+    textFieldFrameNode->SetDragPreview(host->GetDragPreview());
+
     auto dragStart = searchEventHub->GetOnDragStart();
     if (dragStart != nullptr) {
         textFieldEventHub->SetOnDragStart(std::move(dragStart));
@@ -338,7 +338,7 @@ void SearchPattern::OnAfterModifyDone()
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
         CHECK_NULL_VOID(textFieldPattern);
         auto text = textFieldPattern->GetTextValue();
-        Recorder::NodeDataCache::Get().PutString(inspectorId, text);
+        Recorder::NodeDataCache::Get().PutString(host, inspectorId, text);
     }
 }
 

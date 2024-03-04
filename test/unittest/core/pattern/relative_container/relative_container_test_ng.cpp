@@ -1618,6 +1618,12 @@ HWTEST_F(RelativeContainerTestNg, BiasRulesTest005, TestSize.Level1)
  */
 HWTEST_F(RelativeContainerTestNg, BarrierTest001, TestSize.Level1)
 {
+    /**
+     * set pipeline: api = 11
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetMinPlatformVersion(11);
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
         ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));

@@ -262,6 +262,19 @@ void TitleBarPattern::OnModifyDone()
     MountBackButton(hostNode);
     MountTitle(hostNode);
     MountSubTitle(hostNode);
+    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+        isInitialTitle_ || !isTitleChanged_) {
+        return;
+    }
+    isTitleChanged_ = false;
+    if (NearEqual(tempTitleBarHeight_, static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) ||
+        NearEqual(tempTitleBarHeight_, static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()))) {
+        tempTitleBarHeight_ =
+            hostNode->GetSubtitle() ? static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())
+                                    : static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    }
 }
 
 void TitleBarPattern::ProcessTitleDragStart(float offset)
@@ -886,7 +899,7 @@ float TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle(float offset,
     if (LessOrEqual(defaultTitleBarHeight_ + lastCordScrollOffset, minHeight)) {
         // The starting height of this update is smaller than the minHeight, so the navigation component only
         // handles offsets from minHeight to target height.
-        offsetHandled = coordScrollOffset_ - (defaultTitleBarHeight_ - minHeight);
+        offsetHandled = defaultTitleBarHeight_ + coordScrollOffset_ - minHeight;
     } else if (GreatOrEqual(defaultTitleBarHeight_ + lastCordScrollOffset, maxTitleBarHeight_)) {
         // The starting position height of this update is greater than the maxTitleBarHeight_, so the navigation
         // component only handles offsets from maxTitleBarHeight_ to target height.

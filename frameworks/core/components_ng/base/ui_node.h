@@ -58,7 +58,7 @@ class ACE_EXPORT UINode : public virtual AceType {
     DECLARE_ACE_TYPE(UINode, AceType);
 
 public:
-    UINode(const std::string& tag, int32_t nodeId, bool isRoot = false);
+    UINode(const std::string& tag, int32_t nodeId, int32_t instanceId = -1, bool isRoot = false);
     ~UINode() override;
 
     // atomic node is like button, image, custom node and so on.
@@ -571,7 +571,9 @@ protected:
     // update visible change signal to children
     void UpdateChildrenVisible(bool isVisible) const;
 
-protected:
+    void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId);
+    void CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId);
+
     bool needCallChildrenUpdate_ = true;
 
 private:
@@ -597,6 +599,7 @@ private:
     bool isBuildByJS_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
+    int32_t instanceId_ = -1;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int64_t currentAccessibilityId_;

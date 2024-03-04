@@ -24,19 +24,39 @@ class ACE_EXPORT FolderEventInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(FolderEventInfo, BaseEventInfo);
 
 public:
-    FolderEventInfo(FoldStatus foldStatus) : BaseEventInfo("FolderStackInfo"), folderState(foldStatus) {}
+    FolderEventInfo(FoldStatus foldStatus) : BaseEventInfo("FolderStackInfo"), folderState_(foldStatus) {}
+    FolderEventInfo(FoldStatus foldStatus, bool intoHover, Rotation rotation, WindowMode windowMode)
+        : BaseEventInfo("FolderStackInfo"), folderState_(foldStatus), isHoverMode_(intoHover), appRotation_(rotation),
+          windowMode_(windowMode)
+    {}
 
     ~FolderEventInfo() = default;
 
     FoldStatus GetFolderState() const
     {
-        return folderState;
+        return folderState_;
+    }
+    bool IsHoverMode() const
+    {
+        return isHoverMode_;
+    }
+
+    Rotation GetRotation() const
+    {
+        return appRotation_;
+    }
+
+    WindowMode GetWindowMode() const
+    {
+        return windowMode_;
     }
 
 private:
-    FoldStatus folderState;
-
+    FoldStatus folderState_ = FoldStatus::UNKNOWN;
+    bool isHoverMode_ = false;
+    Rotation appRotation_ = Rotation::ROTATION_0;
+    WindowMode windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
 };
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FOLDER_EVENT_INFO_H

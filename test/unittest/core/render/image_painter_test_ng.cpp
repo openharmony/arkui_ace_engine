@@ -73,6 +73,10 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImage1, TestSize.Level1)
     /**
      * @tc.steps1: build a imagePainter and imagePaintConfig object.
      */
+    EXPECT_CALL(testingCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, DetachBrush()).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, DetachPen()).WillRepeatedly(ReturnRef(testingCanvas));
     RefPtr<NG::CanvasImage> canvasImage;
     NG::ImagePainter imagePainter(canvasImage);
     NG::ImagePaintConfig imagePaintConfig;

@@ -39,6 +39,11 @@ public:
         const uint32_t id = 0;
         return id;
     }
+
+    virtual bool BuildFromBitmap(const TestingBitmap& bitmap) const
+    {
+        return true;
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_IMAGE_H

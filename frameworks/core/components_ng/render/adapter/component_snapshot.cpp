@@ -64,6 +64,20 @@ private:
     ComponentSnapshot::JsCallback callback_;
     WeakPtr<FrameNode> node_;
 };
+
+class NormalCaptureCallback : public Rosen::SurfaceCaptureCallback {
+public:
+    explicit NormalCaptureCallback(ComponentSnapshot::NormalCallback&& callback) : callback_(std::move(callback)) {}
+    ~NormalCaptureCallback() override = default;
+    void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
+    {
+        CHECK_NULL_VOID(callback_);
+        callback_(pixelMap);
+    }
+
+private:
+    ComponentSnapshot::NormalCallback callback_;
+};
 } // namespace
 
 std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNode>& node)
@@ -116,6 +130,8 @@ void ComponentSnapshot::Create(
     CHECK_NULL_VOID(pipeline);
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
+    pipeline->FlushUITasks();
+    pipeline->FlushMessages();
 
     executor->PostDelayedTask(
         [callback, node, enableInspector]() mutable {
@@ -127,5 +143,12 @@ void ComponentSnapshot::Create(
                 rsNode, std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr));
         },
         TaskExecutor::TaskType::UI, delayTime);
+}
+
+void ComponentSnapshot::GetNormalCapture(const RefPtr<FrameNode>& frameNode, NormalCallback&& callback)
+{
+    auto rsNode = GetRsNode(frameNode);
+    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<NormalCaptureCallback>(std::move(callback)));
 }
 } // namespace OHOS::Ace::NG

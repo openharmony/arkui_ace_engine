@@ -64,6 +64,7 @@ constexpr int32_t DEFAULT_INTERVAL = 3000;
 constexpr int32_t DEFAULT_DURATION = 400;
 constexpr float DRAG_SPEED = 500.0f;
 constexpr float DRAG_OFFSET_X = 50.0f;
+constexpr float CAPTURE_MARGIN_SIZE = 15.0f;
 
 class SwiperTestNg : public TestNG {
 public:
@@ -73,8 +74,9 @@ public:
     void TearDown() override;
     void GetInstance();
 
+    void Create(const std::function<void(SwiperModelNG)>& callback = nullptr);
     void CreateWithItem(const std::function<void(SwiperModelNG)>& callback = nullptr);
-    void CreateItem(int32_t itemNumber = ITEM_NUMBER);
+    static void CreateItem(int32_t itemNumber = ITEM_NUMBER);
 
     void CreateChildWrapperAppendToHostWrapper(
         int32_t startIndex, int32_t endIndex, const RefPtr<LayoutWrapperNode>& hostWrapper);
@@ -85,6 +87,7 @@ public:
         RefPtr<FrameNode>& arrowNode, RefPtr<LayoutWrapperNode>& arrowLayoutWrapper);
     void AddArrowChild(const RefPtr<FrameNode>& arrowNode, const RefPtr<LayoutWrapperNode>& arrowLayoutWrapper);
     void CreateSwiperLayoutWrapper(const RefPtr<FrameNode>& frameNode_, RefPtr<LayoutWrapperNode>& swiperLayoutWrapper);
+    void InitCaptureTest();
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<SwiperPattern> pattern_;

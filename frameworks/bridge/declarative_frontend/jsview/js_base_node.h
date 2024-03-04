@@ -41,6 +41,8 @@ public:
     void FinishUpdateFunc(const JSCallbackInfo& info);
     void Create(const JSCallbackInfo& info);
     void BuildNode(const JSCallbackInfo& info);
+    void CreateFrameNode(const JSCallbackInfo& info);
+    void ConvertToFrameNode(const JSCallbackInfo& info);
     void PostTouchEvent(const JSCallbackInfo& info);
     void CreateRenderNode(const JSCallbackInfo& info);
     void UpdateStart(const JSCallbackInfo& info);

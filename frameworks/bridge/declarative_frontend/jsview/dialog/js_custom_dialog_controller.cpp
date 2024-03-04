@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<CustomDialogControllerModel> CustomDialogControllerModel::instance_ = nullptr;
@@ -108,6 +109,10 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             };
             instance->dialogProperties_.onCancel = onCancel;
         }
+
+        std::function<void(const int32_t& info)> onWillDismissFunc = nullptr;
+        JSViewAbstract::ParseDialogCallback(constructorArg, onWillDismissFunc);
+        instance->dialogProperties_.onWillDismiss = onWillDismissFunc;
 
         // Parses autoCancel.
         JSRef<JSVal> autoCancelValue = constructorArg->GetProperty("autoCancel");

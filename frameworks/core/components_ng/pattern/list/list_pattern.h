@@ -211,6 +211,10 @@ public:
     {
         return predictLayoutParam_;
     }
+    const LayoutConstraintF& GetLayoutConstraint() const
+    {
+        return layoutConstraint_;
+    }
 
     void CloseAllSwipeActions(OnFinishFunc&&);
 
@@ -227,6 +231,8 @@ public:
     {
         return isNeedToUpdateListDirection_;
     }
+
+    std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
 
 private:
     bool IsNeedInitClickEventRecorder() const override
@@ -307,6 +313,7 @@ private:
     bool crossMatchChild_ = false;
     bool smooth_ = false;
     float scrollSnapVelocity_ = 0.0f;
+    bool snapTrigOnScrollStart_ = false;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
@@ -343,6 +350,7 @@ private:
 
     bool isScrollEnd_ = false;
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
+    LayoutConstraintF layoutConstraint_;
 
     bool isNeedToUpdateListDirection_ = false;
 

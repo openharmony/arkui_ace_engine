@@ -31,6 +31,7 @@ enum UIContentErrorCode : uint16_t {
     NULL_URL,
     WRONG_PAGE_ROUTER,
     NO_STAGE,
+    INVALID_URL,
 };
 } // namespace OHOS::Ace
 

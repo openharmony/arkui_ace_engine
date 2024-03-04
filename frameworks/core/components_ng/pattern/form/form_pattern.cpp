@@ -768,7 +768,7 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddActionEventHandle([weak = WeakClaim(this), instanceID](const std::string& action) {
         ContainerScope scope(instanceID);
-        TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}s", action.c_str());
+        TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}zu", action.length());
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         formPattern->OnActionEvent(action);
@@ -1155,9 +1155,7 @@ void FormPattern::EnableDrag()
     };
     auto eventHub = GetHost()->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (!eventHub->HasOnDragStart()) {
-        eventHub->SetOnDragStart(std::move(dragStart));
-    }
+    eventHub->SetDefaultOnDragStart(std::move(dragStart));
 }
 
 void FormPattern::UpdateConfiguration()
@@ -1192,7 +1190,8 @@ void FormPattern::RegistVisibleAreaChangeCallback()
             CHECK_NULL_VOID(formPattern);
             formPattern->OnVisibleAreaChange(visible);
         };
-        pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
+        std::vector<double> ratioList = {0.0};
+        pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
     }
 }
 } // namespace OHOS::Ace::NG

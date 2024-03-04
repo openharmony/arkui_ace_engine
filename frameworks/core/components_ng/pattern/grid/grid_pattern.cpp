@@ -346,7 +346,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     SetScrollSource(source);
     FireAndCleanScrollingListener();
-
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
     auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
@@ -354,35 +353,35 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
         if (source == SCROLL_FROM_UPDATE) {
             auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
-            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-            gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
-        } else {
-            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-            gridLayoutInfo_.currentOffset_ += offset;
+            offset *= friction;
         }
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+        gridLayoutInfo_.currentOffset_ += offset;
+
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (GreatNotEqual(gridLayoutInfo_.currentOffset_, GetMainContentSize() - itemsHeight)) {
             gridLayoutInfo_.offsetEnd_ = false;
             gridLayoutInfo_.reachEnd_ = false;
         }
+        FireOnWillScroll(-offset);
         return true;
     }
     if (gridLayoutInfo_.reachStart_) {
         if (source == SCROLL_FROM_UPDATE) {
             auto friction =
                 ScrollablePattern::CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
-            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-            gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
-        } else {
-            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-            gridLayoutInfo_.currentOffset_ += offset;
+            offset *= friction;
         }
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+        gridLayoutInfo_.currentOffset_ += offset;
+
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (LessNotEqual(gridLayoutInfo_.currentOffset_, 0.0)) {
             gridLayoutInfo_.reachStart_ = false;
         }
+        FireOnWillScroll(-offset);
         return true;
     }
     // maybe no measure after last update
@@ -390,6 +389,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
         gridLayoutInfo_.offsetUpdated_ = true;
     }
+    FireOnWillScroll(-offset);
     gridLayoutInfo_.currentOffset_ += offset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
@@ -480,6 +480,10 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     if (onScroll) {
         FireOnScroll(finalOffset, onScroll);
     }
+    auto onDidScroll = gridEventHub->GetOnDidScroll();
+    if (onDidScroll) {
+        FireOnScroll(finalOffset, onDidScroll);
+    }
 
     if (indexChanged) {
         auto onScrollIndex = gridEventHub->GetOnScrollIndex();
@@ -527,7 +531,6 @@ void GridPattern::MarkDirtyNodeSelf()
 void GridPattern::OnScrollEndCallback()
 {
     isSmoothScrolling_ = false;
-    SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
@@ -1273,12 +1276,12 @@ void GridPattern::OnAnimateStop()
     // AccessibilityEventType::SCROLL_END
 }
 
-void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
+void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
 {
     if (!isConfigScrollable_) {
         return;
     }
-    ScrollablePattern::AnimateTo(position, duration, curve, smooth);
+    ScrollablePattern::AnimateTo(position, duration, curve, smooth, canOverScroll);
 }
 
 void GridPattern::ScrollTo(float position)
@@ -1780,6 +1783,35 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
     isSmoothScrolling_ = true;
     AnimateTo(targetPos, -1, nullptr, true);
     return true;
+}
+
+std::vector<RefPtr<FrameNode>> GridPattern::GetVisibleSelectedItems()
+{
+    std::vector<RefPtr<FrameNode>> children;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, children);
+    for (int32_t index = gridLayoutInfo_.startIndex_; index <= gridLayoutInfo_.endIndex_; ++index) {
+        auto item = host->GetChildByIndex(index);
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
+        if (!itemPattern) {
+            continue;
+        }
+        if (!itemPattern->IsSelected()) {
+            continue;
+        }
+        children.emplace_back(itemFrameNode);
+    }
+    return children;
+}
+
+void GridPattern::StopAnimate()
+{
+    ScrollablePattern::StopAnimate();
+    isSmoothScrolling_ = false;
 }
 
 } // namespace OHOS::Ace::NG

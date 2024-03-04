@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -268,7 +268,9 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
     animatorResult->ApplyOption();
     napi_ref onframeRef = animatorResult->GetOnframeRef();
     if (onframeRef) {
-        auto onFrameCallback = [env, onframeRef](double value) {
+        auto onFrameCallback = [env, onframeRef,
+                                   weakOption = std::weak_ptr<AnimatorOption>(animatorResult->GetAnimatorOption())](
+                                   double value) {
             napi_handle_scope scope = nullptr;
             napi_open_handle_scope(env, &scope);
             if (scope == nullptr) {
@@ -278,10 +280,12 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
             napi_value valueNapi = nullptr;
             napi_value onframe = nullptr;
             auto result = napi_get_reference_value(env, onframeRef, &onframe);
-            if (result != napi_ok || onframe == nullptr) {
+            auto option = weakOption.lock();
+            if (!(result == napi_ok && onframe && option)) {
                 napi_close_handle_scope(env, scope);
                 return;
             }
+            ACE_SCOPED_TRACE("ohos.animator onframe. duration:%d, curve:%s", option->duration, option->easing.c_str());
             napi_create_double(env, value, &valueNapi);
             napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
             napi_close_handle_scope(env, scope);
@@ -440,7 +444,9 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
     }
     napi_create_reference(env, onframe, 1, &onframeRef);
     animatorResult->SetOnframeRef(onframeRef);
-    auto onFrameCallback = [env, onframeRef](double value) {
+    auto onFrameCallback = [env, onframeRef,
+                               weakOption = std::weak_ptr<AnimatorOption>(animatorResult->GetAnimatorOption())](
+                               double value) {
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
@@ -450,10 +456,12 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
         napi_value valueNapi = nullptr;
         napi_value onframe = nullptr;
         auto result = napi_get_reference_value(env, onframeRef, &onframe);
-        if (result != napi_ok || onframe == nullptr) {
+        auto option = weakOption.lock();
+        if (!(result == napi_ok && onframe && option)) {
             napi_close_handle_scope(env, scope);
             return;
         }
+        ACE_SCOPED_TRACE("ohos.animator onframe. duration:%d, curve:%s", option->duration, option->easing.c_str());
         napi_create_double(env, value, &valueNapi);
         napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
         napi_close_handle_scope(env, scope);
@@ -476,6 +484,11 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
     napi_value undefined;
     napi_get_undefined(env, &undefined);
     return undefined;
+}
+
+static napi_value SetOnFrame(napi_env env, napi_callback_info info)
+{
+    return SetOnframe(env, info);
 }
 
 static napi_value SetOnfinish(napi_env env, napi_callback_info info)
@@ -527,6 +540,11 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
     return undefined;
 }
 
+static napi_value SetOnFinish(napi_env env, napi_callback_info info)
+{
+    return SetOnfinish(env, info);
+}
+
 static napi_value SetOncancel(napi_env env, napi_callback_info info)
 {
     AnimatorResult* animatorResult = nullptr;
@@ -574,6 +592,11 @@ static napi_value SetOncancel(napi_env env, napi_callback_info info)
     napi_value undefined;
     napi_get_undefined(env, &undefined);
     return undefined;
+}
+
+static napi_value SetOnCancel(napi_env env, napi_callback_info info)
+{
+    return SetOncancel(env, info);
 }
 
 static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
@@ -625,6 +648,11 @@ static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
     return undefined;
 }
 
+static napi_value SetOnRepeat(napi_env env, napi_callback_info info)
+{
+    return SetOnrepeat(env, info);
+}
+
 static napi_value JSCreate(napi_env env, napi_callback_info info)
 {
     auto option = std::make_shared<AnimatorOption>();
@@ -655,6 +683,10 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
         DECLARE_NAPI_SETTER("onfinish", SetOnfinish),
         DECLARE_NAPI_SETTER("oncancel", SetOncancel),
         DECLARE_NAPI_SETTER("onrepeat", SetOnrepeat),
+        DECLARE_NAPI_SETTER("onFrame", SetOnFrame),
+        DECLARE_NAPI_SETTER("onFinish", SetOnFinish),
+        DECLARE_NAPI_SETTER("onCancel", SetOnCancel),
+        DECLARE_NAPI_SETTER("onRepeat", SetOnRepeat),
     };
 
     NAPI_CALL(env, napi_define_properties(env, jsAnimator, sizeof(resultFuncs) / sizeof(resultFuncs[0]), resultFuncs));

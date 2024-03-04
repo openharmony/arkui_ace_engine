@@ -26,11 +26,14 @@
 
 #include "base/utils/noncopyable.h"
 #include "core/common/recorder/event_config.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::Recorder {
 constexpr int32_t MAX_SIZE_PER_PAGE = 50;
 
 constexpr int32_t MAX_DATA_LENGTH = 100;
+
+std::string GetPageUrlByNode(const RefPtr<NG::FrameNode>& node);
 
 const std::string GetCurrentPageUrl();
 
@@ -53,25 +56,32 @@ public:
 
     void UpdateConfig(std::shared_ptr<MergedConfig>&& mergedConfig);
 
-    bool PutString(const std::string& id, const std::string& value);
+    bool PutString(const RefPtr<NG::FrameNode>& node, const std::string& id, const std::string& value);
 
-    bool PutBool(const std::string& id, bool value);
+    bool PutBool(const RefPtr<NG::FrameNode>& node, const std::string& id, bool value);
 
-    bool PutInt(const std::string& id, int value);
+    bool PutInt(const RefPtr<NG::FrameNode>& node, const std::string& id, int value);
 
-    bool PutStringArray(const std::string& id, const std::vector<std::string>& value);
+    bool PutStringArray(
+        const RefPtr<NG::FrameNode>& node, const std::string& id, const std::vector<std::string>& value);
 
-    bool PutMultiple(const std::string& id, const std::string& name, bool value);
+    bool PutMultiple(const RefPtr<NG::FrameNode>& node, const std::string& id, const std::string& name, bool value);
 
-    bool PutMultiple(const std::string& id, const std::string& name, int index);
+    bool PutMultiple(const RefPtr<NG::FrameNode>& node, const std::string& id, const std::string& name, int index);
 
-    bool PutMultiple(const std::string& id, const std::string& name, const std::vector<std::string>& value);
+    bool PutMultiple(const RefPtr<NG::FrameNode>& node, const std::string& id, const std::string& name,
+        const std::vector<std::string>& value);
 
     void GetNodeData(const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodes);
 
     void Clear(const std::string& pageUrl);
 
-    void GetExposureCfg(const std::string& inspectId, ExposureCfg& cfg);
+    void GetExposureCfg(const std::string& pageUrl, const std::string& inspectId, ExposureCfg& cfg);
+
+    bool ShouldCollectData() const
+    {
+        return shouldCollectFull_;
+    }
 
 private:
     NodeDataCache();

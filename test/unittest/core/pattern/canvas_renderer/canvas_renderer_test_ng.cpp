@@ -59,6 +59,7 @@ const std::string NULL_STR = "";
 const std::vector<double> CANDIDATE_DOUBLES = { 0.0, 1.0, 10.0, 100.0, 1000.0 };
 const std::string IMAGE_PNG = "image/png";
 BaseInfo infoArr[4] = {};
+BaseInfo infoArrTest[4] = {};
 } // namespace
 class CanvasRendererTestNg : public testing::Test {
 public:
@@ -74,6 +75,8 @@ void CanvasRendererTestNg::SetUpTestSuite()
     infoArr[INDEX_TWO].isOffscreen = true;
     infoArr[INDEX_THREE].isOffscreen = true;
     infoArr[INDEX_THREE].offscreenPattern = CreateCustomPaintView();
+    infoArrTest[INDEX_ONE].canvasPattern = CreateCustomPaintView();
+    infoArrTest[INDEX_ONE].isOffscreen = true;
 }
 
 RefPtr<CustomPaintPattern> CanvasRendererTestNg::CreateCustomPaintView()
@@ -159,7 +162,7 @@ HWTEST_F(CanvasRendererTestNg, CanvasRendererTest002, TestSize.Level1)
      * @tc.steps2: call some fuction.
      * @tc.expected: the paintMethod tasks size meet expectations.
      */
-    for (auto value : infoArr) {
+    for (auto value : infoArrTest) {
         canvasRendererModelNG.DrawImage(value, imageInfo);
         canvasRendererModelNG.PutImageData(value, imageData);
         canvasRendererModelNG.CloseImageBitmap(value, IMAGE_PNG);

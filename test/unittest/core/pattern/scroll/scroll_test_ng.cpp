@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1345,6 +1345,64 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     pattern_->UpdateScrollBarOffset();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(), 0.0f);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset003
+ * @tc.desc: Test whether the isAnimateOverScroll_ can be set right.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, UpdateCurrentOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll model with spring edgeEffect.
+     */
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+    pattern_->isAnimationStop_ = false;
+
+    /**
+     * @tc.steps: step2. Make animateCanOverScroll_ true, UpdateCurrentOffset to a position where over the boundary.
+     * @tc.expected: pattern_->isAnimateOverScroll_ can be set to true.
+     */
+    pattern_->animateCanOverScroll_ = true;
+    pattern_->isAnimateOverScroll_ = false;
+    pattern_->UpdateCurrentOffset(100, SCROLL_FROM_ANIMATION_CONTROLLER);
+    EXPECT_EQ(pattern_->isAnimateOverScroll_, true);
+
+    /**
+     * @tc.steps: step3. Make animateCanOverScroll_ false, UpdateCurrentOffset to a position where over the boundary.
+     * @tc.expected: pattern_->isAnimateOverScroll_ can't be set to true.
+     */
+    pattern_->animateCanOverScroll_ = false;
+    pattern_->isAnimateOverScroll_ = false;
+    pattern_->UpdateCurrentOffset(100, SCROLL_FROM_ANIMATION_CONTROLLER);
+    EXPECT_EQ(pattern_->isAnimateOverScroll_, false);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset004
+ * @tc.desc: Test return value of UpdateCurrentOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, UpdateCurrentOffset004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll model with spring edgeEffect.
+     */
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+    /**
+     * @tc.steps: step2. Make animateCanOverScroll_ true, UpdateCurrentOffset to a position where over the boundary.
+     * @tc.expected: the return value of UpdateCurrentOffset is true.
+     */
+    pattern_->animateCanOverScroll_ = true;
+    EXPECT_EQ(pattern_->UpdateCurrentOffset(100, SCROLL_FROM_ANIMATION_CONTROLLER), true);
+
+    /**
+     * @tc.steps: step3. Make animateCanOverScroll_ false, UpdateCurrentOffset to a position where over the boundary.
+     * @tc.expected: the return value of UpdateCurrentOffset is false.
+     */
+    pattern_->animateCanOverScroll_ = false;
+    EXPECT_EQ(pattern_->UpdateCurrentOffset(100, SCROLL_FROM_ANIMATION_CONTROLLER), false);
 }
 
 /**
@@ -3450,6 +3508,22 @@ HWTEST_F(ScrollTestNg, AnimateTo001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AnimateTo002
+ * @tc.desc: Test the canOverScroll of AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, AnimateTo002, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) {});
+    auto smooth = false;
+    auto canOverScroll = false;
+    pattern_->animateCanOverScroll_ = true;
+    pattern_->AnimateTo(100, 1.f, Curves::LINEAR, smooth, canOverScroll);
+    pattern_->StopAnimate();
+    EXPECT_EQ(pattern_->animateCanOverScroll_, false);
+}
+
+/**
  * @tc.name: PlaySpringAnimation001
  * @tc.desc: Test PlaySpringAnimation
  * @tc.type: FUNC
@@ -3875,5 +3949,138 @@ HWTEST_F(ScrollTestNg, SetMouseEvent001, TestSize.Level1)
     RefPtr<InputEvent> mouseEvent_ = AccessibilityManager::MakeRefPtr<InputEvent>(std::move(mouseTask));
     scrollBar->SetMouseEvent();
     EXPECT_NE(mouseEvent_, nullptr);
+}
+
+/**
+ * @tc.name: onWillScrollAndOnDidScroll001
+ * @tc.desc: Test attribute about onWillScroll and onDidScroll,
+ * Event is triggered while scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test event in VERTICAL
+     */
+    bool isWillScrollTrigger = false;
+    bool isDidScrollTrigger = false;
+    Dimension willOffsetX;
+    Dimension willOffsetY;
+    Dimension didOffsetX;
+    Dimension didOffsetY;
+    auto willEvent = [&isWillScrollTrigger, &willOffsetX, &willOffsetY](
+                         Dimension offsetX, Dimension offsetY, ScrollState state) {
+        isWillScrollTrigger = true;
+        willOffsetX = offsetX;
+        willOffsetY = offsetY;
+    };
+    auto didEvent = [&isDidScrollTrigger, &didOffsetX, &didOffsetY](
+                        Dimension offsetX, Dimension offsetY, ScrollState state) {
+        isDidScrollTrigger = true;
+        didOffsetX = offsetX;
+        didOffsetY = offsetY;
+    };
+    bool isTrigger = false;
+    CreateWithContent([&isTrigger](ScrollModelNG model) {
+        NG::ScrollEvent event = [&isTrigger](Dimension, Dimension) { isTrigger = true; };
+        model.SetOnScroll(std::move(event));
+    });
+    eventHub_->SetOnWillScrollEvent(std::move(willEvent));
+    eventHub_->SetOnDidScrollEvent(std::move(didEvent));
+
+    /**
+     * @tc.steps: step2. Trigger event by OnScrollCallback
+     * @tc.expected: isTrigger is true
+     */
+    pattern_->OnScrollCallback(-ITEM_HEIGHT * TOTAL_LINE_NUMBER, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_TRUE(isTrigger);
+    EXPECT_TRUE(isWillScrollTrigger);
+    EXPECT_TRUE(isDidScrollTrigger);
+    EXPECT_EQ(willOffsetY.Value(), ITEM_HEIGHT * 2);
+    EXPECT_EQ(didOffsetY.Value(), ITEM_HEIGHT * 2);
+
+    /**
+     * @tc.steps: step3. Trigger event by ScrollToEdge
+     * @tc.expected: isTrigger is true
+     */
+    isWillScrollTrigger = false;
+    isDidScrollTrigger = false;
+    willOffsetY.Reset();
+    didOffsetY.Reset();
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isTrigger);
+    EXPECT_TRUE(isWillScrollTrigger);
+    EXPECT_TRUE(isDidScrollTrigger);
+    EXPECT_EQ(willOffsetY.Value(), -ITEM_HEIGHT * 2);
+    EXPECT_EQ(didOffsetY.Value(), -ITEM_HEIGHT * 2);
+}
+
+/**
+ * @tc.name: onWillScrollAndOnDidScroll001
+ * @tc.desc: Test attribute about onWillScroll and onDidScroll,
+ * Event is triggered while scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test event in HORIZONTAL
+     */
+    bool isWillScrollTrigger = false;
+    bool isDidScrollTrigger = false;
+    Dimension willOffsetX;
+    Dimension willOffsetY;
+    Dimension didOffsetX;
+    Dimension didOffsetY;
+    auto willEvent = [&isWillScrollTrigger, &willOffsetX, &willOffsetY](
+                         Dimension offsetX, Dimension offsetY, ScrollState state) {
+        isWillScrollTrigger = true;
+        willOffsetX = offsetX;
+        willOffsetY = offsetY;
+    };
+    auto didEvent = [&isDidScrollTrigger, &didOffsetX, &didOffsetY](
+                        Dimension offsetX, Dimension offsetY, ScrollState state) {
+        isDidScrollTrigger = true;
+        didOffsetX = offsetX;
+        didOffsetY = offsetY;
+    };
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetAxis(Axis::HORIZONTAL);
+    });
+    eventHub_->SetOnWillScrollEvent(std::move(willEvent));
+    eventHub_->SetOnDidScrollEvent(std::move(didEvent));
+
+    /**
+     * @tc.steps: step2. Trigger event by OnScrollCallback
+     * @tc.expected: isTrigger is true
+     */
+    isWillScrollTrigger = false;
+    isDidScrollTrigger = false;
+    willOffsetX.Reset();
+    didOffsetX.Reset();
+    pattern_->OnScrollCallback(-ITEM_WIDTH * TOTAL_LINE_NUMBER, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillScrollTrigger);
+    EXPECT_TRUE(isDidScrollTrigger);
+    EXPECT_EQ(willOffsetX.Value(), ITEM_WIDTH * 2);
+    EXPECT_EQ(didOffsetX.Value(), ITEM_WIDTH * 2);
+
+    /**
+     * @tc.steps: step3. Trigger event by ScrollToEdge
+     * @tc.expected: isTrigger is true
+     */
+    isWillScrollTrigger = false;
+    isDidScrollTrigger = false;
+    willOffsetX.Reset();
+    didOffsetX.Reset();
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isWillScrollTrigger);
+    EXPECT_TRUE(isDidScrollTrigger);
+    EXPECT_EQ(willOffsetX.Value(), -ITEM_WIDTH * 2);
+    EXPECT_EQ(didOffsetX.Value(), -ITEM_WIDTH * 2);
 }
 } // namespace OHOS::Ace::NG

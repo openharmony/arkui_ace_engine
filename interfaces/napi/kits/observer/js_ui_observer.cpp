@@ -35,8 +35,18 @@ namespace {
     void* data;                    \
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data)
 
+static constexpr uint32_t PARAM_SZIE_ONE = 1;
+static constexpr uint32_t PARAM_SZIE_TWO = 2;
+static constexpr uint32_t PARAM_SZIE_THREE = 3;
+
+static constexpr uint32_t PARAM_SECOND = 1;
+static constexpr uint32_t PARAM_THIRD = 2;
+
 static constexpr uint32_t ON_SHOWN = 0;
 static constexpr uint32_t ON_HIDDEN = 1;
+
+static constexpr uint32_t SCROLL_START = 0;
+static constexpr uint32_t SCROLL_STOP = 1;
 
 static constexpr uint32_t ABOUT_TO_APPEAR = 0;
 static constexpr uint32_t ABOUT_TO_DISAPPEAR = 1;
@@ -100,16 +110,28 @@ bool ParseNavigationId(napi_env env, napi_value obj, std::string& navigationStr)
     }
     return ParseStringFromNapi(env, navigationId, navigationStr);
 }
+
+bool ParseScrollId(napi_env env, napi_value obj, std::string& result)
+{
+    napi_value resultId = nullptr;
+    napi_get_named_property(env, obj, "id", &resultId);
+    if (!MatchValueType(env, resultId, napi_string)) {
+        return false;
+    }
+    return ParseStringFromNapi(env, resultId, result);
+}
 } // namespace
 
 ObserverProcess::ObserverProcess()
 {
     registerProcess_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationRegister },
+        { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageRegister },
     };
     unregisterProcess_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationUnRegister },
+        { SCROLL_EVENT, &ObserverProcess::ProcessScrollEventUnRegister },
         { ROUTERPAGE_UPDATE, &ObserverProcess::ProcessRouterPageUnRegister },
     };
 }
@@ -188,6 +210,59 @@ napi_value ObserverProcess::ProcessNavigationUnRegister(napi_env env, napi_callb
         std::string id;
         if (ParseNavigationId(env, argv[1], id)) {
             UIObserver::UnRegisterNavigationCallback(id, argv[2]);
+        }
+    }
+
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessScrollEventRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SZIE_THREE);
+
+    if (argc == PARAM_SZIE_TWO && MatchValueType(env, argv[PARAM_SECOND], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_SECOND]);
+        UIObserver::RegisterScrollEventCallback(listener);
+    }
+
+    if (argc == PARAM_SZIE_THREE && MatchValueType(env, argv[PARAM_SECOND], napi_object)
+        && MatchValueType(env, argv[PARAM_THIRD], napi_function)) {
+        std::string id;
+        if (ParseScrollId(env, argv[PARAM_SECOND], id)) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_THIRD]);
+            UIObserver::RegisterScrollEventCallback(id, listener);
+        }
+    }
+
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessScrollEventUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SZIE_THREE);
+
+    if (argc == PARAM_SZIE_ONE) {
+        UIObserver::UnRegisterScrollEventCallback(nullptr);
+    }
+
+    if (argc == PARAM_SZIE_TWO && MatchValueType(env, argv[PARAM_SECOND], napi_function)) {
+        UIObserver::UnRegisterScrollEventCallback(argv[PARAM_SECOND]);
+    }
+
+    if (argc == PARAM_SZIE_TWO && MatchValueType(env, argv[PARAM_SECOND], napi_object)) {
+        std::string id;
+        if (ParseScrollId(env, argv[PARAM_SECOND], id)) {
+            UIObserver::UnRegisterScrollEventCallback(id, nullptr);
+        }
+    }
+
+    if (argc == PARAM_SZIE_THREE && MatchValueType(env, argv[PARAM_SECOND], napi_object)
+        && MatchValueType(env, argv[PARAM_THIRD], napi_function)) {
+        std::string id;
+        if (ParseScrollId(env, argv[PARAM_SECOND], id)) {
+            UIObserver::UnRegisterScrollEventCallback(id, argv[PARAM_THIRD]);
         }
     }
 
@@ -274,6 +349,7 @@ napi_value ObserverOff(napi_env env, napi_callback_info info)
 static napi_value UIObserverExport(napi_env env, napi_value exports)
 {
     NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFunc(&UIObserver::HandleNavigationStateChange);
+    NG::UIObserverHandler::GetInstance().SetHandleScrollEventChangeFunc(&UIObserver::HandleScrollEventStateChange);
     NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFunc(&UIObserver::HandleRouterPageStateChange);
     napi_value navDestinationState = nullptr;
     napi_create_object(env, &navDestinationState);
@@ -282,6 +358,13 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     napi_set_named_property(env, navDestinationState, "ON_SHOWN", prop);
     napi_create_uint32(env, ON_HIDDEN, &prop);
     napi_set_named_property(env, navDestinationState, "ON_HIDDEN", prop);
+
+    napi_value scrollEventType = nullptr;
+    napi_create_object(env, &scrollEventType);
+    napi_create_uint32(env, SCROLL_START, &prop);
+    napi_set_named_property(env, scrollEventType, "SCROLL_START", prop);
+    napi_create_uint32(env, SCROLL_STOP, &prop);
+    napi_set_named_property(env, scrollEventType, "SCROLL_STOP", prop);
 
     napi_value routerPageState = nullptr;
     napi_create_object(env, &routerPageState);
@@ -300,6 +383,7 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("on", ObserverOn),
         DECLARE_NAPI_FUNCTION("off", ObserverOff),
         DECLARE_NAPI_PROPERTY("NavDestinationState", navDestinationState),
+        DECLARE_NAPI_PROPERTY("ScrollEventType", scrollEventType),
         DECLARE_NAPI_PROPERTY("RouterPageState", routerPageState),
     };
     NAPI_CALL(

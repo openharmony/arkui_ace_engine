@@ -39,6 +39,10 @@ private:
     void HandleTouchUpEvent(const TouchEvent& event) override;
     void HandleTouchMoveEvent(const TouchEvent& event) override;
     void HandleTouchCancelEvent(const TouchEvent& event) override;
+    void HandleTouchDownEvent(const AxisEvent& event) override;
+    void HandleTouchUpEvent(const AxisEvent& event) override;
+    void HandleTouchMoveEvent(const AxisEvent& event) override;
+    void HandleTouchCancelEvent(const AxisEvent& event) override;
 
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     double ComputeAngle();

@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
 #include "base/json/json_util.h"
+#include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
@@ -112,6 +113,7 @@ void JsFunctionBase::ExecuteNew(const std::vector<std::string>& keys, const std:
 
 JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
 {
+    JS_CALLBACK_DURATION();
     JAVASCRIPT_EXECUTION_SCOPE_STATIC
     ACE_FUNCTION_TRACE();
     JSRef<JSVal> jsObject = jsThis_.Lock();
@@ -126,6 +128,7 @@ JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
 
 JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
 {
+    JS_CALLBACK_DURATION();
     JAVASCRIPT_EXECUTION_SCOPE_STATIC
     ACE_FUNCTION_TRACE();
 

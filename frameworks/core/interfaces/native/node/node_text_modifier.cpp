@@ -16,6 +16,7 @@
 
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline/base/element_register.h"
@@ -39,17 +40,18 @@ constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
+const std::string EMPTY_STRING = "";
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::START, OHOS::Ace::TextAlign::CENTER,
     OHOS::Ace::TextAlign::END, OHOS::Ace::TextAlign::JUSTIFY, OHOS::Ace::TextAlign::LEFT, OHOS::Ace::TextAlign::RIGHT };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
+const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 
-std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = {
-    { TextHeightAdaptivePolicy::MAX_LINES_FIRST, 0 },
-    { TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, 1 },
-    { TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST, 2 } };
+std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = { { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
+                                                                                0 },
+    { TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, 1 }, { TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST, 2 } };
 
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
@@ -59,16 +61,24 @@ FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeig
     std::string weightStr(weight);
     return StringUtils::StringToFontWeight(weightStr, defaultFontWeight);
 }
+namespace {
 
 std::string g_strValue;
 
-namespace {
 void SetTextContent(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string content(value);
     TextModelNG::InitText(frameNode, content);
+}
+
+const char* GetTextContent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = TextModelNG::GetContent(frameNode);
+    return g_strValue.c_str();
 }
 
 void SetFontWeightStr(ArkUINodeHandle node, ArkUI_CharPtr weight)
@@ -119,6 +129,14 @@ void SetTextAlign(ArkUINodeHandle node, ArkUI_Uint32 testAlign)
     TextModelNG::SetTextAlign(frameNode, TEXT_ALIGNS[testAlign]);
 }
 
+int32_t GetTextAlign(ArkUINodeHandle node)
+{
+    auto defaultTextAlign = static_cast<int32_t>(OHOS::Ace::TextAlign::START);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultTextAlign);
+    return static_cast<int32_t>(TextModelNG::GetTextAlign(frameNode));
+}
+
 void ResetTextAlign(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -144,6 +162,13 @@ void ResetFontColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     textColor = theme->GetTextStyle().GetTextColor();
     TextModelNG::SetTextColor(frameNode, textColor);
+}
+
+uint32_t GetFontColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
+    return TextModelNG::GetFontColor(frameNode).GetValue();
 }
 
 void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit)
@@ -184,6 +209,13 @@ void SetTextLineHeight(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 u
     TextModelNG::SetLineHeight(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
+float GetTextLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetLineHeight(frameNode);
+}
+
 void ResetTextLineHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -197,6 +229,14 @@ void SetTextTextOverflow(ArkUINodeHandle node, ArkUI_Int32 value)
     CHECK_NULL_VOID(frameNode);
     TextOverflow valueTextOverflow = static_cast<TextOverflow>(value);
     TextModelNG::SetTextOverflow(frameNode, valueTextOverflow);
+}
+
+int32_t GetTextTextOverflow(ArkUINodeHandle node)
+{
+    int defaultTextOverflow = static_cast<int32_t>(TextOverflow::NONE);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultTextOverflow);
+    return static_cast<int32_t>(TextModelNG::GetTextOverflow(frameNode));
 }
 
 void ResetTextTextOverflow(ArkUINodeHandle node)
@@ -215,6 +255,15 @@ void SetTextDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint3
     TextModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
 }
 
+void GetTextDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration)
+{
+    CHECK_NULL_VOID(decoration);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    decoration->decorationType = static_cast<int32_t>(TextModelNG::GetDecoration(frameNode));
+    decoration->color = TextModelNG::GetTextDecorationColor(frameNode).GetValue();
+}
+
 void ResetTextDecoration(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -231,6 +280,14 @@ void SetTextTextCase(ArkUINodeHandle node, ArkUI_Int32 value)
     TextModelNG::SetTextCase(frameNode, static_cast<TextCase>(value));
 }
 
+int32_t GetTextTextCase(ArkUINodeHandle node)
+{
+    int32_t defaultTextCase = static_cast<int32_t>(DEFAULT_TEXT_CASE);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultTextCase);
+    return static_cast<int32_t>(TextModelNG::GetTextCase(frameNode));
+}
+
 void ResetTextTextCase(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -243,6 +300,13 @@ void SetTextMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetMaxLines(frameNode, maxLine);
+}
+
+int32_t GetTextMaxLines(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_MAX_LINE);
+    return TextModelNG::GetMaxLines(frameNode);
 }
 
 void ResetTextMaxLines(ArkUINodeHandle node)
@@ -355,6 +419,32 @@ void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shado
     TextModelNG::SetTextShadow(frameNode, shadowList);
 }
 
+ArkUI_Uint32 GetTextShadowCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return TextModelNG::GetTextShadow(frameNode).size();
+}
+
+void GetTextShadow(ArkUINodeHandle node, ArkUITextShadowStruct* shadow, uint32_t size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<ArkUITextShadowStruct> shadowArray;
+    auto textShadowVector = TextModelNG::GetTextShadow(frameNode);
+    for (uint32_t i = 0; i < size; i++) {
+        if (i < textShadowVector.size()) {
+            *(shadow + i) = { static_cast<float>(textShadowVector[i].GetBlurRadius()),
+                static_cast<int32_t>(textShadowVector[i].GetShadowType()), textShadowVector[i].GetColor().GetValue(),
+                textShadowVector[i].GetOffset().GetX(), textShadowVector[i].GetOffset().GetY(),
+                textShadowVector[i].GetIsFilled()};
+        } else {
+            *(shadow + i) = { 0.0f, static_cast<int32_t>(ShadowType::COLOR),
+                Color::TRANSPARENT.GetValue(), 0.0f, 0.0f, 0 };
+        }
+    }
+}
+
 void ResetTextTextShadow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -392,6 +482,13 @@ void SetTextTextIndent(ArkUINodeHandle node, const struct ArkUIStringAndFloat* t
     TextModelNG::SetTextIndent(frameNode, result);
 }
 
+float GetTextTextIndent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetTextIndent(frameNode).ConvertToVp();
+}
+
 void ResetTextTextIndent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -417,6 +514,13 @@ void ResetTextBaselineOffset(ArkUINodeHandle node)
     TextModelNG::SetBaselineOffset(frameNode, DEFAULT_BASELINE_OFFSET);
 }
 
+ArkUI_Float32 GetTextBaselineOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetTextBaselineOffset(frameNode).ConvertToVp();
+}
+
 void SetTextLetterSpacing(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingStruct)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -437,6 +541,13 @@ void SetTextLetterSpacing(ArkUINodeHandle node, const struct ArkUIStringAndFloat
     TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
 }
 
+ArkUI_Float32 GetTextLetterSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetLetterSpacing(frameNode).ConvertToVp();
+}
+
 void ResetTextLetterSpacing(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -445,10 +556,10 @@ void ResetTextLetterSpacing(ArkUINodeHandle node)
     TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
 }
 
-void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct *fontInfo)
+void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo)
 {
     CHECK_NULL_VOID(fontInfo);
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
     font.fontSize = Dimension(fontInfo->fontSizeNumber, static_cast<DimensionUnit>(fontInfo->fontSizeUnit));
@@ -496,6 +607,23 @@ void ResetWordBreak(ArkUINodeHandle node)
     TextModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[2]); // 2 is the default value of WordBreak::BREAK_WORD
 }
 
+void SetEllipsisMode(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (ellipsisMode < 0 || ellipsisMode >= ELLIPSIS_MODALS.size()) {
+        ellipsisMode = 2; // 2 is the default value of EllipsisMode::TAIL
+    }
+    TextModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[ellipsisMode]);
+}
+
+void ResetEllipsisMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[2]); // 2 is the default value of EllipsisMode::TAIL
+}
+
 ArkUI_CharPtr GetFontFamily(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -509,7 +637,7 @@ ArkUI_CharPtr GetFontFamily(ArkUINodeHandle node)
         if (index != fontFamilies.size() - 1) {
             families += ",";
         }
-        index ++;
+        index++;
     }
     g_strValue = families;
     return g_strValue.c_str();
@@ -563,7 +691,7 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
             if (index != value.fontFamilies.size() - 1) {
                 families += ",";
             }
-            index ++;
+            index++;
         }
         g_strValue = families;
         font->fontFamilies = g_strValue.c_str();
@@ -654,6 +782,21 @@ const ArkUITextModifier* GetTextModifier()
         GetFontSize,
         GetFontWeight,
         GetItalicFontStyle,
+        SetEllipsisMode,
+        ResetEllipsisMode,
+        GetTextContent,
+        GetTextLineHeight,
+        GetTextDecoration,
+        GetTextTextCase,
+        GetTextLetterSpacing,
+        GetTextMaxLines,
+        GetTextAlign,
+        GetTextTextOverflow,
+        GetTextTextIndent,
+        GetFontColor,
+        GetTextBaselineOffset,
+        GetTextShadowCount,
+        GetTextShadow,
     };
 
     return &modifier;

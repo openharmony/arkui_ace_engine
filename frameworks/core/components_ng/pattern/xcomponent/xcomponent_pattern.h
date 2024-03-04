@@ -85,6 +85,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
+        if (type_ == XComponentType::NODE) {
+            return { FocusType::SCOPE, true };
+        }
         return { FocusType::NODE, false };
     }
 
@@ -275,6 +278,12 @@ private:
     void AddAfterLayoutTaskForExportTexture();
     bool DoTextureExport();
     bool StopTextureExport();
+    void InitializeRenderContext();
+
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    void RegisterRenderContextCallBack();
+    void RequestFocus();
+#endif
 
     std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
     std::string id_;

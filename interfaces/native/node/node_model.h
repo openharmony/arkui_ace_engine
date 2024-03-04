@@ -27,11 +27,11 @@ extern "C" {
 #endif
 
 struct ArkUI_Node {
-    ArkUI_NodeType type;
+    int32_t type;
     ArkUINodeHandle uiNodeHandle = nullptr;
 };
 
-constexpr int BASIC_COMPONENT_NUM = 17;
+constexpr int BASIC_COMPONENT_NUM = 18;
 
 #ifdef __cplusplus
 };

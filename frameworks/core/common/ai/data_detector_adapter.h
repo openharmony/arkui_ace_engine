@@ -92,7 +92,6 @@ private:
     void SetWantParamaters(const AISpan& aiSpan, AAFwk::Want& want);
 
     WeakPtr<NG::FrameNode> frameNode_;
-    RefPtr<NG::FrameNode> uiExtNode_;
     bool aiDetectInitialized_ = false;
     bool hasClickedAISpan_ = false;
     std::string textDetectTypes_;

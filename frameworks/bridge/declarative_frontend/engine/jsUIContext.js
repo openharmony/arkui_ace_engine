@@ -345,9 +345,13 @@ class Router {
         }
     }
 
-    back(options) {
+    back(options, params) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_router.back(options);
+        if (typeof options === 'number' || arguments.length === 2) {
+            this.ohos_router.back(options, params);
+        } else {
+            this.ohos_router.back(options);
+        }
         __JSScopeUtil__.restoreInstanceId();
     }
 
@@ -367,6 +371,20 @@ class Router {
     getState() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let state = this.ohos_router.getState();
+        __JSScopeUtil__.restoreInstanceId();
+        return state;
+    }
+
+    getStateByIndex(index) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let state = this.ohos_router.getState(index);
+        __JSScopeUtil__.restoreInstanceId();
+        return state;
+    }
+
+    getStateByUrl(url) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let state = this.ohos_router.getState(url);
         __JSScopeUtil__.restoreInstanceId();
         return state;
     }

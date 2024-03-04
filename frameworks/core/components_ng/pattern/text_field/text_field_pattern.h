@@ -119,7 +119,7 @@ struct PasswordModeStyle {
     MarginProperty margin;
 };
 
-struct PreInlineState {
+struct PreState {
     Color textColor;
     Color bgColor;
     BorderRadiusProperty radius;
@@ -129,7 +129,7 @@ struct PreInlineState {
     MarginProperty margin;
     RectF frameRect;
     bool setHeight = false;
-    bool saveInlineState = false;
+    bool saveState = false;
     bool hasBorderColor = false;
 };
 
@@ -207,6 +207,7 @@ public:
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
+    void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
     void UpdateOverCounterColor();
     void UpdateCounterMargin();
     void CleanCounterNode();
@@ -925,7 +926,22 @@ public:
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
     {
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+            // close customKeyboard and request system keyboard
             CloseCustomKeyboard();
+            customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+            RequestKeyboard(false, true, true);
+            return;
+        }
+        if (!customKeyboardBuilder_ && keyboardBuilder) {
+            // close system keyboard and request custom keyboard
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+            if (imeShown_) {
+                CloseKeyboard(true);
+                customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+                RequestKeyboard(false, true, true);
+                return;
+            }
+#endif
         }
         customKeyboardBuilder_ = keyboardBuilder;
     }
@@ -1039,6 +1055,10 @@ public:
         return isShowMagnifier_;
     }
 
+    virtual void InitBackGroundColorAndBorderRadius();
+
+    void SavePreUnderLineState();
+
     void SetLocalOffset(OffsetF localOffset)
     {
         localOffset_.SetX(localOffset.GetX());
@@ -1109,7 +1129,6 @@ public:
     }
 
     void CleanNodeResponseKeyEvent();
-    void FireSelectEvent();
 
     void OnVirtualKeyboardAreaChanged() override;
 
@@ -1222,8 +1241,9 @@ private:
 
     void UpdateCopyAllStatus();
     void SaveInlineStates();
-    void ApplyInlineStates(bool focusStatus);
+    void ApplyInlineStates();
     void RestorePreInlineStates();
+    void RestoreUnderlineStates();
     void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
@@ -1339,7 +1359,8 @@ private:
     float previewWidth_ = 0.0f;
     float lastTextRectY_ = 0.0f;
     std::optional<DisplayMode> barState_;
-    InputStyle preInputStyle_ = InputStyle::DEFAULT;
+    bool preInline = false;
+    bool preUnderline = false;
     bool preErrorState_ = false;
     float preErrorMargin_ = 0.0f;
     bool restoreMarginState_ = false;
@@ -1390,8 +1411,9 @@ private:
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
     bool needApplyInlineSize_ = false;
-    PreInlineState inlineState_;
+    PreState inlineState_;
     // inline --end
+    PreState preUnderlineState_;
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
@@ -1420,6 +1442,7 @@ private:
     bool leftMouseCanMove_ = false;
     bool isSingleHandle_ = true;
     bool isLongPress_ = false;
+    bool isEdit_ = false;
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
     RefPtr<NG::UINode> unitNode_;
@@ -1440,6 +1463,7 @@ private:
     MagnifierRect magnifierRect_;
     RefPtr<MagnifierController> magnifierController_;
     bool isKeyboardClosedByUser_ = false;
+    bool lockRecord_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -36,6 +36,7 @@ bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
 bool SystemProperties::windowAnimationEnabled_ = true;
 bool SystemProperties::layoutTraceEnable_ = false;
+bool SystemProperties::traceInputEventEnable_ = false;
 bool SystemProperties::buildTraceEnable_ = false;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
@@ -53,6 +54,8 @@ bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
+bool SystemProperties::stateManagerEnable_ = false;
+bool SystemProperties::acePerformanceMonitorEnable_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -131,8 +134,18 @@ bool SystemProperties::GetGridIrregularLayoutEnabled()
     return false;
 }
 
+bool SystemProperties::WaterFlowUseSegmentedLayout()
+{
+    return true;
+}
+
 bool SystemProperties::GetSideBarContainerBlurEnable()
 {
     return sideBarContainerBlurEnable_;
+}
+
+float SystemProperties::GetDefaultResolution()
+{
+    return 1.0f;
 }
 } // namespace OHOS::Ace

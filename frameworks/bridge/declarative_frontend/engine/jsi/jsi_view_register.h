@@ -23,8 +23,8 @@ namespace OHOS::Ace::Framework {
 
 void JsBindViews(BindingTarget globalObj, void* nativeEngine);
 void JsUINodeRegisterCleanUp(BindingTarget globalObj);
-void JsBindFormViews(
-    BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload = false);
+void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList,
+    void* nativeEngine, bool isReload = false);
 
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj);
 void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj);

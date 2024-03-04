@@ -58,6 +58,10 @@ constexpr Dimension LOADING_PROGRESS_SIZE = 32.0_vp;
 constexpr float DEFAULT_FRICTION = 62.0f;
 const RefPtr<Curve> DEFAULT_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 const std::string REFRESH_DRAG_SCENE = "refresh_drag_scene";
+constexpr Dimension DARK_MODE_BLUR_RADIUS = 2.0_vp;
+constexpr double DARK_MODE_LOADING_PROGRESS_BORDER_WIDTH = 2.4f;
+constexpr double DARK_MODE_LOADING_PROGRESS_BACKGROUND_ALPHA = 0.53f;
+constexpr Dimension LOADING_TEXT_TOP_MARGIN = 16.0_vp;
 } // namespace
 
 void RefreshPattern::OnAttachToFrameNode()
@@ -79,6 +83,9 @@ void RefreshPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    refreshOffset_ = layoutProperty->GetRefreshOffset().value_or(TRIGGER_REFRESH_DISTANCE).Value() > 0 ?
+        layoutProperty->GetRefreshOffset().value_or(TRIGGER_REFRESH_DISTANCE) : TRIGGER_REFRESH_DISTANCE;
+    pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     InitChildNode();
@@ -170,7 +177,6 @@ void RefreshPattern::InitProgressNode()
     progressChild_ = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
     CHECK_NULL_VOID(progressChild_);
-    host->AddChild(progressChild_, -1);
     auto gestureHub = progressChild_->GetEventHub<EventHub>();
     if (gestureHub) {
         gestureHub->SetEnabled(false);
@@ -187,8 +193,137 @@ void RefreshPattern::InitProgressNode()
     if (layoutProperty->HasProgressColor()) {
         progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
     }
+    if (HasLoadingText()) {
+        InitProgressColumn();
+    } else {
+        host->AddChild(progressChild_, -1);
+    }
     progressChild_->MarkDirtyNode();
 }
+bool RefreshPattern::HasLoadingText()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->HasLoadingText();
+}
+
+void RefreshPattern::UpdateLoadingTextOpacity(float opacity)
+{
+    CHECK_NULL_VOID(loadingTextNode_);
+    auto loadingTextRenderContext = loadingTextNode_->GetRenderContext();
+    CHECK_NULL_VOID(loadingTextRenderContext);
+    loadingTextRenderContext->UpdateOpacity(opacity);
+}
+void RefreshPattern::UpdateLoadTextScale(float ratio)
+{
+    CHECK_NULL_VOID(loadingTextNode_);
+    auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
+    MarginProperty marginProperty;
+    marginProperty.top = CalcLength(LOADING_TEXT_TOP_MARGIN * ratio);
+    marginProperty.bottom = CalcLength(Dimension(0, DimensionUnit::VP));
+    marginProperty.left = CalcLength(Dimension(0, DimensionUnit::VP));
+    marginProperty.right = CalcLength(Dimension(0, DimensionUnit::VP));
+    textLayoutProperty->UpdateMargin(marginProperty);
+    auto loadingTextRenderContext = loadingTextNode_->GetRenderContext();
+    CHECK_NULL_VOID(loadingTextRenderContext);
+    loadingTextRenderContext->UpdateTransformScale(VectorF(ratio, ratio));
+}
+
+void RefreshPattern::UpdateRefreshBorderWidth(float ratio)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    BorderWidthProperty borderWidth;
+    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        borderWidth.SetBorderWidth(Dimension(DARK_MODE_LOADING_PROGRESS_BORDER_WIDTH * ratio, DimensionUnit::VP));
+    } else {
+        borderWidth.SetBorderWidth(Dimension(0, DimensionUnit::VP));
+    }
+    host->GetLayoutProperty<RefreshLayoutProperty>()->UpdateBorderWidth(borderWidth);
+}
+
+void RefreshPattern::InitProgressColumn()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    columnNode_ = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    columnNode_->AddChild(progressChild_);
+    loadingTextNode_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto loadingTextLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(loadingTextLayoutProperty);
+    auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<RefreshTheme>();
+    CHECK_NULL_VOID(theme);
+    loadingTextLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    loadingTextLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
+
+    UpdateLoadingTextOpacity(0.0f);
+
+    columnNode_->AddChild(loadingTextNode_, -1);
+    host->AddChild(columnNode_, -1);
+}
+
+void RefreshPattern::OnColorConfigurationUpdate()
+{
+    if (isCustomBuilderExist_) {
+        return;
+    }
+
+    CHECK_NULL_VOID(progressChild_);
+    auto loadingProgressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
+    CHECK_NULL_VOID(loadingProgressLayoutProperty);
+    auto loadingProgressRenderContext = progressChild_->GetRenderContext();
+    CHECK_NULL_VOID(loadingProgressRenderContext);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<RefreshTheme>();
+    CHECK_NULL_VOID(theme);
+
+    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        loadingProgressRenderContext->UpdateBackgroundColor(
+            theme->GetBackgroundColor().BlendOpacity(DARK_MODE_LOADING_PROGRESS_BACKGROUND_ALPHA));
+
+        loadingProgressRenderContext->UpdateFrontBlurRadius(DARK_MODE_BLUR_RADIUS);
+        UpdateRefreshBorderWidth(GetFollowRatio());
+
+    } else {
+        loadingProgressRenderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+        loadingProgressRenderContext->UpdateFrontBlurRadius(Dimension(0, DimensionUnit::VP));
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(Dimension(0, DimensionUnit::VP));
+        host->GetLayoutProperty<RefreshLayoutProperty>()->UpdateBorderWidth(borderWidth);
+    }
+
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    if (layoutProperty->HasProgressColor()) {
+        progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
+    } else {
+        progressPaintProperty->UpdateColor(theme->GetProgressColor());
+    }
+    if (HasLoadingText()) {
+        CHECK_NULL_VOID(loadingTextNode_);
+        auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
+        textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    }
+}
+
 // the child need to add to be added to the first position in customBuilder mode,
 // the child need to add to be added to the last position in loadingProgress mode.
 void RefreshPattern::InitChildNode()
@@ -197,8 +332,20 @@ void RefreshPattern::InitChildNode()
     CHECK_NULL_VOID(host);
     if (isCustomBuilderExist_) {
         if (progressChild_) {
-            host->RemoveChild(progressChild_);
-            progressChild_ = nullptr;
+            if (HasLoadingText()) {
+                CHECK_NULL_VOID(columnNode_);
+                host->RemoveChild(loadingTextNode_);
+                loadingTextNode_ = nullptr;
+                host->RemoveChild(progressChild_);
+                progressChild_ = nullptr;
+                auto host = GetHost();
+                CHECK_NULL_VOID(host);
+                host->RemoveChild(columnNode_);
+                columnNode_ = nullptr;
+            } else {
+                host->RemoveChild(progressChild_);
+                progressChild_ = nullptr;
+            }
         }
     } else if (!progressChild_) {
         InitProgressNode();
@@ -206,10 +353,22 @@ void RefreshPattern::InitChildNode()
             auto progressContext = progressChild_->GetRenderContext();
             CHECK_NULL_VOID(progressContext);
             progressContext->UpdateOpacity(0.0);
+            UpdateLoadingTextOpacity(0.0f);
         } else {
             UpdateLoadingProgress();
         }
     }
+
+    if (HasLoadingText()) {
+        auto loadingTextLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(loadingTextLayoutProperty);
+        auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+        loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+
+    OnColorConfigurationUpdate();
 }
 
 void RefreshPattern::RefreshStatusChangeEffect()
@@ -291,13 +450,15 @@ void RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
         if (!isSourceFromAnimation_) {
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
+                UpdateFirstChildPlacement();
+                return;
+            }
+            UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
+            if (LessNotEqual(scrollOffset_, static_cast<float>(refreshOffset_.ConvertToPx())) ||
+                    !pullToRefresh_) {
+                UpdateRefreshStatus(RefreshStatus::DRAG);
             } else {
-                UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
-                if (LessNotEqual(scrollOffset_, static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
-                    UpdateRefreshStatus(RefreshStatus::DRAG);
-                } else {
-                    UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
-                }
+                UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
             }
         }
         UpdateFirstChildPlacement();
@@ -335,9 +496,9 @@ float RefreshPattern::GetFollowRatio()
 {
     auto loadingVisibleHeight = GetLoadingVisibleHeight();
     auto ratio = 0.0f;
-    if (!NearEqual(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()), loadingVisibleHeight)) {
+    if (!NearEqual(static_cast<float>(refreshOffset_.ConvertToPx()), loadingVisibleHeight)) {
         ratio = static_cast<float>(
-            (scrollOffset_ - loadingVisibleHeight) / (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - loadingVisibleHeight));
+            (scrollOffset_ - loadingVisibleHeight) / (refreshOffset_.ConvertToPx() - loadingVisibleHeight));
     }
     return std::clamp(ratio, 0.0f, 1.0f);
 }
@@ -478,6 +639,8 @@ void RefreshPattern::UpdateLoadingProgressStatus(RefreshAnimationState state, fl
         case RefreshAnimationState::FOLLOW_HAND:
         case RefreshAnimationState::RECYCLE:
             progressPaintProperty->UpdateRefreshSizeScaleRatio(ratio);
+            UpdateLoadTextScale(std::clamp(ratio, 0.0f, 1.0f));
+            UpdateRefreshBorderWidth(std::clamp(ratio, 0.0f, 1.0f));
             break;
         default:
             break;
@@ -502,6 +665,7 @@ void RefreshPattern::InitOffsetProperty()
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->AttachNodeAnimatableProperty(offsetProperty_);
+        offsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     }
 }
 
@@ -569,8 +733,16 @@ void RefreshPattern::UpdateLoadingProgressTranslate(float scrollOffset)
             (scrollOffset - loadingVisibleHeight) / (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - loadingVisibleHeight));
         renderContext->UpdateOpacity(std::clamp(ratio, 0.0f, 1.0f));
         renderContext->UpdateTransformTranslate({ 0.0f, (scrollOffset - loadingVisibleHeight) * HALF, 0.0f });
+        if (loadingTextNode_) {
+            UpdateLoadingTextOpacity(std::clamp(ratio, 0.0f, 1.0f));
+            auto loadingTextRenderContext = loadingTextNode_->GetRenderContext();
+            CHECK_NULL_VOID(loadingTextRenderContext);
+            loadingTextRenderContext->UpdateTransformTranslate(
+                { 0.0f, (scrollOffset - loadingVisibleHeight) * HALF, 0.0f });
+        }
     } else {
         renderContext->UpdateOpacity(0.0f);
+        UpdateLoadingTextOpacity(0.0f);
     }
 }
 
@@ -587,9 +759,10 @@ float RefreshPattern::GetLoadingVisibleHeight()
 
 void RefreshPattern::SpeedTriggerAnimation(float speed)
 {
-    auto targetOffset = (isSourceFromAnimation_ || LessNotEqual(scrollOffset_, TRIGGER_REFRESH_DISTANCE.ConvertToPx()))
+    auto targetOffset = (isSourceFromAnimation_ ||
+                            LessNotEqual(scrollOffset_, refreshOffset_.ConvertToPx()) || !pullToRefresh_)
                             ? 0.0f
-                            : TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+                            : refreshOffset_.ConvertToPx();
     auto dealSpeed = 0.0f;
     if (!NearEqual(scrollOffset_, targetOffset)) {
         dealSpeed = speed / (targetOffset - scrollOffset_);
@@ -627,7 +800,7 @@ float RefreshPattern::GetTargetOffset()
     switch (refreshStatus_) {
         case RefreshStatus::OVER_DRAG:
         case RefreshStatus::REFRESH:
-            targetOffset = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+            targetOffset = refreshOffset_.ConvertToPx();
             break;
         default:
             targetOffset = 0.0f;
@@ -647,13 +820,14 @@ void RefreshPattern::SpeedAnimationFinish()
 
 void RefreshPattern::QuickFirstChildAppear()
 {
+    isSourceFromAnimation_ = false;
     UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
     ResetAnimation();
     AnimationOption option;
     option.SetCurve(DEFAULT_CURVE);
     option.SetDuration(LOADING_ANIMATION_DURATION);
     animation_ = AnimationUtils::StartAnimation(
-        option, [&]() { offsetProperty_->Set(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx())); });
+        option, [&]() { offsetProperty_->Set(static_cast<float>(refreshOffset_.ConvertToPx())); });
 }
 
 void RefreshPattern::QuickFirstChildDisappear()
@@ -759,6 +933,8 @@ void RefreshPattern::HandleDragUpdateLowVersion(float delta)
                 ? 1.0f
                 : (scrollOffset_ - triggerLoadingDistance_) / (triggerRefreshDistance - triggerLoadingDistance_);
         progressPaintProperty->UpdateRefreshSizeScaleRatio(std::clamp(ratio, 0.0f, 1.0f));
+        UpdateLoadTextScale(std::clamp(ratio, 0.0f, 1.0f));
+        UpdateRefreshBorderWidth(std::clamp(ratio, 0.0f, 1.0f));
     }
 }
 
@@ -825,9 +1001,13 @@ void RefreshPattern::UpdateLoadingProgress()
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateRefreshSizeScaleRatio(ratio);
+    UpdateLoadTextScale(std::clamp(ratio, 0.0f, 1.0f));
+    UpdateRefreshBorderWidth(std::clamp(ratio, 0.0f, 1.0f));
     auto progressContext = progressChild_->GetRenderContext();
     CHECK_NULL_VOID(progressContext);
     progressContext->UpdateOpacity(std::clamp(ratio, 0.0f, 1.0f));
+    UpdateLoadingTextOpacity(std::clamp(ratio, 0.0f, 1.0f));
+
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 

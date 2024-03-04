@@ -158,7 +158,8 @@ public:
     void RegisterOnFrameWithData(OnFrameCallBackWithData&& onFrameCallBack);
     void RegisterOnFrameWithTimestamp(OnFrameCallBackWithTimestamp&& onFrameCallBack);
 
-    void UnRegisterOnFrame();
+    void UnregisterOnFrame();
+    void CheckShouldUnregisterOnFrame();
 
     void CheckRate(int32_t vsyncRate, int32_t refreshRateMode);
     void UpdateData(uint64_t nanoTimestamp, int32_t vsyncPeriod);
@@ -189,6 +190,7 @@ private:
     int32_t sourceVsyncRate_ = 0;
     bool rateChanged_ = true;
     int32_t refreshRateMode_ = 0;
+    bool needUnregisterOnFrame_ = false;
 };
 } // namespace OHOS::Ace
 

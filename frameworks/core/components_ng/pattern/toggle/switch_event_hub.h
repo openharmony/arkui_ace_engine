@@ -60,7 +60,7 @@ public:
                 auto id = host->GetInspectorIdValue("");
                 builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
                 if (!id.empty()) {
-                    Recorder::NodeDataCache::Get().PutBool(id, isOn);
+                    Recorder::NodeDataCache::Get().PutBool(host, id, isOn);
                 }
             }
             builder.SetChecked(isOn);

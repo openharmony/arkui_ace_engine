@@ -341,10 +341,21 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
     }
 }
 
-void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task) {}
+void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
+{
+    if (task) {
+        task();
+    }
+}
+
 void PipelineContext::FlushSyncGeometryNodeTasks() {}
 
-void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
+void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
+{
+    if (task) {
+        task();
+    }
+}
 
 void PipelineContext::FlushPipelineImmediately() {}
 
@@ -355,12 +366,12 @@ FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t /* recvTime */, uint64_
 
 void PipelineContext::DumpPipelineInfo() const {}
 
-void PipelineContext::AddVisibleAreaChangeNode(
-    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback)
+void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
+    const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback)
 {
     CHECK_NULL_VOID(callback);
     callback(false, 0.0);
-    callback(true, ratio);
+    callback(true, ratio[0]);
 }
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}

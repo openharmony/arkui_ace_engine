@@ -46,7 +46,18 @@ const NG::OffsetF& DRAWOFFSET { 1, 1 };
 NG::ShapePaintProperty shapePaintProperty;
 } // namespace
 
-class CirclePainterTestNg : public testing::Test {};
+class CirclePainterTestNg : public testing::Test {
+public:
+    void CallBack(Testing::MockCanvas& rSCanvas);
+};
+
+void CirclePainterTestNg::CallBack(Testing::MockCanvas& rSCanvas)
+{
+    EXPECT_CALL(rSCanvas, AttachBrush(_)).WillOnce(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachBrush()).WillOnce(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, AttachPen(_)).WillOnce(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachPen()).WillOnce(ReturnRef(rSCanvas));
+}
 
 /**
  * @tc.name: CirclePainterTestNg001
@@ -59,6 +70,7 @@ HWTEST_F(CirclePainterTestNg, CirclePainterTestNg_DrawCircle001, TestSize.Level1
      * @tc.steps1: callback DrawCircle.push shapePaintProperty is null.
      * @tc.expected: expect SetPen return true.
      */
+    CallBack(testingCanvas);
     NG::CirclePainter::DrawCircle(testingCanvas, radius, DRAWOFFSET, shapePaintProperty);
     bool result = NG::ShapePainter::SetPen(pen, shapePaintProperty);
     EXPECT_TRUE(result);
@@ -69,6 +81,7 @@ HWTEST_F(CirclePainterTestNg, CirclePainterTestNg_DrawCircle001, TestSize.Level1
      */
     shapePaintProperty.UpdateStrokeWidth(test);
 
+    CallBack(testingCanvas);
     NG::CirclePainter::DrawCircle(testingCanvas, radius, DRAWOFFSET, shapePaintProperty);
     bool result1 = NG::ShapePainter::SetPen(pen, shapePaintProperty);
     EXPECT_FALSE(result1);

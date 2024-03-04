@@ -690,7 +690,7 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
             V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
         navigationGroupNode->AddChild(dividerNode);
         navigationGroupNode->SetDividerNode(dividerNode);
-        
+
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
             dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
@@ -724,6 +724,9 @@ bool NavigationModelNG::ParseCommonTitle(
     CHECK_NULL_RETURN(navBarNode, false);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, false);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titleBarPattern, false);
+    titleBarPattern->SetIsTitleChanged(true);
     if (navBarNode->GetPrevTitleIsCustomValue(false)) {
         titleBarNode->RemoveChild(titleBarNode->GetTitle());
         titleBarNode->SetTitle(nullptr);
@@ -1542,7 +1545,50 @@ void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
     navBarLayoutProperty->UpdateHideTitleBar(hideTitleBar);
 }
 
-void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& subtitle) {}
+void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& subtitle)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    if (navBarNode->GetPrevTitleIsCustomValue(false)) {
+        titleBarNode->RemoveChild(titleBarNode->GetTitle());
+        titleBarNode->SetTitle(nullptr);
+        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+        CHECK_NULL_VOID(titleBarLayoutProperty);
+        if (titleBarLayoutProperty->HasTitleHeight()) {
+            titleBarLayoutProperty->ResetTitleHeight();
+            navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->ResetTitleMode();
+        }
+    }
+    navBarNode->UpdatePrevTitleIsCustom(false);
+    // create or update subtitle
+    auto subTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    if (subTitle) {
+        // update subtitle
+        auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateContent(subtitle);
+        auto renderContext = subTitle->GetRenderContext();
+        renderContext->UpdateOpacity(1.0);
+    } else {
+        // create and init subtitle
+        subTitle = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        auto theme = NavigationGetTheme();
+        textLayoutProperty->UpdateContent(subtitle);
+        textLayoutProperty->UpdateFontSize(theme->GetSubTitleFontSize());
+        textLayoutProperty->UpdateTextColor(theme->GetSubTitleColor());
+        textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
+        textLayoutProperty->UpdateMaxLines(1);
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        titleBarNode->SetSubtitle(subTitle);
+        titleBarNode->AddChild(subTitle);
+    }
+}
 
 void NavigationModelNG::SetHideBackButton(FrameNode* frameNode, bool hideBackButton)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,12 +20,6 @@
 
 namespace OHOS::Ace::NG {
 
-enum class ScrollEventType {
-    SCROLL_TOP = 0,
-    SCROLL_END,
-    SCROLL_EDGE,
-};
-
 // which edge is reached
 enum class ScrollEdge {
     TOP = 0,
@@ -35,6 +29,7 @@ enum class ScrollEdge {
 };
 
 using ScrollEvent = std::function<void(Dimension, Dimension)>;
+using ScrollEventWithState = std::function<void(Dimension, Dimension, ScrollState)>;
 using ScrollEdgeEvent = std::function<void(ScrollEdge)>;
 using ScrollEndEvent = std::function<void()>;
 
@@ -53,6 +48,26 @@ public:
     void SetOnScroll(ScrollEvent&& onScroll)
     {
         onScroll_ = std::move(onScroll);
+    }
+
+    const ScrollEventWithState& GetOnWillScrollEvent() const
+    {
+        return onWillScroll_;
+    }
+
+    void SetOnWillScrollEvent(ScrollEventWithState&& onWillScroll)
+    {
+        onWillScroll_ = std::move(onWillScroll);
+    }
+
+    const ScrollEventWithState& GetOnDidScrollEvent() const
+    {
+        return onDidScroll_;
+    }
+
+    void SetOnDidScrollEvent(ScrollEventWithState&& onDidScroll)
+    {
+        onDidScroll_ = std::move(onDidScroll);
     }
 
     const ScrollEdgeEvent& GetScrollEdgeEvent()
@@ -87,6 +102,8 @@ public:
 
 private:
     ScrollEvent onScroll_;
+    ScrollEventWithState onWillScroll_;
+    ScrollEventWithState onDidScroll_;
     OnScrollBeginEvent onScrollBegin_;
     ScrollEndEvent onScrollEnd_;
     ScrollEdgeEvent onScrollEdge_;

@@ -31,6 +31,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
@@ -665,6 +666,10 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         HandleNotallowDrag(info);
         return;
     }
+    if (GetTextDraggable() && !GetIsTextDraggable()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, forbidden drag");
+        return;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto eventManager = pipeline->GetEventManager();
@@ -686,7 +691,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
     auto frameTag = frameNode->GetTag();
     auto hostPattern = frameNode->GetPattern<TextDragBase>();
-    if (hostPattern && (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
+    if (hostPattern && GetTextDraggable() && (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
                         frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG)) {
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
         frameNodeSize_ = SizeF(0.0f, 0.0f);
@@ -705,29 +710,30 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
      * Users may remove frameNode in the js callback function "onDragStart "triggered below,
      * so save the offset of the framenode relative to the window in advance
      */
-    auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
-    auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
-    auto dragPreviewInfo = frameNode->GetDragPreview();
+    DragDropInfo dragPreviewInfo;
+    auto dragDropInfo = GetDragDropInfo(info, frameNode, dragPreviewInfo, event);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
-            dragDropInfo.pixelMap = dragPreviewPixelMap_;
-            OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
-            return;
+            if (dragPreviewPixelMap_ != nullptr) {
+                dragDropInfo.pixelMap = dragPreviewPixelMap_;
+                OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+                return;
+            }
         }
     }
-    if (info.GetSourceDevice() == SourceType::MOUSE) {
-        if (dragPreviewInfo.pixelMap != nullptr) {
-            dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
-            OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
-            return;
-        } else if (dragPreviewInfo.customNode != nullptr) {
-            dragDropInfo.customNode = dragPreviewInfo.customNode;
-        }
+
+    if (dragPreviewInfo.pixelMap != nullptr) {
+        dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
+        OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+        return;
+    } else if (dragPreviewInfo.customNode != nullptr) {
+        dragDropInfo.customNode = dragPreviewInfo.customNode;
     }
+
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
         auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
@@ -755,7 +761,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 }
 
 void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context,
-    const RefPtr<FrameNode> frameNode, const DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
+    const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
@@ -772,13 +778,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (eventRet == DragRet::DRAG_FAIL || eventRet == DragRet::DRAG_CANCEL) {
         return;
     }
-    if (GetTextDraggable() && !GetIsTextDraggable()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, forbidden drag");
-        return;
-    }
     std::string udKey;
     int32_t recordsSize = 1;
-    auto unifiedData = dragEvent->GetData();
+    auto unifiedData = GetUnifiedData(frameNode->GetTag(), dragDropInfo, dragEvent);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -838,7 +840,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
     }
     if (!overlayManager->GetIsOnAnimation()) {
-        dragEventActuator_->SetIsNotInPreviewState(true);
+        if (dragEventActuator_ != nullptr) {
+            dragEventActuator_->SetIsNotInPreviewState(true);
+        }
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, animation is %{public}d, pixelMap scale is %{public}f",
         overlayManager->GetIsOnAnimation(), scale);
@@ -852,10 +856,13 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dipScale = pipeline->GetDipScale();
     arkExtraInfoJson->Put("dip_scale", dipScale);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), true, false, summary };
+        info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary };
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         if (dragDropManager->IsNeedScaleDragPreview()) {
@@ -871,14 +878,14 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             TAG_LOGW(AceLogTag::ACE_DRAG, "Register coordination listener failed, error is %{public}d", ret);
         }
     }
-    dragDropManager->UpdateDragStyle();
     dragDropManager->SetPreviewRect(Rect(pixelMapOffset.GetX(), pixelMapOffset.GetY(), width, height));
     dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     eventManager->DoMouseActionRelease();
     eventManager->SetIsDragging(true);
-    if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_->GetIsNotInPreviewState()) {
+    if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_ != nullptr &&
+        dragEventActuator_->GetIsNotInPreviewState()) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
             overlayManager->RemovePixelMap();
             pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
@@ -1194,6 +1201,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
         taskScheduler->PostTask(
             [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage]() {
                 dragDropManager->SetDragResult(notifyMessage, dragEvent);
+                dragDropManager->SetDragBehavior(notifyMessage, dragEvent);
                 dragDropManager->SetIsDragged(false);
                 dragDropManager->ResetDragging();
                 dragDropManager->SetDraggingPointer(-1);
@@ -1309,5 +1317,59 @@ void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
         showMenu_= MakeRefPtr<ClickEvent>(std::move(originalGetGestureEventFunc));
         AddClickEvent(showMenu_);
     }
+}
+
+bool GestureEventHub::IsTextCategoryComponent(const std::string& frameTag)
+{
+    return frameTag == V2::TEXTAREA_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
+           frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG ||
+           frameTag == V2::RICH_EDITOR_ETS_TAG;
+}
+
+DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
+    DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
+{
+    DragDropInfo dragDropInfo;
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_RETURN(eventHub, dragDropInfo);
+    auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
+    auto onDragStart = eventHub->GetOnDragStart();
+    if (!onDragStart && eventHub->HasDefaultOnDragStart()) {
+        onDragStart = eventHub->GetDefaultOnDragStart();
+    }
+    dragDropInfo = onDragStart(dragEvent, extraParams);
+
+    auto frameTag = frameNode->GetTag();
+    if (GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Get drag drop info, pixelmap and customNode are set to null "
+            "when frameTag is %{public}s", frameTag.c_str());
+        dragDropInfo.pixelMap = nullptr;
+        dragDropInfo.customNode = nullptr;
+    } else {
+        dragPreviewInfo = frameNode->GetDragPreview();
+    }
+    return dragDropInfo;
+}
+
+RefPtr<UnifiedData> GestureEventHub::GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
+    const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
+{
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto unifiedData = dragEvent->GetData();
+    bool hasData = static_cast<bool>(unifiedData);
+    if (!unifiedData && eventHub->HasDefaultOnDragStart()) {
+        auto defaultDropInfo = eventHub->GetDefaultOnDragStart()(dragEvent, "");
+        if (dragDropInfo.extraInfo.empty()) {
+            dragDropInfo.extraInfo = defaultDropInfo.extraInfo;
+        }
+        unifiedData = dragEvent->GetData();
+    }
+    auto defaultOnDragStart = eventHub->GetDefaultOnDragStart();
+    CHECK_NULL_RETURN(defaultOnDragStart, unifiedData);
+    if (hasData && frameTag == V2::RICH_EDITOR_ETS_TAG) {
+        defaultOnDragStart(dragEvent, "");
+    }
+    return unifiedData;
 }
 } // namespace OHOS::Ace::NG

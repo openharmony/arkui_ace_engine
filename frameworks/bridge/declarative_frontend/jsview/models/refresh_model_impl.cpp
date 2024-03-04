@@ -189,4 +189,5 @@ void RefreshModelImpl::SetChangeEvent(std::function<void(const std::string)>&& c
 }
 
 void RefreshModelImpl::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) {}
+void RefreshModelImpl::SetLoadingText(const std::string& loadingText) {}
 } // namespace OHOS::Ace::Framework

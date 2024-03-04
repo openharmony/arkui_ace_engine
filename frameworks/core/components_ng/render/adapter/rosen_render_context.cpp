@@ -343,7 +343,11 @@ void RosenRenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
     AddFrameNodeInfoToRsNode();
 }
 
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isUseExtSurface)
+#else
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param)
+#endif
 {
     // skip if node already created
     CHECK_NULL_VOID(!rsNode_);
@@ -373,21 +377,11 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             break;
         }
         case ContextType::HARDWARE_SURFACE: {
-#ifndef VIDEO_TEXTURE_SUPPORTED
-            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-                .isTextureExportNode = isTextureExportNode };
-            auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
-            if (surfaceNode) {
-                surfaceNode->SetHardwareEnabled(true, param->patternType == PatternType::VIDEO ?
-                    SelfDrawingNodeType::VIDEO : SelfDrawingNodeType::DEFAULT);
-            }
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+            rsNode_ = CreateHardwareSurface(param, isUseExtSurface, isTextureExportNode);
 #else
-            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
-                .isTextureExportNode = isTextureExportNode };
-            auto surfaceNode =
-                Rosen::RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
+            rsNode_ = CreateHardwareSurface(param, false, isTextureExportNode);
 #endif
-            rsNode_ = surfaceNode;
             break;
         }
         case ContextType::EFFECT:
@@ -403,6 +397,44 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
     }
 
     AddFrameNodeInfoToRsNode();
+}
+
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
+    const std::optional<ContextParam>& param, bool isUseExtSurface, bool isTextureExportNode)
+{
+#ifndef VIDEO_TEXTURE_SUPPORTED
+    Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+        .isTextureExportNode = isTextureExportNode };
+    auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+    if (surfaceNode) {
+        surfaceNode->SetHardwareEnabled(true);
+    }
+    return surfaceNode;
+#else
+#ifdef XCOMPONENT_SUPPORTED
+    if (isUseExtSurface) {
+        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+            .isTextureExportNode = isTextureExportNode };
+        auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+        if (surfaceNode) {
+            surfaceNode->SetHardwareEnabled(true);
+        }
+        return surfaceNode;
+    } else {
+        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+            .isTextureExportNode = isTextureExportNode };
+        auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
+            RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
+        return surfaceNode;
+    }
+#else
+    Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+        .isTextureExportNode = isTextureExportNode };
+    auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
+        RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
+    return surfaceNode;
+#endif
+#endif
 }
 
 void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
@@ -444,7 +476,11 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto paintRect = AdjustPaintRect();
-    RoundToPixelGrid(isRound, flag);
+    if (isRound && flag == 0) {
+        RoundToPixelGrid(); // call RoundToPixelGrid without param to improve performance
+    } else {
+        RoundToPixelGrid(isRound, flag);
+    }
     paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
     SyncGeometryProperties(paintRect);
     host->OnPixelRoundFinish(geometryNode->GetPixelGridRoundSize());
@@ -2335,6 +2371,11 @@ RectF RosenRenderContext::AdjustPaintRect()
             return rect;
         }
     }
+    bool hasPosition = HasPosition() && IsUsingPosition(frameNode);
+    if (!HasAnchor() && !HasOffset() && !hasPosition) {
+        geometryNode->SetPixelGridRoundOffset(rect.GetOffset());
+        return rect;
+    }
     const auto& layoutConstraint = frameNode->GetGeometryNode()->GetParentLayoutConstraint();
     auto widthPercentReference = layoutConstraint.has_value() ? layoutConstraint->percentReference.Width()
                                                               : PipelineContext::GetCurrentRootWidth();
@@ -2351,7 +2392,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     Dimension parentPaddingTop;
     GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
     // Position properties take precedence over offset locations.
-    if (HasPosition() && IsUsingPosition(frameNode)) {
+    if (hasPosition) {
         CombineMarginAndPosition(
             resultX, resultY, parentPaddingLeft, parentPaddingTop, widthPercentReference, heightPercentReference);
         rect.SetLeft(resultX.ConvertToPx() - anchorX.value_or(0));
@@ -2378,6 +2419,21 @@ RectF RosenRenderContext::AdjustPaintRect()
     return rect;
 }
 
+float RosenRenderContext::RoundValueToPixelGrid(float value)
+{
+    float fractials = fmod(value, 1.0f);
+    if (fractials < 0.0f) {
+        ++fractials;
+    }
+    if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.75f)) {
+        return (value - fractials + 1.0f);
+    } else if (NearEqual(fractials, 0.0f) || !GreatOrEqual(fractials, 0.25f)) {
+        return (value - fractials);
+    } else {
+        return (value - fractials + 0.5f);
+    }
+}
+
 float RosenRenderContext::RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
 {
     float fractials = fmod(value, 1.0f);
@@ -2398,6 +2454,46 @@ float RosenRenderContext::RoundValueToPixelGrid(float value, bool isRound, bool 
         }
     }
     return value;
+}
+
+void RosenRenderContext::RoundToPixelGrid()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    float relativeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
+    float relativeTop = geometryNode->GetPixelGridRoundOffset().GetY();
+    float nodeWidth = geometryNode->GetFrameSize().Width();
+    float nodeHeight = geometryNode->GetFrameSize().Height();
+    float absoluteRight = relativeLeft + nodeWidth;
+    float absoluteBottom = relativeTop + nodeHeight;
+    // round node
+    float nodeLeftI = RoundValueToPixelGrid(relativeLeft);
+    float nodeTopI = RoundValueToPixelGrid(relativeTop);
+    geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
+    float nodeWidthI = RoundValueToPixelGrid(absoluteRight) - nodeLeftI;
+    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom) - nodeTopI;
+    geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+    if (borderWidth_ != Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f)) {
+        // round inner
+        float innerLeft = relativeLeft + borderWidth_[0];
+        float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
+        float innerTop = relativeTop + borderWidth_[1];
+        float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
+        float innerWidthI = RoundValueToPixelGrid(innerRight) - RoundValueToPixelGrid(innerLeft);
+        float innerHeightI = RoundValueToPixelGrid(innerBottom) - RoundValueToPixelGrid(innerTop);
+        // update border
+        float borderLeftI = RoundValueToPixelGrid(borderWidth_[0]);
+        float borderTopI = RoundValueToPixelGrid(borderWidth_[1]);
+        float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
+        float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
+        BorderWidthPropertyF borderWidthPropertyF;
+        borderWidthPropertyF.leftDimen = borderLeftI;
+        borderWidthPropertyF.topDimen = borderTopI;
+        borderWidthPropertyF.rightDimen = borderRightI;
+        borderWidthPropertyF.bottomDimen = borderBottomI;
+        UpdateBorderWidthF(borderWidthPropertyF);
+    }
 }
 
 void RosenRenderContext::RoundToPixelGrid(bool isRound, uint8_t flag)
@@ -2424,31 +2520,31 @@ void RosenRenderContext::RoundToPixelGrid(bool isRound, uint8_t flag)
     float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, ceilLeft, floorLeft);
     float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, ceilTop, floorTop);
     geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
-    float nodeWidthI = RoundValueToPixelGrid(absoluteRight, isRound, ceilRight, floorRight) -
-        RoundValueToPixelGrid(relativeLeft, isRound, ceilLeft, floorLeft);
-    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom, isRound, ceilBottom, floorBottom) -
-        RoundValueToPixelGrid(relativeTop, isRound, ceilTop, floorTop);
+    float nodeWidthI = RoundValueToPixelGrid(absoluteRight, isRound, ceilRight, floorRight) - nodeLeftI;
+    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom, isRound, ceilBottom, floorBottom) - nodeTopI;
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
-    // round inner
-    float innerLeft = relativeLeft + borderWidth_[0];
-    float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
-    float innerTop = relativeTop + borderWidth_[1];
-    float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
-    float innerWidthI = RoundValueToPixelGrid(innerRight, isRound, ceilRight, floorRight) -
-        RoundValueToPixelGrid(innerLeft, isRound, ceilLeft, floorLeft);
-    float innerHeightI = RoundValueToPixelGrid(innerBottom, isRound, ceilBottom, floorBottom) -
-        RoundValueToPixelGrid(innerTop, isRound, ceilTop, floorTop);
-    // update border
-    float borderLeftI = RoundValueToPixelGrid(borderWidth_[0], isRound, ceilLeft, floorLeft);
-    float borderTopI = RoundValueToPixelGrid(borderWidth_[1], isRound, ceilTop, floorTop);
-    float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
-    float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
-    BorderWidthPropertyF borderWidthPropertyF;
-    borderWidthPropertyF.leftDimen = borderLeftI;
-    borderWidthPropertyF.topDimen = borderTopI;
-    borderWidthPropertyF.rightDimen = borderRightI;
-    borderWidthPropertyF.bottomDimen = borderBottomI;
-    UpdateBorderWidthF(borderWidthPropertyF);
+    if (borderWidth_ != Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f)) {
+        // round inner
+        float innerLeft = relativeLeft + borderWidth_[0];
+        float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
+        float innerTop = relativeTop + borderWidth_[1];
+        float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
+        float innerWidthI = RoundValueToPixelGrid(innerRight, isRound, ceilRight, floorRight) -
+            RoundValueToPixelGrid(innerLeft, isRound, ceilLeft, floorLeft);
+        float innerHeightI = RoundValueToPixelGrid(innerBottom, isRound, ceilBottom, floorBottom) -
+            RoundValueToPixelGrid(innerTop, isRound, ceilTop, floorTop);
+        // update border
+        float borderLeftI = RoundValueToPixelGrid(borderWidth_[0], isRound, ceilLeft, floorLeft);
+        float borderTopI = RoundValueToPixelGrid(borderWidth_[1], isRound, ceilTop, floorTop);
+        float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
+        float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
+        BorderWidthPropertyF borderWidthPropertyF;
+        borderWidthPropertyF.leftDimen = borderLeftI;
+        borderWidthPropertyF.topDimen = borderTopI;
+        borderWidthPropertyF.rightDimen = borderRightI;
+        borderWidthPropertyF.bottomDimen = borderBottomI;
+        UpdateBorderWidthF(borderWidthPropertyF);
+    }
 }
 
 void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension& resultY,
@@ -3503,7 +3599,15 @@ void RosenRenderContext::PaintClipMask(const std::unique_ptr<ClipProperty>& clip
     }
 #else
     auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
-    auto maskPath = Rosen::RSMask::CreatePathMask(rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape));
+
+    RSColor rsStrokeColor;
+    rsStrokeColor.SetColorQuad(basicShape->GetStrokeColor());
+    RSPen pen;
+    pen.SetColor(rsStrokeColor);
+    pen.SetWidth(basicShape->GetStrokeWidth());
+
+    auto maskPath =
+        Rosen::RSMask::CreatePathMask(rsPath, pen, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape));
     if (!clipMaskModifier_) {
         auto prop = std::make_shared<RSProperty<std::shared_ptr<RSMask>>>(maskPath);
         clipMaskModifier_ = std::make_shared<Rosen::RSMaskModifier>(prop);
@@ -4708,6 +4812,12 @@ void RosenRenderContext::OnRenderGroupUpdate(bool isRenderGroup)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->MarkNodeGroup(isRenderGroup);
+}
+
+void RosenRenderContext::UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkNodeGroup(isRenderGroup, isForced, includeProperty);
 }
 
 void RosenRenderContext::OnSuggestedRenderGroupUpdate(bool isRenderGroup)

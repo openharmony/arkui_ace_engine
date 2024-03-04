@@ -70,6 +70,8 @@ private:
     static void SetSymmetricExtensible(const JSRef<JSVal>& info);
     static void SetId(const JSRef<JSVal>& info);
     static void SetBottomTabBarStyle(const JSRef<JSObject>& paramObject);
+    static void SetOnWillShow(const JSCallbackInfo& info);
+    static void SetOnWillHide(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

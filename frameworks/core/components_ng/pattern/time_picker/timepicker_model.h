@@ -25,6 +25,12 @@
 
 namespace OHOS::Ace {
 using ChangeEvent = std::function<void(const BaseEventInfo* info)>;
+struct TimePickerDialogEvent {
+    std::function<void()> onDidAppear;
+    std::function<void()> onDidDisappear;
+    std::function<void()> onWillAppear;
+    std::function<void()> onWillDisappear;
+};
 class TimePickerModel {
 public:
     static TimePickerModel* GetInstance();
@@ -53,7 +59,7 @@ public:
 
     virtual void SetTimePickerDialogShow(PickerDialogInfo& pickerDialog, NG::TimePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange) = 0;
+        std::function<void(const std::string&)>&& onChange, TimePickerDialogEvent& timePickerDialogEvent) = 0;
 
 private:
     static std::unique_ptr<TimePickerDialogModel> timePickerDialogInstance_;

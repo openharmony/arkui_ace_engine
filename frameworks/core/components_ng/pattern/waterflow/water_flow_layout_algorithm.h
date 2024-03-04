@@ -21,8 +21,16 @@
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT WaterFlowLayoutAlgorithm : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(WaterFlowLayoutAlgorithm, LayoutAlgorithm);
+class WaterFlowLayoutBase : public LayoutAlgorithm {
+    DECLARE_ACE_TYPE(WaterFlowLayoutBase, LayoutAlgorithm);
+
+public:
+    virtual WaterFlowLayoutInfo GetLayoutInfo() = 0;
+    virtual void SetCanOverScroll(bool canOverScroll) = 0;
+};
+
+class ACE_EXPORT WaterFlowLayoutAlgorithm : public WaterFlowLayoutBase {
+    DECLARE_ACE_TYPE(WaterFlowLayoutAlgorithm, WaterFlowLayoutBase);
 
 public:
     explicit WaterFlowLayoutAlgorithm(WaterFlowLayoutInfo layoutInfo) : layoutInfo_(std::move(layoutInfo)) {}
@@ -32,11 +40,11 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    WaterFlowLayoutInfo GetLayoutInfo()
+    WaterFlowLayoutInfo GetLayoutInfo() override
     {
         return std::move(layoutInfo_);
     }
-    void SetCanOverScroll(bool canOverScroll)
+    void SetCanOverScroll(bool canOverScroll) override
     {
         canOverScroll_ = canOverScroll;
     }
@@ -46,8 +54,6 @@ private:
     void MeasureForAnimation(LayoutWrapper* layoutWrapper);
     void FillViewport(float mainSize, LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
-    LayoutConstraintF CreateChildConstraint(int32_t crossIndex, const RefPtr<WaterFlowLayoutProperty>& layoutProperty,
-        const RefPtr<LayoutWrapper>& childLayoutWrapper);
     float ComputeCrossPosition(int32_t crossIndex) const;
     void InitialItemsCrossSize(
         const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount);
@@ -55,7 +61,7 @@ private:
     {
         return index + layoutInfo_.footerIndex_ + 1;
     }
-    float MeasuerFooter(LayoutWrapper* layoutWrapper);
+    float MeasureFooter(LayoutWrapper* layoutWrapper);
     void LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse);
     void JumpToTargetAlign(const std::pair<float, float>& item);
 

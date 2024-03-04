@@ -138,6 +138,7 @@ public:
     void HandleDragUpdate(int32_t index, float mainDelta);
     void HandleDragEnd(int32_t index, float mainVelocity = SWIPER_SPEED_TH);
     void ScrollSnap(float offset, float velocity);
+    void ScrollSnapForEqualHeightItem(float offset, float velocity);
 
     AssertionResult VerifyPosition(
         const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset);

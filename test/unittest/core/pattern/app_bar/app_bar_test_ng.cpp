@@ -292,14 +292,15 @@ HWTEST_F(AppBarTestNg, AppBarWithNavigation0010, TestSize.Level1)
     auto atom = AppBarView::Create(stage);
     auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
     EXPECT_NE(appBar, nullptr);
+    auto atom_ = appBar->atomicService_.Upgrade();
 
-    auto uiRow = appBar->atom_->GetFirstChild();
+    auto uiRow = atom_->GetFirstChild();
     auto uiBackButton = uiRow->GetFirstChild();
     auto uiBackIcon = uiBackButton->GetFirstChild();
     auto backIcon = AceType::DynamicCast<FrameNode>(uiBackIcon);
     EXPECT_NE(backIcon, nullptr);
 
-    auto uiFaButton = appBar->atom_->GetLastChild();
+    auto uiFaButton = atom_->GetLastChild();
     auto uiFaIcon = uiFaButton->GetFirstChild();
     auto faIcon = AceType::DynamicCast<FrameNode>(uiFaIcon);
     auto property = backIcon->GetLayoutProperty<ImageLayoutProperty>();
@@ -310,32 +311,6 @@ HWTEST_F(AppBarTestNg, AppBarWithNavigation0010, TestSize.Level1)
      */
     appBar->SetEachIconColor(backIcon, Color::WHITE, InternalResource::ResourceId::APP_BAR_BACK_SVG);
     EXPECT_EQ(property->GetImageSourceInfo()->GetFillColor(), Color::WHITE);
-}
-
-/**
- * @tc.name: SetRowWidth001
- * @tc.desc: Testing the SetRowWidth interface
- * @tc.type: FUNC
- */
-HWTEST_F(AppBarTestNg, SetRowWidth001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create appBar.
-     * @tc.expected: appBar is not null.
-     */
-    auto stage = AceType::MakeRefPtr<FrameNode>("stage", 1, AceType::MakeRefPtr<StagePattern>());
-    auto frameNode = AppBarView::Create(stage);
-    auto appBar = Referenced::MakeRefPtr<AppBarView>(frameNode);
-    EXPECT_NE(appBar, nullptr);
-
-    /**
-     * @tc.Construct the parameters required to call the SetRowWidth function
-     * @tc.Calling the SetRowWidth function
-     */
-    const Dimension rootWidthByPx(PipelineContext::GetCurrentRootWidth(), DimensionUnit::PX);
-    const Dimension rootWidthByVp(rootWidthByPx.ConvertToVp(), DimensionUnit::VP);
-    appBar->SetRowWidth(rootWidthByVp);
-    ASSERT_TRUE(appBar->atom_ != nullptr);
 }
 
 /**
@@ -414,14 +389,15 @@ HWTEST_F(AppBarTestNg, SetEachIconColor002, TestSize.Level1)
     auto atom = AppBarView::Create(stage);
     auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
     EXPECT_NE(appBar, nullptr);
+    auto atom_ = appBar->atomicService_.Upgrade();
 
-    auto uiRow = appBar->atom_->GetFirstChild();
+    auto uiRow = atom_->GetFirstChild();
     auto uiBackButton = uiRow->GetFirstChild();
     auto uiBackIcon = uiBackButton->GetFirstChild();
     auto backIcon = AceType::DynamicCast<FrameNode>(uiBackIcon);
     EXPECT_NE(backIcon, nullptr);
 
-    auto uiFaButton = appBar->atom_->GetLastChild();
+    auto uiFaButton = atom_->GetLastChild();
     auto uiFaIcon = uiFaButton->GetFirstChild();
     auto faIcon = AceType::DynamicCast<FrameNode>(uiFaIcon);
     /**
@@ -532,7 +508,7 @@ HWTEST_F(AppBarTestNg, SetContent002, TestSize.Level1)
      * @tc.steps: step1. Set atom_ Value is empty
      * @tc.expected: The value set by SetContent is not equal to the value obtained by get
      */
-    appBar->atom_ = nullptr;
+    appBar->atomicService_ = nullptr;
     appBar->SetContent("content of test");
     EXPECT_NE(property->GetContent(), "content of test");
 }
@@ -554,7 +530,7 @@ HWTEST_F(AppBarTestNg, SetRowColor002, TestSize.Level1)
      * @tc.steps: step1. Set atom_ Value is empty
      * @tc.expected: When atom_ When it is empty, it will jump out of the interface to increase coverage.
      */
-    appBar->atom_ = nullptr;
+    appBar->atomicService_ = nullptr;
     appBar->SetRowColor(Color::RED);
     EXPECT_NE(renderContext->GetBackgroundColorValue(), Color::RED);
     std::optional<Color> NonColor = std::nullopt;
@@ -586,7 +562,8 @@ HWTEST_F(AppBarTestNg, SetRowWidth002, TestSize.Level1)
     Dimension positionLeftX = appBarTheme->GetIconSize() - butttonRadius;
     Dimension positionY = (appBarTheme->GetAppBarHeight() / 2.0f) - appBarTheme->GetIconSize();
 
-    auto faButton = AceType::DynamicCast<FrameNode>(appBar->atom_->GetLastChild());
+    auto atom_ = appBar->atomicService_.Upgrade();
+    auto faButton = AceType::DynamicCast<FrameNode>(atom_->GetLastChild());
     auto geometryNode = faButton->GetGeometryNode();
     EXPECT_NE(geometryNode, nullptr);
     /**
@@ -680,7 +657,8 @@ HWTEST_F(AppBarTestNg, IniColor001, TestSize.Level1)
     EXPECT_NE(backIcon, nullptr);
     auto backBtnproperty = backIcon->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(backBtnproperty, nullptr);
-    auto FaButton = appBar->atom_->GetLastChild();
+    auto atom_ = appBar->atomicService_.Upgrade();
+    auto FaButton = atom_->GetLastChild();
     auto faIcon = AceType::DynamicCast<FrameNode>(FaButton->GetFirstChild());
     auto faButtonproperty = faIcon->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(faButtonproperty, nullptr);

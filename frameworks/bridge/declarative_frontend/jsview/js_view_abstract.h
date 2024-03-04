@@ -64,6 +64,7 @@ enum class ResourceType : uint32_t {
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
 RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj);
+RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const JSRef<JSObject>& jsObj);
 RefPtr<ResourceWrapper> CreateResourceWrapper(const JSRef<JSObject>& jsObj, RefPtr<ResourceObject>& resourceObject);
 RefPtr<ResourceWrapper> CreateResourceWrapper();
 
@@ -125,12 +126,14 @@ public:
     static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss);
+        std::function<void()>& onDisappear, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
+        std::function<void()>& shouldDismiss);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
-    static void ParseOverlayCallback(
-        const JSRef<JSObject>& paramObj, std::function<void()>& onAppear, std::function<void()>& onDisappear);
+    static void ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
+        std::function<void()>& onDisappear, std::function<void()>& onWillAppear,
+        std::function<void()>& onWillDisappear);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);
@@ -285,6 +288,7 @@ public:
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
     static void JsOnAreaChange(const JSCallbackInfo& info);
+    static void JsOnSizeChange(const JSCallbackInfo& info);
 
     static void JsLinearGradient(const JSCallbackInfo& info);
     static void JsRadialGradient(const JSCallbackInfo& info);
@@ -345,9 +349,6 @@ public:
 
     static void JsExpandSafeArea(const JSCallbackInfo& info);
 
-    static void ParseImageAnalyzerTextOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig);
-    static void ParseImageAnalyzerSubjectOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig);
-
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
 
@@ -359,6 +360,9 @@ public:
      * Binds the native methods to the the js object
      */
     static void JSBind(BindingTarget globalObj);
+    static void ParseDialogCallback(const JSRef<JSObject>& paramObj,
+        std::function<void(const int32_t& info)>& onWillDismiss);
+    static panda::Local<panda::JSValueRef> JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     static RefPtr<PipelineBase> GetPipelineContext()
     {
@@ -419,8 +423,8 @@ public:
         }
 
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        JSRef<JSVal> type = jsObj->GetProperty("type");
-        if (!type->IsNumber()) {
+        int32_t resType = jsObj->GetPropertyValue<int32_t>("type", -1);
+        if (resType == -1) {
             return false;
         }
 
@@ -430,7 +434,7 @@ public:
             return false;
         }
 
-        auto resourceObject = GetResourceObject(jsObj);
+        auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
         auto resIdNum = resId->ToNumber<int32_t>();
         if (resIdNum == -1) {
@@ -440,13 +444,13 @@ public:
             JSRef<JSVal> args = jsObj->GetProperty("params");
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
-            if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+            if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
                 result = static_cast<T>(resourceWrapper->GetIntByName(param->ToString()));
                 return true;
             }
             return false;
         }
-        if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
             result = static_cast<T>(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
             return true;
         }

@@ -262,6 +262,16 @@ public:
         return layoutTraceEnable_;
     }
 
+    static bool GetTraceInputEventEnabled()
+    {
+        return traceInputEventEnable_;
+    }
+
+    static bool GetStateManagerEnabled()
+    {
+        return stateManagerEnable_;
+    }
+
     static bool GetBuildTraceEnabled()
     {
         return buildTraceEnable_;
@@ -369,6 +379,11 @@ public:
         return astcPsnr_;
     }
 
+    static bool IsImageFileCacheConvertAstcEnabled()
+    {
+        return imageFileCacheConvertAstc_;
+    }
+
     static void SetExtSurfaceEnabled(bool extSurfaceEnabled)
     {
         extSurfaceEnabled_ = extSurfaceEnabled;
@@ -415,6 +430,8 @@ public:
 
     static bool GetGridIrregularLayoutEnabled();
 
+    static bool WaterFlowUseSegmentedLayout();
+
     static bool GetSideBarContainerBlurEnable();
 
     static void AddWatchSystemParameter(void *context);
@@ -423,10 +440,18 @@ public:
 
     static void RemoveWatchSystemParameter(void *context);
 
+    static float GetDefaultResolution();
+
+    static bool GetAcePerformanceMonitorEnabled()
+    {
+        return acePerformanceMonitorEnable_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
     static bool layoutTraceEnable_;
+    static bool traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
@@ -462,6 +487,7 @@ private:
     static bool astcEnabled_;
     static int32_t astcMax_;
     static int32_t astcPsnr_;
+    static bool imageFileCacheConvertAstc_;
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
@@ -469,6 +495,8 @@ private:
     static bool navigationBlurEnabled_;
     static bool gridCacheEnabled_;
     static bool sideBarContainerBlurEnable_;
+    static bool stateManagerEnable_;
+    static bool acePerformanceMonitorEnable_;
 };
 
 } // namespace OHOS::Ace

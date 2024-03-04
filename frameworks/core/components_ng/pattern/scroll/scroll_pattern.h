@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -298,6 +298,8 @@ public:
         return !snapOffsets_.empty() && GetScrollSnapAlign() != ScrollSnapAlign::NONE;
     }
 
+    void TriggerModifyDone();
+    
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
@@ -317,7 +319,10 @@ private:
     void RegisterScrollBarEventTask();
     void HandleScrollEffect();
     void ValidateOffset(int32_t source);
-    void HandleScrollPosition(float scroll, int32_t scrollState);
+    float ValidateOffset(int32_t source, float willScrollOffset);
+    void HandleScrollPosition(float scroll);
+    void FireOnWillScroll(float scroll);
+    void FireOnDidScroll(float scroll);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction();

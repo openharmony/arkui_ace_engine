@@ -140,22 +140,9 @@ void FolderStackLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
     isIntoFolderStack_ = IsIntoFolderStack(size, layoutProperty, layoutWrapper);
     AdjustNodeTree(hostNode);
+    OnHoverStatusChange(layoutWrapper);
     if (!isIntoFolderStack_) {
-        PaddingProperty padding { CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f) };
-        auto controlPartsStackNode = hostNode->GetControlPartsStackNode();
-        CHECK_NULL_VOID(controlPartsStackNode);
-        auto index = hostNode->GetChildIndexById(controlPartsStackNode->GetId());
-        auto controlPartsWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        CHECK_NULL_VOID(controlPartsWrapper);
-        controlPartsWrapper->GetLayoutProperty()->UpdatePadding(padding);
-        StackLayoutAlgorithm::Measure(layoutWrapper);
-        auto hoverNode = hostNode->GetHoverNode();
-        CHECK_NULL_VOID(hoverNode);
-        auto hoverIndex = hostNode->GetChildIndexById(hoverNode->GetId());
-        auto hoverStackWrapper = layoutWrapper->GetOrCreateChildByIndex(hoverIndex);
-        CHECK_NULL_VOID(hoverStackWrapper);
-        auto geometryNode = hoverStackWrapper->GetGeometryNode();
-        geometryNode->SetFrameSize(controlPartsWrapper->GetGeometryNode()->GetFrameSize());
+        MeasureByStack(hostNode, layoutWrapper);
         pattern->SetNeedCallBack(false);
         return;
     }
@@ -283,14 +270,7 @@ void FolderStackLayoutAlgorithm::AdjustNodeTree(const RefPtr<FolderStackGroupNod
             controlPartsStackNode->AddChild(childNode);
         }
     } else {
-        auto itemId = hostNode->GetItemId();
-        for (auto& childNode : hostNode->GetChildNode()) {
-            if (std::count(itemId.begin(), itemId.end(), childNode->GetInspectorId())) {
-                hoverNode->AddChild(childNode);
-            } else {
-                controlPartsStackNode->AddChild(childNode);
-            }
-        }
+        AddNodeToParent(hoverNode, controlPartsStackNode, hostNode);
     }
 }
 
@@ -320,6 +300,96 @@ bool FolderStackLayoutAlgorithm::IsIntoFolderStack(
     auto foldStatus = displayInfo->GetFoldStatus();
     auto rotation = displayInfo->GetRotation();
     auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
+    TAG_LOGI(AceLogTag::ACE_FOLDER_STACK,
+        "folderStack state isFullWindow:%{public}d, isFoldable:%{public}d, "
+        "foldStatus:%{public}d, isLandscape:%{public}d",
+        isFullWindow, isFoldable, foldStatus, isLandscape);
     return isFullWindow && isFoldable && foldStatus == FoldStatus::HALF_FOLD && isLandscape;
 }
+
+void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrapper)
+{
+    auto pattern = layoutWrapper->GetHostNode()->GetPattern<FolderStackPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (isIntoFolderStack_ == pattern->IsInHoverMode()) {
+        return;
+    }
+    auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto windowMode = windowManager->GetWindowMode();
+    auto displayInfo = pattern->GetDisplayInfo();
+    FolderEventInfo hoverChangeEvent(
+        displayInfo->GetFoldStatus(), isIntoFolderStack_, displayInfo->GetRotation(), windowMode);
+    if (eventHub) {
+        eventHub->OnHoverStatusChange(std::move(hoverChangeEvent));
+        TAG_LOGI(AceLogTag::ACE_FOLDER_STACK,
+            "hoverStatus change callback FoldStatus:%{public}d, isHoverMode:%{public}d, "
+            "appRotation:%{public}d, windowMode:%{public}d",
+            displayInfo->GetFoldStatus(), isIntoFolderStack_, displayInfo->GetRotation(), windowMode);
+    }
+}
+
+void FolderStackLayoutAlgorithm::MeasureByStack(
+    const RefPtr<FolderStackGroupNode>& hostNode, LayoutWrapper* layoutWrapper)
+{
+    PaddingProperty padding { CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f) };
+    auto controlPartsStackNode = hostNode->GetControlPartsStackNode();
+    CHECK_NULL_VOID(controlPartsStackNode);
+    auto index = hostNode->GetChildIndexById(controlPartsStackNode->GetId());
+    auto controlPartsWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(controlPartsWrapper);
+    controlPartsWrapper->GetLayoutProperty()->UpdatePadding(padding);
+    StackLayoutAlgorithm::Measure(layoutWrapper);
+    auto hoverNode = hostNode->GetHoverNode();
+    CHECK_NULL_VOID(hoverNode);
+    auto hoverIndex = hostNode->GetChildIndexById(hoverNode->GetId());
+    auto hoverStackWrapper = layoutWrapper->GetOrCreateChildByIndex(hoverIndex);
+    CHECK_NULL_VOID(hoverStackWrapper);
+    auto geometryNode = hoverStackWrapper->GetGeometryNode();
+    geometryNode->SetFrameSize(controlPartsWrapper->GetGeometryNode()->GetFrameSize());
+}
+
+bool FolderStackLayoutAlgorithm::JudgeSkipNode(const std::string& nodeTag)
+{
+    return nodeTag == V2::JS_IF_ELSE_ETS_TAG || nodeTag == V2::JS_FOR_EACH_ETS_TAG ||
+           nodeTag == V2::JS_LAZY_FOR_EACH_ETS_TAG;
+}
+
+void FolderStackLayoutAlgorithm::AdjustChildren(RefPtr<UINode> childUI, std::list<RefPtr<FrameNode>>& childList)
+{
+    auto child = DynamicCast<FrameNode>(childUI);
+    if (!child) {
+        if (!JudgeSkipNode(childUI->GetTag())) {
+            TAG_LOGD(AceLogTag::ACE_FOLDER_STACK, "%{public}s node is skipped", childUI->GetTag().c_str());
+            return;
+        }
+
+        for (const auto& syntaxChild : childUI->GetChildren()) {
+            AdjustChildren(syntaxChild, childList);
+        }
+        return;
+    }
+    childList.emplace_back(child);
+}
+
+void FolderStackLayoutAlgorithm::AddNodeToParent(const RefPtr<UINode>& hoverNode,
+    const RefPtr<UINode>& controlPartsStackNode, const RefPtr<FolderStackGroupNode>& hostNode)
+{
+    auto itemId = hostNode->GetItemId();
+    std::list<RefPtr<FrameNode>> childList;
+    for (auto& childNode : hostNode->GetChildNode()) {
+        AdjustChildren(childNode, childList);
+        for (auto& child : childList) {
+            if (std::count(itemId.begin(), itemId.end(), child->GetInspectorId())) {
+                hoverNode->AddChild(child);
+            } else {
+                controlPartsStackNode->AddChild(child);
+            }
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

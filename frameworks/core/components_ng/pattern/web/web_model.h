@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,10 +29,11 @@ public:
     virtual ~WebModel() = default;
 
     virtual void Create(const std::string& src, const RefPtr<WebController>& webController,
-        WebType type = WebType::SURFACE, bool incognitoMode = false) = 0;
+        RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false) = 0;
     virtual void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
         std::function<void(const std::string&)>&& setHapPathCallback,
-        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE, bool incognitoMode = false) = 0;
+        int32_t parentWebId, bool popup, RenderMode renderMode = RenderMode::ASYNC_RENDER,
+        bool incognitoMode = false) = 0;
     virtual void SetCustomScheme(const std::string& cmdLine) = 0;
     virtual void SetFocusable(bool focusable) {};
     virtual void SetFocusNode(bool isFocusNode) {};
@@ -113,6 +114,7 @@ public:
     virtual void SetWebStandardFont(const std::string& standardFontFamily) {};
     virtual void SetDefaultFixedFontSize(int32_t defaultFixedFontSize) {};
     virtual void SetDefaultFontSize(int32_t defaultFontSize) {};
+    virtual void SetDefaultTextEncodingFormat(const std::string& textEncodingFormat) {};
     virtual void SetMinFontSize(int32_t minFontSize) {};
     virtual void SetMinLogicalFontSize(int32_t minLogicalFontSize) {};
     virtual void SetBlockNetwork(bool isNetworkBlocked) {};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,11 +157,15 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         targetIndexInGroup_.reset();
     }
     if (predictSnapOffset.has_value()) {
-        if (scrollableTouchEvent_) {
+        if (scrollableTouchEvent_ && !NearZero(predictSnapOffset.value()) && !AnimateRunning()) {
             scrollableTouchEvent_->StartScrollSnapMotion(predictSnapOffset.value(), scrollSnapVelocity_);
-            scrollSnapVelocity_ = 0.0f;
+            if (snapTrigOnScrollStart_) {
+                FireOnScrollStart();
+            }
         }
+        scrollSnapVelocity_ = 0.0f;
         predictSnapOffset_.reset();
+        snapTrigOnScrollStart_ = false;
         if (predictSnapEndPos.has_value()) {
             predictSnapEndPos_ = predictSnapEndPos;
         } else {
@@ -193,6 +197,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
+    layoutConstraint_ = listLayoutAlgorithm->GetLayoutConstraint();
     bool sizeDiminished =
         LessNotEqual(endMainPos_ - startMainPos_, contentMainSize_ - contentStartOffset_ - contentEndOffset_) &&
         GreatOrEqual(prevTotalSize, prevContentSize) && LessNotEqual(endMainPos_ - startMainPos_, prevTotalSize);
@@ -358,6 +363,11 @@ void ListPattern::ProcessEvent(
                 onScroll(offsetVP, GetScrollState(source));
             }
         }
+    }
+
+    auto onDidScroll = listEventHub->GetOnDidScroll();
+    if (onDidScroll) {
+        FireOnScroll(finalOffset, onDidScroll);
     }
 
     if (indexChanged) {
@@ -585,7 +595,7 @@ bool ListPattern::IsAtBottom() const
 
 bool ListPattern::OutBoundaryCallback()
 {
-    bool outBoundary = IsAtTop() || IsAtBottom();
+    bool outBoundary = IsOutOfBoundary();
     if (!dragFromSpring_ && outBoundary && chainAnimation_) {
         chainAnimation_->SetOverDrag(false);
         auto delta = chainAnimation_->SetControlIndex(IsAtTop() ? 0 : maxListItemIndex_);
@@ -708,12 +718,16 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     SetScrollSource(source);
     FireAndCleanScrollingListener();
+    auto lastDelta = currentDelta_;
     currentDelta_ = currentDelta_ - offset;
     if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING) {
         isNeedCheckOffset_ = true;
     }
-    MarkDirtyNodeSelf();
+    if (!NearZero(offset)) {
+        MarkDirtyNodeSelf();
+    }
     if (!IsOutOfBoundary() || !scrollable_) {
+        FireOnWillScroll(currentDelta_ - lastDelta);
         return true;
     }
 
@@ -742,6 +756,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
         currentDelta_ = currentDelta_ * friction;
     }
+    FireOnWillScroll(currentDelta_ - lastDelta);
     return true;
 }
 
@@ -758,7 +773,6 @@ void ListPattern::MarkDirtyNodeSelf()
 
 void ListPattern::OnScrollEndCallback()
 {
-    SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
@@ -837,6 +851,12 @@ bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
     auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
     if (scrollSnapAlign == V2::ScrollSnapAlign::NONE) {
         return false;
+    }
+    if (AnimateRunning()) {
+        return false;
+    }
+    if (!GetIsDragging()) {
+        snapTrigOnScrollStart_ = true;
     }
     predictSnapOffset_ = targetOffset;
     scrollSnapVelocity_ = velocity;
@@ -1232,7 +1252,9 @@ void ListPattern::ScrollTo(float position)
 void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
-    StopAnimate();
+    if (!smooth) {
+        StopAnimate();
+    }
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         currentDelta_ = 0.0f;
         smooth_ = smooth;
@@ -1473,6 +1495,11 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
     }
     if (!NearZero(targetPos)) {
         AnimateTo(targetPos + currentOffset_, -1, nullptr, true);
+        if (predictSnapOffset_.has_value() && AnimateRunning()) {
+            scrollSnapVelocity_ = 0.0f;
+            predictSnapOffset_.reset();
+            snapTrigOnScrollStart_ = false;
+        }
     }
     return true;
 }
@@ -2149,5 +2176,28 @@ DisplayMode ListPattern::GetDefaultScrollBarDisplayMode() const
         defaultDisplayMode = DisplayMode::AUTO;
     }
     return defaultDisplayMode;
+}
+
+std::vector<RefPtr<FrameNode>> ListPattern::GetVisibleSelectedItems()
+{
+    std::vector<RefPtr<FrameNode>> children;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, children);
+    for (int32_t index = startIndex_; index <= endIndex_; ++index) {
+        auto item = host->GetChildByIndex(index);
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto itemPattern = itemFrameNode->GetPattern<ListItemPattern>();
+        if (!itemPattern) {
+            continue;
+        }
+        if (!itemPattern->IsSelected()) {
+            continue;
+        }
+        children.emplace_back(itemFrameNode);
+    }
+    return children;
 }
 } // namespace OHOS::Ace::NG

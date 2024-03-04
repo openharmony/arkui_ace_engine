@@ -49,6 +49,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_animatable_arithmetic.h"
@@ -143,6 +144,7 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+constexpr uint32_t ON_WILL_DISMISS_FIELD_COUNT = 2;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
@@ -1114,7 +1116,8 @@ void CompleteResourceObjectFromParams(
     }
 }
 
-void CompleteResourceObjectFromId(JSRef<JSObject>& jsObj, ResourceType& resType, const std::string& resName)
+void CompleteResourceObjectFromId(
+    JSRef<JSVal>& type, JSRef<JSObject>& jsObj, ResourceType& resType, const std::string& resName)
 {
     JSRef<JSVal> args = jsObj->GetProperty("params");
     if (!args->IsArray()) {
@@ -1131,9 +1134,8 @@ void CompleteResourceObjectFromId(JSRef<JSObject>& jsObj, ResourceType& resType,
         }
         params->SetValueAt(0, name);
         uint32_t paramIndex = 1;
-        auto firstParam = jsObj->GetProperty("type");
-        if (!firstParam->IsEmpty()) {
-            params->SetValueAt(paramIndex, firstParam);
+        if (!type->IsEmpty()) {
+            params->SetValueAt(paramIndex, type);
             paramIndex++;
         }
         for (auto tmpParam : tmpParams) {
@@ -1187,6 +1189,14 @@ RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
         resObjParamsList.push_back(resObjParams);
     }
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>(id, type, resObjParamsList, bundleName, moduleName);
+    return resourceObject;
+}
+
+RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const JSRef<JSObject>& jsObj)
+{
+    auto bundleName = jsObj->GetPropertyValue<std::string>("bundleName", "");
+    auto moduleName = jsObj->GetPropertyValue<std::string>("moduleName", "");
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
     return resourceObject;
 }
 
@@ -1873,7 +1883,7 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
-    int32_t value = 0.0;
+    float value = 0.0;
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsLayoutWeight", info, checkList)) {
         if (!info[0]->IsUndefined()) {
@@ -1882,9 +1892,17 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsNumber()) {
-        value = info[0]->ToNumber<int32_t>();
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            value = info[0]->ToNumber<float>();
+        } else {
+            value = info[0]->ToNumber<int32_t>();
+        }
     } else {
-        value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            value = static_cast<float>(StringUtils::StringToUint(info[0]->ToString()));
+        } else {
+            value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
@@ -2147,6 +2165,7 @@ void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
         if (info[0]->IsNull() || info[0]->IsUndefined()) {
             // undefined use default value.
             ViewAbstractModel::GetInstance()->ResetFlexShrink();
+            return;
         } else {
             return;
         }
@@ -3094,8 +3113,7 @@ void JSViewAbstract::JsOutlineStyle(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("JsBorder", info, checkList)) {
+    if (!info[0]->IsObject()) {
         CalcDimension borderWidth;
         ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
         ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
@@ -3136,13 +3154,6 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
 
 void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
 {
-    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        return;
-    }
-    std::optional<CalcDimension> leftDimen;
-    std::optional<CalcDimension> rightDimen;
-    std::optional<CalcDimension> topDimen;
-    std::optional<CalcDimension> bottomDimen;
     CalcDimension borderWidth;
     if (ParseJsDimensionVp(args, borderWidth)) {
         if (borderWidth.IsNegative()) {
@@ -3153,6 +3164,10 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
         }
         ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
     } else if (args->IsObject()) {
+        std::optional<CalcDimension> leftDimen;
+        std::optional<CalcDimension> rightDimen;
+        std::optional<CalcDimension> topDimen;
+        std::optional<CalcDimension> bottomDimen;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension left;
         if (ParseJsDimensionVp(object->GetProperty("left"), left)) {
@@ -3190,13 +3205,6 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
 
 void JSViewAbstract::ParseOuterBorderWidth(const JSRef<JSVal>& args)
 {
-    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        return;
-    }
-    std::optional<CalcDimension> leftDimen;
-    std::optional<CalcDimension> rightDimen;
-    std::optional<CalcDimension> topDimen;
-    std::optional<CalcDimension> bottomDimen;
     CalcDimension borderWidth;
     if (ParseJsDimensionVp(args, borderWidth)) {
         if (borderWidth.IsNegative() || borderWidth.Unit() == DimensionUnit::PERCENT) {
@@ -3204,6 +3212,10 @@ void JSViewAbstract::ParseOuterBorderWidth(const JSRef<JSVal>& args)
         }
         ViewAbstractModel::GetInstance()->SetOuterBorderWidth(borderWidth);
     } else if (args->IsObject()) {
+        std::optional<CalcDimension> leftDimen;
+        std::optional<CalcDimension> rightDimen;
+        std::optional<CalcDimension> topDimen;
+        std::optional<CalcDimension> bottomDimen;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension left;
         if (ParseJsDimensionVp(object->GetProperty("left"), left) && left.IsNonNegative()) {
@@ -3521,18 +3533,14 @@ void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
 
 void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
 {
-    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
-        return;
-    }
-    std::optional<Color> leftColor;
-    std::optional<Color> rightColor;
-    std::optional<Color> topColor;
-    std::optional<Color> bottomColor;
     Color borderColor;
     if (ParseJsColor(args, borderColor)) {
         ViewAbstractModel::GetInstance()->SetBorderColor(borderColor);
     } else if (args->IsObject()) {
+        std::optional<Color> leftColor;
+        std::optional<Color> rightColor;
+        std::optional<Color> topColor;
+        std::optional<Color> bottomColor;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         Color left;
         if (ParseJsColor(object->GetProperty("left"), left)) {
@@ -3553,24 +3561,20 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
 
         ViewAbstractModel::GetInstance()->SetBorderColor(leftColor, rightColor, topColor, bottomColor);
     } else {
-        return;
+        ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
     }
 }
 
 void JSViewAbstract::ParseOuterBorderColor(const JSRef<JSVal>& args)
 {
-    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color::BLACK);
-        return;
-    }
-    std::optional<Color> leftColor;
-    std::optional<Color> rightColor;
-    std::optional<Color> topColor;
-    std::optional<Color> bottomColor;
     Color borderColor;
     if (ParseJsColor(args, borderColor)) {
         ViewAbstractModel::GetInstance()->SetOuterBorderColor(borderColor);
     } else if (args->IsObject()) {
+        std::optional<Color> leftColor;
+        std::optional<Color> rightColor;
+        std::optional<Color> topColor;
+        std::optional<Color> bottomColor;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         Color left;
         if (ParseJsColor(object->GetProperty("left"), left)) {
@@ -3608,16 +3612,14 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
 
 void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
 {
-    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        return;
-    }
     CalcDimension borderRadius;
     if (ParseJsDimensionVp(args, borderRadius)) {
         if (borderRadius.Unit() == DimensionUnit::PERCENT) {
             borderRadius.Reset();
         }
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
-    } else if (args->IsObject()) {
+    }
+    if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension topLeft;
         CalcDimension topRight;
@@ -3625,7 +3627,7 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
         CalcDimension bottomRight;
         ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
         ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
-    }
+    } 
 }
 
 void JSViewAbstract::ParseOuterBorderRadius(const JSRef<JSVal>& args)
@@ -3685,10 +3687,6 @@ BorderStyle ConvertBorderStyle(int32_t value)
 
 void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
 {
-    if (!args->IsObject() && !args->IsNumber()) {
-        ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
-        return;
-    }
     if (args->IsObject()) {
         std::optional<BorderStyle> styleLeft;
         std::optional<BorderStyle> styleRight;
@@ -3696,26 +3694,30 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
         std::optional<BorderStyle> styleBottom;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         auto leftValue = object->GetProperty("left");
-        if (!leftValue->IsUndefined() && leftValue->IsNumber()) {
+        if (leftValue->IsNumber()) {
             styleLeft = ConvertBorderStyle(leftValue->ToNumber<int32_t>());
         }
         auto rightValue = object->GetProperty("right");
-        if (!rightValue->IsUndefined() && rightValue->IsNumber()) {
+        if (rightValue->IsNumber()) {
             styleRight = ConvertBorderStyle(rightValue->ToNumber<int32_t>());
         }
         auto topValue = object->GetProperty("top");
-        if (!topValue->IsUndefined() && topValue->IsNumber()) {
+        if (topValue->IsNumber()) {
             styleTop = ConvertBorderStyle(topValue->ToNumber<int32_t>());
         }
         auto bottomValue = object->GetProperty("bottom");
-        if (!bottomValue->IsUndefined() && bottomValue->IsNumber()) {
+        if (bottomValue->IsNumber()) {
             styleBottom = ConvertBorderStyle(bottomValue->ToNumber<int32_t>());
         }
         ViewAbstractModel::GetInstance()->SetBorderStyle(styleLeft, styleRight, styleTop, styleBottom);
         return;
     }
-    auto borderStyle = ConvertBorderStyle(args->ToNumber<int32_t>());
-    ViewAbstractModel::GetInstance()->SetBorderStyle(borderStyle);
+    if (args->IsNumber()) {
+        auto borderStyle = ConvertBorderStyle(args->ToNumber<int32_t>());
+        ViewAbstractModel::GetInstance()->SetBorderStyle(borderStyle);
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
 }
 
 void JSViewAbstract::ParseOuterBorderStyle(const JSRef<JSVal>& args)
@@ -3942,7 +3944,7 @@ bool JSViewAbstract::ParseDollarResource(const JSRef<JSVal>& jsValue, std::strin
     if (isParseType && !ConvertResourceType(results[2], resType)) {
         return false;
     }
-    resName = results[3];
+    resName = resPath;
     return true;
 }
 
@@ -3986,21 +3988,18 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
         if (!ParseDollarResource(resId, targetModule, resType, resName, typeNum == UNKNOWN_RESOURCE_TYPE)) {
             return;
         }
+        CompleteResourceObjectFromId(type, jsObj, resType, resName);
     } else if (resId->IsNumber()) {
         int32_t resIdValue = resId->ToNumber<int32_t>();
-        CompleteResourceObjectFromParams(resIdValue, jsObj, targetModule, resType, resName);
-        return;
+        if (resIdValue == -1) {
+            CompleteResourceObjectFromParams(resIdValue, jsObj, targetModule, resType, resName);
+        }
     }
-    CompleteResourceObjectFromId(jsObj, resType, resName);
 }
 
 bool JSViewAbstract::ParseJsDimensionNG(
     const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        return false;
-    }
-
     if (jsValue->IsNumber()) {
         result = CalcDimension(jsValue->ToNumber<double>(), defaultUnit);
         return true;
@@ -4012,61 +4011,66 @@ bool JSViewAbstract::ParseJsDimensionNG(
         }
         return StringUtils::StringToCalcDimensionNG(jsValue->ToString(), result, false, defaultUnit);
     }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
-        return false;
-    }
-
-    auto resourceObject = GetResourceObject(jsObj);
-    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
-    if (!resourceWrapper) {
-        return false;
-    }
-
-    auto resIdNum = resId->ToNumber<int32_t>();
-    uint32_t resType = resourceObject->GetType();
-    if (resIdNum == -1) {
-        if (!IsGetResourceByName(jsObj)) {
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        CompleteResourceObject(jsObj);
+        JSRef<JSVal> resId = jsObj->GetProperty("id");
+        if (!resId->IsNumber()) {
             return false;
         }
-        JSRef<JSVal> args = jsObj->GetProperty("params");
-        if (!args->IsArray()) {
+        auto resType = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+        if (resType == UNKNOWN_RESOURCE_TYPE) {
             return false;
         }
-        JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
-        auto param = params->GetValueAt(0);
-        if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
-            auto value = resourceWrapper->GetStringByName(param->ToString());
+
+        auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
+        auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+        if (!resourceWrapper) {
+            return false;
+        }
+
+        auto resIdNum = resId->ToNumber<int32_t>();
+        if (resIdNum == -1) {
+            if (!IsGetResourceByName(jsObj)) {
+                return false;
+            }
+            JSRef<JSVal> args = jsObj->GetProperty("params");
+            if (!args->IsArray()) {
+                return false;
+            }
+            JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+            auto param = params->GetValueAt(0);
+            if (resType == static_cast<int32_t>(ResourceType::STRING)) {
+                auto value = resourceWrapper->GetStringByName(param->ToString());
+                return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
+            }
+            if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
+                auto value = std::to_string(resourceWrapper->GetIntByName(param->ToString()));
+                StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
+                return true;
+            }
+            result = resourceWrapper->GetDimensionByName(param->ToString());
+            return true;
+        }
+
+        JSRef<JSVal> type = jsObj->GetProperty("type");
+        if (type->IsNull() || !type->IsNumber()) {
+            return false;
+        }
+        if (resType == static_cast<int32_t>(ResourceType::STRING)) {
+            auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
             return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
         }
-        if (resType == static_cast<uint32_t>(ResourceType::INTEGER)) {
-            auto value = std::to_string(resourceWrapper->GetIntByName(param->ToString()));
+        if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
+            auto value = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
             StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
             return true;
         }
-        result = resourceWrapper->GetDimensionByName(param->ToString());
-        return true;
-    }
 
-    JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (type->IsNull() || !type->IsNumber()) {
-        return false;
-    }
-    if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
-        return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
-    }
-    if (resType == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
-        StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
-        return true;
-    }
-
-    if (resType == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = resourceWrapper->GetDimension(resId->ToNumber<uint32_t>()); // float return true pixel value
-        return true;
+        if (resType == static_cast<int32_t>(ResourceType::FLOAT)) {
+            result = resourceWrapper->GetDimension(resId->ToNumber<uint32_t>()); // float return true pixel value
+            return true;
+        }
     }
 
     return false;
@@ -4093,14 +4097,18 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         return false;
     }
 
-    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     if (!resourceWrapper) {
         return false;
     }
 
     auto resIdNum = resId->ToNumber<int32_t>();
-    uint32_t resType = resourceObject->GetType();
+    int32_t resType = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+    if (resType == UNKNOWN_RESOURCE_TYPE) {
+        return false;
+    }
+
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
@@ -4111,12 +4119,12 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
+        if (resType == static_cast<int32_t>(ResourceType::STRING)) {
             auto value = resourceWrapper->GetStringByName(param->ToString());
             result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
             return true;
         }
-        if (resType == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
             auto value = std::to_string(resourceWrapper->GetIntByName(param->ToString()));
             result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
             return true;
@@ -4125,16 +4133,12 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         return true;
     }
 
-    JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (type->IsNull() || !type->IsNumber()) {
-        return false;
-    }
-    if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
+    if (resType == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
         return true;
     }
-    if (resType == static_cast<uint32_t>(ResourceType::INTEGER)) {
+    if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
         result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
         return true;
@@ -4180,15 +4184,17 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
         return false;
     }
     JSRef<JSVal> id = jsObj->GetProperty("id");
-    JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (!id->IsNumber() || !type->IsNumber()) {
+    if (!id->IsNumber()) {
         return false;
     }
 
     auto resId = id->ToNumber<int32_t>();
-    auto resType = type->ToNumber<uint32_t>();
+    int32_t resType = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+    if (resType == UNKNOWN_RESOURCE_TYPE) {
+        return false;
+    }
 
-    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     if (!resourceWrapper) {
         return false;
@@ -4204,29 +4210,29 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
+        if (resType == static_cast<int32_t>(ResourceType::STRING)) {
             auto numberString = resourceWrapper->GetStringByName(param->ToString());
             return StringUtils::StringToDouble(numberString, result);
         }
-        if (resType == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
             result = resourceWrapper->GetIntByName(param->ToString());
             return true;
         }
-        if (resType == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        if (resType == static_cast<int32_t>(ResourceType::FLOAT)) {
             result = resourceWrapper->GetDoubleByName(param->ToString());
             return true;
         }
         return false;
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+    if (resType == static_cast<int32_t>(ResourceType::STRING)) {
         auto numberString = resourceWrapper->GetString(resId);
         return StringUtils::StringToDouble(numberString, result);
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+    if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
         result = resourceWrapper->GetInt(resId);
         return true;
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+    if (resType == static_cast<int32_t>(ResourceType::FLOAT)) {
         result = resourceWrapper->GetDouble(resId);
         return true;
     }
@@ -4268,7 +4274,7 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
         return false;
     }
 
-    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     if (!resourceWrapper) {
         return false;
@@ -4301,7 +4307,7 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         return false;
     }
 
-    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     if (!resourceWrapper) {
         return false;
@@ -4321,20 +4327,17 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         result = resourceWrapper->GetColorByName(param->ToString());
         return true;
     }
-    JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (type->IsNull() || !type->IsNumber()) {
-        return false;
-    }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+    auto type = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+    if (type == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         return Color::ParseColorString(value, result);
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+    if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
         auto value = resourceWrapper->GetInt(resId->ToNumber<uint32_t>());
         result = Color(ColorAlphaAdapt(value));
         return true;
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::COLOR)) {
+    if (type == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
         return true;
     }
@@ -4343,9 +4346,6 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        return false;
-    }
     if (jsValue->IsNumber()) {
         result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
         return true;
@@ -4353,7 +4353,10 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
     if (jsValue->IsString()) {
         return Color::ParseColorString(jsValue->ToString(), result);
     }
-    return ParseJsColorFromResource(jsValue, result);
+    if (jsValue->IsObject()) {
+        return ParseJsColorFromResource(jsValue, result);
+    }
+    return false;
 }
 
 bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy)
@@ -4497,13 +4500,13 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
 
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
-    JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (!type->IsNumber()) {
-        return false;
-    }
 
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
+        return false;
+    }
+    auto type = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+    if (type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
 
@@ -4512,24 +4515,24 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         return false;
     }
 
-    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     if (!resourceWrapper) {
         return false;
     }
 
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
-    auto resIdNum = resourceObject->GetId();
+    auto resIdNum = resId->ToNumber<int32_t>();
     if (resIdNum == -1) {
         if (!IsGetResourceByName(jsObj)) {
             return false;
         }
         auto param = params->GetValueAt(0);
-        if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
+        if (type == static_cast<int32_t>(ResourceType::STRING)) {
             auto originStr = resourceWrapper->GetStringByName(param->ToString());
             ReplaceHolder(originStr, params, 1);
             result = originStr;
-        } else if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::PLURAL)) {
+        } else if (type == static_cast<int32_t>(ResourceType::PLURAL)) {
             auto countJsVal = params->GetValueAt(1);
             int count = 0;
             if (!countJsVal->IsNumber()) {
@@ -4544,11 +4547,11 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         }
         return true;
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+    if (type == static_cast<int32_t>(ResourceType::STRING)) {
         auto originStr = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         ReplaceHolder(originStr, params, 0);
         result = originStr;
-    } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::PLURAL)) {
+    } else if (type == static_cast<int32_t>(ResourceType::PLURAL)) {
         auto countJsVal = params->GetValueAt(0);
         int count = 0;
         if (!countJsVal->IsNumber()) {
@@ -4558,9 +4561,9 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         auto pluralStr = resourceWrapper->GetPluralString(resId->ToNumber<uint32_t>(), count);
         ReplaceHolder(pluralStr, params, 1);
         result = pluralStr;
-    } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+    } else if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
         result = std::to_string(resourceWrapper->GetDouble(resId->ToNumber<uint32_t>()));
-    } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+    } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
         result = std::to_string(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
     } else {
         return false;
@@ -4579,16 +4582,16 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
-    JSRef<JSVal> type = jsObj->GetProperty("type");
+    int32_t type = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNull() && !type->IsNull() && type->IsNumber() && resId->IsNumber()) {
-        auto resourceObject = GetResourceObject(jsObj);
+    if (!resId->IsNull() && type != UNKNOWN_RESOURCE_TYPE && resId->IsNumber()) {
+        auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
         if (!resourceWrapper) {
             return false;
         }
 
-        if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
+        if (type == static_cast<int32_t>(ResourceType::RAWFILE)) {
             JSRef<JSVal> args = jsObj->GetProperty("params");
             if (!args->IsArray()) {
                 return false;
@@ -4612,13 +4615,13 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
             }
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
-            if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
+            if (type == static_cast<int32_t>(ResourceType::MEDIA)) {
                 result = resourceWrapper->GetMediaPathByName(param->ToString());
                 return true;
             }
             return false;
         }
-        if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
+        if (type == static_cast<int32_t>(ResourceType::MEDIA)) {
             result = resourceWrapper->GetMediaPath(resId->ToNumber<uint32_t>());
             return true;
         }
@@ -4640,8 +4643,8 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
 
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
-    JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (!type->IsNumber()) {
+    int32_t resType = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+    if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
 
@@ -4650,7 +4653,7 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
         return false;
     }
 
-    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     if (!resourceWrapper) {
         return false;
@@ -4667,14 +4670,14 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::BOOLEAN)) {
+        if (resType == static_cast<int32_t>(ResourceType::BOOLEAN)) {
             result = resourceWrapper->GetBooleanByName(param->ToString());
             return true;
         }
         return false;
     }
 
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::BOOLEAN)) {
+    if (resType == static_cast<int32_t>(ResourceType::BOOLEAN)) {
         result = resourceWrapper->GetBoolean(resId->ToNumber<uint32_t>());
         return true;
     }
@@ -4719,8 +4722,8 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
 
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
-    JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (!type->IsNumber()) {
+    int32_t resType = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+    if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
 
@@ -4729,7 +4732,7 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
         return false;
     }
 
-    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     if (!resourceWrapper) {
         return false;
@@ -4746,14 +4749,14 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTARRAY)) {
+        if (resType == static_cast<int32_t>(ResourceType::INTARRAY)) {
             result = resourceWrapper->GetIntArrayByName(param->ToString());
             return true;
         }
         return false;
     }
 
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTARRAY)) {
+    if (resType == static_cast<int32_t>(ResourceType::INTARRAY)) {
         result = resourceWrapper->GetIntArray(resId->ToNumber<uint32_t>());
         return true;
     }
@@ -4788,8 +4791,8 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
 
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
-    JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (!type->IsNumber()) {
+    int32_t resType = jsObj->GetPropertyValue<int32_t>("type", UNKNOWN_RESOURCE_TYPE);
+    if (resType == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
 
@@ -4798,7 +4801,7 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         return false;
     }
 
-    auto resourceObject = GetResourceObject(jsObj);
+    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     if (!resourceWrapper) {
         return false;
@@ -4815,14 +4818,14 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRARRAY)) {
+        if (resType == static_cast<int32_t>(ResourceType::STRARRAY)) {
             result = resourceWrapper->GetStringArrayByName(param->ToString());
             return true;
         }
         return false;
     }
 
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRARRAY)) {
+    if (resType == static_cast<int32_t>(ResourceType::STRARRAY)) {
         result = resourceWrapper->GetStringArray(resId->ToNumber<uint32_t>());
         return true;
     }
@@ -5193,6 +5196,25 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetOnAreaChanged(std::move(onAreaChanged));
 }
 
+void JSViewAbstract::JsOnSizeChange(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
+    if (!CheckJSCallbackInfo("JsOnSizeChange", info, checkList)) {
+        return;
+    }
+    auto jsOnSizeChangeFunction = AceType::MakeRefPtr<JsOnSizeChangeFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onSizeChanged = [execCtx = info.GetExecutionContext(), func = std::move(jsOnSizeChangeFunction),
+                            node = frameNode](const NG::RectF& oldRect, const NG::RectF& rect) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onSizeChange");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(oldRect, rect);
+    };
+    ViewAbstractModel::GetInstance()->SetOnSizeChanged(std::move(onSizeChanged));
+}
+
 #ifndef WEARABLE_PRODUCT
 void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
 {
@@ -5247,6 +5269,32 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     }
 }
 #endif
+
+void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,
+    std::function<void(const int32_t& info)>& onWillDismiss)
+{
+    auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
+    if (onWillDismissFunc->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
+        onWillDismiss = [func = std::move(jsFunc)](const int32_t& info) {
+            JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+            objectTemplate->SetInternalFieldCount(ON_WILL_DISMISS_FIELD_COUNT);
+            JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
+            dismissObj->SetPropertyObject(
+                "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissDialog));
+            dismissObj->SetProperty<int32_t>("reason", info);
+            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            func->ExecuteJS(1, &newJSVal);
+        };
+    }
+}
+
+panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ViewAbstractModel::GetInstance()->DismissDialog();
+    return JSValueRef::Undefined(runtimeCallInfo->GetVM());
+}
 
 void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
 {
@@ -5586,7 +5634,7 @@ bool JSViewAbstract::ParseInvertProps(const JSRef<JSVal>& jsValue, InvertVariant
 {
     double invertValue = 0.0;
     if (ParseJsDouble(jsValue, invertValue)) {
-        invert = static_cast<float>(invertValue);
+        invert = static_cast<float>(std::clamp(invertValue, 0.0, 1.0));
         return true;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(jsValue->ToString());
@@ -6100,9 +6148,11 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     modalStyle.modalTransition = NG::ModalTransition::DEFAULT;
     std::function<void()> onShowCallback;
     std::function<void()> onDismissCallback;
+    std::function<void()> onWillShowCallback;
+    std::function<void()> onWillDismissCallback;
     if (info.Length() == 3) {
         if (info[2]->IsObject()) {
-            ParseOverlayCallback(info[2], onShowCallback, onDismissCallback);
+            ParseOverlayCallback(info[2], onShowCallback, onDismissCallback, onWillShowCallback, onWillDismissCallback);
             ParseModalStyle(info[2], modalStyle);
         } else if (info[2]->IsNumber()) {
             auto transitionNumber = info[2]->ToNumber<int32_t>();
@@ -6112,7 +6162,8 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
         }
     }
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), modalStyle,
-        std::move(onShowCallback), std::move(onDismissCallback));
+        std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
+        std::move(onWillDismissCallback));
 }
 
 void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle)
@@ -6171,18 +6222,21 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     sheetStyle.showCloseIcon = true;
     std::function<void()> onShowCallback;
     std::function<void()> onDismissCallback;
+    std::function<void()> onWillShowCallback;
+    std::function<void()> onWillDismissCallback;
     std::function<void()> shouldDismissFunc;
     std::function<void()> titleBuilderFunction;
     if (info.Length() == 3) {
         if (info[2]->IsObject()) {
-            ParseSheetCallback(info[2], onShowCallback, onDismissCallback, shouldDismissFunc);
+            ParseSheetCallback(info[2], onShowCallback, onDismissCallback, shouldDismissFunc, onWillShowCallback,
+                onWillDismissCallback);
             ParseSheetStyle(info[2], sheetStyle);
             ParseSheetTitle(info[2], sheetStyle, titleBuilderFunction);
         }
     }
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
         std::move(titleBuilderFunction), sheetStyle, std::move(onShowCallback), std::move(onDismissCallback),
-        std::move(shouldDismissFunc));
+        std::move(shouldDismissFunc), std::move(onWillShowCallback), std::move(onWillDismissCallback));
 }
 
 void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
@@ -6364,11 +6418,14 @@ bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, Blu
 }
 
 void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-    std::function<void()>& onDisappear, std::function<void()>& shouldDismiss)
+    std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
+    std::function<void()>& onWillDisappear)
 {
     auto showCallback = paramObj->GetProperty("onAppear");
     auto dismissCallback = paramObj->GetProperty("onDisappear");
     auto shouldDismissFunc = paramObj->GetProperty("shouldDismiss");
+    auto willShowCallback = paramObj->GetProperty("onWillAppear");
+    auto willDismissCallback = paramObj->GetProperty("onWillDisappear");
     if (showCallback->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(showCallback));
@@ -6391,6 +6448,16 @@ void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::fu
             JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
             func->ExecuteJS(1, &newJSVal);
         };
+    }
+    if (willShowCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willShowCallback));
+        onWillAppear = [func = std::move(jsFunc)]() { func->Execute(); };
+    }
+    if (willDismissCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willDismissCallback));
+        onWillDisappear = [func = std::move(jsFunc)]() { func->Execute(); };
     }
 }
 
@@ -6429,10 +6496,13 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissSheet(panda::JsiRuntime
 }
 
 void JSViewAbstract::ParseOverlayCallback(
-    const JSRef<JSObject>& paramObj, std::function<void()>& onAppear, std::function<void()>& onDisappear)
+    const JSRef<JSObject>& paramObj, std::function<void()>& onAppear, std::function<void()>& onDisappear,
+    std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear)
 {
     auto showCallback = paramObj->GetProperty("onAppear");
     auto dismissCallback = paramObj->GetProperty("onDisappear");
+    auto willShowCallback = paramObj->GetProperty("onWillAppear");
+    auto willDismissCallback = paramObj->GetProperty("onWillDisappear");
     WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (showCallback->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
@@ -6449,6 +6519,16 @@ void JSViewAbstract::ParseOverlayCallback(
             PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
+    }
+    if (willShowCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willShowCallback));
+        onWillAppear = [func = std::move(jsFunc)]() { func->Execute(); };
+    }
+    if (willDismissCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willDismissCallback));
+        onWillDisappear = [func = std::move(jsFunc)]() { func->Execute(); };
     }
 }
 
@@ -6760,6 +6840,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
     JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
+    JSClass<JSViewAbstract>::StaticMethod("onSizeChange", &JSViewAbstract::JsOnSizeChange);
     JSClass<JSViewAbstract>::StaticMethod("touchable", &JSInteractableView::JsTouchable);
     JSClass<JSViewAbstract>::StaticMethod("monopolizeEvents", &JSInteractableView::JsMonopolizeEvents);
 
@@ -6793,17 +6874,15 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 }
 void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsArray()) {
-        return;
-    }
-
-    auto allowDropArray = JSRef<JSArray>::Cast(info[0]);
     std::set<std::string> allowDropSet;
     allowDropSet.clear();
-    std::string allowDrop;
-    for (size_t i = 0; i < allowDropArray->Length(); i++) {
-        allowDrop = allowDropArray->GetValueAt(i)->ToString();
-        allowDropSet.insert(allowDrop);
+    if (!info[0]->IsUndefined() && info[0]->IsArray()) {
+        auto allowDropArray = JSRef<JSArray>::Cast(info[0]);
+        std::string allowDrop;
+        for (size_t i = 0; i < allowDropArray->Length(); i++) {
+            allowDrop = allowDropArray->GetValueAt(i)->ToString();
+            allowDropSet.insert(allowDrop);
+        }
     }
     ViewAbstractModel::GetInstance()->SetAllowDrop(allowDropSet);
 }
@@ -7896,91 +7975,5 @@ void JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::stri
             moduleName = module->ToString();
         }
     }
-}
-
-void JSViewAbstract::ParseImageAnalyzerSubjectOptions(const JSRef<JSVal>& optionVal,
-    ImageAnalyzerConfig& analyzerConfig)
-{
-    ImageAnalyzerSubjectOptions subjectOptions;
-    auto obj = JSRef<JSObject>::Cast(optionVal);
-    JSRef<JSVal> onAnalyzedVal = obj->GetProperty("onAnalyzed");
-    if (onAnalyzedVal->IsFunction()) {
-        RefPtr<JsFunction> jsOnAnalyzedFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
-            JSRef<JSFunc>::Cast(onAnalyzedVal));
-        onSubcjectAnalyzedFunc onAnalyzedCallback =
-            [func = std::move(jsOnAnalyzedFunc)](std::string tag, std::vector<uint8_t> data) {
-            JSRef<JSVal> params[2];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
-            JSRef<JSArray> indexArray = JSRef<JSArray>::New();
-            for (uint32_t i = 0; i < data.size(); i++) {
-                indexArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(data[i])));
-            }
-            params[1] = JSRef<JSVal>::Cast(indexArray);
-            func->ExecuteJS(2, params);
-        };
-        subjectOptions.onAnalyzedCallback = std::move(onAnalyzedCallback);
-    }
-
-    JSRef<JSVal> dataVal = obj->GetProperty("analyzedData");
-    if (dataVal->IsArray()) {
-        JSRef<JSArray> dataArray  = JSRef<JSArray>::Cast(dataVal);
-        std::vector<uint8_t> analyzedData;
-        for (size_t i = 0; i < dataArray->Length(); ++i) {
-            JSRef<JSVal> value = dataArray->GetValueAt(i);
-            if (value->IsNumber()) {
-                analyzedData.emplace_back(value->ToNumber<uint8_t>());
-            }
-        }
-        subjectOptions.analyzedData = std::move(analyzedData);
-    }
-
-#if defined(PIXEL_MAP_SUPPORTED)
-    auto pixmapVal = obj->GetProperty("sourcePixelmap");
-    RefPtr<PixelMap> pixmap = CreatePixelMapFromNapiValue(pixmapVal);
-    if (pixmap != nullptr) {
-        subjectOptions.sourcePixelmap = ConvertPixmapNapi(pixmap);
-    }
-#endif
-    analyzerConfig.subjectOptions_ = std::move(subjectOptions);
-}
-
-void JSViewAbstract::ParseImageAnalyzerTextOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig)
-{
-    ImageAnalyzerTextOptions textOptions;
-    auto obj = JSRef<JSObject>::Cast(optionVal);
-    JSRef<JSVal> onAnalyzedVal = obj->GetProperty("onAnalyzed");
-    if (onAnalyzedVal->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAnalyzedVal));
-        onTextAnalyzedFunc onAnalyzedCallback = [func = std::move(jsFunc)] (
-            std::string tag, std::string data) {
-            JSRef<JSVal> params[2];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
-            params[1] = JSRef<JSVal>::Make(ToJSValue(data));
-            func->ExecuteJS(2, params);
-        };
-        textOptions.onAnalyzedCallback = std::move(onAnalyzedCallback);
-    }
-
-    JSRef<JSVal> onTextSelected = obj->GetProperty("onTextSelected");
-    if (onTextSelected->IsFunction()) {
-        RefPtr<JsFunction> jsOnTextSelectedFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
-        JSRef<JSFunc>::Cast(onTextSelected));
-        onTextSelectedFunc onTextSelectedCallback =
-            [func = std::move(jsOnTextSelectedFunc)] (std::string tag, std::string data) {
-            JSRef<JSVal> params[2];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
-            params[1] = JSRef<JSVal>::Make(ToJSValue(data));
-            func->ExecuteJS(2, params);
-        };
-        textOptions.onTextSelected = std::move(onTextSelectedCallback);
-    }
-
-    JSRef<JSVal> dataVal = obj->GetProperty("analyzedData");
-    if (dataVal->IsArray()) {
-        std::string analyzedData = dataVal->ToString();
-        textOptions.analyzedData = std::move(analyzedData);
-    }
-    analyzerConfig.textOptions = std::move(textOptions);
 }
 } // namespace OHOS::Ace::Framework

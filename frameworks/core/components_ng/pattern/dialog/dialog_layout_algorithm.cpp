@@ -518,8 +518,8 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_RETURN(displayInfo, false);
     auto foldStatus = displayInfo->GetFoldStatus();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && displayInfo->GetIsFoldable()
-        && foldStatus == FoldStatus::EXPAND) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && displayInfo->GetIsFoldable() &&
+        (foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
         return true;
     }

@@ -207,6 +207,11 @@ public:
         currentTitleBarHeight_ = currentTitleBarHeight;
     }
 
+    void SetIsTitleChanged(bool isTitleChanged)
+    {
+        isTitleChanged_ = isTitleChanged;
+    }
+
     void OnCoordScrollStart();
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
@@ -286,6 +291,7 @@ private:
     float minTitleHeight_ = 0.0f;
     bool CanOverDrag_ = true;
     bool isTitleScaleChange_ = true;
+    bool isTitleChanged_ = false; // navigation Non-custom title changed
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 
     bool isFreeTitleUpdated_ = false;

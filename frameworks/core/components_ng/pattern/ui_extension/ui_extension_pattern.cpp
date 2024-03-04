@@ -28,6 +28,7 @@
 #include "base/error/error_code.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -65,10 +66,6 @@ UIExtensionPattern::~UIExtensionPattern()
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension with id = %{public}d is destroyed.", uiExtensionId_);
     NotifyDestroy();
-    // Release the session.
-    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
-        sessionWrapper_->DestroySession();
-    }
     FireModalOnDestroy();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -107,22 +104,11 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
     UpdateWant(want);
 }
 
-bool UIExtensionPattern::CheckCascadeStatus()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto uiExtensionManager = pipeline->GetUIExtensionManager();
-    CHECK_NULL_RETURN(uiExtensionManager, false);
-    bool isUIExtProcess = uiExtensionManager->IsWindowTypeUIExtension(pipeline);
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Current process type is uiextension: %{private}d.",
-        isUIExtProcess);
-    return isUIExtProcess && IsEmbeddedComponentType();
-}
-
 void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
     CHECK_NULL_VOID(sessionWrapper_);
-    if (CheckCascadeStatus()) {
+    auto container = Container::GetContainer(instanceId_);
+    if (container && container->IsUIExtensionWindow() && embeddedType_ == EmbeddedType::UI_EXTENSION) {
         TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "This is embedded component, not allowed to pull up another.");
         std::string name = "extension_pulling_up_fail";
         std::string message = "pulling another embedded component failed, not allowed to cascade.";
@@ -141,7 +127,6 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         host->RemoveChild(contentNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         NotifyDestroy();
-        sessionWrapper_->DestroySession();
     }
     sessionWrapper_->CreateSession(want, isAsyncModalBinding_);
     NotifyForeground();
@@ -173,12 +158,11 @@ void UIExtensionPattern::OnConnect()
     surfaceNode->CreateNodeInRenderThread();
     surfaceNode->SetForeground(isModal_);
     FireOnRemoteReadyCallback();
-    if (isModal_) {
-        auto focusHub = host->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
+    auto focusHub = host->GetFocusHub();
+    if (isModal_ && focusHub) {
         focusHub->RequestFocusImmediately();
     }
-    bool isFocused = IsCurrentFocus();
+    bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -214,10 +198,6 @@ void UIExtensionPattern::OnDisconnect()
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "The session is disconnected and state = %{public}d, id = %{public}d.", state_, uiExtensionId_);
     FireOnReleaseCallback(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
-    // Release the session.
-    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
-        sessionWrapper_->DestroySession();
-    }
 }
 
 void UIExtensionPattern::OnExtensionDied()
@@ -230,10 +210,6 @@ void UIExtensionPattern::OnExtensionDied()
     host->RemoveChild(contentNode_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FireOnReleaseCallback(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
-    // Release the session.
-    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
-        sessionWrapper_->DestroySession();
-    }
 }
 
 void UIExtensionPattern::OnAreaChangedInner()
@@ -303,9 +279,16 @@ void UIExtensionPattern::OnWindowHide()
     }
 }
 
+void UIExtensionPattern::OnSizeChanged(WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->OnSizeChanged(type, rsTransaction);
+}
+
 void UIExtensionPattern::NotifyForeground()
 {
-    if (state_ != AbilityState::FOREGROUND) {
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid() && state_ != AbilityState::FOREGROUND) {
         state_ = AbilityState::FOREGROUND;
         sessionWrapper_->NotifyForeground();
     }
@@ -313,7 +296,7 @@ void UIExtensionPattern::NotifyForeground()
 
 void UIExtensionPattern::NotifyBackground()
 {
-    if (state_ == AbilityState::FOREGROUND) {
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid() && state_ == AbilityState::FOREGROUND) {
         state_ = AbilityState::BACKGROUND;
         sessionWrapper_->NotifyBackground();
     }
@@ -321,9 +304,11 @@ void UIExtensionPattern::NotifyBackground()
 
 void UIExtensionPattern::NotifyDestroy()
 {
-    if (state_ != AbilityState::DESTRUCTION && state_ != AbilityState::NONE) {
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid() && state_ != AbilityState::DESTRUCTION &&
+        state_ != AbilityState::NONE) {
         state_ = AbilityState::DESTRUCTION;
         sessionWrapper_->NotifyDestroy();
+        sessionWrapper_->DestroySession();
     }
 }
 
@@ -475,6 +460,8 @@ void UIExtensionPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 {
+    DispatchFocusActiveEvent(true);
+    DispatchFocusState(true);
     return DispatchKeyEventSync(event.rawKeyEvent);
 }
 
@@ -688,7 +675,11 @@ void UIExtensionPattern::FireOnReleaseCallback(int32_t releaseCode)
     if (onReleaseCallback_) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "The onRelease is called and state = %{public}d, id = %{public}d.", state_, uiExtensionId_);
-        onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
+        onReleaseCallback_(releaseCode);
+    }
+    // Release the session.
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
     }
 }
 
@@ -838,16 +829,8 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
-}
-
-bool UIExtensionPattern::IsCurrentFocus() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_RETURN(focusHub, false);
-    return focusHub->IsCurrentFocus();
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 
 void UIExtensionPattern::OnLanguageConfigurationUpdate()
@@ -887,11 +870,6 @@ void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidAr
 {
     CHECK_NULL_VOID(sessionWrapper_);
     sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type);
-}
-
-bool UIExtensionPattern::IsEmbeddedComponentType()
-{
-    return embeddedType_ == EmbeddedType::UI_EXTENSION;
 }
 
 void UIExtensionPattern::SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)

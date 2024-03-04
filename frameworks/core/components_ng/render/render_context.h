@@ -140,7 +140,11 @@ public:
         std::optional<std::string> surfaceName;
         PatternType patternType = PatternType::DEFAULT;
     };
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isUseExtSurface = false) {}
+#else
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
+#endif
 
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
@@ -402,6 +406,7 @@ public:
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
+    virtual void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) {}
     virtual void OnSuggestedRenderGroupUpdate(bool isRenderGroup) {}
     virtual void OnRenderFitUpdate(RenderFit renderFit) {}
     virtual void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionArray) {}

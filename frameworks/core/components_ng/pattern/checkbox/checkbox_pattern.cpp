@@ -145,7 +145,7 @@ void CheckBoxPattern::OnAfterModifyDone()
     }
     auto eventHub = host->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
-    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, eventHub->GetName(), lastSelect_);
+    Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, eventHub->GetName(), lastSelect_);
 }
 
 void CheckBoxPattern::InitClickEvent()

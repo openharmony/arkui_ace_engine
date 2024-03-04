@@ -137,6 +137,11 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         auto&& clickPosition = info.GetGlobalLocation();
         if (!contentRect.IsInRegion(
                 PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
+            if (this->ShouldDismiss()) {
+                this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE));
+                TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss");
+                return;
+            }
             PopDialog(-1);
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
@@ -990,12 +995,10 @@ void DialogPattern::UpdateWrapperBackgroundStyle(const RefPtr<FrameNode>& host, 
     CHECK_NULL_VOID(col);
     auto colRenderContext = col->GetRenderContext();
     CHECK_NULL_VOID(colRenderContext);
-    if (!GetDialogProperties().customStyle) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !colRenderContext->IsUniRenderEnabled()) {
-            colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
-        } else if (!GetDialogProperties().isSysBlurStyle) {
-            colRenderContext->UpdateBackBlurStyle(colRenderContext->GetBackBlurStyle());
-        }
+    if (!dialogProperties_.customStyle && !dialogProperties_.backgroundColor.has_value() &&
+        (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !colRenderContext->IsUniRenderEnabled() ||
+            !dialogProperties_.isSysBlurStyle)) {
+        colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
     }
     if (colRenderContext->GetBackBlurStyle().has_value()) {
         colRenderContext->UpdateBackBlurStyle(colRenderContext->GetBackBlurStyle());

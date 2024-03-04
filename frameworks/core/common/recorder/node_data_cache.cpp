@@ -20,9 +20,19 @@
 #include "base/log/log_wrapper.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::Recorder {
 constexpr int32_t PAGE_URL_SUFFIX_LENGTH = 3;
+
+std::string GetPageUrlByNode(const RefPtr<NG::FrameNode>& node)
+{
+    auto pageNode = node->GetPageNode();
+    CHECK_NULL_RETURN(pageNode, "");
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, "");
+    return pagePattern->GetPageUrl();
+}
 
 const std::string GetCurrentPageUrl()
 {
@@ -71,6 +81,7 @@ void NodeDataCache::OnBeforePagePop(bool destroy)
         Clear(pageUrl_);
     }
     shouldCollectFull_ = false;
+    EventRecorder::Get().SetContainerChanged();
 }
 
 void NodeDataCache::UpdateConfig(std::shared_ptr<MergedConfig>&& mergedConfig)
@@ -80,25 +91,26 @@ void NodeDataCache::UpdateConfig(std::shared_ptr<MergedConfig>&& mergedConfig)
     shouldCollectFull_ = false;
 }
 
-bool NodeDataCache::PutString(const std::string& id, const std::string& value)
+bool NodeDataCache::PutString(const RefPtr<NG::FrameNode>& node, const std::string& id, const std::string& value)
 {
     if (id.empty() || value.empty() || value.length() > MAX_DATA_LENGTH) {
         return false;
     }
-    std::unique_lock<std::mutex> lock(cacheLock_);
-    if (pageUrl_.empty()) {
-        pageUrl_ = GetCurrentPageUrl();
+    auto pageUrl = GetPageUrlByNode(node);
+    if (pageUrl.empty()) {
+        return false;
     }
-    auto iter = mergedConfig_->shareNodes.find(pageUrl_);
+    std::unique_lock<std::mutex> lock(cacheLock_);
+    auto iter = mergedConfig_->shareNodes.find(pageUrl);
     if (!shouldCollectFull_ && iter == mergedConfig_->shareNodes.end()) {
         return false;
     }
     if (shouldCollectFull_ || iter->second.find(id) != iter->second.end()) {
-        auto iter = container_->find(pageUrl_);
+        auto iter = container_->find(pageUrl);
         if (iter == container_->end()) {
             auto pageContainer = std::unordered_map<std::string, std::string>();
             pageContainer.emplace(id, value);
-            container_->emplace(pageUrl_, std::move(pageContainer));
+            container_->emplace(pageUrl, std::move(pageContainer));
         } else {
             if (iter->second.size() >= MAX_SIZE_PER_PAGE) {
                 return false;
@@ -109,43 +121,47 @@ bool NodeDataCache::PutString(const std::string& id, const std::string& value)
     return true;
 }
 
-bool NodeDataCache::PutBool(const std::string& id, bool value)
+bool NodeDataCache::PutBool(const RefPtr<NG::FrameNode>& node, const std::string& id, bool value)
 {
     std::string strVal = value ? "true" : "false";
-    return PutString(id, strVal);
+    return PutString(node, id, strVal);
 }
 
-bool NodeDataCache::PutInt(const std::string& id, int value)
+bool NodeDataCache::PutInt(const RefPtr<NG::FrameNode>& node, const std::string& id, int value)
 {
-    return PutString(id, std::to_string(value));
+    return PutString(node, id, std::to_string(value));
 }
 
-bool NodeDataCache::PutStringArray(const std::string& id, const std::vector<std::string>& value)
+bool NodeDataCache::PutStringArray(
+    const RefPtr<NG::FrameNode>& node, const std::string& id, const std::vector<std::string>& value)
 {
     auto jsonArray = JsonUtil::CreateArray(true);
     for (size_t i = 0; i < value.size(); i++) {
         jsonArray->Put(std::to_string(i).c_str(), value.at(i).c_str());
     }
-    return PutString(id, jsonArray->ToString());
+    return PutString(node, id, jsonArray->ToString());
 }
 
-bool NodeDataCache::PutMultiple(const std::string& id, const std::string& name, bool value)
+bool NodeDataCache::PutMultiple(
+    const RefPtr<NG::FrameNode>& node, const std::string& id, const std::string& name, bool value)
 {
     auto json = JsonUtil::Create(true);
     json->Put(KEY_TEXT, name.c_str());
     json->Put(KEY_CHECKED, value);
-    return PutString(id, json->ToString());
+    return PutString(node, id, json->ToString());
 }
 
-bool NodeDataCache::PutMultiple(const std::string& id, const std::string& name, int index)
+bool NodeDataCache::PutMultiple(
+    const RefPtr<NG::FrameNode>& node, const std::string& id, const std::string& name, int index)
 {
     auto json = JsonUtil::Create(true);
     json->Put(KEY_TEXT, name.c_str());
     json->Put(KEY_INDEX, index);
-    return PutString(id, json->ToString());
+    return PutString(node, id, json->ToString());
 }
 
-bool NodeDataCache::PutMultiple(const std::string& id, const std::string& name, const std::vector<std::string>& value)
+bool NodeDataCache::PutMultiple(const RefPtr<NG::FrameNode>& node, const std::string& id, const std::string& name,
+    const std::vector<std::string>& value)
 {
     auto json = JsonUtil::Create(true);
     json->Put(KEY_TEXT, name.c_str());
@@ -154,7 +170,7 @@ bool NodeDataCache::PutMultiple(const std::string& id, const std::string& name, 
         jsonArray->Put(std::to_string(i).c_str(), value.at(i).c_str());
     }
     json->Put(KEY_TEXT_ARRAY, jsonArray);
-    return PutString(id, json->ToString());
+    return PutString(node, id, json->ToString());
 }
 
 void NodeDataCache::GetNodeData(const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodes)
@@ -196,12 +212,12 @@ void NodeDataCache::Reset()
     prePageUrl_ = "";
 }
 
-void NodeDataCache::GetExposureCfg(const std::string& inspectId, ExposureCfg& cfg)
+void NodeDataCache::GetExposureCfg(const std::string& pageUrl, const std::string& inspectId, ExposureCfg& cfg)
 {
-    if (pageUrl_.empty()) {
-        pageUrl_ = GetCurrentPageUrl();
+    if (pageUrl.empty()) {
+        return;
     }
-    auto iter = mergedConfig_->exposureNodes.find(pageUrl_);
+    auto iter = mergedConfig_->exposureNodes.find(pageUrl);
     if (iter == mergedConfig_->exposureNodes.end()) {
         return;
     }

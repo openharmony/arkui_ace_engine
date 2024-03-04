@@ -103,7 +103,10 @@ public:
         }
     }
 
+    void ChangeIndex(const JSCallbackInfo& args);
+
     void FinishAnimation(const JSCallbackInfo& args);
+    void PreloadItems(const JSCallbackInfo& args);
 
     void SetController(const RefPtr<SwiperController>& controller)
     {

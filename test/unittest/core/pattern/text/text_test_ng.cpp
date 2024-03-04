@@ -4985,7 +4985,6 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent001, TestSize.Level1)
     EXPECT_FALSE(pattern->hasClicked_);
 }
 
-
 /**
  * @tc.name: HandleDoubleClickEvent002
  * @tc.desc: test test_pattern.h HandleDoubleClickEvent function.
@@ -5335,7 +5334,7 @@ HWTEST_F(TextTestNg, OnTextSelectionChange002, TestSize.Level1)
      */
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     pattern->paragraph_ = paragraph;
-    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(0));
     EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(2), Return(false)));
     GestureEvent info;
@@ -5414,8 +5413,8 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleSpanSingleClickEvent
- * @tc.desc: test test_pattern.h HandleSpanSingleClickEvent function with valid textSelector
+ * @tc.name: HandleClickAISpanEvent
+ * @tc.desc: test test_pattern.h HandleClickAISpanEvent function with valid textSelector
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, HandleClickAISpanEvent, TestSize.Level1)
@@ -5495,6 +5494,10 @@ HWTEST_F(TextTestNg, ShowUIExtensionMenu, TestSize.Level1)
     aiSpan.content = SPAN_PHONE;
     aiSpan.type = TextDataDetectType::PHONE_NUMBER;
 
+    /**
+     * @tc.steps: step2. call ShowUIExtensionMenu function
+     * @tc.expected: ShowUIExtensionMenu result is true.
+     */
     EXPECT_TRUE(pattern->ShowUIExtensionMenu(aiSpan, nullptr, nullptr));
 }
 
@@ -5589,7 +5592,7 @@ HWTEST_F(TextTestNg, HandleDragEvent001, TestSize.Level1)
     EXPECT_TRUE(gesture->GetTextDraggable());
     gesture->SetIsTextDraggable(true);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto onDragStart = eventHub->GetOnDragStart();
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(event, "");
     EXPECT_EQ(dragDropInfo.extraInfo, "3456");
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
@@ -5666,7 +5669,7 @@ HWTEST_F(TextTestNg, HandleDragEvent002, TestSize.Level1)
      */
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto onDragStart = eventHub->GetOnDragStart();
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(dragDropInfo.extraInfo, "");
     EXPECT_TRUE(!pattern->dragResultObjects_.empty());
@@ -5723,7 +5726,7 @@ HWTEST_F(TextTestNg, GetTextResultObject001, TestSize.Level1)
     pattern->textSelector_.Update(0, 15);
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto onDragStart = eventHub->GetOnDragStart();
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(pattern->dragResultObjects_.back().valueString, SPAN_PHONE);
     EXPECT_EQ(pattern->dragResultObjects_.back().offsetInSpan[RichEditorSpanRange::RANGEEND], 2);
@@ -5792,7 +5795,7 @@ HWTEST_F(TextTestNg, GetSymbolSpanResultObject001, TestSize.Level1)
      */
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto onDragStart = eventHub->GetOnDragStart();
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
     pattern->dragResultObjects_.clear();
     pattern->textSelector_.Update(0, 5);
     auto dragDropInfo = onDragStart(dragEvent, "");
@@ -5866,7 +5869,7 @@ HWTEST_F(TextTestNg, GetImageResultObject001, TestSize.Level1)
     pattern->textSelector_.Update(0, 20);
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto onDragStart = eventHub->GetOnDragStart();
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(pattern->dragResultObjects_.size(), 2); // 2 means result list size.
     EXPECT_EQ(pattern->dragResultObjects_.front().imageStyle.verticalAlign, static_cast<int32_t>(ImageFit::FILL));
@@ -6285,7 +6288,7 @@ HWTEST_F(TextTestNg, CreateParagphDragTest001, TestSize.Level1)
     EXPECT_TRUE(gesture->GetTextDraggable());
     gesture->SetIsTextDraggable(true);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    auto onDragStart = eventHub->GetOnDragStart();
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(event, "");
     EXPECT_EQ(pattern->status_, Status::DRAGGING);
     frameNode->Measure(LayoutConstraintF());

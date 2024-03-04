@@ -19,8 +19,10 @@
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_event_hub.h"
 #include "core/components_ng/pattern/tabs/tab_content_layout_property.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
@@ -55,6 +57,7 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->GetRenderContext()->UpdateClipEdge(true);
+        FireWillShowEvent();
     }
 
     void BeforeCreateLayoutWrapper() override
@@ -189,6 +192,25 @@ public:
         }
     }
 
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<TabContentEventHub>();
+    }
+
+    void FireWillShowEvent()
+    {
+        auto tabContentEventHub = GetEventHub<TabContentEventHub>();
+        CHECK_NULL_VOID(tabContentEventHub);
+        tabContentEventHub->FireWillShowEvent();
+    }
+
+    void FireWillHideEvent()
+    {
+        auto tabContentEventHub = GetEventHub<TabContentEventHub>();
+        CHECK_NULL_VOID(tabContentEventHub);
+        tabContentEventHub->FireWillHideEvent();
+    }
+    
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     TabBarParam tabBarParam_;

@@ -378,6 +378,7 @@ public:
     void ShowNext();
     void ShowPrevious();
     void SwipeTo(int32_t index);
+    void ChangeIndex(int32_t index, bool useAnimation);
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -598,6 +599,10 @@ public:
     }
     void UpdateNextValidIndex();
 
+    void FireWillHideEvent(int32_t willHideIndex) const;
+    void FireWillShowEvent(int32_t willShowIndex) const;
+    void SetOnHiddenChangeForParent();
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -640,6 +645,7 @@ private:
     void HandleMouseEvent(const MouseInfo& info);
     void PlayTranslateAnimation(
         float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false, float velocity = 0.0f);
+    void OnTranslateAnimationFinish();
     void PlaySpringAnimation(double dragVelocity);
     void PlayFadeAnimation();
 
@@ -808,6 +814,54 @@ private:
 
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
 
+    void PreloadItems(const std::set<int32_t>& indexSet);
+    void DoPreloadItems(const std::set<int32_t>& indexSet, int32_t errorCode);
+    void FirePreloadFinishEvent(int32_t errorCode);
+    // capture node start
+    void InitCapture();
+    int32_t GetLeftCaptureId()
+    {
+        if (!leftCaptureId_.has_value()) {
+            leftCaptureId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return leftCaptureId_.value();
+    }
+    int32_t GetRightCaptureId()
+    {
+        if (!rightCaptureId_.has_value()) {
+            rightCaptureId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return rightCaptureId_.value();
+    }
+    void RemoveAllCaptureNode()
+    {
+        auto swiperNode = GetHost();
+        CHECK_NULL_VOID(swiperNode);
+        swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetLeftCaptureId()));
+        leftCaptureId_ = std::nullopt;
+        swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetRightCaptureId()));
+        rightCaptureId_ = std::nullopt;
+    }
+    RefPtr<FrameNode> GetLeftCaptureNode()
+    {
+        auto swiperNode = GetHost();
+        CHECK_NULL_RETURN(swiperNode, nullptr);
+        return DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetLeftCaptureId())));
+    }
+    RefPtr<FrameNode> GetRightCaptureNode()
+    {
+        auto swiperNode = GetHost();
+        CHECK_NULL_RETURN(swiperNode, nullptr);
+        return DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetRightCaptureId())));
+    }
+    bool IsCaptureNodeValid()
+    {
+        return hasCachedCapture_ && GetLeftCaptureNode() && GetRightCaptureNode();
+    }
+    void UpdateTargetCapture(bool forceUpdate);
+    void CreateCaptureCallback(int32_t targetCaptureIndex, int32_t captureId, bool forceUpdate);
+    void UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId);
+    // capture node end
     WeakPtr<NestableScrollContainer> parent_;
     /**
      *  ============================================================
@@ -830,7 +884,10 @@ private:
     // Control translate animation for indicator.
     std::shared_ptr<AnimationUtils::Animation> indicatorAnimation_;
 
+    std::shared_ptr<AnimationUtils::Animation> translateAnimation_;
+
     bool indicatorAnimationIsRunning_ = false;
+    bool translateAnimationIsRunning_ = false;
 
     // stop indicator animation callback
     std::function<void(bool)> stopIndicatorAnimationFunc_;
@@ -872,6 +929,7 @@ private:
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
     bool needTurn_ = false;
+    bool isParentHiddenChange_ = false;
     /**
      * @brief Indicates whether the child NestableScrollContainer is currently scrolling and affecting Swiper.
      */
@@ -896,6 +954,8 @@ private:
     std::optional<int32_t> indicatorId_;
     std::optional<int32_t> leftButtonId_;
     std::optional<int32_t> rightButtonId_;
+    std::optional<int32_t> leftCaptureId_;
+    std::optional<int32_t> rightCaptureId_;
     std::optional<SwiperIndicatorType> lastSwiperIndicatorType_;
 
     float startMainPos_ = 0.0f;
@@ -949,6 +1009,12 @@ private:
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
     PaddingPropertyF tabsPaddingAndBorder_;
     std::map<int32_t, bool> indexCanChangeMap_;
+    // capture
+    std::optional<int32_t> leftCaptureIndex_;
+    std::optional<int32_t> rightCaptureIndex_;
+    bool hasCachedCapture_ = false;
+    bool isCaptureReverse_ = false;
+    OffsetF captureFinalOffset_;
 };
 } // namespace OHOS::Ace::NG
 

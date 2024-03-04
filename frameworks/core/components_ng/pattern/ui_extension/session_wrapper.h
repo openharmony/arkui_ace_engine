@@ -23,6 +23,7 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
+#include "core/common/window_animation_config.h"
 
 namespace OHOS {
 template<typename T>
@@ -37,6 +38,7 @@ class AxisEvent;
 namespace Rosen {
 class OccupiedAreaChangeInfo;
 class RSSurfaceNode;
+class RSTransaction;
 class AvoidArea;
 } // namespace Rosen
 
@@ -104,6 +106,8 @@ public:
     // The interface to control the display area
     virtual std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode() const = 0;
     virtual void RefreshDisplayArea(const RectF& displayArea) = 0;
+    virtual void OnSizeChanged(WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) = 0;
 
     // The interface to send the data for ArkTS
     virtual void SendDataAsync(const AAFwk::WantParams& params) const = 0;
