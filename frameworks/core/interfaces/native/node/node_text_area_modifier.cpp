@@ -568,8 +568,7 @@ void SetOnTextAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraP
     auto onChange = [node, eventId, extraParam](const std::string& str) {
         ArkUINodeEvent event;
         event.kind = ON_TEXTAREA_CHANGE;
-        event.eventId = eventId;
-        event.extraParam= extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.stringAsyncEvent.pStr = str.c_str();
         SendArkUIAsyncEvent(&event);
     };

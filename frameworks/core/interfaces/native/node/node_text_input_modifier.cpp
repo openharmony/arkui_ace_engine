@@ -873,8 +873,7 @@ void SetOnTextInputChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extra
     auto onChange = [node, eventId, extraParam](const std::string& str) {
         ArkUINodeEvent event;
         event.kind = ON_TEXT_INPUT_CHANGE;
-        event.eventId = eventId;
-        event.extraParam= extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.stringAsyncEvent.pStr = str.c_str();
         SendArkUIAsyncEvent(&event);
     };
@@ -888,8 +887,7 @@ void SetTextInputOnSubmit(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extra
     auto onEvent = [node, eventId, extraParam](int32_t value, NG::TextFieldCommonEvent& commonEvent) {
         ArkUINodeEvent event;
         event.kind = ON_TEXT_INPUT_SUBMIT;
-        event.eventId = eventId;
-        event.extraParam= extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.data[0].i32 = value;
         SendArkUIAsyncEvent(&event);
     };
@@ -903,8 +901,7 @@ void SetOnTextInputCut(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraPar
     auto onCut = [node, eventId, extraParam](const std::string& str) {
         ArkUINodeEvent event;
         event.kind = ON_TEXT_INPUT_CUT;
-        event.eventId = eventId;
-        event.extraParam= extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.stringAsyncEvent.pStr = str.c_str();
         SendArkUIAsyncEvent(&event);
     };
@@ -918,8 +915,7 @@ void SetOnTextInputPaste(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraP
     auto onPaste = [node, eventId, extraParam](const std::string& str, NG::TextCommonEvent& commonEvent) {
         ArkUINodeEvent event;
         event.kind = ON_TEXT_INPUT_PASTE;
-        event.eventId = eventId;
-        event.extraParam= extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.stringAsyncEvent.pStr = str.c_str();
         SendArkUIAsyncEvent(&event);
     };

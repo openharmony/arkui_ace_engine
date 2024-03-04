@@ -297,8 +297,7 @@ void SetCheckboxChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraPar
     auto onEvent = [node, eventId, extraParam](const bool value) {
         ArkUINodeEvent event;
         event.kind = ON_CHECKBOX_CHANGE;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(value);
         SendArkUIAsyncEvent(&event);
     };

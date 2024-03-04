@@ -29,6 +29,7 @@ extern "C" {
 struct ArkUI_Node {
     int32_t type;
     ArkUINodeHandle uiNodeHandle = nullptr;
+    void* extraData = nullptr;
 };
 
 constexpr int BASIC_COMPONENT_NUM = 18;

@@ -115,14 +115,14 @@ enum ArkUISourceType {
 
 struct ArkUITouchPoint {
     /**
-     * Pointer identifier
-     */
-    ArkUI_Int32 id;
-
-    /**
      * Time stamp when touch is pressed
      */
     ArkUI_Int64 pressedTime;
+
+    /**
+     * Pointer identifier
+     */
+    ArkUI_Int32 id;
 
     /**
      * X coordinate of the touch position on the screen
@@ -239,27 +239,26 @@ enum ArkUITouchEventAction {
 };
 
 struct ArkUIHistoricalTouchPoint {
+    /** Time stamp of the historical event. */
+    ArkUI_Int64 timeStamp;
     /**
      * Touch action
      */
     ArkUITouchEventAction action;
-    /** Time stamp of the historical event. */
-    ArkUI_Int64 timeStamp;
     /** touch point info of the historical event. */
     ArkUITouchPoint actionTouch;
     ArkUISourceType sourceType;
 };
 
 struct ArkUITouchEvent {
+    /** Time stamp of the current event. */
+    ArkUI_Int64 timeStamp;
+
     /**
      * Touch action
      *
      */
     ArkUITouchEventAction action;
-
-    /** Time stamp of the current event. */
-    ArkUI_Int64 timeStamp;
-
     /**
      * curent action touch point info.
      */
@@ -842,10 +841,9 @@ struct ArkUIAPIEventGestureAsyncEvent {
 };
 
 struct ArkUINodeEvent {
-    ArkUI_Int32 kind; // Actually ArkUIAsyncEventKind, but use int for fixed binary layout.
-    ArkUI_Int32 eventId;
+    ArkUI_Int32 kind; // Actually ArkUIAsyncEventKind.
     ArkUI_Int32 nodeId;
-    void* extraParam;
+    ArkUI_Int64 extraParam;
     union {
         ArkUIAPIEventSinglePointer singlePointer;
         ArkUIAPIEventMultiPointer multiPointer;
@@ -3187,7 +3185,7 @@ struct ArkUIBasicAPI {
      * notify the node to send node event back
      */
     void (*registerNodeAsyncEvent)(
-        ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId, void* extraParam);
+        ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind, ArkUI_Int64 extraParam);
     void (*unRegisterNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind);
     /* registerNodeAsyncEventReceiver() must be redesigned */
     void (*registerNodeAsyncEventReceiver)(void (*eventReceiver)(ArkUINodeEvent* event));
