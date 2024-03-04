@@ -3636,6 +3636,53 @@ HWTEST_F(TextFieldUXTest, testShowUnderline001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testUnderlineColor001
+ * @tc.desc: test testInput underlineColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testUnderlineColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: underlineColor is Red
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowUnderline(true);
+    });
+
+    /**
+     * @tc.step: step2. Set normalUnderlineColor is Red
+     */
+    pattern_->SetNormalUnderlineColor(Color::RED);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetUserUnderlineColor().normal, Color::RED);
+
+    /**
+     * @tc.step: step3. Set userUnderlineColor is RED, GREEN, BLUE, BLACK
+     */
+    UserUnderlineColor userColor = {Color::RED, Color::GREEN, Color::BLUE, Color::BLACK};
+    pattern_->SetUserUnderlineColor(userColor);
+    frameNode_->MarkModifyDone();
+    UserUnderlineColor userColorRes = pattern_->GetUserUnderlineColor();
+    EXPECT_EQ(userColorRes.typing, Color::RED);
+    EXPECT_EQ(userColorRes.normal, Color::GREEN);
+    EXPECT_EQ(userColorRes.error, Color::BLUE);
+    EXPECT_EQ(userColorRes.disable, Color::BLACK);
+
+    /**
+     * @tc.step: step4. Set userUnderlineColor is null
+     */
+    UserUnderlineColor userColorNull = UserUnderlineColor();
+    pattern_->SetUserUnderlineColor(userColorNull);
+    frameNode_->MarkModifyDone();
+    UserUnderlineColor userColorNullRes = pattern_->GetUserUnderlineColor();
+    EXPECT_EQ(userColorNullRes.typing, std::nullopt);
+    EXPECT_EQ(userColorNullRes.normal, std::nullopt);
+    EXPECT_EQ(userColorNullRes.error, std::nullopt);
+    EXPECT_EQ(userColorNullRes.disable, std::nullopt);
+}
+
+/**
  * @tc.name: testCaretPosition001
  * @tc.desc: test testInput caretPosition
  * @tc.type: FUNC
