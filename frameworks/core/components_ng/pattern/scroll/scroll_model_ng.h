@@ -56,7 +56,7 @@ public:
     void SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) override;
     void SetEnablePaging(bool enablePaging) override;
-    void SetInitialOffset(const OffsetT<Dimension>& offset) override;
+    void SetInitialOffset(const OffsetT<CalcDimension>& offset) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetScrollController(

@@ -65,11 +65,6 @@ void ScrollPattern::OnModifyDone()
         SetAxis(axis);
         ResetPosition();
     }
-    if (!isInitialized_) {
-        auto initialOffset = layoutProperty->GetInitialOffset().value_or(OffsetT(Dimension(0.f), Dimension(0.f)));
-        currentOffset_ = axis == Axis::VERTICAL ? -initialOffset.GetY().ConvertToPx() :
-                                                  -initialOffset.GetX().ConvertToPx();
-    }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
         RegisterScrollEventTask();
@@ -993,5 +988,14 @@ float ScrollPattern::GetPagingDelta(float dragDistance, float velocity, float pa
 void ScrollPattern::TriggerModifyDone()
 {
     OnModifyDone();
+}
+
+void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    ScrollablePattern::ToJsonValue(json);
+    auto initialOffset = JsonUtil::Create(true);
+    initialOffset->Put("xOffset", initialOffset_.GetX().ToString().c_str());
+    initialOffset->Put("yOffset", initialOffset_.GetY().ToString().c_str());
+    json->Put("initialOffset", initialOffset);
 }
 } // namespace OHOS::Ace::NG
