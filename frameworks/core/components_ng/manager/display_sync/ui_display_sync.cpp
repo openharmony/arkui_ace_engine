@@ -61,6 +61,8 @@ void UIDisplaySync::OnFrame()
                      "Preferred[%d] VSyncRate[%d] Rate[%d] noSkip[%d]",
                      GetId(), data_->timestamp_, data_->targetTimestamp_,
                      data_->rateRange_->preferred_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
+    CheckShouldUnregisterOnFrame();
+
     if (data_->noSkip_ && data_->onFrame_) {
         data_->onFrame_();
     }
@@ -171,11 +173,22 @@ void UIDisplaySync::RegisterOnFrameWithTimestamp(OnFrameCallBackWithTimestamp&& 
     data_->onFrameWithTimestamp_ = std::move(onFrameCallBack);
 }
 
-void UIDisplaySync::UnRegisterOnFrame()
+void UIDisplaySync::UnregisterOnFrame()
 {
+    needUnregisterOnFrame_ = true;
+}
+
+void UIDisplaySync::CheckShouldUnregisterOnFrame()
+{
+    if (!needUnregisterOnFrame_) {
+        return;
+    }
+
     data_->onFrame_ = nullptr;
     data_->onFrameWithData_ = nullptr;
     data_->onFrameWithTimestamp_ = nullptr;
+
+    needUnregisterOnFrame_ = false;
 }
 
 void UIDisplaySync::SetTimestampData(uint64_t timestamp)
