@@ -73,6 +73,9 @@ private:
     RefPtr<ExtSurface> extSurface_;
     RefPtr<ExtSurfaceCallbackInterface> extSurfaceCallback_;
     int64_t surfaceId_ = -1;
+    void* nativeWindow_ = nullptr;
+    bool isSetConfigSurface_ = false;
+    Rect lastRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurfaceImpl);
 };
