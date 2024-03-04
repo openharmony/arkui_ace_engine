@@ -989,4 +989,13 @@ void ScrollPattern::TriggerModifyDone()
 {
     OnModifyDone();
 }
+
+void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    ScrollablePattern::ToJsonValue(json);
+    auto initialOffset = JsonUtil::Create(true);
+    initialOffset->Put("xOffset", initialOffset_.GetX().ToString().c_str());
+    initialOffset->Put("yOffset", initialOffset_.GetY().ToString().c_str());
+    json->Put("initialOffset", initialOffset);
+}
 } // namespace OHOS::Ace::NG
