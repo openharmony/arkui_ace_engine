@@ -538,7 +538,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure003, TestSize.Level1)
 
 /**
  * @tc.name: GridIrregularLayout::Measure004
- * @tc.desc: Test GridIrregularLayout::Measure with offset
+ * @tc.desc: Test GridIrregularLayout::Measure with overScroll disabled
  * @tc.type: FUNC
  */
 HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
@@ -554,6 +554,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    algorithm->overScroll_ = false;
     auto& info = algorithm->gridLayoutInfo_;
     info.currentOffset_ = 0.0f;
     info.childrenCount_ = 8;
@@ -563,7 +564,11 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
     for (int i = -2; i < 3; ++i) {
         info.currentOffset_ = i * 1.0f;
         algorithm->Measure(AceType::RawPtr(frameNode_));
-        EXPECT_EQ(info.currentOffset_, i * 1.0f);
+        if (i > 0) {
+            EXPECT_EQ(info.currentOffset_, 0.0f);
+        } else {
+            EXPECT_EQ(info.currentOffset_, i * 1.0f);
+        }
         EXPECT_EQ(info.startMainLineIndex_, 0);
         EXPECT_EQ(info.endMainLineIndex_, 3);
         EXPECT_EQ(info.startIndex_, 0);
@@ -574,21 +579,22 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
     info.startIndex_ = 2;
     info.currentOffset_ = -400.0f;
     algorithm->Measure(AceType::RawPtr(frameNode_));
-    EXPECT_EQ(info.currentOffset_, -199.0f); // 1.0f is mainGap
-    EXPECT_EQ(info.startMainLineIndex_, 3);
+    EXPECT_EQ(info.currentOffset_, -303.5f);
+    EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 5);
-    EXPECT_EQ(info.startIndex_, 4);
+    EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 7);
 
     info.startMainLineIndex_ = 2;
     info.startIndex_ = 2;
     info.currentOffset_ = -401.0f;
     algorithm->Measure(AceType::RawPtr(frameNode_));
-    EXPECT_EQ(info.currentOffset_, 1.0f); // 1.0f is mainGap
-    EXPECT_EQ(info.startMainLineIndex_, 4);
+    EXPECT_EQ(info.currentOffset_, -303.5f); // 1.0f is mainGap
+    EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 5);
-    EXPECT_EQ(info.startIndex_, 5);
+    EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 7);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_2);
 }
 
 /**
@@ -725,6 +731,7 @@ HWTEST_F(GridIrregularLayoutTest, TestReset001, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
 
     auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
+    algo->overScroll_ = true;
     algo->wrapper_ = AceType::RawPtr(frameNode_);
 
     algo->Measure(AceType::RawPtr(frameNode_));
