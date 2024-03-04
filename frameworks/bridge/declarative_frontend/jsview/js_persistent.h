@@ -32,6 +32,7 @@ public:
 
     void Set(const JSCallbackInfo& args);
     void Get(const JSCallbackInfo& args);
+    void Has(const JSCallbackInfo& args);
     void Delete(const JSCallbackInfo& args);
     void Clear(const JSCallbackInfo& args);
 

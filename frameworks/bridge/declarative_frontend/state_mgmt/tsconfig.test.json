@@ -36,6 +36,7 @@
     // common, non-sdk
     "src/lib/common/observed_object.ts",
     "src/lib/common/observed_property_abstract.ts",
+    "src/lib/common/utils.ts",
 
     // full_update specific
     "src/lib/full_update/fu_observed_property.ts",
