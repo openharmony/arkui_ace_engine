@@ -858,6 +858,35 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo)
     } else {
         popupPattern->StartEnteringAnimation(nullptr);
     }
+    SetPopupHotAreas(popupNode);
+}
+
+void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
+{
+    CHECK_NULL_VOID(popupNode);
+    auto popupId = popupNode->GetId();
+    auto popupPattern = popupNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(popupPattern);
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto isBlock = layoutProp->GetBlockEventValue(true);
+    auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    if (isShowInSubWindow && popupPattern->IsOnShow()) {
+        std::vector<Rect> rects;
+        if (!isBlock) {
+            auto rect = Rect(popupPattern->GetChildOffset().GetX(), popupPattern->GetChildOffset().GetY(),
+                popupPattern->GetChildSize().Width(), popupPattern->GetChildSize().Height());
+            rects.emplace_back(rect);
+        } else {
+            auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+            auto rect = Rect(popupPattern->GetChildOffset().GetX(), popupPattern->GetChildOffset().GetY(),
+                popupPattern->GetChildSize().Width(), popupPattern->GetChildSize().Height());
+            rects.emplace_back(parentWindowRect);
+            rects.emplace_back(rect);
+        }
+        auto subWindowMgr = SubwindowManager::GetInstance();
+        subWindowMgr->SetPopupHotAreas(rects, popupId, popupPattern->GetContainerId());
+    }
 }
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
