@@ -57,6 +57,9 @@ const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::F
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::string NONE_FONT_FAMILY = "NoneFontFamily";
+const uint32_t ERROR_UINT_CODE = -1;
+const float ERROR_FLOAT_CODE = -1.0f;
+const int32_t ERROR_INT_CODE = -1;
 std::string g_strValue;
 
 const std::unordered_map<int, DimensionUnit> DIMENSION_UNIT_MAP = {
@@ -494,6 +497,27 @@ ArkUI_CharPtr GetButtonLabel(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, "");
     g_strValue = ButtonModelNG::GetLabel(frameNode);
     return g_strValue.c_str();
+}
+
+ArkUI_Float32 GetButtonFontSize(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ButtonModelNG::GetFontSize(frameNode).Value();
+}
+
+ArkUI_Int32 GetButtonFontWeight(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(ButtonModelNG::GetFontWeight(frameNode));
+}
+
+ArkUI_Uint32 GetButtonFontColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return ButtonModelNG::GetFontColor(frameNode).GetValue();
 }
 
 namespace NodeModifier {

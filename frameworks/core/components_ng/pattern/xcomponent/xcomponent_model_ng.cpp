@@ -203,7 +203,7 @@ void XComponentModelNG::SetXComponentSurfaceSize(FrameNode* frameNode, uint32_t 
 {
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
-    xcPattern->SetSurfaceSize(width, height);
+    xcPattern->ConfigSurface(width, height);
 }
 
 std::string XComponentModelNG::GetXComponentId(FrameNode* frameNode)

@@ -155,6 +155,11 @@ public:
     static CalcDimension GetCancelIconSize(FrameNode* frameNode);
     static std::string GetCanacelIconSrc(FrameNode* frameNode);
     static Color GetCancelIconColor(FrameNode* frameNode);
+    static TextAlign GetTextAlign(FrameNode* frameNode);
+    static Color GetTextColor(FrameNode* frameNode);
+    static Ace::FontStyle GetFontStyle(FrameNode* frameNode);
+    static FontWeight GetFontWeight(FrameNode* frameNode);
+    static Dimension GetFontSize(FrameNode* frameNode);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

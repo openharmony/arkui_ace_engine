@@ -742,6 +742,41 @@ ArkUI_Uint32 GetTextInputTextCanacelIconColor(ArkUINodeHandle node)
     return TextFieldModelNG::GetCancelIconColor(frameNode).GetValue();
 }
 
+ArkUI_Int32 GetTextInputTextAlign(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetTextAlign(frameNode));
+}
+
+ArkUI_Uint32 GetTextInputFontColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return TextFieldModelNG::GetTextColor(frameNode).GetValue();
+}
+
+ArkUI_Int32 GetTextInputFontStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetFontStyle(frameNode));
+}
+
+ArkUI_Int32 GetTextInputFontWeight(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetFontWeight(frameNode));
+}
+
+ArkUI_Float32 GetTextInputFontSize(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetFontSize(frameNode).Value();
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -822,6 +857,11 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputCancelIconSize,
         GetTextInputTextCanacelIconSrc,
         GetTextInputTextCanacelIconColor,
+        GetTextInputTextAlign,
+        GetTextInputFontColor,
+        GetTextInputFontStyle,
+        GetTextInputFontWeight,
+        GetTextInputFontSize,
     };
     return &modifier;
 }

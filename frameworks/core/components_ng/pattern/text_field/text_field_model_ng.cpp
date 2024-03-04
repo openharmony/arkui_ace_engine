@@ -1152,4 +1152,35 @@ Color TextFieldModelNG::GetCancelIconColor(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, value, frameNode);
     return value;
 }
+
+TextAlign TextFieldModelNG::GetTextAlign(FrameNode* frameNode)
+{
+    TextAlign value = TextAlign::START;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, TextAlign, value, frameNode, value);
+    return value;
+}
+Color TextFieldModelNG::GetTextColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, TextColor, value, frameNode, value);
+    return value;
+}
+Ace::FontStyle TextFieldModelNG::GetFontStyle(FrameNode* frameNode)
+{
+    Ace::FontStyle value = Ace::FontStyle::NORMAL;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, ItalicFontStyle, value, frameNode, value);
+    return value;
+}
+FontWeight TextFieldModelNG::GetFontWeight(FrameNode* frameNode)
+{
+    FontWeight value = FontWeight::NORMAL;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, FontWeight, value, frameNode, value);
+    return value;
+}
+Dimension TextFieldModelNG::GetFontSize(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, FontSize, value, frameNode, Dimension());
+    return value;
+}
 } // namespace OHOS::Ace::NG
