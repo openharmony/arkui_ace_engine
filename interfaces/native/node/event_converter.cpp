@@ -153,7 +153,6 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event. %{public}d", origin->kind);
         return false;
     }
-    event->eventId = origin->eventId;
     return true;
 }
 }; // namespace OHOS::Ace::NodeModel
