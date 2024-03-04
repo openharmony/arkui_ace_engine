@@ -1361,6 +1361,11 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeArea() const
     return safeAreaManager_->GetSafeArea();
 }
 
+PipelineBase::SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
+{
+    return safeAreaManager_->GetSafeAreaWithoutProcess();
+}
+
 void PipelineContext::SyncSafeArea(bool onKeyboard)
 {
     CHECK_NULL_VOID(stageManager_);

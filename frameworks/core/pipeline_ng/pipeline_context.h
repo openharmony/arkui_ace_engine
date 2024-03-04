@@ -296,6 +296,8 @@ public:
     }
     virtual SafeAreaInsets GetSafeArea() const;
 
+    virtual SafeAreaInsets GetSafeAreaWithoutProcess() const;
+
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
     const RefPtr<StageManager>& GetStageManager();

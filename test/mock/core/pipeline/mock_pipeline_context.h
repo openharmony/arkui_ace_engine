@@ -33,6 +33,7 @@ public:
     static RefPtr<MockPipelineContext> GetCurrent();
     void SetRootSize(double rootWidth, double rootHeight);
     MOCK_CONST_METHOD0(GetSafeArea, SafeAreaInsets());
+    MOCK_CONST_METHOD0(GetSafeAreaWithoutProcess, SafeAreaInsets());
 
     bool GetIsDeclarative() const override
     {
