@@ -634,7 +634,7 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble001, TestSize.Level1)
     ASSERT_NE(columnLayoutProperty->calcLayoutConstraint_, nullptr);
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     auto columnCalcSize =
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
             ? CalcSize(CalcLength(bubbleSize), CalcLength(BUBBLE_ITEM_SIZE * 3 + BUBBLE_DIVIDER_SIZE * 4))
             : CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 3));
     EXPECT_EQ(columnLayoutProperty->calcLayoutConstraint_->selfIdealSize, columnCalcSize);
@@ -664,7 +664,7 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble002, TestSize.Level1)
     ASSERT_NE(columnLayoutProperty->calcLayoutConstraint_, nullptr);
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     auto columnCalcSize =
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
             ? CalcSize(CalcLength(bubbleSize), CalcLength(BUBBLE_ITEM_SIZE * 3 + BUBBLE_DIVIDER_SIZE * 4))
             : CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 3));
     EXPECT_EQ(columnLayoutProperty->calcLayoutConstraint_->selfIdealSize, columnCalcSize);
@@ -694,7 +694,7 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble003, TestSize.Level1)
     ASSERT_NE(columnLayoutProperty->calcLayoutConstraint_, nullptr);
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     auto columnCalcSize =
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
             ? CalcSize(CalcLength(bubbleSize), CalcLength(BUBBLE_ITEM_SIZE * 6 + BUBBLE_DIVIDER_SIZE * 7))
             : CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 6));
     EXPECT_EQ(columnLayoutProperty->calcLayoutConstraint_->selfIdealSize, columnCalcSize);
@@ -971,10 +971,10 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest004, TestSize.Level1)
      * @tc.steps: step1. Get properties.
      * @tc.expected: Properties are correct.
      */
-    EXPECT_EQ(layoutProperty_->GetPopupItemBorderRadiusValue(), Dimension(24));
-    EXPECT_EQ(layoutProperty_->GetPopupBorderRadiusValue(), Dimension(28));
-    EXPECT_EQ(layoutProperty_->GetItemBorderRadiusValue(), Dimension(12));
-    EXPECT_EQ(layoutProperty_->GetIndexerBorderRadiusValue(), Dimension(16));
+    EXPECT_EQ(paintProperty_->GetPopupItemBorderRadiusValue(), Dimension(24));
+    EXPECT_EQ(paintProperty_->GetPopupBorderRadiusValue(), Dimension(28));
+    EXPECT_EQ(paintProperty_->GetItemBorderRadiusValue(), Dimension(12));
+    EXPECT_EQ(paintProperty_->GetIndexerBorderRadiusValue(), Dimension(16));
     EXPECT_EQ(paintProperty_->GetPopupBackgroundBlurStyleValue(), indexerBlurStyle);
     EXPECT_EQ(paintProperty_->GetPopupTitleBackgroundValue(), Color(0x00000000));
 }

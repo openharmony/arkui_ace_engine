@@ -19,26 +19,14 @@
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "core/components/indexer/indexer_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr double DEFAULT_POPUPITEMFONT_SIZE = 24.0;
-const std::string DEFAULT_SELECTEDFONT_SIZE = "12.0";
-const std::string DEFAULT_POPUPFONT_SIZE = "24.0vp";
-const std::string DEFAULT_FONT_SIZE = "12.0";
-const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
-const std::string DEFAULT_FONT_WEIGHT = "normal";
 constexpr int FONT_SIZE_INDEX = 0;
 constexpr int FONT_WEIGHT_INDEX = 1;
 constexpr int FONT_FAMILY_INDEX = 2;
 const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::FontStyle::ITALIC };
-constexpr uint32_t DEFAULT_ITEM_BG_COLOR = 0xFFFFFF;
-constexpr uint32_t DEFAULT_COLOR = 0x99000000;
-constexpr uint32_t DEFAULT_POPUP_COLOR = 0xFF254FF7;
-constexpr uint32_t DEFAULT_SELECTED_COLOR = 0xFF254FF7;
-constexpr uint32_t DEFAULT_POPUP_BG_COLOR = 0xFFFFFFFF;
-constexpr uint32_t DEFAULT_SELECTED_BG_COLOR = 0x1F0A59F7;
-constexpr uint32_t DEFAULT_POPUP_SELECTED_COLOR = 0xFF182431;
 constexpr bool DEFAULT_USINGPOPUP = false;
 constexpr int32_t DEFAULT_SELECTED = 0;
 constexpr Dimension DEFAULT_POPUPHORIZONTALSPACE = -1.0_vp;
@@ -46,6 +34,9 @@ constexpr int32_t DEFAULT_ALIGN_STYLE = static_cast<int32_t>(NG::AlignStyle::RIG
 constexpr double DEFAULT_ITEM_SIZE = 16.0;
 constexpr double DEFAULT_POPUP_POSITION_X = 60.0;
 constexpr double DEFAULT_POPUP_POSITION_Y = 48.0;
+constexpr double POPUP_ITEM_DEFAULT_RADIUS = 24.0;
+constexpr double ITEM_DEFAULT_RADIUS = 8.0;
+constexpr double RADIUS_OFFSET = 4.0;
 } // namespace
 
 void SetPopupItemFont(ArkUINodeHandle node, ArkUI_Float32 size, int unit, const char* weight)
@@ -61,8 +52,14 @@ void ResetPopupItemFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetFontSize(frameNode, Dimension(DEFAULT_POPUPITEMFONT_SIZE, DimensionUnit::FP));
-    IndexerModelNG::SetFontWeight(frameNode, FontWeight::MEDIUM);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    auto fontSize = indexerTheme->GetPopupTextSize();
+    IndexerModelNG::SetFontSize(frameNode, fontSize);
+    auto fontWeight = indexerTheme->GetPopupTextStyle().GetFontWeight();
+    IndexerModelNG::SetFontWeight(frameNode, fontWeight);
 }
 
 void SetSelectedFont(ArkUINodeHandle node, const char* fontInfo, int32_t style)
@@ -87,12 +84,15 @@ void ResetSelectedFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<Dimension> fontSize =
-        StringUtils::StringToCalcDimension(DEFAULT_SELECTEDFONT_SIZE, false, DimensionUnit::FP);
-    std::optional<FontWeight> fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
-    std::optional<std::vector<std::string>> fontFamily =
-        Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY));
-    std::optional<Ace::FontStyle> fontStyle = FONT_STYLES[0];
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    TextStyle selectTextStyle = indexerTheme->GetSelectTextStyle();
+    std::optional<Dimension> fontSize = selectTextStyle.GetFontSize();
+    std::optional<FontWeight> fontWeight = selectTextStyle.GetFontWeight();
+    std::optional<std::vector<std::string>> fontFamily = selectTextStyle.GetFontFamilies();
+    std::optional<Ace::FontStyle> fontStyle = selectTextStyle.GetFontStyle();
     IndexerModelNG::SetSelectedFont(frameNode, fontSize, fontWeight, fontFamily, fontStyle);
 }
 
@@ -118,12 +118,15 @@ void ResetPopupFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<Dimension> fontSize =
-        StringUtils::StringToCalcDimension(DEFAULT_POPUPFONT_SIZE, false, DimensionUnit::FP);
-    std::optional<FontWeight> fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
-    std::optional<std::vector<std::string>> fontFamily =
-        Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY));
-    std::optional<Ace::FontStyle> fontStyle = FONT_STYLES[0];
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    TextStyle popupTextStyle = indexerTheme->GetPopupTextStyle();
+    std::optional<Dimension> fontSize = popupTextStyle.GetFontSize();
+    std::optional<FontWeight> fontWeight = popupTextStyle.GetFontWeight();
+    std::optional<std::vector<std::string>> fontFamily = popupTextStyle.GetFontFamilies();
+    std::optional<Ace::FontStyle> fontStyle = popupTextStyle.GetFontStyle();
     IndexerModelNG::SetPopupFont(frameNode, fontSize, fontWeight, fontFamily, fontStyle);
 }
 
@@ -149,12 +152,15 @@ void ResetAlphabetIndexerFont(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<Dimension> fontSize =
-        StringUtils::StringToCalcDimension(DEFAULT_FONT_SIZE, false, DimensionUnit::FP);
-    std::optional<FontWeight> fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
-    std::optional<std::vector<std::string>> fontFamily =
-        Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY));
-    std::optional<Ace::FontStyle> fontStyle = FONT_STYLES[0];
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    TextStyle defaultTextStyle = indexerTheme->GetDefaultTextStyle();
+    std::optional<Dimension> fontSize = defaultTextStyle.GetFontSize();
+    std::optional<FontWeight> fontWeight = defaultTextStyle.GetFontWeight();
+    std::optional<std::vector<std::string>> fontFamily = defaultTextStyle.GetFontFamilies();
+    std::optional<Ace::FontStyle> fontStyle = defaultTextStyle.GetFontStyle();
     IndexerModelNG::SetFont(frameNode, fontSize, fontWeight, fontFamily, fontStyle);
 }
 
@@ -169,7 +175,14 @@ void ResetPopupItemBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetPopupItemBackground(frameNode, Color(DEFAULT_ITEM_BG_COLOR));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color color = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+                        ? indexerTheme->GetPopupUnclickedBgAreaColor()
+                        : indexerTheme->GetPopupBackgroundColor();
+    IndexerModelNG::SetPopupItemBackground(frameNode, color);
 }
 
 void SetAlphabetIndexerColor(ArkUINodeHandle node, uint32_t color)
@@ -183,7 +196,12 @@ void ResetAlphabetIndexerColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetColor(frameNode, Color(DEFAULT_COLOR));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color color = indexerTheme->GetDefaultTextColor();
+    IndexerModelNG::SetColor(frameNode, color);
 }
 
 void SetPopupColor(ArkUINodeHandle node, uint32_t color)
@@ -197,7 +215,12 @@ void ResetPopupColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetPopupColor(frameNode, Color(DEFAULT_POPUP_COLOR));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color color = indexerTheme->GetPopupTextColor();
+    IndexerModelNG::SetPopupColor(frameNode, color);
 }
 
 void SetAlphabetIndexerSelectedColor(ArkUINodeHandle node, uint32_t color)
@@ -211,7 +234,12 @@ void ResetAlphabetIndexerSelectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetSelectedColor(frameNode, Color(DEFAULT_SELECTED_COLOR));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color color = indexerTheme->GetSelectedTextColor();
+    IndexerModelNG::SetSelectedColor(frameNode, color);
 }
 
 void SetPopupBackground(ArkUINodeHandle node, uint32_t color)
@@ -225,7 +253,12 @@ void ResetPopupBackground(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetPopupBackground(frameNode, Color(DEFAULT_POPUP_BG_COLOR));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color color = indexerTheme->GetPopupBackgroundColor();
+    IndexerModelNG::SetPopupBackground(frameNode, color);
 }
 
 void SetSelectedBackgroundColor(ArkUINodeHandle node, uint32_t color)
@@ -239,7 +272,12 @@ void ResetSelectedBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetSelectedBackgroundColor(frameNode, Color(DEFAULT_SELECTED_BG_COLOR));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color color = indexerTheme->GetSeclectedBackgroundColor();
+    IndexerModelNG::SetSelectedBackgroundColor(frameNode, color);
 }
 
 void SetPopupUnselectedColor(ArkUINodeHandle node, uint32_t color)
@@ -253,7 +291,12 @@ void ResetPopupUnselectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetPopupUnselectedColor(frameNode, Color(DEFAULT_POPUP_SELECTED_COLOR));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color color = indexerTheme->GetPopupUnselectedTextColor();
+    IndexerModelNG::SetPopupUnselectedColor(frameNode, color);
 }
 
 void SetAlignStyle(ArkUINodeHandle node, int32_t value)
@@ -322,7 +365,12 @@ void ResetPopupSelectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetPopupSelectedColor(frameNode, Color(DEFAULT_POPUP_SELECTED_COLOR));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color color = indexerTheme->GetPopupSelectedTextColor();
+    IndexerModelNG::SetPopupSelectedColor(frameNode, color);
 }
 
 void SetItemSize(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
@@ -355,6 +403,88 @@ void ResetPopupPosition(ArkUINodeHandle node)
     IndexerModelNG::SetPopupPositionY(frameNode, Dimension(DEFAULT_POPUP_POSITION_Y, DimensionUnit::VP));
 }
 
+void SetPopupItemBorderRadius(ArkUINodeHandle node, ArkUI_Float32 radiusValue, ArkUI_Int32 radiusUnit,
+    ArkUI_Float32 popupValue, ArkUI_Int32 popupUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetPopupItemBorderRadius(
+        frameNode, Dimension(radiusValue, static_cast<OHOS::Ace::DimensionUnit>(radiusUnit)));
+    IndexerModelNG::SetPopupBorderRadius(
+        frameNode, Dimension(popupValue, static_cast<OHOS::Ace::DimensionUnit>(popupUnit)));
+}
+void ResetPopupItemBorderRadius(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto radius = Dimension(ZERO_RADIUS, DimensionUnit::VP);
+    auto popupRadius = Dimension(ZERO_RADIUS, DimensionUnit::VP);
+    radius.SetValue(POPUP_ITEM_DEFAULT_RADIUS);
+    radius.SetUnit(DimensionUnit::VP);
+    popupRadius.SetValue(radius.Value() + RADIUS_OFFSET);
+    popupRadius.SetUnit(DimensionUnit::VP);
+    IndexerModelNG::SetPopupItemBorderRadius(frameNode, radius);
+    IndexerModelNG::SetPopupBorderRadius(frameNode, popupRadius);
+}
+void SetItemBorderRadius(ArkUINodeHandle node, ArkUI_Float32 radiusValue, ArkUI_Int32 radiusUnit,
+    ArkUI_Float32 indexerValue, ArkUI_Int32 indexerUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetItemBorderRadius(
+        frameNode, Dimension(radiusValue, static_cast<OHOS::Ace::DimensionUnit>(radiusUnit)));
+    IndexerModelNG::SetIndexerBorderRadius(
+        frameNode, Dimension(indexerValue, static_cast<OHOS::Ace::DimensionUnit>(indexerUnit)));
+}
+void ResetItemBorderRadius(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto radius = Dimension(ZERO_RADIUS, DimensionUnit::VP);
+    auto indexerRadius = Dimension(ZERO_RADIUS, DimensionUnit::VP);
+    radius.SetValue(ITEM_DEFAULT_RADIUS);
+    radius.SetUnit(DimensionUnit::VP);
+    indexerRadius.SetValue(radius.Value() + RADIUS_OFFSET);
+    indexerRadius.SetUnit(DimensionUnit::VP);
+    IndexerModelNG::SetIndexerBorderRadius(frameNode, indexerRadius);
+    IndexerModelNG::SetItemBorderRadius(frameNode, radius);
+}
+void SetPopupBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlurStyleOption styleOption;
+    if (value >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+        value <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+        styleOption.blurStyle = static_cast<BlurStyle>(value);
+    }
+    IndexerModelNG::SetPopupBackgroundBlurStyle(frameNode, styleOption);
+}
+void ResetPopupBackgroundBlurStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
+    IndexerModelNG::SetPopupBackgroundBlurStyle(frameNode, styleOption);
+}
+void SetPopupTitleBackground(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetPopupTitleBackground(frameNode, Color(color));
+}
+void ResetPopupTitleBackground(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color color = indexerTheme->GetPopupTitleBackground();
+    IndexerModelNG::SetPopupTitleBackground(frameNode, color);
+}
 namespace NodeModifier {
 const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
@@ -366,7 +496,9 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         SetPopupUnselectedColor, ResetPopupUnselectedColor, SetAlignStyle, ResetAlignStyle, SetUsingPopup,
         ResetUsingPopup, SetAlphabetIndexerSelected, ResetAlphabetIndexerSelected, SetPopupHorizontalSpace,
         ResetPopupHorizontalSpace, SetPopupSelectedColor, ResetPopupSelectedColor, SetItemSize, ResetItemSize,
-        SetPopupPosition, ResetPopupPosition };
+        SetPopupPosition, ResetPopupPosition, SetPopupItemBorderRadius, ResetPopupItemBorderRadius, SetItemBorderRadius,
+        ResetItemBorderRadius, SetPopupBackgroundBlurStyle, ResetPopupBackgroundBlurStyle, SetPopupTitleBackground,
+        ResetPopupTitleBackground };
 
     return &modifier;
 }

@@ -211,11 +211,6 @@ private:
         theme->selectedBackgroundColor_ =
             indexerPattern->GetAttr<Color>("selected_background_color", Color(SELECT_BACKGROUD_COLOR)).ChangeOpacity(
                 indexerPattern->GetAttr<double>("selected_background_color_opacity", SELECT_BACKGROUND_OPACITY));
-        theme->popupBackgroundColor_ =
-            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
-                ? indexerPattern->GetAttr<Color>(
-                      "popup_background_color_api_twelve", Color(POPUP_BACKGROUND_COLOR_API_TWELVE))
-                : indexerPattern->GetAttr<Color>("popup_background_color", Color(POPUP_BACKGROUND_COLOR));
         theme->popupSeparateColor_ =
             indexerPattern->GetAttr<Color>("popup_separator_color", Color(POPUP_SEPARATOR_COLOR));
         theme->popupSelectedTextColor_ =
@@ -229,11 +224,6 @@ private:
         theme->hoverBgAreaSize_ =
             indexerPattern->GetAttr<Dimension>("hover_bg_area_size", Dimension(HOVER_BG_AREA_SIZE, DimensionUnit::VP));
         theme->hoverBgAreaColor_ = indexerPattern->GetAttr<Color>("hover_bg_area_color", Color(HOVER_BG_AREA_COLOR));
-        theme->hoverTextSize_ =
-            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
-                ? indexerPattern->GetAttr<Dimension>(
-                      "hover_text_size_api_twelve", Dimension(HOVER_TEXT_SIZE_API_TWELVE, DimensionUnit::FP))
-                : indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP));
         theme->hoverTextAlpha_ =
             indexerPattern->GetAttr<Dimension>("hover_text_alpha", Dimension(HOVER_TEXT_ALPHA, DimensionUnit::PX));
         theme->slipHoverBackgroundColor_ =
@@ -242,31 +232,15 @@ private:
             indexerPattern->GetAttr<Color>("focus_bg_outline_color", Color(FOCUS_BG_OUTLINE_COLOR));
         theme->focusBgOutlineSize_ = indexerPattern->GetAttr<Dimension>(
             "focus_bg_outline_size", Dimension(FOCUS_BG_OUTLINE_SIZE, DimensionUnit::VP));
-        theme->seletctTextStyle_.SetFontSize(
-            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
-                ? indexerPattern->GetAttr<Dimension>(
-                      "hover_text_size_api_twelve", Dimension(HOVER_TEXT_SIZE_API_TWELVE, DimensionUnit::FP))
-                : indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
         theme->seletctTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR)));
-        theme->seletctTextStyle_.SetFontWeight(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
-                                                   ? FontWeight::MEDIUM
-                                                   : FontWeight::REGULAR);
         theme->seletctTextStyle_.SetFontStyle(FontStyle::NORMAL);
         std::vector<std::string> fontFamilies;
         std::string defaultFamily = "HarmonyOS Sans";
         fontFamilies.emplace_back(defaultFamily);
         theme->seletctTextStyle_.SetFontFamilies(fontFamilies);
-        theme->defaultTextStyle_.SetFontSize(
-            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
-                ? indexerPattern->GetAttr<Dimension>(
-                      "hover_text_size_api_twelve", Dimension(HOVER_TEXT_SIZE_API_TWELVE, DimensionUnit::FP))
-                : indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
         theme->defaultTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR)));
-        theme->defaultTextStyle_.SetFontWeight(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
-                                                   ? FontWeight::MEDIUM
-                                                   : FontWeight::REGULAR);
         theme->defaultTextStyle_.SetFontStyle(FontStyle::NORMAL);
         theme->defaultTextStyle_.SetFontFamilies(fontFamilies);
         theme->popupTextStyle_.SetFontSize(
@@ -286,6 +260,29 @@ private:
             indexerPattern->GetAttr<Color>("popup_title_color", Color(POPUP_TITLE_BG_AREA_COLOR));
         theme->popupUnclickedBgAreaColor_ =
             indexerPattern->GetAttr<Color>("popup_unclicked_bg_area_color", Color(POPUP_UNCLICKED_BG_AREA_COLOR));
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            theme->popupBackgroundColor_ = indexerPattern->GetAttr<Color>(
+                "popup_background_color_api_twelve", Color(POPUP_BACKGROUND_COLOR_API_TWELVE));
+            theme->hoverTextSize_ = indexerPattern->GetAttr<Dimension>(
+                "hover_text_size_api_twelve", Dimension(HOVER_TEXT_SIZE_API_TWELVE, DimensionUnit::FP));
+            theme->seletctTextStyle_.SetFontSize(indexerPattern->GetAttr<Dimension>(
+                "hover_text_size_api_twelve", Dimension(HOVER_TEXT_SIZE_API_TWELVE, DimensionUnit::FP)));
+            theme->seletctTextStyle_.SetFontWeight(FontWeight::MEDIUM);
+            theme->defaultTextStyle_.SetFontSize(indexerPattern->GetAttr<Dimension>(
+                "hover_text_size_api_twelve", Dimension(HOVER_TEXT_SIZE_API_TWELVE, DimensionUnit::FP)));
+            theme->defaultTextStyle_.SetFontWeight(FontWeight::MEDIUM);
+        } else {
+            theme->popupBackgroundColor_ =
+                indexerPattern->GetAttr<Color>("popup_background_color", Color(POPUP_BACKGROUND_COLOR));
+            theme->hoverTextSize_ =
+                indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP));
+            theme->seletctTextStyle_.SetFontSize(
+                indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
+            theme->seletctTextStyle_.SetFontWeight(FontWeight::REGULAR);
+            theme->defaultTextStyle_.SetFontSize(
+                indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
+            theme->defaultTextStyle_.SetFontWeight(FontWeight::REGULAR);
+        }
     }
     static constexpr uint32_t DEFAULT_TEXT_COLOR = 0x99182431;
     static constexpr uint32_t POPUP_SELECTED_TEXT_COLOR = 0xff182431;

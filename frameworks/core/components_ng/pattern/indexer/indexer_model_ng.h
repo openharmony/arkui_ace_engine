@@ -85,6 +85,12 @@ public:
     static void SetItemSize(FrameNode* frameNode, const Dimension& value);
     static void SetPopupPositionX(FrameNode* frameNode, const std::optional<Dimension>& popupPositionXOpt);
     static void SetPopupPositionY(FrameNode* frameNode, const std::optional<Dimension>& popupPositionYOpt);
+    static void SetPopupBorderRadius(FrameNode* frameNode, const Dimension& radius);
+    static void SetPopupItemBorderRadius(FrameNode* frameNode, const Dimension& radius);
+    static void SetItemBorderRadius(FrameNode* frameNode, const Dimension& radius);
+    static void SetIndexerBorderRadius(FrameNode* frameNode, const Dimension& radius);
+    static void SetPopupBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& indexerBlurStyle);
+    static void SetPopupTitleBackground(FrameNode* frameNode, const std::optional<Color>& color);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H

@@ -640,11 +640,11 @@ void IndexerPattern::ApplyIndexChanged(
     if (layoutProperty->GetIsPopupValue(false)) {
         total -= 1;
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto indexerRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(indexerRenderContext);
-        if (layoutProperty->GetIndexerBorderRadius().has_value()) {
-            auto indexerRadius = layoutProperty->GetIndexerBorderRadiusValue();
+        if (paintProperty->GetIndexerBorderRadius().has_value()) {
+            auto indexerRadius = paintProperty->GetIndexerBorderRadiusValue();
             indexerRenderContext->UpdateBorderRadius({ indexerRadius, indexerRadius, indexerRadius, indexerRadius });
         } else {
             auto indexerRadius = Dimension(INDEXER_DEFAULT_RADIUS, DimensionUnit::VP);
@@ -659,9 +659,9 @@ void IndexerPattern::ApplyIndexChanged(
         auto nodeStr = autoCollapse_ && arrayValue_[index].second ?
             StringUtils::Str16ToStr8(INDEXER_STR_DOT) : arrayValue_[index].first;
         if (index == childHoverIndex_ || index == childPressIndex_) {
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                auto radiusSize = layoutProperty->GetItemBorderRadius().has_value()
-                                        ? layoutProperty->GetItemBorderRadiusValue()
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                auto radiusSize = paintProperty->GetItemBorderRadius().has_value()
+                                        ? paintProperty->GetItemBorderRadiusValue()
                                         : Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
                 childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
                 childRenderContext->UpdateBackgroundColor(index == childHoverIndex_
@@ -694,9 +694,9 @@ void IndexerPattern::ApplyIndexChanged(
             }
             nodeLayoutProperty->UpdateTextColor(
                 layoutProperty->GetSelectedColor().value_or(indexerTheme->GetSelectedTextColor()));
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                auto radius = layoutProperty->GetItemBorderRadius().has_value()
-                                    ? layoutProperty->GetItemBorderRadiusValue()
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                auto radius = paintProperty->GetItemBorderRadius().has_value()
+                                    ? paintProperty->GetItemBorderRadiusValue()
                                     : Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
                 childRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
             } else {
@@ -724,7 +724,7 @@ void IndexerPattern::ApplyIndexChanged(
             if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
                 childRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
             }
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 auto radiusDefaultSize = Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
                 childRenderContext->UpdateBorderRadius({ radiusDefaultSize, radiusDefaultSize,
                     radiusDefaultSize, radiusDefaultSize });
@@ -835,13 +835,13 @@ void IndexerPattern::UpdateBubbleView()
     UpdateBubbleLetterView(!currentListData.empty());
     auto columnRenderContext = popupNode_->GetRenderContext();
     CHECK_NULL_VOID(columnRenderContext);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto columnPadding = Dimension(BUBBLE_DIVIDER_SIZE, DimensionUnit::VP).ConvertToPx();
         columnLayoutProperty->UpdatePadding({ CalcLength(0), CalcLength(0), CalcLength(columnPadding), CalcLength(0) });
-        auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetPopupBorderRadius().has_value()) {
-            auto radius = layoutProperty->GetPopupBorderRadiusValue();
+        auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        if (paintProperty->GetPopupBorderRadius().has_value()) {
+            auto radius = paintProperty->GetPopupBorderRadiusValue();
             columnRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
         } else {
             auto radius = Dimension(BUBBLE_RADIUS, DimensionUnit::VP);
@@ -861,7 +861,7 @@ void IndexerPattern::UpdateBubbleView()
 
 void IndexerPattern::UpdateBubbleBackgroundView()
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         CHECK_NULL_VOID(popupNode_);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -909,7 +909,7 @@ void IndexerPattern::UpdateBubbleSize()
 
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     auto columnCalcOffset = autoCollapse_ ? 0 : 1;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto maxItemsSize = autoCollapse_ ? INDEXER_BUBBLE_MAXSIZE_COLLAPSED_API_TWELVE : INDEXER_BUBBLE_MAXSIZE;
         auto bubbleHeight = Dimension(BUBBLE_ITEM_SIZE, DimensionUnit::VP).ConvertToPx();
         auto bubbleDivider = Dimension(BUBBLE_DIVIDER_SIZE, DimensionUnit::VP).ConvertToPx();
@@ -955,14 +955,14 @@ void IndexerPattern::UpdateBubbleLetterView(bool showDivider)
     auto letterLayoutProperty = letterNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(letterLayoutProperty);
     auto letterNodeRenderContext = letterNode->GetRenderContext();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto bubbleSize = Dimension(BUBBLE_ITEM_SIZE, DimensionUnit::VP).ConvertToPx();
         letterLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize)));
         auto letterContext = letterNode->GetRenderContext();
         CHECK_NULL_VOID(letterContext);
-        auto radius = layoutProperty->GetPopupItemBorderRadius().has_value()
-                          ? layoutProperty->GetPopupItemBorderRadiusValue()
-                          : Dimension(BUBBLE_ITEM_RADIUS, DimensionUnit::VP);
+        auto radius = paintProperty->GetPopupItemBorderRadius().has_value()
+                            ? paintProperty->GetPopupItemBorderRadiusValue()
+                            : Dimension(BUBBLE_ITEM_RADIUS, DimensionUnit::VP);
         letterContext->UpdateBorderRadius({ radius, radius, radius, radius });
         letterNodeRenderContext->UpdateBackgroundColor(
             paintProperty->GetPopupTitleBackground().value_or(indexerTheme->GetPopupTitleBackground()));
@@ -1015,7 +1015,7 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     letterLayoutProperty->UpdatePadding(
         { CalcLength(textPadding), CalcLength(textPadding), CalcLength(0), CalcLength(0) });
 
-    if (!autoCollapse_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (!autoCollapse_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto letterStackNode = DynamicCast<FrameNode>(popupNode_->GetFirstChild());
         CHECK_NULL_VOID(letterStackNode);
         auto letterStackLayoutProperty = letterStackNode->GetLayoutProperty<StackLayoutProperty>();
@@ -1046,7 +1046,7 @@ RefPtr<FrameNode> IndexerPattern::GetAutoCollapseLetterNode()
 void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListData)
 {
     CHECK_NULL_VOID(popupNode_);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         CreateBubbleListView(currentListData);
     }
     auto listNode = DynamicCast<FrameNode>(popupNode_->GetLastChild()->GetFirstChild());
@@ -1061,7 +1061,7 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
     CHECK_NULL_VOID(listLayoutProperty);
     UpdateBubbleListSize(currentListData);
     auto popupSize = autoCollapse_ ? currentListData.size() + 1 : currentListData.size();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto maxItemsSize = autoCollapse_ ? INDEXER_BUBBLE_MAXSIZE_COLLAPSED_API_TWELVE : INDEXER_BUBBLE_MAXSIZE;
         auto listPadding = Dimension(BUBBLE_DIVIDER_SIZE, DimensionUnit::VP).ConvertToPx();
         listLayoutProperty->UpdatePadding(
@@ -1074,7 +1074,7 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
         listNode->Clean();
     }
     auto divider = V2::ItemDivider();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         divider.strokeWidth = Dimension(BUBBLE_DIVIDER_SIZE, DimensionUnit::VP);
     } else {
         divider.strokeWidth = Dimension(INDEXER_LIST_DIVIDER, DimensionUnit::PX);
@@ -1097,7 +1097,7 @@ void IndexerPattern::UpdateBubbleListSize(std::vector<std::string>& currentListD
     CHECK_NULL_VOID(popupNode_);
     currentPopupIndex_ = childPressIndex_ >= 0 ? childPressIndex_ : selected_;
     auto popupSize = autoCollapse_ ? currentListData.size() + 1 : currentListData.size();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto maxItemsSize = autoCollapse_ ? INDEXER_BUBBLE_MAXSIZE_COLLAPSED_API_TWELVE : INDEXER_BUBBLE_MAXSIZE;
         auto listActualSize = popupSize < maxItemsSize ? popupSize : maxItemsSize;
         lastPopupIndex_ = currentPopupIndex_;
@@ -1134,12 +1134,12 @@ void IndexerPattern::UpdateBubbleListSize(std::vector<std::string>& currentListD
 void IndexerPattern::CreateBubbleListView(std::vector<std::string>& currentListData)
 {
     CHECK_NULL_VOID(popupNode_);
-    auto listNode = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+    auto listNode = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
                         ? FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                             AceType::MakeRefPtr<ListPattern>())
                         : DynamicCast<FrameNode>(popupNode_->GetLastChild()->GetFirstChild());
     CHECK_NULL_VOID(listNode);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto stackNode = DynamicCast<FrameNode>(popupNode_->GetLastChild());
         CHECK_NULL_VOID(stackNode);
         stackNode->Clean();
@@ -1168,7 +1168,7 @@ void IndexerPattern::CreateBubbleListView(std::vector<std::string>& currentListD
         AddListItemClickListener(listItemNode, i);
         listNode->AddChild(listItemNode);
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto stackNode = DynamicCast<FrameNode>(popupNode_->GetLastChild());
         CHECK_NULL_VOID(stackNode);
         stackNode->AddChild(listNode);
@@ -1295,7 +1295,7 @@ void IndexerPattern::UpdateBubbleListItem(
         layoutProperty->GetFontSize().value_or(indexerTheme->GetPopupTextStyle().GetFontSize());
     auto popupItemTextFontWeight =
         layoutProperty->GetFontWeight().value_or(indexerTheme->GetPopupTextStyle().GetFontWeight());
-    auto bubbleSize = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+    auto bubbleSize = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
                           ? Dimension(BUBBLE_ITEM_SIZE, DimensionUnit::VP).ConvertToPx()
                           : Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     for (uint32_t i = 0; i < currentListData.size(); i++) {
@@ -1340,10 +1340,10 @@ void IndexerPattern::UpdateBubbleListItemContext(
     CHECK_NULL_VOID(listItemNode);
     auto listItemContext = listItemNode->GetRenderContext();
     CHECK_NULL_VOID(listItemContext);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto popupItemRadius = layoutProperty->GetPopupItemBorderRadius().has_value()
-                                   ? layoutProperty->GetPopupItemBorderRadiusValue()
-                                   : Dimension(BUBBLE_ITEM_RADIUS, DimensionUnit::VP);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto popupItemRadius = paintProperty->GetPopupItemBorderRadius().has_value()
+                                    ? paintProperty->GetPopupItemBorderRadiusValue()
+                                    : Dimension(BUBBLE_ITEM_RADIUS, DimensionUnit::VP);
         listItemContext->UpdateBorderRadius({ popupItemRadius, popupItemRadius, popupItemRadius, popupItemRadius });
         auto popupItemBackground =
             paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
@@ -1381,7 +1381,7 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     auto popupUnselectedTextColor =
         paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetPopupUnselectedTextColor());
     auto popupItemBackground =
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
             ? paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor())
             : paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
     auto listNode = popupNode_->GetLastChild()->GetFirstChild();
@@ -1400,9 +1400,10 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
         CHECK_NULL_VOID(textLayoutProperty);
         if (currentIndex == clickIndex) {
             textLayoutProperty->UpdateTextColor(popupSelectedTextColor);
-            listItemContext->UpdateBackgroundColor(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
-                                                       ? indexerTheme->GetPopupClickedBgAreaColor()
-                                                       : Color(POPUP_LISTITEM_CLICKED_BG));
+            listItemContext->UpdateBackgroundColor(
+                Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+                    ? indexerTheme->GetPopupClickedBgAreaColor()
+                    : Color(POPUP_LISTITEM_CLICKED_BG));
         } else {
             textLayoutProperty->UpdateTextColor(popupUnselectedTextColor);
             listItemContext->UpdateBackgroundColor(popupItemBackground);
@@ -1631,7 +1632,7 @@ void IndexerPattern::IndexerPressInAnimation()
         CHECK_NULL_VOID(pipeline);
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);
-        renderContext->UpdateBackgroundColor(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+        renderContext->UpdateBackgroundColor(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
                                                  ? indexerTheme->GetSlipPressedBackgroundColor()
                                                  : indexerTheme->GetSlipHoverBackgroundColor());
     });
@@ -1652,7 +1653,7 @@ void IndexerPattern::IndexerPressOutAnimation()
         CHECK_NULL_VOID(pipeline);
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);
-        renderContext->UpdateBackgroundColor(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+        renderContext->UpdateBackgroundColor(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
                                                  ? indexerTheme->GetSlipPressedBackgroundColor()
                                                  : indexerTheme->GetSlipHoverBackgroundColor());
     });

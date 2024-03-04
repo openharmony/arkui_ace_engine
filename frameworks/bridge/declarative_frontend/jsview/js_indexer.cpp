@@ -59,6 +59,7 @@ const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::A
 constexpr Dimension DEFAULT_ITEM_SIZE = 16.0_vp;
 constexpr double ZERO_RADIUS = 0.0;
 constexpr double POPUP_ITEM_DEFAULT_RADIUS = 24.0;
+constexpr double ITEM_DEFAULT_RADIUS = 8.0;
 constexpr double RADIUS_OFFSET = 4.0;
 }; // namespace
 
@@ -474,7 +475,6 @@ void JSIndexer::SetItemBorderRadius(const JSCallbackInfo& args)
 {
     auto radius = Dimension(ZERO_RADIUS, DimensionUnit::VP);
     auto indexerRadius = Dimension(ZERO_RADIUS, DimensionUnit::VP);
-    RefPtr<IndexerTheme> theme = GetTheme<IndexerTheme>();
     if (args.Length() > 0 && args[0]->IsNumber()) {
         auto radiusValue = args[0]->ToNumber<double>();
         if (radiusValue >= 0) {
@@ -484,8 +484,10 @@ void JSIndexer::SetItemBorderRadius(const JSCallbackInfo& args)
             indexerRadius.SetUnit(DimensionUnit::VP);
         }
     } else {
-        radius = theme->GetHoverRadiusSize();
-        indexerRadius = theme->GetHoverRadiusSize();
+        radius.SetValue(ITEM_DEFAULT_RADIUS);
+        radius.SetUnit(DimensionUnit::VP);
+        indexerRadius.SetValue(radius.Value() + RADIUS_OFFSET);
+        indexerRadius.SetUnit(DimensionUnit::VP);
     }
     IndexerModel::GetInstance()->SetItemBorderRadius(radius);
     IndexerModel::GetInstance()->SetIndexerBorderRadius(indexerRadius);

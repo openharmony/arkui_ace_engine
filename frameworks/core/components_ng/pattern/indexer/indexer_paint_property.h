@@ -42,6 +42,10 @@ public:
         value->propPopupSelectedColor_ = ClonePopupSelectedColor();
         value->propPopupUnselectedColor_ = ClonePopupUnselectedColor();
         value->propPopupItemBackground_ = ClonePopupItemBackground();
+        value->propPopupBorderRadius_ = ClonePopupBorderRadius();
+        value->propPopupItemBorderRadius_ = ClonePopupItemBorderRadius();
+        value->propItemBorderRadius_ = CloneItemBorderRadius();
+        value->propIndexerBorderRadius_ = CloneIndexerBorderRadius();
         value->propPopupBackgroundBlurStyle_ = ClonePopupBackgroundBlurStyle();
         value->propPopupTitleBackground_ = ClonePopupTitleBackground();
 
@@ -56,6 +60,10 @@ public:
         ResetPopupSelectedColor();
         ResetPopupUnselectedColor();
         ResetPopupItemBackground();
+        ResetPopupBorderRadius();
+        ResetPopupItemBorderRadius();
+        ResetItemBorderRadius();
+        ResetIndexerBorderRadius();
         ResetPopupBackgroundBlurStyle();
         ResetPopupTitleBackground();
     }
@@ -76,18 +84,37 @@ public:
             propPopupUnselectedColor_.value_or(indexerTheme->GetPopupUnselectedTextColor()).ColorToString().c_str());
         json->Put("popupItemBackground",
             propPopupItemBackground_.value_or(indexerTheme->GetPopupBackgroundColor()).ColorToString().c_str());
-        if (propPopupBackgroundBlurStyle_.has_value()) {
-            BlurStyleOption blurStyleOption = propPopupBackgroundBlurStyle_.value();
-            auto jsonValue = JsonUtil::Create(true);
-            blurStyleOption.ToJsonValue(jsonValue);
-            json->Put("popupBackgroundBlurStyle", jsonValue->GetValue("backgroundBlurStyle")->GetValue("value"));
+        if (propPopupBorderRadius_.has_value()) {
+            json->Put("popupBorderRadius", propPopupBorderRadius_.value().ToString().c_str());
         } else {
-            BlurStyleOption blurStyleOption;
-            blurStyleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
-            auto jsonValue = JsonUtil::Create(true);
-            blurStyleOption.ToJsonValue(jsonValue);
-            json->Put("popupBackgroundBlurStyle", jsonValue->GetValue("backgroundBlurStyle")->GetValue("value"));
+            json->Put("popupBorderRadius", Dimension(NG::BUBBLE_RADIUS, DimensionUnit::VP).ToString().c_str());
         }
+        if (propPopupItemBorderRadius_.has_value()) {
+            json->Put("popupItemBorderRadius", propPopupItemBorderRadius_.value().ToString().c_str());
+        } else {
+            json->Put("popupItemBorderRadius", Dimension(NG::BUBBLE_ITEM_RADIUS, DimensionUnit::VP).ToString().c_str());
+        }
+        if (propItemBorderRadius_.has_value()) {
+            json->Put("itemBorderRadius", propItemBorderRadius_.value().ToString().c_str());
+        } else {
+            json->Put("itemBorderRadius",
+                Dimension(NG::INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP).ToString().c_str());
+        }
+        if (propIndexerBorderRadius_.has_value()) {
+            json->Put("indexerBorderRadius", propIndexerBorderRadius_.value().ToString().c_str());
+        } else {
+            json->Put(
+                "indexerBorderRadius", Dimension(NG::INDEXER_DEFAULT_RADIUS, DimensionUnit::VP).ToString().c_str());
+        }
+        BlurStyleOption blurStyleOption;
+        if (propPopupBackgroundBlurStyle_.has_value()) {
+            blurStyleOption = propPopupBackgroundBlurStyle_.value();
+        } else {
+            blurStyleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
+        }
+        auto jsonValue = JsonUtil::Create(true);
+        blurStyleOption.ToJsonValue(jsonValue);
+        json->Put("popupBackgroundBlurStyle", jsonValue->GetValue("backgroundBlurStyle")->GetValue("value"));
         json->Put("popupTitleBackground",
             propPopupTitleBackground_.value_or(indexerTheme->GetPopupTitleBackground()).ColorToString().c_str());
     }
@@ -97,6 +124,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupBackground, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupItemBackground, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupBorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupItemBorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemBorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndexerBorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupBackgroundBlurStyle, BlurStyleOption, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupTitleBackground, Color, PROPERTY_UPDATE_RENDER);
 };

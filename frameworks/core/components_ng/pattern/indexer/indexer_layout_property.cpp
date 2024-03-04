@@ -73,32 +73,6 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("autoCollapse", propAutoCollapse_.value_or(false) ? "true" : "false");
     json->Put("popupHorizontalSpace", propPopupHorizontalSpace_.value_or(
         Dimension(NG::INDEXER_BUBBLE_INVALID_SPACE, DimensionUnit::VP)).ToString().c_str());
-    BorderRadiusToJsonValue(json);
-}
-
-void IndexerLayoutProperty::BorderRadiusToJsonValue(std::unique_ptr<JsonValue>& json) const
-{
-    if (propPopupBorderRadius_.has_value()) {
-        json->Put("popupBorderRadius", propPopupBorderRadius_.value().ToString().c_str());
-    } else {
-        json->Put("popupBorderRadius", Dimension(NG::BUBBLE_RADIUS, DimensionUnit::VP).ToString().c_str());
-    }
-    if (propPopupItemBorderRadius_.has_value()) {
-        json->Put("popupItemBorderRadius", propPopupItemBorderRadius_.value().ToString().c_str());
-    } else {
-        json->Put("popupItemBorderRadius", Dimension(NG::BUBBLE_ITEM_RADIUS, DimensionUnit::VP).ToString().c_str());
-    }
-    if (propItemBorderRadius_.has_value()) {
-        json->Put("itemBorderRadius", propItemBorderRadius_.value().ToString().c_str());
-    } else {
-        json->Put("itemBorderRadius",
-            Dimension(NG::INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP).ToString().c_str());
-    }
-    if (propIndexerBorderRadius_.has_value()) {
-        json->Put("indexerBorderRadius", propIndexerBorderRadius_.value().ToString().c_str());
-    } else {
-        json->Put("indexerBorderRadius", Dimension(NG::INDEXER_DEFAULT_RADIUS, DimensionUnit::VP).ToString().c_str());
-    }
 }
 
 std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextStyle& textStyle)

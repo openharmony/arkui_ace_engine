@@ -282,22 +282,22 @@ void IndexerModelNG::SetAutoCollapse(bool autoCollapse)
 
 void IndexerModelNG::SetPopupBorderRadius(const Dimension& radius)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupBorderRadius, radius);
+    ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupBorderRadius, radius);
 }
 
 void IndexerModelNG::SetPopupItemBorderRadius(const Dimension& radius)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupItemBorderRadius, radius);
+    ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupItemBorderRadius, radius);
 }
 
 void IndexerModelNG::SetItemBorderRadius(const Dimension& radius)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ItemBorderRadius, radius);
+    ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, ItemBorderRadius, radius);
 }
 
 void IndexerModelNG::SetIndexerBorderRadius(const Dimension& radius)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, IndexerBorderRadius, radius);
+    ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, IndexerBorderRadius, radius);
 }
 
 void IndexerModelNG::SetPopupBackgroundBlurStyle(const BlurStyleOption& indexerBlurStyle)
@@ -311,6 +311,41 @@ void IndexerModelNG::SetPopupTitleBackground(const std::optional<Color>& color)
         ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupTitleBackground, color.value());
     } else {
         ACE_RESET_PAINT_PROPERTY_WITH_FLAG(IndexerPaintProperty, PopupTitleBackground, PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void IndexerModelNG::SetPopupBorderRadius(FrameNode* frameNode, const Dimension& radius)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(IndexerPaintProperty, PopupBorderRadius, radius, frameNode);
+}
+
+void IndexerModelNG::SetPopupItemBorderRadius(FrameNode* frameNode, const Dimension& radius)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(IndexerPaintProperty, PopupItemBorderRadius, radius, frameNode);
+}
+
+void IndexerModelNG::SetItemBorderRadius(FrameNode* frameNode, const Dimension& radius)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(IndexerPaintProperty, ItemBorderRadius, radius, frameNode);
+}
+
+void IndexerModelNG::SetIndexerBorderRadius(FrameNode* frameNode, const Dimension& radius)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(IndexerPaintProperty, IndexerBorderRadius, radius, frameNode);
+}
+
+void IndexerModelNG::SetPopupBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& indexerBlurStyle)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(IndexerPaintProperty, PopupBackgroundBlurStyle, indexerBlurStyle, frameNode);
+}
+
+void IndexerModelNG::SetPopupTitleBackground(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(IndexerPaintProperty, PopupTitleBackground, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            IndexerPaintProperty, PopupTitleBackground, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 

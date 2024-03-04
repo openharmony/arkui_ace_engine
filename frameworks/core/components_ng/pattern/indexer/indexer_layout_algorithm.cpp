@@ -43,7 +43,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto itemSize = indexerLayoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
     itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, layoutConstraint.maxSize.Height()).value();
     auto defaultHorizontalPadding = Dimension(INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
-    auto defaultVerticalPadding = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+    auto defaultVerticalPadding = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
                                       ? Dimension(INDEXER_PADDING_TOP_API_TWELVE, DimensionUnit::VP).ConvertToPx()
                                       : Dimension(INDEXER_PADDING_TOP, DimensionUnit::VP).ConvertToPx();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorderWithDefault(
@@ -91,7 +91,7 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto defaultHorizontalPadding = Dimension(INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
-    auto defaultVerticalPadding = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
+    auto defaultVerticalPadding = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
                                       ? Dimension(INDEXER_PADDING_TOP_API_TWELVE, DimensionUnit::VP).ConvertToPx()
                                       : Dimension(INDEXER_PADDING_TOP, DimensionUnit::VP).ConvertToPx();
     const auto& padding = layoutProperty->CreatePaddingAndBorderWithDefault(
