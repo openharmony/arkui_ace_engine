@@ -244,7 +244,7 @@ public:
     void SetExportTextureSurfaceId(const std::string& surfaceId);
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
-    void SetSurfaceSize(uint32_t surfaceWidth, uint32_t surfaceHeight);
+    void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -268,7 +268,6 @@ private:
     ExternalEvent CreateExternalEvent();
     void CreateSurface();
     void SetMethodCall();
-    void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
     void SetTouchPoint(
         const std::list<TouchLocationInfo>& touchInfoList, int64_t timeStamp, const TouchType& touchType);
     void HandleSetExpectedRateRangeEvent();

@@ -29,7 +29,7 @@ extern "C" {
 #define ARKUI_FULL_API_VERSION 69
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 69
+#define ARKUI_NODE_API_VERSION 70
 
 #define ARKUI_BASIC_API_VERSION 5
 #define ARKUI_EXTENDED_API_VERSION 5
@@ -1398,6 +1398,9 @@ struct ArkUIButtonModifier {
         ArkUI_CharPtr heightValue, ArkUI_Int32 heightUnit);
     void (*resetButtonSize)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getButtonLabel)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getButtonFontSize)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getButtonFontWeight)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getButtonFontColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIImageModifier {
@@ -2098,6 +2101,11 @@ struct ArkUITextInputModifier {
     ArkUI_Float32 (*getTextInputCancelIconSize)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextInputTextCanacelIconSrc)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextInputTextCanacelIconColor)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputTextAlign)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getTextInputFontColor)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputFontStyle)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputFontWeight)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextInputFontSize)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

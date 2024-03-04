@@ -3812,6 +3812,13 @@ const ArkUI_AttributeItem* GetXComponentType(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+void ResetXComponentType(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getXComponentModifier()->setXComponentType(
+        node->uiNodeHandle, ARKUI_XCOMPONENT_TYPE_SURFACE);
+}
+
 int32_t SetXComponentSurfaceSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_TWO_PARAM);
@@ -6634,6 +6641,16 @@ const ArkUI_AttributeItem* GetFontColor(ArkUI_NodeHandle node)
                 getSpanFontColor(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
+        case ARKUI_NODE_TEXT_INPUT:
+            g_numberValues[0].u32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
+                getTextInputFontColor(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        case ARKUI_NODE_BUTTON:
+            g_numberValues[0].u32 = fullImpl->getNodeModifiers()->getButtonModifier()->
+                getButtonFontColor(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
         default:
             break;
     }
@@ -6652,6 +6669,16 @@ const ArkUI_AttributeItem* GetFontSize(ArkUI_NodeHandle node)
         case ARKUI_NODE_SPAN:
             g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getSpanModifier()->
                 getSpanFontSize(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        case ARKUI_NODE_TEXT_INPUT:
+            g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
+                getTextInputFontSize(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        case ARKUI_NODE_BUTTON:
+            g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getButtonModifier()->
+                getButtonFontSize(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
         default:
@@ -6674,6 +6701,11 @@ const ArkUI_AttributeItem* GetFontStyle(ArkUI_NodeHandle node)
                 getSpanFontStyle(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
+        case ARKUI_NODE_TEXT_INPUT:
+            g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
+                getTextInputFontStyle(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
         default:
             break;
     }
@@ -6691,6 +6723,16 @@ const ArkUI_AttributeItem* GetFontWeight(ArkUI_NodeHandle node)
         case ARKUI_NODE_SPAN:
             g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getSpanModifier()->
                 getSpanFontWeight(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        case ARKUI_NODE_TEXT_INPUT:
+            g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
+                getTextInputFontWeight(node->uiNodeHandle);
+            g_attributeItem.size = REQUIRED_ONE_PARAM;
+            break;
+        case ARKUI_NODE_BUTTON:
+            g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getButtonModifier()->
+                getButtonFontWeight(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
         default:
@@ -6794,7 +6836,12 @@ const ArkUI_AttributeItem* GetMaxLines(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetTextAlign(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
-    auto textAlign = fullImpl->getNodeModifiers()->getTextModifier()->getTextAlign(node->uiNodeHandle);
+    int32_t textAlign = NUM_0;
+    if (node->type == ARKUI_NODE_TEXT) {
+        textAlign = fullImpl->getNodeModifiers()->getTextModifier()->getTextAlign(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        textAlign = fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputTextAlign(node->uiNodeHandle);
+    }
     g_numberValues[0].i32 = textAlign;
     g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
@@ -8039,7 +8086,7 @@ const ArkUI_AttributeItem* GetXComponentAttribute(ArkUI_NodeHandle node, int32_t
 
 void ResetXComponentAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* setters[] = { nullptr, nullptr, ResetXComponentSurfaceSize };
+    static Resetter* setters[] = { nullptr, ResetXComponentType, ResetXComponentSurfaceSize };
     if (subTypeId >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
