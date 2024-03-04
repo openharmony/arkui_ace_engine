@@ -478,6 +478,11 @@ public:
         return allowDrop_;
     }
 
+    void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
+    {
+        drawModifier_ = drawModifier;
+    }
+
     void SetDragPreview(const NG::DragDropInfo& info)
     {
         dragPreviewInfo_ = info;
@@ -677,6 +682,7 @@ public:
     RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetNodeContainer();
+    RefPtr<ContentModifier> GetContentModifier();
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode);
 
@@ -848,6 +854,7 @@ private:
     bool needRestoreSafeArea_ = true;
 
     RefPtr<FrameNode> overlayNode_;
+    RefPtr<NG::DrawModifier> drawModifier_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 

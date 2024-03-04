@@ -30,6 +30,7 @@
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -235,6 +236,7 @@ public:
     virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
     virtual void SetAllowDrop(const std::set<std::string>& allowDrop) = 0;
+    virtual void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier) = 0;
     virtual void SetDragPreview(const NG::DragDropInfo& info) = 0;
     virtual void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) = 0;
@@ -243,6 +245,7 @@ public:
             onAreaChanged) = 0;
     virtual void SetOnSizeChanged(
         std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) = 0;
+    virtual void* GetFrameNode() = 0;
 
     // Disable event when the param is undefined.
     virtual void DisableOnClick() = 0;

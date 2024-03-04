@@ -48,7 +48,7 @@ public:
         taskThread_ = taskThread;
     }
 
-    void FlushRender();
+    void FlushRender(const RefPtr<NG::DrawModifier>& drawModifier);
 
     TaskThread CanRunOnWhichThread() const
     {
