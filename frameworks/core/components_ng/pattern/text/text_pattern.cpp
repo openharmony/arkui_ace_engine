@@ -598,6 +598,7 @@ void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->sourceType_ = info.GetSourceDevice();
         pattern->HandleLongPress(info);
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
@@ -625,7 +626,7 @@ void TextPattern::OnHandleTouchUp()
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
-    if (dataDetectorAdapter_->hasClickedAISpan_) {
+    if (dataDetectorAdapter_->hasClickedAISpan_ && !isMousePressed_) {
         dataDetectorAdapter_->hasClickedAISpan_ = false;
     } else if (hasClicked_) {
         hasClicked_ = false;
@@ -651,10 +652,15 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
-    HandleClickAISpanEvent(textOffset);
+    if (!isMousePressed_) {
+        HandleClickAISpanEvent(textOffset);
+    }
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
             selectOverlayProxy_->DisableMenu(true);
+        }
+        if (!isMousePressed_) {
+            dataDetectorAdapter_->hasClickedAISpan_ = false;
         }
         return;
     }
@@ -686,7 +692,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 void TextPattern::HandleClickAISpanEvent(const PointF& textOffset)
 {
     dataDetectorAdapter_->hasClickedAISpan_ = false;
-    if (!NeedShowAIDetect()) {
+    if (!NeedShowAIDetect() || mouseStatus_ == MouseStatus::MOVE || IsDragging()) {
         return;
     }
 
@@ -751,7 +757,7 @@ bool TextPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
     for (auto&& rect : aiRects) {
         if (rect.IsInRegion(textOffset)) {
             dataDetectorAdapter_->hasClickedAISpan_ = true;
-            if (isMousePressed_) {
+            if (leftMousePressed_) {
                 dataDetectorAdapter_->ResponseBestMatchItem(aiSpan);
                 return true;
             }
@@ -784,8 +790,8 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
                 calculateHandleFunc();
             }
             if (showSelectOverlayFunc == nullptr) {
-                pattern->ShowSelectOverlay(
-                    pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle, true);
+                pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle,
+                    true, pattern->sourceType_ == SourceType::MOUSE);
             } else {
                 showSelectOverlayFunc(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle);
             }
@@ -875,6 +881,7 @@ void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->sourceType_ = info.GetSourceDevice();
         pattern->HandleClickEvent(info);
     };
     auto clickListener = MakeRefPtr<ClickEvent>(std::move(clickCallback));
@@ -895,6 +902,7 @@ void TextPattern::InitMouseEvent()
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->sourceType_ = info.GetSourceDevice();
         pattern->HandleMouseEvent(info);
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -951,6 +959,7 @@ void TextPattern::HandleMouseLeftButton(const MouseInfo& info, const Offset& tex
 void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset& textOffset)
 {
     isMousePressed_ = true;
+    leftMousePressed_ = true;
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
         return;
@@ -971,7 +980,20 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     if (isDoubleClick_) {
         isDoubleClick_ = false;
         isMousePressed_ = false;
+        leftMousePressed_ = false;
         return;
+    }
+    if (oldMouseStatus != MouseStatus::MOVE && !IsDragging()) {
+        HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
+        if (dataDetectorAdapter_->hasClickedAISpan_) {
+            if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+                selectOverlayProxy_->DisableMenu(true);
+            }
+            dataDetectorAdapter_->hasClickedAISpan_ = false;
+            isMousePressed_ = false;
+            leftMousePressed_ = false;
+            return;
+        }
     }
 
     CHECK_NULL_VOID(paragraph_);
@@ -992,6 +1014,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true, true);
     }
     isMousePressed_ = false;
+    leftMousePressed_ = false;
 }
 
 void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset)
@@ -1011,13 +1034,17 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
 void TextPattern::HandleMouseRightButton(const MouseInfo& info, const Offset& textOffset)
 {
     if (info.GetAction() == MouseAction::RELEASE) {
-        HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
-        if (dataDetectorAdapter_->hasClickedAISpan_) {
-            return;
-        }
-
         mouseReleaseOffset_ = OffsetF(
             static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
+        if (!BetweenSelectedPosition(info.GetGlobalLocation())) {
+            HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
+            if (dataDetectorAdapter_->hasClickedAISpan_) {
+                isMousePressed_ = false;
+                dataDetectorAdapter_->hasClickedAISpan_ = false;
+                return;
+            }
+        }
+
         CalculateHandleOffsetAndShowOverlay(true);
         if (SelectOverlayIsOn()) {
             CloseSelectOverlay(true);
@@ -1032,10 +1059,12 @@ void TextPattern::HandleMouseRightButton(const MouseInfo& info, const Offset& te
             }
         }
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true, true);
+        isMousePressed_ = false;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else if (info.GetAction() == MouseAction::PRESS) {
+        isMousePressed_ = true;
         CloseSelectOverlay(true);
     }
 }
@@ -1051,6 +1080,7 @@ void TextPattern::InitTouchEvent()
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->sourceType_ = info.GetSourceDevice();
         pattern->HandleTouchEvent(info);
     };
     auto touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
