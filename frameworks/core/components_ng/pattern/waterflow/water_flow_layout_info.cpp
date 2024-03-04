@@ -275,13 +275,17 @@ void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
     if (static_cast<size_t>(currentIndex + 1) < itemInfos_.size()) {
         itemInfos_.resize(currentIndex + 1);
     }
-    if (segment + 1 < segmentStartPos_.size()) {
-        segmentStartPos_.resize(segment + 1);
-    }
 
     auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), currentIndex,
         [](int32_t index, const std::pair<float, int32_t>& pos) { return index < pos.second; });
     endPosArray_.erase(it, endPosArray_.end());
+
+    if (segment + 1 < segmentStartPos_.size()) {
+        segmentStartPos_.resize(segment + 1);
+        if (currentIndex == segmentTails_[segment]) {
+            SetNextSegmentStartPos(currentIndex);
+        }
+    }
 }
 
 bool WaterFlowLayoutInfo::ReachStart(float prevOffset, bool firstLayout) const

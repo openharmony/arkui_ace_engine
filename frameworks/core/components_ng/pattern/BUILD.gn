@@ -508,6 +508,7 @@ build_component_ng("pattern_ng") {
     "waterflow/water_flow_accessibility_property.cpp",
     "waterflow/water_flow_content_modifier.cpp",
     "waterflow/water_flow_item_model_ng.cpp",
+    "waterflow/water_flow_item_node.cpp",
     "waterflow/water_flow_layout_algorithm.cpp",
     "waterflow/water_flow_layout_info.cpp",
     "waterflow/water_flow_layout_property.cpp",
