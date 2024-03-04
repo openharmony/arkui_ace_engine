@@ -531,7 +531,7 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF
         }
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
             topLeftPoint = OffsetF((maxSize.Width() - childSize.Width()) / 2.0,
-                maxSize.Height() - childSize.Height() - GetPaddingBottom());
+                std::max(maxSize.Height() - childSize.Height() - GetPaddingBottom(), 0.0));
             return true;
         }
     }
