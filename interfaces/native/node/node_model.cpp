@@ -201,6 +201,11 @@ const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttribu
     return GetNodeAttribute(node, attribute);
 }
 
+struct InnerExtraParam {
+    int32_t eventId;
+    ArkUI_NodeHandle nodePtr;
+}
+
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId)
 {
     auto originEventType = ConvertOriginEventType(eventType);
@@ -210,8 +215,9 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
     }
     // already check in entry point.
     auto* impl = GetFullImpl();
+    auto* extraParam = new InnerExtraParam({eventId, nodePtr});
     impl->getBasicAPI()->registerNodeAsyncEvent(
-        nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), reinterpret_cast<intptr_t>(nodePtr));
+        nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), reinterpret_cast<int64_t>(extraParam));
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -229,11 +235,15 @@ void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event))
         auto* impl = GetFullImpl();
         auto innerReceiver = [](ArkUINodeEvent* origin) {
             if (g_eventReceiver) {
-                auto event = reinterpret_cast<ArkUI_NodeEvent*>(origin);
-                event->node = reinterpret_cast<ArkUI_NodeHandle>(origin->extraParam);
-                event->kind = ConvertToNodeEventType(static_cast<ArkUIAsyncEventKind>(origin->kind));
-                event->stringEvent.pStr = origin->stringAsyncEvent.pStr;
-                g_eventReceiver(event);
+                ArkUI_NodeEvent event;
+                auto* extraParam = reinterpret_cast<InnerExtraParam*>(origin->extraParam);
+                event.node = extraParam->nodePtr;
+                event.eventId = extraParam->eventId;
+                if (ConvertEvent(origin, &event)) {
+                    g_eventReceiver(&event);
+                    ConvertEventResult(&event, origin);
+                }
+                delete extraParam;
             }
         };
         impl->getBasicAPI()->registerNodeAsyncEventReceiver(innerReceiver);
