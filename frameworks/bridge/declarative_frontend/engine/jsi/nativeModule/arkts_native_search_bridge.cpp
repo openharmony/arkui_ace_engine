@@ -15,11 +15,11 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_search_bridge.h"
 
 #include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/search/search_theme.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -27,9 +27,7 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
-constexpr int CONVERSION_RADIX = 10;
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
-constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 
 ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -65,12 +63,8 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
 
     if (threeArg->IsString() || threeArg->IsNumber()) {
         if (threeArg->IsString()) {
-            auto strPtr = threeArg->ToString(vm)->ToString().c_str();
-            char* end;
-            value.fontWeight = strtol(strPtr, &end, CONVERSION_RADIX);
-            if (end == strPtr || *end != '\0' || errno == ERANGE) {
-                value.fontWeight = static_cast<ArkUI_Int32>(DEFAULT_FONT_WEIGHT);
-            }
+            auto weightPtr = threeArg->ToString(vm)->ToString();
+            value.fontWeight = OHOS::Ace::StringUtils::StringToInt(weightStr);
         }
 
         if (threeArg->IsNumber()) {
@@ -356,12 +350,8 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
 
     if (threeArg->IsString() || threeArg->IsNumber()) {
         if (threeArg->IsString()) {
-            auto strPtr = threeArg->ToString(vm)->ToString().c_str();
-            char* end;
-            value.fontWeight = strtol(strPtr, &end, CONVERSION_RADIX);
-            if (end == strPtr || *end != '\0' || errno == ERANGE) {
-                value.fontWeight = static_cast<ArkUI_Int32>(DEFAULT_FONT_WEIGHT);
-            }
+            auto weightPtr = threeArg->ToString(vm)->ToString();
+            value.fontWeight = OHOS::Ace::StringUtils::StringToInt(weightStr);
         }
 
         if (threeArg->IsNumber()) {
