@@ -69,8 +69,9 @@ export declare type OperateCheck = {
 const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
 const TEXT_COLUMN_SPACE = 4;
-const TEXT_SAFE_MARGIN = 12;
-const LISTITEM_PADDING = 12;
+const TEXT_SAFE_MARGIN = 8;
+const LISTITEM_PADDING = 8;
+const SWITCH_PADDING = 6;
 const BADGE_SIZE = 8;
 const SMALL_ICON_SIZE = 16;
 const SYSTEM_ICON_SIZE = 24;
@@ -89,7 +90,7 @@ const DEFAULT_ROW_SPACE = 0;
 const SPECICAL_ROW_SPACE = 4;
 const OPERATEITEM_ICONLIKE_SIZE = 24;
 const OPERATEITEM_ARROW_WIDTH = 12
-const OPERATEITEM_ICON_CLICKABLE_SIZE = 48;
+const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
 const HOVERING_COLOR = '#0d000000';
 const TOUCH_DOWN_COLOR = '#1a000000';
@@ -193,7 +194,7 @@ struct ContentItemStruct {
     }
     .margin({ right: 16 })
     .padding({ left: LISTITEM_PADDING })
-    .width("calc(66% - 16vp)")
+    .width('calc(66% - 16vp)')
     .flexShrink(1)
   }
 }
@@ -462,7 +463,7 @@ struct OperateItemStruct {
         })
         .hitTestBehavior(HitTestMode.Block)
     }
-    .margin({ right: LISTITEM_PADDING / 2 })
+    .margin({ right: SWITCH_PADDING })
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .justifyContent(FlexAlign.Center)
@@ -501,7 +502,7 @@ struct OperateItemStruct {
           .focusable(true)
           .draggable(false)
           .constraintSize({
-            maxWidth: `calc(100% - ${ OPERATEITEM_ARROW_WIDTH + TEXT_SAFE_MARGIN }vp)`
+            maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
           })
         Image(icon.value)
           .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -588,7 +589,7 @@ struct OperateItemStruct {
         }
       }
     }
-    .width("34%")
+    .width('34%')
     .flexShrink(1)
     .justifyContent(FlexAlign.End)
   }
