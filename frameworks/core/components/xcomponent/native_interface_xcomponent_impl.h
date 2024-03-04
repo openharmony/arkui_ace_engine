@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -328,6 +328,16 @@ public:
         detachNativeNodeCallback_(container_, root);
     }
 
+    void SetNeedSoftKeyboard(bool needSoftKeyboard)
+    {
+        needSoftKeyboard_ = needSoftKeyboard;
+    }
+
+    bool IsNeedSoftKeyboard() const
+    {
+        return needSoftKeyboard_;
+    }
+
 private:
     std::string xcomponentId_;
     void* window_ = nullptr;
@@ -351,6 +361,7 @@ private:
     NativeNode_Callback attachNativeNodeCallback_ = nullptr;
     NativeNode_Callback detachNativeNodeCallback_ = nullptr;
     void* container_;
+    bool needSoftKeyboard_ = false;
 };
 } // namespace OHOS::Ace
 
@@ -381,6 +392,7 @@ struct OH_NativeXComponent {
     int32_t DetachNativeRootNode(void* root);
     int32_t RegisterUIAxisEventCallback(
         void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type));
+    int32_t SetNeedSoftKeyboard(bool needSoftKeyboard);
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;
