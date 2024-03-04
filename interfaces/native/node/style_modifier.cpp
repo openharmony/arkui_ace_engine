@@ -550,14 +550,24 @@ int32_t SetBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     }
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundColor(node->uiNodeHandle, item->value[NUM_0].u32);
+    if (node->type == ARKUI_NODE_BUTTON) {
+        fullImpl->getNodeModifiers()->getButtonModifier()->setButtonBackgroundColor(
+            node->uiNodeHandle, item->value[NUM_0].u32);
+    } else {
+        fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundColor(
+            node->uiNodeHandle, item->value[NUM_0].u32);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetBackgroundColor(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->resetBackgroundColor(node->uiNodeHandle);
+    if (node->type == ARKUI_NODE_BUTTON) {
+        fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonBackgroundColor(node->uiNodeHandle);
+    } else {
+        fullImpl->getNodeModifiers()->getCommonModifier()->resetBackgroundColor(node->uiNodeHandle);
+    }
 }
 
 int32_t SetBackgroundImage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -2318,6 +2328,12 @@ void ResetFontColor(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->resetFontColor(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputFontColor(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_SPAN) {
+        fullImpl->getNodeModifiers()->getSpanModifier()->resetSpanFontColor(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_BUTTON) {
+        fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonFontColor(node->uiNodeHandle);
     }
 }
 
@@ -2356,6 +2372,12 @@ void ResetFontWeight(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->resetFontWeight(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputFontWeight(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_SPAN) {
+        fullImpl->getNodeModifiers()->getSpanModifier()->resetSpanFontWeight(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_BUTTON) {
+        fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonFontWeight(node->uiNodeHandle);
     }
 }
 
@@ -2388,6 +2410,12 @@ void ResetFontSize(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->resetFontSize(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputFontSize(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_SPAN) {
+        fullImpl->getNodeModifiers()->getSpanModifier()->resetSpanFontSize(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_BUTTON) {
+        fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonFontSize(node->uiNodeHandle);
     }
 }
 
@@ -2422,6 +2450,10 @@ void ResetFontStyle(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->resetFontStyle(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputFontStyle(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_SPAN) {
+        fullImpl->getNodeModifiers()->getSpanModifier()->resetSpanFontStyle(node->uiNodeHandle);
     }
 }
 
