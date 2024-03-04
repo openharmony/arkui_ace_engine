@@ -535,7 +535,9 @@ public:
     static Dimension GetSepia(FrameNode* frameNode);
     static Dimension GetContrast(FrameNode* frameNode);
     static Color GetForegroundColor(FrameNode* frameNode);
-
+    static Dimension GetFrontBlur(FrameNode* frameNode);
+    static NG::Gradient GetLinearGradient(FrameNode* frameNode);
+    static Alignment GetAlign(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager();
 };

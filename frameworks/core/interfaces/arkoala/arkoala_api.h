@@ -1213,6 +1213,10 @@ struct ArkUICommonModifier {
     ArkUI_Float32 (*getSepia)(ArkUINodeHandle node);
     ArkUI_Float32 (*getContrast)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getForegroundColor)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getBlur)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getLinearGradient)(
+        ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Uint32* colors, ArkUI_Float32* stop);
+    ArkUI_Int32 (*getAlign)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
