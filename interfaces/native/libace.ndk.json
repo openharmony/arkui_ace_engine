@@ -106,5 +106,53 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_GetNodeHandleFromNapiValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_RegisterUIInputEventCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_UIInputEvent_GetType"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_UIInputEvent_GetEventTime"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_GetX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_GetY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_GetWindowX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_GetWindowY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_GetDisplayX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_GetDisplayY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AxisEvent_GetVerticalAxisValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AxisEvent_GetHorizontalAxisValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AxisEvent_GetPinchAxisScaleValue"
     }
 ]

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
+#include "interfaces/native/ui_input_event.h"
+
 #include "base/geometry/ng/size_t.h"
 #include "base/log/log_wrapper.h"
 #include "base/ressched/ressched_report.h"
@@ -22,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
+#include "core/event/axis_event.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #else
@@ -549,6 +552,7 @@ void XComponentPattern::InitEvent()
     InitTouchEvent(gestureHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     InitMouseEvent(inputHub);
+    InitAxisEvent(inputHub);
     InitMouseHoverEvent(inputHub);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -629,6 +633,20 @@ void XComponentPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
 
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void XComponentPattern::InitAxisEvent(const RefPtr<InputEventHub>& inputHub)
+{
+    CHECK_NULL_VOID(!axisEvent_);
+
+    auto axisTask = [weak = WeakClaim(this)](const AxisInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleAxisEvent(info);
+    };
+
+    axisEvent_ = MakeRefPtr<InputEvent>(std::move(axisTask));
+    inputHub->AddOnAxisEvent(axisEvent_);
 }
 
 void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
@@ -751,6 +769,12 @@ void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
     NativeXComponentDispatchMouseEvent(mouseEventPoint);
 }
 
+void XComponentPattern::HandleAxisEvent(const AxisInfo& info)
+{
+    auto axisEvent = info.ConvertToAxisEvent();
+    NativeXComponentDispatchAxisEvent(&axisEvent);
+}
+
 void XComponentPattern::HandleMouseHoverEvent(bool isHover)
 {
     CHECK_RUN_ON(UI);
@@ -773,6 +797,17 @@ void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXCompo
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(callback->DispatchMouseEvent);
     callback->DispatchMouseEvent(nativeXComponent_.get(), surface);
+}
+
+void XComponentPattern::NativeXComponentDispatchAxisEvent(AxisEvent* axisEvent)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    const auto callback = nativeXComponentImpl_->GetUIAxisEventCallback();
+    CHECK_NULL_VOID(callback);
+    auto* uiEvent = static_cast<ArkUI_UIInputEvent*>(axisEvent);
+    callback(nativeXComponent_.get(), uiEvent, ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS);
 }
 
 void XComponentPattern::SetTouchPoint(

@@ -128,6 +128,7 @@ public:
     void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent,
         const std::vector<XComponentTouchPoint>& xComponentTouchPoints);
     void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
+    void NativeXComponentDispatchAxisEvent(AxisEvent* axisEvent);
 
     void InitNativeWindow(float textureWidth, float textureHeight);
     void XComponentSizeInit();
@@ -256,9 +257,11 @@ private:
     void InitNativeNodeCallbacks();
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitAxisEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleMouseEvent(const MouseInfo& info);
+    void HandleAxisEvent(const AxisInfo& info);
     void InitMouseHoverEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleMouseHoverEvent(bool isHover);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
@@ -304,6 +307,7 @@ private:
     RefPtr<TouchEventImpl> touchEvent_;
     OH_NativeXComponent_TouchEvent touchEventPoint_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> axisEvent_;
     RefPtr<InputEvent> mouseHoverEvent_;
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
     RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;

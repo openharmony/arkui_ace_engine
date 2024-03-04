@@ -41,6 +41,7 @@
 
 #include "native_type.h"
 #include "native_xcomponent_key_event.h"
+#include "ui_input_event.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -645,6 +646,21 @@ int32_t OH_NativeXComponent_AttachNativeRootNode(OH_NativeXComponent* component,
  * @since 12
  */
 int32_t OH_NativeXComponent_DetachNativeRootNode(OH_NativeXComponent* component, ArkUI_NodeHandle root);
+
+/**
+ * @brief Registers a UI input event callback for this <b>OH_NativeXComponent</b> instance and enables the callback to
+ * be invoked when a UI input event is received.
+ *
+ * @param component Indicates the pointer to the <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to the UI input event callback.
+ * @param type Indicates the type of the current UI input event.
+ * @return Returns 0 if success.
+ * Returns 401 if a parameter exception occurs.
+ * @since 12
+ */
+int32_t OH_NativeXComponent_RegisterUIInputEventCallback(OH_NativeXComponent* component,
+    void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type),
+    ArkUI_UIInputEvent_Type type);
 
 #ifdef __cplusplus
 };
