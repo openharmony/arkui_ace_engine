@@ -224,6 +224,7 @@ public:
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
+    virtual void SetWordBreak(Ace::WordBreak value) {};
     virtual void SetFontStyle(FontStyle value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
     virtual void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) = 0;

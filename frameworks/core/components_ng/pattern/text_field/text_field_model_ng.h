@@ -47,6 +47,7 @@ public:
     void SetFontSize(const Dimension& value) override;
     void SetFontWeight(FontWeight value) override;
     void SetTextColor(const Color& value) override;
+    void SetWordBreak(Ace::WordBreak value) override;
     void SetFontStyle(Ace::FontStyle value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) override;

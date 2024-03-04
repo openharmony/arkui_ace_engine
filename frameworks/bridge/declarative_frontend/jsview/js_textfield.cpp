@@ -77,6 +77,7 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
+const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
@@ -440,6 +441,21 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
         textColor = theme->GetTextColor();
     }
     TextFieldModel::GetInstance()->SetTextColor(textColor);
+}
+
+void JSTextField::SetWordBreak(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
+        return;
+    }
+    TextFieldModel::GetInstance()->SetWordBreak(WORD_BREAK_TYPES[index]);
 }
 
 void JSTextField::SetForegroundColor(const JSCallbackInfo& info)
