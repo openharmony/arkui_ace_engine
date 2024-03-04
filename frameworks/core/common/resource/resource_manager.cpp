@@ -39,14 +39,13 @@ RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(RefPtr<Resou
     std::string bundleName = resourceObject->GetBundleName();
     std::string moduleName = resourceObject->GetModuleName();
 
-    auto isResourceAdapterRecord = IsResourceAdapterRecord(bundleName, moduleName);
-    if (!isResourceAdapterRecord) {
-        auto resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName);
-        if (resourceAdapter == nullptr) {
-            return GetResourceAdapter(DEFAULT_BUNDLE_NAME, DEFAULT_MODULE_NAME);
+    auto resourceAdapter = GetResourceAdapter(bundleName, moduleName);
+    if (resourceAdapter == nullptr) {
+        resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName);
+        if (resourceAdapter) {
+            AddResourceAdapter(bundleName, moduleName, resourceAdapter);
         }
-        AddResourceAdapter(bundleName, moduleName, resourceAdapter);
     }
-    return GetResourceAdapter(bundleName, moduleName);
+    return resourceAdapter;
 }
 } // namespace OHOS::Ace
