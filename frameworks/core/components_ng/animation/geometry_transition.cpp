@@ -230,14 +230,16 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     } else if (IsNodeInAndIdentity(node)) {
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d in and identity", node->GetId());
         state_ = State::IDLE;
-        node->SetLayoutPriority(0);
         direction = true;
         hasInAnim_ = false;
     } else if (isRoot && IsNodeOutAndActive(node)) {
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d out and active, dependency check: %{public}d",
             node->GetId(), !hasInAnim_);
+        if (hasInAnim_) {
+            MarkLayoutDirty(node);
+            return;
+        }
         hasOutAnim_ = false;
-        CHECK_NULL_VOID(!hasInAnim_);
         direction = false;
     }
 
@@ -316,6 +318,7 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     auto activeCornerRadius = targetRenderContext->GetBorderRadius().value_or(BorderRadiusProperty());
     auto cornerRadius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
     if (isNodeIn) {
+        self->SetLayoutPriority(0);
         renderContext->SetFrameWithoutAnimation(activeFrameRect);
         if (target->IsRemoving()) {
             renderContext->RegisterSharedTransition(targetRenderContext); // notify backend for hierarchy processing
@@ -404,7 +407,6 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         inRenderContext->UnregisterSharedTransition(outRenderContext);
         hasOutAnim_ = false;
-        followWithoutTransition_ = false;
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow cancelled");
         holder_ = nullptr;
         return false;

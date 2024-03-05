@@ -22,6 +22,7 @@
 #include "refbase.h"
 #include "session_manager/include/extension_session_manager.h"
 #include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_transaction.h"
 #include "ui/rs_surface_node.h"
 #include "want_params.h"
 #include "wm/wm_common.h"
@@ -33,11 +34,9 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
-#ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/transaction/rs_transaction.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -406,10 +405,20 @@ void SessionWrapperImpl::NotifyConfigurationUpdate() {}
 void SessionWrapperImpl::OnConnect()
 {
     taskExecutor_->PostTask(
-        [weak = hostPattern_]() {
+        [weak = hostPattern_, wrapperWeak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnConnect();
+            auto wrapper = wrapperWeak.Upgrade();
+            CHECK_NULL_VOID(wrapper && wrapper->session_);
+            ContainerScope scope(wrapper->instanceId_);
+            if (auto hostWindowNode = WindowSceneHelper::FindWindowScene(pattern->GetHost())) {
+                auto hostNode = AceType::DynamicCast<FrameNode>(hostWindowNode);
+                CHECK_NULL_VOID(hostNode);
+                auto hostPattern = hostNode->GetPattern<SystemWindowScene>();
+                CHECK_NULL_VOID(hostPattern);
+                wrapper->session_->SetParentSession(hostPattern->GetSession());
+            }
         },
         TaskExecutor::TaskType::UI);
 }
@@ -500,17 +509,19 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     displayArea_ = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
     UIEXT_LOGD("The display area with '%{public}s' is notified to the provider.", displayArea_.ToString().c_str());
     std::shared_ptr<Rosen::RSTransaction> transaction;
-    if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
-        transaction = transactionController->GetRSTransaction();
-#ifdef ENABLE_ROSEN_BACKEND
-        if (transaction) {
-            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+    auto parentSession = session_->GetParentSession();
+    auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    if (reason == Rosen::SizeChangeReason::ROTATION) {
+        if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+            transaction = transactionController->GetRSTransaction();
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            if (transaction && parentSession && pipelineContext) {
+                transaction->SetDuration(pipelineContext->GetSyncAnimationOption().GetDuration());
+            }
         }
-#endif
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
-                             std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
-        session_->GetSizeChangeReason(), transaction);
+        std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, transaction);
 }
 
 void SessionWrapperImpl::NotifySizeChangeReason(

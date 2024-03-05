@@ -59,10 +59,6 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
     session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
-
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateSizeChangeReason(static_cast<WindowSizeChangeReason>(session_->GetSizeChangeReason()));
 }
 
 void SystemWindowScene::OnAttachToFrameNode()
