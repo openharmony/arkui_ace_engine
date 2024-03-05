@@ -146,6 +146,49 @@ struct SafeAreaExpandOpts {
     {
         return type != SAFE_AREA_TYPE_NONE && edges != SAFE_AREA_EDGE_NONE;
     }
+
+    std::string ToString()
+    {
+        return "SafeAreaExpandOpts: type:" + TypeToString() + ", edges: " + EdgeToString();
+    }
+
+    std::string TypeToString()
+    {
+        switch (type) {
+            case SAFE_AREA_TYPE_NONE:
+                return "SAFE_AREA_TYPE_NONE";
+            case SAFE_AREA_TYPE_SYSTEM:
+                return "SAFE_AREA_TYPE_SYSTEM";
+            case SAFE_AREA_TYPE_CUTOUT:
+                return "SAFE_AREA_TYPE_CUTOUT";
+            case SAFE_AREA_TYPE_KEYBOARD:
+                return "SAFE_AREA_TYPE_KEYBOARD";
+            case SAFE_AREA_TYPE_ALL:
+                return "SAFE_AREA_TYPE_ALL";
+            default:
+                return "SAFE_AREA_TYPE_OTHERS_" + std::to_string(type);
+        }
+    }
+
+    std::string EdgeToString()
+    {
+        switch (edges) {
+            case SAFE_AREA_EDGE_NONE:
+                return "SAFE_AREA_EDGE_NONE";
+            case SAFE_AREA_EDGE_TOP:
+                return "SAFE_AREA_EDGE_TOP";
+            case SAFE_AREA_EDGE_BOTTOM:
+                return "SAFE_AREA_EDGE_BOTTOM";
+            case SAFE_AREA_EDGE_START:
+                return "SAFE_AREA_EDGE_START";
+            case SAFE_AREA_EDGE_END:
+                return "SAFE_AREA_EDGE_END";
+            case SAFE_AREA_EDGE_ALL:
+                return "SAFE_AREA_EDGE_ALL";
+            default:
+                return "SAFE_AREA_EDGE_OTHERS_" + std::to_string(edges);;
+        }
+    }
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_SAFE_AREA_INSETS_H
