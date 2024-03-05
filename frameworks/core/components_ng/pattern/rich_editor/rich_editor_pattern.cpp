@@ -4193,6 +4193,7 @@ void RichEditorPattern::ResetAfterPaste()
     record.addText = pasteStr;
     SetCaretSpanIndex(-1);
     StartTwinkling();
+    CloseSelectOverlay();
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
         record.beforeCaretPosition = caretPosition_;
@@ -4229,6 +4230,7 @@ void RichEditorPattern::HandleOnPaste()
         if (data.empty()) {
             richEditor->ResetSelection();
             richEditor->StartTwinkling();
+            richEditor->CloseSelectOverlay();
             return;
         }
         richEditor->AddPasteStr(data);
