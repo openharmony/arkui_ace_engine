@@ -15,7 +15,10 @@
 
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 
+#include "base/geometry/axis.h"
 #include "base/geometry/ng/size_t.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 
@@ -139,6 +142,7 @@ void GridIrregularFiller::FillOne(const int32_t idx)
     }
 
     info_->gridMatrix_[row][col] = idx;
+    SetItemInfo(idx, row, col, size);
 
     posY_ = row;
     posX_ = col;
@@ -326,5 +330,40 @@ int32_t GridIrregularFiller::FindItemTopRow(int32_t row, int32_t col) const
         --row;
     }
     return row;
+}
+
+void GridIrregularFiller::SetItemInfo(int32_t idx, int32_t row, int32_t col, const GridItemSize& size)
+{
+    if (size.rows == 1 && size.columns == 1) {
+        return;
+    }
+    auto item = wrapper_->GetOrCreateChildByIndex(idx);
+    CHECK_NULL_VOID(item);
+    auto pattern = item->GetHostNode()->GetPattern<GridItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto props = pattern->GetLayoutProperty<GridItemLayoutProperty>();
+    if (info_->axis_ == Axis::VERTICAL) {
+        pattern->SetIrregularItemInfo({ .mainIndex = row,
+            .mainStart = row,
+            .mainSpan = size.rows,
+            .mainEnd = row + size.rows - 1,
+            .crossIndex = col,
+            .crossStart = col,
+            .crossSpan = size.columns,
+            .crossEnd = col + size.columns - 1 });
+        props->UpdateMainIndex(row);
+        props->UpdateCrossIndex(col);
+    } else {
+        pattern->SetIrregularItemInfo({ .mainIndex = col,
+            .mainStart = col,
+            .mainSpan = size.columns,
+            .mainEnd = col + size.columns - 1,
+            .crossIndex = row,
+            .crossStart = row,
+            .crossSpan = size.rows,
+            .crossEnd = row + size.rows - 1 });
+        props->UpdateMainIndex(col);
+        props->UpdateCrossIndex(row);
+    }
 }
 } // namespace OHOS::Ace::NG

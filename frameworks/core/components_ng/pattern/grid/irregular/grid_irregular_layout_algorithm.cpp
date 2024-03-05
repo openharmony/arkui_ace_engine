@@ -30,6 +30,9 @@
 namespace OHOS::Ace::NG {
 void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    if (gridLayoutInfo_.childrenCount_ <= 0) {
+        return;
+    }
     wrapper_ = layoutWrapper;
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
 
@@ -51,6 +54,9 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    if (gridLayoutInfo_.childrenCount_ <= 0) {
+        return;
+    }
     wrapper_ = layoutWrapper;
 
     wrapper_->RemoveAllChildInRenderTree();
@@ -344,13 +350,13 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
             }
             auto child = wrapper_->GetOrCreateChildByIndex(row.at(c));
 
-            SizeF blockSize = info.axis_ == Axis::HORIZONTAL ? SizeF { crossLens_.at(c), info.lineHeightMap_.at(r) }
-                                                             : SizeF { info.lineHeightMap_.at(r), crossLens_.at(c) };
+            SizeF blockSize = info.axis_ == Axis::VERTICAL ? SizeF { crossLens_.at(c), info.lineHeightMap_.at(r) }
+                                                           : SizeF { info.lineHeightMap_.at(r), crossLens_.at(c) };
             auto alignPos =
                 Alignment::GetAlignPosition(blockSize, child->GetGeometryNode()->GetMarginFrameSize(), align);
 
-            OffsetF offset = info.axis_ == Axis::HORIZONTAL ? OffsetF { mainOffset, crossPos[c] }
-                                                            : OffsetF { crossPos[c], mainOffset };
+            OffsetF offset = info.axis_ == Axis::VERTICAL ? OffsetF { crossPos[c], mainOffset }
+                                                          : OffsetF { mainOffset, crossPos[c] };
             child->GetGeometryNode()->SetMarginFrameOffset(offset + alignPos);
             child->Layout();
         }
