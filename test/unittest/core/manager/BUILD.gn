@@ -78,6 +78,6 @@ group("core_manager_unittest") {
     ":post_event_manager_test_ng",
     ":select_overlay_manager_test_ng",
     ":select_overlay_proxy_test_ng",
-    ":shared_overlay_manager_test_ng"
+    ":shared_overlay_manager_test_ng",
   ]
 }
