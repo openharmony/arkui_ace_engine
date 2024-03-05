@@ -809,6 +809,17 @@ void WebModelNG::SetSafeBrowsingCheckResultId(
     webEventHub->SetOnSafeBrowsingCheckResultEvent(std::move(safeBrowsingCheckResultId));
 }
 
+void WebModelNG::SetIntelligentTrackingPreventionResultId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
+        intelligentTrackingPreventionResultId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->
+        GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnIntelligentTrackingPreventionResultEvent(
+        std::move(intelligentTrackingPreventionResultId));
+}
+
 void WebModelNG::SetDarkMode(WebDarkMode mode)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
