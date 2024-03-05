@@ -1175,7 +1175,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const arr = itemArray; // just to trigger a 'get' onto the array
 
     // ID gen is with index.
-    if (idGenFuncUsesIndex) {
+    if (idGenFuncUsesIndex || idGenFunc.length > 1) {
       // Create array of new ids.
       arr.forEach((item, indx) => {
         newIdArray.push(idGenFunc(item, indx));
@@ -1184,7 +1184,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     else {
       // Create array of new ids.
       arr.forEach((item, index) => {
-        newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item, index));
+        newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
       });
     }
 
