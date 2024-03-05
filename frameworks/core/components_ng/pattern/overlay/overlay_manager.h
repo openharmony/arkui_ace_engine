@@ -257,6 +257,7 @@ public:
     void SetHasFilter(bool hasFilter)
     {
         hasFilter_ = hasFilter;
+        hasFilterActived = true;
     }
 
     bool GetHasEvent()
@@ -410,6 +411,11 @@ public:
 
     void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
+    void SetFilterActive(bool actived)
+    {
+        hasFilterActived = actived;
+    }
+
 private:
     void PopToast(int32_t targetId);
 
@@ -511,6 +517,8 @@ private:
     std::unordered_map<int32_t, WeakPtr<FrameNode>> uiExtNodes_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
+
+    bool hasFilterActived {false};
 };
 } // namespace OHOS::Ace::NG
 
