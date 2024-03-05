@@ -4231,17 +4231,17 @@ void GetClipShape(ArkUINodeHandle node, ArkUIClipShapeOptions* options)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto basicShape = ViewAbstract::GetClipShape(frameNode);
-    options->width = basicShape.value()->GetWidth().Value();
-    options->height = basicShape.value()->GetHeight().Value();
-    options->type = static_cast<ArkUI_Int32>(basicShape.value()->GetBasicShapeType());
-    switch (basicShape.value()->GetBasicShapeType()) {
+    options->width = basicShape->GetWidth().Value();
+    options->height = basicShape->GetHeight().Value();
+    options->type = static_cast<ArkUI_Int32>(basicShape->GetBasicShapeType());
+    switch (basicShape->GetBasicShapeType()) {
         case BasicShapeType::PATH: {
-            auto path = AceType::DynamicCast<Path>(basicShape.value());
+            auto path = AceType::DynamicCast<Path>(basicShape);
             options->commands = path->GetValue().c_str();
             break;
         }
         case BasicShapeType::RECT: {
-            auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape.value());
+            auto shapeRect = AceType::DynamicCast<ShapeRect>(basicShape);
             //radius x
             options->radiusWidth = shapeRect->GetTopLeftRadius().GetX().Value();
             //radius y
@@ -4301,49 +4301,59 @@ void GetCustomShadow(ArkUINodeHandle node, ArkUICustomShadowOptions* options)
     options->fill = static_cast<ArkUI_Int32>(shadow->GetIsFilled());
 }
 
-void GetSweepGradient(ArkUINodeHandle node, ArkUISweepGradientOptions* options)
+ArkUI_Int32 GetSweepGradient(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Uint32* colors, ArkUI_Float32* stops)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto gradient = ViewAbstract::GetGradient(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto gradient = ViewAbstract::GetSweepGradient(frameNode);
     auto sweepGradient = gradient.GetSweepGradient();
-    auto colors = gradient.GetColors();
-    for (ArkUI_Uint32 i = 0; i < gradient.GetColors().size(); i++) {
-        options->colors[i] = colors[i].GetColor().GetValue();
-        options->dimensions[i] = colors[i].GetDimension().Value();
+
+    values[NUM_0] = sweepGradient->centerX->Value();
+    values[NUM_1] = sweepGradient->centerY->Value();
+    values[NUM_2] = sweepGradient->startAngle->Value();
+    values[NUM_3] = sweepGradient->endAngle->Value();
+    values[NUM_4] = sweepGradient->rotation->Value();
+    values[NUM_5] = gradient.GetRepeat();
+
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    //0 start index
+    int index = 0;
+    for (auto& gradientColor : gradientColors) {
+        colors[index] = gradientColor.GetColor().GetValue();
+        stops[index] = gradientColor.GetDimension().Value();
+        index++;
     }
-    options->colorSize = gradient.GetColors().size();
-    options->repeating = gradient.GetRepeat();
-    options->ceneterX = sweepGradient->centerX->Value();
-    options->ceneterY = sweepGradient->centerY->Value();
-    options->startAngle = sweepGradient->startAngle->Value();
-    options->endAngle = sweepGradient->endAngle->Value();
-    options->rotation = sweepGradient->rotation->Value();
+    return index;
 }
 
-void GetRadialGradient(ArkUINodeHandle node, ArkUIRadialGradientOptions* options)
+ArkUI_Int32 GetRadialGradient(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Uint32* colors, ArkUI_Float32* stops)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto gradient = ViewAbstract::GetGradient(frameNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    auto gradient = ViewAbstract::GetRadialGradient(frameNode);
     auto radialGradient = gradient.GetRadialGradient();
-    auto colors = gradient.GetColors();
-    for (ArkUI_Uint32 i = 0; i < gradient.GetColors().size(); i++) {
-        options->colors[i] = colors[i].GetColor().GetValue();
-        options->dimensions[i] = colors[i].GetDimension().Value();
+
+    values[NUM_0] = radialGradient->radialCenterX->Value();
+    values[NUM_1] = radialGradient->radialCenterY->Value();
+    values[NUM_2] = gradient.GetInnerRadius();
+    values[NUM_3] = gradient.GetRepeat();
+
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    //0 start index
+    int index = 0;
+    for (auto& gradientColor : gradientColors) {
+        colors[index] = gradientColor.GetColor().GetValue();
+        stops[index] = gradientColor.GetDimension().Value();
+        index++;
     }
-    options->colorSize = gradient.GetColors().size();
-    options->repeating = gradient.GetRepeat();
-    options->ceneterX = radialGradient->radialCenterX->Value();
-    options->ceneterY = radialGradient->radialCenterY->Value();
-    options->radius = gradient.GetInnerRadius();
+    return index;
 }
 
 void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto basicShape = ViewAbstract::GetMask(frameNode).value();
+    auto basicShape = ViewAbstract::GetMask(frameNode);
     options->type = static_cast<ArkUI_Int32>(basicShape->GetBasicShapeType());
     if (basicShape->GetBasicShapeType() == BasicShapeType::PATH) {
         auto path = AceType::DynamicCast<Path>(basicShape);
@@ -4370,7 +4380,7 @@ void GetMask(ArkUINodeHandle node, ArkUIMaskOptions* options)
         options->width = basicShape->GetWidth().Value();
         options->height = basicShape->GetHeight().Value();
     } else {
-        auto process = ViewAbstract::GetMaskProgress(frameNode).value();
+        auto process = ViewAbstract::GetMaskProgress(frameNode);
         options->value = process->GetValue();
         options->color = process->GetColor().GetValue();
         options->maxValue = process->GetMaxValue();
@@ -4504,6 +4514,84 @@ ArkUI_Int32 GetAlign(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return ConvertAlignmentToInt(ViewAbstract::GetAlign(frameNode));
 }
+
+ArkUI_Float32 GetWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetWidth(frameNode);
+}
+
+ArkUI_Float32 GetHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetHeight(frameNode);
+}
+
+ArkUI_Uint32 GetBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetBackgroundColor(frameNode).GetValue();
+}
+
+void GetBackgroundImage(ArkUINodeHandle node, ArkUIBackgroundImage* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    options->src = ViewAbstract::GetBackgroundImageSrc(frameNode).c_str();
+    options->repeat = static_cast<int>(ViewAbstract::GetBackgroundImageRepeat(frameNode));
+}
+
+void GetPadding(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto padding = ViewAbstract::GetPadding(frameNode);
+    values[NUM_0] = padding.top->GetDimension().Value();
+    values[NUM_1] = padding.right->GetDimension().Value();
+    values[NUM_2] = padding.bottom->GetDimension().Value();
+    values[NUM_3] = padding.left->GetDimension().Value();
+    length = NUM_4;
+}
+
+ArkUI_CharPtr GetKey(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = ViewAbstract::GetKey(frameNode);
+    return g_strValue.c_str();
+}
+
+int GetEnabled(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(ViewAbstract::GetEnabled(frameNode));
+}
+
+void GetMargin(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto margin = ViewAbstract::GetMargin(frameNode);
+    values[NUM_0] = margin.top->GetDimension().Value();
+    values[NUM_1] = margin.right->GetDimension().Value();
+    values[NUM_2] = margin.bottom->GetDimension().Value();
+    values[NUM_3] = margin.left->GetDimension().Value();
+    length = NUM_4;
+}
+
+void GetTranslate(ArkUINodeHandle node, ArkUI_Float32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto translate = ViewAbstract::GetTranslate(frameNode);
+    values[NUM_0] = translate.x.Value();
+    values[NUM_1] = translate.y.Value();
+    values[NUM_2] = translate.z.Value();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -4557,9 +4645,10 @@ const ArkUICommonModifier* GetCommonModifier()
         GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
         GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules,
         GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, GetScale, GetRotate,
-        GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow,
-        GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale, GetInvert,
-        GetSepia, GetContrast, GetForegroundColor, GetBlur, GetLinearGradient, GetAlign};
+        GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis,
+        GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur,
+        GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetKey,
+        GetEnabled, GetMargin, GetTranslate };
 
     return &modifier;
 }
