@@ -91,6 +91,11 @@ public:
         return { FocusType::NODE, false };
     }
 
+    bool NeedSoftKeyboard() const override
+    {
+        return nativeXComponentImpl_ ? nativeXComponentImpl_->IsNeedSoftKeyboard() : false;
+    }
+
     std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, std::weak_ptr<OH_NativeXComponent>> GetNativeXComponent()
     {
         if (!nativeXComponent_ || !nativeXComponentImpl_) {
