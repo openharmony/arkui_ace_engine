@@ -590,6 +590,7 @@ void GetFrameNodeParent(const RefPtr<NG::UINode>& uiNode, RefPtr<NG::FrameNode>&
             return;
         }
     }
+    CHECK_NULL_VOID(uiNode);
     auto parentNode = uiNode->GetParent();
     GetFrameNodeParent(parentNode, parent);
 }
