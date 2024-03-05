@@ -2270,11 +2270,12 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         modalNode->AddChild(builder);
         FireModalPageShow();
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) ||
+            modalTransition == ModalTransition::NONE) {
             modalPagePattern->OnAppear();
+            // Fire hidden event of navdestination under the appeared modal
+            FireNavigationStateChange(false);
         }
-        // Fire hidden event of navdestination under the appeared modal
-        FireNavigationStateChange(false);
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(modalNode, true);
         } else if (modalTransition == ModalTransition::ALPHA) {
@@ -2402,53 +2403,70 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
     auto showHeight = rootHeight - modalPositionY;
 
     if (isTransitionIn) {
-        context->OnTransformTranslateUpdate({ 0.0f, showHeight, 0.0f });
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            option.SetOnFinishEvent(
-                [modalWK = WeakClaim(RawPtr(modalNode))] {
-                    auto modal = modalWK.Upgrade();
-                    CHECK_NULL_VOID(modal);
-                    modal->GetPattern<ModalPresentationPattern>()->OnAppear();
-                });
-        }
-        AnimationUtils::Animate(option, [context]() {
+        PlayDefaultModalIn(modalNode, context, option, showHeight);
+    } else {
+        PlayDefaultModalOut(modalNode, context, option, showHeight);
+    }
+}
+
+void OverlayManager::PlayDefaultModalIn(
+    const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context, AnimationOption option, float showHeight)
+{
+    context->OnTransformTranslateUpdate({ 0.0f, showHeight, 0.0f });
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        option.SetOnFinishEvent([modalWK = WeakClaim(RawPtr(modalNode)), overlayWeak = WeakClaim(this)] {
+            auto modal = modalWK.Upgrade();
+            auto overlayManager = overlayWeak.Upgrade();
+            CHECK_NULL_VOID(modal && overlayManager);
+            modal->GetPattern<ModalPresentationPattern>()->OnAppear();
+            // Fire hidden event of navdestination on the disappeared modal
+            overlayManager->FireNavigationStateChange(false);
+        });
+    }
+    AnimationUtils::Animate(
+        option,
+        [context]() {
             if (context) {
                 context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
             }
-        }, option.GetOnFinishEvent());
-    } else {
-        auto lastModalNode = lastModalNode_.Upgrade();
-        CHECK_NULL_VOID(lastModalNode);
-        auto lastModalContext = lastModalNode->GetRenderContext();
-        CHECK_NULL_VOID(lastModalContext);
-        lastModalContext->UpdateOpacity(1.0);
-        option.SetOnFinishEvent(
-            [rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)), overlayWeak = WeakClaim(this)] {
-                auto modal = modalWK.Upgrade();
-                auto overlayManager = overlayWeak.Upgrade();
-                CHECK_NULL_VOID(modal && overlayManager);
-                auto root = overlayManager->FindWindowScene(modal);
-                CHECK_NULL_VOID(root);
-                if (!modal->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
-                    modal->GetPattern<ModalPresentationPattern>()->OnDisappear();
-                    // Fire hidden event of navdestination on the disappeared modal
-                    overlayManager->FireNavigationStateChange(false, modal);
-                }
-                root->RemoveChild(modal);
-                root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-                // Fire shown event of navdestination under the disappeared modal
-                overlayManager->FireNavigationStateChange(true);
-            });
-        context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-        AnimationUtils::Animate(
-            option,
-            [context, showHeight]() {
-                if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, showHeight, 0.0f });
-                }
-            },
-            option.GetOnFinishEvent());
-    }
+        },
+        option.GetOnFinishEvent());
+}
+
+void OverlayManager::PlayDefaultModalOut(
+    const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context, AnimationOption option, float showHeight)
+{
+    auto lastModalNode = lastModalNode_.Upgrade();
+    CHECK_NULL_VOID(lastModalNode);
+    auto lastModalContext = lastModalNode->GetRenderContext();
+    CHECK_NULL_VOID(lastModalContext);
+    lastModalContext->UpdateOpacity(1.0);
+    option.SetOnFinishEvent(
+        [rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)), overlayWeak = WeakClaim(this)] {
+            auto modal = modalWK.Upgrade();
+            auto overlayManager = overlayWeak.Upgrade();
+            CHECK_NULL_VOID(modal && overlayManager);
+            auto root = overlayManager->FindWindowScene(modal);
+            CHECK_NULL_VOID(root);
+            if (!modal->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
+                modal->GetPattern<ModalPresentationPattern>()->OnDisappear();
+                // Fire hidden event of navdestination on the disappeared modal
+                overlayManager->FireNavigationStateChange(false, modal);
+            }
+            root->RemoveChild(modal);
+            root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            // Fire shown event of navdestination under the disappeared modal
+            overlayManager->FireNavigationStateChange(true);
+        });
+    context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+    AnimationUtils::Animate(
+        option,
+        [context, showHeight]() {
+            if (context) {
+                context->OnTransformTranslateUpdate({ 0.0f, showHeight, 0.0f });
+            }
+        },
+        option.GetOnFinishEvent());
 }
 
 void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn)
@@ -2468,12 +2486,14 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
         lastModalContext->OpacityAnimation(option, 1, 0);
         lastModalContext->UpdateOpacity(0);
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            option.SetOnFinishEvent(
-                [modalWK = WeakClaim(RawPtr(modalNode))] {
-                    auto modal = modalWK.Upgrade();
-                    CHECK_NULL_VOID(modal);
-                    modal->GetPattern<ModalPresentationPattern>()->OnAppear();
-                });
+            option.SetOnFinishEvent([modalWK = WeakClaim(RawPtr(modalNode)), overlayWeak = WeakClaim(this)] {
+                auto modal = modalWK.Upgrade();
+                auto overlayManager = overlayWeak.Upgrade();
+                CHECK_NULL_VOID(modal && overlayManager);
+                modal->GetPattern<ModalPresentationPattern>()->OnAppear();
+                // Fire hidden event of navdestination on the disappeared modal
+                overlayManager->FireNavigationStateChange(false);
+            });
         }
         // current modal page animation
         context->OpacityAnimation(option, 0, 1);
@@ -2781,13 +2801,14 @@ void OverlayManager::PlaySheetTransition(
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
-        option.SetOnFinishEvent([sheetWK = WeakClaim(RawPtr(sheetNode))] {
+        option.SetOnFinishEvent([sheetWK = WeakClaim(RawPtr(sheetNode)), isFirst = isFirstTransition] {
             auto sheetNode = sheetWK.Upgrade();
             CHECK_NULL_VOID(sheetNode);
             auto context = sheetNode->GetRenderContext();
             CHECK_NULL_VOID(context);
             context->UpdateRenderGroup(false, true, true);
-            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+                isFirst) {
                 sheetNode->GetPattern<SheetPresentationPattern>()->OnAppear();
             }
         });

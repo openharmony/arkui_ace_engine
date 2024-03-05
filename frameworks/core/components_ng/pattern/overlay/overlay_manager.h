@@ -466,6 +466,10 @@ private:
     void PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn);
     void CheckReturnFocus(RefPtr<FrameNode> node);
     void MountPopup(int32_t targetId, const PopupInfo& popupInfo);
+    void PlayDefaultModalIn(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
+        AnimationOption option, float showHeight);
+    void PlayDefaultModalOut(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
+        AnimationOption option, float showHeight);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
