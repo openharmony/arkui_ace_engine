@@ -712,7 +712,9 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING) {
         isNeedCheckOffset_ = true;
     }
-    MarkDirtyNodeSelf();
+    if (!NearZero(offset)) {
+        MarkDirtyNodeSelf();
+    }
     if (!IsOutOfBoundary() || !scrollable_) {
         return true;
     }
