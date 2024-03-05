@@ -27,11 +27,11 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
-#include "core/components_ng/pattern/text_field/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_painter.h"
 
 namespace OHOS::Ace::NG {
 class TextFieldOverlayModifier : public ScrollBarOverlayModifier {
@@ -102,7 +102,7 @@ private:
     RefPtr<PropertySizeF> frameSize_;
     RefPtr<PropertyBool> changeSelectedRects_;
     RectF textRect_;
-    MagnifierRect magnifierRect_;
+    MagnifierPainter magnifierPainter_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);
 };
 } // namespace OHOS::Ace::NG
