@@ -251,12 +251,13 @@ std::u16string TextFieldPattern::CreateObscuredText(int32_t len)
 }
 
 std::u16string TextFieldPattern::CreateDisplayText(
-    const std::string& content, int32_t nakedCharPosition, bool needObscureText)
+    const std::string& content, int32_t nakedCharPosition, bool needObscureText, bool showPasswordDirectly)
 {
     if (!content.empty() && needObscureText) {
         auto text =
             TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(content).length()));
-        if (nakedCharPosition >= 0 && nakedCharPosition < static_cast<int32_t>(content.length())) {
+        if (nakedCharPosition >= 0 && nakedCharPosition < static_cast<int32_t>(content.length())
+            && !showPasswordDirectly) {
             auto rawContent = StringUtils::Str8ToStr16(content);
             text[nakedCharPosition] = rawContent[nakedCharPosition];
         }
