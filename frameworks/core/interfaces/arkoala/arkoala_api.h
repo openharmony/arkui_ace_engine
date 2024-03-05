@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 69
+#define ARKUI_FULL_API_VERSION 71
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 70
+#define ARKUI_NODE_API_VERSION 71
 
 #define ARKUI_BASIC_API_VERSION 5
 #define ARKUI_EXTENDED_API_VERSION 5
@@ -2560,7 +2560,10 @@ struct ArkUITextPickerModifier {
     void (*resetTextPickerDisappearTextStyle)(ArkUINodeHandle node);
     void (*resetTextPickerDefaultPickerItemHeight)(ArkUINodeHandle node);
     void (*resetTextPickerBackgroundColor)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getTextPickerRangeStr)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextPickerSingleRange)(ArkUINodeHandle node);
     void (*setTextPickerRangeStr)(ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange);
+    ArkUI_CharPtr (*getTextPickerValue)(ArkUINodeHandle node);
     void (*setTextPickerValue)(ArkUINodeHandle node, ArkUI_CharPtr valueStr);
 };
 

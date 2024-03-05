@@ -186,6 +186,7 @@ constexpr int32_t EDGE_OFFSET_Y_INDEX = 2;
 constexpr int32_t SELECTED_YEAR_INDEX = 0;
 constexpr int32_t SELECTED_MONTH_INDEX = 1;
 constexpr int32_t SELECTED_DAY_INDEX = 2;
+constexpr int32_t DATEPICKER_START_TIME = 1970;
 constexpr int32_t CALENDAR_PICKER_FONT_COLOR_INDEX = 0;
 constexpr int32_t CALENDAR_PICKER_FONT_SIZE_INDEX = 1;
 constexpr int32_t CALENDAR_PICKER_FONT_WEIGHT_INDEX = 2;
@@ -4720,9 +4721,9 @@ int32_t SetDatePickerStart(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    auto year = StringToInt(date[NUM_0].c_str());
-    auto month = StringToInt(date[NUM_1].c_str());
-    auto day = StringToInt(date[NUM_2].c_str());
+    auto year = StringToInt(date[NUM_0].c_str(), DATEPICKER_START_TIME);
+    auto month = StringToInt(date[NUM_1].c_str(), NUM_1);
+    auto day = StringToInt(date[NUM_2].c_str(), NUM_1);
     fullImpl->getNodeModifiers()->getDatePickerModifier()->setStartDate(node->uiNodeHandle, year, month, day);
 
     return ERROR_CODE_NO_ERROR;
@@ -5241,6 +5242,17 @@ void ResetTextPickerSelectedIndex(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTextPickerModifier()->resetTextPickerSelectedIndex(node->uiNodeHandle);
 }
 
+const ArkUI_AttributeItem* GetTextPickerRange(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto value =
+        fullImpl->getNodeModifiers()->getTextPickerModifier()->getTextPickerRangeStr(node->uiNodeHandle);
+    g_numberValues[0].i32 =
+        fullImpl->getNodeModifiers()->getTextPickerModifier()->getTextPickerSingleRange(node->uiNodeHandle);
+    g_attributeItem.string = value;
+    return &g_attributeItem;
+}
+
 int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
@@ -5264,6 +5276,14 @@ void ResetTextPickerRange(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
 
     fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(node->uiNodeHandle, "", true);
+}
+
+const ArkUI_AttributeItem* GetTextPickerValue(ArkUI_NodeHandle node)
+{
+    auto value =
+        GetFullImpl()->getNodeModifiers()->getTextPickerModifier()->getTextPickerValue(node->uiNodeHandle);
+    g_attributeItem.string = value;
+    return &g_attributeItem;
 }
 
 int32_t SetTextPickerValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -8209,8 +8229,9 @@ int32_t SetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const A
 
 const ArkUI_AttributeItem* GetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetTextPickerDisappearTextStyle, GetTextPickerTextStyle,
-        GetTextPickerSelectedTextStyle, GetTextPickerSelectedIndex };
+    static Getter* getters[] = { GetTextPickerRange, GetTextPickerSelectedIndex, GetTextPickerValue,
+        GetTextPickerDisappearTextStyle, GetTextPickerTextStyle, GetTextPickerSelectedTextStyle,
+        GetTextPickerSelectedIndex };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
