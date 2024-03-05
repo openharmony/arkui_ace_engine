@@ -28,7 +28,7 @@ public:
     void OnChange(ChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
-    void SetBackgroundColor(const Color& color) override;
+    void SetBackgroundColor(const Color& color, bool flag) override;
     bool IsToggle() override;
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) override;
     void OnChangeEvent(ChangeEvent&& onChangeEvent) override;

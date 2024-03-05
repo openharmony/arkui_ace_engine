@@ -16,6 +16,7 @@
 
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
@@ -66,48 +67,42 @@ void ResetRadioStyle(ArkUINodeHandle node)
     RadioModelNG::SetIndicatorColor(frameNode, theme->GetPointColor());
 }
 
-void SetRadioWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Uint32 unit)
+void SetRadioWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
-    RadioModelNG::SetWidth(frameNode, width);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetWidth(frameNode, CalcLength(CalcLength(std::string(calcValue))));
+    } else {
+        ViewAbstract::SetWidth(frameNode, CalcLength(value, unitEnum));
+    }
 }
 
 void ResetRadioWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
-    auto defaultWidth = radioTheme->GetDefaultWidth();
-    auto horizontalPadding = radioTheme->GetHotZoneHorizontalPadding();
-    auto width = defaultWidth - horizontalPadding * 2; //2 is Calculate the parameters of the formula
-    RadioModelNG::SetWidth(frameNode, width);
+    ViewAbstract::ClearWidthOrHeight(frameNode, true);
 }
 
-void SetRadioHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Uint32 unit)
+void SetRadioHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension height = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
-    RadioModelNG::SetHeight(frameNode, height);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetHeight(frameNode, CalcLength(CalcLength(std::string(calcValue))));
+    } else {
+        ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
+    }
 }
 
 void ResetRadioHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
-    auto defaultHeight = radioTheme->GetDefaultHeight();
-    auto verticalPadding = radioTheme->GetHotZoneVerticalPadding();
-    auto height = defaultHeight - verticalPadding * 2; //2 is Calculate the parameters of the formula
-    RadioModelNG::SetHeight(frameNode, height);
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
 void SetRadioSize(ArkUINodeHandle node, ArkUI_Float32 widthValue, ArkUI_Int32 widthUnit,

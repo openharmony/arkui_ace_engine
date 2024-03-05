@@ -476,9 +476,13 @@ void SetButtonSize(
     std::optional<CalcDimension> heightInfo;
     if (widthValueStr != "undefined") {
         widthInfo = CalcDimension(StringUtils::StringToDouble(widthValueStr), (DimensionUnit)widthUnit);
+    } else {
+        ViewAbstract::ClearWidthOrHeight(frameNode, true);
     }
     if (heightValueStr != "undefined") {
         heightInfo = CalcDimension(StringUtils::StringToDouble(heightValueStr), (DimensionUnit)heightUnit);
+    } else {
+        ViewAbstract::ClearWidthOrHeight(frameNode, false);
     }
     ButtonModelNG::SetSize(frameNode, widthInfo, heightInfo);
 }
@@ -487,8 +491,8 @@ void ResetButtonSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension value(0.0, DimensionUnit::VP);
-    ButtonModelNG::SetSize(frameNode, value, value);
+    ViewAbstract::ClearWidthOrHeight(frameNode, true);
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
 ArkUI_CharPtr GetButtonLabel(ArkUINodeHandle node)

@@ -176,8 +176,6 @@ void ToggleModelImpl::SetHeight(const Dimension& height)
     }
 }
 
-void ToggleModelImpl::SetBackgroundColor(const Color& color) {}
-
 bool ToggleModelImpl::IsToggle()
 {
     auto* stack = ViewStackProcessor::GetInstance();

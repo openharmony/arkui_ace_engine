@@ -27,7 +27,7 @@ class ACE_EXPORT ToggleButtonModelNG {
 public:
     static void Create(const std::string& tagName);
     static void SetSelectedColor(const Color& selectedColor);
-    static void SetBackgroundColor(const Color& backgroundColor);
+    static void SetBackgroundColor(const Color& backgroundColor, bool flag);
     static void SetIsOn(bool isOn);
     static void SetSelectedColor(FrameNode* frameNode, const Color& selectedColor);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& backgroundColor);

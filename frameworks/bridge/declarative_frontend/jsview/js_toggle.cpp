@@ -387,19 +387,13 @@ NG::PaddingProperty JSToggle::GetPadding(const std::optional<CalcDimension>& top
 
 void JSToggle::SetBackgroundColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
-    Color backgroundColor;
-    if (!ParseJsColor(info[0], backgroundColor)) {
-        return;
-    }
-
+    Color backgroundColor = Color::TRANSPARENT;
+    bool flag = ParseJsColor(info[0], backgroundColor);
     if (!Container::IsCurrentUseNewPipeline()) {
         JSViewAbstract::JsBackgroundColor(info);
         return;
     }
-    ToggleModel::GetInstance()->SetBackgroundColor(backgroundColor);
+    ToggleModel::GetInstance()->SetBackgroundColor(backgroundColor, flag);
 }
 
 void JSToggle::JsHoverEffect(const JSCallbackInfo& info)

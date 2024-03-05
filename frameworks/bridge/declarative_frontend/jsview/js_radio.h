@@ -25,13 +25,9 @@ public:
     static void Checked(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
-    static void JsWidth(const JSCallbackInfo& info);
-    static void JsHeight(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsRadioStyle(const JSCallbackInfo& info);
     static void JsResponseRegion(const JSCallbackInfo& info);
-    static void JsWidth(const JSRef<JSVal>& jsValue);
-    static void JsHeight(const JSRef<JSVal>& jsValue);
     static void JsSize(const JSCallbackInfo& args);
     static void JsOnClick(const JSCallbackInfo& args);
     static void OnChange(const JSCallbackInfo& info);
