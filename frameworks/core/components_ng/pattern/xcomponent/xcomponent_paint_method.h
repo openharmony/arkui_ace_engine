@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,16 +20,20 @@
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace::NG {
+class XComponentPattern;
 class ACE_EXPORT XComponentPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(XComponentPaintMethod, NodePaintMethod)
 public:
-    XComponentPaintMethod(RefPtr<NG::RenderSurface> surface) : renderSuface_(surface) {}
+    XComponentPaintMethod(const RefPtr<NG::RenderSurface>& surface, const RefPtr<XComponentPattern>& pattern)
+        : renderSuface_(surface), pattern_(pattern)
+    {}
     ~XComponentPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
     RefPtr<NG::RenderSurface> renderSuface_;
+    WeakPtr<XComponentPattern> pattern_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_PAINT_METHOD_H

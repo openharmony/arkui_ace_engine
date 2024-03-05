@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -354,7 +354,8 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
 #endif
 }
 
-void RosenRenderSurface::DrawBufferForXComponent(RSCanvas& canvas, float width, float height)
+void RosenRenderSurface::DrawBufferForXComponent(
+    RSCanvas& canvas, float width, float height, float offsetX, float offsetY)
 {
 #ifdef OHOS_PLATFORM
     auto renderContext = renderContext_.Upgrade();
@@ -379,13 +380,13 @@ void RosenRenderSurface::DrawBufferForXComponent(RSCanvas& canvas, float width, 
     CHECK_NULL_VOID(skCanvas);
     auto* recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
     CHECK_NULL_VOID(recordingCanvas);
-    Rosen::RSSurfaceBufferInfo info { surfaceNode->buffer_, 0, 0, static_cast<int32_t>(width),
+    Rosen::RSSurfaceBufferInfo info { surfaceNode->buffer_, offsetX, offsetY, static_cast<int32_t>(width),
         static_cast<int32_t>(height) };
     recordingCanvas->DrawSurfaceBuffer(info);
 #else
     auto& recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
-    Rosen::DrawingSurfaceBufferInfo info {surfaceNode->buffer_, 0, 0, static_cast<int32_t>(width),
-        static_cast<int32_t>(height)};
+    Rosen::DrawingSurfaceBufferInfo info { surfaceNode->buffer_, offsetX, offsetY, static_cast<int32_t>(width),
+        static_cast<int32_t>(height) };
     recordingCanvas.DrawSurfaceBuffer(info);
 #endif
 #endif
