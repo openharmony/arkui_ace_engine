@@ -2512,9 +2512,6 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
     auto curve = GetCurve();
     auto container = Container::Current();
     bool isLauncherFeature = container ? container->IsLauncherContainer() : false;
-    if (!curve && !isLauncherFeature) {
-        curve = Curves::LINEAR;
-    }
 
     if (isLauncherFeature) {
         finishCallbackType_ = FinishCallbackType::LOGICALLY;
