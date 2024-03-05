@@ -1478,6 +1478,11 @@ void RichEditorPattern::StopTwinkling()
 
 void RichEditorPattern::HandleClickEvent(GestureEvent& info)
 {
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsFocusable()) {
+        return;
+    }
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         dataDetectorAdapter_->hasClickedAISpan_ = false;
     } else if (hasClicked_) {
@@ -1830,6 +1835,11 @@ bool RichEditorPattern::JudgeDraggable(GestureEvent& info)
 
 void RichEditorPattern::HandleLongPress(GestureEvent& info)
 {
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsFocusable()) {
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "handle long press!");
     caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
     HandleDoubleClickOrLongPress(info);
@@ -3742,6 +3752,11 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
         }
         return;
     }
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsCurrentFocus()) {
+        return;
+    }
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -3777,6 +3792,11 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
         blockPress_ = true;
         return;
     }
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsFocusable()) {
+        return;
+    }
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -3790,7 +3810,6 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
 
     auto position = paragraphs_.GetIndex(textOffset);
     AdjustCursorPosition(position);
-    auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (focusHub && focusHub->RequestFocusImmediately()) {
         float caretHeight = 0.0f;
         SetCaretPosition(position);
@@ -3842,6 +3861,11 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
 
 void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
 {
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsFocusable()) {
+        return;
+    }
     if (info.GetAction() == MouseAction::PRESS) {
         isMousePressed_ = true;
         usingMouseRightButton_ = true;
