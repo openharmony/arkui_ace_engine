@@ -71,6 +71,8 @@ void CalendarPickerModelNG::LayoutPicker(const RefPtr<CalendarPickerPattern>& pi
         auto contentNode = CreateCalendarNodeChild(pickerPattern->GetContentId(), settingData, theme);
         CHECK_NULL_VOID(contentNode);
         contentNode->MountToParent(pickerNode);
+    } else {
+        pickerPattern->SetDate(settingData.selectedDate.ToString(true));
     }
     auto flexNode = CreateButtonFlexChild(pickerPattern->GetButtonFlexId(), theme);
     CHECK_NULL_VOID(flexNode);
