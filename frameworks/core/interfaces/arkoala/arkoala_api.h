@@ -455,28 +455,6 @@ struct ArkUICustomShadowOptions {
     ArkUI_Int32 fill;
 };
 
-struct ArkUISweepGradientOptions {
-    ArkUI_Uint32* colors;
-    ArkUI_Float32* dimensions;
-    ArkUI_Uint32 colorSize;
-    ArkUI_Float32 ceneterX;
-    ArkUI_Float32 ceneterY;
-    ArkUI_Float32 startAngle;
-    ArkUI_Float32 endAngle;
-    ArkUI_Float32 rotation;
-    ArkUI_Int32 repeating;
-};
-
-struct ArkUIRadialGradientOptions {
-    ArkUI_Uint32* colors;
-    ArkUI_Float32* dimensions;
-    ArkUI_Uint32 colorSize;
-    ArkUI_Float32 ceneterX;
-    ArkUI_Float32 ceneterY;
-    ArkUI_Float32 radius;
-    ArkUI_Int32 repeating;
-};
-
 struct ArkUIMaskOptions {
     ArkUI_Uint32 fill;
     ArkUI_Uint32 strockColor;
@@ -928,6 +906,11 @@ union ArkUIInt32orFloat32 {
     ArkUI_Int32 i32;
 };
 
+struct ArkUIBackgroundImage {
+    ArkUI_CharPtr src;
+    ArkUI_Int32 repeat;
+};
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -1216,8 +1199,10 @@ struct ArkUICommonModifier {
     void (*getPosition)(ArkUINodeHandle node, ArkUIPositionOptions* options);
     ArkUI_Int32 (*getShadow)(ArkUINodeHandle node);
     void (*getCustomShadow)(ArkUINodeHandle node, ArkUICustomShadowOptions* options);
-    void (*getSweepGradient)(ArkUINodeHandle node, ArkUISweepGradientOptions* options);
-    void (*getRadialGradient)(ArkUINodeHandle node, ArkUIRadialGradientOptions* options);
+    ArkUI_Int32 (*getSweepGradient)(
+        ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Uint32* colors, ArkUI_Float32* stops);
+    ArkUI_Int32 (*getRadialGradient)(
+        ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Uint32* colors, ArkUI_Float32* stops);
     void (*getMask)(ArkUINodeHandle node, ArkUIMaskOptions* options);
     ArkUI_Int32 (*getBlendMode)(ArkUINodeHandle node);
     ArkUI_Int32 (*getDirection)(ArkUINodeHandle node);
@@ -1251,6 +1236,15 @@ struct ArkUICommonModifier {
     ArkUI_Int32 (*getLinearGradient)(
         ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Uint32* colors, ArkUI_Float32* stop);
     ArkUI_Int32 (*getAlign)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getWidth)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getHeight)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getBackgroundColor)(ArkUINodeHandle node);
+    void (*getBackgroundImage)(ArkUINodeHandle node, ArkUIBackgroundImage* options);
+    void (*getPadding)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length);
+    ArkUI_CharPtr (*getKey)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getEnabled)(ArkUINodeHandle node);
+    void (*getMargin)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length);
+    void (*getTranslate)(ArkUINodeHandle node, ArkUI_Float32* values);
 };
 
 struct ArkUICommonShapeModifier {

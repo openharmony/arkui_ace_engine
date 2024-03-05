@@ -514,14 +514,15 @@ public:
     static int GetZIndex(FrameNode* frameNode);
     static VisibleType GetVisibility(FrameNode* frameNode);
     static bool GetClip(FrameNode* frameNode);
-    static std::optional<RefPtr<BasicShape>> GetClipShape(FrameNode* frameNode);
+    static RefPtr<BasicShape> GetClipShape(FrameNode* frameNode);
     static Matrix4 GetTransform(FrameNode* frameNode);
     static HitTestMode GetHitTestBehavior(FrameNode* frameNode);
     static OffsetT<Dimension> GetPosition(FrameNode* frameNode);
     static std::optional<Shadow> GetShadow(FrameNode* frameNode);
-    static NG::Gradient GetGradient(FrameNode* frameNode);
-    static std::optional<RefPtr<BasicShape>> GetMask(FrameNode* frameNode);
-    static const std::optional<RefPtr<ProgressMaskProperty>> GetMaskProgress(FrameNode* frameNode);
+    static NG::Gradient GetSweepGradient(FrameNode* frameNode);
+    static NG::Gradient GetRadialGradient(FrameNode* frameNode);
+    static RefPtr<BasicShape> GetMask(FrameNode* frameNode);
+    static RefPtr<ProgressMaskProperty> GetMaskProgress(FrameNode* frameNode);
     static BlendMode GetBlendMode(FrameNode* frameNode);
     static TextDirection GetDirection(FrameNode* frameNode);
     static std::map<AlignDirection, AlignRule> GetAlignRules(FrameNode* frameNode);
@@ -547,6 +548,16 @@ public:
     static Dimension GetBrightness(FrameNode* frameNode);
     static Dimension GetSaturate(FrameNode* frameNode);
     static BackgroundImagePosition GetBackgroundImagePosition(FrameNode* frameNode);
+    static float GetWidth(FrameNode* frameNode);
+    static float GetHeight(FrameNode* frameNode);
+    static Color GetBackgroundColor(FrameNode* frameNode);
+    static std::string GetBackgroundImageSrc(FrameNode* frameNode);
+    static ImageRepeat GetBackgroundImageRepeat(FrameNode* frameNode);
+    static PaddingProperty GetPadding(FrameNode* frameNode);
+    static std::string GetKey(FrameNode* frameNode);
+    static bool GetEnabled(FrameNode* frameNode);
+    static MarginProperty GetMargin(FrameNode* frameNode);
+    static TranslateOptions GetTranslate(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();
