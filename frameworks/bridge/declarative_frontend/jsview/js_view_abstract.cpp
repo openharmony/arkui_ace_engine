@@ -6492,6 +6492,43 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
     }
+
+    // Parse border width
+    auto borderWidthValue = paramObj->GetProperty("borderWidth");
+    NG::BorderWidthProperty borderWidth;
+    if (ParseBorderWidthProps(borderWidthValue, borderWidth)) {
+        sheetStyle.borderWidth = borderWidth;
+        // Parse border color
+        auto colorValue = paramObj->GetProperty("borderColor");
+        NG::BorderColorProperty borderColor;
+        if (ParseBorderColorProps(colorValue, borderColor)) {
+            sheetStyle.borderColor = borderColor;
+        } else {
+            sheetStyle.borderColor =
+                NG::BorderColorProperty({ Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK });
+        }
+        // Parse border style
+        auto styleValue = paramObj->GetProperty("borderStyle");
+        NG::BorderStyleProperty borderStyle;
+        if (ParseBorderStyleProps(styleValue, borderStyle)) {
+            sheetStyle.borderStyle = borderStyle;
+        } else {
+            sheetStyle.borderStyle = NG::BorderStyleProperty(
+                { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID });
+        }
+    }
+    // Parse shadow
+    Shadow shadow;
+    auto shadowValue = paramObj->GetProperty("shadow");
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
+            sheetStyle.shadow = shadow;
+    }
+
+    auto widthValue = paramObj->GetProperty("width");
+    CalcDimension width;
+    if (ParseJsDimensionVpNG(widthValue, width, true)) {
+        sheetStyle.width = width;
+    }
 }
 
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents)

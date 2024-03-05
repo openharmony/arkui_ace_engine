@@ -74,6 +74,11 @@ struct SheetStyle {
     std::vector<SheetHeight> detents;
     std::optional<bool> interactive;
     std::optional<bool> showInPage;
+    std::optional<NG::BorderWidthProperty> borderWidth; // border width
+    std::optional<NG::BorderColorProperty> borderColor; // border color
+    std::optional<NG::BorderStyleProperty> borderStyle;  // border style
+    std::optional<Shadow> shadow;
+    std::optional<Dimension> width;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
@@ -83,7 +88,10 @@ struct SheetStyle {
                 backgroundColor == sheetStyle.backgroundColor && maskColor == sheetStyle.maskColor &&
                 detents == sheetStyle.detents && backgroundBlurStyle == sheetStyle.backgroundBlurStyle &&
                 sheetTitle == sheetStyle.sheetTitle && sheetSubtitle == sheetStyle.sheetSubtitle &&
-                interactive == sheetStyle.interactive && showInPage == sheetStyle.showInPage);
+                interactive == sheetStyle.interactive && showInPage == sheetStyle.showInPage &&
+                borderWidth == sheetStyle.borderWidth && borderColor == sheetStyle.borderColor &&
+                borderStyle == sheetStyle.borderStyle && shadow == sheetStyle.shadow &&
+                width == sheetStyle.width);
     }
 };
 } // namespace OHOS::Ace::NG
