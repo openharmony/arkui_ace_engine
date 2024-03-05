@@ -484,9 +484,9 @@ public:
         CHECK_NULL_VOID(taskExecutor);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [instanceId = instanceId_] {
+            [instanceId = instanceId_, targetId = targetId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->ClearMenuNG(instanceId, true, true);
+                SubwindowManager::GetInstance()->ClearMenuNG(instanceId, targetId, true, true);
                 SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
             },
             TaskExecutor::TaskType::UI);
@@ -494,6 +494,7 @@ public:
 
 private:
     int32_t instanceId_ = -1;
+    int32_t targetId_ = -1;
 };
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)

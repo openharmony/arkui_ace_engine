@@ -593,7 +593,7 @@ void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
     overlay->UpdateContextMenuDisappearPosition(offset);
 }
 
-void SubwindowOhos::ClearMenuNG(bool inWindow, bool showAnimation)
+void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimation)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -605,7 +605,7 @@ void SubwindowOhos::ClearMenuNG(bool inWindow, bool showAnimation)
     if (showAnimation) {
         overlay->CleanMenuInSubWindowWithAnimation();
     } else {
-        overlay->CleanMenuInSubWindow();
+        overlay->CleanMenuInSubWindow(targetId);
     }
     HideWindow();
     context->FlushPipelineImmediately();
