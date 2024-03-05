@@ -443,6 +443,32 @@ HWTEST_F(WaterFlowTestNg, Property011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Property012
+ * @tc.desc: all the properties of WaterFlow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Property012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create WaterFlow
+     */
+    ViewStackProcessor::GetInstance()->SetVisualState(VisualState::FOCUSED);
+    CreateWithItem([](WaterFlowModelNG model) {
+        model.SetItemMinWidth(Dimension(10));
+        model.SetItemMinHeight(Dimension(10));
+        model.SetItemMaxWidth(Dimension(300));
+        model.SetItemMaxHeight(Dimension(300));
+    });
+
+    /**
+     * @tc.steps: step2. set value when IsCurrentVisualStateProcess is false.
+     * @tc.expected: the value not set.
+     */
+    EXPECT_EQ(layoutProperty_->itemLayoutConstraint_, nullptr);
+    ViewStackProcessor::GetInstance()->ClearVisualState();
+}
+
+/**
  * @tc.name: WaterFlowTest001
  * @tc.desc: Fill all items to waterFlow with fixed row and column
  * @tc.type: FUNC
@@ -839,24 +865,48 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, WaterFlowPatternTest002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create waterFlow
+     * @tc.expected: startIndex_ = 0  endIndex_ = 21
+     */
     Create([](WaterFlowModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
         CreateItem(TOTAL_LINE_NUMBER * 4);
     });
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 21);
 
     /**
-     * @tc.steps: step1. Run pattern func.
-     * @tc.expected: The return_value is correct.
+     * @tc.steps: step2. UpdateCurrentOffset -100.f.
+     * @tc.expected: startIndex_ = 0  endIndex_ = 21.
      */
     pattern_->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
     pattern_->UpdateScrollBarOffset();
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0.f);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 21);
 
+    /**
+     * @tc.steps: step3. UpdateCurrentOffset 200.f.
+     * @tc.expected: startIndex_ = 5  endIndex_ = 27.
+     */
     pattern_->UpdateCurrentOffset(200.f, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -ITEM_HEIGHT * 2);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 5);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 27);
+
+    /**
+     * @tc.steps: step3. UpdateCurrentOffset 100.f.
+     * @tc.expected: startIndex_ = 1  endIndex_ = 24.
+     */
+    pattern_->UpdateCurrentOffset(100.f, SCROLL_FROM_ANIMATION_SPRING);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -ITEM_HEIGHT);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 1);
+    EXPECT_EQ(pattern_->layoutInfo_.endIndex_, 24);
 }
 
 /**
@@ -1642,6 +1692,55 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 1);
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -100);
+}
+
+/**
+ * @tc.name: ScrollToIndex003
+ * @tc.desc: Test ScrollToIndex func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollToIndex003, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(30);
+    });
+
+    pattern_->ScrollToIndex(3, true, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
+
+    pattern_->ScrollToIndex(3, true, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, -400.f);
+
+    pattern_->ScrollToIndex(15, true, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 500.f);
+
+    pattern_->ScrollToIndex(15, true, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 800.f);
+
+    pattern_->ScrollToIndex(3, true, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 800.f);
+
+    pattern_->ScrollPage(false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_LT(pattern_->layoutInfo_.currentOffset_, 0.f);
+
+    pattern_->ScrollToIndex(3, true, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
+
+    pattern_->ScrollToIndex(3, true, ScrollAlign::NONE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
+
+    pattern_->ScrollToIndex(LAST_ITEM, true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
 }
 
 /**

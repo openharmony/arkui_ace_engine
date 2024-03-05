@@ -94,6 +94,78 @@ HWTEST_F(TabsAttrTestNg, Interface004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Interface005
+ * @tc.desc: Test Tabs attr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
+{
+    /**
+     * @tc.cases: create tabs
+     */
+    TabsModelNG model;
+    model.Create(BarPosition::START, 0, nullptr, nullptr);
+    ViewAbstract::SetWidth(CalcLength(TABS_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(TABS_HEIGHT));
+    CreateItem(TABCONTENT_NUMBER);
+    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto tabBarNode_ = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
+    tabBarNode_->GetOrCreateFocusHub();
+    model.Pop();
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.cases: set invalid properties
+     * @tc.expected: tabs properties equals expected value
+     */
+    TabsItemDivider divider;
+    divider.isNull = true;
+    divider.strokeWidth = Dimension(1.0f);
+    model.SetDivider(AceType::RawPtr(frameNode_), divider);
+    model.SetAnimationDuration(AceType::RawPtr(frameNode_), -1);
+    model.SetIsVertical(AceType::RawPtr(frameNode_), false);
+    model.SetTabBarHeight(AceType::RawPtr(frameNode_), Dimension(-1));
+    model.SetTabBarWidth(AceType::RawPtr(frameNode_), Dimension(-1));
+    model.SetBarOverlap(AceType::RawPtr(frameNode_), false);
+    FlushLayoutTask(frameNode_);
+
+    auto dividerRenderContext = dividerNode_->GetRenderContext();
+    auto tabBarRenderContext = tabBarNode_->GetRenderContext();
+    EXPECT_EQ(dividerRenderContext->GetOpacityValue(), 0.0);
+    EXPECT_EQ(layoutProperty_->GetDividerValue(), divider);
+    EXPECT_EQ(tabBarPattern_->animationDuration_, -1);
+    EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::HORIZONTAL);
+    EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::HORIZONTAL);
+    EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(-1.f));
+    EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(-1.f));
+    EXPECT_FALSE(tabBarRenderContext->HasFrontSaturate());
+
+    /**
+     * @tc.steps3: set valid properties
+     * @tc.expected: tabs properties equals expected value
+     */
+    divider.isNull = false;
+    model.SetDivider(AceType::RawPtr(frameNode_), divider);
+    model.SetAnimationDuration(AceType::RawPtr(frameNode_), 500);
+    model.SetIsVertical(AceType::RawPtr(frameNode_), true);
+    model.SetTabBarHeight(AceType::RawPtr(frameNode_), Dimension(60.f));
+    model.SetTabBarWidth(AceType::RawPtr(frameNode_), Dimension(60.f));
+    model.SetBarOverlap(AceType::RawPtr(frameNode_), true);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(dividerRenderContext->GetOpacityValue(), 1.0);
+    EXPECT_EQ(layoutProperty_->GetDividerValue(), divider);
+    EXPECT_EQ(tabBarPattern_->animationDuration_, 500);
+    EXPECT_EQ(swiperPaintProperty_->GetDurationValue(400), 500);
+    EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::VERTICAL);
+    EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::VERTICAL);
+    EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(60.f));
+    EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(60.f));
+    EXPECT_EQ(tabBarRenderContext->GetFrontSaturateValue(BAR_SATURATE), BAR_SATURATE);
+}
+
+/**
  * @tc.name: Bar001
  * @tc.desc: Test Tabs attr
  * @tc.type: FUNC
@@ -120,9 +192,7 @@ HWTEST_F(TabsAttrTestNg, Bar002, TestSize.Level1)
      * @tc.cases: BarMode is SCROLLABLE
      * @tc.expected: TabBarItem width is its actual width
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetTabBarMode(TabBarMode::SCROLLABLE);
-    });
+    CreateWithItem([](TabsModelNG model) { model.SetTabBarMode(TabBarMode::SCROLLABLE); });
     EXPECT_EQ(GetChildWidth(tabBarNode_, 0), 10.f);
     EXPECT_TRUE(IsEqual(tabBarNode_->GetGeometryNode()->GetFrameSize(), SizeF(TABS_WIDTH, TABBAR_DEFAULT_HEIGHT)));
 }
@@ -241,5 +311,39 @@ HWTEST_F(TabsAttrTestNg, BarGridAlign002, TestSize.Level1)
     EXPECT_EQ(GetChildX(tabBarNode_, 1), 273.125);
     EXPECT_EQ(GetChildX(tabBarNode_, 2), 360);
     EXPECT_EQ(GetChildX(tabBarNode_, 3), 446.875);
+}
+
+/**
+ * @tc.name: BarGridAlign003
+ * @tc.desc: Test Tabs attr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, BarGridAlign003, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set BarGridColumnOptions
+     * @tc.expected: TabBarItem position changed
+     */
+    TabsModelNG model;
+    model.Create(BarPosition::START, 1, nullptr, nullptr);
+    ViewAbstract::SetWidth(CalcLength(TABS_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(TABS_HEIGHT));
+    CreateItem(TABCONTENT_NUMBER);
+    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto tabBarNode_ = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
+    tabBarNode_->GetOrCreateFocusHub();
+
+    frameNode_ = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    swiperNode_ = AceType::DynamicCast<FrameNode>(frameNode_->GetTabs());
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(swiperNode_->TotalChildCount(), TABCONTENT_NUMBER);
+
+    model.SetIndex(2);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(frameNode_->GetIndex(), 2);
+
+    model.SetIndex(-1);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(frameNode_->GetIndex(), 0);
 }
 } // namespace OHOS::Ace::NG
