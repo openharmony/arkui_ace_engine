@@ -529,7 +529,7 @@ const ArkUIButtonModifier* GetButtonModifier()
         SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle, SetButtonFontFamily,
         ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle, SetButtonBackgroundColor,
         ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius, SetButtonFontWeightEnum,
-        SetButtonSize, ResetButtonSize, GetButtonLabel };
+        SetButtonSize, ResetButtonSize, GetButtonLabel, GetButtonFontSize, GetButtonFontWeight, GetButtonFontColor };
 
     return &modifier;
 }
