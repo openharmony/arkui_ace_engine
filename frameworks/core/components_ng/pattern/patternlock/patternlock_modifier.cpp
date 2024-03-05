@@ -824,6 +824,7 @@ void PatternLockModifier::Reset()
     SetIsTouchDown(false);
     needCanceledLine_ = false;
     challengeResult_.reset();
+    choosePoint_.clear();
     connectedLineTailPoint_->Set(OffsetF());
     canceledLineTailPoint_->Set(OffsetF());
     for (auto& radius : backgroundCircleRadius_) {
