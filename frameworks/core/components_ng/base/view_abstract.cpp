@@ -2646,6 +2646,16 @@ void ViewAbstract::SetAlignRules(FrameNode* frameNode, const std::map<AlignDirec
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules, frameNode);
 }
 
+std::map<AlignDirection, AlignRule> ViewAbstract::GetAlignRules(FrameNode* frameNode)
+{
+    std::map<AlignDirection, AlignRule> alignRules;
+    CHECK_NULL_RETURN(frameNode, alignRules);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, alignRules);
+    CHECK_NULL_RETURN(layoutProperty->GetFlexItemProperty(), alignRules);
+    return layoutProperty->GetFlexItemProperty()->GetAlignRules().value_or(alignRules);
+}
+
 void ViewAbstract::SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3234,6 +3244,51 @@ Color ViewAbstract::GetForegroundColor(FrameNode* frameNode)
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     return target->GetForegroundColorValue(value);
+}
+
+NG::VectorF ViewAbstract::GetScale(FrameNode* frameNode)
+{
+    NG::VectorF defaultVector = { 1.0f, 1.0f };
+    CHECK_NULL_RETURN(frameNode, defaultVector);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultVector);
+    return renderContext->GetTransformScale().value_or(defaultVector);
+}
+
+NG::Vector5F ViewAbstract::GetRotate(FrameNode* frameNode)
+{
+    NG::Vector5F defaultVector = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    CHECK_NULL_RETURN(frameNode, defaultVector);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultVector);
+    return renderContext->GetTransformRotate().value_or(defaultVector);
+}
+
+Dimension ViewAbstract::GetBrightness(FrameNode* frameNode)
+{
+    Dimension defaultBrightness(1.0);
+    CHECK_NULL_RETURN(frameNode, defaultBrightness);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultBrightness);
+    return renderContext->GetFrontBrightness().value_or(defaultBrightness);
+}
+
+Dimension ViewAbstract::GetSaturate(FrameNode* frameNode)
+{
+    Dimension defaultSaturate(1.0);
+    CHECK_NULL_RETURN(frameNode, defaultSaturate);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultSaturate);
+    return renderContext->GetFrontSaturate().value_or(defaultSaturate);
+}
+
+BackgroundImagePosition ViewAbstract::GetBackgroundImagePosition(FrameNode* frameNode)
+{
+    BackgroundImagePosition defaultImagePosition;
+    CHECK_NULL_RETURN(frameNode, defaultImagePosition);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultImagePosition);
+    return renderContext->GetBackgroundImagePosition().value_or(defaultImagePosition);
 }
 
 Dimension ViewAbstract::GetFrontBlur(FrameNode* frameNode)

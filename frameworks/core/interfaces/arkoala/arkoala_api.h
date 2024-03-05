@@ -560,11 +560,41 @@ struct ArkUIAnchorType {
     ArkUI_Float32 yCoordinate;
 };
 
+struct ArkUIAlignRulesType {
+    ArkUI_Int32 leftAlignAnchor;
+    ArkUI_Int32 leftAlignType;
+    ArkUI_Int32 middleAlignAnchor;
+    ArkUI_Int32 middleAlignType;
+    ArkUI_Int32 rightAlignAnchor;
+    ArkUI_Int32 rightAlignType;
+    ArkUI_Int32 topAlignAnchor;
+    ArkUI_Int32 topAlignType;
+    ArkUI_Int32 verticalCenterAlignAnchor;
+    ArkUI_Int32 verticalCenterAlignType;
+    ArkUI_Int32 bottomAlignAnchor;
+    ArkUI_Int32 bottomAlignType;
+    ArkUI_Float32 biasHorizontalValue;
+    ArkUI_Float32 biasVerticalValue;
+};
+
 struct ArkUIImageSizeType {
     ArkUI_Float32 xValue;
     ArkUI_Float32 yValue;
     ArkUI_Int32 xType;
     ArkUI_Int32 yType;
+};
+
+struct ArkUIScaleType {
+    ArkUI_Float32 xValue;
+    ArkUI_Float32 yValue;
+};
+
+struct ArkUIRotateType {
+    ArkUI_Float32 xCoordinate;
+    ArkUI_Float32 yCoordinate;
+    ArkUI_Float32 zCoordinate;
+    ArkUI_Float32 angle;
+    ArkUI_Float32 sightDistance;
 };
 
 struct ArkUIBlurStyleOptionType {
@@ -1199,9 +1229,15 @@ struct ArkUICommonModifier {
     ArkUITranslateTransitionType (*getTranslateTransition)(ArkUINodeHandle node);
     ArkUIOffsetType (*getOffset)(ArkUINodeHandle node);
     ArkUIAnchorType (*getMarkAnchor)(ArkUINodeHandle node);
+    void (*getAlignRules)(ArkUINodeHandle node, ArkUIAlignRulesType* alignRulesType);
     ArkUIBlurStyleOptionType (*getBackgroundBlurStyle)(ArkUINodeHandle node);
     ArkUIImageSizeType (*getBackgroundImageSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getBackgroundImageSizeWithStyle)(ArkUINodeHandle node);
+    void (*getScale)(ArkUINodeHandle node, ArkUIScaleType* scaleType);
+    void (*getRotate)(ArkUINodeHandle node, ArkUIRotateType* rotateType);
+    ArkUI_Float32 (*getBrightness)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getSaturate)(ArkUINodeHandle node);
+    void (*getBackgroundImagePosition)(ArkUINodeHandle node, ArkUIPositionOptions* position);
     ArkUI_Float32 (*getFlexGrow)(ArkUINodeHandle node);
     ArkUI_Float32 (*getFlexShrink)(ArkUINodeHandle node);
     ArkUI_Float32 (*getFlexBasis)(ArkUINodeHandle node);

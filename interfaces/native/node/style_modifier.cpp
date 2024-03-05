@@ -57,6 +57,7 @@ constexpr int NUM_10 = 10;
 constexpr int NUM_11 = 11;
 constexpr int NUM_12 = 12;
 constexpr int NUM_13 = 13;
+constexpr int NUM_14 = 14;
 constexpr int NUM_16 = 16;
 constexpr int NUM_23 = 23;
 constexpr int NUM_59 = 59;
@@ -151,7 +152,6 @@ constexpr int32_t ROTATE_ANIMATION_BASE = 5;
 constexpr int32_t SCALE_ANIMATION_BASE = 3;
 constexpr int32_t TRANSLATE_ANIMATION_BASE = 3;
 constexpr int32_t DEFAULT_DURATION = 1000;
-constexpr int32_t ALIGN_RULES_ARRAY_LENGTH = 6;
 const std::vector<std::string> ALIGN_RULES_HORIZONTAL_ARRAY = { "start", "center", "end" };
 const std::vector<std::string> ALIGN_RULES_VERTICAL_ARRAY = { "top", "center", "bottom" };
 typedef std::map<const std::string, ArkUI_Int32> AttrStringToIntMap;
@@ -167,7 +167,7 @@ constexpr int32_t REQUIRED_FOUR_PARAM = 4;
 constexpr int32_t REQUIRED_FIVE_PARAM = 5;
 constexpr int32_t REQUIRED_SEVEN_PARAM = 7;
 constexpr int32_t REQUIRED_TWENTY_PARAM = 20;
-constexpr int32_t MAX_ATTRIBUTE_ITEM_LEN = 12;
+constexpr int32_t MAX_ATTRIBUTE_ITEM_LEN = 20;
 ArkUI_NumberValue g_numberValues[MAX_ATTRIBUTE_ITEM_LEN] = { 0 };
 ArkUI_AttributeItem g_attributeItem = { g_numberValues, MAX_ATTRIBUTE_ITEM_LEN, nullptr, nullptr };
 
@@ -735,6 +735,17 @@ void ResetScale(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetScale(node->uiNodeHandle);
 }
 
+const ArkUI_AttributeItem* GetScale(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUIScaleType scaleType = { 0.0f, 0.0f };
+    fullImpl->getNodeModifiers()->getCommonModifier()->getScale(node->uiNodeHandle, &scaleType);
+    g_numberValues[NUM_0].f32 = scaleType.xValue;
+    g_numberValues[NUM_1].f32 = scaleType.yValue;
+    g_attributeItem.size = NUM_2;
+    return &g_attributeItem;
+}
+
 int32_t SetRotate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_FIVE_PARAM);
@@ -760,6 +771,20 @@ void ResetRotate(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetRotate(node->uiNodeHandle);
 }
 
+const ArkUI_AttributeItem* GetRotate(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUIRotateType rotateType = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    fullImpl->getNodeModifiers()->getCommonModifier()->getRotate(node->uiNodeHandle, &rotateType);
+    g_numberValues[NUM_0].f32 = rotateType.xCoordinate;
+    g_numberValues[NUM_1].f32 = rotateType.yCoordinate;
+    g_numberValues[NUM_2].f32 = rotateType.zCoordinate;
+    g_numberValues[NUM_3].f32 = rotateType.angle;
+    g_numberValues[NUM_4].f32 = rotateType.sightDistance;
+    g_attributeItem.size = NUM_5;
+    return &g_attributeItem;
+}
+
 int32_t SetBrightness(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
@@ -780,6 +805,14 @@ void ResetBrightness(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetBrightness(node->uiNodeHandle);
 }
 
+const ArkUI_AttributeItem* GetBrightness(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getCommonModifier()->getBrightness(node->uiNodeHandle);
+    g_attributeItem.size = NUM_1;
+    return &g_attributeItem;
+}
+
 int32_t SetSaturate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
@@ -798,6 +831,14 @@ void ResetSaturate(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
 
     fullImpl->getNodeModifiers()->getCommonModifier()->resetSaturate(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetSaturate(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getCommonModifier()->getSaturate(node->uiNodeHandle);
+    g_attributeItem.size = NUM_1;
+    return &g_attributeItem;
 }
 
 int32_t SetBlur(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -1751,6 +1792,18 @@ void ResetBackgroundImagePosition(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
 
     fullImpl->getNodeModifiers()->getCommonModifier()->resetBackgroundImagePosition(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetBackgroundImagePosition(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    ArkUIPositionOptions positionOption = { 0.0f, 0.0f };
+    fullImpl->getNodeModifiers()->getCommonModifier()->getBackgroundImagePosition(node->uiNodeHandle,
+        &positionOption);
+    g_numberValues[NUM_0].f32 = positionOption.x;
+    g_numberValues[NUM_1].f32 = positionOption.y;
+    g_attributeItem.size = NUM_2;
+    return &g_attributeItem;
 }
 
 int32_t SetSweepGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -4605,6 +4658,7 @@ const ArkUI_AttributeItem* GetTextBaseLineOffset(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getTextModifier()->getTextBaselineOffset(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
 }
 
@@ -5740,26 +5794,47 @@ int32_t SetMarkAnchor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     return ERROR_CODE_NO_ERROR;
 }
 
+bool CheckAlignRulesHorizotal(int32_t alignIndex, const ArkUI_AttributeItem* item)
+{
+    if (alignIndex < item->size && (item->value[alignIndex].i32 < 0 || item->value[alignIndex].i32 >
+        static_cast<int32_t>(ARKUI_HORIZONTAL_ALIGNMENT_END))) {
+        return false;
+    }
+    return true;
+}
+
+bool CheckAlignRulesVertical(int32_t alignIndex, const ArkUI_AttributeItem* item)
+{
+    if (alignIndex < item->size && (item->value[alignIndex].i32 < 0 || item->value[alignIndex].i32 >
+        static_cast<int32_t>(ARKUI_VERTICAL_ALIGNMENT_BOTTOM))) {
+        return false;
+    }
+    return true;
+}
+
+bool CheckAlignRules(const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, false);
+    if (!CheckAlignRulesHorizotal(NUM_1, item) || !CheckAlignRulesHorizotal(NUM_3, item) ||
+        !CheckAlignRulesHorizotal(NUM_5, item)) {
+        return false;
+    }
+    if (!CheckAlignRulesVertical(NUM_7, item) || !CheckAlignRulesVertical(NUM_9, item) ||
+        !CheckAlignRulesVertical(NUM_11, item)) {
+        return false;
+    }
+    return true;
+}
+
 int32_t SetAlignRules(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    auto fullImpl = GetFullImpl();
-    std::vector<std::string> alignRulesVector;
-    StringUtils::StringSplitter(std::string(item->string), ' ', alignRulesVector);
-    const char* alignAnchorArray[ALIGN_RULES_ARRAY_LENGTH];
-    ArkUI_Int32 alignStyleArray[ALIGN_RULES_ARRAY_LENGTH];
-    for (size_t i = 0; i < alignRulesVector.size() && i < ALIGN_RULES_ARRAY_LENGTH; i++) {
-        if (i % TWO == 0) {
-            alignAnchorArray[i / TWO] = alignRulesVector[i].c_str();
-        } else {
-            alignStyleArray[i / TWO] =
-                ((i / TWO) < HORIZONTAL_DIRECTION_RANGE)
-                    ? StringToEnumInt(alignRulesVector[i].c_str(), ALIGN_RULES_HORIZONTAL_ARRAY, 0)
-                    : StringToEnumInt(alignRulesVector[i].c_str(), ALIGN_RULES_VERTICAL_ARRAY, 0);
-        }
+    if (item->size < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!CheckAlignRules(item)) {
+        return ERROR_CODE_PARAM_INVALID;
     }
     // todo
-    fullImpl->getNodeModifiers()->getCommonModifier()->setAlignRules(
-        node->uiNodeHandle, nullptr, nullptr, ALIGN_RULES_ARRAY_LENGTH);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6646,8 +6721,25 @@ const ArkUI_AttributeItem* GetMarkAnchor(ArkUI_NodeHandle node)
 
 const ArkUI_AttributeItem* GetAlignRules(ArkUI_NodeHandle node)
 {
-    g_attributeItem.size = 0;
-    // todo
+    auto fullImpl = GetFullImpl();
+    ArkUIAlignRulesType alignRulesType = { 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f };
+    fullImpl->getNodeModifiers()->getCommonModifier()->getAlignRules(node->uiNodeHandle, &alignRulesType);
+    g_numberValues[NUM_0].i32 = alignRulesType.leftAlignAnchor;
+    g_numberValues[NUM_1].i32 = alignRulesType.leftAlignType;
+    g_numberValues[NUM_2].i32 = alignRulesType.middleAlignAnchor;
+    g_numberValues[NUM_3].i32 = alignRulesType.middleAlignType;
+    g_numberValues[NUM_4].i32 = alignRulesType.rightAlignAnchor;
+    g_numberValues[NUM_5].i32 = alignRulesType.rightAlignType;
+    g_numberValues[NUM_6].i32 = alignRulesType.topAlignAnchor;
+    g_numberValues[NUM_7].i32 = alignRulesType.topAlignType;
+    g_numberValues[NUM_8].i32 = alignRulesType.verticalCenterAlignAnchor;
+    g_numberValues[NUM_9].i32 = alignRulesType.verticalCenterAlignType;
+    g_numberValues[NUM_10].i32 = alignRulesType.bottomAlignAnchor;
+    g_numberValues[NUM_11].i32 = alignRulesType.bottomAlignType;
+    g_numberValues[NUM_12].f32 = alignRulesType.biasHorizontalValue;
+    g_numberValues[NUM_13].f32 = alignRulesType.biasVerticalValue;
+    g_attributeItem.size = NUM_14;
     return &g_attributeItem;
 }
 
@@ -7574,10 +7666,10 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         nullptr,
         nullptr,
         nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
+        GetScale,
+        GetRotate,
+        GetBrightness,
+        GetSaturate,
         GetBlur,
         GetLinearGradient,
         GetAlign,
@@ -7620,7 +7712,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetForegroundColor,
         GetOffset,
         GetMarkAnchor,
-        nullptr,
+        GetBackgroundImagePosition,
         GetAlignRules,
         GetAlignSelf,
         GetFlexGrow,

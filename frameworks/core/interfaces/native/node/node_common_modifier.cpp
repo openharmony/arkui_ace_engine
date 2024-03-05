@@ -85,6 +85,8 @@ constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
 constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
+constexpr float DEFAULT_SATURATE = 1.0f;
+constexpr float DEFAULT_BRIGHTNESS = 1.0f;
 constexpr int32_t ORIGINAL_IMAGE_SIZE_AUTO = 0;
 constexpr int32_t ORIGINAL_IMAGE_SIZE_CONTAIN = 2;
 
@@ -1758,8 +1760,8 @@ ArkUIImageSizeType GetBackgroundImageSize(ArkUINodeHandle node)
     CHECK_NULL_RETURN(renderContext->GetBackground(), imageSizeType);
     auto imageSize = renderContext->GetBackground()->GetBackgroundImageSize();
     CHECK_NULL_RETURN(imageSize, imageSizeType);
-    imageSizeType.xValue = imageSize->GetSizeValueX();
-    imageSizeType.yValue = imageSize->GetSizeValueY();
+    imageSizeType.xValue = Dimension(imageSize->GetSizeValueX(), DimensionUnit::PX).ConvertToVp();
+    imageSizeType.yValue = Dimension(imageSize->GetSizeValueY(), DimensionUnit::PX).ConvertToVp();
     imageSizeType.xType = static_cast<int32_t>(imageSize->GetSizeTypeX());
     imageSizeType.yType = static_cast<int32_t>(imageSize->GetSizeTypeY());
     return imageSizeType;
@@ -1769,8 +1771,12 @@ int32_t GetBackgroundImageSizeWidthStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0);
-    // todo
-    return 0;
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, 0);
+    CHECK_NULL_RETURN(renderContext->GetBackground(), 0);
+    auto imageSize = renderContext->GetBackground()->GetBackgroundImageSize();
+    CHECK_NULL_RETURN(imageSize, 0);
+    return static_cast<int32_t>(imageSize->GetSizeTypeX());
 }
 
 void ResetBackgroundImageSize(ArkUINodeHandle node)
@@ -1869,6 +1875,50 @@ void SetScale(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 val
         center.SetZ(centerZ);
     }
     ViewAbstract::SetPivot(frameNode, center);
+}
+
+void GetScale(ArkUINodeHandle node, ArkUIScaleType* scaleType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto scale = ViewAbstract::GetScale(frameNode);
+    scaleType->xValue = scale.x;
+    scaleType->yValue = scale.y;
+}
+
+void GetRotate(ArkUINodeHandle node, ArkUIRotateType* rotateType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto rotate = ViewAbstract::GetRotate(frameNode);
+    rotateType->xCoordinate = rotate.x;
+    rotateType->yCoordinate = rotate.y;
+    rotateType->zCoordinate = rotate.z;
+    rotateType->angle = rotate.w;
+    rotateType->sightDistance = rotate.v;
+}
+
+ArkUI_Float32 GetBrightness(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_BRIGHTNESS);
+    return ViewAbstract::GetBrightness(frameNode).Value();
+}
+
+ArkUI_Float32 GetSaturate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_SATURATE);
+    return ViewAbstract::GetSaturate(frameNode).Value();
+}
+
+void GetBackgroundImagePosition(ArkUINodeHandle node, ArkUIPositionOptions* position)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto imagePosition = ViewAbstract::GetBackgroundImagePosition(frameNode);
+    position->x = imagePosition.GetSizeX().Value();
+    position->y = imagePosition.GetSizeY().Value();
 }
 
 /**
@@ -2844,6 +2894,44 @@ void ResetAlignRules(ArkUINodeHandle node)
         alignRules[static_cast<AlignDirection>(i)] = alignRule;
     }
     ViewAbstract::SetAlignRules(frameNode, alignRules);
+}
+
+void GetAlignRules(ArkUINodeHandle node, ArkUIAlignRulesType* alignRulesType)
+{
+    CHECK_NULL_VOID(alignRulesType);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto alignRules = ViewAbstract::GetAlignRules(frameNode);
+    auto leftIteractor = alignRules.find(AlignDirection::LEFT);
+    if (leftIteractor != alignRules.end()) {
+        alignRulesType->leftAlignAnchor = std::atoi(leftIteractor->second.anchor.c_str());
+        alignRulesType->leftAlignType = static_cast<int32_t>(leftIteractor->second.horizontal);
+    }
+    auto middleIteractor = alignRules.find(AlignDirection::MIDDLE);
+    if (alignRules.find(AlignDirection::MIDDLE) != alignRules.end()) {
+        alignRulesType->middleAlignAnchor = std::atoi(middleIteractor->second.anchor.c_str());
+        alignRulesType->middleAlignType = static_cast<int32_t>(middleIteractor->second.horizontal);
+    }
+    auto rightIteractor = alignRules.find(AlignDirection::RIGHT);
+    if (rightIteractor != alignRules.end()) {
+        alignRulesType->rightAlignAnchor = std::atoi(rightIteractor->second.anchor.c_str());
+        alignRulesType->rightAlignType = static_cast<int32_t>(rightIteractor->second.horizontal);
+    }
+    auto topIteractor = alignRules.find(AlignDirection::TOP);
+    if (topIteractor != alignRules.end()) {
+        alignRulesType->topAlignAnchor = std::atoi(topIteractor->second.anchor.c_str());
+        alignRulesType->topAlignType = static_cast<int32_t>(topIteractor->second.vertical);
+    }
+    auto centerIteractor = alignRules.find(AlignDirection::CENTER);
+    if (centerIteractor != alignRules.end()) {
+        alignRulesType->verticalCenterAlignAnchor = std::atoi(centerIteractor->second.anchor.c_str());
+        alignRulesType->verticalCenterAlignType = static_cast<int32_t>(centerIteractor->second.vertical);
+    }
+    auto bottomIteractor = alignRules.find(AlignDirection::BOTTOM);
+    if (bottomIteractor != alignRules.end()) {
+        alignRulesType->bottomAlignAnchor = std::atoi(bottomIteractor->second.anchor.c_str());
+        alignRulesType->bottomAlignType = static_cast<int32_t>(bottomIteractor->second.vertical);
+    }
 }
 
 void SetAccessibilityDescription(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -4467,8 +4555,9 @@ const ArkUICommonModifier* GetCommonModifier()
         GetOpacity, GetBorderWidth, GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip,
         GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient,
         GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
-        GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor,
-        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, GetFlexGrow,
+        GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules,
+        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, GetScale, GetRotate,
+        GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow,
         GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale, GetInvert,
         GetSepia, GetContrast, GetForegroundColor, GetBlur, GetLinearGradient, GetAlign};
 
