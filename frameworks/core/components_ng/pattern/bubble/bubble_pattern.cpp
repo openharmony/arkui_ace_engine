@@ -437,6 +437,13 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
     AnimationOption optionAlpha;
     optionAlpha.SetDuration(ENTRY_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
+    auto host = GetHost();
+    auto popupId = host->GetId();
+    CHECK_NULL_VOID(host);
+    auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    auto isBlock = layoutProp->GetBlockEventValue(true);
     AnimationUtils::Animate(
         optionAlpha,
         [weak = WeakClaim(this)]() {
@@ -447,13 +454,29 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(VISIABLE_ALPHA);
         },
-        [weak = WeakClaim(this), finish]() {
+        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->transitionStatus_ != TransitionStatus::ENTERING) {
                 return;
             }
             pattern->transitionStatus_ = TransitionStatus::NORMAL;
+            if (showInSubWindow) {
+                std::vector<Rect> rects;
+                if (!isBlock) {
+                    auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
+                        pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
+                    rects.emplace_back(rect);
+                } else {
+                    auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+                    auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
+                        pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
+                    rects.emplace_back(parentWindowRect);
+                    rects.emplace_back(rect);
+                }
+                auto subWindowMgr = SubwindowManager::GetInstance();
+                subWindowMgr->SetPopupHotAreas(rects, popupId, pattern->GetContainerId());
+            }
             if (finish) {
                 finish();
             }

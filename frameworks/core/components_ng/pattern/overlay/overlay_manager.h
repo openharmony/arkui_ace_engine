@@ -81,6 +81,7 @@ public:
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();
+    void SetPopupHotAreas(RefPtr<FrameNode> popupNode);
 
     PopupInfo GetPopupInfo(int32_t targetId) const
     {

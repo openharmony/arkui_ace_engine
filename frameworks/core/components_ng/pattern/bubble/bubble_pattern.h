@@ -94,6 +94,11 @@ public:
         return childOffset_;
     }
 
+    SizeF GetChildSize()
+    {
+        return childSize_;
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
