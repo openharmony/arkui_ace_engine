@@ -130,6 +130,7 @@ public:
     static void OnFirstContentfulPaint(const JSCallbackInfo& args);
     static void OnSafeBrowsingCheckResult(const JSCallbackInfo& args);
     static void OnNavigationEntryCommitted(const JSCallbackInfo& args);
+    static void OnIntelligentTrackingPreventionResult(const JSCallbackInfo& args);
     static void OnControllerAttached(const JSCallbackInfo& args);
     static void OnOverScroll(const JSCallbackInfo& args);
     static void SetLayoutMode(int32_t layoutMode);

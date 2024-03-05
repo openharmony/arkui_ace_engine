@@ -96,6 +96,24 @@ void UIObserverListener::OnRouterPageStateChange(napi_value context, int32_t ind
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
 }
 
+void UIObserverListener::OnDensityChange(double density)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle density change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value objValue = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_value napiDensity = nullptr;
+    napi_create_double(env_, density, &napiDensity);
+    napi_set_named_property(env_, objValue, "density", napiDensity);
+    napi_value argv[] = { objValue };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+}
+
 napi_value UIObserverListener::GetNapiCallback()
 {
     napi_value callback = nullptr;

@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
@@ -157,7 +158,7 @@ void WaterFlowTestNg::CreateItem(int32_t number)
 void WaterFlowTestNg::AddItems(int32_t number)
 {
     for (int i = 0; i < number; ++i) {
-        auto child = FrameNode::GetOrCreateFrameNode(
+        auto child = WaterFlowItemNode::GetOrCreateFlowItem(
             V2::FLOW_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
         if (i & 1) {
             child->GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -1496,6 +1497,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest005, TestSize.Level1)
     float maxMainHeight = pattern_->layoutInfo_.GetMaxMainHeight();
     int32_t crossIndex = pattern_->layoutInfo_.items_[0].rbegin()->first;
     pattern_->layoutInfo_.items_[0][crossIndex + 1][0] = std::pair<float, float>(1.0f, maxMainHeight);
+    pattern_->layoutInfo_.itemInfos_.clear();
+    pattern_->layoutInfo_.endPosArray_.clear();
     EXPECT_EQ(pattern_->layoutInfo_.GetMaxMainHeight(), maxMainHeight + 1.0f);
 
     /**

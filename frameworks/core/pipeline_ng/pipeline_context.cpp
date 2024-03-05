@@ -514,6 +514,7 @@ void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
         windowFocus_.reset();
         windowShow_.reset();
         focusOnNodeCallback_();
+        FocusHub::IsCloseKeyboard(curFrameNode);
         preNodeId_ = curFrameNode->GetId();
         return;
     }
@@ -917,11 +918,10 @@ void PipelineContext::SetupRootElement()
 
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
-    auto atomicService = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
+    RefPtr<AppBarView> appBar = AceType::MakeRefPtr<AppBarView>();
+    auto atomicService = installationFree_ ? appBar->Create(stageNode) : nullptr;
     auto container = Container::Current();
-    if (container && atomicService) {
-        auto appBar = Referenced::MakeRefPtr<AppBarView>(atomicService);
-        appBar->iniBehavior();
+    if (container) {
         container->SetAppBar(appBar);
     }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
@@ -1361,6 +1361,11 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeArea() const
     return safeAreaManager_->GetSafeArea();
 }
 
+PipelineBase::SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
+{
+    return safeAreaManager_->GetSafeAreaWithoutProcess();
+}
+
 void PipelineContext::SyncSafeArea(bool onKeyboard)
 {
     CHECK_NULL_VOID(stageManager_);
@@ -1649,10 +1654,11 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
     const auto& children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-        auto destinationNode = AceType::DynamicCast<NavDestinationGroupNode>(child);
-        if (destinationNode && destinationNode->GetLayoutProperty()) {
-            auto property = destinationNode->GetLayoutProperty<LayoutProperty>();
-            if (property->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        auto childNode = AceType::DynamicCast<FrameNode>(child);
+        if (childNode && childNode->GetLayoutProperty()) {
+            auto property = childNode->GetLayoutProperty();
+            if (property->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE ||
+                !childNode->IsActive()) {
                 continue;
             }
         }
@@ -1882,6 +1888,9 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     density_ = density;
     if (!NearZero(viewScale_)) {
         dipScale_ = density_ / viewScale_;
+    }
+    if (isDensityChanged_) {
+        UIObserverHandler::GetInstance().NotifyDensityChange(density_);
     }
 }
 
@@ -2887,11 +2896,13 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         manager->OnDragMoveOut(pointerEvent);
         manager->ClearSummary();
         manager->ClearExtraInfo();
+        manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         return;
     }
 
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->RequireSummary();
+        manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
     }
     extraInfo = manager->GetExtraInfo();
     if (action == DragEventAction::DRAG_EVENT_END) {

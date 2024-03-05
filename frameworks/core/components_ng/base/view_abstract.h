@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include "modifier.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -140,6 +141,8 @@ public:
     static void SetBorderStyle(const BorderStyleProperty &value);
     static void SetOpacity(double opacity);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);
+    static void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier);
+    static void* GetFrameNode();
     static void SetDragPreview(const NG::DragDropInfo& info);
 
     static void SetBorderImage(const RefPtr<BorderImage> &borderImage);
@@ -241,6 +244,7 @@ public:
         const OffsetF &origin)> &&onAreaChanged);
     static void SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
         const std::vector<double> &ratioList);
+    static void SetOnSizeChanged(std::function<void(const RectF &oldRect, const RectF &rect)> &&onSizeChanged);
     static void SetResponseRegion(const std::vector<DimensionRect> &responseRegion);
     static void SetMouseResponseRegion(const std::vector<DimensionRect> &mouseResponseRegion);
     static void SetTouchable(bool touchable);
@@ -510,17 +514,50 @@ public:
     static int GetZIndex(FrameNode* frameNode);
     static VisibleType GetVisibility(FrameNode* frameNode);
     static bool GetClip(FrameNode* frameNode);
-    static std::optional<RefPtr<BasicShape>> GetClipShape(FrameNode* frameNode);
+    static RefPtr<BasicShape> GetClipShape(FrameNode* frameNode);
     static Matrix4 GetTransform(FrameNode* frameNode);
     static HitTestMode GetHitTestBehavior(FrameNode* frameNode);
     static OffsetT<Dimension> GetPosition(FrameNode* frameNode);
     static std::optional<Shadow> GetShadow(FrameNode* frameNode);
-    static NG::Gradient GetGradient(FrameNode* frameNode);
-    static std::optional<RefPtr<BasicShape>> GetMask(FrameNode* frameNode);
-    static const std::optional<RefPtr<ProgressMaskProperty>> GetMaskProgress(FrameNode* frameNode);
+    static NG::Gradient GetSweepGradient(FrameNode* frameNode);
+    static NG::Gradient GetRadialGradient(FrameNode* frameNode);
+    static RefPtr<BasicShape> GetMask(FrameNode* frameNode);
+    static RefPtr<ProgressMaskProperty> GetMaskProgress(FrameNode* frameNode);
     static BlendMode GetBlendMode(FrameNode* frameNode);
     static TextDirection GetDirection(FrameNode* frameNode);
+    static std::map<AlignDirection, AlignRule> GetAlignRules(FrameNode* frameNode);
     static FlexAlign GetAlignSelf(FrameNode* frameNode);
+
+    static float GetFlexGrow(FrameNode* frameNode);
+    static float GetFlexShrink(FrameNode* frameNode);
+    static Dimension GetFlexBasis(FrameNode* frameNode);
+    static float GetMinWidth(FrameNode* frameNode);
+    static float GetMaxWidth(FrameNode* frameNode);
+    static float GetMinHeight(FrameNode* frameNode);
+    static float GetMaxHeight(FrameNode* frameNode);
+    static Dimension GetGrayScale(FrameNode* frameNode);
+    static InvertVariant GetInvert(FrameNode* frameNode);
+    static Dimension GetSepia(FrameNode* frameNode);
+    static Dimension GetContrast(FrameNode* frameNode);
+    static Color GetForegroundColor(FrameNode* frameNode);
+    static Dimension GetFrontBlur(FrameNode* frameNode);
+    static NG::Gradient GetLinearGradient(FrameNode* frameNode);
+    static Alignment GetAlign(FrameNode* frameNode);
+    static NG::VectorF GetScale(FrameNode* frameNode);
+    static NG::Vector5F GetRotate(FrameNode* frameNode);
+    static Dimension GetBrightness(FrameNode* frameNode);
+    static Dimension GetSaturate(FrameNode* frameNode);
+    static BackgroundImagePosition GetBackgroundImagePosition(FrameNode* frameNode);
+    static float GetWidth(FrameNode* frameNode);
+    static float GetHeight(FrameNode* frameNode);
+    static Color GetBackgroundColor(FrameNode* frameNode);
+    static std::string GetBackgroundImageSrc(FrameNode* frameNode);
+    static ImageRepeat GetBackgroundImageRepeat(FrameNode* frameNode);
+    static PaddingProperty GetPadding(FrameNode* frameNode);
+    static std::string GetKey(FrameNode* frameNode);
+    static bool GetEnabled(FrameNode* frameNode);
+    static MarginProperty GetMargin(FrameNode* frameNode);
+    static TranslateOptions GetTranslate(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

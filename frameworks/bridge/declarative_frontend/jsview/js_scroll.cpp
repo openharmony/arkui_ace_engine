@@ -496,14 +496,10 @@ void JSScroll::SetInitialOffset(const JSCallbackInfo& args)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    Dimension xOffset;
-    Dimension yOffset;
-    if (ConvertFromJSValue(obj->GetProperty("xOffset"), xOffset) && xOffset.Unit() == DimensionUnit::PERCENT) {
-        xOffset = 0.0_vp;
-    }
-    if (ConvertFromJSValue(obj->GetProperty("yOffset"), yOffset) && yOffset.Unit() == DimensionUnit::PERCENT) {
-        yOffset = 0.0_vp;
-    }
+    CalcDimension xOffset;
+    ParseJsDimensionVp(obj->GetProperty("xOffset"), xOffset);
+    CalcDimension yOffset;
+    ParseJsDimensionVp(obj->GetProperty("yOffset"), yOffset);
     ScrollModel::GetInstance()->SetInitialOffset(NG::OffsetT(xOffset, yOffset));
 }
 } // namespace OHOS::Ace::Framework

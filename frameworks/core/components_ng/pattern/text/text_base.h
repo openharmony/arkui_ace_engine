@@ -179,12 +179,48 @@ public:
     virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
 
     virtual void OnVirtualKeyboardAreaChanged() {}
+
+    const RectF& GetContentRect() const
+    {
+        return contentRect_;
+    }
+
+    virtual int32_t GetContentWideTextLength()
+    {
+        return 0;
+    }
+
+    virtual int32_t GetCaretIndex() const
+    {
+        return 0;
+    }
+
+    virtual OffsetF GetCaretOffset() const
+    {
+        return OffsetF();
+    }
+
+    virtual OffsetF GetTextPaintOffset() const
+    {
+        return OffsetF();
+    }
+
+    virtual OffsetF GetFirstHandleOffset() const
+    {
+        return OffsetF();
+    }
+
+    virtual OffsetF GetSecondHandleOffset() const
+    {
+        return OffsetF();
+    }
     
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;
     std::vector<std::string> dragContents_;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
+    RectF contentRect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextBase);
 };
 } // namespace OHOS::Ace::NG

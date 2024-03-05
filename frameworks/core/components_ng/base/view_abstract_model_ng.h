@@ -28,6 +28,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -855,9 +856,15 @@ public:
     {
         ViewAbstract::SetOnDragMove(std::move(onDragMove));
     }
+
     void SetAllowDrop(const std::set<std::string>& allowDrop) override
     {
         ViewAbstract::SetAllowDrop(allowDrop);
+    }
+
+    void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier) override
+    {
+        ViewAbstract::SetDrawModifier(drawModifier);
     }
 
     void SetDragPreview(const NG::DragDropInfo& info) override
@@ -882,6 +889,17 @@ public:
                 Offset(origin.GetX(), origin.GetY()));
         };
         ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
+    }
+
+    void SetOnSizeChanged(
+        std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged) override
+    {
+        ViewAbstract::SetOnSizeChanged(std::move(onSizeChanged));
+    }
+
+    void* GetFrameNode() override
+    {
+        return ViewAbstract::GetFrameNode();
     }
 
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override

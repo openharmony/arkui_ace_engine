@@ -34,6 +34,9 @@ std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedRouterPageListeners_;
 std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::infos_;
 
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedDensityListeners_;
+
 // UIObserver.on(type: "navDestinationUpdate", callback)
 // register a global listener without options
 void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
@@ -337,6 +340,62 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_
     auto& holder = specifiedRouterPageListeners_[currentId];
     for (const auto& listener : holder) {
         listener->OnRouterPageStateChange(context, index, name, path, state);
+    }
+}
+
+// UIObserver.on(type: "densityUpdate", uiContext | null, callback)
+// register a listener on current page
+void UIObserver::RegisterDensityCallback(
+    int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    if (specifiedDensityListeners_.find(uiContextInstanceId) == specifiedDensityListeners_.end()) {
+        specifiedDensityListeners_[uiContextInstanceId] =
+            std::list<std::shared_ptr<UIObserverListener>>({ listener });
+        return;
+    }
+    auto& holder = specifiedDensityListeners_[uiContextInstanceId];
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+// UIObserver.off(type: "densityUpdate", uiContext | null, callback)
+void UIObserver::UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_value callback)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    if (specifiedDensityListeners_.find(uiContextInstanceId) == specifiedDensityListeners_.end()) {
+        return;
+    }
+    auto& holder = specifiedDensityListeners_[uiContextInstanceId];
+    if (callback == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        holder.end());
+}
+
+void UIObserver::HandleDensityChange(NG::AbilityContextInfo& info, double density)
+{
+    auto currentId = Container::CurrentId();
+    if (specifiedDensityListeners_.find(currentId) == specifiedDensityListeners_.end()) {
+        return;
+    }
+    auto& holder = specifiedDensityListeners_[currentId];
+    for (const auto& listener : holder) {
+        listener->OnDensityChange(density);
     }
 }
 

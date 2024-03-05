@@ -104,7 +104,7 @@ public:
                 auto id = host->GetInspectorIdValue("");
                 builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
                 if (!id.empty()) {
-                    Recorder::NodeDataCache::Get().PutInt(id, index);
+                    Recorder::NodeDataCache::Get().PutInt(host, id, index);
                 }
             }
             builder.SetIndex(index);

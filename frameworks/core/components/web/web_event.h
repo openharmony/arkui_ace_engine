@@ -1515,6 +1515,32 @@ private:
     bool didReplaceEntry_ = false;
 };
 
+class ACE_EXPORT IntelligentTrackingPreventionResultEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(IntelligentTrackingPreventionResultEvent, BaseEventInfo);
+
+public:
+    IntelligentTrackingPreventionResultEvent(
+        const std::string& websiteHost, const std::string& trackerHost)
+        : BaseEventInfo("IntelligentTrackingPreventionResultEvent"),
+          host_(websiteHost), trackerHost_(trackerHost) {}
+
+    ~IntelligentTrackingPreventionResultEvent() = default;
+
+    const std::string& GetHost() const
+    {
+        return host_;
+    }
+
+    const std::string& GetTrackerHost() const
+    {
+        return trackerHost_;
+    }
+
+private:
+    std::string host_;
+    std::string trackerHost_;
+};
+
 struct EmbedInfo final {
     std::string id = "";
     std::string type = "";

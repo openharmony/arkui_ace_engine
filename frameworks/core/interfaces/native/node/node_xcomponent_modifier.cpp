@@ -23,6 +23,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const uint32_t ERROR_UINT_CODE = -1;
+std::string g_strValue;
+
 void SetXComponentBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -88,6 +91,35 @@ void SetXComponentSurfaceSize(ArkUINodeHandle node, uint32_t width, uint32_t hei
     CHECK_NULL_VOID(frameNode);
     XComponentModelNG::SetXComponentSurfaceSize(frameNode, width, height);
 }
+
+ArkUI_CharPtr GetXComponentId(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    g_strValue = XComponentModelNG::GetXComponentId(frameNode);
+    return g_strValue.c_str();
+}
+
+ArkUI_Int32 GetXComponentType(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return static_cast<ArkUI_Int32>(XComponentModelNG::GetXComponentType(frameNode));
+}
+
+ArkUI_Uint32 GetXComponentSurfaceWidth(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return XComponentModelNG::GetXComponentSurfaceWidth(frameNode);
+}
+
+ArkUI_Uint32 GetXComponentSurfaceHeight(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return XComponentModelNG::GetXComponentSurfaceHeight(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -105,6 +137,10 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         SetXComponentId,
         SetXComponentType,
         SetXComponentSurfaceSize,
+        GetXComponentId,
+        GetXComponentType,
+        GetXComponentSurfaceWidth,
+        GetXComponentSurfaceHeight,
     };
 
     return &modifier;

@@ -2216,7 +2216,7 @@ class AccessibilityGroupModifier extends ModifierWithKey {
   }
 }
 AccessibilityGroupModifier.identity = Symbol('accessibilityGroup');
-class HoverEffectModifier extends Modifier {
+class HoverEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -2346,6 +2346,7 @@ function modifierWithKey(modifiers, identity, modifierClass, value) {
   const item = modifiers.get(identity);
   if (item) {
     item.stageValue = value;
+    modifiers.set(identity, item);
   }
   else {
     modifiers.set(identity, new modifierClass(value));
@@ -2356,6 +2357,7 @@ class ArkComponent {
     this._modifiers = new Map();
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
+    this._changed = false;
   }
   applyModifierPatch() {
     let expiringItems = [];
@@ -2707,7 +2709,7 @@ class ArkComponent {
     throw new Error('Method not implemented.');
   }
   hoverEffect(value) {
-    modifier(this._modifiers, HoverEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, HoverEffectModifier.identity, HoverEffectModifier, value);
     return this;
   }
   onMouse(event) {
@@ -6031,6 +6033,14 @@ class ArkSpanComponent {
     });
     expiringItemsWithKeys.forEach(key => {
       this._modifiersWithKeys.delete(key);
+    });
+  }
+  cleanStageValue() {
+    if (!this._modifiersWithKeys) {
+      return;
+    }
+    this._modifiersWithKeys.forEach((value, key) => {
+        value.stageValue = undefined;
     });
   }
   onGestureJudgeBegin(callback) {
@@ -18003,7 +18013,7 @@ class ArkTabsComponent extends ArkComponent {
     return this;
   }
   divider(value) {
-    modifierWithKey(this._modifiersWithKeys, DividerModifier.identity, DividerModifier, value);
+    modifierWithKey(this._modifiersWithKeys, TabsDividerModifier.identity, TabsDividerModifier, value);
     return this;
   }
   barOverlap(value) {
@@ -18044,7 +18054,7 @@ class BarGridAlignModifier extends ModifierWithKey {
   }
 }
 BarGridAlignModifier.identity = Symbol('barGridAlign');
-class DividerModifier extends ModifierWithKey {
+class TabsDividerModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -18063,7 +18073,7 @@ class DividerModifier extends ModifierWithKey {
       this.stageValue.endMargin === this.value.endMargin);
   }
 }
-DividerModifier.identity = Symbol('Divider');
+TabsDividerModifier.identity = Symbol('tabsDivider');
 class BarWidthModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

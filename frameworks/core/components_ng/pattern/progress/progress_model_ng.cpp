@@ -538,4 +538,32 @@ void ProgressModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& valu
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, value, frameNode);
 }
 
+double ProgressModelNG::GetValue(FrameNode* frameNode)
+{
+    double value = 0;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ProgressPaintProperty, Value, value, frameNode, value);
+    return value;
+}
+
+Color ProgressModelNG::GetColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, value, frameNode);
+    return value;
+}
+
+double ProgressModelNG::GetTotal(FrameNode* frameNode)
+{
+    double value = 100;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ProgressPaintProperty, MaxValue, value, frameNode, value);
+    return value;
+}
+
+NG::ProgressType ProgressModelNG::GetType(FrameNode* frameNode)
+{
+    NG::ProgressType value = ProgressType::LINEAR;
+    ACE_GET_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, value, frameNode);
+    return value;
+}
+
 } // namespace OHOS::Ace::NG

@@ -858,6 +858,35 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo)
     } else {
         popupPattern->StartEnteringAnimation(nullptr);
     }
+    SetPopupHotAreas(popupNode);
+}
+
+void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
+{
+    CHECK_NULL_VOID(popupNode);
+    auto popupId = popupNode->GetId();
+    auto popupPattern = popupNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(popupPattern);
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto isBlock = layoutProp->GetBlockEventValue(true);
+    auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    if (isShowInSubWindow && popupPattern->IsOnShow()) {
+        std::vector<Rect> rects;
+        if (!isBlock) {
+            auto rect = Rect(popupPattern->GetChildOffset().GetX(), popupPattern->GetChildOffset().GetY(),
+                popupPattern->GetChildSize().Width(), popupPattern->GetChildSize().Height());
+            rects.emplace_back(rect);
+        } else {
+            auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+            auto rect = Rect(popupPattern->GetChildOffset().GetX(), popupPattern->GetChildOffset().GetY(),
+                popupPattern->GetChildSize().Width(), popupPattern->GetChildSize().Height());
+            rects.emplace_back(parentWindowRect);
+            rects.emplace_back(rect);
+        }
+        auto subWindowMgr = SubwindowManager::GetInstance();
+        subWindowMgr->SetPopupHotAreas(rects, popupId, popupPattern->GetContainerId());
+    }
 }
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
@@ -1479,6 +1508,7 @@ void OverlayManager::CloseCustomDialog(const int32_t dialogId)
             iter++;
         }
         if (tmpNode) {
+            DeleteDialogHotAreas(tmpNode);
             CloseDialogInner(tmpNode);
         } else {
             LOGE("not find dialog when no dialog id");
@@ -1490,6 +1520,7 @@ void OverlayManager::CloseCustomDialog(const int32_t dialogId)
             return;
         }
         RefPtr<FrameNode> tmpDialog = (*iter).second;
+        DeleteDialogHotAreas(tmpDialog);
         CloseDialogInner(tmpDialog);
     }
     return;
@@ -1597,6 +1628,10 @@ void OverlayManager::PopModalDialog(int32_t maskId)
     for (auto it = DialogMap.begin(); it != DialogMap.end(); it++) {
         auto dialogProp = DynamicCast<DialogLayoutProperty>(it->second->GetLayoutProperty());
         if (dialogId == it->first) {
+            auto hub = it->second->GetEventHub<DialogEventHub>();
+            if (hub) {
+                hub->FireCancelEvent();
+            }
             subOverlayManager->CloseDialog(it->second);
         }
     }
@@ -1643,14 +1678,8 @@ RefPtr<FrameNode> OverlayManager::GetDialog(int32_t dialogId)
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "close dialog enter");
+    DeleteDialogHotAreas(dialogNode);
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
-    CHECK_NULL_VOID(dialogLayoutProp);
-    if (dialogLayoutProp->GetShowInSubWindowValue(false)) {
-        SubwindowManager::GetInstance()->DeleteHotAreas(
-            SubwindowManager::GetInstance()->GetDialogSubWindowId(), dialogNode->GetId());
-        SubwindowManager::GetInstance()->HideDialogSubWindow(
-            SubwindowManager::GetInstance()->GetDialogSubWindowId());
-    }
     if (dialogLayoutProp->GetShowInSubWindowValue(false) && dialogLayoutProp->GetIsModal().value_or(true)) {
         auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
         CHECK_NULL_VOID(parentPipelineContext);
@@ -1663,6 +1692,18 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
         }
     }
     CloseDialogInner(dialogNode);
+}
+
+void OverlayManager::DeleteDialogHotAreas(const RefPtr<FrameNode>& dialogNode)
+{
+    auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
+    CHECK_NULL_VOID(dialogLayoutProp);
+    if (dialogLayoutProp->GetShowInSubWindowValue(false)) {
+        SubwindowManager::GetInstance()->DeleteHotAreas(
+            SubwindowManager::GetInstance()->GetDialogSubWindowId(), dialogNode->GetId());
+        SubwindowManager::GetInstance()->HideDialogSubWindow(
+            SubwindowManager::GetInstance()->GetDialogSubWindowId());
+    }
 }
 
 void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
@@ -1700,7 +1741,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     CallOnHideDialogCallback();
 }
 
-bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter)
+bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove dialog enter");
     if (overlay->IsRemoving()) {
@@ -1710,7 +1751,7 @@ bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackP
         return true;
     }
     auto hub = overlay->GetEventHub<DialogEventHub>();
-    if (!isPageRouter && hub) {
+    if (hub) {
         hub->FireCancelEvent();
     }
     CloseDialog(overlay);
@@ -1768,6 +1809,9 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             }
         }
         if (InstanceOf<DialogPattern>(pattern)) {
+            if (isPageRouter) {
+                return false;
+            }
             auto dialogPattern = DynamicCast<DialogPattern>(pattern);
             CHECK_NULL_RETURN(dialogPattern, false);
             if (dialogPattern->ShouldDismiss()) {
@@ -1775,7 +1819,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
                 TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
                 return true;
             }
-            return RemoveDialog(overlay, isBackPressed, isPageRouter);
+            return RemoveDialog(overlay, isBackPressed);
         }
         if (InstanceOf<BubblePattern>(pattern)) {
             return RemoveBubble(overlay);
@@ -1998,7 +2042,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
             return true;
         }
-        return RemoveDialog(overlay, false, false);
+        return RemoveDialog(overlay, false);
     }
     if (InstanceOf<BubblePattern>(pattern)) {
         auto popupPattern = DynamicCast<BubblePattern>(pattern);
@@ -2133,10 +2177,10 @@ void OverlayManager::ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOve
             pageFocusHub->SetParentFocusable(true);
             return;
         }
-        if (node->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
-            auto serviceFocusHub = node->GetFocusHub();
-            CHECK_NULL_VOID(serviceFocusHub);
-            serviceFocusHub->SetParentFocusable(true);
+        if (node->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG || node->GetTag() == V2::SHEET_WRAPPER_TAG) {
+            auto currentFocusHub = node->GetFocusHub();
+            CHECK_NULL_VOID(currentFocusHub);
+            currentFocusHub->SetParentFocusable(true);
             return;
         }
         auto focusHub = node->GetOrCreateFocusHub();
@@ -2266,9 +2310,8 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         modalNode->AddChild(builder);
         FireModalPageShow();
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
-            onAppear) {
-            onAppear();
+        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            modalPagePattern->OnAppear();
         }
         // Fire hidden event of navdestination under the appeared modal
         FireNavigationStateChange(false);
@@ -2651,8 +2694,10 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     if (onWillAppear) {
         onWillAppear();
     }
-    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) && onAppear) {
-        onAppear();
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
+        sheetPattern->OnAppear();
     }
 
     // start transition animation

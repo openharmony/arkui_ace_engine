@@ -29,10 +29,11 @@ public:
     virtual ~WebModel() = default;
 
     virtual void Create(const std::string& src, const RefPtr<WebController>& webController,
-        WebType type = WebType::SURFACE, bool incognitoMode = false) = 0;
+        RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false) = 0;
     virtual void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
         std::function<void(const std::string&)>&& setHapPathCallback,
-        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE, bool incognitoMode = false) = 0;
+        int32_t parentWebId, bool popup, RenderMode renderMode = RenderMode::ASYNC_RENDER,
+        bool incognitoMode = false) = 0;
     virtual void SetCustomScheme(const std::string& cmdLine) = 0;
     virtual void SetFocusable(bool focusable) {};
     virtual void SetFocusNode(bool isFocusNode) {};
@@ -159,6 +160,9 @@ public:
 
     virtual void SetCopyOptionMode(CopyOptions mode) {};
     virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
+    virtual void SetIntelligentTrackingPreventionResultId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
+            intelligentTrackingPreventionResultId) {};
     virtual void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
 private:
     static std::unique_ptr<WebModel> instance_;

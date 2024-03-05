@@ -291,8 +291,7 @@ void SetTimePickerOnChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extr
     auto onChange = [eventId, extraParam](const BaseEventInfo* info) {
         ArkUINodeEvent event;
         event.kind = ON_TIME_PICKER_CHANGE;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
         std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo->GetSelectedStr());
         if (!argsPtr) {

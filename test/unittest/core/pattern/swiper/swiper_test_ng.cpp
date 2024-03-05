@@ -5169,6 +5169,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSwiperController001, TestSize.Level1)
     pattern_->swiperController_->swipeToWithoutAnimationImpl_(0);
     pattern_->swiperController_->showNextImpl_();
     pattern_->swiperController_->showPrevImpl_();
+    pattern_->swiperController_->changeIndexImpl_(0, true);
     pattern_->swiperController_->finishImpl_();
 }
 
@@ -5481,26 +5482,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlayTranslateAnimation001, TestSize.Level1)
         pattern_->PlayTranslateAnimation(startPos, endPos, nextIndex, restartAutoPlay, velocity);
         pattern_->controller_ = AceType::MakeRefPtr<Animator>();
         frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateCurve(curve1);
-    }
-
-    double value = 1.0;
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                pattern_->PlayTranslateAnimation(startPos, endPos, nextIndex, restartAutoPlay, velocity);
-                Animation<double>::ValueCallback valueCallback =
-                    static_cast<CurveAnimation<double>*>(AceType::RawPtr(pattern_->controller_->interpolators_.front()))
-                        ->callbacks_.begin()
-                        ->second;
-                valueCallback.callback_(value);
-                value = 0;
-                startPos = 0.0f;
-                endPos = 0.0f;
-            }
-            endPos = 0.1f;
-        }
-        endPos = 0.0f;
-        startPos = 0.1f;
     }
 }
 
@@ -12057,7 +12038,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeSwipePageNextIndex001, TestSize.Level
     EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 3);
 
     dragVelocity = -781.0f;
-    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 6);
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 3);
 
     pattern_->itemPosition_.clear();
     swiperItemInfo1.startPos = -301.0f;
@@ -12137,6 +12118,69 @@ HWTEST_F(SwiperTestNg, SwiperPatternSwipeByGroupShowPrevious001, TestSize.Level1
     pattern_->isVisible_ = true;
     pattern_->ShowPrevious();
     EXPECT_EQ(pattern_->targetIndex_.value_or(0), -3);
+}
+
+/**
+ * @tc.name: SwiperPatternChangeIndex001
+ * @tc.desc: ChangeIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternChangeIndex001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+
+    pattern_->ChangeIndex(1, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+}
+
+/**
+ * @tc.name: SwiperPatternChangeIndex002
+ * @tc.desc: ChangeIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternChangeIndex002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+
+    pattern_->ChangeIndex(1, true);
+    EXPECT_EQ(pattern_->targetIndex_.value_or(0), 1);
+}
+
+/**
+ * @tc.name: SwiperPatternChangeIndex003
+ * @tc.desc: ChangeIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternChangeIndex003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    pattern_->ChangeIndex(4, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+}
+
+/**
+ * @tc.name: SwiperPatternSwipeByGroupChangeIndex001
+ * @tc.desc: Test SwiperPattern ChangeIndex On SwipeByGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSwipeByGroupChangeIndex001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    layoutProperty_->UpdateSwipeByGroup(true);
+    layoutProperty_->UpdateDisplayCount(2);
+    layoutProperty_->UpdateLoop(true);
+    pattern_->currentIndex_ = 0;
+    pattern_->isVisible_ = true;
+    pattern_->ChangeIndex(3, true);
+    EXPECT_EQ(pattern_->targetIndex_.value_or(0), 2);
 }
 
 void SwiperTestNg::InitCaptureTest()

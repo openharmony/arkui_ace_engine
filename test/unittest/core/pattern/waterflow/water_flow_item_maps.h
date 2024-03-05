@@ -175,6 +175,14 @@ const std::vector<WaterFlowSections::Section> SECTION_7 = {
         .rowsGap = 2.0_px,
         .margin = MARGIN_2 },
 };
+
+const std::function<float(int32_t)> GET_MAIN_SIZE_ILLEGAL = [](int32_t idx) { return -100.0f; };
+const std::vector<WaterFlowSections::Section> SECTION_8 = {
+    WaterFlowSections::Section { .itemsCount = 10,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_ILLEGAL,
+        .crossCount = 1,
+        .margin = MARGIN_2 },
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_WATER_FLOW_ITEM_MAPS_H

@@ -37,6 +37,9 @@ struct RingParam {
     float radius = 1.0f;
     float strokeWidth = 1.0f;
     float movement = 0.0f;
+    float darkRingRadius = 0.0f;
+    float darkBackgroundWidth = 1.0f;
+    float darkBackgroundRadius = 1.0f;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_BASE_H

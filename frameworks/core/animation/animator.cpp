@@ -113,6 +113,16 @@ bool Animator::HasScheduler() const
     return scheduler_ != nullptr;
 }
 
+bool Animator::SetExpectedFrameRateRange(FrameRateRange& frameRateRange)
+{
+    if (HasScheduler() && frameRateRange.IsValid()) {
+        scheduler_->SetExpectedFrameRateRange(frameRateRange);
+        return true;
+    }
+
+    return false;
+}
+
 void Animator::AddInterpolator(const RefPtr<Interpolator>& animation)
 {
     CHECK_RUN_ON(UI);

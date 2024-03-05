@@ -31,8 +31,8 @@ class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridIrregularLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
 public:
-    explicit GridIrregularLayoutAlgorithm(GridLayoutInfo gridLayoutInfo)
-        : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)) {};
+    explicit GridIrregularLayoutAlgorithm(GridLayoutInfo gridLayoutInfo, bool overScroll = false)
+        : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)), overScroll_(overScroll) {};
 
     ~GridIrregularLayoutAlgorithm() override = default;
 
@@ -60,6 +60,8 @@ private:
     void Init(const RefPtr<GridLayoutProperty>& props);
 
     void MeasureOnOffset(float mainSize);
+    void MeasureForward(float mainSize);
+    void MeasureBackward(float mainSize);
 
     /**
      * @brief Check if offset is larger than the entire viewport. If so, skip measuring intermediate items and jump
@@ -163,6 +165,7 @@ private:
     float postJumpOffset_ = 0.0f; /**< The offset to be applied after performing a jump. */
 
     bool enableSkip_ = true;
+    bool overScroll_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayoutAlgorithm);
 };

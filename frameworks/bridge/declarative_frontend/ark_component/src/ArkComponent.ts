@@ -2277,7 +2277,7 @@ class AccessibilityGroupModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class HoverEffectModifier extends Modifier<HoverEffect> {
+class HoverEffectModifier extends ModifierWithKey<HoverEffect> {
   constructor(value: HoverEffect) {
     super(value);
   }
@@ -2388,6 +2388,7 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
   const item = modifiers.get(identity);
   if (item) {
     item.stageValue = value;
+    modifiers.set(identity, item);
   } else {
     modifiers.set(identity, new modifierClass(value));
   }
@@ -2396,12 +2397,14 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
 class ArkComponent implements CommonMethod<CommonAttribute> {
   _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
   _modifiersWithKeys: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
+  _changed: boolean;
   nativePtr: KNode;
 
   constructor(nativePtr: KNode) {
     this._modifiers = new Map();
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
+    this._changed = false;
   }
 
   applyModifierPatch(): void {
@@ -2782,7 +2785,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   hoverEffect(value: HoverEffect): this {
-    modifier(this._modifiers, HoverEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, HoverEffectModifier.identity, HoverEffectModifier, value);
     return this;
   }
 

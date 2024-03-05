@@ -69,8 +69,9 @@ export declare type OperateCheck = {
 const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
 const TEXT_COLUMN_SPACE = 4;
-const TEXT_SAFE_MARGIN = 12;
-const LISTITEM_PADDING = 12;
+const TEXT_SAFE_MARGIN = 8;
+const LISTITEM_PADDING = 8;
+const SWITCH_PADDING = 6;
 const BADGE_SIZE = 8;
 const SMALL_ICON_SIZE = 16;
 const SYSTEM_ICON_SIZE = 24;
@@ -89,7 +90,7 @@ const DEFAULT_ROW_SPACE = 0;
 const SPECICAL_ROW_SPACE = 4;
 const OPERATEITEM_ICONLIKE_SIZE = 24;
 const OPERATEITEM_ARROW_WIDTH = 12
-const OPERATEITEM_ICON_CLICKABLE_SIZE = 48;
+const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
 const HOVERING_COLOR = '#0d000000';
 const TOUCH_DOWN_COLOR = '#1a000000';
@@ -131,6 +132,7 @@ struct ContentItemStruct {
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
           .focusable(true)
           .draggable(false)
+          .fillColor($r('sys.color.ohos_id_color_secondary'))
       }
       else {
         Image(this.icon)
@@ -144,6 +146,7 @@ struct ContentItemStruct {
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
           .focusable(true)
           .draggable(false)
+          .fillColor($r('sys.color.ohos_id_color_secondary'))
       }
     }
   }
@@ -193,7 +196,7 @@ struct ContentItemStruct {
     }
     .margin({ right: 16 })
     .padding({ left: LISTITEM_PADDING })
-    .width("calc(66% - 16vp)")
+    .width('calc(66% - 16vp)')
     .flexShrink(1)
   }
 }
@@ -336,6 +339,7 @@ struct OperateItemStruct {
   @Builder
   createText(text: string) {
     Text(text)
+      .margin({ right: LISTITEM_PADDING })
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
       .fontColor($r('sys.color.ohos_id_color_text_secondary'))
       .focusable(true)
@@ -462,7 +466,7 @@ struct OperateItemStruct {
         })
         .hitTestBehavior(HitTestMode.Block)
     }
-    .margin({ right: LISTITEM_PADDING / 2 })
+    .margin({ right: SWITCH_PADDING })
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .justifyContent(FlexAlign.Center)
@@ -501,7 +505,7 @@ struct OperateItemStruct {
           .focusable(true)
           .draggable(false)
           .constraintSize({
-            maxWidth: `calc(100% - ${ OPERATEITEM_ARROW_WIDTH + TEXT_SAFE_MARGIN }vp)`
+            maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
           })
         Image(icon.value)
           .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -588,7 +592,7 @@ struct OperateItemStruct {
         }
       }
     }
-    .width("34%")
+    .width('34%')
     .flexShrink(1)
     .justifyContent(FlexAlign.End)
   }
@@ -705,18 +709,23 @@ export struct ComposeListItem {
           this.frontColor = this.isActive ? ACTIVED_COLOR : Color.Transparent.toString()
         }
       })
-
-      if (this.canFocus) {
-        Row()
-          .height(this.itemHeight)
-          .width('100%')
-          .hitTestBehavior(HitTestMode.None)
+      .stateStyles({
+        focused: {
           .border({
+            radius: $r('sys.float.ohos_id_corner_radius_default_m'),
             width: ITEM_BORDER_SHOWN,
-            color: $r('sys.color.ohos_id_color_focused_outline')
+            color: $r('sys.color.ohos_id_color_focused_outline'),
+            style: BorderStyle.Solid
           })
-          .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
-      }
+        },
+        normal: {
+          .border({
+            radius: $r('sys.float.ohos_id_corner_radius_default_m'),
+            width: ITEM_BORDER_SHOWN,
+            color: Color.Transparent
+          })
+        }
+      })
     }
     .padding({
       left: $r('sys.float.ohos_id_default_padding_start'),

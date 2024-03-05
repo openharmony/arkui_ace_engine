@@ -299,7 +299,24 @@ public:
     }
 
     void TriggerModifyDone();
-    
+
+    void SetInitialOffset(const OffsetT<CalcDimension>& offset)
+    {
+        initialOffset_ = offset;
+    }
+
+    OffsetT<CalcDimension> GetInitialOffset()
+    {
+        return initialOffset_;
+    }
+
+    bool IsInitialized()
+    {
+        return isInitialized_;
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
@@ -359,6 +376,9 @@ private:
     float lastPageLength_ = 0.0f;
     float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
     float GetPagingDelta(float dragDistance, float velocity, float pageLength) const;
+
+    //initialOffset
+    OffsetT<CalcDimension> initialOffset_;
 };
 
 } // namespace OHOS::Ace::NG

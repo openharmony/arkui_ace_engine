@@ -460,4 +460,61 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest008, TestSize.Level1)
 
     EXPECT_EQ(0, displaySyncRate3);
 }
+
+/**
+ * @tc.name: DisplaySyncManagerTest009
+ * @tc.desc: DisplaySync registers and unregisters callback functions, and sets refreshrate mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    int32_t initSize = 0;
+    EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
+
+    /**
+     * @tc.steps: step2. Construct DisplaySync and add the DisplaySync to DisplaySyncManager.
+     */
+    RefPtr<UIDisplaySync> displaySync = AceType::MakeRefPtr<UIDisplaySync>();
+    displaySync->AddToPipelineOnContainer();
+    EXPECT_TRUE(displaySync->IsOnPipeline());
+
+    /**
+     * @tc.steps: step3. Register different callback functions.
+     */
+    displaySync->RegisterOnFrame([]() {});
+    displaySync->RegisterOnFrameWithData([](RefPtr<DisplaySyncData> data) {});
+    displaySync->RegisterOnFrameWithTimestamp([](uint64_t timestamp) {});
+
+    /**
+     * @tc.steps: step4. Unregister callback functions.
+     */
+    displaySync->UnregisterOnFrame();
+    EXPECT_NE(nullptr, displaySync->GetDisplaySyncData()->onFrame_);
+    EXPECT_NE(nullptr, displaySync->GetDisplaySyncData()->onFrameWithData_);
+    EXPECT_NE(nullptr, displaySync->GetDisplaySyncData()->onFrameWithTimestamp_);
+
+    displaySync->CheckShouldUnregisterOnFrame();
+    EXPECT_EQ(nullptr, displaySync->GetDisplaySyncData()->onFrame_);
+    EXPECT_EQ(nullptr, displaySync->GetDisplaySyncData()->onFrameWithData_);
+    EXPECT_EQ(nullptr, displaySync->GetDisplaySyncData()->onFrameWithTimestamp_);
+
+    /**
+     * @tc.steps: step5. Set refreshrate mode.
+     */
+    displaySync->SetRefreshRateMode(0);
+    EXPECT_TRUE(displaySync->IsNonAutoRefreshRateMode());
+    EXPECT_FALSE(displaySync->IsAutoRefreshRateMode());
+
+    /**
+     * @tc.steps: step6. Remove the DisplaySync from DisplaySyncManager.
+     */
+    displaySync->DelFromPipelineOnContainer();
+    EXPECT_FALSE(displaySync->IsOnPipeline());
+}
 } // namespace OHOS::Ace::NG

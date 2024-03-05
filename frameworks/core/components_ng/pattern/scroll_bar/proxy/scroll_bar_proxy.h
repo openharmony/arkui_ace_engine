@@ -60,7 +60,7 @@ public:
      * Notify scrollable node to update state, called by scroll bar.
      * @param distance absolute distance that scroll bar has scrolled.
      */
-    void NotifyScrollableNode(float distance, const WeakPtr<ScrollBarPattern>& weakScrollBar) const;
+    void NotifyScrollableNode(float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar) const;
 
     /*
      * Notify scrollable node to callback scrollStart, called by scroll bar.

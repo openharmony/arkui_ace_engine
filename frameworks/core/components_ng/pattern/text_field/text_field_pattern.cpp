@@ -251,12 +251,13 @@ std::u16string TextFieldPattern::CreateObscuredText(int32_t len)
 }
 
 std::u16string TextFieldPattern::CreateDisplayText(
-    const std::string& content, int32_t nakedCharPosition, bool needObscureText)
+    const std::string& content, int32_t nakedCharPosition, bool needObscureText, bool showPasswordDirectly)
 {
     if (!content.empty() && needObscureText) {
         auto text =
             TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(content).length()));
-        if (nakedCharPosition >= 0 && nakedCharPosition < static_cast<int32_t>(content.length())) {
+        if (nakedCharPosition >= 0 && nakedCharPosition < static_cast<int32_t>(content.length())
+            && !showPasswordDirectly) {
             auto rawContent = StringUtils::Str8ToStr16(content);
             text[nakedCharPosition] = rawContent[nakedCharPosition];
         }
@@ -979,7 +980,7 @@ void TextFieldPattern::HandleBlurEvent()
     needToRequestKeyboardInner_ = false;
     isLongPress_ = false;
     isFocusedBeforeClick_ = false;
-    UpdateShowMagnifier();
+    magnifierController_->UpdateShowMagnifier();
     CloseSelectOverlay(!isKeyboardClosedByUser_);
     StopTwinkling();
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_)) {
@@ -1388,8 +1389,8 @@ void TextFieldPattern::HandleTouchUp()
     if (isMousePressed_) {
         isMousePressed_ = false;
     }
-    if (GetShowMagnifier()) {
-        UpdateShowMagnifier();
+    if (magnifierController_->GetShowMagnifier()) {
+        magnifierController_->UpdateShowMagnifier();
     }
     if (enableTouchAndHoverEffect_ && !HasStateStyle(UI_STATE_PRESSED)) {
         auto tmpHost = GetHost();
@@ -2216,7 +2217,7 @@ void TextFieldPattern::OnAfterModifyDone()
                                               TextInputType::VISIBLE_PASSWORD
                                         : false;
         if (!isPwdType) {
-            Recorder::NodeDataCache::Get().PutString(inspectorId, contentController_->GetTextValue());
+            Recorder::NodeDataCache::Get().PutString(host, inspectorId, contentController_->GetTextValue());
         }
     }
 }
@@ -2658,7 +2659,7 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     CHECK_NULL_VOID(SelectOverlayIsOn());
     CHECK_NULL_VOID(!contentController_->IsEmpty());
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset_;
-    SetLocalOffset(localOffset);
+    magnifierController_->SetLocalOffset(localOffset);
     if (isSingleHandle_) {
         selectController_->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
     } else {
@@ -2733,7 +2734,7 @@ void TextFieldPattern::UpdateCopyAllStatus()
 void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFirstHandle)
 {
     UpdateCopyAllStatus();
-    UpdateShowMagnifier();
+    magnifierController_->UpdateShowMagnifier();
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
     if (!isSingleHandle_) {
@@ -2766,8 +2767,8 @@ void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
     if (closedByGlobalEvent) {
         UpdateSelectMenuVisibility(false);
     }
-    if (GetShowMagnifier()) {
-        UpdateShowMagnifier();
+    if (magnifierController_->GetShowMagnifier()) {
+        magnifierController_->UpdateShowMagnifier();
     }
 }
 
@@ -4641,7 +4642,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
-    if (HasFocus() && !GetShowMagnifier()) {
+    if (HasFocus() && !magnifierController_->GetShowMagnifier()) {
         StartTwinkling();
         FireOnSelectionChange(position, position);
     }
@@ -6516,30 +6517,6 @@ void TextFieldPattern::ScrollToSafeArea() const
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->ScrollTextFieldToSafeArea();
-}
-
-RefPtr<PixelMap> TextFieldPattern::GetPixelMap()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, NULL);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_RETURN(overlayManager, NULL);
-    auto rootUINode = overlayManager->GetRootNode().Upgrade();
-    CHECK_NULL_RETURN(rootUINode, NULL);
-    auto rootFrameNode = DynamicCast<FrameNode>(rootUINode);
-    CHECK_NULL_RETURN(rootFrameNode, NULL);
-
-    auto context = rootFrameNode->GetRenderContext();
-    if (!context) {
-        UpdateShowMagnifier();
-    }
-    CHECK_NULL_RETURN(context, NULL);
-    auto pixelMap = context->GetThumbnailPixelMap();
-    if (!pixelMap) {
-        UpdateShowMagnifier();
-    }
-    CHECK_NULL_RETURN(pixelMap, NULL);
-    return pixelMap;
 }
 
 void TextFieldPattern::ShowMenu()

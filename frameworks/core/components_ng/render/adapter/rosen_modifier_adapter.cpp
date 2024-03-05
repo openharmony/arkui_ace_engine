@@ -79,7 +79,7 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
 #else
     DrawingContext context_ = { *context.canvas, context.width, context.height };
 #endif
-    modifier->onDraw(context_);
+    modifier->Draw(context_);
 }
 
 #define CONVERT_PROP(prop, srcType, propType)                                      \

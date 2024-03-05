@@ -241,6 +241,7 @@ export struct SubHeader {
               .width(IMAGE_WIDTH)
               .height(IMAGE_HEIGHT_NUM)
               .focusable(true)
+              .draggable(false)
           }.margin({ left: SPACE_MARGIN, right: SPACE_MARGIN })
         }
         .height(BUTTON_SIZE)

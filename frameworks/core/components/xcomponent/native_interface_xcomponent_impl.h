@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "interfaces/native/native_interface_xcomponent.h"
+#include "interfaces/native/ui_input_event.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -46,7 +47,9 @@ namespace OHOS::Ace {
 class NativeXComponentImpl : public virtual AceType {
     DECLARE_ACE_TYPE(NativeXComponentImpl, AceType);
     using NativeXComponent_Callback = void (*)(OH_NativeXComponent*, void*);
-    using SetExpectedRateRangeEvent_Callback  = std::function<void()>;
+    using NativeXComponent_UIEventCallback = void (*)(
+        OH_NativeXComponent*, ArkUI_UIInputEvent*, ArkUI_UIInputEvent_Type);
+    using SetExpectedRateRangeEvent_Callback = std::function<void()>;
     using SetOnFrameEvent_Callback = std::function<void()>;
     using SetUnregisterOnFrameEvent_Callback = std::function<void()>;
     using OnFrame_Callback = void (*)(OH_NativeXComponent*, uint64_t, uint64_t);
@@ -251,6 +254,16 @@ public:
         blurEventCallback_ = callback;
     }
 
+    void SetUIAxisEventCallback(NativeXComponent_UIEventCallback callback)
+    {
+        uiAxisEventCallback_ = callback;
+    }
+
+    NativeXComponent_UIEventCallback GetUIAxisEventCallback() const
+    {
+        return uiAxisEventCallback_;
+    }
+
     void SetOnFrameCallback(OnFrame_Callback callback)
     {
         onFrameCallback_ = callback;
@@ -315,6 +328,16 @@ public:
         detachNativeNodeCallback_(container_, root);
     }
 
+    void SetNeedSoftKeyboard(bool needSoftKeyboard)
+    {
+        needSoftKeyboard_ = needSoftKeyboard;
+    }
+
+    bool IsNeedSoftKeyboard() const
+    {
+        return needSoftKeyboard_;
+    }
+
 private:
     std::string xcomponentId_;
     void* window_ = nullptr;
@@ -330,6 +353,7 @@ private:
     NativeXComponent_Callback focusEventCallback_ = nullptr;
     NativeXComponent_Callback keyEventCallback_ = nullptr;
     NativeXComponent_Callback blurEventCallback_ = nullptr;
+    NativeXComponent_UIEventCallback uiAxisEventCallback_ = nullptr;
     std::vector<XComponentTouchPoint> touchPoints_;
     std::vector<OH_NativeXComponent_HistoricalPoint> historicalPoints_;
     OnFrame_Callback onFrameCallback_ = nullptr;
@@ -337,6 +361,7 @@ private:
     NativeNode_Callback attachNativeNodeCallback_ = nullptr;
     NativeNode_Callback detachNativeNodeCallback_ = nullptr;
     void* container_;
+    bool needSoftKeyboard_ = false;
 };
 } // namespace OHOS::Ace
 
@@ -365,6 +390,9 @@ struct OH_NativeXComponent {
     int32_t UnregisterOnFrameCallback();
     int32_t AttachNativeRootNode(void* root);
     int32_t DetachNativeRootNode(void* root);
+    int32_t RegisterUIAxisEventCallback(
+        void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type));
+    int32_t SetNeedSoftKeyboard(bool needSoftKeyboard);
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

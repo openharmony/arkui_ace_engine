@@ -657,4 +657,166 @@ HWTEST_F(TextFieldModifyTest, StripNextLine001, TestSize.Level1)
     pattern_->StripNextLine(value);
     EXPECT_EQ(ori, StringUtils::ToString(value));
 }
+
+/**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: Test get Select HandleInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnHandleMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create selectOverlayProxy.
+     */
+    pattern_->ProcessOverlay(true, true, true);
+
+    RectF handleRect;
+    pattern_->OnHandleMove(handleRect, false);
+    EXPECT_EQ(pattern_->selectController_->
+        firstHandleInfo_.rect, RectF(2.0f, 2.0f, 1.5f, 0.0f));
+}
+
+/**
+ * @tc.name: OnHandleMove002
+ * @tc.desc: Test get Select HandleInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnHandleMove002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create selectOverlayProxy.
+     */
+    pattern_->ProcessOverlay(true, true, true);
+
+    /**
+     * @tc.steps: step2. set two handle and call OnHandleMove
+     * tc.expected: step2. Check if the value is created.
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    pattern_->isSingleHandle_ = false;
+    RectF handleRect;
+    pattern_->OnHandleMove(handleRect, false);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
+}
+
+/**
+ * @tc.name: OnHandleMove003
+ * @tc.desc: Test get Select HandleInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnHandleMove003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create selectOverlayProxy.
+     */
+    pattern_->ProcessOverlay(true, true, true);
+
+    /**
+     * @tc.steps: step2. set two handle and call OnHandleMove
+     * tc.expected: step2. Check if the value is created.
+     */
+    pattern_->isSingleHandle_ = false;
+    RectF handleRect;
+    pattern_->OnHandleMove(handleRect, true);
+    OffsetF localOffset(0.0f, 0.0f);
+    EXPECT_EQ(pattern_->parentGlobalOffset_, localOffset);
+}
+
+/**
+ * @tc.name: OnHandleMove004
+ * @tc.desc: Test get Select HandleInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnHandleMove004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create selectOverlayProxy.
+     */
+    pattern_->ProcessOverlay(true, true, true);
+
+    /**
+     * @tc.steps: step2. set two handle and call OnHandleMove
+     * tc.expected: step2. Check if the value is created.
+     */
+    pattern_->isSingleHandle_ = false;
+    FlushLayoutTask(frameNode_);
+    RectF handleRect;
+    pattern_->OnHandleMove(handleRect, false);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
+}
+
+/**
+ * @tc.name: OnHandleMoveDone001
+ * @tc.desc: Test the result after handle move done.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnHandleMoveDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create selectOverlayProxy.
+     */
+    pattern_->ProcessOverlay(true, true, true);
+    RectF handleRect;
+    pattern_->OnHandleMove(handleRect, false);
+    pattern_->isSingleHandle_ = false;
+    pattern_->OnHandleMoveDone(handleRect, false);
+
+    pattern_->isSingleHandle_ = true;
+    pattern_->OnHandleMoveDone(handleRect, false);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
+}
+
+/**
+ * @tc.name: OnHandleMoveDone002
+ * @tc.desc: Test the result after handle move done.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnHandleMoveDone002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create selectOverlayProxy.
+     */
+    pattern_->ProcessOverlay(true, true, true);
+    RectF handleRect;
+    pattern_->OnHandleMove(handleRect, false);
+    pattern_->isSingleHandle_ = false;
+    pattern_->OnHandleMoveDone(handleRect, false);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
+}
 } // namespace OHOS::Ace::NG

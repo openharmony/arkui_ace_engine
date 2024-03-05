@@ -628,7 +628,6 @@ public:
     void OnContextMenuHide(const std::string& info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
     bool OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
-    bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);
     void OnScroll(double xOffset, double yOffset);
@@ -708,7 +707,7 @@ public:
     }
 #endif
     void SetToken();
-    void SetWebType(WebType type);
+    void SetRenderMode(RenderMode renderMode);
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
@@ -721,6 +720,9 @@ public:
     void SetAccessibilityState(bool state);
     void UpdateAccessibilityState(bool state);
     OHOS::NWeb::NWebPreference::CopyOptionMode GetCopyOptionMode() const;
+    void OnIntelligentTrackingPreventionResult(
+        const std::string& websiteHost, const std::string& trackerHost);
+    bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -856,8 +858,9 @@ private:
     EventCallbackV2 onSafeBrowsingCheckResultV2_;
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
+    EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
 
-    int32_t webType_;
+    int32_t renderMode_;
     std::string bundlePath_;
     std::string bundleDataPath_;
     std::string hapPath_;

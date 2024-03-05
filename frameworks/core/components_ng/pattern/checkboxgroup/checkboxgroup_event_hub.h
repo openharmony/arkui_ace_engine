@@ -59,7 +59,7 @@ public:
                 auto id = host->GetInspectorIdValue("");
                 builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
                 if (!id.empty()) {
-                    Recorder::NodeDataCache::Get().PutMultiple(id, groupname_, groupRet->GetNameList());
+                    Recorder::NodeDataCache::Get().PutMultiple(host, id, groupname_, groupRet->GetNameList());
                 }
             }
             builder.SetTextArray(groupRet->GetNameList()).SetText(groupname_);

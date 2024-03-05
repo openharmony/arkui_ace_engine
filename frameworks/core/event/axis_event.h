@@ -18,6 +18,8 @@
 
 #include <list>
 
+#include "interfaces/native/ui_input_event.h"
+
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "core/event/ace_events.h"
@@ -55,7 +57,14 @@ enum class AxisAction : int32_t {
     CANCEL,
 };
 
-struct AxisEvent final {
+struct UIInputEvent : public ArkUI_UIInputEvent {
+    virtual ~UIInputEvent() = default;
+    ArkUI_UIInputEvent_Type eventType = ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_UNKNOWN;
+    TimeStamp time;
+};
+
+struct AxisEvent final : public UIInputEvent {
+    ~AxisEvent() = default;
     int32_t id = 0;
     float x = 0.0;
     float y = 0.0;
@@ -66,49 +75,43 @@ struct AxisEvent final {
     double pinchAxisScale = 0.0;
     double rotateAxisAngle = 0.0;
     bool isRotationEvent = false;
-    AxisAction action;
-    TimeStamp time;
+    AxisAction action = AxisAction::NONE;
     int64_t deviceId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    int32_t touchEventId;
+
+    // Coordinates relative to the upper-left corner of the current component
+    float localX = 0.0;
+    float localY = 0.0;
+
+    AxisEvent()
+    {
+        eventType = ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS;
+    }
+
+    AxisEvent(int32_t id, float x, float y, float screenX, float screenY, double verticalAxis, double horizontalAxis,
+        double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent, AxisAction action, TimeStamp timestamp,
+        int64_t deviceId, SourceType sourceType, SourceTool sourceTool, std::shared_ptr<MMI::PointerEvent> pointerEvent)
+        : id(id), x(x), y(y), screenX(screenX), screenY(screenY), verticalAxis(verticalAxis),
+          horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale), rotateAxisAngle(rotateAxisAngle),
+          isRotationEvent(isRotationEvent), action(action), deviceId(deviceId), sourceType(sourceType),
+          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent))
+    {
+        eventType = ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS;
+        time = timestamp;
+    }
 
     AxisEvent CreateScaleEvent(float scale) const
     {
         if (NearZero(scale)) {
-            return { .id = id,
-                .x = x,
-                .y = y,
-                .screenX = screenX,
-                .screenY = screenY,
-                .verticalAxis = verticalAxis,
-                .horizontalAxis = horizontalAxis,
-                .pinchAxisScale = pinchAxisScale,
-                .rotateAxisAngle = rotateAxisAngle,
-                .isRotationEvent = isRotationEvent,
-                .action = action,
-                .time = time,
-                .deviceId = deviceId,
-                .sourceType = sourceType,
-                .sourceTool = sourceTool,
-                .pointerEvent = pointerEvent };
+            return { id, x, y, screenX, screenY, verticalAxis, horizontalAxis, pinchAxisScale, rotateAxisAngle,
+                isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent };
         }
-        return { .id = id,
-            .x = x / scale,
-            .y = y / scale,
-            .screenX = screenX / scale,
-            .screenY = screenY / scale,
-            .verticalAxis = verticalAxis,
-            .horizontalAxis = horizontalAxis,
-            .pinchAxisScale = pinchAxisScale,
-            .rotateAxisAngle = rotateAxisAngle,
-            .isRotationEvent = isRotationEvent,
-            .action = action,
-            .time = time,
-            .deviceId = deviceId,
-            .sourceType = sourceType,
-            .sourceTool = sourceTool,
-            .pointerEvent = pointerEvent };
+        return { id, x / scale, y / scale, screenX / scale, screenY / scale, verticalAxis, horizontalAxis,
+            pinchAxisScale, rotateAxisAngle, isRotationEvent, action, time, deviceId, sourceType, sourceTool,
+            pointerEvent };
     }
 
     Offset GetOffset() const
@@ -290,6 +293,23 @@ public:
         return globalLocation_;
     }
 
+    AxisEvent ConvertToAxisEvent() const
+    {
+        AxisEvent axisEvent;
+        axisEvent.x = static_cast<float>(globalLocation_.GetX());
+        axisEvent.y = static_cast<float>(globalLocation_.GetY());
+        axisEvent.screenX = static_cast<float>(screenLocation_.GetX());
+        axisEvent.screenY = static_cast<float>(screenLocation_.GetY());
+        axisEvent.horizontalAxis = horizontalAxis_;
+        axisEvent.verticalAxis = verticalAxis_;
+        axisEvent.pinchAxisScale = pinchAxisScale_;
+        axisEvent.rotateAxisAngle = rotateAxisAngle_;
+        axisEvent.time = timeStamp_;
+        axisEvent.localX = static_cast<float>(localLocation_.GetX());
+        axisEvent.localY = static_cast<float>(localLocation_.GetY());
+        return axisEvent;
+    }
+
 private:
     AxisAction action_ = AxisAction::NONE;
     float verticalAxis_ = 0.0;
@@ -357,6 +377,7 @@ public:
         Offset localLocation = Offset(
             event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
         AxisInfo info = AxisInfo(event, localLocation, GetEventTarget().value_or(EventTarget()));
+        info.SetScreenLocation(Offset(event.screenX, event.screenY));
         onAxisCallback_(info);
         return true;
     }

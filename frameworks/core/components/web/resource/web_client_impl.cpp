@@ -903,6 +903,15 @@ bool WebClientImpl::FilterScrollEvent(const float x, const float y, const float 
     return delegate->FilterScrollEvent(x, y, xVelocity, yVelocity);
 }
 
+void WebClientImpl::OnIntelligentTrackingPreventionResult(
+    const std::string& websiteHost, const std::string& trackerHost)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnIntelligentTrackingPreventionResult(websiteHost, trackerHost);
+}
+
 bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
 {
     ContainerScope scope(instanceId_);
@@ -915,5 +924,4 @@ bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebU
     
     return result;
 }
-
 } // namespace OHOS::Ace

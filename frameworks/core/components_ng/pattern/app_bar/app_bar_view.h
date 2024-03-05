@@ -26,56 +26,37 @@ namespace OHOS::Ace::NG {
 /**
  * The structure of Atomic Service (install free):
  * |--AtomicService(Column)
- *   |--AppBar(Row)
- *
  *   |--Stage
- *     |--Page
+ *   |--MenuBarRow
+ *     |--MenuBar
+ *       |--menuButton
+ *       |--divider
+ *       |--closeButton
  */
 
-/**
- * The structure of AppBar:+
- * |--AppBar
- *   |--row
- *     |--BackButton
- *     |--Title
- *   |FaButton
- */
 class ACE_FORCE_EXPORT AppBarView : public Referenced {
 public:
     AppBarView() = default;
-    explicit AppBarView(const RefPtr<FrameNode>& atom)
-    {
-        atomicService_ = atom;
-    }
-    static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
-    void SetVisible(bool visible);
-    void SetRowColor(const std::optional<Color>& color);
-    void SetContent(const std::string& content);
-    void SetFontStyle(Ace::FontStyle fontStyle);
-    void SetIconColor(const std::optional<Color>& color);
-    void iniBehavior();
-    void SetRowWidth(const Dimension& positionX);
-    void IniColor();
-    void ReverseBackButton();
-    void UpdateRowLayout();
+    RefPtr<FrameNode> Create(const RefPtr<FrameNode>& stage);
+    void SetVisible(bool visible) {}
+    void SetRowColor(const std::optional<Color>& color) {}
+    void SetContent(const std::string& content) {}
+    void SetFontStyle(Ace::FontStyle fontStyle) {}
+    void SetIconColor(const std::optional<Color>& color) {}
+    std::optional<RectF> GetAppBarRect();
 
 private:
-    static RefPtr<FrameNode> BuildBarTitle();
-    static RefPtr<FrameNode> BuildBarLabel();
-    static RefPtr<FrameNode> BuildIconButton(
-        InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isBackButton);
+    RefPtr<FrameNode> BuildMenuBarRow();
+    RefPtr<FrameNode> BuildMenuBar();
+    RefPtr<FrameNode> BuildButton(bool isMenuButton);
+    RefPtr<FrameNode> BuildIcon(bool isMenuIcon);
+    RefPtr<FrameNode> BuildDivider();
+    void BindMenuCallback(const RefPtr<FrameNode>& menuButton);
+    void BindCloseCallback(const RefPtr<FrameNode>& closeButton);
     static void BindContentCover(const RefPtr<FrameNode>& targetNode);
-    static RefPtr<FrameNode> BuildFaButton();
-    static void SetEachIconColor(
-        RefPtr<FrameNode> icon, const std::optional<Color>& color, InternalResource::ResourceId image);
-    RefPtr<FrameNode> GetFaButton();
-    RefPtr<FrameNode> GetBackButton();
-    
+
     WeakPtr<FrameNode> atomicService_;
-    bool isVisibleSetted = false;
-    bool isRowColorSetted = false;
-    bool isIconColorSetted = false;
-    bool isRtlSetted = false;
+    
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_APP_BAR_VIEW_H

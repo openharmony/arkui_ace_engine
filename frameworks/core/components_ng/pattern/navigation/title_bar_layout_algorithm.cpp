@@ -22,6 +22,7 @@
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -185,30 +186,26 @@ float TitleBarLayoutAlgorithm::WidthAfterAvoidMenubar(const RefPtr<TitleBarNode>
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, afterAvoidWidth);
     if (!pipeline->GetInstallationFree()) {
+        LOGI("xhq:: not install free");
         return afterAvoidWidth;
     }
     
     auto titlebarRect = titleBarNode->GetParentGlobalOffsetDuringLayout();
-    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-    auto buttonRect = appBarTheme->GetAppBarRect();
 
-    Dimension buttonRectTopVP(buttonRect->Top(), DimensionUnit::VP);
-    Dimension buttonRectTopPX(buttonRectTopVP.ConvertToPx(), DimensionUnit::PX);
-
-    Dimension buttonRectHeightVP(buttonRect->Height(), DimensionUnit::VP);
-    Dimension buttonRectHeightPX(buttonRectHeightVP.ConvertToPx(), DimensionUnit::PX);
-
-    Dimension buttonRectLeftVP(buttonRect->Left(), DimensionUnit::VP);
-    Dimension buttonRectLeftPX(buttonRectLeftVP.ConvertToPx(), DimensionUnit::PX);
-
-    auto safeArea = pipeline->GetSafeArea();
-    auto safeAreaHeight = safeArea.top_.Length();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, afterAvoidWidth);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_RETURN(appBar, afterAvoidWidth);
+    auto appBarRect = appBar->GetAppBarRect();
+    CHECK_NULL_RETURN(appBarRect, afterAvoidWidth);
+    auto appBarOffset = appBarRect->GetOffset();
+    auto appBarSize = appBarRect->GetSize();
 
     auto titleBarGeo = titleBarNode->GetGeometryNode();
     CHECK_NULL_RETURN(titleBarGeo, afterAvoidWidth);
 
-    auto avoidArea = titlebarRect.GetX() + titleBarGeo->GetFrameSize().Width() - buttonRectLeftPX.Value();
-    auto buttonTop = buttonRectTopPX.Value() + buttonRectHeightPX.Value() + safeAreaHeight;
+    auto avoidArea = titlebarRect.GetX() + titleBarGeo->GetFrameSize().Width() - appBarOffset.GetX();
+    auto buttonTop = appBarOffset.GetY() + appBarSize.Height();
     if (LessOrEqual(titlebarRect.GetY(), buttonTop) && GreatOrEqual(avoidArea, 0.0)) {
         afterAvoidWidth = afterAvoidWidth - avoidArea;
     }

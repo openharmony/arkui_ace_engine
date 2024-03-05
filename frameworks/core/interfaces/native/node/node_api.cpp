@@ -97,9 +97,16 @@ void SendArkUIAsyncEvent(ArkUINodeEvent* event)
 
 namespace {
 
-ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 /*flags*/)
+void SetCustomCallback(ArkUINodeHandle node, ArkUI_Int32 callback)
 {
-    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    ViewModel::SetCustomCallback(node, callback);
+}
+
+ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
+{
+    auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    ViewModel::RegisterCompanion(node, peerId, flags);
+    return node;
 }
 
 void DisposeNode(ArkUINodeHandle node)
@@ -201,7 +208,7 @@ const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
 };
 
 /* clang-format on */
-void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId, void* extraParam)
+void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int64 extraParam)
 {
     unsigned int subClassType = kind / ARKUI_MAX_EVENT_NUM;
     unsigned int subKind = kind % ARKUI_MAX_EVENT_NUM;
@@ -319,7 +326,8 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
         }
     }
     if (eventHandle) {
-        eventHandle(node, eventId, extraParam);
+        // TODO: fix handlers.
+        eventHandle(node, 0, reinterpret_cast<void*>(static_cast<intptr_t>(extraParam)));
     } else {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d EMPTY IMPLEMENT", kind);
     }
@@ -352,16 +360,14 @@ void MarkDirty(ArkUINodeHandle nodePtr, ArkUI_Uint32 flag)
     }
 }
 
-static ArkUIAPICallbackMethod* callbacks = nullptr;
-
 static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
 {
-    callbacks = method;
+    ViewModel::SetCallbackMethod(method);
 }
 
 ArkUIAPICallbackMethod* GetArkUIAPICallbackMethod()
 {
-    return callbacks;
+    return ViewModel::GetCallbackMethod();
 }
 
 int SetVsyncCallback(ArkUIVMContext vmContext, ArkUI_Int32 device, ArkUI_Int32 callbackId)
@@ -383,9 +389,94 @@ void UnblockVsyncWait(ArkUIVMContext vmContext, ArkUI_Int32 device)
     PipelineContext::GetCurrentContext()->RequestFrame();
 }
 
+ArkUI_Int32 MeasureNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data)
+{
+    return ViewModel::MeasureNode(vmContext, node, data);
+}
+
+ArkUI_Int32 LayoutNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data)
+{
+    return ViewModel::LayoutNode(vmContext, node, data);
+}
+
+ArkUI_Int32 DrawNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data)
+{
+    return ViewModel::DrawNode(vmContext, node, data);
+}
+
 ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootPtr)
 {
+    auto* root = reinterpret_cast<FrameNode*>(rootPtr);
+    float scale = static_cast<float>(OHOS::Ace::SystemProperties::GetResolution());
+    float width = root->GetGeometryNode()->GetFrameSize().Width() / scale;
+    float height = root->GetGeometryNode()->GetFrameSize().Height() / scale;
+    // measure
+    ArkUI_Float32 measureData[] = { width, height, width, height };
+    MeasureNode(vmContext, rootPtr, &measureData[0]);
+    // layout
+    ArkUI_Float32 layoutData[] = { 0, 0, width, height };
+    LayoutNode(vmContext, rootPtr, &layoutData[0]);
+    // draw
+    ArkUI_Float32 drawData[] = { 0, 0, 0, 0 };
+    DrawNode(vmContext, rootPtr, &drawData[0]);
+
     return 0;
+}
+
+void SetMeasureWidth(ArkUINodeHandle node, ArkUI_Float32 value)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
+    companion->setMeasureWidthValue(value);
+}
+
+ArkUI_Float32 GetMeasureWidth(ArkUINodeHandle node)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_RETURN(companion, 0);
+    return companion->getMeasureWidthValue();
+}
+
+void SetMeasureHeight(ArkUINodeHandle node, ArkUI_Float32 value)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
+    companion->setMeasureHeightValue(value);
+}
+
+ArkUI_Float32 GetMeasureHeight(ArkUINodeHandle node)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_RETURN(companion, 0);
+    return companion->getMeasureHeightValue();
+}
+
+void SetX(ArkUINodeHandle node, ArkUI_Float32 value)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
+    companion->setXValue(value);
+}
+
+void SetY(ArkUINodeHandle node, ArkUI_Float32 value)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
+    companion->setYValue(value);
+}
+
+void SetAlignment(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_VOID(companion);
+    companion->alignment = value;
+}
+
+ArkUI_Int32 GetAlignment(ArkUINodeHandle node)
+{
+    auto* companion = ViewModel::GetCompanion(node);
+    CHECK_NULL_RETURN(companion, 0);
+    return companion->alignment;
 }
 
 const ArkUIBasicAPI* GetBasicAPI()
@@ -431,17 +522,19 @@ ArkUIExtendedNodeAPI impl_extended = {
     nullptr, // getCanvasRenderingContext2DModifier
 
     SetCallbackMethod,
-    nullptr, // setCustomCallback
+    SetCustomCallback, // setCustomCallback
     MeasureLayoutAndDraw,
-    nullptr, // measureNode
-    nullptr, // layoutNode
-    nullptr, // drawNode
-    nullptr, // setMeasureWidth
-    nullptr, // getMeasureWidth
-    nullptr, // setMeasureHeight
-    nullptr, // getMeasureHeight
-    nullptr, // setX
-    nullptr, // setY
+    MeasureNode,
+    LayoutNode,
+    DrawNode,
+    SetMeasureWidth, // setMeasureWidth
+    GetMeasureWidth, // getMeasureWidth
+    SetMeasureHeight, // setMeasureHeight
+    GetMeasureHeight, // getMeasureHeight
+    SetX, // setX
+    SetY, // setY
+    SetAlignment,
+    GetAlignment,
     nullptr, // indexerChecker
     nullptr, // setRangeUpdater
     nullptr, // setLazyItemIndexer

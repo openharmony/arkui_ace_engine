@@ -298,7 +298,6 @@ private:
     bool isSelected_ = false;
     MenuAlign menuAlign_;
     std::string selectValue_;
-    bool isColorConfigurationUpdate_ = false;
     bool isFitTrigger_ = false;
     Color selectDefaultBgColor_ = Color::TRANSPARENT;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);

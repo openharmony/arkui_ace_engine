@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H
 
+#include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
@@ -35,7 +36,16 @@ public:
     {
         return MakeRefPtr<AtomicServiceLayoutAlgorithm>();
     }
-
+    RefPtr<FrameNode> GetMenuBarRow();
+    RefPtr<FrameNode> GetMenuBar();
+    RefPtr<FrameNode> GetMenuButton();
+    RefPtr<FrameNode> GetCloseButton();
+    RefPtr<FrameNode> GetMenuIcon();
+    RefPtr<FrameNode> GetCloseIcon();
+    void UpdateColor();
+    void UpdateRowLayout();
+    void SetEachIconColor(
+        RefPtr<FrameNode> icon, const std::optional<Color>& color, InternalResource::ResourceId image);
     ACE_DISALLOW_COPY_AND_MOVE(AtomicServicePattern);
 };
 } // namespace OHOS::Ace::NG

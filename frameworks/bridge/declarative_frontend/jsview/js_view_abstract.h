@@ -64,6 +64,7 @@ enum class ResourceType : uint32_t {
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
 RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj);
+RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const JSRef<JSObject>& jsObj);
 RefPtr<ResourceWrapper> CreateResourceWrapper(const JSRef<JSObject>& jsObj, RefPtr<ResourceObject>& resourceObject);
 RefPtr<ResourceWrapper> CreateResourceWrapper();
 
@@ -287,6 +288,7 @@ public:
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
     static void JsOnAreaChange(const JSCallbackInfo& info);
+    static void JsOnSizeChange(const JSCallbackInfo& info);
 
     static void JsLinearGradient(const JSCallbackInfo& info);
     static void JsRadialGradient(const JSCallbackInfo& info);
@@ -334,6 +336,7 @@ public:
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);
     static void JsAllowDrop(const JSCallbackInfo& info);
+    static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
     static void JsAccessibilityVirtualNode(const JSCallbackInfo& info);
 
@@ -421,8 +424,8 @@ public:
         }
 
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        JSRef<JSVal> type = jsObj->GetProperty("type");
-        if (!type->IsNumber()) {
+        int32_t resType = jsObj->GetPropertyValue<int32_t>("type", -1);
+        if (resType == -1) {
             return false;
         }
 
@@ -432,7 +435,7 @@ public:
             return false;
         }
 
-        auto resourceObject = GetResourceObject(jsObj);
+        auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
         auto resIdNum = resId->ToNumber<int32_t>();
         if (resIdNum == -1) {
@@ -442,13 +445,13 @@ public:
             JSRef<JSVal> args = jsObj->GetProperty("params");
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
-            if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+            if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
                 result = static_cast<T>(resourceWrapper->GetIntByName(param->ToString()));
                 return true;
             }
             return false;
         }
-        if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
             result = static_cast<T>(resourceWrapper->GetInt(resId->ToNumber<uint32_t>()));
             return true;
         }

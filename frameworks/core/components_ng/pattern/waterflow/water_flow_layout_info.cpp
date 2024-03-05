@@ -85,6 +85,10 @@ int32_t WaterFlowLayoutInfo::GetEndIndexByOffset(float offset) const
 
 float WaterFlowLayoutInfo::GetMaxMainHeight() const
 {
+    if (!endPosArray_.empty()) {
+        const auto& margin = margins_.back();
+        return endPosArray_.back().first + (axis_ == Axis::VERTICAL ? margin.bottom : margin.right).value_or(0.0f);
+    }
     if (items_.empty()) {
         return 0.0f;
     }
@@ -271,13 +275,17 @@ void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
     if (static_cast<size_t>(currentIndex + 1) < itemInfos_.size()) {
         itemInfos_.resize(currentIndex + 1);
     }
-    if (segment + 1 < segmentStartPos_.size()) {
-        segmentStartPos_.resize(segment + 1);
-    }
 
     auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), currentIndex,
         [](int32_t index, const std::pair<float, int32_t>& pos) { return index < pos.second; });
     endPosArray_.erase(it, endPosArray_.end());
+
+    if (segment + 1 < segmentStartPos_.size()) {
+        segmentStartPos_.resize(segment + 1);
+        if (currentIndex == segmentTails_[segment]) {
+            SetNextSegmentStartPos(currentIndex);
+        }
+    }
 }
 
 bool WaterFlowLayoutInfo::ReachStart(float prevOffset, bool firstLayout) const
@@ -380,11 +388,6 @@ void WaterFlowLayoutInfo::Sync(float mainSize, bool overScroll)
     endIndex_ = FastSolveEndIndex(mainSize);
 
     maxHeight_ = GetMaxMainHeight();
-    if (axis_ == Axis::VERTICAL) {
-        maxHeight_ += margins_.back().bottom.value_or(0.0f);
-    } else {
-        maxHeight_ += margins_.back().right.value_or(0.0f);
-    }
 
     itemStart_ = GreatOrEqual(currentOffset_, 0.0f);
     itemEnd_ = endIndex_ >= 0 && endIndex_ == childrenCount_ - 1;
@@ -435,6 +438,9 @@ void WaterFlowLayoutInfo::InitMargins(
     const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth)
 {
     size_t n = sections.size();
+    if (n == 0) {
+        return;
+    }
     margins_.resize(n);
     for (size_t i = 0; i < n; ++i) {
         if (sections[i].margin) {

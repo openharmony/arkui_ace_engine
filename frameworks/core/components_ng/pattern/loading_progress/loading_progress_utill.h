@@ -26,6 +26,12 @@ constexpr uint32_t SIZE = 6;
 const Dimension RING_STROKE_WIDTH[] = { 1.12_vp, 1.5_vp, 1.76_vp, 1.9_vp, 2.16_vp, 2.28_vp };
 const Dimension COMET_RADIUS[] = { 1.2_vp, 1.8_vp, 2.4_vp, 3.0_vp, 3.36_vp, 4.18_vp };
 const Dimension DIAMETER[] = { 16.0_vp, 24.0_vp, 32.0_vp, 40.0_vp, 48.0_vp, 76.0_vp};
+const float RING_DARK_RADIUS_16VP = 0.5f;
+const float RING_DARK_RADIUS_40VP = 0.2f;
+const float RING_DARK_RADIUS_76VP = 0.1f;
+const float RING_DARK_BACKGROUND_WIDTH_40VP = 3.0f;
+const float RING_DARK_BACKGROUND_WIDTH_76VP = 2.0f;
+const float RING_DARK_BACKGROUND_RADIUS = 2.0f;
 const Dimension MODE_16 = 16.0_vp;
 const Dimension MODE_24 = 24.0_vp;
 const Dimension MODE_32 = 32.0_vp;
@@ -66,6 +72,37 @@ public:
             }
         }
         return RING_STROKE_WIDTH[DEFAULT_INDEX].ConvertToPx();
+    }
+
+    static float GetRingDarkRadius(float diameter)
+    {
+        if (LessOrEqual(diameter, MODE_16.ConvertToPx())) {
+            return Dimension(RING_DARK_RADIUS_16VP * (diameter / MODE_40.ConvertToPx()), DimensionUnit::VP)
+                .ConvertToPx();
+        } else if (GreatOrEqual(diameter, MODE_76.ConvertToPx())) {
+            return Dimension(RING_DARK_RADIUS_76VP * (diameter / MODE_40.ConvertToPx()), DimensionUnit::VP)
+                .ConvertToPx();
+        } else {
+            return Dimension(RING_DARK_RADIUS_40VP * (diameter / MODE_40.ConvertToPx()), DimensionUnit::VP)
+                .ConvertToPx();
+        }
+    }
+
+    static float GetRingDarkBackgroundWidth(float diameter)
+    {
+        if (LessOrEqual(diameter, MODE_40.ConvertToPx())) {
+            return Dimension(RING_DARK_BACKGROUND_WIDTH_40VP * (diameter / MODE_40.ConvertToPx()), DimensionUnit::VP)
+                .ConvertToPx();
+        } else {
+            return Dimension(RING_DARK_BACKGROUND_WIDTH_76VP * (diameter / MODE_40.ConvertToPx()), DimensionUnit::VP)
+                .ConvertToPx();
+        }
+    }
+
+    static float GetRingDarkBackgroundRadius(float diameter)
+    {
+        return Dimension(RING_DARK_BACKGROUND_RADIUS * (diameter / MODE_40.ConvertToPx()), DimensionUnit::VP)
+            .ConvertToPx();
     }
 
     static float GetCometRadius(float diameter)

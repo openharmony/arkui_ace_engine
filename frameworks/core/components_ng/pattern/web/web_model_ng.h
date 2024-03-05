@@ -33,10 +33,11 @@ using setPermissionClipboardCallback = std::function<void(const std::shared_ptr<
 class ACE_EXPORT WebModelNG : public OHOS::Ace::WebModel {
 public:
     void Create(const std::string& src, const RefPtr<WebController>& webController,
-        WebType type = WebType::SURFACE, bool incognitoMode = false) override;
+        RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false) override;
     void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
         std::function<void(const std::string&)>&& setHapPathCallback,
-        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE, bool incognitoMode = false) override;
+        int32_t parentWebId, bool popup, RenderMode renderMode = RenderMode::ASYNC_RENDER,
+        bool incognitoMode = false) override;
     void SetCustomScheme(const std::string& cmdLine) override;
     void SetOnCommonDialog(std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType) override;
     void SetOnConsoleLog(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
@@ -162,6 +163,9 @@ public:
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) override;
     
     void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
+    void SetIntelligentTrackingPreventionResultId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
+            intelligentTrackingPreventionResultId) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

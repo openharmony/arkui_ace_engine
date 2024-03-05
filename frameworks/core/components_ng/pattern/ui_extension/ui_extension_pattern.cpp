@@ -460,6 +460,8 @@ void UIExtensionPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 {
+    DispatchFocusActiveEvent(true);
+    DispatchFocusState(true);
     return DispatchKeyEventSync(event.rawKeyEvent);
 }
 

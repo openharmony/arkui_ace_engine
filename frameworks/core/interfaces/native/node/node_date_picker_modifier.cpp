@@ -385,8 +385,7 @@ void SetDatePickerOnDateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* 
     auto onDateChange = [eventId, extraParam](const BaseEventInfo* info) {
         ArkUINodeEvent event;
         event.kind = ON_DATE_PICKER_DATE_CHANGE;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
         std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo->GetSelectedStr());
         if (!argsPtr) {

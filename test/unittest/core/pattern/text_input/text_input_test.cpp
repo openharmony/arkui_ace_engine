@@ -332,6 +332,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition001, TestSize.Level1)
      * @tc.steps: Create Text filed node with default text and placeholder
      */
     CreateTextField(DEFAULT_TEXT);
+    GetFocus();
 
     /**
      * @tc.expected: Current caret position is end of text
@@ -455,6 +456,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition006, TestSize.Level1)
      * @tc.steps: Initialize text input and get select controller, update caret position and insert value
      */
     CreateTextField(DEFAULT_TEXT);
+    GetFocus();
 
     auto controller = pattern_->GetTextSelectController();
     controller->UpdateCaretIndex(2);
@@ -630,6 +632,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition004, TestSize.Le
      * @tc.steps: Initialize insert text and expected values when 'IsSelected() = false'
      */
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+    GetFocus();
     pattern_->InsertValue("abc");
     FlushLayoutTask(frameNode_);
 
@@ -2644,7 +2647,9 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
      * @tc.steps: step2. Move handle
      */
     OffsetF localOffset(1.0f, 1.0f);
-    pattern_->SetLocalOffset(localOffset);
+    auto controller = pattern_->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->SetLocalOffset(localOffset);
     RectF handleRect;
     pattern_->OnHandleMove(handleRect, false);
 
@@ -2652,7 +2657,7 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
      * @tc.steps: step3. Test magnifier open or close
      * @tc.expected: magnifier is open
      */
-    auto ret = pattern_->GetShowMagnifier();
+    auto ret = controller->GetShowMagnifier();
     EXPECT_TRUE(ret);
 
     /**
@@ -2686,7 +2691,7 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
      * @tc.steps: step8. Test magnifier open or close
      * @tc.expected: magnifier is close
      */
-    ret = pattern_->GetShowMagnifier();
+    ret = controller->GetShowMagnifier();
     EXPECT_FALSE(ret);
 }
 

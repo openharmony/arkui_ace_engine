@@ -38,6 +38,8 @@ public:
     void SetChangeEvent(RefreshChangeEvent&& changeEvent) override;
     void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) override;
     void SetLoadingText(const std::string& loadingText) override;
+    void SetRefreshOffset(const Dimension& offset) override;
+    void SetPullToRefresh(bool isPullToRefresh) override;
     // @deprecated
     void Pop() override {}
     void SetRefreshDistance(const Dimension& refreshDistance) override {}

@@ -186,6 +186,8 @@ public:
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) override;
+    void SetOnSizeChanged(
+        std::function<void(const NG::RectF& oldRect, const NG::RectF& rect)>&& onSizeChanged) override {};
 
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetEnabled(bool enabled) override;
@@ -246,6 +248,8 @@ public:
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
+    void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier) override {}
+    void* GetFrameNode() override { return nullptr; }
     void SetAllowDrop(const std::set<std::string>& allowDrop) override {}
     void SetDragPreview(const NG::DragDropInfo& info) override {}
 

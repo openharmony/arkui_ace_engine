@@ -75,6 +75,10 @@ public:
     static void SetBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetTotal(FrameNode* frameNode, double max);
     static void SetType(FrameNode* frameNode, NG::ProgressType type);
+    static double GetValue(FrameNode* frameNode);
+    static Color GetColor(FrameNode* frameNode);
+    static double GetTotal(FrameNode* frameNode);
+    static NG::ProgressType GetType(FrameNode* frameNode);
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);

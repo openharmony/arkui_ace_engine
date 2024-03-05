@@ -66,8 +66,6 @@ private:
     void RegularInit(const SizeF& frameSize);
     void InitFooter(float crossSize);
 
-    void CheckReset(const RefPtr<WaterFlowSections>& secObj);
-
     /**
      * @brief Measure self before measuring children.
      *

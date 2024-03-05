@@ -566,6 +566,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         NotifyDragFrameNode(point, DragEventType::DROP, DragRet::DRAG_CANCEL);
         summaryMap_.clear();
         parentHitNodes_.clear();
+        dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
         ClearVelocityInfo();
         return;
     }
@@ -582,6 +583,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         NotifyDragFrameNode(point, DragEventType::DROP, DragRet::DRAG_FAIL);
         summaryMap_.clear();
         parentHitNodes_.clear();
+        dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
         return;
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Current windowId is %{public}d, drag position is (%{public}f, %{public}f)."
@@ -622,6 +624,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     dragFrameNode->MarkDirtyNode();
     summaryMap_.clear();
     parentHitNodes_.clear();
+    dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
 
 void DragDropManager::RequireSummary()
@@ -639,7 +642,6 @@ void DragDropManager::RequireSummary()
     previewRect_ = Rect(-1, -1, -1, -1);
     extraInfo_ = extraInfo;
     summaryMap_ = summary;
-    UpdateDragStyle();
 }
 
 void DragDropManager::ResetRecordSize(uint32_t recordSize)

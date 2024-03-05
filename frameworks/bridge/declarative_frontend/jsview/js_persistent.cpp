@@ -29,6 +29,7 @@ void JSPersistent::JSBind(BindingTarget globalObj)
     JSClass<JSPersistent>::Declare("Storage");
     JSClass<JSPersistent>::CustomMethod("set", &JSPersistent::Set);
     JSClass<JSPersistent>::CustomMethod("get", &JSPersistent::Get);
+    JSClass<JSPersistent>::CustomMethod("has", &JSPersistent::Has);
     JSClass<JSPersistent>::CustomMethod("clear", &JSPersistent::Clear);
     JSClass<JSPersistent>::CustomMethod("delete", &JSPersistent::Delete);
     JSClass<JSPersistent>::Bind(globalObj, JSPersistent::ConstructorCallback, JSPersistent::DestructorCallback);
@@ -61,7 +62,8 @@ void JSPersistent::Set(const JSCallbackInfo& args)
     return;
 #endif
     ContainerScope scope(Container::CurrentIdSafely());
-    if (args.Length() < 2 || !args[0]->IsString() || args[1]->IsUndefined() || args[1]->IsNull()) {
+    if (args.Length() < 2 || !args[0]->IsString()) {
+        LOGW("JSPersistent: Fail to set persistent data, args too few or key type is not a string");
         return;
     }
     std::string key = args[0]->ToString();
@@ -103,13 +105,36 @@ void JSPersistent::Get(const JSCallbackInfo& args)
     }
     auto executor = container->GetTaskExecutor();
     std::string value = StorageProxy::GetInstance()->GetStorage(executor)->GetString(key);
-    if (value.empty()) {
+    if (value.empty() || value == "undefined") {
         args.SetReturnValue(JSVal::Undefined());
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     JSRef<JSVal> ret = obj->ToJsonObject(value.c_str());
     args.SetReturnValue(ret);
+}
+
+void JSPersistent::Has(const JSCallbackInfo& args)
+{
+#if defined(PREVIEW)
+    LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
+        "emulator or a real device instead.");
+    return;
+#endif
+    ContainerScope scope(Container::CurrentIdSafely());
+    if (args.Length() < 1 || !args[0]->IsString()) {
+        LOGW("JSPersistent: Failed to Get persistent data, args too few");
+        return;
+    }
+    std::string key = args[0]->ToString();
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return;
+    }
+    auto executor = container->GetTaskExecutor();
+    std::string value = StorageProxy::GetInstance()->GetStorage(executor)->GetString(key);
+    args.SetReturnValue(value.empty()? JSVal::False() : JSVal::True());
 }
 
 void JSPersistent::Delete(const JSCallbackInfo& args)

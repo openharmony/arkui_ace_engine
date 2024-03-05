@@ -36,6 +36,7 @@ public:
     void onDraw(DrawingContext& context) override;
     void DrawOrbit(DrawingContext& canvas, const CometParam& cometParam, float orbitRadius, float date);
     void DrawRing(DrawingContext& canvas, const RingParam& ringParam);
+    void DrawRingBackground(DrawingContext& canvas, const RingParam& ringParam, LinearColor& ringColor);
     void StartRecycle();
     void StartRecycleRingAnimation();
     void StartRecycleCometAnimation();

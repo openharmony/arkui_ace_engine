@@ -77,7 +77,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
         result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     } else if (SystemProperties::GetGridIrregularLayoutEnabled()) {
-        return MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_);
+        return MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, CanOverScroll(GetScrollSource()));
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }
@@ -531,7 +531,6 @@ void GridPattern::MarkDirtyNodeSelf()
 void GridPattern::OnScrollEndCallback()
 {
     isSmoothScrolling_ = false;
-    SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
@@ -1807,6 +1806,12 @@ std::vector<RefPtr<FrameNode>> GridPattern::GetVisibleSelectedItems()
         children.emplace_back(itemFrameNode);
     }
     return children;
+}
+
+void GridPattern::StopAnimate()
+{
+    ScrollablePattern::StopAnimate();
+    isSmoothScrolling_ = false;
 }
 
 } // namespace OHOS::Ace::NG

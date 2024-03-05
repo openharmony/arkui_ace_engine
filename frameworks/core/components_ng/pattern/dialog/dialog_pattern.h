@@ -150,6 +150,11 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    bool AvoidBottom() const override
+    {
+        return false;
+    }
+    
     void RegisterDialogDidAppearCallback(std::function<void()>&& onDidAppear)
     {
         onDidAppearCallback_ = std::move(onDidAppear);

@@ -17,17 +17,21 @@
 
 #include <cstdint>
 #include <optional>
+#include <string>
 #include <utility>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
-#include "base/log/log_wrapper.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -41,11 +45,11 @@
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -950,6 +954,15 @@ void ViewAbstract::SetOnAreaChanged(std::function<void(const RectF &oldRect, con
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
 }
 
+void ViewAbstract::SetOnSizeChanged(std::function<void(const RectF &oldRect, const RectF &rect)> &&onSizeChanged)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
+}
+
 void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
     const std::vector<double> &ratioList)
 {
@@ -1160,6 +1173,19 @@ void ViewAbstract::SetAllowDrop(const std::set<std::string> &allowDrop)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->SetAllowDrop(allowDrop);
+}
+
+void ViewAbstract::SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDrawModifier(drawModifier);
+}
+
+void* ViewAbstract::GetFrameNode()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    return static_cast<void*>(AceType::RawPtr(frameNode));
 }
 
 void ViewAbstract::SetDragPreview(const NG::DragDropInfo& info)
@@ -1395,7 +1421,7 @@ void ViewAbstract::DismissDialog()
     CHECK_NULL_VOID(rootNode);
     auto overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
     CHECK_NULL_VOID(overlay);
-    overlayManager->RemoveDialog(overlay, false, false);
+    overlayManager->RemoveDialog(overlay, false);
     auto pattern = overlay->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (overlayManager->isMaskNode(pattern->GetHost()->GetId())) {
@@ -2624,6 +2650,16 @@ void ViewAbstract::SetAlignRules(FrameNode* frameNode, const std::map<AlignDirec
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules, frameNode);
 }
 
+std::map<AlignDirection, AlignRule> ViewAbstract::GetAlignRules(FrameNode* frameNode)
+{
+    std::map<AlignDirection, AlignRule> alignRules;
+    CHECK_NULL_RETURN(frameNode, alignRules);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, alignRules);
+    CHECK_NULL_RETURN(layoutProperty->GetFlexItemProperty(), alignRules);
+    return layoutProperty->GetFlexItemProperty()->GetAlignRules().value_or(alignRules);
+}
+
 void ViewAbstract::SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2937,6 +2973,7 @@ double ViewAbstract::GetOpacity(FrameNode* frameNode)
 {
     double opacity = 1.0f;
     const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, opacity);
     return target->GetOpacityValue(opacity);
 }
 
@@ -2945,6 +2982,7 @@ BorderWidthProperty ViewAbstract::GetBorderWidth(FrameNode* frameNode)
     Dimension defaultDimension(0);
     BorderWidthProperty borderWidths = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
     const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, borderWidths);
     return target->GetBorderWidthValue(borderWidths);
 }
 
@@ -2953,6 +2991,7 @@ BorderRadiusProperty ViewAbstract::GetBorderRadius(FrameNode* frameNode)
     Dimension defaultDimension(0);
     BorderRadiusProperty borderRadius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
     const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, borderRadius);
     return target->GetBorderRadiusValue(borderRadius);
 }
 
@@ -2961,6 +3000,7 @@ BorderColorProperty ViewAbstract::GetBorderColor(FrameNode* frameNode)
     Color defaultColor(0xff000000);
     BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
     const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, borderColors);
     return target->GetBorderColorValue(borderColors);
 }
 
@@ -2969,6 +3009,7 @@ BorderStyleProperty ViewAbstract::GetBorderStyle(FrameNode* frameNode)
     BorderStyle defaultStyle = BorderStyle::SOLID;
     BorderStyleProperty borderStyles = { defaultStyle, defaultStyle, defaultStyle, defaultStyle };
     const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, borderStyles);
     return target->GetBorderStyleValue(borderStyles);
 }
 
@@ -2976,6 +3017,7 @@ int ViewAbstract::GetZIndex(FrameNode* frameNode)
 {
     int zindex = 0;
     const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, zindex);
     return target->GetZIndexValue(zindex);
 }
 
@@ -2988,20 +3030,26 @@ VisibleType ViewAbstract::GetVisibility(FrameNode* frameNode)
 
 bool ViewAbstract::GetClip(FrameNode* frameNode)
 {
+    bool value = false;
     const auto& target = frameNode->GetRenderContext();
-    return target->GetClipEdge().has_value();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetClipEdgeValue(value);
 }
 
-std::optional<RefPtr<BasicShape>> ViewAbstract::GetClipShape(FrameNode* frameNode)
+RefPtr<BasicShape> ViewAbstract::GetClipShape(FrameNode* frameNode)
 {
+    RefPtr<BasicShape> value = AceType::MakeRefPtr<BasicShape>();
     const auto& target = frameNode->GetRenderContext();
-    return target->GetClipShape();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetClipShapeValue(value);
 }
 
 Matrix4 ViewAbstract::GetTransform(FrameNode* frameNode)
 {
+    Matrix4 value;
     const auto& target = frameNode->GetRenderContext();
-    return target->GetLocalTransformMatrix();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetTransformMatrixValue(value);
 }
 
 HitTestMode ViewAbstract::GetHitTestBehavior(FrameNode* frameNode)
@@ -3016,38 +3064,58 @@ OffsetT<Dimension> ViewAbstract::GetPosition(FrameNode* frameNode)
     Dimension PositionY(0, DimensionUnit::VP);
     OffsetT<Dimension> position(PositionX, PositionY);
     const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, position);
     return target->GetPositionValue(position);
 }
 
 std::optional<Shadow> ViewAbstract::GetShadow(FrameNode* frameNode)
 {
+    Shadow value;
     const auto& target = frameNode->GetRenderContext();
-    return target->GetBackShadow();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetBackShadowValue(value);
 }
 
-NG::Gradient ViewAbstract::GetGradient(FrameNode* frameNode)
+NG::Gradient ViewAbstract::GetSweepGradient(FrameNode* frameNode)
 {
-    Gradient gradient;
+    Gradient value;
+    value.CreateGradientWithType(NG::GradientType::SWEEP);
     const auto& target = frameNode->GetRenderContext();
-    return target->GetSweepGradientValue(gradient);
+    CHECK_NULL_RETURN(target, value);
+    return target->GetSweepGradientValue(value);
 }
 
-std::optional<RefPtr<BasicShape>> ViewAbstract::GetMask(FrameNode* frameNode)
+NG::Gradient ViewAbstract::GetRadialGradient(FrameNode* frameNode)
 {
+    Gradient value;
+    value.CreateGradientWithType(NG::GradientType::RADIAL);
     const auto& target = frameNode->GetRenderContext();
-    return target->GetClipMask();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetSweepGradientValue(value);
 }
 
-const std::optional<RefPtr<ProgressMaskProperty>> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
+RefPtr<BasicShape> ViewAbstract::GetMask(FrameNode* frameNode)
 {
+    RefPtr<BasicShape> value = AceType::MakeRefPtr<BasicShape>();
     const auto& target = frameNode->GetRenderContext();
-    return target->GetProgressMask();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetClipMaskValue(value);
+}
+
+RefPtr<ProgressMaskProperty> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
+{
+    RefPtr<ProgressMaskProperty> value = AceType::MakeRefPtr<ProgressMaskProperty>();
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetProgressMaskValue(value);
 }
 
 BlendMode ViewAbstract::GetBlendMode(FrameNode* frameNode)
 {
-    const auto& target = frameNode->GetRenderContext();
-    return target->GetBackBlendMode().value();
+    BlendMode value = BlendMode::CLEAR;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetBackBlendModeValue(value);
 }
 
 TextDirection ViewAbstract::GetDirection(FrameNode* frameNode)
@@ -3062,5 +3130,361 @@ FlexAlign ViewAbstract::GetAlignSelf(FrameNode* frameNode)
 {
     const auto& flexItemProperty = frameNode->GetLayoutProperty()->GetFlexItemProperty();
     return flexItemProperty->GetAlignSelf().value_or(FlexAlign::AUTO);
+}
+
+float ViewAbstract::GetFlexGrow(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_RETURN(property, value);
+    auto getValue = property->GetFlexGrow();
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
+}
+
+float ViewAbstract::GetFlexShrink(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_RETURN(property, value);
+    auto getValue = property->GetFlexShrink();
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
+}
+
+Dimension ViewAbstract::GetFlexBasis(FrameNode* frameNode)
+{
+    Dimension value;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_RETURN(property, value);
+    auto getValue = property->GetFlexBasis();
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
+}
+
+float ViewAbstract::GetMinWidth(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(property, value);
+    auto size = property->minSize;
+    if (size.has_value()) {
+        auto width = size->Width();
+        if (width.has_value()) {
+            value = width.value().GetDimension().Value();
+        }
+    }
+    return value;
+}
+
+float ViewAbstract::GetMaxWidth(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(property, value);
+    auto size = property->maxSize;
+    if (size.has_value()) {
+        auto width = size->Width();
+        if (width.has_value()) {
+            value = width.value().GetDimension().Value();
+        }
+    }
+    return value;
+}
+
+float ViewAbstract::GetMinHeight(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(property, value);
+    auto size = property->minSize;
+    if (size.has_value()) {
+        auto height = size->Height();
+        if (height.has_value()) {
+            value = height.value().GetDimension().Value();
+        }
+    }
+    return value;
+}
+
+float ViewAbstract::GetMaxHeight(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(property, value);
+    auto size = property->maxSize;
+    if (size.has_value()) {
+        auto height = size->Height();
+        if (height.has_value()) {
+            value = height.value().GetDimension().Value();
+        }
+    }
+    return value;
+}
+
+Dimension ViewAbstract::GetGrayScale(FrameNode* frameNode)
+{
+    Dimension value;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetFrontGrayScaleValue(value);
+}
+
+InvertVariant ViewAbstract::GetInvert(FrameNode* frameNode)
+{
+    InvertVariant value = 0.0f;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetFrontInvertValue(value);
+}
+
+Dimension ViewAbstract::GetSepia(FrameNode* frameNode)
+{
+    Dimension value;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetFrontSepiaValue(value);
+}
+
+Dimension ViewAbstract::GetContrast(FrameNode* frameNode)
+{
+    Dimension value;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetFrontContrastValue(value);
+}
+
+Color ViewAbstract::GetForegroundColor(FrameNode* frameNode)
+{
+    Color value;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetForegroundColorValue(value);
+}
+
+NG::VectorF ViewAbstract::GetScale(FrameNode* frameNode)
+{
+    NG::VectorF defaultVector = { 1.0f, 1.0f };
+    CHECK_NULL_RETURN(frameNode, defaultVector);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultVector);
+    return renderContext->GetTransformScale().value_or(defaultVector);
+}
+
+NG::Vector5F ViewAbstract::GetRotate(FrameNode* frameNode)
+{
+    NG::Vector5F defaultVector = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    CHECK_NULL_RETURN(frameNode, defaultVector);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultVector);
+    return renderContext->GetTransformRotate().value_or(defaultVector);
+}
+
+Dimension ViewAbstract::GetBrightness(FrameNode* frameNode)
+{
+    Dimension defaultBrightness(1.0);
+    CHECK_NULL_RETURN(frameNode, defaultBrightness);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultBrightness);
+    return renderContext->GetFrontBrightness().value_or(defaultBrightness);
+}
+
+Dimension ViewAbstract::GetSaturate(FrameNode* frameNode)
+{
+    Dimension defaultSaturate(1.0);
+    CHECK_NULL_RETURN(frameNode, defaultSaturate);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultSaturate);
+    return renderContext->GetFrontSaturate().value_or(defaultSaturate);
+}
+
+BackgroundImagePosition ViewAbstract::GetBackgroundImagePosition(FrameNode* frameNode)
+{
+    BackgroundImagePosition defaultImagePosition;
+    CHECK_NULL_RETURN(frameNode, defaultImagePosition);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultImagePosition);
+    return renderContext->GetBackgroundImagePosition().value_or(defaultImagePosition);
+}
+
+Dimension ViewAbstract::GetFrontBlur(FrameNode* frameNode)
+{
+    Dimension value;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    auto& property = target->GetForeground();
+    auto getValue = property->propBlurRadius;
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
+}
+
+NG::Gradient ViewAbstract::GetLinearGradient(FrameNode *frameNode)
+{
+    NG::Gradient value;
+    value.CreateGradientWithType(NG::GradientType::LINEAR);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetLinearGradientValue(value);
+}
+
+Alignment ViewAbstract::GetAlign(FrameNode *frameNode)
+{
+    Alignment value = Alignment::CENTER;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetPositionProperty();
+    CHECK_NULL_RETURN(property, value);
+    auto getValue = property->GetAlignment();
+    if (getValue.has_value()) {
+        return getValue.value();
+    }
+    return value;
+}
+
+float ViewAbstract::GetWidth(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(property, value);
+    auto size = property->selfIdealSize;
+    if (size.has_value()) {
+        auto width = size->Width();
+        if (width.has_value()) {
+            value = width.value().GetDimension().Value();
+        }
+    }
+    return value;
+}
+
+float ViewAbstract::GetHeight(FrameNode* frameNode)
+{
+    float value = 0.0f;
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(property, value);
+    auto size = property->selfIdealSize;
+    if (size.has_value()) {
+        auto height = size->Height();
+        if (height.has_value()) {
+            value = height.value().GetDimension().Value();
+        }
+    }
+    return value;
+}
+
+Color ViewAbstract::GetBackgroundColor(FrameNode* frameNode)
+{
+    Color value;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetBackgroundColorValue(value);
+}
+
+std::string ViewAbstract::GetBackgroundImageSrc(FrameNode* frameNode)
+{
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, "");
+    return target->GetBackgroundImage()->GetSrc();
+}
+
+ImageRepeat ViewAbstract::GetBackgroundImageRepeat(FrameNode* frameNode)
+{
+    ImageRepeat value = ImageRepeat::NO_REPEAT;
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetBackgroundImageRepeat().value();
+}
+
+PaddingProperty ViewAbstract::GetPadding(FrameNode* frameNode)
+{
+    CalcLength defaultDimen = CalcLength(0, DimensionUnit::VP);
+    PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(defaultDimen);
+    paddings.right = std::optional<CalcLength>(defaultDimen);
+    paddings.bottom = std::optional<CalcLength>(defaultDimen);
+    paddings.left = std::optional<CalcLength>(defaultDimen);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, paddings);
+    const auto& property = layoutProperty->GetPaddingProperty();
+    CHECK_NULL_RETURN(property, paddings);
+    CalcLength top = CalcLength(property->top->GetDimension().Value(), DimensionUnit::VP);
+    CalcLength right = CalcLength(property->right->GetDimension().Value(), DimensionUnit::VP);
+    CalcLength bottom = CalcLength(property->bottom->GetDimension().Value(), DimensionUnit::VP);
+    CalcLength left = CalcLength(property->left->GetDimension().Value(), DimensionUnit::VP);
+    paddings.top = std::optional<CalcLength>(top);
+    paddings.right = std::optional<CalcLength>(right);
+    paddings.bottom = std::optional<CalcLength>(bottom);
+    paddings.left = std::optional<CalcLength>(left);
+    return paddings;
+}
+
+std::string ViewAbstract::GetKey(FrameNode* frameNode)
+{
+    std::string value;
+    CHECK_NULL_RETURN(frameNode, value);
+    return value = frameNode->GetInspectorIdValue();
+}
+
+bool ViewAbstract::GetEnabled(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    return eventHub->IsEnabled();
+}
+
+MarginProperty ViewAbstract::GetMargin(FrameNode* frameNode)
+{
+    CalcLength defaultDimen = CalcLength(0, DimensionUnit::VP);
+    MarginProperty margins;
+    margins.top = std::optional<CalcLength>(defaultDimen);
+    margins.right = std::optional<CalcLength>(defaultDimen);
+    margins.bottom = std::optional<CalcLength>(defaultDimen);
+    margins.left = std::optional<CalcLength>(defaultDimen);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, margins);
+    const auto& property = layoutProperty->GetMarginProperty();
+    CHECK_NULL_RETURN(property, margins);
+    CalcLength top = CalcLength(property->top->GetDimension().Value(), DimensionUnit::VP);
+    CalcLength right = CalcLength(property->right->GetDimension().Value(), DimensionUnit::VP);
+    CalcLength bottom = CalcLength(property->bottom->GetDimension().Value(), DimensionUnit::VP);
+    CalcLength left = CalcLength(property->left->GetDimension().Value(), DimensionUnit::VP);
+    margins.top = std::optional<CalcLength>(top);
+    margins.right = std::optional<CalcLength>(right);
+    margins.bottom = std::optional<CalcLength>(bottom);
+    margins.left = std::optional<CalcLength>(left);
+    return margins;
+}
+
+TranslateOptions ViewAbstract::GetTranslate(FrameNode* frameNode)
+{
+    TranslateOptions value(0.0f, 0.0f, 0.0f);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetTransformTranslateValue(value);
 }
 } // namespace OHOS::Ace::NG

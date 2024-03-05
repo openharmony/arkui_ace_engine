@@ -59,6 +59,7 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -252,8 +253,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg002, TestSize.Level1)
     context_->onAreaChangeNodeIds_.clear();
     context_->onAreaChangeNodeIds_.emplace(NOT_REGISTER_ID);
     context_->onAreaChangeNodeIds_.emplace(customNode_->nodeId_);
-    context_->AddVisibleAreaChangeNode(frameNode_, {DEFAULT_DOUBLE1}, nullptr);
-    context_->AddVisibleAreaChangeNode(frameNode_, {DEFAULT_DOUBLE1}, nullptr, false);
+    context_->AddVisibleAreaChangeNode(frameNode_, { DEFAULT_DOUBLE1 }, nullptr);
+    context_->AddVisibleAreaChangeNode(frameNode_, { DEFAULT_DOUBLE1 }, nullptr, false);
     EXPECT_EQ(context_->onVisibleAreaChangeNodeIds_.size(), DEFAULT_SIZE1);
     context_->onVisibleAreaChangeNodeIds_.emplace(customNode_->GetId());
     context_->onVisibleAreaChangeNodeIds_.emplace(ElementRegister::UndefinedElementId);
@@ -2572,10 +2573,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg053, TestSize.Level1)
      */
     context_->SetupRootElement();
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto node = NavigationGroupNode::GetOrCreateGroupNode(TEST_TAG, nodeId, nullptr);
-
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto node = NavigationGroupNode::GetOrCreateGroupNode(
+        TEST_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    node->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     auto childId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto childNode = NavigationGroupNode::GetOrCreateFrameNode(TEST_TAG, childId, nullptr);
+    auto childNode = NavigationGroupNode::GetOrCreateGroupNode(
+        TEST_TAG, childId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    childNode->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     node->AddChild(childNode);
     EXPECT_EQ(context_->FindNavigationNodeToHandleBack(node), nullptr);
 }

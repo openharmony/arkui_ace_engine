@@ -5327,7 +5327,7 @@ std::string RichEditorPattern::GetPositionSpansText(int32_t position, int32_t& s
 
     std::stringstream sstream;
     for (const auto& obj : list) {
-        if (obj.type == SelectSpanType::TYPEIMAGE) {
+        if (obj.type == SelectSpanType::TYPEIMAGE || obj.type == SelectSpanType::TYPESYMBOLSPAN) {
             if (obj.spanPosition.spanRange[1] <= position) {
                 sstream.str("");
                 startSpan = -1;

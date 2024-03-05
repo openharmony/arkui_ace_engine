@@ -91,10 +91,21 @@ void ResetFlexOptions(ArkUINodeHandle node)
     FlexModelNG::SetFlexAlignContent(frameNode, NUM_1);
 }
 
+void GetFlexOptions(ArkUINodeHandle node, ArkUIFlexOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    options->direction = FlexModelNG::GetFlexDirection(frameNode);
+    options->wrap = FlexModelNG::GetFlexWrap(frameNode);
+    options->justifyContent = FlexModelNG::GetFlexJustifyContent(frameNode);
+    options->alignItems = FlexModelNG::GetFlexAlignItems(frameNode);
+    options->alignContent = FlexModelNG::GetFlexAlignContent(frameNode);
+}
+
 namespace NodeModifier {
 const ArkUIFlexModifier* GetFlexModifier()
 {
-    static const ArkUIFlexModifier modifier = { SetFlexOptions, ResetFlexOptions };
+    static const ArkUIFlexModifier modifier = { SetFlexOptions, ResetFlexOptions, GetFlexOptions };
     return &modifier;
 }
 }

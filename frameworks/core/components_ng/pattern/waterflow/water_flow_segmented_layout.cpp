@@ -33,6 +33,9 @@ namespace OHOS::Ace::NG {
 namespace {
 bool IsDataValid(const WaterFlowLayoutInfo& info)
 {
+    if (info.segmentTails_.empty()) {
+        return false;
+    }
     if (info.childrenCount_ - 1 != info.segmentTails_.back()) {
         TAG_LOGW(AceLogTag::ACE_WATERFLOW,
             "Children count = %{public}d and doesn't match the number provided in Sections, which is %{public}d.",
@@ -114,10 +117,9 @@ namespace {
  * @brief Prepares a jump to the current StartItem.
  *
  * @param info WaterFlowLayoutInfo
- * @param reset whether LayoutInfo should be cleared before the jump.
  * @return current StartItem's offset relative to the viewport.
  */
-float PrepareJump(WaterFlowLayoutInfo& info, bool reset)
+float PrepareJump(WaterFlowLayoutInfo& info)
 {
     if (info.endIndex_ == -1) {
         // implies that LayoutInfo has already been reset, no need to jump
@@ -129,22 +131,9 @@ float PrepareJump(WaterFlowLayoutInfo& info, bool reset)
                            ? 0.0f
                            : info.currentOffset_ + info.itemInfos_[info.startIndex_].mainOffset;
 
-    if (!reset) {
-        return itemOffset;
-    }
-
     info.startIndex_ = 0;
     info.endIndex_ = -1;
     info.currentOffset_ = 0.0f;
-
-    for (auto& section : info.items_) {
-        for (auto& column : section) {
-            column.second.clear();
-        }
-    }
-    info.ResetSegmentStartPos();
-    info.itemInfos_.clear();
-    info.endPosArray_.clear();
 
     return itemOffset;
 }
@@ -154,24 +143,32 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 {
     info_.childrenCount_ = wrapper_->GetTotalChildCount();
     auto secObj = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
-    CheckReset(secObj);
-
     if (secObj) {
-        SegmentInit(secObj->GetSectionInfo(), frameSize);
+        const auto& sections = secObj->GetSectionInfo();
+        if (info_.margins_.empty()) {
+            // empty margins_ implies a segment change
+            auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
+            postJumpOffset_ = PrepareJump(info_);
+            info_.InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
+        }
+        SegmentInit(sections, frameSize);
         if (info_.segmentTails_.empty()) {
-            info_.InitSegments(secObj->GetSectionInfo(), 0);
+            info_.InitSegments(sections, 0);
         }
     } else {
-        size_t lastCrossCnt = info_.items_[0].size();
         RegularInit(frameSize);
         if (info_.footerIndex_ >= 0) {
             InitFooter(frameSize.CrossSize(axis_));
         }
+    }
 
-        // crossCount changed
-        if (lastCrossCnt > 0 && lastCrossCnt != info_.items_[0].size()) {
-            postJumpOffset_ = PrepareJump(info_, true);
+    int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
+    if (updateIdx != -1) {
+        if (updateIdx <= info_.endIndex_) {
+            postJumpOffset_ = PrepareJump(info_);
         }
+        info_.ClearCacheAfterIndex(updateIdx - 1);
+        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
     }
 }
 
@@ -254,58 +251,27 @@ void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
 
 void WaterFlowSegmentedLayout::InitFooter(float crossSize)
 {
-    if (info_.footerIndex_ == 0) {
+    mainGaps_.emplace_back(0.0f);
+    itemsCrossSize_.emplace_back(std::vector<float> { crossSize });
+
+    if (info_.items_.size() == 1) {
+        info_.items_.emplace_back();
+        info_.items_.back().try_emplace(0);
+    }
+    info_.margins_.emplace_back();
+    info_.segmentTails_.emplace_back(info_.childrenCount_ - 1);
+
+    if (info_.footerIndex_ != info_.childrenCount_ - 1) {
+        info_.footerIndex_ = std::min(info_.footerIndex_, info_.childrenCount_ - 1);
+        info_.ClearCacheAfterIndex(info_.footerIndex_ - 1);
         // re-insert at the end
         auto footer = wrapper_->GetOrCreateChildByIndex(info_.footerIndex_);
         auto waterFlow = wrapper_->GetHostNode();
         waterFlow->RemoveChildAtIndex(info_.footerIndex_);
         footer->GetHostNode()->MountToParent(waterFlow);
         footer->SetActive(false);
-    }
-    if (info_.footerIndex_ != info_.childrenCount_ - 1) {
+        info_.segmentCache_.erase(info_.footerIndex_);
         info_.footerIndex_ = info_.childrenCount_ - 1;
-    }
-
-    mainGaps_.push_back(0.0f);
-    itemsCrossSize_.push_back({ crossSize });
-
-    size_t sectionCnt = mainGaps_.size();
-    if (info_.items_.size() == sectionCnt - 1) {
-        info_.items_.emplace_back();
-        info_.items_.back().try_emplace(0);
-    }
-    if (info_.segmentTails_.size() == sectionCnt - 1) {
-        info_.segmentTails_.push_back(info_.childrenCount_ - 1);
-    }
-    if (info_.margins_.size() == sectionCnt - 1) {
-        info_.margins_.emplace_back();
-    }
-}
-
-void WaterFlowSegmentedLayout::CheckReset(const RefPtr<WaterFlowSections>& secObj)
-{
-    if (secObj && info_.margins_.empty()) {
-        // empty margins_ implies a segment change
-        const auto& sections = secObj->GetSectionInfo();
-        auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
-        postJumpOffset_ = PrepareJump(info_, false);
-        info_.InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
-        return;
-    }
-
-    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
-        postJumpOffset_ = PrepareJump(info_, true);
-        return;
-    }
-
-    int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
-    if (updateIdx != -1) {
-        if (updateIdx <= info_.endIndex_) {
-            postJumpOffset_ = PrepareJump(info_, true);
-        } else {
-            info_.ClearCacheAfterIndex(updateIdx - 1);
-        }
-        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
     }
 }
 
@@ -416,6 +382,9 @@ float GetUserDefHeight(const RefPtr<WaterFlowSections>& sections, int32_t seg, i
     const auto& section = sections->GetSectionInfo()[seg];
     if (section.onGetItemMainSizeByIndex) {
         Dimension len(section.onGetItemMainSizeByIndex(idx), DimensionUnit::VP);
+        if (len.IsNegative()) {
+            return 0.0f;
+        }
         return len.ConvertToPx();
     }
     return -1.0f;

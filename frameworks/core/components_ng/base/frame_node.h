@@ -55,14 +55,14 @@
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
-}
+} // namespace OHOS::Accessibility
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
 class Pattern;
 class StateModifyTask;
 class UITask;
-class FramePorxy;
+class FrameProxy;
 
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
@@ -195,6 +195,10 @@ public:
     }
 
     void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
+
+    void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
+
+    void TriggerOnSizeChangeCallback();
 
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
@@ -422,7 +426,8 @@ public:
         customerSet_ = false;
     }
 
-    void SetCustomerDraggable(bool draggable) {
+    void SetCustomerDraggable(bool draggable)
+    {
         draggable_ = draggable;
         userSet_ = true;
         customerSet_ = true;
@@ -474,6 +479,11 @@ public:
         return allowDrop_;
     }
 
+    void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
+    {
+        drawModifier_ = drawModifier;
+    }
+
     void SetDragPreview(const NG::DragDropInfo& info)
     {
         dragPreviewInfo_ = info;
@@ -498,9 +508,8 @@ public:
 
     RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
-    void CreateAnimatablePropertyFloat(
-        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent,
-        const PropertyUnit& propertyType = PropertyUnit::UNKNOWN);
+    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+        const std::function<void(float)>& onCallbackEvent, const PropertyUnit& propertyType = PropertyUnit::UNKNOWN);
     void DeleteAnimatablePropertyFloat(const std::string& propertyName);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
     void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
@@ -574,6 +583,14 @@ public:
 
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) override;
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) override;
+    /**
+     * @brief Get the index of Child among all FrameNode children of [this].
+     * Handles intermediate SyntaxNodes like LazyForEach.
+     *
+     * @param child pointer to the Child FrameNode.
+     * @return index of Child, or -1 if not found.
+     */
+    int32_t GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const;
     const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) override;
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
@@ -673,6 +690,7 @@ public:
     RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetNodeContainer();
+    RefPtr<ContentModifier> GetContentModifier();
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode);
 
@@ -715,6 +733,12 @@ private:
     void UpdateLayoutPropertyFlag() override;
     void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
+    /**
+     * @brief try to mark Parent dirty with flag PROPERTY_UPDATE_BY_CHILD_REQUEST.
+     *
+     * @return true if Parent is successfully marked dirty.
+     */
+    virtual bool RequestParentDirty();
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
@@ -739,6 +763,7 @@ private:
     void DumpInfo() override;
     void DumpOverlayInfo();
     void DumpCommonInfo();
+    void DumpSafeAreaInfo();
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     bool CheckAutoSave() override;
@@ -795,6 +820,7 @@ private:
     std::function<RefPtr<UINode>()> builderFunc_;
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
+    std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
@@ -802,7 +828,7 @@ private:
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
     RefPtr<GeometryNode> oldGeometryNode_;
     std::optional<bool> skipMeasureContent_;
-    std::unique_ptr<FramePorxy> frameProxy_;
+    std::unique_ptr<FrameProxy> frameProxy_;
     WeakPtr<TargetComponent> targetComponent_;
 
     bool needSyncRenderTree_ = false;
@@ -843,6 +869,7 @@ private:
     bool needRestoreSafeArea_ = true;
 
     RefPtr<FrameNode> overlayNode_;
+    RefPtr<NG::DrawModifier> drawModifier_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
@@ -858,7 +885,6 @@ private:
     friend class Pattern;
 
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
-
 };
 } // namespace OHOS::Ace::NG
 

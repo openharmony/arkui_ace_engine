@@ -65,7 +65,10 @@ inline double GetLinearSlope(const LeastSquareImpl& axis)
     const auto& x = axis.GetXVals();
     const auto& y = axis.GetYVals();
     auto count = axis.GetTrackNum();
-    return (y[count - 1] - y[count - 2]) / (x[count - 1] - x[count - 2]); // 2: const
+    double velocity = (y[count - 1] - y[count - 2]) / (x[count - 1] - x[count - 2]); // 2: const
+    LOGI("Linear velocity:%{public}f, startY:%{public}f, endY:%{public}f, startX:%{public}f, endX:%{public}f",
+        velocity, y[count - 2], y[count - 1], x[count - 2], x[count - 1]);
+    return velocity;
 }
 
 void CorrectMonotonicAxisVelocity(const LeastSquareImpl& axis, double& v, double extremX)

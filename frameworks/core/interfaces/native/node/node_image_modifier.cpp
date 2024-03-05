@@ -497,8 +497,7 @@ void SetImageOnComplete(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraPa
     auto onEvent = [node, eventId, extraParam](const LoadImageSuccessEvent& info) {
         ArkUINodeEvent event;
         event.kind = ON_IMAGE_COMPLETE;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.data[IMAGE_LOAD_STATUS_INDEX].i32 = info.GetLoadingStatus();
         event.componentAsyncEvent.data[IMAGE_WIDTH_INDEX].f32 = info.GetWidth();
         event.componentAsyncEvent.data[IMAGE_HEIGHT_INDEX].f32 = info.GetHeight();
@@ -520,8 +519,7 @@ void SetImageOnError(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
     auto onEvent = [node, eventId, extraParam](const LoadImageFailEvent& info) {
         ArkUINodeEvent event;
         event.kind = ON_IMAGE_ERROR;
-        event.eventId = eventId;
-        event.extraParam = extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.data[0].i32 = LOAD_ERROR_CODE;
         SendArkUIAsyncEvent(&event);
     };
