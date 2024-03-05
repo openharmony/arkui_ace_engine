@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,22 @@ public:
 
     XComponentControllerErrorCode ResetExtController(
         std::shared_ptr<XComponentController> xcomponentController) override;
+
+    void SetIdealSurfaceWidth(float surfaceWidth) override;
+
+    void SetIdealSurfaceHeight(float surfaceHeight) override;
+
+    void SetIdealSurfaceOffsetX(float offsetX) override;
+
+    void SetIdealSurfaceOffsetY(float offsetY) override;
+
+    void ClearIdealSurfaceOffset(bool isXAxis) override;
+
+    void UpdateSurfaceBounds() override;
+
+    void GetSurfaceSize(float& surfaceWidth, float& surfaceHeight) override;
+
+    void GetLocalLocation(float& offsetX, float& offsetY) override;
 
     void SetPattern(const RefPtr<XComponentPattern>& pattern);
 

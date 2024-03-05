@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,7 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (type_ == XComponentType::TEXTURE) {
-            auto paint = MakeRefPtr<XComponentPaintMethod>(renderSurface_);
+            auto paint = MakeRefPtr<XComponentPaintMethod>(renderSurface_, AceType::Claim(this));
             return paint;
         }
         return nullptr;
@@ -174,14 +174,24 @@ public:
         type_ = type;
     }
 
-    SizeF GetDrawSize()
+    const SizeF& GetDrawSize() const
     {
         return drawSize_;
     }
 
-    OffsetF GetGlobalPosition()
+    const SizeF& GetSurfaceSize() const
+    {
+        return surfaceSize_;
+    }
+
+    const OffsetF& GetGlobalPosition() const
     {
         return globalPosition_;
+    }
+
+    const OffsetF& GetLocalPosition() const
+    {
+        return localPosition_;
     }
 
     OffsetF GetOffsetRelativeToWindow();
@@ -246,6 +256,14 @@ public:
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
     void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
+
+    void SetIdealSurfaceWidth(float surfaceWidth);
+    void SetIdealSurfaceHeight(float surfaceHeight);
+    void SetIdealSurfaceOffsetX(float offsetX);
+    void SetIdealSurfaceOffsetY(float offsetY);
+    void ClearIdealSurfaceOffset(bool isXAxis);
+    void UpdateSurfaceBounds(bool needForceRender = false);
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -314,10 +332,18 @@ private:
     WeakPtr<NG::PipelineContext> context_;
     int32_t instanceId_;
     SizeF initSize_;
-    OffsetF localposition_;
+    OffsetF localPosition_;
     OffsetF globalPosition_;
     SizeF drawSize_;
+    SizeF surfaceSize_;
     RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>();
+
+    std::optional<float> selfIdealSurfaceWidth_;
+    std::optional<float> selfIdealSurfaceHeight_;
+    std::optional<float> selfIdealSurfaceOffsetX_;
+    std::optional<float> selfIdealSurfaceOffsetY_;
+
+    // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     uint64_t exportTextureSurfaceId_ = 0U;
 #ifdef OHOS_PLATFORM

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,7 +98,7 @@ public:
 
     virtual void SetSurfaceQueueSize(int32_t queueSize) {}
 
-    virtual void DrawBufferForXComponent(RSCanvas& canvas, float width, float height) {};
+    virtual void DrawBufferForXComponent(RSCanvas& canvas, float width, float height, float offsetX, float offsetY) {};
 
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
