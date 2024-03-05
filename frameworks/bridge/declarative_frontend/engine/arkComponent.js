@@ -2216,7 +2216,7 @@ class AccessibilityGroupModifier extends ModifierWithKey {
   }
 }
 AccessibilityGroupModifier.identity = Symbol('accessibilityGroup');
-class HoverEffectModifier extends Modifier {
+class HoverEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -2709,7 +2709,7 @@ class ArkComponent {
     throw new Error('Method not implemented.');
   }
   hoverEffect(value) {
-    modifier(this._modifiers, HoverEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, HoverEffectModifier.identity, HoverEffectModifier, value);
     return this;
   }
   onMouse(event) {

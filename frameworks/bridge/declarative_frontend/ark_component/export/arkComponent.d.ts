@@ -1197,7 +1197,7 @@ declare class ArkProgressComponent extends ArkComponent implements ProgressAttri
         RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions>;
     style(value: LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions):
         ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions | RingStyleOptions |
-            EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions>;
+        EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions>;
     backgroundColor(value: ResourceColor): this;
 }
 declare class ArkQRCodeComponent extends ArkComponent implements QRCodeAttribute {
