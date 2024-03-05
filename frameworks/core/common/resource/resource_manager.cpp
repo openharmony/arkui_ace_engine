@@ -42,9 +42,10 @@ RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(RefPtr<Resou
     auto resourceAdapter = GetResourceAdapter(bundleName, moduleName);
     if (resourceAdapter == nullptr) {
         resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName);
-        if (resourceAdapter) {
-            AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+        if (!resourceAdapter) {
+            return GetResourceAdapter(DEFAULT_BUNDLE_NAME, DEFAULT_MODULE_NAME);
         }
+        AddResourceAdapter(bundleName, moduleName, resourceAdapter);
     }
     return resourceAdapter;
 }
