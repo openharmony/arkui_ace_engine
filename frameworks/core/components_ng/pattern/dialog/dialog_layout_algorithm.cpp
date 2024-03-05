@@ -265,8 +265,6 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
             deviceColumns = 3;
         } else if (type == GridSizeType::MD) {
             deviceColumns = 4;
-        } else if (type == GridSizeType::LG) {
-            deviceColumns = 5;
         } else {
             deviceColumns = 5;
         }
@@ -275,8 +273,6 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
             deviceColumns = 4;
         } else if (type == GridSizeType::MD) {
             deviceColumns = 5;
-        } else if (type == GridSizeType::LG) {
-            deviceColumns = 6;
         } else {
             deviceColumns = 6;
         }
@@ -285,24 +281,14 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
             deviceColumns = 4;
         } else if (type == GridSizeType::MD) {
             deviceColumns = 6;
-        } else if (type == GridSizeType::LG) {
-            deviceColumns = 8;
         } else {
             deviceColumns = 8;
-        }
-    } else if (deviceType == DeviceType::TABLET) {
-        if (type == GridSizeType::SM) {
-            deviceColumns = 2;
-        } else {
-            deviceColumns = 4;
         }
     } else {
         if (type == GridSizeType::SM) {
             deviceColumns = 2;
-        } else if (type == GridSizeType::MD) {
+        } else if (type == GridSizeType::MD && deviceType != DeviceType::TABLET) {
             deviceColumns = 3;
-        } else if (type == GridSizeType::LG) {
-            deviceColumns = 4;
         } else {
             deviceColumns = 4;
         }
