@@ -1889,6 +1889,9 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     if (!NearZero(viewScale_)) {
         dipScale_ = density_ / viewScale_;
     }
+    if (isDensityChanged_) {
+        UIObserverHandler::GetInstance().NotifyDensityChange(density_);
+    }
 }
 
 void PipelineContext::RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback)
