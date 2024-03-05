@@ -135,6 +135,16 @@ public:
         return labelStyle_;
     }
 
+    void SetIconStyle(const IconStyle& iconStyle)
+    {
+        iconStyle_ = iconStyle;
+    }
+
+    const IconStyle& GetIconStyle() const
+    {
+        return iconStyle_;
+    }
+
     void SetPadding(const PaddingProperty& padding)
     {
         padding_ = padding;
@@ -218,6 +228,7 @@ private:
     SelectedMode selectedMode_ = SelectedMode::INDICATOR;
     BoardStyle boardStyle_;
     LabelStyle labelStyle_;
+    IconStyle iconStyle_;
     PaddingProperty padding_;
     std::string tabBarInspectorId_;
     BottomTabBarStyle bottomTabBarStyle_;

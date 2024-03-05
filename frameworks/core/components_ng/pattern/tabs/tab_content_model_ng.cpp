@@ -177,6 +177,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     tabBarPattern->SetBottomTabBarStyle(bottomTabBarStyle, myIndex);
     auto labelStyle = tabContentPattern->GetLabelStyle();
     tabBarPattern->SetLabelStyle(labelStyle, myIndex);
+    auto iconStyle = tabContentPattern->GetIconStyle();
+    tabBarPattern->SetIconStyle(iconStyle, myIndex);
     auto tabBarStyle = tabContentPattern->GetTabBarStyle();
     if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
         auto renderContext = columnNode->GetRenderContext();
@@ -266,9 +268,17 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(textLayoutProperty);
     if (!swiperPattern->IsUseCustomAnimation() || !swiperPattern->GetCustomAnimationToIndex().has_value()) {
         if (myIndex == indicator) {
-            textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
+            if (labelStyle.selectedColor.has_value()) {
+                textLayoutProperty->UpdateTextColor(labelStyle.selectedColor.value());
+            } else {
+                textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
+            }
         } else {
-            textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
+            if (labelStyle.unselectedColor.has_value()) {
+                textLayoutProperty->UpdateTextColor(labelStyle.unselectedColor.value());
+            } else {
+                textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
+            }
         }
     }
 
@@ -304,12 +314,22 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
     UpdateLabelStyle(labelStyle, textLayoutProperty);
     ImageSourceInfo imageSourceInfo(tabBarParam.GetIcon());
+    auto imagePaintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imagePaintProperty);
     if (imageSourceInfo.IsSvg()) {
         if (myIndex == indicator) {
             tabBarPattern->SetImageColorOnIndex(indicator);
-            imageSourceInfo.SetFillColor(tabTheme->GetBottomTabIconOn());
+            if (iconStyle.selectedColor.has_value()) {
+                imagePaintProperty->UpdateSvgFillColor(iconStyle.selectedColor.value());
+            } else {
+                imagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOn());
+            }
         } else {
-            imageSourceInfo.SetFillColor(tabTheme->GetBottomTabIconOff());
+            if (iconStyle.unselectedColor.has_value()) {
+                imagePaintProperty->UpdateSvgFillColor(iconStyle.unselectedColor.value());
+            } else {
+                imagePaintProperty->UpdateSvgFillColor(tabTheme->GetBottomTabIconOff());
+            }
         }
     }
 
@@ -390,6 +410,13 @@ void TabContentModelNG::SetLabelStyle(const LabelStyle& labelStyle)
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetLabelStyle(labelStyle);
+}
+
+void TabContentModelNG::SetIconStyle(const IconStyle& iconStyle)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetIconStyle(iconStyle);
 }
 
 void TabContentModelNG::SetPadding(const PaddingProperty& padding)
