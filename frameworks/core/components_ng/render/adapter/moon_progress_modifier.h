@@ -17,6 +17,8 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {
 class MoonProgressModifier : public OverlayModifier {
@@ -31,21 +33,36 @@ public:
     void SetMaxValue(float value);
     float GetMaxValue();
     void InitRatio();
-    void SetMoonAnimate(float value) const;
-    void SetBigRadius(const SizeF& frameSize);
+    void SetMoonAnimate(float value);
+    void StartPictureAnimate() const;
+    void StopPictureAnimate() const;
+
+    void SetBigRadius();
+    void SetEnableBreathe(bool enableBreathe);
 
 private:
-    void PaintSquareMoon(RSCanvas& canvas, const SizeF& frameSize) const;
+    void PaintSquareMoon(RSCanvas& canvas) const;
+    void PaintSquareMoonShadow(RSCanvas& canvas, RSBrush& brush) const;
+    void InitImage();
+    void OnImageDataReady();
+    void OnImageLoadSuccess();
+    void OnImageLoadFail(const std::string& errorMsg);
 
     // Animatable
     RefPtr<AnimatablePropertyColor> maskColor_;
     RefPtr<AnimatablePropertyFloat> ratio_;
     RefPtr<AnimatablePropertyFloat> value_;
+    RefPtr<AnimatablePropertyFloat> opacity_;
     // No animatable
     RefPtr<PropertyFloat> maxValue_;
+    RefPtr<PropertyBool> enableBreathe_;
+    RefPtr<ImageLoadingContext> loadingCtx_;
+    RefPtr<PixelMapImage> canvasImage_;
     // Others
     float bigRadius_ = .0f;
     float smallRadius_ = .0f;
+    SizeF frameSize_;
+    bool animationEnd_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MASK_PROGRESS_MOON_PROGRESS_MODIFIER_H

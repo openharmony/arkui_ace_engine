@@ -5755,6 +5755,10 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
             RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
             progressMask->SetColor(theme->GetMaskColor());
         }
+        JSRef<JSVal> jEnableBreathe = paramObject->GetProperty("breathe");
+        if (jEnableBreathe->IsBoolean()) {
+            progressMask->SetEnableBreathe(jEnableBreathe->ToBoolean());
+        }
         ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
     } else {
         JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
