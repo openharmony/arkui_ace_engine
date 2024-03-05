@@ -1459,4 +1459,32 @@ HWTEST_F(WaterFlowSegmentTest, Illegal001, TestSize.Level1)
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, -1);
 }
+
+/**
+ * @tc.name: Illegal002
+ * @tc.desc: Layout WaterFlow with negative main size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Illegal002, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(10);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_8);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->layoutInfo_;
+
+    // user-defined negative size would be treated as 0
+    UpdateCurrentOffset(-205.0f);
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.itemInfos_[0].mainSize, 0.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 9);
+}
 } // namespace OHOS::Ace::NG

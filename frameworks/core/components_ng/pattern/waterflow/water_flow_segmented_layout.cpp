@@ -382,6 +382,9 @@ float GetUserDefHeight(const RefPtr<WaterFlowSections>& sections, int32_t seg, i
     const auto& section = sections->GetSectionInfo()[seg];
     if (section.onGetItemMainSizeByIndex) {
         Dimension len(section.onGetItemMainSizeByIndex(idx), DimensionUnit::VP);
+        if (len.IsNegative()) {
+            return 0.0f;
+        }
         return len.ConvertToPx();
     }
     return -1.0f;
