@@ -799,6 +799,20 @@ void UINode::UpdateChildrenVisible(bool isVisible) const
     }
 }
 
+void UINode::OnRecycle()
+{
+    for (const auto& child: GetChildren()) {
+        child->OnRecycle();
+    }
+}
+
+void UINode::OnReuse()
+{
+    for (const auto& child: GetChildren()) {
+        child->OnReuse();
+    }
+}
+
 std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
 {
     if (GetId() == id) {

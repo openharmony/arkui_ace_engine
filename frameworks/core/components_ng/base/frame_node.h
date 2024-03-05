@@ -327,6 +327,10 @@ public:
 
     void OnNotifyMemoryLevel(int32_t level) override;
 
+    // call by recycle framework.
+    void OnRecycle() override;
+    void OnReuse() override;
+
     OffsetF GetOffsetRelativeToWindow() const;
 
     OffsetF GetTransformRelativeOffset() const;

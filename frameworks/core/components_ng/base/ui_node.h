@@ -313,6 +313,10 @@ public:
 
     virtual void OnVisibleChange(bool isVisible);
 
+    // call by recycle framework.
+    virtual void OnRecycle();
+    virtual void OnReuse();
+
     virtual bool MarkRemoving();
 
     bool IsOnMainTree() const
