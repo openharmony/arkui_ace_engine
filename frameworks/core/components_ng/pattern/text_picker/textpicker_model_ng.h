@@ -110,6 +110,12 @@ public:
     static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
     static PickerTextStyle getDisappearTextStyle(FrameNode* frameNode);
     static int32_t getTextPickerSelectedIndex(FrameNode* frameNode);
+    static std::string getTextPickerValue(FrameNode* frameNode);
+    static std::string getTextPickerRange(FrameNode* frameNode);
+    static int32_t isSingleRange()
+    {
+        return isSingleRange_;
+    }
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
