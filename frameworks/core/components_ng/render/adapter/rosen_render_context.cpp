@@ -4821,6 +4821,12 @@ void RosenRenderContext::UpdateRenderGroup(bool isRenderGroup, bool isForced, bo
     rsNode_->MarkNodeGroup(isRenderGroup, isForced, includeProperty);
 }
 
+void RosenRenderContext::OnNodeNameUpdate(const std::string& id)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetNodeName(id);
+}
+
 void RosenRenderContext::OnSuggestedRenderGroupUpdate(bool isRenderGroup)
 {
     CHECK_NULL_VOID(rsNode_);

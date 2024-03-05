@@ -3173,6 +3173,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end)
 
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
+    renderContext_->UpdateNodeName(id);
     RecordExposureIfNeed(id);
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
