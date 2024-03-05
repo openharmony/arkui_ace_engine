@@ -107,6 +107,16 @@ public:
         frame_.rect_.SetSize(size);
     }
 
+    void SetFrameHeight(const float heigth)
+    {
+        frame_.rect_.SetHeight(heigth);
+    }
+
+    void SetFrameWidth(const float width)
+    {
+        frame_.rect_.SetWidth(width);
+    }
+
     SizeF GetPaddingSize() const
     {
         auto size = frame_.rect_.GetSize();

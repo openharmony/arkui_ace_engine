@@ -350,6 +350,42 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetTabBarHeight(height);
 }
 
+void JSTabs::SetWidth(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsWidth(info);
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsString() && info[0]->ToString().empty()) {
+        return;
+    }
+    if (info[0]->IsString() && info[0]->ToString() == "auto") {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        TabsModel::GetInstance()->SetWidthAuto(true);
+        return;
+    }
+
+    TabsModel::GetInstance()->SetWidthAuto(false);
+}
+
+void JSTabs::SetHeight(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsHeight(info);
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsString() && info[0]->ToString().empty()) {
+        return;
+    }
+    if (info[0]->IsString() && info[0]->ToString() == "auto") {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        TabsModel::GetInstance()->SetHeightAuto(true);
+        return;
+    }
+
+    TabsModel::GetInstance()->SetHeightAuto(false);
+}
+
 void JSTabs::SetIndex(int32_t index)
 {
     TabsModel::GetInstance()->SetIndex(index);
@@ -596,6 +632,8 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("barMode", &JSTabs::SetBarMode);
     JSClass<JSTabs>::StaticMethod("barWidth", &JSTabs::SetBarWidth);
     JSClass<JSTabs>::StaticMethod("barHeight", &JSTabs::SetBarHeight);
+    JSClass<JSTabs>::StaticMethod("width", &JSTabs::SetWidth);
+    JSClass<JSTabs>::StaticMethod("height", &JSTabs::SetHeight);
     JSClass<JSTabs>::StaticMethod("index", &JSTabs::SetIndex);
     JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration);
     JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);
