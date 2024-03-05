@@ -26,6 +26,9 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr Color FRONT_COLOR = Color(0xff0000ff);
+} // namespace
 class ToolBarTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -124,5 +127,89 @@ HWTEST_F(ToolBarTestNg, ToolbarNodeTest002, TestSize.Level1)
      */
     auto result = toolBarNode_->GetOrCreateToolbarNode(tag, nodeId, patternCreator);
     EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: ToolBarPatternTest002
+ * @tc.desc: Test the SetToolbarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternTest002, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    EXPECT_NE(navToolbarPattern, nullptr);
+    NavigationToolbarOptions opt;
+    navToolbarPattern->SetToolbarOptions(std::move(opt));
+}
+
+/**
+ * @tc.name: ToolBarPatternTest003
+ * @tc.desc: Test the SetToolbarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternTest003, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    EXPECT_NE(navToolbarPattern, nullptr);
+    NavigationToolbarOptions opt;
+    opt.bgOptions.color = std::make_optional(FRONT_COLOR);
+    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    navToolbarPattern->SetToolbarOptions(std::move(opt));
+}
+
+/**
+ * @tc.name: ToolBarPatternTest004
+ * @tc.desc: Test the SetToolbarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternTest004, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    EXPECT_NE(navToolbarPattern, nullptr);
+    NavigationToolbarOptions opt;
+    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    navToolbarPattern->SetToolbarOptions(std::move(opt));
+}
+
+/**
+ * @tc.name: ToolBarPatternTest005
+ * @tc.desc: Test the SetToolbarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternTest005, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    EXPECT_NE(navToolbarPattern, nullptr);
+    NavigationToolbarOptions opt;
+    opt.bgOptions.color = std::make_optional(FRONT_COLOR);
+    navToolbarPattern->SetToolbarOptions(std::move(opt));
+}
+
+/**
+ * @tc.name: ToolBarPatternTest006
+ * @tc.desc: Test the SetDefaultBackgroundColorIfNeeded function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternTest006, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    EXPECT_NE(navToolbarPattern, nullptr);
+    navToolbarPattern->options_.bgOptions.color = std::make_optional(FRONT_COLOR);
+    navToolbarPattern->SetDefaultBackgroundColorIfNeeded();
 }
 } // namespace OHOS::Ace::NG
