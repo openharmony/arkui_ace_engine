@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include <string>
 
 #define private public
 #define protected public
@@ -51,6 +52,8 @@ constexpr int32_t FINGERS_NUMBER_GREATER_THAN_DEFAULT = 2;
 constexpr float DISTANCE_GREATER_THAN_DEFAULT = 6.0f;
 constexpr float DISTANCE_EQUAL_DEFAULT = 5.0f;
 constexpr float IMAGE_INVALID_RECT_WIDTH = 100.0f;
+const std::string COMPONENT_ID = "id of component which you want to get screenshot from";
+const std::string NO_COMPONENT_ID = "";
 } // namespace
 
 class DragEventTestNg : public testing::Test {
@@ -884,5 +887,22 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
     TranslateOptions result = imageContext->GetTransformTranslate().value();
     TranslateOptions expectValue { 0.0f, 0.0f, 0.0f };
     EXPECT_EQ(result.x.calcvalue_, expectValue.x.calcvalue_);
+}
+
+/**
+ * @tc.name: DragEventTestNg010
+ * @tc.desc: Invoke GetPreviewPixelMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventTestNg010, TestSize.Level1)
+{
+    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(NO_COMPONENT_ID, nullptr), nullptr);
+    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(COMPONENT_ID, nullptr), nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    
+    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
+    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
 }
 } // namespace OHOS::Ace::NG

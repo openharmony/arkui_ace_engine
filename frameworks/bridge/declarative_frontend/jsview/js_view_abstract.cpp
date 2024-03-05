@@ -6979,7 +6979,7 @@ void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
+    if ((!info[0]->IsObject()) && (!info[0]->IsString())) {
         return;
     }
     NG::DragDropInfo dragPreviewInfo;
@@ -6997,6 +6997,9 @@ void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
 #endif
         extraInfo = dragItemInfo->GetProperty("extraInfo");
         ParseJsString(extraInfo, dragPreviewInfo.extraInfo);
+    } else if (info[0]->IsString()) {
+        auto inspectorId = info[0];
+        ParseJsString(inspectorId, dragPreviewInfo.inspectorId);
     } else {
         return;
     }
