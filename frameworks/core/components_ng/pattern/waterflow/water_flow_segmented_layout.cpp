@@ -86,8 +86,6 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 
     wrapper_ = wrapper;
 
-    wrapper_->RemoveAllChildInRenderTree();
-
     auto padding = wrapper_->GetLayoutProperty()->CreatePaddingAndBorder();
     auto initialOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
@@ -107,6 +105,7 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     for (int32_t i = info_.startIndex_; i <= info_.endIndex_; ++i) {
         LayoutItem(i, crossPos[info_.GetSegment(i)][info_.itemInfos_[i].crossIdx], initialOffset, isReverse);
     }
+    wrapper_->SetActiveChildRange(info_.startIndex_, info_.endIndex_);
 
     // for compatibility
     info_.firstIndex_ = info_.startIndex_;
@@ -436,8 +435,10 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
 {
     int32_t segment = info_.GetSegment(idx);
     auto item = wrapper_->GetOrCreateChildByIndex(idx);
-    item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-        { itemsCrossSize_[segment][crossIdx], mainSize_, axis_ }, props, item));
+    if (item->CheckNeedForceMeasureAndLayout()) {
+        item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
+            { itemsCrossSize_[segment][crossIdx], mainSize_, axis_ }, props, item));
+    }
     return item;
 }
 
@@ -474,7 +475,11 @@ void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const Off
     OffsetF offset = (axis_ == Axis::VERTICAL) ? OffsetF(crossPos, mainOffset) : OffsetF(mainOffset, crossPos);
     auto wrapper = wrapper_->GetOrCreateChildByIndex(idx);
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + padding);
-    wrapper->Layout();
+    if (wrapper->CheckNeedForceMeasureAndLayout()) {
+        wrapper->Layout();
+    } else {
+        wrapper->GetHostNode()->ForceSyncGeometryNode();
+    }
 
     // recode restore info
     if (idx == info_.startIndex_) {
