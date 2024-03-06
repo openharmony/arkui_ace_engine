@@ -274,7 +274,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
             auto menuItemLayoutProperty = menuItemNode->GetLayoutProperty<ButtonLayoutProperty>();
             CHECK_NULL_RETURN(menuItemLayoutProperty, nullptr);
             menuItemLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
+                CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
             menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
             menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
             auto renderContext = menuItemNode->GetRenderContext();
@@ -283,10 +283,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
             InitTitleBarButtonEvent(menuItemNode, false, menuItem);
 
             PaddingProperty padding;
-            padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
-            padding.right = CalcLength(BUTTON_PADDING.ConvertToPx());
-            padding.top = CalcLength(BUTTON_PADDING.ConvertToPx());
-            padding.bottom = CalcLength(BUTTON_PADDING.ConvertToPx());
+            padding.SetEdges(CalcLength(BUTTON_PADDING));
             menuItemLayoutProperty->UpdatePadding(padding);
 
             int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -328,7 +325,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         auto menuItemLayoutProperty = menuItemNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_RETURN(menuItemLayoutProperty, nullptr);
         menuItemLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
+            CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
         menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
         menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
         auto renderContext = menuItemNode->GetRenderContext();
@@ -338,10 +335,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         InitTitleBarButtonEvent(menuItemNode, true);
 
         PaddingProperty padding;
-        padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
-        padding.right = CalcLength(BUTTON_PADDING.ConvertToPx());
-        padding.top = CalcLength(BUTTON_PADDING.ConvertToPx());
-        padding.bottom = CalcLength(BUTTON_PADDING.ConvertToPx());
+        padding.SetEdges(CalcLength(BUTTON_PADDING));
         menuItemLayoutProperty->UpdatePadding(padding);
 
         barItemNode->MountToParent(menuItemNode);
