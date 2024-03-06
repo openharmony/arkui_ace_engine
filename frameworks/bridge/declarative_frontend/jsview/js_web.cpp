@@ -1163,6 +1163,11 @@ public:
         args.SetReturnValue(headers);
     }
 
+    void SetLoadOverrideEvent(const LoadOverrideEvent& eventInfo)
+    {
+        request_ = eventInfo.GetRequest();
+    }
+
 private:
     static void Constructor(const JSCallbackInfo& args)
     {
@@ -1682,6 +1687,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("nestedScroll", &JSWeb::SetNestedScroll);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentStart", &JSWeb::JavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentEnd", &JSWeb::JavaScriptOnDocumentEnd);
+    JSClass<JSWeb>::StaticMethod("onOverrideUrlLoading", &JSWeb::OnOverrideUrlLoading);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -1908,6 +1914,14 @@ JSRef<JSVal> SearchResultReceiveEventToJSValue(const SearchResultReceiveEvent& e
     obj->SetProperty("numberOfMatches", eventInfo.GetNumberOfMatches());
     obj->SetProperty("isDoneCounting", eventInfo.GetIsDoneCounting());
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> LoadOverrideEventToJSValue(const LoadOverrideEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    requestEvent->SetLoadOverrideEvent(eventInfo);
+    return JSRef<JSVal>::Cast(requestObj);
 }
 
 void JSWeb::ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc)
@@ -4203,6 +4217,33 @@ void JSWeb::JavaScriptOnDocumentEnd(const JSCallbackInfo& args)
     ScriptItems scriptItems;
     ParseScriptItems(args, scriptItems);
     WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
+}
+
+void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadOverrideEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadOverrideEventToJSValue);
+    auto instanceId = Container::CurrentId();
+
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) -> bool {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadOverrideEvent>(info);
+        JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+        if (message->IsBoolean()) {
+            return message->ToBoolean();
+        }
+        return false;
+    };
+    WebModel::GetInstance()->SetOnOverrideUrlLoading(std::move(uiCallback));
 }
 
 void JSWeb::CopyOption(int32_t copyOption)

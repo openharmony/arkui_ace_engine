@@ -921,4 +921,17 @@ void WebClientImpl::OnIntelligentTrackingPreventionResult(
     CHECK_NULL_VOID(delegate);
     delegate->OnIntelligentTrackingPreventionResult(websiteHost, trackerHost);
 }
+
+bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+
+    bool result = delegate->OnHandleOverrideLoading(request);
+    
+    return result;
+}
 } // namespace OHOS::Ace

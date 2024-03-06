@@ -723,6 +723,7 @@ public:
     OHOS::NWeb::NWebPreference::CopyOptionMode GetCopyOptionMode() const;
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost);
+    bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
 private:
     void InitWebEvent();
     void RegisterWebEvent();

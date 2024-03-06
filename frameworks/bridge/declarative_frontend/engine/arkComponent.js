@@ -15823,6 +15823,9 @@ class ArkWebComponent extends ArkComponent {
   nestedScroll(value) {
     throw new Error('Method not implemented.');
   }
+  onOverrideUrlLoading(callback) {
+    throw new Error('Method not implemented.');
+  }
 }
 // @ts-ignore
 globalThis.Web.attributeModifier = function (modifier) {

@@ -163,6 +163,7 @@ public:
     virtual void SetIntelligentTrackingPreventionResultId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
             intelligentTrackingPreventionResultId) {};
+    virtual void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;
