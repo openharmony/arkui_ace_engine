@@ -163,7 +163,6 @@ class ModifierWithKey<T extends number | string | boolean | object> {
       this.value = this.stageValue;
       this.applyPeer(node, false);
     }
-    this.stageValue = undefined;
     return false;
   }
 
@@ -2405,6 +2404,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
+  }
+
+  cleanStageValue(){
+    if (!this._modifiersWithKeys){
+      return;
+    }
+    this._modifiersWithKeys.forEach((value, key) => {
+        value.stageValue = undefined;
+    });
   }
 
   applyModifierPatch(): void {
