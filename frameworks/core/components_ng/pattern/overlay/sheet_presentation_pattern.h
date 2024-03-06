@@ -135,7 +135,6 @@ public:
         }
     }
 
-
     void CallShouldDismiss()
     {
         if (shouldDismiss_) {
@@ -153,6 +152,7 @@ public:
     bool IsScrollable() const;
     void AvoidAiBar();
     void AvoidSafeArea();
+    void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);
     float InitialSingleGearHeight(NG::SheetStyle& sheetStyle);
