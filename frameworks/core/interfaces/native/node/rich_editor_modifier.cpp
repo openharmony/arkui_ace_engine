@@ -21,6 +21,21 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 namespace OHOS::Ace::NG {
+constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
+
+void SetRichEditorDetectEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetTextDetectEnable(frameNode, static_cast<bool>(value));
+}
+
+void ResetRichEditorDetectEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetTextDetectEnable(frameNode, DEFAULT_ENABLE_TEXT_DETECTOR);
+}
 
 void SetRichEditorCopyOptions(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue)
 {
@@ -41,7 +56,8 @@ void ResetRichEditorCopyOptions(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
-    static const ArkUIRichEditorModifier modifier = {SetRichEditorCopyOptions, ResetRichEditorCopyOptions};
+    static const ArkUIRichEditorModifier modifier = { SetRichEditorDetectEnable, ResetRichEditorDetectEnable,
+        SetRichEditorCopyOptions, ResetRichEditorCopyOptions };
     return &modifier;
 }
 }
