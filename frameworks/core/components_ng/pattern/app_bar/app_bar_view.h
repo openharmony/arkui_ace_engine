@@ -54,6 +54,7 @@ private:
     void BindMenuCallback(const RefPtr<FrameNode>& menuButton);
     void BindCloseCallback(const RefPtr<FrameNode>& closeButton);
     static void BindContentCover(const RefPtr<FrameNode>& targetNode);
+    static std::map<std::string, std::string> CreateUIExtensionParams();
 
     WeakPtr<FrameNode> atomicService_;
     
