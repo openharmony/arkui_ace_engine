@@ -129,11 +129,11 @@ void InsertChildAfter(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHa
     ViewModel::InsertChildAfter(parent, child, sibling);
 }
 
-typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, void* extraParam);
 
 /**
  * IMPORTANT!!!
- * the order of declaring the handler must be same as the ArkUIAsyncEventKind did
+ * the order of declaring the handler must be same as the ArkUIEventSubKind did
  */
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
@@ -208,7 +208,7 @@ const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
 };
 
 /* clang-format on */
-void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int64 extraParam)
+void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, ArkUI_Int64 extraParam)
 {
     unsigned int subClassType = kind / ARKUI_MAX_EVENT_NUM;
     unsigned int subKind = kind % ARKUI_MAX_EVENT_NUM;
@@ -327,13 +327,13 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
     }
     if (eventHandle) {
         // TODO: fix handlers.
-        eventHandle(node, 0, reinterpret_cast<void*>(static_cast<intptr_t>(extraParam)));
+        eventHandle(node, reinterpret_cast<void*>(static_cast<intptr_t>(extraParam)));
     } else {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d EMPTY IMPLEMENT", kind);
     }
 }
 
-void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind subKind)
+void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind subKind)
 {
     // TODO
 }

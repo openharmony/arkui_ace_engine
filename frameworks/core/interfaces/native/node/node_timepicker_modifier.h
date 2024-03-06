@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUITimepickerModifier* GetTimepickerModifier();
-void SetTimePickerOnChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+void SetTimePickerOnChange(ArkUINodeHandle node, void* extraParam);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TIME_PICKER_MODIFIER_H

@@ -20,8 +20,8 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUIRefreshModifier* GetRefreshModifier();
-    void SetRefreshOnStateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-    void SetOnRefreshing(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+    void SetRefreshOnStateChange(ArkUINodeHandle node, void* extraParam);
+    void SetOnRefreshing(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_REFRESH_MODIFIER_H

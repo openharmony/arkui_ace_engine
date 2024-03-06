@@ -20,10 +20,10 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICommonModifier* GetCommonModifier();
 
-void SetOnAppear(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnBlur(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnClick(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnTouch(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+void SetOnAppear(ArkUINodeHandle node,  void* extraParam);
+void SetOnFocus(ArkUINodeHandle node, void* extraParam);
+void SetOnBlur(ArkUINodeHandle node, void* extraParam);
+void SetOnAreaChange(ArkUINodeHandle node, void* extraParam);
+void SetOnClick(ArkUINodeHandle node, void* extraParam);
+void SetOnTouch(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier

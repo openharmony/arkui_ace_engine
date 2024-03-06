@@ -57,7 +57,6 @@ bool SetToggleDimension(
     optDimension = dimensionValue;
     return true;
 }
-} // namespace
 
 void SetToggleSelectedColor(ArkUINodeHandle node, ArkUI_Uint32 selectedColor)
 {
@@ -252,6 +251,7 @@ void ResetToggleHoverEffect(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ToggleModelNG::SetHoverEffect(frameNode, OHOS::Ace::HoverEffectType::AUTO);
 }
+} // namespace
 
 namespace NodeModifier {
 const ArkUIToggleModifier* GetToggleModifier()
@@ -278,14 +278,15 @@ const ArkUIToggleModifier* GetToggleModifier()
     return &modifier;
 }
 
-void SetOnToggleChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnToggleChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node, eventId, extraParam](const bool isOn) {
+    auto onChange = [node, extraParam](const bool isOn) {
         ArkUINodeEvent event;
-        event.kind = ON_TOGGLE_CHANGE;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TOGGLE_CHANGE;
         event.componentAsyncEvent.data[0].u32 = isOn;
         SendArkUIAsyncEvent(&event);
     };

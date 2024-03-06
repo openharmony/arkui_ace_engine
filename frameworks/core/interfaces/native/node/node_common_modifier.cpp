@@ -4629,55 +4629,67 @@ const ArkUICommonModifier* GetCommonModifier()
     return &modifier;
 }
 
-void SetOnAppear(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnAppear(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onAppear = [frameNode, eventId, extraParam]() {
+    int32_t nodeId = frameNode->GetId();
+    auto onAppear = [frameNode, nodeId, extraParam]() {
         ArkUINodeEvent event;
-        event.kind = ON_APPEAR;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.nodeId = nodeId;
+        event.componentAsyncEvent.subKind = ON_APPEAR;
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
 }
 
-void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnFocus(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam]() {
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam]() {
         ArkUINodeEvent event;
-        event.kind = ON_FOCUS;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_FOCUS;
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
 }
 
-void SetOnBlur(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnBlur(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam]() {
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam]() {
         ArkUINodeEvent event;
-        event.kind = ON_BLUR;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_BLUR;
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
 }
 
-void SetOnAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onAreaChanged = [frameNode, eventId, extraParam](
+    int32_t nodeId = frameNode->GetId();
+    auto onAreaChanged = [nodeId, frameNode, extraParam](
                              const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
         ArkUINodeEvent event;
-        event.kind = ON_AREA_CHANGE;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_AREA_CHANGE;
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         auto oldLocalOffset = oldRect.GetOffset();
         event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Width());
@@ -4709,14 +4721,17 @@ void SetOnAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
     ViewAbstract::SetOnAreaChanged(frameNode, std::move(areaChangeCallback));
 }
 
-void SetOnClick(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnClick(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam](GestureEvent& info) {
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](GestureEvent& info) {
         ArkUINodeEvent event;
-        event.kind = ON_CLICK;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.nodeId = nodeId;
+        event.componentAsyncEvent.subKind = ON_CLICK;
 
         Offset globalOffset = info.GetGlobalLocation();
         Offset localOffset = info.GetLocalLocation();
@@ -4743,15 +4758,17 @@ void SetOnClick(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
 }
 
-void SetOnTouch(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnTouch(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam](TouchEventInfo& eventInfo) {
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](TouchEventInfo& eventInfo) {
         globalEventInfo = eventInfo;
         ArkUINodeEvent event;
-        event.kind = ON_TOUCH;
+        event.kind = TOUCH_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.nodeId = nodeId;
         const std::list<TouchLocationInfo>& changeTouch = eventInfo.GetChangedTouches();
         if (changeTouch.size() > 0) {
             TouchLocationInfo front = changeTouch.front();
