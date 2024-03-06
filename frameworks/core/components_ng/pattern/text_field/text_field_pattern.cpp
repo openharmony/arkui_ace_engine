@@ -1334,6 +1334,7 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    CHECK_NULL_VOID(!IsDragging());
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::UP) {
         RequestKeyboardAfterLongPress();
@@ -1743,6 +1744,7 @@ void TextFieldPattern::InitClickEvent()
 
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
+    CHECK_NULL_VOID(!IsDragging());
     auto focusHub = GetFocusHub();
     if (!focusHub->IsFocusable()) {
         return;
@@ -2364,6 +2366,7 @@ void TextFieldPattern::InitLongPressEvent()
 
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
 {
+    CHECK_NULL_VOID(!IsDragging());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!focusHub->IsFocusable()) {
@@ -2888,6 +2891,7 @@ void TextFieldPattern::ChangeMouseState(const Offset location, const RefPtr<Pipe
 
 void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
 {
+    CHECK_NULL_VOID(!IsDragging());
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto frameId = tmpHost->GetId();
