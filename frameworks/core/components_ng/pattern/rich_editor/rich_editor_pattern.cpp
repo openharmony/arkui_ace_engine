@@ -2069,9 +2069,7 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
         showSelect_ = true;
         isShowMenu_ = false;
         CalculateHandleOffsetAndShowOverlay();
-        if (!IsUsingMouse()) {
-            ResetSelection();
-        }
+        ResetSelection();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
