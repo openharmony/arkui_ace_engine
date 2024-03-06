@@ -130,7 +130,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeById(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     int nodeId = firstArg->ToNumber(vm)->Value();
-    auto nodePtr = GetArkUINodeModifiers()->getUIStateModifier()->getFrameNodeById(nodeId);
+    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getFrameNodeById(nodeId);
     return panda::NativePointerRef::New(vm, nodePtr);
 }
 
@@ -156,6 +156,16 @@ ArkUINativeModuleValue ArkUINativeModule::SetSupportedUIState(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeByKey(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto key = firstArg->ToString(vm)->ToString();
+    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getFrameNodeByKey(key.c_str());
+    return panda::NativePointerRef::New(vm, nodePtr);
+}
+
 ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -166,6 +176,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetUIState));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSupportedUIState"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetSupportedUIState));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNodeByKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetFrameNodeByKey));
 
     auto common = panda::ObjectRef::New(vm);
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
@@ -2093,6 +2105,10 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetParent));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getIdByNodePtr"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetIdByNodePtr));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPositionToParent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetPositionToParent));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPositionToWindow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetPositionToWindow));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
 }
 

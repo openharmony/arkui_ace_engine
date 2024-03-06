@@ -204,4 +204,43 @@ class FrameNode {
     const number = getUINativeModule().frameNode.getChildNumber(this.nodePtr_);
     return number;
   }
+  getPositionToParent(): Position {
+    const position = getUINativeModule().frameNode.getPositionToParent(this.nodePtr_);
+    return {x: position[0], y: position[1]};
+  }
+
+  getPositionToWindow(): Position {
+    const position = getUINativeModule().frameNode.getPositionToWindow(this.nodePtr_);
+    return {x: position[0], y: position[1]};
+  }
+}
+
+class FrameNodeUtils {
+  static searchNodeInRegisterProxy(nodePtr: NodePtr): FrameNode | null {
+    let nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+    if (nodeId === -1) {
+      return null;
+    }
+    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      return frameNode === undefined ? null : frameNode;
+    }
+    return null;
+  }
+
+  static createFrameNode(uiContext: UIContext, nodePtr: NodePtr): FrameNode | null {
+    if (!getUINativeModule().frameNode.isModifiable(nodePtr)) {
+      let frameNode = new FrameNode(uiContext, 'ArkTsNode');
+      let baseNode = new BaseNode(uiContext);
+      let node = baseNode.convertToFrameNode(nodePtr);
+      let nodeId = getUINativeModule().frameNode.getIdByNodePtr(node);
+      if (nodeId !== getUINativeModule().frameNode.getIdByNodePtr(node)) {
+        return null;
+      }
+      frameNode.setNodePtr(nodePtr);
+      frameNode.setBaseNode(baseNode);
+      return frameNode;
+    }
+    return null;
+  }
 }
