@@ -2342,6 +2342,22 @@ void FrameNode::OnAccessibilityEvent(
     }
 }
 
+void FrameNode::OnRecycle()
+{
+    for (const auto& destroyCallback : destroyCallbacks_) {
+        destroyCallback();
+    }
+    layoutProperty_->ResetGeometryTransition();
+    pattern_->OnRecycle();
+    UINode::OnRecycle();
+}
+
+void FrameNode::OnReuse()
+{
+    pattern_->OnReuse();
+    UINode::OnReuse();
+}
+
 bool FrameNode::MarkRemoving()
 {
     bool pendingRemove = false;

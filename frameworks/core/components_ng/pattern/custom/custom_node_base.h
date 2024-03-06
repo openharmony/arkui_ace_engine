@@ -120,24 +120,7 @@ public:
         recycleRenderFunc_ = std::move(func);
     }
 
-    void FireRecycleRenderFunc()
-    {
-        if (recycleRenderFunc_) {
-            ACE_SCOPED_TRACE("CustomNode:BuildRecycle %s", GetJSViewName().c_str());
-            {
-                ScopedViewStackProcessor scopedViewStackProcessor;
-                recycleRenderFunc_();
-            }
-            for (const auto& weak : recyclePatterns_) {
-                auto pattern = weak.Upgrade();
-                if (pattern) {
-                    pattern->OnReuse();
-                }
-            }
-            recyclePatterns_.clear();
-            recycleRenderFunc_ = nullptr;
-        }
-    }
+    void FireRecycleRenderFunc();
 
     bool HasRecycleRenderFunc()
     {
@@ -228,7 +211,6 @@ private:
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
     bool needRebuild_ = false;
     bool executeFireOnAppear_ = false;
-    std::list<WeakPtr<Pattern>> recyclePatterns_;
 };
 } // namespace OHOS::Ace::NG
 

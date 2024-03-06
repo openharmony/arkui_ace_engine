@@ -724,6 +724,14 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool follow
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
 }
 
+void LayoutProperty::ResetGeometryTransition()
+{
+    if (!GetGeometryTransition()) {
+        return;
+    }
+    UpdateGeometryTransition("");
+}
+
 void LayoutProperty::UpdateLayoutDirection(TextDirection value)
 {
     if (layoutDirection_ == value) {
