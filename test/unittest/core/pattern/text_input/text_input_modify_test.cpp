@@ -86,6 +86,7 @@ const std::string DEFAULT_PLACE_HOLDER = "please input text here";
 const std::string LOWERCASE_FILTER = "[a-z]";
 const std::string NUMBER_FILTER = "^[0-9]*$";
 const std::string DEFAULT_INPUT_FILTER = "[a-z]";
+const TextAlign DEFAULT_TEXT_ALIGN = TextAlign::LEFT;
 template<typename CheckItem, typename Expected>
 struct TestItem {
     CheckItem item;
@@ -1014,5 +1015,329 @@ HWTEST_F(TextFieldModifyTest, OnHandleMoveDone002, TestSize.Level1)
     pattern_->isSingleHandle_ = false;
     pattern_->OnHandleMoveDone(handleRect, false);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
+}
+
+/**
+ * @tc.name: RequestKeyboard001
+ * @tc.desc: Test the result after request custom keyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, RequestKeyboard001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxLength(DEFAULT_TEXT.size() - 2);
+        model.SetInputFilter(DEFAULT_INPUT_FILTER, nullptr);
+        model.SetCopyOption(CopyOptions::InApp);
+        model.SetTextAlign(DEFAULT_TEXT_ALIGN);
+        model.SetEnableAutoFill(false);
+        model.SetType(TextInputType::TEXT);
+        model.SetShowUnderline(true);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Set SetCustomKeyboard.
+     */
+    pattern_->SetCustomKeyboard([]() {});
+    pattern_->DumpInfo();
+    pattern_->DumpAdvanceInfo();
+
+    /**
+     * @tc.steps: step3. call RequestKeyboard.
+     */
+    EXPECT_TRUE(pattern_->RequestKeyboard(true, true, true));
+}
+
+/**
+ * @tc.name: RequestKeyboard002
+ * @tc.desc: Test the result after request custom keyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, RequestKeyboard002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Set SetCustomKeyboard.
+     */
+    pattern_->SetCustomKeyboard([]() {});
+    pattern_->RequestCustomKeyboard();
+
+    /**
+     * @tc.steps: step3. call RequestKeyboard.
+     */
+    EXPECT_TRUE(pattern_->RequestKeyboard(true, true, true));
+}
+
+/**
+ * @tc.name: DumpViewDataPageNode001
+ * @tc.desc: Test the result after dump viewData pageNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DumpViewDataPageNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create PageNodeInfoWrap ptr.
+     */
+    auto info = PageNodeInfoWrap::CreatePageNodeInfoWrap();
+    auto autoFillType = AceAutoFillType::ACE_UNSPECIFIED;
+
+    /**
+     * @tc.steps: step3. call DumpViewDataPageNode.
+     */
+    pattern_->NotifyFillRequestSuccess(info, autoFillType);
+}
+
+/**
+ * @tc.name: CheckAutoSave001
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, CheckAutoSave001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and SetEnableAutoFill false.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(false);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave002
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, CheckAutoSave002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and SetEnableAutoFill true.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave003
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, CheckAutoSave003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set textValue empty.
+     */
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave004
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, CheckAutoSave004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextInputType USER_NAME.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetType(TextInputType::USER_NAME);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step4. set PasswordTextValue ne textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave005
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, CheckAutoSave005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextInputType VISIBLE_PASSWORD.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave006
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, CheckAutoSave006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextInputType NEW_PASSWORD.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetType(TextInputType::NEW_PASSWORD);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: IsTouchAtLeftOffset001
+ * @tc.desc: Test the result after touch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, IsTouchAtLeftOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. set currentOffsetX 10 and call IsTouchAtLeftOffset.
+     * @tc.expected: return true
+     */
+    EXPECT_TRUE(pattern_->IsTouchAtLeftOffset(10));
+
+    /**
+     * @tc.steps: step2. set currentOffsetX 400 and call IsTouchAtLeftOffset.
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(pattern_->IsTouchAtLeftOffset(400));
+}
+
+/**
+ * @tc.name: GetDragUpperLeftCoordinates001
+ * @tc.desc: Test dragUpper left coordinates.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, GetDragUpperLeftCoordinates001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2.call GetDragUpperLeftCoordinates.
+     * @tc.expected: return true
+     */
+    OffsetF localOffset(0.0f, 0.0f);
+    EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), localOffset);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test color configuration update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2.call OnColorConfigurationUpdate.
+     */
+    pattern_->OnColorConfigurationUpdate();
+    EXPECT_TRUE(pattern_->colorModeChange_);
 }
 } // namespace OHOS::Ace::NG
