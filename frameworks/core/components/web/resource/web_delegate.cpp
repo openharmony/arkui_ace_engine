@@ -5677,11 +5677,17 @@ void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedT
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     if (touchEvent) {
-        TouchEvent event{touchEvent->GetId(), touchEvent->GetX(), touchEvent->GetY(), touchEvent->GetScreenX(),
-            touchEvent->GetScreenY(), static_cast<OHOS::Ace::TouchType>(touchEvent->GetType())};
+        TouchEvent event;
+        event.SetId(touchEvent->GetId())
+            .SetX(touchEvent->GetX())
+            .SetY(touchEvent->GetY())
+            .SetScreenX(touchEvent->GetScreenX())
+            .SetScreenY(touchEvent->GetScreenY())
+            .SetType(static_cast<OHOS::Ace::TouchType>(touchEvent->GetType()));
         webPattern->SetTouchEventInfo(event, touchEventInfo);
     } else {
-        TouchEvent event = {0, };
+        TouchEvent event;
+        event.SetId(0);
         webPattern->SetTouchEventInfo(event, touchEventInfo);
     }
 }

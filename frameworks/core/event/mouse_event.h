@@ -192,19 +192,19 @@ struct MouseEvent final {
             .downTime = time,
             .size = 0.0,
             .isPressed = (type == TouchType::DOWN) };
-        TouchEvent event { .id = pointId,
-            .x = x,
-            .y = y,
-            .screenX = screenX,
-            .screenY = screenY,
-            .type = type,
-            .time = time,
-            .size = 0.0,
-            .deviceId = deviceId,
-            .targetDisplayId = targetDisplayId,
-            .sourceType = sourceType,
-            .pointerEvent = pointerEvent,
-        };
+        TouchEvent event;
+        event.SetId(id)
+            .SetX(x)
+            .SetY(y)
+            .SetScreenX(screenX)
+            .SetScreenY(screenY)
+            .SetType(type)
+            .SetTime(time)
+            .SetSize(0.0)
+            .SetDeviceId(deviceId)
+            .SetTargetDisplayId(targetDisplayId)
+            .SetSourceType(sourceType)
+            .SetPointerEvent(pointerEvent);
         event.pointers.emplace_back(std::move(point));
         return event;
     }

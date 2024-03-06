@@ -809,6 +809,10 @@ private:
 
     void SetCachedTransformRelativeOffset(const std::pair<uint64_t, OffsetF>& timestampOffset);
 
+    HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
+
+    void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();

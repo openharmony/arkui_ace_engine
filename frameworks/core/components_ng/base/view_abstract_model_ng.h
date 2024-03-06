@@ -765,6 +765,11 @@ public:
         ViewAbstract::SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     }
 
+    void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override
+    {
+        ViewAbstract::SetOnTouchIntercept(std::move(touchInterceptFunc));
+    }
+
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override
     {
         ViewAbstract::SetOnTouch(std::move(touchEventFunc));
