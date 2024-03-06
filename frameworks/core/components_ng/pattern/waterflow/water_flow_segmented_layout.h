@@ -141,6 +141,7 @@ private:
     float SolveJumpOffset(const WaterFlowLayoutInfo::ItemInfo& item) const;
 
     LayoutWrapper* wrapper_ {};
+    RefPtr<WaterFlowSections> sections_;
 
     // [segmentIdx, [crossIdx, item's width]]
     std::vector<std::vector<float>> itemsCrossSize_;

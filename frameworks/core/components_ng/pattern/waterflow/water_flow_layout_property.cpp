@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 #include "base/geometry/dimension.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
@@ -89,5 +90,25 @@ RefPtr<LayoutProperty> WaterFlowLayoutProperty::Clone() const
         value->itemLayoutConstraint_ = std::make_unique<MeasureProperty>(*itemLayoutConstraint_);
     }
     return value;
+}
+
+namespace {
+inline bool UseSegmentedLayout(const RefPtr<FrameNode>& host)
+{
+    return SystemProperties::WaterFlowUseSegmentedLayout() || host->GetPattern<WaterFlowPattern>()->GetSections();
+}
+} // namespace
+
+void WaterFlowLayoutProperty::OnRowsGapUpdate(Dimension /* rowsGap */) const
+{
+    if (GetAxis() == Axis::VERTICAL || UseSegmentedLayout(GetHost())) {
+        ResetWaterflowLayoutInfoAndMeasure();
+    }
+}
+void WaterFlowLayoutProperty::OnColumnsGapUpdate(Dimension /* columnsGap */) const
+{
+    if (GetAxis() == Axis::HORIZONTAL || UseSegmentedLayout(GetHost())) {
+        ResetWaterflowLayoutInfoAndMeasure();
+    }
 }
 } // namespace OHOS::Ace::NG

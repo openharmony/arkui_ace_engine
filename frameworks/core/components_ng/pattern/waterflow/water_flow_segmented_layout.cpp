@@ -142,9 +142,9 @@ float PrepareJump(WaterFlowLayoutInfo& info)
 void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 {
     info_.childrenCount_ = wrapper_->GetTotalChildCount();
-    auto secObj = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
-    if (secObj) {
-        const auto& sections = secObj->GetSectionInfo();
+    sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
+    if (sections_) {
+        const auto& sections = sections_->GetSectionInfo();
         if (info_.margins_.empty()) {
             // empty margins_ implies a segment change
             auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
@@ -305,7 +305,8 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
         // measure appearing items when scrolling upwards
         auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
         for (int32_t i = info_.startIndex_; i < oldStart; ++i) {
-            auto item = MeasureItem(props, i, info_.itemInfos_[i].crossIdx, -1.0f);
+            auto item = MeasureItem(
+                props, i, info_.itemInfos_[i].crossIdx, GetUserDefHeight(sections_, info_.GetSegment(i), i));
         }
     }
 }
@@ -330,15 +331,14 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     info_.Sync(mainSize_, false);
 
     // only if range [startIndex, jumpIdx) isn't measured (used user-defined size)
-    auto section = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
-    if (!section) {
+    if (!sections_) {
         return;
     }
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     for (int32_t i = info_.startIndex_; i < jumpIdx; ++i) {
         auto seg = info_.GetSegment(i);
-        if (section->GetSectionInfo()[seg].onGetItemMainSizeByIndex) {
-            auto item = MeasureItem(props, i, info_.itemInfos_[i].crossIdx, GetUserDefHeight(section, seg, i));
+        if (sections_->GetSectionInfo()[seg].onGetItemMainSizeByIndex) {
+            auto item = MeasureItem(props, i, info_.itemInfos_[i].crossIdx, GetUserDefHeight(sections_, seg, i));
         }
     }
 }
@@ -384,14 +384,12 @@ float WaterFlowSegmentedLayout::SolveJumpOffset(const WaterFlowLayoutInfo::ItemI
 
 void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx)
 {
-    auto sections = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
-
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     targetIdx = std::min(targetIdx, info_.childrenCount_ - 1);
     for (int32_t i = info_.itemInfos_.size(); i <= targetIdx; ++i) {
         int32_t seg = info_.GetSegment(i);
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[seg]);
-        float itemHeight = GetUserDefHeight(sections, seg, i);
+        float itemHeight = GetUserDefHeight(sections_, seg, i);
         if (itemHeight < 0.0f) {
             auto item = MeasureItem(props, i, position.crossIndex, -1.0f);
 
@@ -403,14 +401,13 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx)
 
 void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
 {
-    auto sections = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     for (int32_t i = startIdx; i < info_.childrenCount_; ++i) {
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[info_.GetSegment(i)]);
         if (GreatOrEqual(position.startMainPos + info_.currentOffset_, mainSize_)) {
             break;
         }
-        float itemHeight = GetUserDefHeight(sections, info_.GetSegment(i), i);
+        float itemHeight = GetUserDefHeight(sections_, info_.GetSegment(i), i);
         auto item = MeasureItem(props, i, position.crossIndex, itemHeight);
         if (info_.itemInfos_.size() <= static_cast<size_t>(i)) {
             info_.RecordItem(i, position, GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis_));
