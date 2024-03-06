@@ -1478,6 +1478,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     CHECK_NULL_VOID(manager);
     if (NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
         prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
+        TAG_LOGD(
+            AceLogTag::ACE_KEYBOARD, "KeyboardHeight as same as last time, don't need to calculate keyboardOffset");
         return;
     }
     manager->UpdatePrevHasTextFieldPattern();
@@ -1524,6 +1526,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         } else {
             context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
         }
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+            "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, final calculate keyboard"
+            "offset is %{public}f",
+            keyboardHeight, positionY, height, context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(true);
         // layout immediately
         context->FlushUITasks();
@@ -1531,7 +1537,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         manager->ScrollTextFieldToSafeArea();
         context->FlushUITasks();
     };
-
     AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
     Animate(option, option.GetCurve(), func);
 
