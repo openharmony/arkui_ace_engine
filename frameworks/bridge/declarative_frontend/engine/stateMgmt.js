@@ -6123,7 +6123,7 @@ class ViewPU extends NativeViewPartialUpdate {
         let idDuplicates = [];
         const arr = itemArray; // just to trigger a 'get' onto the array
         // ID gen is with index.
-        if (idGenFuncUsesIndex) {
+        if (idGenFuncUsesIndex || idGenFunc.length > 1) {
             // Create array of new ids.
             arr.forEach((item, indx) => {
                 newIdArray.push(idGenFunc(item, indx));
