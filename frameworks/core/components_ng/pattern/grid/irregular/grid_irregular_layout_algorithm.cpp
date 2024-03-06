@@ -59,10 +59,8 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     wrapper_ = layoutWrapper;
 
-    wrapper_->RemoveAllChildInRenderTree();
-
     LayoutChildren(gridLayoutInfo_.currentOffset_);
-
+    wrapper_->SetActiveChildRange(gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_);
     UpdateLayoutInfo();
 }
 
@@ -358,7 +356,11 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
             OffsetF offset = info.axis_ == Axis::VERTICAL ? OffsetF { crossPos[c], mainOffset }
                                                           : OffsetF { mainOffset, crossPos[c] };
             child->GetGeometryNode()->SetMarginFrameOffset(offset + alignPos);
-            child->Layout();
+            if (child->CheckNeedForceMeasureAndLayout()) {
+                child->Layout();
+            } else {
+                child->GetHostNode()->ForceSyncGeometryNode();
+            }
         }
         // add mainGap below the item
         if (info.lineHeightMap_.find(r) == info.lineHeightMap_.end()) {
