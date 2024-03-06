@@ -63,6 +63,7 @@ public:
     static LunarDate getEndDate(FrameNode* frameNode);
     static LunarDate getSelectedDate(FrameNode* frameNode);
     static uint32_t getBackgroundColor(FrameNode* frameNode);
+    static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
