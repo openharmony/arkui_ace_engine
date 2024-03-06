@@ -514,7 +514,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         spanNode->AddPropertyInfo(PropertyInfo::NONE);
         spanNode->UpdateTextShadow(options.style.value().GetTextShadows());
         spanNode->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
-		spanNode->UpdateLineHeight(options.style.value().GetLineHeight());
+        spanNode->UpdateLineHeight(options.style.value().GetLineHeight());
         spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
         spanNode->UpdateLetterSpacing(options.style.value().GetLetterSpacing());
         spanNode->AddPropertyInfo(PropertyInfo::LETTERSPACE);
@@ -1133,7 +1133,7 @@ void RichEditorPattern::UpdateTextStyle(
         spanNode->UpdateTextColor(textStyle.GetTextColor());
         spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
     }
-	if (updateSpanStyle.updateLineHeight.has_value()) {
+    if (updateSpanStyle.updateLineHeight.has_value()) {
         spanNode->UpdateLineHeight(textStyle.GetLineHeight());
         spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
     }
@@ -1185,7 +1185,7 @@ void RichEditorPattern::UpdateSymbolStyle(
         spanNode->UpdateFontSize(textStyle.GetFontSize());
         spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
     }
-	if (updateSpanStyle.updateLineHeight.has_value()) {
+    if (updateSpanStyle.updateLineHeight.has_value()) {
         spanNode->UpdateLineHeight(textStyle.GetLineHeight());
         spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
     }
@@ -2735,7 +2735,7 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetFontSize(spanNode->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp());
     retInfo.SetFontStyle(spanNode->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
     retInfo.SetFontWeight(static_cast<int32_t>(spanNode->GetFontWeightValue(FontWeight::NORMAL)));
-	retInfo.SetTextStyle(GetTextStyleObject(spanNode));
+    retInfo.SetTextStyle(GetTextStyleObject(spanNode));
     std::string fontFamilyValue;
     auto fontFamily = spanNode->GetFontFamilyValue({ "HarmonyOS Sans" });
     for (const auto& str : fontFamily) {
@@ -3594,7 +3594,7 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     auto contentStartPosition = spanItem->position - StringUtils::ToWstring(spanItem->content).length();
     spanResult.SetSpanRangeStart(contentStartPosition);
     int32_t eraseLength = 0;
-	auto host = GetHost();
+    auto host = GetHost();
     CHECK_NULL_RETURN(host, 1);
     auto uiNode = host->GetChildAtIndex(spanResult.GetSpanIndex());
     CHECK_NULL_RETURN(uiNode, 1);

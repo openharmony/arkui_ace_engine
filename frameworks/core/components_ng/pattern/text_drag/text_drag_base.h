@@ -41,7 +41,7 @@ public:
     virtual const RectF& GetTextRect() = 0;
     virtual const RectF& GetTextContentRect() const = 0;
     virtual float GetLineHeight() const = 0;
-	virtual float GetLetterSpacing() const = 0;
+    virtual float GetLetterSpacing() const = 0;
 
     virtual std::vector<RectF> GetTextBoxes() = 0;
     virtual OffsetF GetParentGlobalOffset() const = 0;

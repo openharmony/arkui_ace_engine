@@ -193,7 +193,7 @@ JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyl
     JSRef<JSObject> symbolSpanStyleObj = JSRef<JSObject>::New();
     symbolSpanStyleObj->SetProperty<std::string>("fontColor", symbolSpanStyle.symbolColor);
     symbolSpanStyleObj->SetProperty<double>("fontSize", symbolSpanStyle.fontSize);
-	symbolSpanStyleObj->SetProperty<double>("lineHeight", symbolSpanStyle.lineHeight);
+    symbolSpanStyleObj->SetProperty<double>("lineHeight", symbolSpanStyle.lineHeight);
     symbolSpanStyleObj->SetProperty<double>("letterSpacing", symbolSpanStyle.letterSpacing);
     symbolSpanStyleObj->SetProperty<int32_t>("fontWeight", symbolSpanStyle.fontWeight);
     symbolSpanStyleObj->SetProperty<uint32_t>("renderingStrategy", symbolSpanStyle.renderingStrategy);
@@ -455,7 +455,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     decorationObj->SetProperty<std::string>("color", textSpanResult.GetColor());
     textStyleObj->SetProperty<std::string>("fontColor", textSpanResult.GetFontColor());
     textStyleObj->SetProperty<double>("fontSize", textSpanResult.GetFontSize());
-	textStyleObj->SetProperty<double>("lineHeight", textSpanResult.GetTextStyle().lineHeight);
+    textStyleObj->SetProperty<double>("lineHeight", textSpanResult.GetTextStyle().lineHeight);
     textStyleObj->SetProperty<double>("letterSpacing", textSpanResult.GetTextStyle().letterSpacing);
     textStyleObj->SetProperty<int32_t>("fontStyle", static_cast<int32_t>(textSpanResult.GetFontStyle()));
     textStyleObj->SetProperty<int32_t>("fontWeight", textSpanResult.GetFontWeight());
@@ -521,7 +521,7 @@ void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::R
     decorationObj->SetProperty<std::string>("color", spanResult.GetColor());
     textStyleObj->SetProperty<std::string>("fontColor", spanResult.GetFontColor());
     textStyleObj->SetProperty<double>("fontSize", spanResult.GetFontSize());
-	textStyleObj->SetProperty<double>("lineHeight", spanResult.GetTextStyle().lineHeight);
+    textStyleObj->SetProperty<double>("lineHeight", spanResult.GetTextStyle().lineHeight);
     textStyleObj->SetProperty<double>("letterSpacing", spanResult.GetTextStyle().letterSpacing);
     textStyleObj->SetProperty<int32_t>("fontStyle", static_cast<int32_t>(spanResult.GetFontStyle()));
     textStyleObj->SetProperty<int32_t>("fontWeight", spanResult.GetFontWeight());
@@ -956,7 +956,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         style.SetFontSize(size);
     }
 	
-	JSRef<JSVal> lineHeight = styleObject->GetProperty("lineHeight");
+    JSRef<JSVal> lineHeight = styleObject->GetProperty("lineHeight");
     CalcDimension lineHigh;
     if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, lineHigh, false) &&
         !lineHigh.IsNegative() && lineHigh.Unit() != DimensionUnit::PERCENT) {
