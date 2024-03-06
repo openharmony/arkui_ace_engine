@@ -859,8 +859,8 @@ private:
         return hasCachedCapture_ && GetLeftCaptureNode() && GetRightCaptureNode();
     }
     void UpdateTargetCapture(bool forceUpdate);
-    void CreateCaptureCallback(int32_t targetCaptureIndex, int32_t captureId, bool forceUpdate);
-    void UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId);
+    void CreateCaptureCallback(int32_t targetIndex, int32_t captureId, bool forceUpdate);
+    void UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId, int32_t targetIndex);
     // capture node end
     WeakPtr<NestableScrollContainer> parent_;
     /**
