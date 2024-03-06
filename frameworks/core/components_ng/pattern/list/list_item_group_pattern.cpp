@@ -118,6 +118,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     headerMainSize_ = layoutAlgorithm->GetHeaderMainSize();
     footerMainSize_ = layoutAlgorithm->GetFooterMainSize();
     layoutedItemInfo_ = layoutAlgorithm->GetLayoutedItemInfo();
+    layoutConstraint_ = layoutAlgorithm->GetLayoutConstraint();
     layouted_ = true;
     CheckListDirectionInCardStyle();
     auto host = GetHost();
