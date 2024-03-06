@@ -1183,4 +1183,11 @@ Dimension TextFieldModelNG::GetFontSize(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, FontSize, value, frameNode, Dimension());
     return value;
 }
+
+CleanNodeStyle TextFieldModelNG::GetCleanNodeStyle(FrameNode* frameNode)
+{
+    CleanNodeStyle value = CleanNodeStyle::INPUT;
+    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, value, frameNode);
+    return value;
+}
 } // namespace OHOS::Ace::NG

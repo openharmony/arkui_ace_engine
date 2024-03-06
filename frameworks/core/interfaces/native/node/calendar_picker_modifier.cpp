@@ -40,7 +40,7 @@ float GetHintRadius(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0.0f);
-    return CalendarPickerModelNG::GetHintRadius(frameNode).ConvertToVp();
+    return CalendarPickerModelNG::GetHintRadius(frameNode).Value();
 }
 
 void SetSelectedDate(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
