@@ -257,7 +257,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         // TODO: add margin is negative case.
         marginResult_.reset();
         auto margin = CreateMargin();
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->maxSize);
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->minSize);
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->percentReference);
@@ -269,6 +269,14 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         // already has non negative protection
         MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
         MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
+    }
+    if (padding_) {
+        auto padding = CreatePaddingAndBorder();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            AddPaddingToSize(padding, layoutConstraint_->maxSize);
+            AddPaddingToSize(padding, layoutConstraint_->minSize);
+            AddPaddingToSize(padding, layoutConstraint_->percentReference);
+        }
     }
     auto originMax = layoutConstraint_->maxSize;
     if (calcLayoutConstraint_) {
