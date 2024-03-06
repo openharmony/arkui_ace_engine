@@ -89,7 +89,8 @@ public:
     void SetEnableAutoFill(bool enableAutoFill) override;
     void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) override;
     void SetCancelIconSize(const CalcDimension& iconSize) override;
-    void SetCanacelIconSrc(const std::string& iconSrc) override;
+    void SetCanacelIconSrc(
+        const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) override;
     void SetCancelIconColor(const Color& iconColor) override;
     void SetIsShowCancelButton(bool isShowCancelButton) override;
     void SetSelectAllValue(bool isSetSelectAllValue) override;

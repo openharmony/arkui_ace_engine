@@ -72,6 +72,8 @@ public:
         ResetCleanNodeStyle();
         ResetIconSize();
         ResetIconSrc();
+        ResetBundleName();
+        ResetModuleName();
         ResetIconColor();
         ResetSelectAllValue();
         ResetShowHighlightBorder();
@@ -167,6 +169,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CleanNodeStyle, CleanNodeStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSize, CalcDimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSrc, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BundleName, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ModuleName, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowCancelButton, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetCounter, int32_t, PROPERTY_UPDATE_MEASURE);
@@ -209,6 +213,8 @@ protected:
         value->propSelectAllValue_ = CloneSelectAllValue();
         value->propSetCounter_ = CloneSetCounter();
         value->propShowHighlightBorder_ = CloneShowHighlightBorder();
+        value->propBundleName_ = CloneBundleName();
+        value->propModuleName_ = CloneModuleName();
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutProperty);

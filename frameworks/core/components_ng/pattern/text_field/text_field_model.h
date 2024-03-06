@@ -235,7 +235,8 @@ public:
     virtual void SetShowCounterBorder(bool value) {};
     virtual void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) = 0;
     virtual void SetCancelIconSize(const CalcDimension& iconSize) = 0;
-    virtual void SetCanacelIconSrc(const std::string& iconSrc) = 0;
+    virtual void SetCanacelIconSrc(
+        const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetCancelIconColor(const Color& iconColor) = 0;
     virtual void SetIsShowCancelButton(bool isShowCancelButton) = 0;
     virtual void SetPasswordRules(const std::string& passwordRules) = 0;

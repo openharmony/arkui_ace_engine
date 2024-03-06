@@ -532,11 +532,19 @@ void CleanNodeResponseArea::LoadingImageProperty()
     if (textFieldLayoutProperty->HasIconColor()) {
         iconColor_ = textFieldLayoutProperty->GetIconColorValue();
     }
+    if (textFieldLayoutProperty->HasBundleName()) {
+        bundleName_ = textFieldLayoutProperty->GetBundleNameValue();
+    }
+    if (textFieldLayoutProperty->HasModuleName()) {
+        moduleName_ = textFieldLayoutProperty->GetModuleNameValue();
+    }
 }
 
 ImageSourceInfo CleanNodeResponseArea::CreateImageSourceInfo()
 {
     ImageSourceInfo info;
+    info.SetBundleName(bundleName_);
+    info.SetModuleName(moduleName_);
     if (iconSrc_.empty()) {
         info.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
     } else {
