@@ -3947,7 +3947,7 @@ void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->UpdateCurrentActiveNode(node);
-        context->PostAsyncEvent([execCtx, postFunc = func]() {
+        context->PostSyncEvent([execCtx, postFunc = func]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             postFunc->Execute();
         });
