@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t MONTH_NODE_INDEX = 2;
 constexpr int32_t DAY_NODE_INDEX = 4;
 constexpr int32_t ONE_DIGIT_BOUNDARY = 10;
+constexpr float DEFAULT_HINT_RADIUS = 16.0f;
 void CalendarPickerModelNG::Create(const CalendarSettingData& settingData)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -472,7 +473,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::GetDayNode(FrameNode* calendarPickerNod
 
 Dimension CalendarPickerModelNG::GetHintRadius(FrameNode* frameNode)
 {
-    Dimension defaultRadius(0);
+    Dimension defaultRadius(DEFAULT_HINT_RADIUS);
     CHECK_NULL_RETURN(frameNode, defaultRadius);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_RETURN(pickerPattern, defaultRadius);

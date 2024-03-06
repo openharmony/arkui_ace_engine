@@ -108,9 +108,6 @@ const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::FRICTION,
 };
 constexpr int32_t DEFAULT_DURATION = 1000;
-constexpr int32_t BLUR_STYLE_NONE_INDEX = 7;
-constexpr int32_t PLAY_MODE_REVERSE_VALUE = 1;
-constexpr int32_t PLAY_MODE_ALTERNATE_VALUE = 2;
 std::string g_strValue;
 
 BorderStyle ConvertBorderStyle(int32_t value)
@@ -1540,27 +1537,16 @@ void ResetLinearGradientBlur(ArkUINodeHandle node)
     ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
 }
 
-int32_t GetBlurStyle(int32_t originBlurStyle)
-{
-    if (originBlurStyle < BLUR_STYLE_NONE_INDEX) {
-        return originBlurStyle + 1;
-    } else if (originBlurStyle == BLUR_STYLE_NONE_INDEX) {
-        return static_cast<int32_t>(BlurStyle::NO_MATERIAL);
-    }
-    return originBlurStyle;
-}
-
 void SetBackgroundBlurStyle(
     ArkUINodeHandle node, ArkUI_Int32 blurStyle, ArkUI_Int32 colorMode, ArkUI_Int32 adaptiveColor, ArkUI_Float32 scale)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption bgBlurStyle;
-    int32_t inputBlurStyle = GetBlurStyle(blurStyle);
-    if (inputBlurStyle >= 0) {
-        if (inputBlurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            inputBlurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
-            bgBlurStyle.blurStyle = static_cast<BlurStyle>(inputBlurStyle);
+    if (blurStyle >= 0) {
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            bgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
     bool isHasOptions = !((colorMode < 0) && (adaptiveColor < 0) && (scale < 0));
@@ -3345,23 +3331,13 @@ void ResetClip(ArkUINodeHandle node)
     ViewAbstract::SetClipEdge(frameNode, false);
 }
 
-int32_t GetAnimationDirection(int32_t animationPlayMode)
-{
-    if (animationPlayMode == PLAY_MODE_REVERSE_VALUE) {
-        return static_cast<int32_t>(AnimationDirection::REVERSE);
-    } else if (animationPlayMode == PLAY_MODE_ALTERNATE_VALUE) {
-        return static_cast<int32_t>(AnimationDirection::ALTERNATE);
-    }
-    return animationPlayMode;
-}
-
 void SetAnimationOption(std::shared_ptr<AnimationOption>& option, const ArkUIAnimationOptionType* animationOption)
 {
     option->SetDuration(animationOption->duration);
     option->SetCurve(CURVES[std::clamp(animationOption->curve, 0, static_cast<int32_t>(CURVES.size() - 1))]);
     option->SetDelay(animationOption->delay);
     option->SetIteration(animationOption->iteration);
-    option->SetAnimationDirection(static_cast<AnimationDirection>(GetAnimationDirection(animationOption->playMode)));
+    option->SetAnimationDirection(static_cast<AnimationDirection>(animationOption->playMode));
     option->SetTempo(animationOption->tempo);
 }
 

@@ -720,6 +720,13 @@ ArkUI_Bool GetTextInputShowCancelButton(ArkUINodeHandle node)
     return TextFieldModelNG::GetShowCancelButton(frameNode);
 }
 
+ArkUI_Int32 GetTextInputCancelButtonStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetCleanNodeStyle(frameNode));
+}
+
 ArkUI_Float32 GetTextInputCancelIconSize(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -862,6 +869,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputFontStyle,
         GetTextInputFontWeight,
         GetTextInputFontSize,
+        GetTextInputCancelButtonStyle,
     };
     return &modifier;
 }
