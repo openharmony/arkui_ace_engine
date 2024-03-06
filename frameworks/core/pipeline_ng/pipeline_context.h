@@ -816,6 +816,9 @@ private:
     std::list<DelayedTask> delayedTasks_;
     RefPtr<PostEventManager> postEventManager_;
 
+    std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
+    std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
+
     VsyncCallbackFun vsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
