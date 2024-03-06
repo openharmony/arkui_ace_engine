@@ -1906,6 +1906,7 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll()
     CalculateHandleOffsetAndShowOverlay();
     if (IsShowSelectMenuUsingMouse()) {
         CloseSelectOverlay();
+        StopTwinkling();
     }
     auto responseType = selectOverlayProxy_
                             ? static_cast<TextResponseType>(
@@ -3274,7 +3275,7 @@ void RichEditorPattern::HandleOnSelectAll()
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     SetCaretPosition(newPos);
     MoveCaretToContentRect();
-    StartTwinkling();
+    StopTwinkling();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -4063,10 +4064,10 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnCopy();
             pattern->CloseSelectOverlay();
-            if (!pattern->textDetectEnable_) {
-                pattern->StartTwinkling();
-            }
             if (!usingMouse) {
+                if (!pattern->textDetectEnable_) {
+                    pattern->StartTwinkling();
+                }
                 pattern->ResetSelection();
             }
         };
