@@ -717,6 +717,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         return false;
     }
+    UpdateFrameSizeToWeb();
     SetScrollSource(source);
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
@@ -2200,5 +2201,22 @@ std::vector<RefPtr<FrameNode>> ListPattern::GetVisibleSelectedItems()
         children.emplace_back(itemFrameNode);
     }
     return children;
+}
+
+void ListPattern::registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener)
+{
+    listenerVector_.emplace_back(listener);
+}
+
+void ListPattern::UpdateFrameSizeToWeb()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto frameSize = host->GetGeometryNode()->GetFrameSize();
+    for (auto listenerItem : listenerVector_) {
+        if (listenerItem) {
+            listenerItem->OnSlideUpdate(frameSize);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

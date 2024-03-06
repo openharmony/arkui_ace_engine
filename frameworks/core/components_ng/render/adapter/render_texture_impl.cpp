@@ -67,7 +67,7 @@ void RenderTextureImpl::InitSurface()
     });
 }
 
-void RenderTextureImpl::UpdateXComponentConfig() {}
+void RenderTextureImpl::UpdateSurfaceConfig() {}
 
 void* RenderTextureImpl::GetNativeWindow()
 {

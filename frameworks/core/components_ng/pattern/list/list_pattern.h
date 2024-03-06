@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/web/slide_update_listener.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -233,6 +234,7 @@ public:
     }
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
+    void registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener);
 
 private:
     bool IsNeedInitClickEventRecorder() const override
@@ -295,7 +297,9 @@ private:
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
     void RefreshLanesItemRange();
     void UpdateListDirectionInCardStyle();
+    void UpdateFrameSizeToWeb();
     RefPtr<ListContentModifier> listContentModifier_;
+    std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;

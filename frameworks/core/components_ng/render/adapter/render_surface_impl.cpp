@@ -70,7 +70,7 @@ void RenderSurfaceImpl::InitSurface()
     });
 }
 
-void RenderSurfaceImpl::UpdateXComponentConfig() {}
+void RenderSurfaceImpl::UpdateSurfaceConfig() {}
 
 void* RenderSurfaceImpl::GetNativeWindow()
 {

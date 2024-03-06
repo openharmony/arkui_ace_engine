@@ -174,7 +174,7 @@ void XComponentPattern::Initialize(int32_t instanceId)
             controllerNG->SetPattern(AceType::Claim(this));
         }
         renderSurface_->InitSurface();
-        renderSurface_->UpdateXComponentConfig();
+        renderSurface_->UpdateSurfaceConfig();
         InitEvent();
         SetMethodCall();
     } else if (type_ == XComponentType::NODE) {

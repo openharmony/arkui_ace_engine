@@ -118,7 +118,7 @@ public:
 
     bool NeedSoftKeyboard() const override;
 
-    void UpdateScrollOffset(SizeF frameSize) override;
+    void UpdateSlideOffset(SizeF frameSize) override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -554,8 +554,8 @@ private:
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
     void ResetDragAction();
-    RefPtr<ScrollPattern> SearchParent();
-    void InitScrollUpdateListener();
+    void UpdateRelativeOffset();
+    void InitSlideUpdateListener();
     void CalculateHorizontalDrawRect(const SizeF frameSize);
     void CalculateVerticalDrawRect(const SizeF frameSize);
 
@@ -658,6 +658,8 @@ private:
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
     Size drawSize_;
+    Size lastSyncRenderSize_;
+    int64_t lastTimeStamp_ = 0;
     Size drawSizeCache_;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
@@ -690,9 +692,11 @@ private:
     bool scrollState_ = false;
     NestedScrollMode nestedScrollForwardMode_ = NestedScrollMode::SELF_FIRST;
     NestedScrollMode nestedScrollBackwardMode_ = NestedScrollMode::SELF_FIRST;
-    Axis axis_ = Axis::FREE;
+    Axis axis_ = Axis::NONE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
+    int32_t drawRectWidth_ = 0;
+    int32_t drawRectHeight_ = 0;
     WeakPtr<NestableScrollContainer> parent_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;

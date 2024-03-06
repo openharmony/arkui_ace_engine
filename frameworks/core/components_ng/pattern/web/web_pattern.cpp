@@ -35,6 +35,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -143,6 +144,12 @@ std::string ParseTextJsonValue(const std::string& textJson)
     }
     return "";
 }
+
+template<class T>
+int64_t GetSteadyTimestamp()
+{
+    return std::chrono::duration_cast<T>(std::chrono::steady_clock::now().time_since_epoch()).count();
+}
 } // namespace
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
@@ -152,16 +159,17 @@ constexpr double DEFAULT_DBCLICK_OFFSET = 2.0;
 constexpr double DEFAULT_AXIS_RATIO = -0.06;
 constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
-constexpr uint32_t DEFAULT_WEB_DRAW_HEIGHT = 4000;
+constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
-constexpr int32_t SURFACE_QUEUE_SIZE = 8;
+constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
+constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE = 3;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
+constexpr int64_t SYNC_RENDER_DELAY_TIME = 100000000;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
-const std::vector<int32_t> DEFAULT_HEIGHT_GEAR {7998, 7999, 8001, 8002, 8003};
-const std::vector<int32_t> DEFAULT_ORIGN_GEAR {0, 2000, 4000, 6000, 8000};
+const std::vector<std::string> SYNC_RENDER_SLIDE {V2::LIST_ETS_TAG, V2::SCROLL_ETS_TAG};
 
 WebPattern::WebPattern() = default;
 
@@ -1193,6 +1201,18 @@ void WebPattern::UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, do
 
 void WebPattern::OnAreaChangedInner()
 {
+    if ((renderMode_ == RenderMode::SYNC_RENDER) && (lastSyncRenderSize_ != drawSize_)) {
+        lastSyncRenderSize_ = drawSize_;
+        int64_t now = GetSteadyTimestamp<std::chrono::nanoseconds>();
+        if (now - lastTimeStamp_ < SYNC_RENDER_DELAY_TIME) {
+            return;
+        }
+        lastTimeStamp_ = now;
+        auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnAreaChangedInner size is %{public}s", drawSize_.ToString().c_str());
+        delegate_->SetBoundsOrResize(drawSize_, offset);
+        return;
+    }
     auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     if (webOffset_ == offset) {
         return;
@@ -1610,17 +1630,19 @@ void WebPattern::OnModifyDone()
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
             int32_t instanceId = Container::CurrentId();
+            CHECK_NULL_VOID(renderSurface_);
             renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
                 renderSurface_->SetIsTexture(true);
                 renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
-                renderSurface_->SetSurfaceQueueSize(SURFACE_QUEUE_SIZE);
+                renderSurface_->SetSurfaceQueueSize(SYNC_SURFACE_QUEUE_SIZE);
             } else {
                 renderSurface_->SetIsTexture(false);
+                renderSurface_->SetSurfaceQueueSize(ASYNC_SURFACE_QUEUE_SIZE);
             }
             renderSurface_->InitSurface();
-            renderSurface_->UpdateXComponentConfig();
+            renderSurface_->UpdateSurfaceConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
         }
         UpdateJavaScriptOnDocumentStart();
@@ -1701,7 +1723,7 @@ void WebPattern::OnModifyDone()
     // Initialize scrollupdate listener
     if (renderMode_ == RenderMode::SYNC_RENDER) {
         auto task = [this]() {
-            InitScrollUpdateListener();
+            InitSlideUpdateListener();
         };
         PostTaskToUI(std::move(task));
     }
@@ -2909,17 +2931,20 @@ RefPtr<NestableScrollContainer> WebPattern::WebSearchParent()
 
 void WebPattern::OnRootLayerChanged(int width, int height)
 {
+    if ((rootLayerWidth_ == width) && (rootLayerHeight_ == height)) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnRootLayerChanged width : %{public}d, height : %{public}d", width, height);
     rootLayerWidth_ = width;
     rootLayerHeight_ = height;
-    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
-        auto frameNode = GetHost();
-        CHECK_NULL_VOID(frameNode);
-        auto newRect = Size(width, height);
-        drawSize_.SetSize(newRect);
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-        auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
-        delegate_->SetBoundsOrResize(drawSize_, offset, false);
+    if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
+        return;
     }
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto newRect = Size(width, height);
+    drawSize_.SetSize(newRect);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
@@ -2954,10 +2979,10 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
     return false;
 }
 
-RefPtr<ScrollPattern> WebPattern::SearchParent()
+void WebPattern::UpdateRelativeOffset()
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
+    CHECK_NULL_VOID(host);
     if (isParentHasScroll_) {
         relativeOffsetOfScroll_.Reset();
     }
@@ -2967,65 +2992,101 @@ RefPtr<ScrollPattern> WebPattern::SearchParent()
         if (!frameNode) {
             continue;
         }
-        auto pattern = frameNode->GetPattern<ScrollPattern>();
-        if (!pattern) {
+        bool hasTargetParent =
+            std::find(SYNC_RENDER_SLIDE.begin(), SYNC_RENDER_SLIDE.end(), parent->GetTag()) == SYNC_RENDER_SLIDE.end();
+        if (hasTargetParent) {
             relativeOffsetOfScroll_ += frameNode->GetGeometryNode()->GetFrameOffset();
             continue;
         }
         isParentHasScroll_ = true;
-        return pattern;
+        return;
     }
     isParentHasScroll_ = false;
-    return nullptr;
 }
 
-void WebPattern::InitScrollUpdateListener()
+void WebPattern::InitSlideUpdateListener()
 {
-    std::shared_ptr<ScrollUpdateListener> listener = std::make_shared<ScrollUpdateListener>();
+    std::shared_ptr<SlideUpdateListener> listener = std::make_shared<SlideUpdateListener>();
     listener->SetPatternToListener(AceType::WeakClaim(this));
-    auto pattern = SearchParent();
-    CHECK_NULL_VOID(pattern);
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern registerScrollUpdateListener");
-    pattern->registerScrollUpdateListener(listener);
-    axis_ = pattern->GetAxis();
-}
-
-void WebPattern::UpdateScrollOffset(SizeF frameSize)
-{
-    if (isParentHasScroll_) {
-        SearchParent();
-        switch (axis_) {
-            case Axis::HORIZONTAL:
-                CalculateHorizontalDrawRect(frameSize);
-                break;
-            case Axis::VERTICAL:
-                CalculateVerticalDrawRect(frameSize);
-                break;
-            default :
-                break;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        bool hasTargetParent =
+            std::find(SYNC_RENDER_SLIDE.begin(), SYNC_RENDER_SLIDE.end(), parent->GetTag()) == SYNC_RENDER_SLIDE.end();
+        if (hasTargetParent) {
+            continue;
         }
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        CHECK_NULL_VOID(frameNode);
+        if (parent->GetTag() == V2::LIST_ETS_TAG) {
+            auto pattern = frameNode->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(pattern);
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern registerSlideUpdateListener List");
+            pattern->registerSlideUpdateListener(listener);
+            axis_ = pattern->GetAxis();
+        } else {
+            auto pattern = frameNode->GetPattern<ScrollPattern>();
+            CHECK_NULL_VOID(pattern);
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern registerSlideUpdateListener SCROLL");
+            pattern->registerSlideUpdateListener(listener);
+            axis_ = pattern->GetAxis();
+        }
+        CHECK_NULL_VOID(renderSurface_);
+        renderSurface_->SetWebSlideAxis(axis_);
     }
 }
 
-void WebPattern::CalculateHorizontalDrawRect(SizeF frameSize) {}
+void WebPattern::UpdateSlideOffset(SizeF frameSize)
+{
+    UpdateRelativeOffset();
+    switch (axis_) {
+        case Axis::HORIZONTAL:
+            CalculateHorizontalDrawRect(frameSize);
+            break;
+        case Axis::VERTICAL:
+            CalculateVerticalDrawRect(frameSize);
+            break;
+        default :
+            break;
+    }
+}
+
+void WebPattern::CalculateHorizontalDrawRect(SizeF frameSize)
+{
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->SetWebOffset(relativeOffsetOfScroll_.GetX());
+    if (relativeOffsetOfScroll_.GetX() >= 0) {
+        return;
+    }
+
+    int32_t stepGear = (-relativeOffsetOfScroll_.GetX()) / ADJUST_WEB_DRAW_LENGTH;
+    int32_t width = ADJUST_WEB_DRAW_LENGTH * 2 + stepGear;
+    int32_t height = (int32_t)frameSize.Height();
+    int32_t x = ADJUST_WEB_DRAW_LENGTH * stepGear;
+    int32_t y = 0;
+    renderSurface_->SetWebMessage({ x, 0 });
+    TAG_LOGD(AceLogTag::ACE_WEB, "SetDrawRect x : %{public}d, y : %{public}d, width : %{public}d, height : %{public}d",
+        x, y, width, height);
+    SetDrawRect(x, y, width, height);
+}
 
 void WebPattern::CalculateVerticalDrawRect(SizeF frameSize)
 {
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->SetWebOffset(relativeOffsetOfScroll_.GetY());
     if (relativeOffsetOfScroll_.GetY() >= 0) {
         return;
     }
 
-    int32_t stepGear = (-relativeOffsetOfScroll_.GetY()) / DEFAULT_WEB_DRAW_HEIGHT;
-    if (stepGear >= static_cast<int32_t>(DEFAULT_HEIGHT_GEAR.size())) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "stepGear out of DEFAULT_HEIGHT_GEAR orign");
-        return;
-    }
-    int32_t height = DEFAULT_HEIGHT_GEAR[stepGear];
-    int32_t y = DEFAULT_ORIGN_GEAR[stepGear];
-    CHECK_NULL_VOID(renderSurface_);
+    int32_t stepGear = (-relativeOffsetOfScroll_.GetY()) / ADJUST_WEB_DRAW_LENGTH;
+    int32_t width = (int32_t)frameSize.Width();
+    int32_t height = ADJUST_WEB_DRAW_LENGTH * 2 + stepGear;
+    int32_t x = 0;
+    int32_t y = ADJUST_WEB_DRAW_LENGTH * stepGear;
     renderSurface_->SetWebMessage({ 0, y });
-
-    SetDrawRect(relativeOffsetOfScroll_.GetX(), -y, frameSize.Width(), height);
+    TAG_LOGD(AceLogTag::ACE_WEB, "SetDrawRect x : %{public}d, y : %{public}d, width : %{public}d, height : %{public}d",
+        x, y, width, height);
+    SetDrawRect(x, y, width, height);
 }
 
 void WebPattern::PostTaskToUI(const std::function<void()>&& task) const
@@ -3042,8 +3103,13 @@ void WebPattern::PostTaskToUI(const std::function<void()>&& task) const
 
 void WebPattern::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height)
 {
+    if ((drawRectWidth_ == width) && (drawRectHeight_ == height)) {
+        return;
+    }
+    drawRectWidth_ = width;
+    drawRectHeight_ = height;
     CHECK_NULL_VOID(delegate_);
-    delegate_->SetDrawRect(x, -y, width, height);
+    delegate_->SetDrawRect(x, y, width, height);
 }
 
 RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()
