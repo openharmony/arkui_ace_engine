@@ -77,6 +77,17 @@ void ScrollableController::ScrollBy(double pixelX, double pixelY, bool /* smooth
     pattern->UpdateCurrentOffset(static_cast<float>(-offset), SCROLL_FROM_JUMP);
 }
 
+void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, float velocity)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
+        pattern->ScrollAtFixedVelocity(velocity);
+    } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
+        pattern->ScrollAtFixedVelocity(-velocity);
+    }
+}
+
 void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
