@@ -710,8 +710,11 @@ class ACE_EXPORT FullScreenEnterEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(FullScreenEnterEvent, BaseEventInfo);
 
 public:
-    FullScreenEnterEvent(const RefPtr<FullScreenExitHandler>& handler)
-        : BaseEventInfo("FullScreenEnterEvent"), handler_(handler) {}
+    FullScreenEnterEvent(
+        const RefPtr<FullScreenExitHandler>& handler, int videoNaturalWidth, int videoNaturalHeight)
+        : BaseEventInfo("FullScreenEnterEvent"), handler_(handler), videoNaturalWidth_(videoNaturalWidth),
+          videoNaturalHeight_(videoNaturalHeight)
+    {}
     ~FullScreenEnterEvent() = default;
 
     const RefPtr<FullScreenExitHandler>& GetHandler() const
@@ -719,8 +722,20 @@ public:
         return handler_;
     }
 
+    int GetVideoNaturalWidth() const
+    {
+        return videoNaturalWidth_;
+    }
+
+    int GetVideoNaturalHeight() const
+    {
+        return videoNaturalHeight_;
+    }
+
 private:
     RefPtr<FullScreenExitHandler> handler_;
+    int videoNaturalWidth_;
+    int videoNaturalHeight_;
 };
 
 class ACE_EXPORT FullScreenExitEvent : public BaseEventInfo {

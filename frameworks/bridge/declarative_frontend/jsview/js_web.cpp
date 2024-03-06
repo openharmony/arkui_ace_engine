@@ -1759,6 +1759,8 @@ JSRef<JSVal> FullScreenEnterEventToJSValue(const FullScreenEnterEvent& eventInfo
     jsFullScreenExitHandler->SetHandler(eventInfo.GetHandler());
 
     obj->SetPropertyObject("handler", resultObj);
+    obj->SetProperty("videoWidth", eventInfo.GetVideoNaturalWidth());
+    obj->SetProperty("videoHeight", eventInfo.GetVideoNaturalHeight());
     return JSRef<JSVal>::Cast(obj);
 }
 

@@ -618,7 +618,8 @@ public:
     void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
-    void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler);
+    void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler, int videoNaturalWidth,
+        int videoNaturalHeight);
     bool OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message);
     void OnRouterPush(const std::string& param);
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason);

@@ -123,6 +123,8 @@ public:
     void OnGeolocationHide() override;
     void OnFullScreenExit() override;
     void OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler) override;
+    void OnFullScreenEnterWithVideoSize(std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler,
+        int videoNaturalWidth, int videoNaturalHeight) override;
     void OnGeolocationShow(const std::string& origin,
         std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> callback) override;
 

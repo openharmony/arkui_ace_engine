@@ -4244,16 +4244,18 @@ bool WebDelegate::OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, Dia
     return result;
 }
 
-void WebDelegate::OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler)
+void WebDelegate::OnFullScreenEnter(
+    std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler, int videoNaturalWidth, int videoNaturalHeight)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), handler]() {
+        [weak = WeakClaim(this), handler, videoNaturalWidth, videoNaturalHeight]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto param =
-                std::make_shared<FullScreenEnterEvent>(AceType::MakeRefPtr<FullScreenExitHandlerOhos>(handler, weak));
+                std::make_shared<FullScreenEnterEvent>(AceType::MakeRefPtr<FullScreenExitHandlerOhos>(handler, weak),
+		    videoNaturalWidth, videoNaturalHeight);
 #ifdef NG_BUILD
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);

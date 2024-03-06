@@ -235,7 +235,17 @@ void WebClientImpl::OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHa
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     CHECK_NULL_VOID(handler);
-    delegate->OnFullScreenEnter(handler);
+    delegate->OnFullScreenEnter(handler, 0, 0);
+}
+
+void WebClientImpl::OnFullScreenEnterWithVideoSize(
+    std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler, int videoNaturalWidth, int videoNaturalHeight)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    CHECK_NULL_VOID(handler);
+    delegate->OnFullScreenEnter(handler, videoNaturalWidth, videoNaturalHeight);
 }
 
 void WebClientImpl::OnGeolocationHide()
