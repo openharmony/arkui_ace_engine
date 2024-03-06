@@ -68,6 +68,7 @@ public:
     virtual void SetOnScrollStart(OnScrollStartEvent&& onScrollStart) = 0;
     virtual void SetOnScrollStop(OnScrollStopEvent&& onScrollStop) = 0;
     virtual void SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex) = 0;
+    virtual void SetOnScrollVisibleContentChange(OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange) = 0;
     virtual void SetOnReachStart(OnReachEvent&& onReachStart) = 0;
     virtual void SetOnReachEnd(OnReachEvent&& onReachEnd) = 0;
     virtual void SetOnItemDelete(OnItemDeleteEvent&& onItemDelete) = 0;
