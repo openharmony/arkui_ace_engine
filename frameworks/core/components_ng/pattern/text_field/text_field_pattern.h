@@ -686,6 +686,11 @@ public:
     {
         return selectController_->GetCaretRect().Height();
     }
+	
+	float GetLetterSpacing() const override
+    {
+        return selectController_->GetCaretRect().Width();
+    }
 
     OffsetF GetParentGlobalOffset() const override
     {

@@ -1498,6 +1498,8 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
     textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
     auto lm = node->GetLeadingMarginValue({});
+	textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToVp();
+    textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToVp();
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = Dimension(lm.size.Width()).ConvertToVp();
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_END] = Dimension(lm.size.Height()).ConvertToVp();
     return textStyle;
@@ -1682,6 +1684,14 @@ float TextPattern::GetLineHeight() const
     paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
     CHECK_NULL_RETURN(selectedRects.size(), {});
     return selectedRects.front().Height();
+}
+
+float TextPattern::GetLetterSpacing() const
+{
+    std::vector<RectF> selectedRects;
+    paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
+    CHECK_NULL_RETURN(selectedRects.size(), {});
+    return selectedRects.front().Width();
 }
 
 std::vector<RectF> TextPattern::GetTextBoxes()

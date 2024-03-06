@@ -113,6 +113,36 @@ void RichEditorAbstractSpanResult::SetFontColor(const std::string& fontColor)
     fontColor_ = fontColor;
 }
 
+void RichEditorAbstractSpanResult::SetTextStyle(TextStyleResult textStyle)
+{
+    textStyle_ = textStyle;
+}
+
+TextStyleResult RichEditorAbstractSpanResult::GetTextStyle() const
+{
+    return textStyle_;
+} 
+
+void RichEditorAbstractSpanResult::SetLineHeight(double lineHeight)
+{
+    lineHeight_ = lineHeight;
+}
+
+double RichEditorAbstractSpanResult::GetLineHeight() const
+{
+    return lineHeight_;
+}
+
+void RichEditorAbstractSpanResult::SetLetterspacing(double letterSpacing)
+{
+    letterSpacing_ = letterSpacing;
+}
+
+double RichEditorAbstractSpanResult::GetLetterspacing() const
+{
+    return letterSpacing_;
+}
+
 const std::string& RichEditorAbstractSpanResult::GetFontColor() const
 {
     return fontColor_;

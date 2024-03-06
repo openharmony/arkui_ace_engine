@@ -247,6 +247,7 @@ public:
         return contentRect_;
     }
     float GetLineHeight() const override;
+	float GetLetterSpacing() const override;
 
     std::vector<RectF> GetTextBoxes() override;
     OffsetF GetParentGlobalOffset() const override;
