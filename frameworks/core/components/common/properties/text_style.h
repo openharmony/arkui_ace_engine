@@ -77,6 +77,7 @@ enum class EllipsisMode {
 };
 
 enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD };
+extern const std::vector<WordBreak> WORD_BREAK_TYPES;
 
 /// Where to vertically align the placeholder relative to the surrounding text.
 enum class PlaceholderAlignment {
