@@ -1601,6 +1601,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
     JSClass<JSWeb>::StaticMethod("enableNativeEmbedMode", &JSWeb::EnableNativeEmbedMode);
+    JSClass<JSWeb>::StaticMethod("registerNativeEmbedRule", &JSWeb::RegisterNativeEmbedRule);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
     JSClass<JSWeb>::StaticMethod("javaScriptProxy", &JSWeb::JavaScriptProxy);
@@ -2801,6 +2802,11 @@ void JSWeb::EnableNativeEmbedMode(bool isEmbedModeEnabled)
     WebModel::GetInstance()->SetNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
+void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
+{
+    WebModel::GetInstance()->RegisterNativeEmbedRule(tag, type);
+}
+
 void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
 {
     WebModel::GetInstance()->SetGeolocationAccessEnabled(isGeolocationAccessEnabled);
@@ -3981,9 +3987,11 @@ JSRef<JSVal> EmbedLifecycleChangeToJSValue(const NativeEmbedDataInfo& eventInfo)
     requestObj->SetProperty("id", eventInfo.GetEmebdInfo().id);
     requestObj->SetProperty("type", eventInfo.GetEmebdInfo().type);
     requestObj->SetProperty("src", eventInfo.GetEmebdInfo().src);
+    requestObj->SetProperty("tag", eventInfo.GetEmebdInfo().tag);
     requestObj->SetProperty("width", eventInfo.GetEmebdInfo().width);
     requestObj->SetProperty("height", eventInfo.GetEmebdInfo().height);
     requestObj->SetProperty("url", eventInfo.GetEmebdInfo().url);
+    requestObj->SetProperty("params", eventInfo.GetEmebdInfo().params);
     obj->SetPropertyObject("info", requestObj);
 
     return JSRef<JSVal>::Cast(obj);

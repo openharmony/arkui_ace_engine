@@ -3543,6 +3543,53 @@ void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    tag_ = tag;
+    if (tag_.empty() || tag_type_.empty()) {
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->RegisterNativeEmbedRule(delegate->tag_, delegate->tag_type_);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    tag_type_ = type;
+    if (tag_.empty() || tag_type_.empty()) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->RegisterNativeEmbedRule(delegate->tag_, delegate->tag_type_);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::UpdateScrollBarColor(const std::string& colorValue)
 {
     auto context = context_.Upgrade();
@@ -5657,7 +5704,8 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         auto embedInfo = dataInfo->GetNativeEmbedInfo();
         if (embedInfo) {
             info = {embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(),
-                embedInfo->GetUrl(), embedInfo->GetWidth(), embedInfo->GetHeight()};
+                embedInfo->GetUrl(), embedInfo->GetTag(), embedInfo->GetWidth(),
+                embedInfo->GetHeight(), embedInfo->GetParams()};
         }
     }
 
