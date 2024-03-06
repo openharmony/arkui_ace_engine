@@ -237,6 +237,11 @@ public:
         return debugBoundaryEnabled_;
     }
 
+    static bool GetDebugOffsetLogEnabled()
+    {
+        return debugOffsetLogEnabled_;
+    }
+
     static bool GetDebugAutoUIEnabled()
     {
         return debugAutoUIEnabled_;
@@ -481,6 +486,7 @@ private:
     static bool debugEnabled_;
     static bool debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
+    static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
