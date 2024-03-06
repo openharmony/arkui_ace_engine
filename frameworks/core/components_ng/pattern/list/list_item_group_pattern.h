@@ -170,6 +170,11 @@ public:
         return layouted_ && (layoutedItemInfo_.has_value() || itemTotalCount_ == 0);
     }
 
+    const LayoutConstraintF& GetLayoutConstraint() const
+    {
+        return layoutConstraint_;
+    }
+
 private:
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -196,6 +201,7 @@ private:
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     bool layouted_ = false;
+    LayoutConstraintF layoutConstraint_;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;
