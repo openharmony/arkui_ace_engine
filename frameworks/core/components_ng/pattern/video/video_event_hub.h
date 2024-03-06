@@ -145,6 +145,20 @@ public:
         }
     }
 
+    void SetOnStop(VideoEventCallback&& onStop)
+    {
+        onStop_ = std ::move(onStop);
+    }
+    void FireStopEvent(const std::string& param)
+    {
+        if (onStop_) {
+            // onStop_ may be overwritten in its invoke so we copy it first
+            auto onStop = onStop_;
+            onStop(param);
+        }
+        RecorderOnEvent(Recorder::EventType::VIDEO_STOP, param);
+    }
+
     void SetOnFullScreenChange(VideoEventCallback&& onFullScreenChange)
     {
         onFullScreenChange_ = std ::move(onFullScreenChange);
@@ -188,6 +202,7 @@ private:
     VideoEventCallback onSeeking_;
     VideoEventCallback onSeeked_;
     VideoEventCallback onUpdate_;
+    VideoEventCallback onStop_;
     VideoEventCallback onFullScreenChange_;
     std::string inspectorId_;
 };
