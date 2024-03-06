@@ -75,6 +75,7 @@ ohos_shared_library("ace_ndk") {
     libs = [ "log" ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
