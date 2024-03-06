@@ -44,7 +44,19 @@ public:
             parentView_->MarkNeedUpdate();
         }
     }
+    void OnDataBulkAdded(size_t index, size_t count) override
+    {
+        if (parentView_ != nullptr) {
+            parentView_->MarkNeedUpdate();
+        }
+    }
     void OnDataDeleted(size_t index) override
+    {
+        if (parentView_ != nullptr) {
+            parentView_->MarkNeedUpdate();
+        }
+    }
+    void OnDataBulkDeleted(size_t index, size_t count) override
     {
         if (parentView_ != nullptr) {
             parentView_->MarkNeedUpdate();

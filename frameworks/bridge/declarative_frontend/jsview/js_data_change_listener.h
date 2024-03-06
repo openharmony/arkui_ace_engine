@@ -68,9 +68,33 @@ private:
         NotifyAll(&V2::DataChangeListener::OnDataAdded, args);
     }
 
+    void OnDataBulkAdded(const JSCallbackInfo& args)
+    {
+        ContainerScope scope(instanceId_);
+        size_t index = 0;
+        size_t count = 0;
+        size_t length = 2;
+        if (args.Length() < length || !ConvertFromJSValue(args[0], index) || !ConvertFromJSValue(args[1], count)) {
+            return;
+        }
+        NotifyAll(&V2::DataChangeListener::OnDataBulkAdded, index, count);
+    }
+
     void OnDataDeleted(const JSCallbackInfo& args)
     {
         NotifyAll(&V2::DataChangeListener::OnDataDeleted, args);
+    }
+
+    void OnDataBulkDeleted(const JSCallbackInfo& args)
+    {
+        ContainerScope scope(instanceId_);
+        size_t index = 0;
+        size_t count = 0;
+        size_t length = 2;
+        if (args.Length() < length || !ConvertFromJSValue(args[0], index) || !ConvertFromJSValue(args[1], count)) {
+            return;
+        }
+        NotifyAll(&V2::DataChangeListener::OnDataBulkDeleted, index, count);
     }
 
     void OnDataChanged(const JSCallbackInfo& args)
