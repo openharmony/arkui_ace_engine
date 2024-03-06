@@ -107,10 +107,11 @@ private:
      * @param props LayoutProps.
      * @param idx index of the FlowItem.
      * @param crossIdx column (when vertical) index of the target FlowItem.
+     * @param userDefMainSize user-defined main-axis size of the FlowItem.
      * @return LayoutWrapper of the FlowItem.
      */
     inline RefPtr<LayoutWrapper> MeasureItem(
-        const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx) const;
+        const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx, float userDefMainSize) const;
 
     /**
      * @brief Layout a FlowItem at [idx].
