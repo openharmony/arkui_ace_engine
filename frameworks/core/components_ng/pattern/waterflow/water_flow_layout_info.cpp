@@ -385,6 +385,10 @@ void WaterFlowLayoutInfo::SetNextSegmentStartPos(int32_t itemIdx)
 
 void WaterFlowLayoutInfo::Sync(float mainSize, bool overScroll)
 {
+    // adjust offset when it can't overScroll at top
+    if (!overScroll) {
+        currentOffset_ = std::min(currentOffset_, 0.0f);
+    }
     endIndex_ = FastSolveEndIndex(mainSize);
 
     maxHeight_ = GetMaxMainHeight();
@@ -392,7 +396,7 @@ void WaterFlowLayoutInfo::Sync(float mainSize, bool overScroll)
     itemStart_ = GreatOrEqual(currentOffset_, 0.0f);
     itemEnd_ = endIndex_ >= 0 && endIndex_ == childrenCount_ - 1;
     offsetEnd_ = itemEnd_ && GreatOrEqual(mainSize - currentOffset_, maxHeight_);
-    // adjust offset when it can't overScroll
+    // adjust offset when it can't overScroll at bottom
     if (offsetEnd_ && !overScroll) {
         currentOffset_ = std::min(-maxHeight_ + mainSize, 0.0f);
     }
