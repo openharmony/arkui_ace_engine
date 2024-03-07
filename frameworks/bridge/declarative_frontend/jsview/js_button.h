@@ -49,7 +49,7 @@ public:
     static void JsSize(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
-
+    static void SetRole(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void CreateWithChild(const JSCallbackInfo& info);
     static void CreateWithLabel(const JSCallbackInfo& info);
@@ -57,6 +57,7 @@ public:
     static constexpr char STATE_EFFECT[] = "stateEffect";
     static constexpr char BUTTON_STYLE[] = "buttonStyle";
     static constexpr char CONTROL_SIZE[] = "controlSize";
+    static constexpr char ROLE[] = "role";
 
 private:
     static void HandleDifferentRadius(const JSRef<JSVal>& args);
@@ -69,6 +70,7 @@ private:
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
         const std::optional<CalcDimension>& right);
     static CreateWithPara ParseCreatePara(const JSCallbackInfo& info, bool hasLabel);
+    static void ParseButtonRole(const JSRef<JSObject>& optionObj, CreateWithPara& param);
     static bool isLabelButton_;
 };
 } // namespace OHOS::Ace::Framework

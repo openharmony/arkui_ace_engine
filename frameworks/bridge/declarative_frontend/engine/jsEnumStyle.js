@@ -2623,3 +2623,9 @@ let RenderMode;
   RenderMode['ASYNC_RENDER'] = 0;
   RenderMode['SYNC_RENDER'] = 1;
 })(RenderMode || (RenderMode = {}));
+
+let ButtonRole;
+(function (ButtonRole){
+  ButtonRole['NORMAL'] = 0;
+  ButtonRole['ERROR'] = 1;
+})(ButtonRole || (ButtonRole = {}));
