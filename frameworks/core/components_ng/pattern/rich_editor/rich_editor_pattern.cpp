@@ -1045,10 +1045,10 @@ bool RichEditorPattern::SetCaretPosition(int32_t pos)
 {
     auto correctPos = std::clamp(pos, 0, GetTextContentLength());
     ResetLastClickOffset();
-    UpdateCaretInfoToController();
     if (pos == correctPos) {
         FireOnSelectionChange(correctPos);
         caretPosition_ = correctPos;
+        UpdateCaretInfoToController();
         return true;
     }
     return false;
