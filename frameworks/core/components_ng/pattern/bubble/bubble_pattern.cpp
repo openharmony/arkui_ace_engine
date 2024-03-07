@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -186,6 +186,18 @@ void BubblePattern::HandleTouchDown(const Offset& clickPosition)
     }
     auto autoCancel = bubbleRenderProp->GetAutoCancel().value_or(true);
     if (autoCancel) {
+        if (GetInteractiveDismiss()) {
+            return;
+        }
+        if (HasOnWillDismiss()) {
+            auto pipelineNg = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineNg);
+            auto overlayManager = pipelineNg->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->SetDismissPopupId(targetNodeId_);
+            CallOnWillDismiss(static_cast<int32_t>(DismissReason::TOUCH_OUTSIDE));
+            return;
+        }
         PopBubble();
     }
 }
