@@ -427,7 +427,7 @@ public:
 
 private:
     int64_t pageId_ = -1;
-    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> accessibilityNodeInfo_;
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> accessibilityNodeInfo_ = nullptr;
     WeakPtr<FrameNode> webNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
