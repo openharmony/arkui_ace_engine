@@ -347,6 +347,7 @@ public:
     void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void ResetSurface() override;
+    void PaintDebugBoundary(bool flag) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
 
 private:
@@ -517,7 +518,6 @@ private:
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
     void BdImagePaintTask(RSCanvas& canvas);
 
-    void PaintDebugBoundary();
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
     void SetContentRectToFrame(RectF rect) override;

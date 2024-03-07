@@ -729,6 +729,8 @@ public:
 
     OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
 
+    void PaintDebugBoundary(bool flag) override;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(

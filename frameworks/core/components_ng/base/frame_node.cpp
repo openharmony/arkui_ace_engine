@@ -3500,4 +3500,14 @@ void FrameNode::SetCachedTransformRelativeOffset(const std::pair<uint64_t, Offse
 {
     cachedTransformRelativeOffset_ = timestampOffset;
 }
+
+void FrameNode::PaintDebugBoundary(bool flag)
+{
+    if (!isActive_) {
+        return;
+    }
+    if (renderContext_) {
+        renderContext_->PaintDebugBoundary(flag);
+    }
+}
 } // namespace OHOS::Ace::NG
