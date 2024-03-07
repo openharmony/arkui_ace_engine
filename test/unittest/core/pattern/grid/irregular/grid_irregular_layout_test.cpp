@@ -584,12 +584,25 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
     EXPECT_EQ(info.endMainLineIndex_, 5);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 7);
+}
 
-    layoutProperty_->layoutConstraint_ = { .maxSize = { 610.0f, 1000.0f }, .percentReference = { 610.0f, 1000.0f } };
-    info.startMainLineIndex_ = 2;
-    info.startIndex_ = 2;
-    info.currentOffset_ = -401.0f;
-    algorithm->Measure(AceType::RawPtr(frameNode_));
+/**
+ * @tc.name: GridIrregularLayout::Measure005
+ * @tc.desc: Test GridIrregularLayout::Measure with mainSize > content
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Measure005, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo2());
+        model.SetColumnsGap(Dimension { 5.0f });
+        model.SetRowsGap(Dimension { 1.0f });
+        CreateFixedItem(8);
+        ViewAbstract::SetWidth(CalcLength(610.0f));
+        ViewAbstract::SetHeight(CalcLength(1000.0f));
+    });
+    auto& info = pattern_->gridLayoutInfo_;
     EXPECT_EQ(info.currentOffset_, 0.0f);
     EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 5);
