@@ -48,7 +48,7 @@ void ToggleButtonModelNG::SetIsOn(bool isOn)
     ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, IsOn, isOn);
 }
 
-void ToggleButtonModelNG::SetBackgroundColor(const Color& backgroundColor)
+void ToggleButtonModelNG::SetBackgroundColor(const Color& backgroundColor, bool flag)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
@@ -56,7 +56,11 @@ void ToggleButtonModelNG::SetBackgroundColor(const Color& backgroundColor)
     CHECK_NULL_VOID(frameNode);
     auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
     if (buttonPattern) {
-        ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, BackgroundColor, backgroundColor);
+        if (flag) {
+            ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, BackgroundColor, backgroundColor);
+        } else {
+            ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ToggleButtonPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
+        }
         return;
     }
     NG::ViewAbstract::SetBackgroundColor(backgroundColor);

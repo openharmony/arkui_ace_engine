@@ -219,7 +219,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest004, TestSize.Level1)
     toggleModelNG.SetSelectedColor(SELECTED_COLOR);
     toggleModelNG.SetWidth(TOGGLE_WIDTH);
     toggleModelNG.SetHeight(TOGGLE_HEIGH);
-    toggleModelNG.SetBackgroundColor(BACKGROUND_COLOR);
+    toggleModelNG.SetBackgroundColor(BACKGROUND_COLOR, true);
     auto padding = CreatePadding(ZERO);
     NG::PaddingProperty newPadding(
         { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });

@@ -1561,8 +1561,10 @@ struct EmbedInfo final {
     std::string type = "";
     std::string src = "";
     std::string url = "";
+    std::string tag = "";
     int32_t width = 0;
     int32_t height = 0;
+    std::map<std::string, std::string> params;
 };
 
 class ACE_EXPORT NativeEmbedDataInfo : public BaseEventInfo {

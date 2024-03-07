@@ -233,31 +233,42 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 }
 
-void SwiperLayoutAlgorithm::CaptureMeasure(LayoutWrapper* layoutWrapper, const LayoutConstraintF& childLayoutConstraint)
+void SwiperLayoutAlgorithm::CaptureMeasure(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)
 {
-    if (!hasCachedCapture_) {
+    if (!hasCachedCapture_ || itemPosition_.empty()) {
         return;
     }
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
-    auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto captureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_LEFT_CAPTURE_ETS_TAG);
-    if (captureWrapper) {
-        auto geometryNode = captureWrapper->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto oldSize = geometryNode->GetMarginFrameSize();
-        captureWrapper->Measure(childLayoutConstraint);
-        geometryNode = captureWrapper->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        if (oldSize != geometryNode->GetMarginFrameSize()) {
-            isNeedUpdateCapture_ = true;
-        }
+    auto leftCaptureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_LEFT_CAPTURE_ETS_TAG);
+    auto rightCaptureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_RIGHT_CAPTURE_ETS_TAG);
+    if (isCaptureReverse_) {
+        leftCaptureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_RIGHT_CAPTURE_ETS_TAG);
+        rightCaptureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_LEFT_CAPTURE_ETS_TAG);
     }
-    captureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_RIGHT_CAPTURE_ETS_TAG);
-    if (captureWrapper) {
-        captureWrapper->Measure(childLayoutConstraint);
-    }
+    CHECK_NULL_VOID(leftCaptureWrapper);
+    CHECK_NULL_VOID(rightCaptureWrapper);
+    auto lastWrapper = layoutWrapper->GetOrCreateChildByIndex(GetLoopIndex(itemPosition_.rbegin()->first));
+    CHECK_NULL_VOID(lastWrapper);
+    auto lastNode = lastWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(lastNode);
+    auto leftCaptureGeometryNode = leftCaptureWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(leftCaptureGeometryNode);
+    auto leftOldSize = leftCaptureGeometryNode->GetFrameSize();
+    childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(lastNode->GetMarginFrameSize()));
+    leftCaptureWrapper->Measure(childLayoutConstraint);
+
+    auto firstWrapper = layoutWrapper->GetOrCreateChildByIndex(GetLoopIndex(itemPosition_.begin()->first));
+    CHECK_NULL_VOID(firstWrapper);
+    auto firstNode = firstWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(firstNode);
+    auto rightCaptureGeometryNode = rightCaptureWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(rightCaptureGeometryNode);
+    auto rightOldSize = rightCaptureGeometryNode->GetFrameSize();
+    childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(firstNode->GetMarginFrameSize()));
+    rightCaptureWrapper->Measure(childLayoutConstraint);
+
+    isNeedUpdateCapture_ = leftOldSize != lastNode->GetFrameSize() || rightOldSize != firstNode->GetFrameSize();
 }
 
 void SwiperLayoutAlgorithm::MeasureCustomAnimation(
@@ -534,7 +545,13 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
 {
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(swiperLayoutProperty, 0);
-    if ((currentIndex - 1 < 0 && !isLoop_) || static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_) {
+    int32_t displayCount = swiperLayoutProperty->GetDisplayCount().has_value() ?
+        swiperLayoutProperty->GetDisplayCount().value() : 1;
+    if ((currentIndex - 1 < 0 && !isLoop_) ||
+        static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_ + displayCount - 1) {
+        return false;
+    }
+    if (hasCachedCapture_ && static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_) {
         return false;
     }
 

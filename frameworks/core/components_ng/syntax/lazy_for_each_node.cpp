@@ -123,6 +123,19 @@ void LazyForEachNode::OnDataAdded(size_t index)
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
+void LazyForEachNode::OnDataBulkAdded(size_t index, size_t count)
+{
+    ACE_SCOPED_TRACE("OnDataBulkAdded");
+    auto insertIndex = static_cast<int32_t>(index);
+    if (builder_) {
+        builder_->OnDataBulkAdded(index, count);
+    }
+    children_.clear();
+    NotifyDataCountChanged(insertIndex);
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
 void LazyForEachNode::OnDataDeleted(size_t index)
 {
     ACE_SCOPED_TRACE("OnDataDeleted");
@@ -138,6 +151,31 @@ void LazyForEachNode::OnDataDeleted(size_t index)
             }
             builder_->ProcessOffscreenNode(node, true);
         }
+    }
+    children_.clear();
+    NotifyDataCountChanged(deletedIndex);
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
+{
+    ACE_SCOPED_TRACE("OnDataBulkDeleted");
+    auto deletedIndex = static_cast<int32_t>(index);
+    if (builder_) {
+        auto nodeList = builder_->OnDataBulkDeleted(index, count);
+        for (auto& node : nodeList) {
+            if (node == nullptr) {
+                continue;
+            }
+            if (!node->OnRemoveFromParent(true)) {
+                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node);
+            } else {
+                node->DetachFromMainTree();
+            }
+            builder_->ProcessOffscreenNode(node, true);
+        }
+        builder_->clearBulkDeletedNodes();
     }
     children_.clear();
     NotifyDataCountChanged(deletedIndex);

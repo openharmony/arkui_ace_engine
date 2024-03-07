@@ -61,6 +61,8 @@ constexpr int NUM_14 = 14;
 constexpr int NUM_16 = 16;
 constexpr int NUM_23 = 23;
 constexpr int NUM_59 = 59;
+constexpr int NUM_100 = 100;
+constexpr int NUM_400 = 400;
 constexpr int DEFAULT_UNIT = 1;
 const int ALLOW_SIZE_1(1);
 const int ALLOW_SIZE_2(2);
@@ -105,61 +107,48 @@ constexpr int32_t PROGRESS_TYPE_MOON = 7;
 constexpr int32_t PROGRESS_TYPE_CAPSULE = 9;
 const std::vector<int32_t> PROGRESS_TYPE_ARRAY = { PROGRESS_TYPE_LINEAR, PROGRESS_TYPE_RING, PROGRESS_TYPE_MOON,
     PROGRESS_TYPE_SCALE, PROGRESS_TYPE_CAPSULE};
-const std::vector<std::string> TEXT_COPY_OPTION_ARRAY = { "none", "in-app", "local", "distributed" };
-const std::vector<std::string> TEXT_TEXT_SHADOW_ARRAY = { "color", "blur" };
-const std::vector<std::string> FONT_STYLE_ARRAY = { "normal", "italic" };
-const std::vector<std::string> FONT_OVERFLOW_ARRAY = { "none", "clip", "ellipsis", "marquee" };
-const std::vector<std::string> IMAGE_REPEAT_ARRAY = { "no-repeat", "x", "y", "xy" };
-const std::vector<std::string> TEXT_INPUT_ENTER_KEY_TYPE = { "begin", "none", "go", "search", "send", "next", "done",
-    "previous", "new-line" };
-const std::vector<std::string> TEXT_INPUT_TYPE = { "normal", "multiline", "number", "phone-number", "date-time",
-    "email", "url", "password", "number-password", "screen-lock-password", "user-name", "new-password",
-    "number-decimal" };
-const std::vector<std::string> COMMON_GRADIENT_DIRECTION = { "left", "top", "right", "bottom", "left-top",
-    "left-bottom", "right-top", "right-bottom", "none" };
-const std::vector<std::string> COMMON_ALIGNMENT = { "top-start", "top", "top-end", "start", "center", "end",
-    "bottom-start", "bottom", "bottom-end" };
-const std::vector<std::string> COMMON_BORDER_STYLE = { "solid", "dashed", "dotted" };
-const std::vector<std::string> COMMON_VISIBLE_STYLE = { "visible", "hidden", "none" };
-const std::vector<std::string> COMMON_HIT_TEST_MODE_STYLE = { "default", "block", "transparent" };
-const std::vector<std::string> COMMON_SHADOW_TYPE = { "COLOR", "BLUR" };
-const std::vector<std::string> COMMON_SHADOW_COLORING_STRATEGY = { "invert", "average", "primary" };
-const std::vector<std::string> COMMON_SHADOW_STYLE = { "outer-default-xs", "outer-default-sm", "outer-default-md",
-    "outer-default-lg", "outer-floating-sm", "outer-floating-md", "none" };
-const std::vector<std::string> SCROLL_DISPLAY_MODE = { "off", "auto", "on" };
-const std::vector<std::string> SCROLL_AXIS = { "vertical", "horizontal", "free", "none" };
-const std::vector<std::string> SCROLL_EDGE_EFFECT = { "spring", "fade", "none" };
-const std::vector<std::string> LIST_STICKY_STYLE = { "none", "header", "footer", "both" };
+constexpr int32_t OBJECT_FIT_FILL = 0;
+constexpr int32_t OBJECT_FIT_CONTAIN = 1;
+constexpr int32_t OBJECT_FIT_COVER = 2;
+constexpr int32_t OBJECT_FIT_AUTO = 3;
+constexpr int32_t OBJECT_FIT_NONE = 5;
+constexpr int32_t OBJECT_FIT_SCALE_DOWN = 6;
+const std::vector<int32_t> OBJECT_FIT_ARRAY = { OBJECT_FIT_CONTAIN, OBJECT_FIT_COVER, OBJECT_FIT_AUTO,
+    OBJECT_FIT_FILL, OBJECT_FIT_SCALE_DOWN, OBJECT_FIT_NONE };
+constexpr int32_t IMAGE_SPAN_ALIGNMENT_BASELINE = 4;
+constexpr int32_t IMAGE_SPAN_ALIGNMENT_BOTTOM = 3;
+constexpr int32_t IMAGE_SPAN_ALIGNMENT_CENTER = 2;
+constexpr int32_t IMAGE_SPAN_ALIGNMENT_TOP = 1;
+const std::vector<int32_t> IMAGE_SPAN_ALIGNMENT_ARRAY = { IMAGE_SPAN_ALIGNMENT_BASELINE, IMAGE_SPAN_ALIGNMENT_BOTTOM,
+    IMAGE_SPAN_ALIGNMENT_CENTER, IMAGE_SPAN_ALIGNMENT_TOP };
 const std::vector<std::string> CURVE_ARRAY = { "linear", "ease", "ease-in", "ease-out", "ease-in-out",
     "fast-out-slow-in", "linear-out-slow-in", "fast-out-linear-in", "extreme-deceleration", "sharp", "rhythm", "smooth",
     "friction" };
-const std::vector<std::string> PLAY_MODE_ARRAY = { "normal", "alternate", "reverse", "alternate_reverse" };
 const std::vector<std::string> FONT_STYLES = { "normal", "italic" };
 const std::vector<int32_t> SPAN_ATTRIBUTES = { static_cast<int32_t>(NODE_SPAN_CONTENT),
     static_cast<int32_t>(NODE_TEXT_DECORATION), static_cast<int32_t>(NODE_FONT_COLOR),
     static_cast<int32_t>(NODE_FONT_SIZE), static_cast<int32_t>(NODE_FONT_STYLE), static_cast<int32_t>(NODE_FONT_WEIGHT),
     static_cast<int32_t>(NODE_TEXT_LINE_HEIGHT), static_cast<int32_t>(NODE_TEXT_CASE),
     static_cast<int32_t>(NODE_TEXT_LETTER_SPACING) };
-const std::string DEFAULT_CURVE = "linear";
 constexpr int32_t ANIMATION_DURATION_INDEX = 0;
 constexpr int32_t ANIMATION_CURVE_INDEX = 1;
 constexpr int32_t ANIMATION_DELAY_INDEX = 2;
 constexpr int32_t ANIMATION_INTERATION_INDEX = 3;
 constexpr int32_t ANIMATION_PLAY_MODE_INDEX = 4;
 constexpr int32_t ANIMATION_TEMPO_INDEX = 5;
+constexpr int32_t ANIMATION_PLAY_MODE_REVERSE_VALUE = 2;
+constexpr int32_t ANIMATION_PLAY_MODE_ALTERNATE_VALUE = 1;
 constexpr int32_t OPACITY_ANIMATION_BASE = 1;
 constexpr int32_t ROTATE_ANIMATION_BASE = 5;
 constexpr int32_t SCALE_ANIMATION_BASE = 3;
 constexpr int32_t TRANSLATE_ANIMATION_BASE = 3;
 constexpr int32_t DEFAULT_DURATION = 1000;
-const std::vector<std::string> ALIGN_RULES_HORIZONTAL_ARRAY = { "start", "center", "end" };
-const std::vector<std::string> ALIGN_RULES_VERTICAL_ARRAY = { "top", "center", "bottom" };
-typedef std::map<const std::string, ArkUI_Int32> AttrStringToIntMap;
 constexpr int32_t TWO = 2;
 constexpr float ZERO_F = 0.0f;
 constexpr float HUNDRED = 100.0f;
 constexpr float SLIDER_STEP_MIN_F = 0.01f;
 constexpr float HALF = 0.5f;
+constexpr float DEFAULT_HINT_RADIUS = 16.0f;
 constexpr int32_t REQUIRED_ONE_PARAM = 1;
 constexpr int32_t REQUIRED_TWO_PARAM = 2;
 constexpr int32_t REQUIRED_THREE_PARAM = 3;
@@ -309,6 +298,66 @@ std::string ShapeToString(int shape)
             break;
     }
     return shapeStr;
+}
+
+int32_t ConvertBlurStyle(int32_t originBlurStyle)
+{
+    if (originBlurStyle < static_cast<int32_t>(ARKUI_BLUR_STYLE_NONE)) {
+        return originBlurStyle + 1;
+    } else if (originBlurStyle == static_cast<int32_t>(ARKUI_BLUR_STYLE_NONE)) {
+        return 0;
+    }
+    return originBlurStyle;
+}
+
+int32_t UnConvertBlurStyle(int32_t blurStyle)
+{
+    if (blurStyle <= static_cast<int32_t>(ARKUI_BLUR_STYLE_NONE)) {
+        return blurStyle - 1;
+    } else if (blurStyle == 0) {
+        return static_cast<int32_t>(ARKUI_BLUR_STYLE_NONE);
+    }
+    return blurStyle;
+}
+
+int32_t ConvertAnimationDirection(int32_t animationPlayMode)
+{
+    if (animationPlayMode == static_cast<int32_t>(ARKUI_ANIMATION_PLAY_MODE_REVERSE)) {
+        return ANIMATION_PLAY_MODE_REVERSE_VALUE;
+    } else if (animationPlayMode == static_cast<int32_t>(ARKUI_ANIMATION_PLAY_MODE_ALTERNATE)) {
+        return ANIMATION_PLAY_MODE_ALTERNATE_VALUE;
+    }
+    return animationPlayMode;
+}
+
+int32_t UnConvertAnimationDirection(int32_t animationPlayMode)
+{
+    if (animationPlayMode == static_cast<int32_t>(ANIMATION_PLAY_MODE_REVERSE_VALUE)) {
+        return static_cast<int32_t>(ARKUI_ANIMATION_PLAY_MODE_REVERSE);
+    } else if (animationPlayMode == static_cast<int32_t>(ANIMATION_PLAY_MODE_ALTERNATE_VALUE)) {
+        return static_cast<int32_t>(ARKUI_ANIMATION_PLAY_MODE_ALTERNATE);
+    }
+    return animationPlayMode;
+}
+
+bool isLeapYear(uint32_t year)
+{
+    return (year % NUM_4 == 0 && year % NUM_100 != 0) || (year % NUM_400 == 0);
+}
+
+bool isValidDate(uint32_t year, uint32_t month, uint32_t day)
+{
+    if (year <= 0) {
+        return false;
+    }
+    if (month < NUM_1 || month > NUM_12) {
+        return false;
+    }
+    int daysInMonth[] = { 31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if (day < NUM_1 || day > daysInMonth[month - 1]) {
+        return false;
+    }
+    return true;
 }
 
 int32_t CheckAttributeItemArray(const ArkUI_AttributeItem* item, int32_t requiredAtLeastSize)
@@ -478,7 +527,7 @@ void ParseAnimation(const ArkUI_AttributeItem* item, int32_t actualSize, ArkUIAn
     const int32_t animationPlayModeIndex = animationIndexBase + ANIMATION_PLAY_MODE_INDEX;
     int32_t direction = 0;
     if (animationPlayModeIndex < actualSize) {
-        direction = item->value[animationPlayModeIndex].i32;
+        direction = ConvertAnimationDirection(item->value[animationPlayModeIndex].i32);
     }
     const int32_t animationTempoIndex = animationIndexBase + ANIMATION_TEMPO_INDEX;
     float tempo = 1.0f;
@@ -1637,7 +1686,7 @@ void ResetFocusable(ArkUI_NodeHandle node)
 
 int32_t SetAccessibilityGroup(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+    if (node->type == ARKUI_NODE_SPAN || item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1647,6 +1696,10 @@ int32_t SetAccessibilityGroup(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
 
 const ArkUI_AttributeItem* GetAccessibilityGroup(ArkUI_NodeHandle node)
 {
+    if (node->type == ARKUI_NODE_SPAN) {
+        g_attributeItem.size = NUM_0;
+        return nullptr;
+    }
     auto resultValue =
         GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAccessibilityGroup(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
@@ -1655,13 +1708,16 @@ const ArkUI_AttributeItem* GetAccessibilityGroup(ArkUI_NodeHandle node)
 
 void ResetAccessibilityGroup(ArkUI_NodeHandle node)
 {
+    if (node->type == ARKUI_NODE_SPAN) {
+        return;
+    }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityGroup(node->uiNodeHandle);
 }
 
 int32_t SetAccessibilityText(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->string == nullptr) {
+    if (node->type == ARKUI_NODE_SPAN || item->string == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1671,6 +1727,10 @@ int32_t SetAccessibilityText(ArkUI_NodeHandle node, const ArkUI_AttributeItem* i
 
 const ArkUI_AttributeItem* GetAccessibilityText(ArkUI_NodeHandle node)
 {
+    if (node->type == ARKUI_NODE_SPAN) {
+        g_attributeItem.size = NUM_0;
+        return nullptr;
+    }
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAccessibilityText(node->uiNodeHandle);
     g_attributeItem.string = resultValue;
     g_attributeItem.size = 0;
@@ -1679,13 +1739,16 @@ const ArkUI_AttributeItem* GetAccessibilityText(ArkUI_NodeHandle node)
 
 void ResetAccessibilityText(ArkUI_NodeHandle node)
 {
+    if (node->type == ARKUI_NODE_SPAN) {
+        return;
+    }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityText(node->uiNodeHandle);
 }
 
 int32_t SetAccessibilityLevel(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0 && !CheckAttributeIsAccessibilityLevel(item->value[0].i32)) {
+    if (node->type == ARKUI_NODE_SPAN || item->size == 0 || !CheckAttributeIsAccessibilityLevel(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1696,6 +1759,10 @@ int32_t SetAccessibilityLevel(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
 
 const ArkUI_AttributeItem* GetAccessibilityLevel(ArkUI_NodeHandle node)
 {
+    if (node->type == ARKUI_NODE_SPAN) {
+        g_attributeItem.size = NUM_0;
+        return nullptr;
+    }
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAccessibilityLevel(
         node->uiNodeHandle);
     std::string levelString(resultValue);
@@ -1705,13 +1772,16 @@ const ArkUI_AttributeItem* GetAccessibilityLevel(ArkUI_NodeHandle node)
 
 void ResetAccessibilityLevel(ArkUI_NodeHandle node)
 {
+    if (node->type == ARKUI_NODE_SPAN) {
+        return;
+    }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityLevel(node->uiNodeHandle);
 }
 
 int32_t SetAccessibilityDescription(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->string == nullptr) {
+    if (node->type == ARKUI_NODE_SPAN || item->string == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -1721,6 +1791,10 @@ int32_t SetAccessibilityDescription(ArkUI_NodeHandle node, const ArkUI_Attribute
 
 const ArkUI_AttributeItem* GetAccessibilityDescription(ArkUI_NodeHandle node)
 {
+    if (node->type == ARKUI_NODE_SPAN) {
+        g_attributeItem.size = NUM_0;
+        return nullptr;
+    }
     auto resultValue =
         GetFullImpl()->getNodeModifiers()->getCommonModifier()->getAccessibilityDescription(node->uiNodeHandle);
     g_attributeItem.string = resultValue;
@@ -1730,6 +1804,9 @@ const ArkUI_AttributeItem* GetAccessibilityDescription(ArkUI_NodeHandle node)
 
 void ResetAccessibilityDescription(ArkUI_NodeHandle node)
 {
+    if (node->type == ARKUI_NODE_SPAN) {
+        return;
+    }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityDescription(node->uiNodeHandle);
 }
@@ -2867,7 +2944,7 @@ const ArkUI_AttributeItem* GetMaxLength(ArkUI_NodeHandle node)
         resultValue = GetFullImpl()->getNodeModifiers()->getTextAreaModifier()->getTextAreaMaxLength(
             node->uiNodeHandle);
     }
-    g_numberValues[0].f32 = resultValue;
+    g_numberValues[0].i32 = resultValue;
     return &g_attributeItem;
 }
 
@@ -3182,7 +3259,7 @@ const ArkUI_AttributeItem* GetTextInputCancelButton(ArkUI_NodeHandle node)
 {
     int index = 0;
     g_numberValues[index++].i32 =
-        GetFullImpl()->getNodeModifiers()->getTextInputModifier()->getTextInputShowCancelButton(node->uiNodeHandle);
+        GetFullImpl()->getNodeModifiers()->getTextInputModifier()->getTextInputCancelButtonStyle(node->uiNodeHandle);
     g_numberValues[index++].f32 =
         GetFullImpl()->getNodeModifiers()->getTextInputModifier()->getTextInputCancelIconSize(node->uiNodeHandle);
     g_numberValues[index++].u32 =
@@ -5719,7 +5796,7 @@ int32_t SetBackgroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     }
     int32_t blurStyle = ARKUI_BLUR_STYLE_THIN;
     if (BLUR_STYLE_INDEX < actualSize) {
-        blurStyle = item->value[BLUR_STYLE_INDEX].i32;
+        blurStyle = ConvertBlurStyle(item->value[BLUR_STYLE_INDEX].i32);
     }
     int32_t colorMode = ARKUI_COLOR_MODE_SYSTEM;
     if (COLOR_MODE_INDEX < actualSize) {
@@ -6197,7 +6274,7 @@ int32_t SetVerticalAlign(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_PARAM_INVALID;
     }
     fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanVerticalAlign(
-        node->uiNodeHandle, item->value[0].i32);
+        node->uiNodeHandle, IMAGE_SPAN_ALIGNMENT_ARRAY[item->value[0].i32]);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6221,7 +6298,8 @@ int32_t SetObjectFit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->value[0].i32 < 0 || item->value[0].i32 > static_cast<int32_t>(ARKUI_OBJECT_FIT_NONE)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    fullImpl->getNodeModifiers()->getImageModifier()->setObjectFit(node->uiNodeHandle, item->value[0].i32);
+    fullImpl->getNodeModifiers()->getImageModifier()->setObjectFit(
+        node->uiNodeHandle, OBJECT_FIT_ARRAY[item->value[0].i32]);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6322,22 +6400,13 @@ int32_t SetSelectedDate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[SELECTED_YEAR_INDEX].u32 == 0 || item->value[SELECTED_MONTH_INDEX].u32 == 0 ||
-        item->value[SELECTED_DAY_INDEX].u32 == 0) {
+    if (!isValidDate(item->value[SELECTED_YEAR_INDEX].u32,
+        item->value[SELECTED_MONTH_INDEX].u32, item->value[SELECTED_DAY_INDEX].u32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    uint32_t selectedYear = 0;
-    if (SELECTED_YEAR_INDEX < actualSize) {
-        selectedYear = item->value[SELECTED_YEAR_INDEX].u32;
-    }
-    uint32_t selectedMonth = 0;
-    if (SELECTED_MONTH_INDEX < actualSize) {
-        selectedMonth = item->value[SELECTED_MONTH_INDEX].u32;
-    }
-    uint32_t selectedDay = 0;
-    if (SELECTED_DAY_INDEX < actualSize) {
-        selectedDay = item->value[SELECTED_DAY_INDEX].u32;
-    }
+    uint32_t selectedYear = item->value[SELECTED_YEAR_INDEX].u32;
+    uint32_t selectedMonth = item->value[SELECTED_MONTH_INDEX].u32;
+    uint32_t selectedDay = item->value[SELECTED_DAY_INDEX].u32;
     fullImpl->getNodeModifiers()->getCalendarPickerModifier()->setSelectDate(
         node->uiNodeHandle, selectedYear, selectedMonth, selectedDay);
     return ERROR_CODE_NO_ERROR;
@@ -6450,7 +6519,7 @@ void ResetHintRadius(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCalendarPickerModifier()->setHintRadius(
-        node->uiNodeHandle, 0.0f, static_cast<int32_t>(DimensionUnit::VP));
+        node->uiNodeHandle, DEFAULT_HINT_RADIUS, static_cast<int32_t>(DimensionUnit::VP));
 }
 
 void ResetSelectedDate(ArkUI_NodeHandle node)
@@ -6664,8 +6733,8 @@ void ResetImageSpanSrc(ArkUI_NodeHandle node)
 void ResetVerticalAlign(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanVerticalAlign(
-        node->uiNodeHandle, static_cast<int32_t>(ARKUI_IMAGE_SPAN_ALIGNMENT_BASELINE));
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->resetImageSpanVerticalAlign(
+        node->uiNodeHandle);
 }
 
 void ResetImageSrc(ArkUI_NodeHandle node)
@@ -6735,7 +6804,7 @@ const ArkUI_AttributeItem* GetBackgroundBlurStyle(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     auto backGroundBlurStyle =
         fullImpl->getNodeModifiers()->getCommonModifier()->getBackgroundBlurStyle(node->uiNodeHandle);
-    g_numberValues[BLUR_STYLE_INDEX].i32 = backGroundBlurStyle.blurStyle;
+    g_numberValues[BLUR_STYLE_INDEX].i32 = UnConvertBlurStyle(backGroundBlurStyle.blurStyle);
     g_numberValues[COLOR_MODE_INDEX].i32 = backGroundBlurStyle.colorMode;
     g_numberValues[ADAPTIVE_COLOR_INDEX].i32 = backGroundBlurStyle.adaptiveColor;
     g_numberValues[SCALE_INDEX].f32 = backGroundBlurStyle.scale;
@@ -6770,7 +6839,7 @@ const ArkUI_AttributeItem* GetOpacityTransition(ArkUI_NodeHandle node)
     g_numberValues[animationCurveIndex].i32 = opacityTransition.animation.curve;
     g_numberValues[animationDelayIndex].i32 = opacityTransition.animation.delay;
     g_numberValues[animationIterationsIndex].i32 = opacityTransition.animation.iteration;
-    g_numberValues[animationPlayModeIndex].i32 = opacityTransition.animation.playMode;
+    g_numberValues[animationPlayModeIndex].i32 =UnConvertAnimationDirection(opacityTransition.animation.playMode);
     g_numberValues[animationTempoIndex].f32 = opacityTransition.animation.tempo;
     g_attributeItem.size = REQUIRED_SEVEN_PARAM;
     return &g_attributeItem;
@@ -6795,7 +6864,7 @@ const ArkUI_AttributeItem* GetRotateTransition(ArkUI_NodeHandle node)
     g_numberValues[animationCurveIndex].i32 = rotateTransition.animation.curve;
     g_numberValues[animationDelayIndex].i32 = rotateTransition.animation.delay;
     g_numberValues[animationIterationsIndex].i32 = rotateTransition.animation.iteration;
-    g_numberValues[animationPlayModeIndex].i32 = rotateTransition.animation.playMode;
+    g_numberValues[animationPlayModeIndex].i32 = UnConvertAnimationDirection(rotateTransition.animation.playMode);
     g_numberValues[animationTempoIndex].f32 = rotateTransition.animation.tempo;
     g_attributeItem.size = NUM_11;
     return &g_attributeItem;
@@ -6818,7 +6887,7 @@ const ArkUI_AttributeItem* GetScaleTransition(ArkUI_NodeHandle node)
     g_numberValues[animationCurveIndex].i32 = scaleTransition.animation.curve;
     g_numberValues[animationDelayIndex].i32 = scaleTransition.animation.delay;
     g_numberValues[animationIterationsIndex].i32 = scaleTransition.animation.iteration;
-    g_numberValues[animationPlayModeIndex].i32 = scaleTransition.animation.playMode;
+    g_numberValues[animationPlayModeIndex].i32 = UnConvertAnimationDirection(scaleTransition.animation.playMode);
     g_numberValues[animationTempoIndex].f32 = scaleTransition.animation.tempo;
     g_attributeItem.size = NUM_9;
     return &g_attributeItem;
@@ -6842,7 +6911,7 @@ const ArkUI_AttributeItem* GetTranslateTransition(ArkUI_NodeHandle node)
     g_numberValues[animationCurveIndex].i32 = translateTransition.animation.curve;
     g_numberValues[animationDelayIndex].i32 = translateTransition.animation.delay;
     g_numberValues[animationIterationsIndex].i32 = translateTransition.animation.iteration;
-    g_numberValues[animationPlayModeIndex].i32 = translateTransition.animation.playMode;
+    g_numberValues[animationPlayModeIndex].i32 = UnConvertAnimationDirection(translateTransition.animation.playMode);
     g_numberValues[animationTempoIndex].f32 = translateTransition.animation.tempo;
     return &g_attributeItem;
 }
@@ -7156,8 +7225,11 @@ const ArkUI_AttributeItem* GetVerticalAlign(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     auto verticalAlign =
         fullImpl->getNodeModifiers()->getImageSpanModifier()->getImageSpanVerticalAlign(node->uiNodeHandle);
-    g_numberValues[0].i32 = verticalAlign;
-    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    auto it = std::find(IMAGE_SPAN_ALIGNMENT_ARRAY.begin(), IMAGE_SPAN_ALIGNMENT_ARRAY.end(), verticalAlign);
+    if (it != IMAGE_SPAN_ALIGNMENT_ARRAY.end()) {
+        g_numberValues[0].i32 = std::distance(IMAGE_SPAN_ALIGNMENT_ARRAY.begin(), it);
+        g_attributeItem.size = REQUIRED_ONE_PARAM;
+    }
     return &g_attributeItem;
 }
 
@@ -7172,7 +7244,11 @@ const ArkUI_AttributeItem* GetImageSrc(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetObjectFit(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
-    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getImageModifier()->getObjectFit(node->uiNodeHandle);
+    auto resultValue = fullImpl->getNodeModifiers()->getImageModifier()->getObjectFit(node->uiNodeHandle);
+    auto it = std::find(OBJECT_FIT_ARRAY.begin(), OBJECT_FIT_ARRAY.end(), resultValue);
+    if (it != OBJECT_FIT_ARRAY.end()) {
+        g_numberValues[0].i32 = std::distance(OBJECT_FIT_ARRAY.begin(), it);
+    }
     g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
 }

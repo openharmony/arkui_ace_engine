@@ -561,15 +561,16 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
     return &modifier;
 }
 
-void SetOnTextAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnTextAreaChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node, eventId, extraParam](const std::string& str) {
+    auto onChange = [node, extraParam](const std::string& str) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXTAREA_CHANGE;
+        event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.stringAsyncEvent.pStr = str.c_str();
+        event.textInputEvent.subKind = ON_TEXTAREA_CHANGE;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));

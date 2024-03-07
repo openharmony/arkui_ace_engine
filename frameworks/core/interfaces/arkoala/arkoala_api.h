@@ -26,13 +26,13 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 71
+#define ARKUI_FULL_API_VERSION 72
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 71
+#define ARKUI_NODE_API_VERSION 72
 
-#define ARKUI_BASIC_API_VERSION 5
-#define ARKUI_EXTENDED_API_VERSION 5
+#define ARKUI_BASIC_API_VERSION 6
+#define ARKUI_EXTENDED_API_VERSION 6
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 6
 #define ARKUI_AUTO_GENERATE_NODE_ID -2
@@ -660,12 +660,12 @@ enum ArkUIEventCategory {
     COMPONENT_ASYNC_EVENT = 4,
     TEXT_INPUT = 5,
     GESTURE_ASYNC_EVENT = 6,
-    STRING_EVENT = 7
+    TOUCH_EVENT=7,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
 
-enum ArkUIAsyncEventKind {
+enum ArkUIEventSubKind {
     // common events
     ON_APPEAR = 0,
     ON_DISAPPEAR = 1,
@@ -804,8 +804,8 @@ struct ArkUIAPIEventMultiPointer {
 };
 
 struct ArkUIAPIEventTextInput {
-    ArkUI_Int32 nativeStringLow;
-    ArkUI_Int32 nativeStringHigh;
+    ArkUI_Int64 nativeStringPtr;
+    ArkUI_Int32 subKind; // ArkUIEventSubKind actually
 };
 
 #define ARKUI_CALLBACK_ARGS_COUNT 12
@@ -820,11 +820,8 @@ struct ArkUIAPIEventCallback {
 #define ARKUI_ASYNC_EVENT_ARGS_COUNT 12
 
 struct ArkUINodeAsyncEvent {
+    ArkUI_Int32 subKind; // ArkUIEventSubKind actually
     ArkUIEventCallbackArg data[ARKUI_ASYNC_EVENT_ARGS_COUNT];
-};
-
-struct ArkUIStringAsyncEvent {
-    ArkUI_CharPtr pStr;
 };
 
 struct ArkUIAPIEventGestureAsyncEvent {
@@ -849,7 +846,7 @@ struct ArkUIAPIEventGestureAsyncEvent {
 };
 
 struct ArkUINodeEvent {
-    ArkUI_Int32 kind; // Actually ArkUIAsyncEventKind.
+    ArkUI_Int32 kind; // Actually ArkUIEventCategory.
     ArkUI_Int32 nodeId;
     ArkUI_Int64 extraParam;
     union {
@@ -859,7 +856,6 @@ struct ArkUINodeEvent {
         ArkUINodeAsyncEvent componentAsyncEvent;
         ArkUIAPIEventTextInput textInputEvent;
         ArkUIAPIEventGestureAsyncEvent gestureAsyncEvent;
-        ArkUIStringAsyncEvent stringAsyncEvent;
         ArkUITouchEvent touchEvent;
     };
 };
@@ -2134,6 +2130,7 @@ struct ArkUITextInputModifier {
     ArkUI_Int32 (*getTextInputFontStyle)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputFontWeight)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputFontSize)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputCancelButtonStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2204,9 +2201,10 @@ struct ArkUICheckboxGroupModifier {
     void (*resetCheckboxGroupUnSelectedColor)(ArkUINodeHandle node);
     void (*setCheckboxGroupSelectAll)(ArkUINodeHandle node, ArkUI_Bool isSelected);
     void (*resetCheckboxGroupSelectAll)(ArkUINodeHandle node);
-    void (*setCheckboxGroupWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setCheckboxGroupWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetCheckboxGroupWidth)(ArkUINodeHandle node);
-    void (*setCheckboxGroupHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setCheckboxGroupHeight)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetCheckboxGroupHeight)(ArkUINodeHandle node);
     void (*setCheckboxGroupMark)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue);
@@ -2787,9 +2785,9 @@ struct ArkUIRadioModifier {
     void (*setRadioStyle)(ArkUINodeHandle node, ArkUI_Uint32 checkedBackgroundColor, ArkUI_Uint32 uncheckedBorderColor,
         ArkUI_Uint32 indicatorColor);
     void (*resetRadioStyle)(ArkUINodeHandle node);
-    void (*setRadioWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Uint32 unit);
+    void (*setRadioWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetRadioWidth)(ArkUINodeHandle node);
-    void (*setRadioHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Uint32 unit);
+    void (*setRadioHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetRadioHeight)(ArkUINodeHandle node);
     void (*setRadioSize)(ArkUINodeHandle node, ArkUI_Float32 widthValue, ArkUI_Int32 widthUnit,
         ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit);
@@ -3002,8 +3000,8 @@ struct ArkUIRenderNodeModifier {
 
 struct ArkUIFrameNodeModifier {
     ArkUI_Bool (*isModifiable)(ArkUINodeHandle node);
-    void (*appendChild)(ArkUINodeHandle node, ArkUINodeHandle child);
-    void (*insertChildAfter)(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling);
+    ArkUI_Bool (*appendChild)(ArkUINodeHandle node, ArkUINodeHandle child);
+    ArkUI_Bool (*insertChildAfter)(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling);
     void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*clearChildren)(ArkUINodeHandle node);
     ArkUI_Int32 (*getChildrenNumber)(ArkUINodeHandle node);
@@ -3218,8 +3216,8 @@ struct ArkUIBasicAPI {
      * notify the node to send node event back
      */
     void (*registerNodeAsyncEvent)(
-        ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind, ArkUI_Int64 extraParam);
-    void (*unRegisterNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind);
+        ArkUINodeHandle nodePtr, ArkUIEventSubKind kind, ArkUI_Int64 extraParam);
+    void (*unRegisterNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUIEventSubKind kind);
     /* registerNodeAsyncEventReceiver() must be redesigned */
     void (*registerNodeAsyncEventReceiver)(void (*eventReceiver)(ArkUINodeEvent* event));
     void (*unRegisterNodeAsyncEventReceiver)();

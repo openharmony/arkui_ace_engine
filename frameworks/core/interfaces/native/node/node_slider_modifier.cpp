@@ -648,14 +648,15 @@ const ArkUISliderModifier* GetSliderModifier()
     return &modifier;
 }
 
-void SetSliderChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetSliderChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam](float value, int32_t mode) {
+    auto onEvent = [node, extraParam](float value, int32_t mode) {
         ArkUINodeEvent event;
-        event.kind = ON_SLIDER_CHANGE;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SLIDER_CHANGE;
         event.componentAsyncEvent.data[0].f32 = value;
         event.componentAsyncEvent.data[1].i32 = mode;
         SendArkUIAsyncEvent(&event);

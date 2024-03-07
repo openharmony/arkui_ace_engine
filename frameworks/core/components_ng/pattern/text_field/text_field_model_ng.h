@@ -160,6 +160,7 @@ public:
     static Ace::FontStyle GetFontStyle(FrameNode* frameNode);
     static FontWeight GetFontWeight(FrameNode* frameNode);
     static Dimension GetFontSize(FrameNode* frameNode);
+    static CleanNodeStyle GetCleanNodeStyle(FrameNode* frameNode);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

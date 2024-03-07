@@ -327,6 +327,10 @@ public:
 
     void OnNotifyMemoryLevel(int32_t level) override;
 
+    // call by recycle framework.
+    void OnRecycle() override;
+    void OnReuse() override;
+
     OffsetF GetOffsetRelativeToWindow() const;
 
     OffsetF GetTransformRelativeOffset() const;
@@ -725,6 +729,8 @@ public:
 
     OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
 
+    void PaintDebugBoundary(bool flag) override;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -802,6 +808,10 @@ private:
     const std::pair<uint64_t, OffsetF>& GetCachedTransformRelativeOffset() const;
 
     void SetCachedTransformRelativeOffset(const std::pair<uint64_t, OffsetF>& timestampOffset);
+
+    HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
+
+    void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

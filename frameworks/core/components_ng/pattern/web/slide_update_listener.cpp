@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#pragma once
+#include "core/components_ng/pattern/web/slide_update_listener.h"
 
-#include "core/interfaces/native/node/node_api.h"
-
-namespace OHOS::Ace::NG::NodeModifier {
-    const ArkUITextInputModifier* GetTextInputModifier();
-    void SetOnTextInputChange(ArkUINodeHandle node, void* extraParam);
-    void SetTextInputOnSubmit(ArkUINodeHandle node, void* extraParam);
-    void SetOnTextInputCut(ArkUINodeHandle node, void* extraParam);
-    void SetOnTextInputPaste(ArkUINodeHandle node, void* extraParam);
-} // namespace OHOS::Ace::NG::NodeModifier
+namespace OHOS::Ace::NG {
+void SlideUpdateListener::OnSlideUpdate(const SizeF& frameSize)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateSlideOffset(frameSize);
+}
+} // namespace OHOS::Ace::NG

@@ -290,14 +290,15 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
     return &modifier;
 }
 
-void SetCheckboxChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetCheckboxChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam](const bool value) {
+    auto onEvent = [node, extraParam](const bool value) {
         ArkUINodeEvent event;
-        event.kind = ON_CHECKBOX_CHANGE;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_CHECKBOX_CHANGE;
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(value);
         SendArkUIAsyncEvent(&event);
     };

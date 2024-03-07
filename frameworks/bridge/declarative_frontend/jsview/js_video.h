@@ -40,6 +40,7 @@ public:
     static void JsOnSeeked(const JSCallbackInfo& info);
     static void JsOnUpdate(const JSCallbackInfo& info);
     static void JsOnError(const JSCallbackInfo& info);
+    static void JsOnStop(const JSCallbackInfo& info);
 
     static void JSBind(BindingTarget globalObj);
 

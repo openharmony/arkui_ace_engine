@@ -463,8 +463,8 @@ void ResetSelectSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetWidth(frameNode, CalcLength(0.0));
-    ViewAbstract::SetHeight(frameNode, CalcLength(0.0));
+    ViewAbstract::ClearWidthOrHeight(frameNode, true);
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
 namespace NodeModifier {

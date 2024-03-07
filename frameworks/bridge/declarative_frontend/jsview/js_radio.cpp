@@ -82,8 +82,6 @@ void JSRadio::JSBind(BindingTarget globalObj)
 
     JSClass<JSRadio>::StaticMethod("create", &JSRadio::Create);
     JSClass<JSRadio>::StaticMethod("checked", &JSRadio::Checked);
-    JSClass<JSRadio>::StaticMethod("width", &JSRadio::JsWidth);
-    JSClass<JSRadio>::StaticMethod("height", &JSRadio::JsHeight);
     JSClass<JSRadio>::StaticMethod("size", &JSRadio::JsSize);
     JSClass<JSRadio>::StaticMethod("padding", &JSRadio::JsPadding);
     JSClass<JSRadio>::StaticMethod("radioStyle", &JSRadio::JsRadioStyle);
@@ -132,73 +130,16 @@ void JSRadio::Checked(const JSCallbackInfo& info)
     }
 }
 
-void JSRadio::JsWidth(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-
-    JsWidth(info[0]);
-}
-
-void JSRadio::JsWidth(const JSRef<JSVal>& jsValue)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
-    auto defaultWidth = radioTheme->GetDefaultWidth();
-    auto horizontalPadding = radioTheme->GetHotZoneHorizontalPadding();
-    auto width = defaultWidth - horizontalPadding * 2;
-    CalcDimension value(width);
-    ParseJsDimensionVp(jsValue, value);
-    if (value.IsNegative()) {
-        value = width;
-    }
-    RadioModel::GetInstance()->SetWidth(value);
-}
-
-void JSRadio::JsHeight(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-
-    JsHeight(info[0]);
-}
-
-void JSRadio::JsHeight(const JSRef<JSVal>& jsValue)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
-    auto defaultHeight = radioTheme->GetDefaultHeight();
-    auto verticalPadding = radioTheme->GetHotZoneVerticalPadding();
-    auto height = defaultHeight - verticalPadding * 2;
-    CalcDimension value(height);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVpNG(jsValue, value)) {
-            value = height;
-        }
-    } else {
-        ParseJsDimensionVp(jsValue, value);
-        if (value.IsNegative()) {
-            value = height;
-        }
-    }
-    RadioModel::GetInstance()->SetHeight(value);
-}
-
 void JSRadio::JsSize(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
+        JSViewAbstract::JsWidth(JSVal::Undefined());
+        JSViewAbstract::JsHeight(JSVal::Undefined());
         return;
     }
-
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    JsWidth(sizeObj->GetProperty("width"));
-    JsHeight(sizeObj->GetProperty("height"));
+    JSViewAbstract::JsWidth(sizeObj->GetProperty("width"));
+    JSViewAbstract::JsHeight(sizeObj->GetProperty("height"));
 }
 
 void JSRadio::JsPadding(const JSCallbackInfo& info)

@@ -125,6 +125,10 @@ bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
+const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
+const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
+const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
+const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const int32_t REQUEST_CODE = -1;
 
 using ContentFinishCallback = std::function<void()>;
@@ -590,7 +594,7 @@ void UIContentImpl::PreInitializeForm(OHOS::Rosen::Window* window, const std::st
         LOGI("[%{public}s][%{public}s][%{public}d]: CommonInitializeForm url = %{public}s", bundleName_.c_str(),
             moduleName_.c_str(), instanceId_, url.c_str());
         CommonInitializeForm(window, url, storage);
-        SystemProperties::AddWatchSystemParameter(this);
+        AddWatchSystemParameter();
     }
 }
 
@@ -607,7 +611,7 @@ void UIContentImpl::RunFormPage()
 
 UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
-    SystemProperties::AddWatchSystemParameter(this);
+    AddWatchSystemParameter();
     return InitializeInner(window, url, storage, false);
 }
 
@@ -617,7 +621,7 @@ UIContentErrorCode UIContentImpl::Initialize(
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, "", storage);
     CHECK_ERROR_CODE_RETURN(errorCode);
-    SystemProperties::AddWatchSystemParameter(this);
+    AddWatchSystemParameter();
     if (content) {
         LOGI("Initialize by buffer, size:%{public}zu", content->size());
         // run page.
@@ -635,7 +639,7 @@ UIContentErrorCode UIContentImpl::Initialize(
 UIContentErrorCode UIContentImpl::InitializeByName(
     OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
-    SystemProperties::AddWatchSystemParameter(this);
+    AddWatchSystemParameter();
     return InitializeInner(window, name, storage, true);
 }
 
@@ -649,7 +653,7 @@ void UIContentImpl::InitializeDynamic(
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
 
     CommonInitializeForm(nullptr, abcPath, nullptr);
-    SystemProperties::AddWatchSystemParameter(this);
+    AddWatchSystemParameter();
 
     LOGI("[%{public}s][%{public}s][%{public}d]: Initialize DynamicComponent startUrl "
          "= %{public}s, entryPoint = %{public}s",
@@ -665,7 +669,7 @@ void UIContentImpl::Initialize(
 {
     if (window) {
         CommonInitialize(window, url, storage);
-        SystemProperties::AddWatchSystemParameter(this);
+        AddWatchSystemParameter();
     }
     if (focusWindowId != 0) {
         LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension host window id:%{public}u", bundleName_.c_str(),
@@ -1684,7 +1688,14 @@ void UIContentImpl::UnFocus()
 void UIContentImpl::Destroy()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window destroy", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
-    SystemProperties::RemoveWatchSystemParameter(this);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_TRACE_LAYOUT_KEY, this, EnableSystemParameterTraceLayoutCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_SECURITY_DEVELOPERMODE_KEY, this, EnableSystemParameterSecurityDevelopermodeCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_DEBUG_STATEMGR_KEY, this, EnableSystemParameterDebugStatemgrCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_DEBUG_BOUNDARY_KEY, this, EnableSystemParameterDebugBoundaryCallback);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file
@@ -2837,5 +2848,63 @@ void UIContentImpl::UpdateTransform(const OHOS::Rosen::Transform& transform)
     auto windowScale = transform.scaleX_;
     taskExecutor->PostTask(
         [container, windowScale]() { container->SetWindowScale(windowScale); }, TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::RenderLayoutBoundary(bool isDebugBoundary)
+{
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [isDebugBoundary]() {
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto rootNode = pipeline->GetRootElement();
+            CHECK_NULL_VOID(rootNode);
+            rootNode->PaintDebugBoundaryTreeAll(isDebugBoundary);
+            pipeline->RequestFrame();
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SystemProperties::SetLayoutTraceEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void UIContentImpl::EnableSystemParameterSecurityDevelopermodeCallback(
+    const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void UIContentImpl::EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SystemProperties::SetStateManagerEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void UIContentImpl::EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context)
+{
+    bool isDebugBoundary = strcmp(value, "true") == 0;
+    SystemProperties::SetDebugBoundaryEnabled(isDebugBoundary);
+    auto that = reinterpret_cast<UIContentImpl*>(context);
+    that->RenderLayoutBoundary(isDebugBoundary);
+}
+
+void UIContentImpl::AddWatchSystemParameter()
+{
+    SystemProperties::AddWatchSystemParameter(ENABLE_TRACE_LAYOUT_KEY, this, EnableSystemParameterTraceLayoutCallback);
+    SystemProperties::AddWatchSystemParameter(
+        ENABLE_SECURITY_DEVELOPERMODE_KEY, this, EnableSystemParameterSecurityDevelopermodeCallback);
+    SystemProperties::AddWatchSystemParameter(
+        ENABLE_DEBUG_STATEMGR_KEY, this, EnableSystemParameterDebugStatemgrCallback);
+    SystemProperties::AddWatchSystemParameter(
+        ENABLE_DEBUG_BOUNDARY_KEY, this, EnableSystemParameterDebugBoundaryCallback);
 }
 } // namespace OHOS::Ace

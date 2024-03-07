@@ -311,18 +311,7 @@ void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
         };
 
         // Create parameters of UIExtension.
-        auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
-        std::map<std::string, std::string> params;
-        params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
-        params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
-        params.try_emplace("module", Container::Current()->GetModuleName());
-        if (missionId != -1) {
-            params.try_emplace("missionId", std::to_string(missionId));
-        }
-        params.try_emplace("ability.want.params.uiExtensionType", "sys/commonUI");
-        LOGI("BundleName: %{public}s, AbilityName: %{public}s, Module: %{public}s",
-            AceApplicationInfo::GetInstance().GetProcessName().c_str(),
-            AceApplicationInfo::GetInstance().GetAbilityName().c_str(), Container::Current()->GetModuleName().c_str());
+        std::map<std::string, std::string> params = CreateUIExtensionParams();
 
         // Create UIExtension node.
         auto appGalleryBundleName = OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName();
@@ -341,6 +330,23 @@ void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
     };
     overlayManager->BindContentCover(
         true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
+}
+
+std::map<std::string, std::string> AppBarView::CreateUIExtensionParams()
+{
+    auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
+    std::map<std::string, std::string> params;
+    params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
+    params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
+    params.try_emplace("module", Container::Current()->GetModuleName());
+    if (missionId != -1) {
+        params.try_emplace("missionId", std::to_string(missionId));
+    }
+    params.try_emplace("ability.want.params.uiExtensionType", "sys/commonUI");
+    LOGI("BundleName: %{public}s, AbilityName: %{public}s, Module: %{public}s",
+        AceApplicationInfo::GetInstance().GetProcessName().c_str(),
+        AceApplicationInfo::GetInstance().GetAbilityName().c_str(), Container::Current()->GetModuleName().c_str());
+    return params;
 }
 
 std::optional<RectF> AppBarView::GetAppBarRect()

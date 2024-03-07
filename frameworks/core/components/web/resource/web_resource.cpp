@@ -34,7 +34,7 @@ const char WEB_RESULT_FAIL[] = "fail";
 
 void WebResource::Release(const std::function<void(bool)>& onRelease)
 {
-    if (id_ == INVALID_ID) {
+    if (id_ == WEB_INVALID_ID) {
         return;
     }
     // TODO: add support for ng.
@@ -58,7 +58,7 @@ void WebResource::Release(const std::function<void(bool)>& onRelease)
         }
         bool ret = resRegister->ReleaseResource(webResource->hash_);
         if (ret) {
-            webResource->id_ = INVALID_ID;
+            webResource->id_ = WEB_INVALID_ID;
             webResource->hash_.clear();
         }
 

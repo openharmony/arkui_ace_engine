@@ -286,6 +286,15 @@ int32_t OH_NativeXComponent_RegisterSurfaceHideCallback(
     return component->RegisterSurfaceHideCallback(callback);
 }
 
+int32_t OH_NativeXComponent_RegisterOnTouchInterceptCallback(
+    OH_NativeXComponent* component, HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event))
+{
+    if ((component == nullptr) || (callback == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    return component->RegisterOnTouchInterceptCallback(callback);
+}
+
 #ifdef __cplusplus
 };
 #endif

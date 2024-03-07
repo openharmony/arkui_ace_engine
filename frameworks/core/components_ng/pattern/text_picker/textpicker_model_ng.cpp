@@ -222,6 +222,7 @@ RefPtr<FrameNode> TextPickerModelNG::CreateFrameNode(int32_t nodeId)
     CHECK_NULL_RETURN(pickerTheme, textPickerNode);
     showCount_ = BUFFER_NODE_NUMBER + pickerTheme->GetShowOptionCount();
     rangeValue_.clear();
+    SetDefaultAttributes(textPickerNode, pickerTheme);
     return textPickerNode;
 }
 

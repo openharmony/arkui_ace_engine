@@ -81,6 +81,8 @@ enum class HitTestMode {
     HTMTRANSPARENT_SELF,
 };
 
+using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
+
 enum class TouchTestStrategy {
     DEFAULT = 0,
     FORWARD_COMPETITION,
@@ -247,6 +249,10 @@ public:
 
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
 
+    void SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc);
+
+    TouchInterceptFunc GetOnTouchIntercept() const;
+
     void SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc);
 
     GestureJudgeFunc GetOnGestureJudgeBeginCallback() const
@@ -401,16 +407,7 @@ public:
         responseRegionFunc_ = func;
     }
 
-    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
-    {
-        responseRegion_ = responseRegion;
-        if (!responseRegion_.empty()) {
-            isResponseRegion_ = true;
-        }
-        if (responseRegionFunc_) {
-            responseRegionFunc_(responseRegion_);
-        }
-    }
+    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
 
     void SetOnTouchTestFunc(OnChildTouchTestFunc&& callback)
     {
@@ -440,21 +437,7 @@ public:
         }
     }
 
-    void RemoveLastResponseRect()
-    {
-        if (responseRegion_.empty()) {
-            isResponseRegion_ = false;
-            return;
-        }
-        responseRegion_.pop_back();
-        if (responseRegion_.empty()) {
-            isResponseRegion_ = false;
-        }
-
-        if (responseRegionFunc_) {
-            responseRegionFunc_(responseRegion_);
-        }
-    }
+    void RemoveLastResponseRect();
 
     bool GetTouchable() const
     {
@@ -651,6 +634,8 @@ private:
 
     GestureJudgeFunc gestureJudgeFunc_;
     GestureJudgeFunc gestureJudgeNativeFunc_;
+
+    TouchInterceptFunc touchInterceptFunc_;
 
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     bool textDraggable_ = false;

@@ -1411,8 +1411,8 @@ void CustomPaintPaintMethod::Arc(PaintWrapper* paintWrapper, const ArcParam& par
     RSPoint point1(left, top);
     RSPoint point2(right, bottom);
     if (!NearEqual(startAngle, endAngle) &&
-        (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) ||
-            NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), FULL_CIRCLE_ANGLE))) {
+        (NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), 0.0) ||
+            NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), FULL_CIRCLE_ANGLE))) {
         // draw circle
         double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
         rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
@@ -1511,8 +1511,8 @@ void CustomPaintPaintMethod::Ellipse(PaintWrapper* paintWrapper, const EllipsePa
         matrix.Rotate(-rotation, param.x + offset.GetX(), param.y + offset.GetY());
         rsPath_.Transform(matrix);
     }
-    if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) ||
-        NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), FULL_CIRCLE_ANGLE)) {
+    if (NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), 0.0) ||
+        NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), FULL_CIRCLE_ANGLE)) {
         double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
         rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
         rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
@@ -1694,14 +1694,17 @@ void CustomPaintPaintMethod::Path2DArc(const OffsetF& offset, const PathArgs& ar
     }
 #else
     if (!NearEqual(startAngle, endAngle) &&
-        (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) ||
-         NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), FULL_CIRCLE_ANGLE))) {
-        rsPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
-        rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
+        (NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), 0.0) ||
+         NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), FULL_CIRCLE_ANGLE))) {
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
     } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
-        rsPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
-        rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
-        rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE + HALF_CIRCLE_ANGLE, sweepAngle);
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
+        rsPath2d_.ArcTo(
+            point1, point2, static_cast<RSScalar>(half + half + startAngle), static_cast<RSScalar>(sweepAngle));
     } else {
         rsPath2d_.ArcTo(point1, point2, startAngle, sweepAngle);
     }
@@ -1775,14 +1778,17 @@ void CustomPaintPaintMethod::Path2DEllipse(const OffsetF& offset, const PathArgs
         matrix.Rotate(-rotation, x + offset.GetX(), y + offset.GetY());
         rsPath2d_.Transform(matrix);
     }
-    if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) ||
-        NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), FULL_CIRCLE_ANGLE)) {
-        rsPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
-        rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
+    if (NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), 0.0) ||
+        NearEqual(std::abs(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE)), FULL_CIRCLE_ANGLE)) {
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
     } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
-        rsPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
-        rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
-        rsPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE + HALF_CIRCLE_ANGLE, sweepAngle);
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        rsPath2d_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
+        rsPath2d_.ArcTo(
+            point1, point2, static_cast<RSScalar>(half + half + startAngle), static_cast<RSScalar>(sweepAngle));
     } else {
         rsPath2d_.ArcTo(point1, point2, startAngle, sweepAngle);
     }

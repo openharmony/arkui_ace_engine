@@ -1514,7 +1514,7 @@ void WebDelegate::CreatePluginResource(
 
         std::string param = paramStream.str();
         webDelegate->id_ = resRegister->CreateResource(WEB_CREATE, param);
-        if (webDelegate->id_ == INVALID_ID) {
+        if (webDelegate->id_ == WEB_INVALID_ID) {
             if (webDelegate->onError_) {
                 webDelegate->onError_(WEB_ERROR_CODE_CREATEFAIL, WEB_ERROR_MSG_CREATEFAIL);
             }
@@ -3537,6 +3537,53 @@ void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled)
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
                 if (setting) {
                     setting->SetNativeEmbedMode(isEmbedModeEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    tag_ = tag;
+    if (tag_.empty() || tag_type_.empty()) {
+        return;
+    }
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->RegisterNativeEmbedRule(delegate->tag_, delegate->tag_type_);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    tag_type_ = type;
+    if (tag_.empty() || tag_type_.empty()) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->RegisterNativeEmbedRule(delegate->tag_, delegate->tag_type_);
                 }
             }
         },
@@ -5630,11 +5677,17 @@ void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedT
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     if (touchEvent) {
-        TouchEvent event{touchEvent->GetId(), touchEvent->GetX(), touchEvent->GetY(), touchEvent->GetScreenX(),
-            touchEvent->GetScreenY(), static_cast<OHOS::Ace::TouchType>(touchEvent->GetType())};
+        TouchEvent event;
+        event.SetId(touchEvent->GetId())
+            .SetX(touchEvent->GetX())
+            .SetY(touchEvent->GetY())
+            .SetScreenX(touchEvent->GetScreenX())
+            .SetScreenY(touchEvent->GetScreenY())
+            .SetType(static_cast<OHOS::Ace::TouchType>(touchEvent->GetType()));
         webPattern->SetTouchEventInfo(event, touchEventInfo);
     } else {
-        TouchEvent event = {0, };
+        TouchEvent event;
+        event.SetId(0);
         webPattern->SetTouchEventInfo(event, touchEventInfo);
     }
 }
@@ -5657,7 +5710,8 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         auto embedInfo = dataInfo->GetNativeEmbedInfo();
         if (embedInfo) {
             info = {embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(),
-                embedInfo->GetUrl(), embedInfo->GetWidth(), embedInfo->GetHeight()};
+                embedInfo->GetUrl(), embedInfo->GetTag(), embedInfo->GetWidth(),
+                embedInfo->GetHeight(), embedInfo->GetParams()};
         }
     }
 

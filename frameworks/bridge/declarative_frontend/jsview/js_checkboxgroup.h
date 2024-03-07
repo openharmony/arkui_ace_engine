@@ -26,12 +26,8 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void SetSelectAll(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& args);
-    static void JsWidth(const JSCallbackInfo& info);
-    static void JsHeight(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsResponseRegion(const JSCallbackInfo& info);
-    static void JsWidth(const JSRef<JSVal>& jsValue);
-    static void JsHeight(const JSRef<JSVal>& jsValue);
     static void JsSize(const JSCallbackInfo& info);
     static void SelectedColor(const JSCallbackInfo& info);
     static void UnSelectedColor(const JSCallbackInfo& info);

@@ -52,9 +52,9 @@ type UIClassObject = { prototype: Object, pop?: () => void };
 class UpdateFuncRecord {
   private updateFunc_: UpdateFunc;
   private classObject_: UIClassObject;
-  private node_?: Object
+  private node_?: ArkComponent
 
-  constructor(params: { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: Object }) {
+  constructor(params: { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: ArkComponent }) {
     this.updateFunc_ = params.updateFunc;
     this.classObject_ = params.classObject;
     this.node_ = params.node;
@@ -76,11 +76,11 @@ class UpdateFuncRecord {
     return (this.classObject_ && "pop" in this.classObject_) ? this.classObject_.pop! : () => { };
   }
 
-  public getNode(): Object | undefined {
+  public getNode(): ArkComponent | undefined {
     return this.node_;
   }
 
-  public setNode(node: Object | undefined): void {
+  public setNode(node: ArkComponent | undefined): void {
     this.node_ = node;
   }
 }
@@ -956,6 +956,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
         _popFunc();
       }
 
+      let node = this.getNodeById(elmtId);
+      if (node !== undefined) {
+        (node as ArkComponent).cleanStageValue();
+      }
+
       if (ConfigureStateMgmt.instance.needsV3Observe()) {
         // FIXME dito
         ObserveV3.getObserve().startBind(null, -1);
@@ -1175,7 +1180,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const arr = itemArray; // just to trigger a 'get' onto the array
 
     // ID gen is with index.
-    if (idGenFuncUsesIndex) {
+    if (idGenFuncUsesIndex || idGenFunc.length > 1) {
       // Create array of new ids.
       arr.forEach((item, indx) => {
         newIdArray.push(idGenFunc(item, indx));
@@ -1287,7 +1292,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     return localStorageProp;
   }
 
-  public createOrGetNode(elmtId: number, builder: () => object): object {
+  public createOrGetNode(elmtId: number, builder: () => ArkComponent): object {
     const entry = this.updateFuncByElmtId.get(elmtId);
     if (entry === undefined) {
       throw new Error(`${this.debugInfo__()} fail to create node, elmtId is illegal`);
@@ -1298,6 +1303,16 @@ abstract class ViewPU extends NativeViewPartialUpdate
       entry.setNode(nodeInfo);
     }
     return nodeInfo;
+  }
+
+  /**
+   * getNodeById is used to get ArkComponent stored updateFuncByElmtId
+   * @param elmtId -  the id of the component
+   * @returns ArkComponent | undefined
+   */
+  public getNodeById(elmtId: number): ArkComponent | undefined {
+    const entry = this.updateFuncByElmtId.get(elmtId);
+    return entry ? entry.getNode() : undefined;
   }
 
   /**
@@ -1535,7 +1550,7 @@ class UpdateFuncsByElmtId {
     return this.map_.delete(elmtId);
   }
 
-  public set(elmtId: number, params: UpdateFunc | { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: Object }): void {
+  public set(elmtId: number, params: UpdateFunc | { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: ArkComponent }): void {
     (typeof params === 'object') ?
       this.map_.set(elmtId, new UpdateFuncRecord(params)) :
       this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params as UpdateFunc }));

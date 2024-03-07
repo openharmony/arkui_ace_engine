@@ -214,6 +214,24 @@ void JSVideo::JsOnFinish(const JSCallbackInfo& info)
     VideoModel::GetInstance()->SetOnFinish(std::move(onFinish));
 }
 
+void JSVideo::JsOnStop(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onStop = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const std::string& param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Video.onStop");
+        PipelineContext::SetCallBackNode(node);
+        std::vector<std::string> keys = { "stop" };
+        func->Execute(keys, param);
+    };
+    VideoModel::GetInstance()->SetOnStop(std::move(onStop));
+}
+
 void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -359,6 +377,7 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onSeeked", &JSVideo::JsOnSeeked);
     JSClass<JSVideo>::StaticMethod("onUpdate", &JSVideo::JsOnUpdate);
     JSClass<JSVideo>::StaticMethod("onError", &JSVideo::JsOnError);
+    JSClass<JSVideo>::StaticMethod("onStop", &JSVideo::JsOnStop);
 
     JSClass<JSVideo>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSVideo>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

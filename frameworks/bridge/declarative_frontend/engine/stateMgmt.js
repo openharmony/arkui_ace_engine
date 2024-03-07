@@ -5932,6 +5932,10 @@ class ViewPU extends NativeViewPartialUpdate {
             if (!isFirstRender) {
                 _popFunc();
             }
+            let node = this.getNodeById(elmtId);
+            if (node !== undefined) {
+                node.cleanStageValue();
+            }
             if (ConfigureStateMgmt.instance.needsV3Observe()) {
                 // FIXME dito
                 ObserveV3.getObserve().startBind(null, -1);
@@ -6123,7 +6127,7 @@ class ViewPU extends NativeViewPartialUpdate {
         let idDuplicates = [];
         const arr = itemArray; // just to trigger a 'get' onto the array
         // ID gen is with index.
-        if (idGenFuncUsesIndex) {
+        if (idGenFuncUsesIndex || idGenFunc.length > 1) {
             // Create array of new ids.
             arr.forEach((item, indx) => {
                 newIdArray.push(idGenFunc(item, indx));
@@ -6228,6 +6232,15 @@ class ViewPU extends NativeViewPartialUpdate {
             entry.setNode(nodeInfo);
         }
         return nodeInfo;
+    }
+    /**
+     * getNodeById is used to get ArkComponent stored updateFuncByElmtId
+     * @param elmtId -  the id of the component
+     * @returns object | undefined
+     */
+    getNodeById(elmtId) {
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        return entry ? entry.getNode() : undefined;
     }
     /**
      * onDumpInfo is used to process commands delivered by the hidumper process

@@ -94,7 +94,7 @@ RefPtr<FrameNode> ToggleButtonTestNg::CreateToggleButtonFrameNode(const TestProp
         toggleButtonModelNG.SetSelectedColor(testProperty.selectedColor.value());
     }
     if (testProperty.backgroundColor.has_value()) {
-        toggleButtonModelNG.SetBackgroundColor(testProperty.backgroundColor.value());
+        toggleButtonModelNG.SetBackgroundColor(testProperty.backgroundColor.value(), true);
     }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
@@ -381,7 +381,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest008, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     stack->Push(frameNode);
-    ToggleButtonModelNG::SetBackgroundColor(BACKGROUND_COLOR);
+    ToggleButtonModelNG::SetBackgroundColor(BACKGROUND_COLOR, true);
     auto context = frameNode->GetRenderContext();
     EXPECT_EQ(context->GetBackgroundColorValue(), BACKGROUND_COLOR);
 }

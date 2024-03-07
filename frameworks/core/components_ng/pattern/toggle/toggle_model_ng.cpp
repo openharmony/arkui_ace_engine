@@ -284,9 +284,9 @@ void ToggleModelNG::SetHeight(const Dimension& height)
     NG::ViewAbstract::SetHeight(NG::CalcLength(height));
 }
 
-void ToggleModelNG::SetBackgroundColor(const Color& color)
+void ToggleModelNG::SetBackgroundColor(const Color& color, bool flag)
 {
-    ToggleButtonModelNG::SetBackgroundColor(color);
+    ToggleButtonModelNG::SetBackgroundColor(color, flag);
 }
 
 bool ToggleModelNG::IsToggle()

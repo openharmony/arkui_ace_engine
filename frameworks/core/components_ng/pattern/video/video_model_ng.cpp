@@ -199,6 +199,15 @@ void VideoModelNG::SetOnUpdate(VideoEventFunc&& onUpdate)
     eventHub->SetOnUpdate(std::move(onUpdate));
 }
 
+void VideoModelNG::SetOnStop(VideoEventFunc&& onStop)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStop(std::move(onStop));
+}
+
 void VideoModelNG::SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

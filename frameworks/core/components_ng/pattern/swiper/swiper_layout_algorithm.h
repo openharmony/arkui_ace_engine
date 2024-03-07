@@ -282,7 +282,7 @@ private:
     bool HasCustomIndicatorOffset(const RefPtr<LayoutWrapper>& indicatorWrapper);
     const OffsetF CalculateCustomOffset(
         const RefPtr<LayoutWrapper>& indicatorWrapper, const OffsetF& currentOffset);
-    void CaptureMeasure(LayoutWrapper* layoutWrapper, const LayoutConstraintF& childLayoutConstraint);
+    void CaptureMeasure(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void CaptureLayout(LayoutWrapper* layoutWrapper);
     bool IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) const;
 

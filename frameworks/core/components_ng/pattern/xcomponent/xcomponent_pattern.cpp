@@ -15,14 +15,17 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
+#include "interfaces/native/native_event.h"
 #include "interfaces/native/ui_input_event.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/log/log_wrapper.h"
+#include "base/memory/ace_type.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/event/axis_event.h"
 #ifdef NG_BUILD
@@ -174,7 +177,7 @@ void XComponentPattern::Initialize(int32_t instanceId)
             controllerNG->SetPattern(AceType::Claim(this));
         }
         renderSurface_->InitSurface();
-        renderSurface_->UpdateXComponentConfig();
+        renderSurface_->UpdateSurfaceConfig();
         InitEvent();
         SetMethodCall();
     } else if (type_ == XComponentType::NODE) {
@@ -552,6 +555,7 @@ void XComponentPattern::InitEvent()
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitTouchEvent(gestureHub);
+    InitOnTouchIntercept(gestureHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     InitMouseEvent(inputHub);
     InitAxisEvent(inputHub);
@@ -649,6 +653,20 @@ void XComponentPattern::InitAxisEvent(const RefPtr<InputEventHub>& inputHub)
 
     axisEvent_ = MakeRefPtr<InputEvent>(std::move(axisTask));
     inputHub->AddOnAxisEvent(axisEvent_);
+}
+
+void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gestureHub)
+{
+    gestureHub->SetOnTouchIntercept(
+        [pattern = Claim(this)](
+            const TouchEventInfo& touchEvent) -> HitTestMode {
+            auto event = touchEvent.ConvertToTouchEvent();
+            auto* uiEvent = static_cast<ArkUI_UIInputEvent*>(&event);
+            CHECK_NULL_RETURN(uiEvent, NG::HitTestMode::HTMDEFAULT);
+            const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
+            CHECK_NULL_RETURN(onTouchInterceptCallback, NG::HitTestMode::HTMDEFAULT);
+            return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), uiEvent));
+        });
 }
 
 void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)

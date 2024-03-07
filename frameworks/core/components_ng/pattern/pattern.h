@@ -248,7 +248,7 @@ public:
         return true;
     }
 
-    virtual void UpdateScrollOffset(SizeF /* frameSize */) {}
+    virtual void UpdateSlideOffset(SizeF /* frameSize */) {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(

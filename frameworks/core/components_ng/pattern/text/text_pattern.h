@@ -565,6 +565,7 @@ protected:
     std::vector<RectF> dragBoxes_;
     std::map<std::pair<TextSpanType, TextResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
     std::optional<TextSpanType> selectedType_;
+    SourceType sourceType_ = SourceType::NONE;
 
     // properties for AI
     bool textDetectEnable_ = false;
@@ -607,6 +608,7 @@ private:
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
+    bool leftMousePressed_ = false;
     bool isCustomFont_ = false;
     bool blockPress_ = false;
     bool hasClicked_ = false;
