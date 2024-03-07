@@ -125,6 +125,9 @@ public:
     }
 
     int32_t GetIndexByUINode(const RefPtr<UINode>& uiNode) const;
+    void SetLazyStartIndex(int32_t start);
+    void SetLazyCount(int32_t count);
+    void RecycleItems(int32_t from, int32_t to);
 
 private:
     void OnAttachToMainTree(bool recursive) override
@@ -169,6 +172,8 @@ private:
     mutable bool needPredict_ = false;
     bool needMarkParent_ = true;
     bool isActive_ = true;
+    int32_t startIndex_ = 0;
+    int32_t count_ = 0;
 
     RefPtr<LazyForEachBuilder> builder_;
 

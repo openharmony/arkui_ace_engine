@@ -169,6 +169,11 @@ public:
             if (cursor_->startIndex + cursor_->count > index) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(
                     cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex, needBuild));
+                auto lazyNode = AceType::DynamicCast<LazyForEachNode>(cursor_->node);
+                if (lazyNode) {
+                    lazyNode->SetLazyStartIndex(cursor_->startIndex);
+                    lazyNode->SetLazyCount(cursor_->count);
+                }
                 return frameNode;
             }
             cursor_++;

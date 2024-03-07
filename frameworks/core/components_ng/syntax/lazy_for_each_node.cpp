@@ -256,6 +256,29 @@ int32_t LazyForEachNode::GetIndexByUINode(const RefPtr<UINode>& uiNode) const
     return -1;
 }
 
+void LazyForEachNode::SetLazyStartIndex(int32_t startIndex)
+{
+    startIndex_ = startIndex;
+}
+
+void LazyForEachNode::SetLazyCount(int32_t count)
+{
+    count_ = count;
+}
+
+void LazyForEachNode::RecycleItems(int32_t from, int32_t to)
+{
+    if (!builder_) {
+        return;
+    }
+    children_.clear();
+    for (auto index = from; index < to; index++) {
+        if (index >= startIndex_ && index < startIndex_ + count_) {
+            builder_->RecycleChildByIndex(index - startIndex_);
+        }
+    }
+}
+
 void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 {
     if (!builder_) {
