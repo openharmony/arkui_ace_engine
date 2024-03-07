@@ -1056,7 +1056,7 @@ bool RichEditorPattern::SetCaretPosition(int32_t pos)
 
 void RichEditorPattern::FireOnSelectionChange(const int32_t caretPosition)
 {
-    if (!textSelector_.SelectNothing() || caretPosition == caretPosition_) {
+    if (!textSelector_.SelectNothing() || caretPosition == caretPosition_ || !caretTwinkling_) {
         return;
     }
     FireOnSelectionChange(caretPosition, caretPosition);
@@ -1064,7 +1064,7 @@ void RichEditorPattern::FireOnSelectionChange(const int32_t caretPosition)
 
 void RichEditorPattern::FireOnSelectionChange(const TextSelector& selector)
 {
-    if (selector.SelectNothing()) {
+    if (selector.SelectNothing() || caretTwinkling_) {
         return;
     }
     FireOnSelectionChange(selector.GetStart(), selector.GetEnd());
@@ -1749,7 +1749,9 @@ void RichEditorPattern::HandleFocusEvent()
     }
     dataDetectorAdapter_->CancelAITask();
     UseHostToUpdateTextFieldManager();
-    StartTwinkling();
+    if (textSelector_.SelectNothing()) {
+        StartTwinkling();
+    }
     if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Handle Focus Event, Request keyboard.");
         RequestKeyboard(false, true, true);
@@ -1889,6 +1891,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
             selectOverlayProxy_.Reset();
         }
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        FireOnSelectionChange(selectStart, selectEnd);
         StopTwinkling();
     } else if (selectStart == selectEnd) {
         StartTwinkling();
@@ -2884,7 +2887,7 @@ std::wstring RichEditorPattern::DeleteForwardOperation(int32_t length)
 {
     if (textSelector_.IsValid()) {
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-        SetCaretPosition(textSelector_.GetTextStart());
+        caretPosition_ = textSelector_.GetTextStart();
         CloseSelectOverlay();
         ResetSelection();
     }
