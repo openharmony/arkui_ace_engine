@@ -479,7 +479,10 @@ class FrameNode {
         if (node.type_ === 'ArkTsNode') {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
-        getUINativeModule().frameNode.appendChild(this.nodePtr_, node.nodePtr_);
+        let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, node.nodePtr_);
+        if (!flag) {
+            throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+        }
     }
     insertChildAfter(child, sibling) {
         this.checkType();
@@ -489,11 +492,15 @@ class FrameNode {
         if (child.type_ === 'ArkTsNode') {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
+        let flag = true;
         if (sibling === undefined || sibling === null) {
-            getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, null);
+            flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, null);
         }
         else {
-            getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, sibling.nodePtr_);
+            flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, sibling.nodePtr_);
+        }
+        if (!flag) {
+            throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
     }
     removeChild(node) {

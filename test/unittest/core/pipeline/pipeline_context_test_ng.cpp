@@ -3005,11 +3005,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg066, TestSize.Level1)
     auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
     auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
     std::vector<TouchEvent> history;
-    history.push_back(TouchEvent { .x = 100.0f, .y = 200.0f, .time = timeStampAce });
-    history.push_back(TouchEvent { .x = 150.0f, .y = 250.0f, .time = timeStampTwo });
+    history.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
+    history.push_back(TouchEvent {}.SetX(150.0f).SetY(250.0f).SetTime(timeStampTwo));
     std::vector<TouchEvent> current;
-    current.push_back(TouchEvent { .x = 200.0f, .y = 300.0f, .time = timeStampThree });
-    current.push_back(TouchEvent { .x = 250.0f, .y = 350.0f, .time = timeStampFour });
+    current.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampThree));
+    current.push_back(TouchEvent {}.SetX(250.0f).SetY(350.0f).SetTime(timeStampFour));
 
     auto resampledCoord = context_->GetResampleCoord(history, current, 2500, true);
 
@@ -3043,8 +3043,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg068, TestSize.Level1)
     auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
     auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
     std::vector<TouchEvent> current;
-    current.push_back(TouchEvent { .x = 100.0f, .y = 200.0f, .time = timeStampAce });
-    current.push_back(TouchEvent { .x = 150.0f, .y = 250.0f, .time = timeStampTwo });
+    current.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
+    current.push_back(TouchEvent {}.SetX(150.0f).SetY(250.0f).SetTime(timeStampTwo));
     uint64_t nanoTimeStamp = 1500;
 
     TouchEvent latestPoint = context_->GetLatestPoint(current, nanoTimeStamp);
@@ -3065,11 +3065,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg069, TestSize.Level1)
     auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
     auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
     std::vector<TouchEvent> history;
-    history.push_back(TouchEvent { .x = 100.0f, .y = 200.0f, .time = timeStampAce });
-    history.push_back(TouchEvent { .x = 150.0f, .y = 250.0f, .time = timeStampTwo });
+    history.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
+    history.push_back(TouchEvent {}.SetX(150.0f).SetY(250.0f).SetTime(timeStampTwo));
     std::vector<TouchEvent> current;
-    current.push_back(TouchEvent { .x = 200.0f, .y = 300.0f, .time = timeStampThree });
-    current.push_back(TouchEvent { .x = 250.0f, .y = 350.0f, .time = timeStampFour });
+    current.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampThree));
+    current.push_back(TouchEvent {}.SetX(250.0f).SetY(350.0f).SetTime(timeStampFour));
     uint64_t nanoTimeStamp = 2500;
 
     TouchEvent resampledTouchEvent = context_->GetResampleTouchEvent(history, current, nanoTimeStamp);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -824,6 +824,13 @@ void ViewAbstract::SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc)
     gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
 }
 
+void ViewAbstract::SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchIntercept(std::move(touchInterceptFunc));
+}
+
 void ViewAbstract::SetOnTouch(TouchEventFunc &&touchEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -1404,11 +1411,20 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     }
     if (isShow) {
         if (popupInfo.isCurrentOnShow != isShow) {
-            overlayManager->ShowPopup(targetId, popupInfo);
+            overlayManager->ShowPopup(targetId, popupInfo, param->GetOnWillDismiss(), param->GetInteractiveDismiss());
         }
     } else {
         overlayManager->HidePopup(targetId, popupInfo);
     }
+}
+
+void ViewAbstract::DismissPopup()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->DismissPopup();
 }
 
 void ViewAbstract::DismissDialog()

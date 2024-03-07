@@ -35,10 +35,8 @@ public:
         JsFunction::Execute();
     }
     void Execute(TouchEventInfo& info);
-
-private:
-    JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info);
-    JSRef<JSObject> CreateJSEventInfo(TouchEventInfo& info);
+    static JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info);
+    static JSRef<JSObject> CreateJSEventInfo(TouchEventInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

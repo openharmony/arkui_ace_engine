@@ -1019,6 +1019,16 @@ void GestureEventHub::SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc
     gestureJudgeFunc_ = std::move(gestureJudgeFunc);
 }
 
+void GestureEventHub::SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc)
+{
+    touchInterceptFunc_ = std::move(touchInterceptFunc);
+}
+
+TouchInterceptFunc GestureEventHub::GetOnTouchIntercept() const
+{
+    return touchInterceptFunc_;
+}
+
 void GestureEventHub::SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc)
 {
     gestureJudgeNativeFunc_ = std::move(gestureJudgeFunc);
@@ -1372,4 +1382,31 @@ RefPtr<UnifiedData> GestureEventHub::GetUnifiedData(const std::string& frameTag,
     }
     return unifiedData;
 }
+
+void GestureEventHub::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
+{
+    responseRegion_ = responseRegion;
+    if (!responseRegion_.empty()) {
+        isResponseRegion_ = true;
+    }
+    if (responseRegionFunc_) {
+        responseRegionFunc_(responseRegion_);
+    }
+}
+
+void GestureEventHub::RemoveLastResponseRect()
+    {
+        if (responseRegion_.empty()) {
+            isResponseRegion_ = false;
+            return;
+        }
+        responseRegion_.pop_back();
+        if (responseRegion_.empty()) {
+            isResponseRegion_ = false;
+        }
+
+        if (responseRegionFunc_) {
+            responseRegionFunc_(responseRegion_);
+        }
+    }
 } // namespace OHOS::Ace::NG

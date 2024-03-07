@@ -772,6 +772,7 @@ private:
     void DumpSafeAreaInfo();
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -808,6 +809,10 @@ private:
     const std::pair<uint64_t, OffsetF>& GetCachedTransformRelativeOffset() const;
 
     void SetCachedTransformRelativeOffset(const std::pair<uint64_t, OffsetF>& timestampOffset);
+
+    HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
+
+    void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -885,6 +890,13 @@ private:
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
     std::pair<uint64_t, OffsetF> cachedTransformRelativeOffset_ = { 0, OffsetF() };
+
+    struct onSizeChangeDumpInfo {
+        int64_t onSizeChangeTimeStamp;
+        RectF lastFrameRect;
+        RectF currFrameRect;
+    };
+    std::vector<onSizeChangeDumpInfo> onSizeChangeDumpInfos;
 
     friend class RosenRenderContext;
     friend class RenderContext;

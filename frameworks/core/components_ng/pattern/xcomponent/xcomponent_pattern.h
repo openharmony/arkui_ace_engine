@@ -280,6 +280,7 @@ private:
     void InitNativeNodeCallbacks();
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitOnTouchIntercept(const RefPtr<GestureEventHub>& gestureHub);
     void InitAxisEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);

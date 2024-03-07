@@ -217,19 +217,20 @@ bool Inspector::SendEventByKey(
             if (!context) {
                 return;
             }
-
-            TouchEvent point { .x = static_cast<float>(rect.Left() + rect.Width() / 2),
-                .y = static_cast<float>(rect.Top() + rect.Height() / 2),
-                .type = TouchType::DOWN,
-                .time = std::chrono::high_resolution_clock::now() };
+            TouchEvent point;
+            point.SetX(static_cast<float>(rect.Left() + rect.Width() / 2))
+                .SetY(static_cast<float>(rect.Top() + rect.Height() / 2))
+                .SetType(TouchType::DOWN)
+                .SetTime(std::chrono::high_resolution_clock::now());
             context->OnTouchEvent(point);
 
             switch (action) {
                 case static_cast<int>(AceAction::ACTION_CLICK): {
-                    TouchEvent upPoint { .x = point.x,
-                        .y = point.y,
-                        .type = TouchType::UP,
-                        .time = std::chrono::high_resolution_clock::now() };
+                    TouchEvent upPoint;
+                    upPoint.SetX(point.x)
+                        .SetY(point.y)
+                        .SetType(TouchType::UP)
+                        .SetTime(std::chrono::high_resolution_clock::now());
                     context->OnTouchEvent(upPoint);
                     break;
                 }
@@ -238,10 +239,11 @@ bool Inspector::SendEventByKey(
                     auto&& callback = [weak, point]() {
                         auto refPtr = weak.Upgrade();
                         if (refPtr) {
-                            TouchEvent upPoint { .x = point.x,
-                                .y = point.y,
-                                .type = TouchType::UP,
-                                .time = std::chrono::high_resolution_clock::now() };
+                            TouchEvent upPoint;
+                            upPoint.SetX(point.x)
+                                .SetY(point.y)
+                                .SetType(TouchType::UP)
+                                .SetTime(std::chrono::high_resolution_clock::now());
                             refPtr->OnTouchEvent(upPoint);
                         }
                     };

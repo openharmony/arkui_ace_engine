@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -765,6 +765,11 @@ public:
         ViewAbstract::SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
     }
 
+    void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override
+    {
+        ViewAbstract::SetOnTouchIntercept(std::move(touchInterceptFunc));
+    }
+
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override
     {
         ViewAbstract::SetOnTouch(std::move(touchEventFunc));
@@ -1013,6 +1018,11 @@ public:
     void DismissDialog() override
     {
         ViewAbstract::DismissDialog();
+    }
+
+    void DismissPopup() override
+    {
+        ViewAbstract::DismissPopup();
     }
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;

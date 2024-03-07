@@ -78,11 +78,11 @@ class MonitorV3 {
   private analysisPath(isInit: boolean): Object | undefined {
     let obj = this.target_;
     for (const prop of this.props_) {
-      if (Reflect.has(obj, prop)) {
+      if (typeof obj=="object" && Reflect.has(obj, prop)) {
         obj = obj[prop]
       } else {
         // FIXME change to stateMgmtConsole.applicationError
-        isInit && console.log(`@monitor("${this.props_.join(".")}"): path does not exist, make sure it exist. Application error, ignoring @MonitorV3!`)
+        isInit && stateMgmtConsole.warn(`@monitor("${this.props_.join(".")}"): path currently does not exist (can be ok when monitoring union type values)`)
         return undefined
       }
     }
@@ -91,9 +91,10 @@ class MonitorV3 {
 }
 
 /**
- * @monitor("varibale.path.expression") function decorator
+ * @monitor("variable.path.expression") function decorator
  */
-/* const monitor = function (key) {
+/*
+ const monitor = function (key) {
   return function (target, _, descriptor) {
     let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + target.constructor.name)
     target[watchProp] ? target[watchProp][key] = descriptor.value : target[watchProp] = { [key]: descriptor.value }
@@ -116,5 +117,6 @@ class AsyncAddMonitorV3 {
     for (let item of AsyncAddMonitorV3.watches) {
       ObserveV3.getObserve().constructMonitor(item[0], item[1])
     }
+    AsyncAddMonitorV3.watches=[];
   }
 }

@@ -35,6 +35,7 @@ struct ListItemInfo {
     float startPos;
     float endPos;
     bool isGroup;
+    bool isPressed = false;
 };
 
 struct ListPredictLayoutParam {

@@ -83,7 +83,7 @@ const int32_t DURATION = 100;
 
 struct CreateWithPara createWithPara = { std::make_optional(true), std::make_optional(CREATE_VALUE),
     std::make_optional(true), std::make_optional(ButtonType::CAPSULE), std::make_optional(true), std::nullopt,
-    std::nullopt };
+    std::nullopt, std::nullopt };
 } // namespace
 
 struct TestProperty {
@@ -97,6 +97,7 @@ struct TestProperty {
     std::optional<Dimension> borderRadius = std::nullopt;
     std::optional<ButtonStyleMode> buttonStyle = std::nullopt;
     std::optional<ControlSize> controlSize = std::nullopt;
+    std::optional<ButtonRole> buttonRole = std::nullopt;
 };
 
 struct LableStyleProperty {
@@ -133,10 +134,19 @@ void ButtonTestNg::SetUpTestCase()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     buttonTheme->height_ = DEFAULT_HEIGTH;
-    buttonTheme->bgColorMap_.emplace(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::EMPHASIZE, Color::RED));
-    buttonTheme->bgColorMap_.emplace(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::NORMAL, Color::GRAY));
-    buttonTheme->textColorMap_.emplace(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::EMPHASIZE, Color::BLACK));
-    buttonTheme->textColorMap_.emplace(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::NORMAL, Color::BLUE));
+
+    std::unordered_map<ButtonStyleMode, Color> normalBgColorMap_ = { { ButtonStyleMode::EMPHASIZE, Color::RED },
+        { ButtonStyleMode::NORMAL, Color::GRAY }, { ButtonStyleMode::TEXT, Color::BLUE } };
+    std::unordered_map<ButtonStyleMode, Color> errorBgColorMap_ = { { ButtonStyleMode::EMPHASIZE, Color::WHITE },
+        { ButtonStyleMode::NORMAL, Color::GRAY }, { ButtonStyleMode::TEXT, Color::BLUE } };
+    buttonTheme->bgColorMap_.emplace(ButtonRole::NORMAL, normalBgColorMap_);
+    buttonTheme->bgColorMap_.emplace(ButtonRole::ERROR, errorBgColorMap_);
+    buttonTheme->textColorMap_.insert(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::EMPHASIZE, Color::BLACK));
+    buttonTheme->textColorMap_.insert(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::NORMAL, Color::BLUE));
+    buttonTheme->textColorMap_.insert(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::TEXT, Color::WHITE));
+    buttonTheme->textColorByRoleMap_.insert(std::pair<ButtonRole, Color>(ButtonRole::NORMAL, Color::BLACK));
+    buttonTheme->textColorByRoleMap_.insert(std::pair<ButtonRole, Color>(ButtonRole::ERROR, Color::RED));
+
     buttonTheme->heightMap_.emplace(std::pair<ControlSize, Dimension>(ControlSize::SMALL, DEFAULT_HEIGTH));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 }
@@ -257,6 +267,9 @@ RefPtr<FrameNode> ButtonTestNg::CreateLabelButtonParagraph(
     }
     if (testProperty.controlSize.has_value()) {
         buttonModelNG.SetControlSize(testProperty.controlSize.value());
+    }
+    if (testProperty.buttonRole.has_value()) {
+        buttonModelNG.SetRole(testProperty.buttonRole.value());
     }
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     return AceType::DynamicCast<FrameNode>(element);
@@ -1288,6 +1301,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest023, TestSize.Level1)
     TestProperty testProperty;
     testProperty.buttonStyle = ButtonStyleMode::EMPHASIZE;
     testProperty.controlSize = ControlSize::SMALL;
+    testProperty.buttonRole = ButtonRole::NORMAL;
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1301,6 +1315,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest023, TestSize.Level1)
     ASSERT_NE(buttonLayoutProperty, nullptr);
     EXPECT_EQ(buttonLayoutProperty->GetButtonStyleValue(), ButtonStyleMode::EMPHASIZE);
     EXPECT_EQ(buttonLayoutProperty->GetControlSizeValue(), ControlSize::SMALL);
+    EXPECT_EQ(buttonLayoutProperty->GetButtonRoleValue(), ButtonRole::NORMAL);
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     EXPECT_EQ(renderContext->GetBackgroundColor(), Color::RED);
@@ -1322,6 +1337,40 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest023, TestSize.Level1)
     buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Height(), DEFAULT_HEIGTH.ConvertToPx());
+}
+
+/**
+ * @tc.name: ButtonPatternTest024
+ * @tc.desc: Test ButtonStyle 、 ControlSize and ButtonRle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode
+     */
+    TestProperty testProperty;
+    testProperty.buttonStyle = ButtonStyleMode::EMPHASIZE;
+    testProperty.controlSize = ControlSize::NORMAL;
+    testProperty.buttonRole = ButtonRole::ERROR;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test button style control size and button role
+     * @tc.expected: step2. button style control size and button role is set correct
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto buttonLayoutProperty = buttonPattern->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    EXPECT_EQ(buttonLayoutProperty->GetButtonStyleValue(), ButtonStyleMode::EMPHASIZE);
+    EXPECT_EQ(buttonLayoutProperty->GetControlSizeValue(), ControlSize::NORMAL);
+    EXPECT_EQ(buttonLayoutProperty->GetButtonRoleValue(), ButtonRole::ERROR);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::WHITE);
+    EXPECT_EQ(renderContext->GetForegroundColor(), Color::BLACK);
 }
 
 /**

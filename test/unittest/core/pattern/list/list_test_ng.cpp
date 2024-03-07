@@ -483,8 +483,8 @@ AssertionResult ListTestNg::VerifyGroupItemPosition(
     }
     for (int32_t index = 0; index < viewItemNumber; index++) {
         int32_t itemIndex = index;
-        float startPos = itemPosition[itemIndex].first;
-        float endPos = itemPosition[itemIndex].second;
+        float startPos = itemPosition[itemIndex].startPos;
+        float endPos = itemPosition[itemIndex].endPos;
         float expectStartPos = (index / lanes) * itemSpaceLength + startOffset;
         float expectEndPos = expectStartPos + itemMainLength;
         if (!NearEqual(startPos, expectStartPos) || !NearEqual(endPos, expectEndPos)) {

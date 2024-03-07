@@ -31,6 +31,7 @@ struct CreateWithPara {
     std::optional<bool> stateEffect;
     std::optional<ButtonStyleMode> buttonStyleMode;
     std::optional<ControlSize> controlSize;
+    std::optional<ButtonRole> buttonRole;
 };
 
 struct ButtonParameters {

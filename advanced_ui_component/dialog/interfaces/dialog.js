@@ -28,8 +28,12 @@ const DIVIDER_CONTAINER_WIDTH = 16;
 const DIVIDER_HEIGHT = 24;
 const DIVIDER_WIDTH = 2;
 const LOADING_PROGRESS_WIDTH = 40;
-const LOADING_PROGRESS_HEIGHT = 48;
+const LOADING_PROGRESS_HEIGHT = 40;
 const ITEM_TEXT_SIZE = 14;
+const LOADING_MAX_LINES = 10;
+const LOADING_TEXT_LAYOUT_WEIGHT = 1;
+const LOADING_TEXT_MARGIN_LEFT = 12;
+const LOADING_MIN_HEIGHT = 48;
 
 export class TipsDialog extends ViewPU {
   constructor(e, o, t, r = -1) {
@@ -1422,128 +1426,6 @@ export class AlertDialog extends ViewPU {
     }
 }
 
-export class LoadingDialog extends ViewPU {
-  constructor(e, o, t, r = -1) {
-    super(e, t, r);
-    this.controller = void 0;
-    this.content = '';
-    this.setInitiallyProvidedValue(o);
-  }
-
-  setInitiallyProvidedValue(e) {
-    void 0 !== e.controller && (this.controller = e.controller);
-    void 0 !== e.content && (this.content = e.content);
-  }
-
-  updateStateVars(e) {
-  }
-
-  purgeVariableDependenciesOnElmtId(e) {
-  }
-
-  aboutToBeDeleted() {
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-
-  setController(e) {
-    this.controller = e;
-  }
-
-  initialRender() {
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Column.create();
-      Column.backgroundBlurStyle(BlurStyle.Thick);
-      Column.borderRadius({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_corner_radius_dialog'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Column.margin({
-        left: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_start'],
-          bundleName: '',
-          moduleName: ''
-        },
-        right: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_end'],
-          bundleName: '',
-          moduleName: ''
-        },
-        bottom: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_bottom'],
-          bundleName: '',
-          moduleName: ''
-        }
-      });
-      Column.backgroundColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_dialog_bg'],
-        bundleName: '',
-        moduleName: ''
-      });
-      o || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.margin({ left: 24, right: 24, top: 24, bottom: 24 });
-      Row.constraintSize({ minHeight: 48 });
-      o || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Text.create(this.content);
-      Text.fontSize({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_body1'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Text.fontWeight(FontWeight.Medium);
-      Text.fontColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_text_primary'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Text.layoutWeight(1);
-      o || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    Text.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      LoadingProgress.create();
-      LoadingProgress.width(LOADING_PROGRESS_WIDTH);
-      LoadingProgress.height(LOADING_PROGRESS_HEIGHT);
-      LoadingProgress.margin({ left: 16 });
-      o || LoadingProgress.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    Row.pop();
-    Column.pop();
-  }
-
-  rerender() {
-    this.updateDirtyElements();
-  }
-}
-
 if (!("finalizeConstruction" in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
@@ -2231,6 +2113,127 @@ function getNumberByResource(a) {
     let d = b.message;
     hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResource error, code: ${c}, message: ${d}`);
     return 0;
+  }
+}
+
+export class LoadingDialog extends ViewPU {
+  constructor(b1, c1, d1, e1 = -1, f1 = undefined, g1) {
+      super(b1, d1, e1, g1);
+      if (typeof f1 === 'function') {
+          this.paramsGenerator_ = f1;
+      }
+      this.controller = undefined;
+      this.content = '';
+      this.setInitiallyProvidedValue(c1);
+      this.finalizeConstruction();
+  }
+  setInitiallyProvidedValue(a1) {
+      if (a1.controller !== undefined) {
+          this.controller = a1.controller;
+      }
+      if (a1.content !== undefined) {
+          this.content = a1.content;
+      }
+  }
+  updateStateVars(z) {
+  }
+  purgeVariableDependenciesOnElmtId(y) {
+  }
+  aboutToBeDeleted() {
+      SubscriberManager.Get().delete(this.id__());
+      this.aboutToBeDeletedInternal();
+  }
+  setController(x) {
+      this.controller = x;
+  }
+  initialRender() {
+      this.observeComponentCreation((v, w) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(v);
+          Column.create();
+          if (!w) {
+              Column.pop();
+          }
+          ViewStackProcessor.StopGetAccessRecording();
+      });
+      {
+          this.observeComponentCreation((p, q) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(p);
+              if (q) {
+                  let r = new CustomDialogContentComponent(this, {
+                      controller: this.controller,
+                      contentBuilder: () => {
+                          this.contentBuilder();
+                      },
+                  }, undefined, p, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 758 });
+                  ViewPU.create(r);
+                  let s = () => {
+                      return {
+                          controller: this.controller,
+                          contentBuilder: () => {
+                              this.contentBuilder();
+                          }
+                      };
+                  };
+                  r.paramsGenerator_ = s;
+              }
+              else {
+                  this.updateStateVarsOfChildByElmtId(p, {});
+              }
+              ViewStackProcessor.StopGetAccessRecording();
+          });
+      }
+      Column.pop();
+  }
+  contentBuilder(a = null) {
+      this.observeComponentCreation((l, m) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(l);
+          Column.create();
+          if (!m) {
+              Column.pop();
+          }
+          ViewStackProcessor.StopGetAccessRecording();
+      });
+      this.observeComponentCreation((j, k) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(j);
+          Row.create();
+          Row.constraintSize({ minHeight: LOADING_MIN_HEIGHT });
+          if (!k) {
+              Row.pop();
+          }
+          ViewStackProcessor.StopGetAccessRecording();
+      });
+      this.observeComponentCreation((h, i) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(h);
+          Text.create(this.content);
+          Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '', 'moduleName': '' });
+          Text.fontWeight(FontWeight.Regular);
+          Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '', 'moduleName': '' });
+          Text.layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT);
+          Text.maxLines(LOADING_MAX_LINES);
+          Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+          if (!i) {
+              Text.pop();
+          }
+          ViewStackProcessor.StopGetAccessRecording();
+      });
+      Text.pop();
+      this.observeComponentCreation((f, g) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(f);
+          LoadingProgress.create();
+          LoadingProgress.color({ 'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'], 'bundleName': '', 'moduleName': '' });
+          LoadingProgress.width(LOADING_PROGRESS_WIDTH);
+          LoadingProgress.height(LOADING_PROGRESS_HEIGHT);
+          LoadingProgress.margin({ left: LOADING_TEXT_MARGIN_LEFT });
+          if (!g) {
+              LoadingProgress.pop();
+          }
+          ViewStackProcessor.StopGetAccessRecording();
+      });
+      Row.pop();
+      Column.pop();
+  }
+  rerender() {
+      this.updateDirtyElements();
   }
 }
 

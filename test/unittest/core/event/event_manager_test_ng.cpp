@@ -1267,7 +1267,8 @@ HWTEST_F(EventManagerTestNg, EventManagerTest025, TestSize.Level1)
     touchTestResults.push_back(AceType::MakeRefPtr<MockTouchEventTarget>());
     eventManager->touchTestResults_.emplace(resultId, touchTestResults);
 
-    TouchEvent event { .id = resultId };
+    TouchEvent event {};
+    event.id = resultId;
     std::list<TouchEvent> touchEvents { event };
     eventManager->FlushTouchEventsBegin(touchEvents);
     EXPECT_NE(eventManager->touchTestResults_.find(event.id), eventManager->touchTestResults_.end());
@@ -1292,7 +1293,8 @@ HWTEST_F(EventManagerTestNg, EventManagerTest026, TestSize.Level1)
     touchTestResults.push_back(AceType::MakeRefPtr<MockTouchEventTarget>());
     eventManager->touchTestResults_.emplace(resultId, touchTestResults);
 
-    TouchEvent event { .id = resultId };
+    TouchEvent event {};
+    event.id = resultId;
     std::list<TouchEvent> touchEvents { event };
     eventManager->FlushTouchEventsEnd(touchEvents);
     EXPECT_NE(eventManager->touchTestResults_.find(event.id), eventManager->touchTestResults_.end());

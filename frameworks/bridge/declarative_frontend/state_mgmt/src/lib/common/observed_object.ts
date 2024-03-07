@@ -56,13 +56,23 @@
 // define just once to get just one Symbol
 const __IS_OBSERVED_PROXIED = Symbol("_____is_observed_proxied__");
 
-function Observed(constructor_: any, _?: any): any {
-  stateMgmtConsole.debug(`@Observed class decorator: Overwriting constructor for '${constructor_.name}', gets wrapped inside ObservableObject proxy.`);
-  let ObservedClass = class extends constructor_ {
+type Constructor = { new(...args: any[]): any };
+
+function Observed<T extends Constructor>(BaseClass: T): Constructor {
+  stateMgmtConsole.debug(`@Observed class decorator: Overwriting constructor for '${BaseClass.name}', gets wrapped inside ObservableObject proxy.`);
+
+  // prevent use of V3 @track inside V2 @Observed class
+  if (BaseClass.prototype && Reflect.has(BaseClass.prototype, ObserveV3.SYMBOL_REFS)) {
+    const error = `'@Observed class ${BaseClass?.name}': invalid use of V3 @track decorator inside V2 @Observed class. Need to fix class definition to use @Track.`;
+    stateMgmtConsole.error(error);
+    throw new Error(error);
+  }
+
+  return class extends BaseClass {
     constructor(...args: any) {
       super(...args);
-      stateMgmtConsole.debug(`@Observed '${constructor_.name}' modified constructor.`);
-      ConfigureStateMgmt.instance.intentUsingV2(`@Observed`, constructor_.name);
+      stateMgmtConsole.debug(`@Observed '${BaseClass.name}' modified constructor.`);
+      ConfigureStateMgmt.instance.intentUsingV2(`@Observed`, BaseClass.name);
       let isProxied = Reflect.has(this, __IS_OBSERVED_PROXIED);
       Object.defineProperty(this, __IS_OBSERVED_PROXIED, {
         value: true,
@@ -71,21 +81,15 @@ function Observed(constructor_: any, _?: any): any {
         writable: false
       });
       if (isProxied) {
-        stateMgmtConsole.debug(`   ... new '${constructor_.name}', is proxied already`);
+        stateMgmtConsole.debug(`   ... new '${BaseClass.name}', is proxied already`);
         return this;
       } else {
-        stateMgmtConsole.debug(`   ... new '${constructor_.name}', wrapping inside ObservedObject proxy`);
+        stateMgmtConsole.debug(`   ... new '${BaseClass.name}', wrapping inside ObservedObject proxy`);
         return ObservedObject.createNewInternal(this, undefined);
       }
     }
   };
-  return ObservedClass;
 }
-
-// force tsc to generate the __decorate data structure needed for @Observed
-// tsc will not generate unless the @Observed class decorator is used at least once
-@Observed class __IGNORE_FORCE_decode_GENERATION__ { }
-
 
 /**
  * class ObservedObject and supporting Handler classes, 
@@ -194,6 +198,11 @@ class SubscribableHandler {
         break;
       case SubscribableHandler.COUNT_SUBSCRIBERS:
         return this.owningProperties_.size
+        break;
+      case ObserveV3.SYMBOL_REFS:
+      case ObserveV3.V3_DECO_META:
+        // return result unmonitored
+        return Reflect.get(target, property, receiver);
         break;
       default:
         const result = Reflect.get(target, property, receiver);
