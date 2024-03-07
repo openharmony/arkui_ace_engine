@@ -803,6 +803,8 @@ public:
         }
     }
 
+    void OnDataBulkAdded(size_t index, size_t count) override {};
+
     void OnDataDeleted(size_t index) override
     {
         LOGI("OnDataDeleted(%{public}zu)", index);
@@ -847,6 +849,8 @@ public:
             host->OnDataSourceUpdated(startIndex_ + index);
         }
     }
+
+    void OnDataBulkDeleted(size_t index, size_t count) override {};
 
     void OnDataChanged(size_t index) override
     {
