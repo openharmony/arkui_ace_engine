@@ -955,6 +955,11 @@ void TextFieldPattern::HandleBlurEvent()
     CHECK_NULL_VOID(context);
     UpdateBlurReason();
     if (!context->GetOnFoucs()) {
+        needToRequestKeyboardInner_ = false;
+        if ((customKeyboardBuilder_ && isCustomKeyboardAttached_)) {
+            CloseKeyboard(true);
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFieldPattern Blur, Close Keyboard.");
+        }
         StopTwinkling();
         return;
     }
