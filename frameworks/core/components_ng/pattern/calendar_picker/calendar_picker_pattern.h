@@ -171,6 +171,8 @@ public:
     void HandleTouchEvent(bool isPressed, const Offset& globalLocation);
 
     bool IsContainerModal();
+
+    void SetDate(const std::string& info);
 private:
     void OnModifyDone() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
@@ -199,7 +201,6 @@ private:
     void UpdateEntryButtonColor();
 
     std::string GetEntryDateInfo();
-    void SetDate(const std::string& info);
 
     uint32_t yearEnterCount_ = 0;
     uint32_t yearPrefixZeroCount_ = 0;
