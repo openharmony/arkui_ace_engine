@@ -15,6 +15,7 @@
 
 const hilog = requireNapi('hilog');
 const resourceManager = requireNapi('resourceManager');
+const measure = requireNapi('measure');
 
 const TITLE_MAX_LINES = 2;
 const HORIZON_BUTTON_MAX_COUNT = 2;
@@ -1231,261 +1232,194 @@ export class ConfirmDialog extends ViewPU {
 }
 
 export class AlertDialog extends ViewPU {
-  constructor(e, o, t, r = -1) {
-    super(e, t, r);
-    this.controller = void 0;
-    this.content = '';
-    this.primaryButton = { value: '' };
-    this.secondaryButton = { value: '' };
-    this.setInitiallyProvidedValue(o);
-  }
-
-  setInitiallyProvidedValue(e) {
-    void 0 !== e.controller && (this.controller = e.controller);
-    void 0 !== e.content && (this.content = e.content);
-    void 0 !== e.primaryButton && (this.primaryButton = e.primaryButton);
-    void 0 !== e.secondaryButton && (this.secondaryButton = e.secondaryButton);
-  }
-
-  updateStateVars(e) {
-  }
-
-  purgeVariableDependenciesOnElmtId(e) {
-  }
-
-  aboutToBeDeleted() {
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
-  }
-
-  setController(e) {
-    this.controller = e;
-  }
-
-  initialRender() {
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Column.create();
-      Column.backgroundBlurStyle(BlurStyle.Thick);
-      Column.borderRadius({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_corner_radius_dialog'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Column.margin({
-        left: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_start'],
-          bundleName: '',
-          moduleName: ''
-        },
-        right: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_end'],
-          bundleName: '',
-          moduleName: ''
-        },
-        bottom: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_bottom'],
-          bundleName: '',
-          moduleName: ''
+    constructor(d8, e8, f8, g8 = -1, h8 = undefined, i8) {
+        super(d8, f8, g8, i8);
+        if (typeof h8 === 'function') {
+            this.paramsGenerator_ = h8;
         }
-      });
-      Column.backgroundColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_dialog_bg'],
-        bundleName: '',
-        moduleName: ''
-      });
-      o || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.padding({
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: this.secondaryButton.value || this.primaryButton.value ? 0 : 24
-      });
-      o || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Text.create(this.content);
-      Text.fontSize({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_body1'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Text.fontWeight(FontWeight.Medium);
-      Text.fontColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_text_primary'],
-        bundleName: '',
-        moduleName: ''
-      });
-      o || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    Text.pop();
-    Row.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.width('100%');
-      Row.padding({ left: 16, right: 16, top: 16, bottom: 16 });
-      o || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.primaryButton.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Button.createWithLabel(this.primaryButton.value);
-          Button.fontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_button1'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontWeight(FontWeight.Medium);
-          Button.layoutWeight(1);
-          Button.backgroundColor(this.primaryButton.background ? this.primaryButton.background : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_background_transparent'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_text_primary_activated'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.onClick((() => {
-            this.primaryButton.action && this.primaryButton.action();
-            this.controller.close();
-          }));
-          o || Button.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        Button.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.secondaryButton.value && this.primaryButton.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Column.create();
-          Column.width(DIVIDER_CONTAINER_WIDTH);
-          Column.alignItems(HorizontalAlign.Center);
-          o || Column.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          If.create();
-          this.secondaryButton.background ? If.branchId(1) : this.ifElseBranchUpdateFunction(0, (() => {
-            this.observeComponentCreation(((e, o) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              Divider.create();
-              Divider.width(DIVIDER_WIDTH);
-              Divider.height(DIVIDER_HEIGHT);
-              Divider.color({
-                id: -1,
-                type: 10001,
-                params: ['sys.color.ohos_id_color_list_separator'],
-                bundleName: '',
-                moduleName: ''
-              });
-              Divider.vertical(!0);
-              o || Divider.pop();
-              ViewStackProcessor.StopGetAccessRecording();
-            }));
-          }));
-          o || If.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        If.pop();
+        this.controller = undefined;
+        this.content = '';
+        this.primaryButton = null;
+        this.secondaryButton = null;
+        this.buttons = undefined;
+        this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlignment');
+        this.__textMarginOffset = new ObservedPropertySimplePU(0, this, 'textMarginOffset');
+        this.__marginOffset = new ObservedPropertySimplePU(0, this, 'marginOffset');
+        this.setInitiallyProvidedValue(e8);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(c8) {
+        if (c8.controller !== undefined) {
+            this.controller = c8.controller;
+        }
+        if (c8.content !== undefined) {
+            this.content = c8.content;
+        }
+        if (c8.primaryButton !== undefined) {
+            this.primaryButton = c8.primaryButton;
+        }
+        if (c8.secondaryButton !== undefined) {
+            this.secondaryButton = c8.secondaryButton;
+        }
+        if (c8.buttons !== undefined) {
+            this.buttons = c8.buttons;
+        }
+        if (c8.textAlignment !== undefined) {
+            this.textAlignment = c8.textAlignment;
+        }
+        if (c8.textMarginOffset !== undefined) {
+            this.textMarginOffset = c8.textMarginOffset;
+        }
+        if (c8.marginOffset !== undefined) {
+            this.marginOffset = c8.marginOffset;
+        }
+    }
+    updateStateVars(b8) {
+    }
+    purgeVariableDependenciesOnElmtId(a8) {
+        this.__textAlignment.purgeDependencyOnElmtId(a8);
+        this.__textMarginOffset.purgeDependencyOnElmtId(a8);
+        this.__marginOffset.purgeDependencyOnElmtId(a8);
+    }
+    aboutToBeDeleted() {
+        this.__textAlignment.aboutToBeDeleted();
+        this.__textMarginOffset.aboutToBeDeleted();
+        this.__marginOffset.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    setController(z7) {
+        this.controller = z7;
+    }
+    get textAlignment() {
+        return this.__textAlignment.get();
+    }
+    set textAlignment(y7) {
+        this.__textAlignment.set(y7);
+    }
+    get textMarginOffset() {
+        return this.__textMarginOffset.get();
+    }
+    set textMarginOffset(x7) {
+        this.__textMarginOffset.set(x7);
+    }
+    get marginOffset() {
+        return this.__marginOffset.get();
+    }
+    set marginOffset(w7) {
+        this.__marginOffset.set(w7);
+    }
+    initialRender() {
+        {
+            this.observeComponentCreation((q7, r7) => {
+                ViewStackProcessor.StartGetAccessRecordingFor(q7);
+                if (r7) {
+                    let s7 = new CustomDialogContentComponent(this, {
+                        controller: this.controller,
+                        contentBuilder: () => {
+                            this.AlertDialogContentBuilder();
+                        },
+                        buttons: this.buttons,
+                    }, undefined, q7, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 378 });
+                    ViewPU.create(s7);
+                    let t7 = () => {
+                        return {
+                            controller: this.controller,
+                            contentBuilder: () => {
+                                this.AlertDialogContentBuilder();
+                            },
+                            buttons: this.buttons
+                        };
+                    };
+                    s7.paramsGenerator_ = t7;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(q7, {});
+                }
+                ViewStackProcessor.StopGetAccessRecording();
+            });
+        }
+    }
+    AlertDialogContentBuilder(f7 = null) {
+        this.observeComponentCreation((n7, o7) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(n7);
+            Column.create();
+            Column.margin({ right: `${this.marginOffset}vp`, });
+            if (!o7) {
+                Column.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
+        this.observeComponentCreation((l7, m7) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(l7);
+            Scroll.create();
+            Scroll.width('100%');
+            if (!m7) {
+                Scroll.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
+        this.observeComponentCreation((j7, k7) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(j7);
+            Text.create(this.content);
+            Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
+            Text.fontWeight(FontWeight.Medium);
+            Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
+            Text.margin({ right: { id: -1, type: 10002, params: ['sys.float.padding_level8'], bundleName: '', moduleName: '' }, });
+            Text.width(`calc(100% - ${this.textMarginOffset}vp)`);
+            Text.textAlign(this.textAlignment);
+            if (!k7) {
+                Text.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
+        Text.pop();
+        Scroll.pop();
         Column.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.secondaryButton.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Button.createWithLabel(this.secondaryButton.value);
-          Button.fontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_button1'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontWeight(FontWeight.Medium);
-          Button.layoutWeight(1);
-          Button.backgroundColor(this.secondaryButton.background ? this.secondaryButton.background : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_background_transparent'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontColor(this.secondaryButton.fontColor ? this.secondaryButton.fontColor : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_text_primary_activated'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.onClick((() => {
-            this.secondaryButton.action && this.secondaryButton.action();
-            this.controller.close();
-          }));
-          o || Button.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        Button.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    Row.pop();
-    Column.pop();
-  }
-
-  rerender() {
-    this.updateDirtyElements();
-  }
+    }
+    aboutToAppear() {
+        this.initTextAlign();
+        this.initButtons();
+        this.initMargin();
+    }
+    initTextAlign() {
+        let d7 = measure.measureTextSize({
+            textContent: this.content,
+            fontSize: { id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' },
+        });
+        let e7 = measure.measureTextSize({
+            textContent: '1',
+            fontSize: { i: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' },
+        });
+        if (this.getTextHeight(d7) <= this.getTextHeight(e7)) {
+            this.textAlignment = TextAlign.Center;
+        }
+    }
+    getTextHeight(c7) {
+        if (c7 && c7.height !== null && c7.height !== undefined) {
+            return Number(c7.height);
+        }
+        return 0;
+    }
+    initButtons() {
+        if (!this.primaryButton && !this.secondaryButton) {
+            return;
+        }
+        this.buttons = [];
+        if (this.primaryButton) {
+            this.buttons.push(this.primaryButton);
+        }
+        if (this.secondaryButton) {
+            this.buttons.push(this.secondaryButton);
+        }
+    }
+    initMargin() {
+        this.textMarginOffset = getNumberByResource('padding_level8');
+        this.marginOffset = 0 - this.textMarginOffset;
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
 }
 
 export class LoadingDialog extends ViewPU {

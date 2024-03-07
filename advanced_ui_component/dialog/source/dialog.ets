@@ -16,6 +16,7 @@
 import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import resourceManager from '@ohos.resourceManager';
+import measure from '@ohos.measure';
 
 const TITLE_MAX_LINES: number = 2;
 const HORIZON_BUTTON_MAX_COUNT: number = 2;
@@ -346,67 +347,87 @@ export struct ConfirmDialog{
 }
 
 @CustomDialog
-export struct AlertDialog{
-  controller: CustomDialogController
-  content: ResourceStr = ''
-  primaryButton?: ButtonOptions = {value: ""}
-  secondaryButton?: ButtonOptions = {value: ""}
+export struct AlertDialog {
+  controller: CustomDialogController;
+  content: ResourceStr = '';
+  primaryButton?: ButtonOptions | null = null;
+  secondaryButton?: ButtonOptions | null = null;
+  buttons?: ButtonOptions[] | undefined = undefined;
+  @State textAlignment: TextAlign = TextAlign.Start;
+  @State textMarginOffset: number = 0;
+  @State marginOffset: number = 0;
+
   build() {
-    Column() {
-      Row() {
-        Text(this.content)
-          .fontSize($r('sys.float.ohos_id_text_size_body1'))
-          .fontWeight(FontWeight.Medium)
-          .fontColor($r('sys.color.ohos_id_color_text_primary'))
-      }.padding({
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: this.secondaryButton.value || this.primaryButton.value ? 0 : 24
-      })
-      Row() {
-        if (this.primaryButton.value) {
-          Button(this.primaryButton.value)
-            .fontSize($r('sys.float.ohos_id_text_size_button1'))
-            .fontWeight(FontWeight.Medium)
-            .layoutWeight(1)
-            .backgroundColor(this.primaryButton.background? this.primaryButton.background: $r('sys.color.ohos_id_color_background_transparent'))
-            .fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor: $r('sys.color.ohos_id_color_text_primary_activated'))
-            .onClick(() => {
-              if (this.primaryButton.action) this.primaryButton.action()
-              this.controller.close()
-            })
-        }
-        if (this.secondaryButton.value && this.primaryButton.value) {
-          Column() {
-            if (!this.secondaryButton.background) {
-              Divider().width(DIVIDER_WIDTH).height(DIVIDER_HEIGHT).color($r('sys.color.ohos_id_color_list_separator')).vertical(true)
-            }
-          }.width(DIVIDER_CONTAINER_WIDTH).alignItems(HorizontalAlign.Center)
-        }
-        if (this.secondaryButton.value) {
-          Button(this.secondaryButton.value)
-            .fontSize($r('sys.float.ohos_id_text_size_button1'))
-            .fontWeight(FontWeight.Medium)
-            .layoutWeight(1)
-            .backgroundColor(this.secondaryButton.background? this.secondaryButton.background: $r('sys.color.ohos_id_color_background_transparent'))
-            .fontColor(this.secondaryButton.fontColor ? this.secondaryButton.fontColor: $r('sys.color.ohos_id_color_text_primary_activated'))
-            .onClick(() => {
-              if (this.secondaryButton.action) this.secondaryButton.action()
-              this.controller.close()
-            })
-        }
-      }.width('100%').padding({ left: 16, right: 16, top: 16, bottom: 16 })
-    }
-    .backgroundBlurStyle(BlurStyle.Thick)
-    .borderRadius($r('sys.float.ohos_id_corner_radius_dialog'))
-    .margin({
-      left: $r('sys.float.ohos_id_dialog_margin_start'),
-      right: $r('sys.float.ohos_id_dialog_margin_end'),
-      bottom: $r('sys.float.ohos_id_dialog_margin_bottom')
+    CustomDialogContentComponent({
+      controller: this.controller,
+      contentBuilder: () => {
+        this.AlertDialogContentBuilder();
+      },
+      buttons: this.buttons,
     })
-    // 1.backgroundcolor use in blur enable mod mast set this color: colorDialogBgBlur. but now it is not found
-    .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
+  }
+
+  @Builder
+  AlertDialogContentBuilder(): void {
+    Column() {
+      Scroll() {
+        Text(this.content)
+          .fontSize($r('sys.float.Body_L'))
+          .fontWeight(FontWeight.Medium)
+          .fontColor($r('sys.color.font_primary'))
+          .margin({ right: $r('sys.float.padding_level8'), })
+          .width(`calc(100% - ${this.textMarginOffset}vp)`)
+          .textAlign(this.textAlignment)
+      }
+      .width('100%')
+    }
+    .margin({ right: `${this.marginOffset}vp`, })
+  }
+
+  aboutToAppear(): void {
+    this.initTextAlign();
+    this.initButtons();
+    this.initMargin();
+  }
+
+  private initTextAlign(): void {
+    let contentSize: SizeOptions = measure.measureTextSize({
+      textContent: this.content,
+      fontSize: $r('sys.float.Body_L'),
+    });
+    let oneLineSize: SizeOptions = measure.measureTextSize({
+      textContent: '1',
+      fontSize: $r('sys.float.Body_L'),
+    });
+
+    if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
+      this.textAlignment = TextAlign.Center;
+    }
+  }
+
+  private getTextHeight(textSize: SizeOptions): number {
+    if (textSize && textSize.height !== null && textSize.height !== undefined) {
+      return Number(textSize.height);
+    }
+    return 0;
+  }
+
+  private initButtons(): void {
+    if (!this.primaryButton && !this.secondaryButton) {
+      return;
+    }
+    this.buttons = [];
+    if (this.primaryButton) {
+      this.buttons.push(this.primaryButton);
+    }
+    if (this.secondaryButton) {
+      this.buttons.push(this.secondaryButton);
+    }
+  }
+
+  private initMargin(): void {
+    this.textMarginOffset = getNumberByResource('padding_level8');
+    this.marginOffset = 0 - this.textMarginOffset;
   }
 }
 
