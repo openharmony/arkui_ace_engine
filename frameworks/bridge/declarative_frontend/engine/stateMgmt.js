@@ -6787,10 +6787,12 @@ class ObserveV3 {
         this.bindCmp_ = null;
         // bindId: UINode elmtId or watchId, depending on what is being observed
         this.bindId_ = UINodeRegisterProxy.notRecordingDependencies;
-        // Map bindId to WeakRef<ViewPU> | MonitorV3
+        // Map bindId to ViewPU/MonitorV3
+        // FIXME use Map<number, ViewPU | MonitorV3>
         this.id2cmp_ = {};
-        // Map bindId -> Set of @observed class objects
+        // Map bindId -> Set 0f view model object
         // reverse dependency map for quickly removing all dependencies of a bindId
+        // FIXME: string typing: Map<number, Set<Object>>
         this.id2targets_ = {};
         // queued up Set of bindId
         // elmtIds of UINodes need re-render
@@ -6821,7 +6823,7 @@ class ObserveV3 {
         this.bindId_ = id;
         if (cmp != null) {
             this.clearBinding(id);
-            this.id2cmp_[id] = (cmp instanceof ViewPU) ? new WeakRef(cmp) : cmp;
+            this.id2cmp_[id] = cmp;
         }
     }
     // clear any previously created dependency view model object to elmtId
@@ -7001,19 +7003,22 @@ class ObserveV3 {
         }
     }
     notifyDirtyElmtIdsToOwningViews() {
-        let view;
         
-        this.elmtIdsChanged_.forEach((elmtId) => {
-            var _a;
-            if ((view = (_a = this.id2cmp_[elmtId]) === null || _a === void 0 ? void 0 : _a.deref()) && (view instanceof ViewPU)) {
-                // FIXME Review: uiNodeNeedUpdateV3 just copies elmtIds to another set
-                // waits for FlushBuild to call rerender call updateDirtyElements
-                // to actually render the UINodes. Could we call ViewPU.UpdateElement 
-                // right away?        
-                view.uiNodeNeedUpdateV3(elmtId);
-            }
-        });
-        this.elmtIdsChanged_.clear();
+        // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
+        UINodeRegisterProxy.obtainDeletedElmtIds();
+        // unregister the removed elementids requested from the cpp side for all viewpus, it will make the first viewpu slower
+        // than before, but the rest viewpu will be faster
+        UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+        while (this.elmtIdsChanged_.size > 0) {
+            const elmtIds = this.elmtIdsChanged_;
+            this.elmtIdsChanged_ = new Set();
+            elmtIds.forEach((elmtId) => {
+                const view = this.id2cmp_[elmtId];
+                if (view && view instanceof ViewPU) {
+                    view.UpdateElement(elmtId);
+                }
+            });
+        }
     }
     constructMonitor(target, name) {
         let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + name);

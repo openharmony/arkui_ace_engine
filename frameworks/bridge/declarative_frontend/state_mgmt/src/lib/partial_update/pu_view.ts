@@ -563,7 +563,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtProfiler.end();
   }
 
-  private UpdateElement(elmtId: number): void {
+  public UpdateElement(elmtId: number): void {
     stateMgmtProfiler.begin("ViewPU.UpdateElement");
     if (elmtId == this.id__()) {
       // do not attempt to update itself.

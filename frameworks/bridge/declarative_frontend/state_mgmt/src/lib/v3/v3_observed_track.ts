@@ -279,18 +279,25 @@ class ObserveV3 {
   }
 
   private notifyDirtyElmtIdsToOwningViews() : void {
-    let view : WeakRef<ViewPU> | undefined;
     stateMgmtConsole.debug(`notifyDirtyElmtIdsToOwningViews ${JSON.stringify(Array.from(this.elmtIdsChanged_))} ...`);
-    this.elmtIdsChanged_.forEach((elmtId) => {
-      if ((view = this.id2cmp_[elmtId]?.deref()) && (view instanceof ViewPU)) {
-        // FIXME Review: uiNodeNeedUpdateV3 just copies elmtIds to another set
-        // waits for FlushBuild to call rerender call updateDirtyElements
-        // to actually render the UINodes. Could we call ViewPU.UpdateElement 
-        // right away?        
-        view.uiNodeNeedUpdateV3(elmtId);
-      }
-    });
-    this.elmtIdsChanged_.clear();
+
+    // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
+    UINodeRegisterProxy.obtainDeletedElmtIds();
+    // unregister the removed elementids requested from the cpp side for all viewpus, it will make the first viewpu slower
+    // than before, but the rest viewpu will be faster
+    UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+
+    while (this.elmtIdsChanged_.size > 0) {
+      const elmtIds = this.elmtIdsChanged_;
+      this.elmtIdsChanged_=new Set<number>();
+
+      elmtIds.forEach((elmtId) => {
+        const view = this.id2cmp_[elmtId];
+        if (view && view instanceof ViewPU) {
+          view.UpdateElement(elmtId);
+        }
+      });
+    }
   }
 
   public constructMonitor(target: any, name: string) : void {
