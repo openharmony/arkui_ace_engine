@@ -454,6 +454,7 @@ private:
     void HandleFocusEvent();
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
+    void MoveCaretAndStartFocus(const Offset& offset);
     void HandleDoubleClickEvent(GestureEvent& info);
     bool HandleUserClickEvent(GestureEvent& info);
     bool HandleUserLongPressEvent(GestureEvent& info);

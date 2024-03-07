@@ -21,6 +21,7 @@
 #include "base/log/log_wrapper.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -83,15 +84,21 @@ std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
+        std::function<void ()> onMenuDisappear;
         std::string action = wantParams.GetStringParam("action");
         if (!action.empty() && onClickMenu) {
-            onClickMenu(action);
+            onMenuDisappear = [action, onClickMenu]() {
+                onClickMenu(action);
+            };
         }
         std::string closeMenu = wantParams.GetStringParam("closeMenu");
         if (closeMenu == "true") {
             int32_t targetId = targetNode->GetId();
             auto menuNode = overlayManager->GetMenuNode(targetId);
             CHECK_NULL_VOID(menuNode);
+            auto menuPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
+            CHECK_NULL_VOID(menuPattern);
+            menuPattern->RegisterMenuDisappearCallback(onMenuDisappear);
             overlayManager->HideMenu(menuNode, targetId);
             return;
         }
