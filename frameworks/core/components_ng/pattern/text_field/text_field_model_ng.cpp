@@ -44,10 +44,8 @@ void TextFieldModelNG::CreateNode(
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     auto textValue = pattern->GetTextValue();
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("TextFieldModelNG::GetOrCreateNode with text %{public}s, current text %{public}s",
-            value.value_or("NA").c_str(), textValue.c_str());
-    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "new text:%{public}s, old text:%{public}s", value.value_or("NA").c_str(),
+        textValue.c_str());
     if (value.has_value() && value.value() != textValue) {
         pattern->InitValueText(value.value());
     }
@@ -97,10 +95,8 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     auto textValue = pattern->GetTextValue();
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("TextFieldModelNG::GetOrCreateNode with text %{public}s, current text %{public}s",
-            value.value_or("NA").c_str(), textValue.c_str());
-    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "new text:%{public}s, old text:%{public}s", value.value_or("NA").c_str(),
+        textValue.c_str());
     if (value.has_value() && value.value() != textValue) {
         pattern->InitEditingValueText(value.value());
     }
@@ -918,23 +914,22 @@ void TextFieldModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
 void TextFieldModelNG::SetPlaceholderFont(FrameNode* frameNode, const Font& value)
 {
     if (value.fontSize.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty,
-            PlaceholderFontSize, value.fontSize.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextFieldLayoutProperty, PlaceholderFontSize, value.fontSize.value(), frameNode);
     }
     if (value.fontStyle) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty,
-            PlaceholderItalicFontStyle, value.fontStyle.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextFieldLayoutProperty, PlaceholderItalicFontStyle, value.fontStyle.value(), frameNode);
     }
     if (value.fontWeight) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty,
-            PlaceholderFontWeight, value.fontWeight.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextFieldLayoutProperty, PlaceholderFontWeight, value.fontWeight.value(), frameNode);
     }
     if (!value.fontFamilies.empty()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty,
-            PlaceholderFontFamily, value.fontFamilies, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderFontFamily, value.fontFamilies, frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty,
-        PreferredPlaceholderLineHeightNeedToUpdate, true, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextFieldLayoutProperty, PreferredPlaceholderLineHeightNeedToUpdate, true, frameNode);
 }
 
 void TextFieldModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
@@ -1029,8 +1024,8 @@ void TextFieldModelNG::SetOnCut(FrameNode* frameNode, std::function<void(const s
     eventHub->SetOnCut(std::move(func));
 }
 
-void TextFieldModelNG::SetOnPasteWithEvent(FrameNode* frameNode,
-    std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
+void TextFieldModelNG::SetOnPasteWithEvent(
+    FrameNode* frameNode, std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
@@ -1137,7 +1132,7 @@ Font TextFieldModelNG::GetPlaceholderFont(FrameNode* frameNode)
         TextFieldLayoutProperty, PlaceholderFontWeight, fontWeight, frameNode, fontWeight);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextFieldLayoutProperty, PlaceholderFontFamily, fontFamilies, frameNode, fontFamilies);
-    Font value { fontWeight, fontSize, fontStyle, fontFamilies};
+    Font value { fontWeight, fontSize, fontStyle, fontFamilies };
     return value;
 }
 
