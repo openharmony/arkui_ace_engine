@@ -64,7 +64,6 @@ void PaintWrapper::FlushRender(const RefPtr<NG::DrawModifier>& drawModifier)
     CHECK_NULL_VOID(renderContext);
     auto contentModifier = DynamicCast<ContentModifier>(nodePaintImpl_->GetContentModifier(this));
     if (contentModifier) {
-        contentModifier->SetDrawModifier(drawModifier);
         nodePaintImpl_->UpdateContentModifier(this);
     }
 
@@ -79,7 +78,7 @@ void PaintWrapper::FlushRender(const RefPtr<NG::DrawModifier>& drawModifier)
     auto contentDraw = nodePaintImpl_->GetContentDrawFunction(this);
     auto contentDrawModifier = [drawModifier, contentDraw, weak = WeakClaim(this)](RSCanvas& canvas) -> void {
         auto wrapper = weak.Upgrade();
-        auto layoutSize = wrapper->GetContentSize();
+        auto layoutSize = wrapper->GetGeometryNode()->GetFrameSize();
         NG::DrawingContext context = { .canvas = canvas, .width = layoutSize.Width(), .height = layoutSize.Height() };
         if (drawModifier && drawModifier->jsDrawBehindFunc) {
             drawModifier->jsDrawBehindFunc(context);

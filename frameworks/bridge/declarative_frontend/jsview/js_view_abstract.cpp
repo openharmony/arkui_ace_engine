@@ -6958,9 +6958,17 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier)
         return panda::JSValueRef::Undefined(vm);
     };
     auto jsInvalidate = JSRef<JSFunc>::New<FunctionCallback>(invalidate);
-    auto frameNode = ViewAbstractModel::GetInstance()->GetFrameNode();
+    auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
+    if (frameNode) {
+        auto contentModifier = frameNode->GetContentModifier();
+        if (contentModifier) {
+            contentModifier->SetContentChange();
+        } else {
+            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+        }
+    }
     jsInvalidate->GetHandle()->SetNativePointerFieldCount(jsInvalidate->GetEcmaVM(), 1);
-    jsInvalidate->GetHandle()->SetNativePointerField(jsInvalidate->GetEcmaVM(), 0, frameNode);
+    jsInvalidate->GetHandle()->SetNativePointerField(jsInvalidate->GetEcmaVM(), 0, static_cast<void*>(frameNode));
     jsDrawModifier->SetPropertyObject("invalidate", jsInvalidate);
 }
 
@@ -7013,8 +7021,8 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
     drawModifier->jsDrawContentFunc = getDrawModifierFunc("drawContent");
     drawModifier->jsDrawFrontFunc = getDrawModifierFunc("drawFront");
 
-    AddInvalidateFunc(jsDrawModifier);
     ViewAbstractModel::GetInstance()->SetDrawModifier(drawModifier);
+    AddInvalidateFunc(jsDrawModifier);
 }
 
 void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
