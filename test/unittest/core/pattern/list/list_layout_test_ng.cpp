@@ -1513,4 +1513,72 @@ HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea002, TestSize.Level1)
     EXPECT_EQ(pattern_->contentEndOffset_, 0);
     EXPECT_TRUE(IsEqual(frameNode_->geometryNode_->GetFrameSize(), SizeF(LIST_WIDTH, LIST_HEIGHT)));
 }
+
+/**
+ * @tc.name: PostListItemPressStyleTask001
+ * @tc.desc: Test list layout with PostListItemPressStyleTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    CreateWithItem([](ListModelNG model) {
+        model.SetDivider(ITEM_DIVIDER);
+    });
+    UpdateContentModifier();
+    auto dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    auto dividerMap = lda->GetDividerMap();
+    EXPECT_EQ(dividerMap.size(), 2);
+
+    auto listItemNode = GetChildFrameNode(frameNode_, 0);
+    auto listItemNodeId = listItemNode->GetId();
+    auto stateStyleMgr = AceType::DynamicCast<StateStyleManager>(listItemNode);
+    stateStyleMgr->PostListItemPressStyleTask(UI_STATE_PRESSED);
+    RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
+    RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
+    for (auto child : listPaint->itemPosition_) {
+        if (child.second.id == listItemNodeId) {
+            EXPECT_TRUE(child.second.isPressed);
+        }
+    }
+
+    UpdateContentModifier();
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_EQ(dividerMap.size(), 0);
+}
+
+/**
+ * @tc.name: PostListItemPressStyleTask002
+ * @tc.desc: Test listItemGroup layout with PostListItemPressStyleTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    CreateWithItem([](ListModelNG model) {
+        model.SetDivider(ITEM_DIVIDER);
+        CreateGroup(TOTAL_LINE_NUMBER, Axis::VERTICAL);
+    });
+
+    auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto listItemNode = GetChildFrameNode(groupFrameNode, 0);
+    auto listItemNodeId = listItemNode->GetId();
+    auto stateStyleMgr = AceType::DynamicCast<StateStyleManager>(listItemNode);
+    stateStyleMgr->PostListItemPressStyleTask(UI_STATE_PRESSED);
+    auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
+    RefPtr<NodePaintMethod> paint = groupPattern->CreateNodePaintMethod();
+    RefPtr<ListItemGroupPaintMethod> groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
+    for (auto child : groupPaint->itemPosition_) {
+        if (child.second.id == listItemNodeId) {
+            EXPECT_TRUE(child.second.isPressed);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
