@@ -580,12 +580,13 @@ void SheetPresentationPattern::DismissTransition(bool isTransitionIn, float drag
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->ModalPageLostFocus(GetHost());
-
+    if (!isTransitionIn) {
+        OnWillDisappear();
+    }
     auto sheetType = GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP) {
         BubbleStyleSheetTransition(isTransitionIn);
     } else {
-        OnWillDisappear();
         SheetTransition(isTransitionIn, dragVelocity);
     }
 }
