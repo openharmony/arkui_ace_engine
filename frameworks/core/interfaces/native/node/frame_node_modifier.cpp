@@ -27,6 +27,17 @@ ArkUI_Bool IsModifiable(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, false);
     return frameNode->GetTag() == "FrameNode";
 }
+
+RefPtr<FrameNode> GetParentNode(UINode* node)
+{
+    auto uiNode = AceType::Claim<UINode>(node);
+    auto parent = uiNode->GetParent();
+    while (parent != nullptr && !AceType::InstanceOf<FrameNode>(parent)) {
+        parent = parent->GetParent();
+    }
+    return AceType::DynamicCast<FrameNode>(parent);
+}
+
 ArkUI_Bool AppendChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -61,75 +72,89 @@ ArkUI_Bool InsertChildAfterInFrameNode(ArkUINodeHandle node, ArkUINodeHandle chi
 
 void RemoveChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
 {
-    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(currentNode);
-    auto* childNode = reinterpret_cast<UINode*>(child);
+    auto* childNode = reinterpret_cast<FrameNode*>(child);
     currentNode->RemoveChild(Referenced::Claim<UINode>(childNode));
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
 void ClearChildrenInFrameNode(ArkUINodeHandle node)
 {
-    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(currentNode);
     currentNode->Clean();
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-ArkUI_Int32 GetChildrenNumber(ArkUINodeHandle node)
+ArkUI_Uint32 GetChildrenNumber(ArkUINodeHandle node)
 {
-    auto* currentNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_RETURN(currentNode, -1);
-    return currentNode->GetChildren().size();
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, 0);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return frameNode->GetAllChildrenWithBuild(false).size();
 }
 
 ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index)
 {
-    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
-    auto child = currentNode->GetChildAtIndex(index);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(child));
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->GetAllChildrenWithBuild(false);
+    auto child = frameNode->GetChildByIndex(index);
+    auto childNode = AceType::DynamicCast<FrameNode>(child);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
 }
 
 ArkUINodeHandle GetFirst(ArkUINodeHandle node)
 {
-    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
-    auto child = currentNode->GetFirstChild();
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(child));
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->GetAllChildrenWithBuild(false);
+    auto child = frameNode->GetChildByIndex(0);
+    auto childNode = AceType::DynamicCast<FrameNode>(child);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
 }
 
 ArkUINodeHandle GetNextSibling(ArkUINodeHandle node)
 {
-    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
-    auto parent = currentNode->GetParent();
+    auto parent = GetParentNode(currentNode);
     CHECK_NULL_RETURN(parent, nullptr);
-    auto index = parent->GetChildIndex(Referenced::Claim<UINode>(currentNode));
-    auto sibling = parent->GetChildAtIndex(index + 1);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(sibling));
+    parent->GetAllChildrenWithBuild(false);
+    auto index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
+    auto sibling = parent->GetChildByIndex(index + 1);
+    auto childNode = AceType::DynamicCast<FrameNode>(sibling);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
 }
 
 ArkUINodeHandle GetPreviousSibling(ArkUINodeHandle node)
 {
-    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
-    auto parent = currentNode->GetParent();
+    auto parent = GetParentNode(currentNode);
     CHECK_NULL_RETURN(parent, nullptr);
-    auto index = parent->GetChildIndex(Referenced::Claim<UINode>(currentNode));
-    auto sibling = parent->GetChildAtIndex(index - 1);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(sibling));
+    parent->GetAllChildrenWithBuild(false);
+    auto index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
+    auto sibling = parent->GetChildByIndex(index - 1);
+    auto childNode = AceType::DynamicCast<FrameNode>(sibling);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
 }
 
 ArkUINodeHandle GetParent(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
-    auto parent = currentNode->GetParent();
+    auto parent = GetParentNode(currentNode);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(parent));
 }
 
-ArkUI_Bool GetIdByNodePtr(ArkUINodeHandle node)
+ArkUI_Int32 GetIdByNodePtr(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(currentNode, -1);
