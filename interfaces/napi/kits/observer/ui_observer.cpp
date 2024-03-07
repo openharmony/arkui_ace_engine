@@ -36,7 +36,8 @@ std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::infos_;
 
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedDensityListeners_;
-
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> UIObserver::specifiedDrawListeners_;
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> UIObserver::specifiedLayoutListeners_;
 // UIObserver.on(type: "navDestinationUpdate", callback)
 // register a global listener without options
 void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
@@ -314,6 +315,91 @@ void UIObserver::UnRegisterRouterPageCallback(int32_t uiContextInstanceId, napi_
         holder.end());
 }
 
+// UIObserver.on(type: "willDraw", uiContext | null, callback)
+// register a listener on current page
+void UIObserver::RegisterDrawCallback(int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    if (specifiedDrawListeners_.find(uiContextInstanceId) == specifiedDrawListeners_.end()) {
+        specifiedDrawListeners_[uiContextInstanceId] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
+        return;
+    }
+    auto& holder = specifiedDrawListeners_[uiContextInstanceId];
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+// UIObserver.off(type: "willDraw", uiContext | null, callback)
+void UIObserver::UnRegisterDrawCallback(int32_t uiContextInstanceId, napi_value callback)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    if (specifiedDrawListeners_.find(uiContextInstanceId) == specifiedDrawListeners_.end()) {
+        return;
+    }
+    auto& holder = specifiedDrawListeners_[uiContextInstanceId];
+    if (callback == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        holder.end());
+}
+
+// UIObserver.on(type: "didLayout", uiContext | null, callback)
+// register a listener on current page
+void UIObserver::RegisterLayoutCallback(
+    int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    if (specifiedLayoutListeners_.find(uiContextInstanceId) == specifiedLayoutListeners_.end()) {
+        specifiedLayoutListeners_[uiContextInstanceId] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
+        return;
+    }
+    auto& holder = specifiedLayoutListeners_[uiContextInstanceId];
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+// UIObserver.off(type: "didLayout", uiContext | null, callback)
+void UIObserver::UnRegisterLayoutCallback(int32_t uiContextInstanceId, napi_value callback)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    if (specifiedLayoutListeners_.find(uiContextInstanceId) == specifiedLayoutListeners_.end()) {
+        return;
+    }
+    auto& holder = specifiedLayoutListeners_[uiContextInstanceId];
+    if (callback == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        holder.end());
+}
+
 void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_value context, int32_t index,
     const std::string& name, const std::string& path, NG::RouterPageState state)
 {
@@ -396,6 +482,30 @@ void UIObserver::HandleDensityChange(NG::AbilityContextInfo& info, double densit
     auto& holder = specifiedDensityListeners_[currentId];
     for (const auto& listener : holder) {
         listener->OnDensityChange(density);
+    }
+}
+
+void UIObserver::HandDrawCommandSendChange()
+{
+    auto currentId = Container::CurrentId();
+    if (specifiedDrawListeners_.find(currentId) == specifiedDrawListeners_.end()) {
+        return;
+    }
+    auto& holder = specifiedDrawListeners_[currentId];
+    for (const auto& listener : holder) {
+        listener->OnDrawOrLayout();
+    }
+}
+
+void UIObserver::HandLayoutDoneChange()
+{
+    auto currentId = Container::CurrentId();
+    if (specifiedLayoutListeners_.find(currentId) == specifiedLayoutListeners_.end()) {
+        return;
+    }
+    auto& holder = specifiedLayoutListeners_[currentId];
+    for (const auto& listener : holder) {
+        listener->OnDrawOrLayout();
     }
 }
 

@@ -59,7 +59,13 @@ public:
         int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_value callback);
     static void HandleDensityChange(NG::AbilityContextInfo& info, double density);
-
+    static void RegisterDrawCallback(int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterDrawCallback(int32_t uiContextInstanceId, napi_value callback);
+    static void RegisterLayoutCallback(
+        int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterLayoutCallback(int32_t uiContextInstanceId, napi_value callback);
+    static void HandDrawCommandSendChange();
+    static void HandLayoutDoneChange();
     static bool ParseStringFromNapi(napi_env env, napi_value val, std::string& str);
     static bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType);
 private:
@@ -79,6 +85,8 @@ private:
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> infos_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedDensityListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> specifiedDrawListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> specifiedLayoutListeners_;
 };
 } // namespace OHOS::Ace::Napi
 #endif // FOUNDATION_ACE_INTERFACES_OBSERVER_H

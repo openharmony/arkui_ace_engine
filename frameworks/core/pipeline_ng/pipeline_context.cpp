@@ -602,6 +602,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
     taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
     taskScheduler_->FlushTask();
+    UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
     taskScheduler_->FinishRecordFrameInfo();
     FlushAnimationClosure();
     TryCallNextFrameLayoutCallback();
@@ -626,6 +627,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         dragWindowVisibleCallback_ = nullptr;
     }
     FlushMessages();
+    UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
     InspectDrew();
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocus();
