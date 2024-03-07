@@ -37,6 +37,7 @@
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#include "core/components_ng/render/adapter/rosen_render_surface.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -240,6 +241,12 @@ void XComponentPattern::OnAttachToFrameNode()
 {
     instanceId_ = Container::CurrentIdSafely();
     Initialize(instanceId_);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
 }
 
 void XComponentPattern::OnModifyDone()
@@ -306,6 +313,11 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         }
 #endif
     }
+
+    auto id = frameNode->GetId();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
 }
 
 void XComponentPattern::SetMethodCall()
@@ -1147,5 +1159,59 @@ void XComponentPattern::UpdateSurfaceBounds(bool needForceRender)
         CHECK_NULL_VOID(host);
         host->MarkNeedRenderOnly();
     }
+}
+
+void XComponentPattern::NativeSurfaceHide()
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto surfaceHideCallback = nativeXComponentImpl_->GetSurfaceHideCallback();
+    CHECK_NULL_VOID(surfaceHideCallback);
+    surfaceHideCallback(nativeXComponent_.get(), surface);
+}
+
+void XComponentPattern::NativeSurfaceShow()
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    CHECK_NULL_VOID(nativeXComponent_);
+    auto width = initSize_.Width();
+    auto height = initSize_.Height();
+    nativeXComponentImpl_->SetXComponentWidth(static_cast<uint32_t>(width));
+    nativeXComponentImpl_->SetXComponentHeight(static_cast<uint32_t>(height));
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto surfaceShowCallback = nativeXComponentImpl_->GetSurfaceShowCallback();
+    CHECK_NULL_VOID(surfaceShowCallback);
+    surfaceShowCallback(nativeXComponent_.get(), surface);
+}
+
+void XComponentPattern::OnWindowHide()
+{
+#if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_PLATFORM)
+    if (!hasXComponentInit_ || hasReleasedSurface_) {
+        return;
+    }
+    if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
+        NativeSurfaceHide();
+        auto renderSurface = DynamicCast<RosenRenderSurface>(renderSurface_);
+        renderSurface->GetSurface()->CleanCache();
+        hasReleasedSurface_ = true;
+    }
+#endif
+}
+
+void XComponentPattern::OnWindowShow()
+{
+#if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_PLATFORM)
+    if (!hasXComponentInit_ || hasReleasedSurface_) {
+        return;
+    }
+    if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
+        NativeSurfaceShow();
+        hasReleasedSurface_ = false;
+    }
+#endif
 }
 } // namespace OHOS::Ace::NG

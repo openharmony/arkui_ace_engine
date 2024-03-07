@@ -140,6 +140,26 @@ public:
         return mouseEventCallback_;
     }
 
+    NativeXComponent_Callback GetSurfaceShowCallback() const
+    {
+        return surfaceShowCallback_;
+    }
+
+    void SetSurfaceShowCallback(NativeXComponent_Callback callback)
+    {
+        surfaceShowCallback_ = callback;
+    }
+
+    NativeXComponent_Callback GetSurfaceHideCallback() const
+    {
+        return surfaceHideCallback_;
+    }
+
+    void SetSurfaceHideCallback(NativeXComponent_Callback callback)
+    {
+        surfaceHideCallback_ = callback;
+    }
+
     void SetTouchEvent(const OH_NativeXComponent_TouchEvent touchEvent)
     {
         touchEvent_ = touchEvent;
@@ -350,6 +370,8 @@ private:
     OH_NativeXComponent_KeyEvent keyEvent_;
     OH_NativeXComponent_Callback* callback_ = nullptr;
     OH_NativeXComponent_MouseEvent_Callback* mouseEventCallback_ = nullptr;
+    NativeXComponent_Callback surfaceShowCallback_ = nullptr;
+    NativeXComponent_Callback surfaceHideCallback_ = nullptr;
     NativeXComponent_Callback focusEventCallback_ = nullptr;
     NativeXComponent_Callback keyEventCallback_ = nullptr;
     NativeXComponent_Callback blurEventCallback_ = nullptr;
@@ -377,6 +399,8 @@ struct OH_NativeXComponent {
     int32_t GetHistoryPoints(const void* window, int32_t* size, OH_NativeXComponent_HistoricalPoint** historicalPoints);
     int32_t RegisterCallback(OH_NativeXComponent_Callback* callback);
     int32_t RegisterMouseEventCallback(OH_NativeXComponent_MouseEvent_Callback* callback);
+    int32_t RegisterSurfaceShowCallback(void (*callback)(OH_NativeXComponent* component, void* window));
+    int32_t RegisterSurfaceHideCallback(void (*callback)(OH_NativeXComponent* component, void* window));
     int32_t GetToolType(size_t pointIndex, OH_NativeXComponent_TouchPointToolType* toolType);
     int32_t GetTiltX(size_t pointIndex, float* tiltX);
     int32_t GetTiltY(size_t pointIndex, float* tiltY);

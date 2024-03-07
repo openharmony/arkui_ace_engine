@@ -278,3 +278,21 @@ int32_t OH_NativeXComponent::SetNeedSoftKeyboard(bool needSoftKeyboard)
     xcomponentImpl_->SetNeedSoftKeyboard(needSoftKeyboard);
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
+
+int32_t OH_NativeXComponent::RegisterSurfaceShowCallback(void (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetSurfaceShowCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::RegisterSurfaceHideCallback(void (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetSurfaceHideCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}

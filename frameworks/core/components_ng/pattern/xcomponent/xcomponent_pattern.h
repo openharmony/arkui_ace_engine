@@ -275,6 +275,10 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnAreaChangedInner() override;
+    void OnWindowHide() override;
+    void OnWindowShow() override;
+    void NativeSurfaceHide();
+    void NativeSurfaceShow();
     void OnModifyDone() override;
 
     void InitNativeNodeCallbacks();
@@ -353,6 +357,7 @@ private:
     uint64_t exportTextureSurfaceId_ = 0U;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
+    bool hasReleasedSurface_ = false;
 #endif
 };
 } // namespace OHOS::Ace::NG
