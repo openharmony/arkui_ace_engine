@@ -28,8 +28,12 @@ const DIVIDER_CONTAINER_WIDTH: number = 16
 const DIVIDER_HEIGHT: number = 24
 const DIVIDER_WIDTH: number = 2
 const LOADING_PROGRESS_WIDTH: number = 40
-const LOADING_PROGRESS_HEIGHT: number = 48
+const LOADING_PROGRESS_HEIGHT: number = 40
 const ITEM_TEXT_SIZE: number = 14
+const LOADING_MAX_LINES: number = 10;
+const LOADING_TEXT_LAYOUT_WEIGHT: number = 1;
+const LOADING_TEXT_MARGIN_LEFT: number = 12;
+const LOADING_MIN_HEIGHT: number = 48;
 export declare type ButtonOptions = {
   value: ResourceStr;
   action?: () => void;
@@ -411,34 +415,6 @@ export struct AlertDialog{
 }
 
 @CustomDialog
-export struct LoadingDialog{
-  controller: CustomDialogController
-  content?: ResourceStr = ''
-  build() {
-    Column() {
-      Row() {
-        Text(this.content)
-          .fontSize($r('sys.float.ohos_id_text_size_body1'))
-          .fontWeight(FontWeight.Medium)
-          .fontColor($r('sys.color.ohos_id_color_text_primary'))
-          .layoutWeight(1)
-        LoadingProgress().width(LOADING_PROGRESS_WIDTH).height(LOADING_PROGRESS_HEIGHT).margin({ left: 16 })
-      }.margin({ left: 24, right: 24, top: 24, bottom: 24 })
-      .constraintSize({minHeight: 48})
-    }
-    .backgroundBlurStyle(BlurStyle.Thick)
-    .borderRadius($r('sys.float.ohos_id_corner_radius_dialog'))
-    .margin({
-      left: $r('sys.float.ohos_id_dialog_margin_start'),
-      right: $r('sys.float.ohos_id_dialog_margin_end'),
-      bottom: $r('sys.float.ohos_id_dialog_margin_bottom')
-    })
-    // 1.backgroundcolor use in blur enable mod mast set this color: colorDialogBgBlur. but now it is not found
-    .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
-  }
-}
-
-@CustomDialog
 export struct CustomContentDialog {
   controller: CustomDialogController;
   primaryTitle?: ResourceStr;
@@ -769,5 +745,43 @@ function getNumberByResource(resourceName: string): number {
     let message: string = (error as BusinessError).message;
     hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResource error, code: ${code}, message: ${message}`);
     return 0;
+  }
+}
+
+@CustomDialog
+export struct LoadingDialog {
+  controller: CustomDialogController;
+  content?: ResourceStr = '';
+
+  build() {
+    Column() {
+      CustomDialogContentComponent({
+        controller: this.controller,
+        contentBuilder: () => {
+          this.contentBuilder();
+        },
+      })
+    }
+  }
+
+  @Builder
+  contentBuilder() {
+    Column() {
+      Row() {
+        Text(this.content)
+          .fontSize($r('sys.float.Body_L'))
+          .fontWeight(FontWeight.Regular)
+          .fontColor($r('sys.color.font_primary'))
+          .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)
+          .maxLines(LOADING_MAX_LINES)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+        LoadingProgress()
+          .color($r('sys.color.icon_secondary'))
+          .width(LOADING_PROGRESS_WIDTH)
+          .height(LOADING_PROGRESS_HEIGHT)
+          .margin({ left: LOADING_TEXT_MARGIN_LEFT })
+      }
+      .constraintSize({ minHeight: LOADING_MIN_HEIGHT })
+    }
   }
 }
