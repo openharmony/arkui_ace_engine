@@ -234,7 +234,7 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
         extraData->eventMap[eventType] = extraParam;
     }
     impl->getBasicAPI()->registerNodeAsyncEvent(
-        nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), reinterpret_cast<int64_t>(nodePtr));
+        nodePtr->uiNodeHandle, static_cast<ArkUIEventSubKind>(originEventType), reinterpret_cast<int64_t>(nodePtr));
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -271,9 +271,24 @@ void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event))
                 if (!nodePtr->extraData) {
                     return;
                 }
-                
+
                 auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
-                auto eventType = ConvertToNodeEventType(static_cast<ArkUIAsyncEventKind>(origin->kind));
+
+                ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(-1);
+                switch (origin->kind) {
+                    case COMPONENT_ASYNC_EVENT:
+                        subKind = static_cast<ArkUIEventSubKind>(origin->componentAsyncEvent.subKind);
+                        break;
+                    case TEXT_INPUT:
+                        subKind = static_cast<ArkUIEventSubKind>(origin->textInputEvent.subKind);
+                        break;
+                    case TOUCH_EVENT:
+                        subKind = ON_TOUCH;
+                    default:
+                        /* Empty */ ;
+                }
+                ArkUI_NodeEventType eventType = static_cast<ArkUI_NodeEventType>(ConvertToNodeEventType(subKind));
+
                 auto innerEventExtraParam = extraData->eventMap.find(eventType);
                 if (innerEventExtraParam == extraData->eventMap.end()) {
                     return;

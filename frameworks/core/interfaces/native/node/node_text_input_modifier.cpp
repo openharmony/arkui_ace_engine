@@ -874,57 +874,61 @@ const ArkUITextInputModifier* GetTextInputModifier()
     return &modifier;
 }
 
-void SetOnTextInputChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnTextInputChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node, eventId, extraParam](const std::string& str) {
+    auto onChange = [node, extraParam](const std::string& str) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXT_INPUT_CHANGE;
+        event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.stringAsyncEvent.pStr = str.c_str();
+        event.textInputEvent.subKind = ON_TEXT_INPUT_CHANGE;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 
-void SetTextInputOnSubmit(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetTextInputOnSubmit(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam](int32_t value, NG::TextFieldCommonEvent& commonEvent) {
+    auto onEvent = [node, extraParam](int32_t value, NG::TextFieldCommonEvent& commonEvent) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXT_INPUT_SUBMIT;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXT_INPUT_SUBMIT;
         event.componentAsyncEvent.data[0].i32 = value;
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onEvent));
 }
 
-void SetOnTextInputCut(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnTextInputCut(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onCut = [node, eventId, extraParam](const std::string& str) {
+    auto onCut = [node, extraParam](const std::string& str) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXT_INPUT_CUT;
+        event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.stringAsyncEvent.pStr = str.c_str();
+        event.textInputEvent.subKind = ON_TEXT_INPUT_CUT;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnCut(frameNode, std::move(onCut));
 }
 
-void SetOnTextInputPaste(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnTextInputPaste(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onPaste = [node, eventId, extraParam](const std::string& str, NG::TextCommonEvent& commonEvent) {
+    auto onPaste = [node, extraParam](const std::string& str, NG::TextCommonEvent& commonEvent) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXT_INPUT_PASTE;
+        event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.stringAsyncEvent.pStr = str.c_str();
+        event.textInputEvent.subKind = ON_TEXT_INPUT_PASTE;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));

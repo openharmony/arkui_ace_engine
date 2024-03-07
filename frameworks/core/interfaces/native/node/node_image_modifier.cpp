@@ -463,14 +463,15 @@ const ArkUIImageModifier* GetImageModifier()
     return &modifier;
 }
 
-void SetImageOnComplete(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetImageOnComplete(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam](const LoadImageSuccessEvent& info) {
+    auto onEvent = [node, extraParam](const LoadImageSuccessEvent& info) {
         ArkUINodeEvent event;
-        event.kind = ON_IMAGE_COMPLETE;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_COMPLETE;
         event.componentAsyncEvent.data[IMAGE_LOAD_STATUS_INDEX].i32 = info.GetLoadingStatus();
         event.componentAsyncEvent.data[IMAGE_WIDTH_INDEX].f32 = info.GetWidth();
         event.componentAsyncEvent.data[IMAGE_HEIGHT_INDEX].f32 = info.GetHeight();
@@ -485,14 +486,15 @@ void SetImageOnComplete(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraPa
     ImageModelNG::SetOnComplete(frameNode, std::move(onEvent));
 }
 
-void SetImageOnError(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetImageOnError(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam](const LoadImageFailEvent& info) {
+    auto onEvent = [node, extraParam](const LoadImageFailEvent& info) {
         ArkUINodeEvent event;
-        event.kind = ON_IMAGE_ERROR;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_ERROR;
         event.componentAsyncEvent.data[0].i32 = LOAD_ERROR_CODE;
         SendArkUIAsyncEvent(&event);
     };
