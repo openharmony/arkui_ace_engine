@@ -15,11 +15,11 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_search_bridge.h"
 
 #include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/search/search_theme.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -64,7 +64,7 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
     if (threeArg->IsString() || threeArg->IsNumber()) {
         if (threeArg->IsString()) {
             auto weightStr = threeArg->ToString(vm)->ToString();
-            value.fontWeight = std::stoi(weightStr);
+            value.fontWeight = OHOS::Ace::StringUtils::StringToInt(weightStr);
         }
 
         if (threeArg->IsNumber()) {
@@ -351,7 +351,7 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
     if (threeArg->IsString() || threeArg->IsNumber()) {
         if (threeArg->IsString()) {
             auto weightStr = threeArg->ToString(vm)->ToString();
-            value.fontWeight = std::stoi(weightStr);
+            value.fontWeight = OHOS::Ace::StringUtils::StringToInt(weightStr);
         }
 
         if (threeArg->IsNumber()) {

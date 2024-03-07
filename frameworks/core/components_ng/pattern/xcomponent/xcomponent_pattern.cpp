@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
+#include "interfaces/native/ui_input_event.h"
+
 #include "base/geometry/ng/size_t.h"
 #include "base/log/log_wrapper.h"
 #include "base/ressched/ressched_report.h"
@@ -22,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
+#include "core/event/axis_event.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #else
@@ -141,14 +144,14 @@ void XComponentPattern::Initialize(int32_t instanceId)
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         renderContext->SetClipToFrame(true);
         renderContext->SetClipToBounds(true);
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+        renderSurface_ = RenderSurface::Create(SystemProperties::GetExtSurfaceEnabled());
+#else
         renderSurface_ = RenderSurface::Create();
+#endif
         renderSurface_->SetInstanceId(instanceId_);
         if (type_ == XComponentType::SURFACE) {
-            renderContextForSurface_ = RenderContext::Create();
-            static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
-                id_ + "Surface" };
-            renderContextForSurface_->InitContext(false, param);
-            renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+            InitializeRenderContext();
             if (!SystemProperties::GetExtSurfaceEnabled()) {
                 renderSurface_->SetRenderContext(renderContextForSurface_);
             } else {
@@ -157,19 +160,21 @@ void XComponentPattern::Initialize(int32_t instanceId)
                 pipelineContext->AddOnAreaChangeNode(host->GetId());
                 extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
                 renderSurface_->SetExtSurfaceCallback(extSurfaceClient_);
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+                RegisterRenderContextCallBack();
+#endif
             }
             handlingSurfaceRenderContext_ = renderContextForSurface_;
-            auto* controllerNG = static_cast<XComponentControllerNG*>(xcomponentController_.get());
-            if (controllerNG) {
-                controllerNG->SetPattern(AceType::Claim(this));
-            }
         } else if (type_ == XComponentType::TEXTURE) {
             renderSurface_->SetRenderContext(renderContext);
             renderSurface_->SetIsTexture(true);
         }
-
+        auto* controllerNG = static_cast<XComponentControllerNG*>(xcomponentController_.get());
+        if (controllerNG) {
+            controllerNG->SetPattern(AceType::Claim(this));
+        }
         renderSurface_->InitSurface();
-        renderSurface_->UpdateXComponentConfig();
+        renderSurface_->UpdateSurfaceConfig();
         InitEvent();
         SetMethodCall();
     } else if (type_ == XComponentType::NODE) {
@@ -180,6 +185,56 @@ void XComponentPattern::Initialize(int32_t instanceId)
         }
     }
 }
+
+void XComponentPattern::InitializeRenderContext()
+{
+    renderContextForSurface_ = RenderContext::Create();
+    static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, id_ + "Surface" };
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    renderContextForSurface_->InitContext(false, param, SystemProperties::GetExtSurfaceEnabled());
+#else
+    renderContextForSurface_->InitContext(false, param);
+#endif
+    renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+}
+
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+void XComponentPattern::RegisterRenderContextCallBack()
+{
+    CHECK_NULL_VOID(renderContextForSurface_);
+    auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto xcomponentNodeSize = geometryNode->GetContentSize();
+        auto xcomponentNodeOffset = geometryNode->GetContentOffset();
+        auto transformRelativeOffset = host->GetTransformRelativeOffset();
+        Rect rect = Rect(transformRelativeOffset.GetX() + xcomponentNodeOffset.GetX(),
+            transformRelativeOffset.GetY() + xcomponentNodeOffset.GetY(), xcomponentNodeSize.Width(),
+            xcomponentNodeSize.Height());
+        if (pattern->renderSurface_) {
+            pattern->renderSurface_->SetExtSurfaceBoundsSync(rect.Left(), rect.Top(),
+                rect.Width(), rect.Height());
+        }
+    };
+    renderContextForSurface_->SetSurfaceChangedCallBack(OnAreaChangedCallBack);
+}
+
+void XComponentPattern::RequestFocus()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    focusHub->RequestFocusImmediately();
+}
+#endif
 
 void XComponentPattern::OnAttachToFrameNode()
 {
@@ -201,6 +256,7 @@ void XComponentPattern::OnModifyDone()
 
 void XComponentPattern::OnAreaChangedInner()
 {
+#if !(defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED))
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -213,6 +269,7 @@ void XComponentPattern::OnAreaChangedInner()
             transformRelativeOffset.GetY() + xcomponentNodeOffset.GetY(), xcomponentNodeSize.Width(),
             xcomponentNodeSize.Height());
     }
+#endif
 }
 
 void XComponentPattern::OnRebuildFrame()
@@ -243,6 +300,11 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestroyEvent();
         eventHub->FireDetachEvent(id_);
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+        if (renderContextForSurface_) {
+            renderContextForSurface_->RemoveSurfaceChangedCallBack();
+        }
+#endif
     }
 }
 
@@ -278,7 +340,7 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     drawSize_ = geometryNode->GetContentSize();
-    if (drawSize_.IsNonPositive()) {
+    if (!drawSize_.IsPositive()) {
         return false;
     }
 
@@ -301,26 +363,19 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             }
         }
     }
-    localposition_ = geometryNode->GetContentOffset();
+    localPosition_ = geometryNode->GetContentOffset();
+#if !(defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED))
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
         renderSurface_->SetExtSurfaceBounds(
-            static_cast<int32_t>(transformRelativeOffset.GetX() + localposition_.GetX()),
-            static_cast<int32_t>(transformRelativeOffset.GetY() + localposition_.GetY()),
+            static_cast<int32_t>(transformRelativeOffset.GetX() + localPosition_.GetX()),
+            static_cast<int32_t>(transformRelativeOffset.GetY() + localPosition_.GetY()),
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
     }
-    if (handlingSurfaceRenderContext_) {
-        handlingSurfaceRenderContext_->SetBounds(
-            localposition_.GetX(), localposition_.GetY(), drawSize_.Width(), drawSize_.Height());
-#ifdef ENABLE_ROSEN_BACKEND
-        auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
-        }
 #endif
-    }
+    UpdateSurfaceBounds();
     // XComponentType::SURFACE has set surface default size in RSSurfaceNode->SetBounds()
     if (type_ == XComponentType::TEXTURE) {
         renderSurface_->SetSurfaceDefaultSize(
@@ -355,6 +410,11 @@ void XComponentPattern::NativeXComponentChange(float width, float height)
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(callback->OnSurfaceChanged);
     callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+#endif
 }
 
 void XComponentPattern::NativeXComponentDestroy()
@@ -415,6 +475,11 @@ void XComponentPattern::XComponentSizeInit()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     InitNativeWindow(initSize_.Width(), initSize_.Height());
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    if (xcomponentController_ && renderSurface_) {
+        xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
+    }
+#endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();
@@ -478,6 +543,7 @@ void XComponentPattern::InitEvent()
     InitTouchEvent(gestureHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     InitMouseEvent(inputHub);
+    InitAxisEvent(inputHub);
     InitMouseHoverEvent(inputHub);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -486,6 +552,10 @@ void XComponentPattern::InitEvent()
 
 void XComponentPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    focusHub->SetFocusable(true);
+#endif
+
     auto onFocusEvent = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -556,6 +626,20 @@ void XComponentPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
     gestureHub->AddTouchEvent(touchEvent_);
 }
 
+void XComponentPattern::InitAxisEvent(const RefPtr<InputEventHub>& inputHub)
+{
+    CHECK_NULL_VOID(!axisEvent_);
+
+    auto axisTask = [weak = WeakClaim(this)](const AxisInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleAxisEvent(info);
+    };
+
+    axisEvent_ = MakeRefPtr<InputEvent>(std::move(axisTask));
+    inputHub->AddOnAxisEvent(axisEvent_);
+}
+
 void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 {
     CHECK_NULL_VOID(!mouseEvent_);
@@ -623,6 +707,12 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
         nativeXComponentImpl_->SetHistoricalPoint(SetHistoryPoint(info.GetHistory()));
     }
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
+
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    if (touchType == TouchType::DOWN) {
+        RequestFocus();
+    }
+#endif
 }
 
 void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
@@ -670,6 +760,12 @@ void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
     NativeXComponentDispatchMouseEvent(mouseEventPoint);
 }
 
+void XComponentPattern::HandleAxisEvent(const AxisInfo& info)
+{
+    auto axisEvent = info.ConvertToAxisEvent();
+    NativeXComponentDispatchAxisEvent(&axisEvent);
+}
+
 void XComponentPattern::HandleMouseHoverEvent(bool isHover)
 {
     CHECK_RUN_ON(UI);
@@ -692,6 +788,17 @@ void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXCompo
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(callback->DispatchMouseEvent);
     callback->DispatchMouseEvent(nativeXComponent_.get(), surface);
+}
+
+void XComponentPattern::NativeXComponentDispatchAxisEvent(AxisEvent* axisEvent)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    const auto callback = nativeXComponentImpl_->GetUIAxisEventCallback();
+    CHECK_NULL_VOID(callback);
+    auto* uiEvent = static_cast<ArkUI_UIInputEvent*>(axisEvent);
+    callback(nativeXComponent_.get(), uiEvent, ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS);
 }
 
 void XComponentPattern::SetTouchPoint(
@@ -765,7 +872,6 @@ std::vector<OH_NativeXComponent_HistoricalPoint> XComponentPattern::SetHistoryPo
     return historicalPoints;
 }
 
-
 void XComponentPattern::FireExternalEvent(RefPtr<NG::PipelineContext> context,
     const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
@@ -803,7 +909,7 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     handlingSurfaceRenderContext_->SetBounds(
-        localposition_.GetX(), localposition_.GetY(), drawSize_.Width(), drawSize_.Height());
+        localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height());
 }
 
 OffsetF XComponentPattern::GetOffsetRelativeToWindow()
@@ -881,7 +987,7 @@ void XComponentPattern::HandleUnregisterOnFrameEvent()
     CHECK_NULL_VOID(nativeXComponent_);
     CHECK_NULL_VOID(nativeXComponentImpl_);
     CHECK_NULL_VOID(displaySync_);
-    displaySync_->UnRegisterOnFrame();
+    displaySync_->UnregisterOnFrame();
     displaySync_->DelFromPipelineOnContainer();
 }
 
@@ -979,9 +1085,67 @@ void XComponentPattern::SetExportTextureSurfaceId(const std::string& surfaceId)
     exportTextureSurfaceId_ = StringUtils::StringToLongUint(surfaceId);
 }
 
-void XComponentPattern::SetSurfaceSize(uint32_t surfaceWidth, uint32_t surfaceHeight)
+void XComponentPattern::SetIdealSurfaceWidth(float surfaceWidth)
 {
-    CHECK_NULL_VOID(xcomponentController_);
-    xcomponentController_->ConfigSurface(surfaceWidth, surfaceHeight);
+    selfIdealSurfaceWidth_ = surfaceWidth;
+}
+
+void XComponentPattern::SetIdealSurfaceHeight(float surfaceHeight)
+{
+    selfIdealSurfaceHeight_ = surfaceHeight;
+}
+
+void XComponentPattern::SetIdealSurfaceOffsetX(float offsetX)
+{
+    selfIdealSurfaceOffsetX_ = offsetX;
+}
+
+void XComponentPattern::SetIdealSurfaceOffsetY(float offsetY)
+{
+    selfIdealSurfaceOffsetY_ = offsetY;
+}
+
+void XComponentPattern::ClearIdealSurfaceOffset(bool isXAxis)
+{
+    if (isXAxis) {
+        selfIdealSurfaceOffsetX_.reset();
+    } else {
+        selfIdealSurfaceOffsetY_.reset();
+    }
+}
+
+void XComponentPattern::UpdateSurfaceBounds(bool needForceRender)
+{
+    if (!drawSize_.IsPositive()) {
+        return;
+    }
+    if (selfIdealSurfaceWidth_.has_value() && Positive(selfIdealSurfaceWidth_.value()) &&
+        selfIdealSurfaceHeight_.has_value() && Positive(selfIdealSurfaceHeight_.value())) {
+        localPosition_.SetX(selfIdealSurfaceOffsetX_.has_value()
+                                ? selfIdealSurfaceOffsetX_.value()
+                                : (drawSize_.Width() - selfIdealSurfaceWidth_.value()) / 2.0f);
+
+        localPosition_.SetY(selfIdealSurfaceOffsetY_.has_value()
+                                ? selfIdealSurfaceOffsetY_.value()
+                                : (drawSize_.Height() - selfIdealSurfaceHeight_.value()) / 2.0f);
+        surfaceSize_ = { selfIdealSurfaceWidth_.value(), selfIdealSurfaceHeight_.value() };
+    } else {
+        surfaceSize_ = drawSize_;
+    }
+    if (handlingSurfaceRenderContext_) {
+        handlingSurfaceRenderContext_->SetBounds(
+            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
+#ifdef ENABLE_ROSEN_BACKEND
+        auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->FlushImplicitTransaction();
+        }
+#endif
+    }
+    if (needForceRender) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkNeedRenderOnly();
+    }
 }
 } // namespace OHOS::Ace::NG

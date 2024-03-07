@@ -65,8 +65,11 @@ public:
     void MarkNewFrameAvailable(void* nativeWindow) override;
     void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) override;
     void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) override;
-
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+    void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isUseExtSurface = false) override;
+#else
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
+#endif
 
     void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
 
@@ -345,6 +348,7 @@ public:
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void ResetSurface() override;
     void PaintDebugBoundary(bool flag) override;
+    void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -417,6 +421,7 @@ private:
     void OnRenderGroupUpdate(bool isRenderGroup) override;
     void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;
     void OnRenderFitUpdate(RenderFit renderFit) override;
+    void OnNodeNameUpdate(const std::string& id) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
@@ -517,13 +522,17 @@ private:
 
     void SetContentRectToFrame(RectF rect) override;
 
+    float RoundValueToPixelGrid(float value);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
+    void RoundToPixelGrid();
     void RoundToPixelGrid(bool isRound, uint8_t flag);
     Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
 
+    std::shared_ptr<Rosen::RSNode> CreateHardwareSurface(
+        const std::optional<ContextParam>& param, bool isUseExtSurface, bool isTextureExportNode);
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;

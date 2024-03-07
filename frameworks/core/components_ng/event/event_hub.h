@@ -33,6 +33,8 @@ class FrameNode;
 using OnAreaChangedFunc =
     std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
 
+using OnSizeChangedFunc = std::function<void(const RectF& oldRect, const RectF& rect)>;
+
 struct KeyboardShortcut {
     std::string value;
     uint8_t keys = 0;
@@ -230,6 +232,10 @@ public:
         return !onAreaChangedInnerCallbacks_.empty();
     }
 
+    void SetOnSizeChanged(OnSizeChangedFunc&& onSizeChanged);
+    void FireOnSizeChanged(const RectF& oldRect, const RectF& rect);
+    bool HasOnSizeChanged() const;
+
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
     using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
     using OnDragStartFunc = std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -245,7 +251,7 @@ public:
 
     bool HasOnDragStart() const
     {
-        return static_cast<bool>(onDragStart_);
+        return static_cast<bool>(onDragStart_) || static_cast<bool>(defaultOnDragStart_);
     }
 
     void SetOnDragEnter(OnDragFunc&& onDragEnter)
@@ -489,15 +495,7 @@ public:
         return customerOnDragEnd_;
     }
 
-    void ClearCustomerOnDragFunc()
-    {
-        onDragStart_ = nullptr;
-        customerOnDragEnter_ = nullptr;
-        customerOnDragLeave_ = nullptr;
-        customerOnDragMove_ = nullptr;
-        customerOnDrop_ = nullptr;
-        customerOnDragEnd_ = nullptr;
-    }
+    void ClearCustomerOnDragFunc();
 
     void FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OHOS::Ace::DragEvent>& info,
         const std::string& extraParams = "");
@@ -510,9 +508,21 @@ public:
 
     void AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback);
 
-    void ClearOnAreaChangedInnerCallbacks()
+    void ClearOnAreaChangedInnerCallbacks();
+
+    void SetDefaultOnDragStart(OnDragStartFunc&& defaultOnDragStart)
     {
-        onAreaChangedInnerCallbacks_.clear();
+        defaultOnDragStart_ = std::move(defaultOnDragStart);
+    }
+
+    const OnDragStartFunc& GetDefaultOnDragStart() const
+    {
+        return defaultOnDragStart_;
+    }
+
+    bool HasDefaultOnDragStart() const
+    {
+        return static_cast<bool>(defaultOnDragStart_);
     }
 
     std::vector<double>& GetVisibleAreaRatios(bool isUser)
@@ -576,6 +586,7 @@ private:
     std::function<void()> onDisappear_;
     OnAreaChangedFunc onAreaChanged_;
     std::unordered_map<int32_t, OnAreaChangedFunc> onAreaChangedInnerCallbacks_;
+    OnSizeChangedFunc onSizeChanged_;
 
     OnDragStartFunc onDragStart_;
     OnDragFunc onDragEnter_;
@@ -584,6 +595,7 @@ private:
     OnDragFunc onDrop_;
     OnNewDragFunc onDragEnd_;
 
+    OnDragStartFunc defaultOnDragStart_;
     OnDragFunc customerOnDragEnter_;
     OnDragFunc customerOnDragLeave_;
     OnDragFunc customerOnDragMove_;

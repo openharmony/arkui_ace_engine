@@ -262,7 +262,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     auto buttonsContext = controlButtonsNode->GetRenderContext();
     CHECK_NULL_VOID(buttonsContext);
 
-    auto titlePopupDistance = CONTAINER_TITLE_HEIGHT.ConvertToPx();
+    auto titlePopupDistance = titleHeight_.ConvertToPx();
     AnimationOption option;
     option.SetDuration(TITLE_POPUP_DURATION);
     option.SetCurve(Curves::EASE_IN_OUT);
@@ -286,8 +286,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
             [floatingContext, buttonsContext, titlePopupDistance, height]() {
                 floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(titlePopupDistance)- height,
                     0.0f });
-                buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(titlePopupDistance) - height,
-                    0.0f });
+                buttonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
             },
             [floatingLayoutProperty]() {
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);

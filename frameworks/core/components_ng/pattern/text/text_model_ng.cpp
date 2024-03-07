@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -65,7 +66,7 @@ RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string
     }
     // set draggable for framenode
     if (frameNode->IsFirstBuilding()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto draggable = pipeline->GetDraggable<TextTheme>();
         frameNode->SetDraggable(draggable);
@@ -471,6 +472,11 @@ void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value, frameNode);
 }
 
+void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value, frameNode);
+}
+
 void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType,
     std::function<void()>& buildFunc, SelectMenuParam& menuParam)
 {
@@ -503,27 +509,109 @@ void TextModelNG::SetClipEdge()
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+std::string TextModelNG::GetContent(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return layoutProperty->GetContent().value_or("");
+}
+
+float TextModelNG::GetLineHeight(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    Dimension defaultLineHeight(0);
+    auto value = layoutProperty->GetLineHeight().value_or(defaultLineHeight);
+    return static_cast<float>(value.Value());
+}
+
+TextDecoration TextModelNG::GetDecoration(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextDecoration::NONE);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDecoration::NONE);
+    return layoutProperty->GetFontStyle()->GetTextDecoration().value_or(TextDecoration::NONE);
+}
+
+Color TextModelNG::GetTextDecorationColor(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, Color::BLACK);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Color::BLACK);
+    return layoutProperty->GetTextDecorationColor().value_or(Color::BLACK);
+}
+
+TextCase TextModelNG::GetTextCase(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextCase::NORMAL);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextCase::NORMAL);
+    return layoutProperty->GetFontStyle()->GetTextCase().value_or(TextCase::NORMAL);
+}
+
+Dimension TextModelNG::GetLetterSpacing(FrameNode* frameNode)
+{
+    Dimension defaultSpacing(0);
+    CHECK_NULL_RETURN(frameNode, defaultSpacing);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultSpacing);
+    return layoutProperty->GetFontStyle()->GetLetterSpacing().value_or(defaultSpacing);
+}
+
+uint32_t TextModelNG::GetMaxLines(FrameNode* frameNode)
+{
+    uint32_t defaultMaxLines = Infinity<uint32_t>();
+    CHECK_NULL_RETURN(frameNode, defaultMaxLines);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultMaxLines);
+    return layoutProperty->GetTextLineStyle()->GetMaxLines().value_or(defaultMaxLines);
+}
+
+TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, OHOS::Ace::TextAlign::START);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, OHOS::Ace::TextAlign::START);
+    return layoutProperty->GetTextLineStyle()->GetTextAlign().value_or(TextAlign::START);
+}
+
+TextOverflow TextModelNG::GetTextOverflow(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextOverflow::NONE);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextOverflow::NONE);
+    return layoutProperty->GetTextLineStyle()->GetTextOverflow().value_or(TextOverflow::NONE);
+}
+
+Dimension TextModelNG::GetTextIndent(FrameNode* frameNode)
+{
+    Dimension defaultTextIndent(0);
+    CHECK_NULL_RETURN(frameNode, defaultTextIndent);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultTextIndent);
+    return layoutProperty->GetTextLineStyle()->GetTextIndent().value_or(defaultTextIndent);
+}
+
 std::vector<std::string> TextModelNG::GetFontFamily(FrameNode* frameNode)
 {
     std::vector<std::string> value;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextLayoutProperty, FontFamily, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontFamily, value, frameNode, value);
     return value;
 }
 
 CopyOptions TextModelNG::GetCopyOption(FrameNode* frameNode)
 {
     CopyOptions value = CopyOptions::None;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextLayoutProperty, CopyOption, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, CopyOption, value, frameNode, value);
     return value;
 }
 
 TextHeightAdaptivePolicy TextModelNG::GetHeightAdaptivePolicy(FrameNode* frameNode)
 {
     TextHeightAdaptivePolicy value = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextLayoutProperty, HeightAdaptivePolicy, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, HeightAdaptivePolicy, value, frameNode, value);
     return value;
 }
 
@@ -556,24 +644,57 @@ Font TextModelNG::GetFont(FrameNode* frameNode)
 Dimension TextModelNG::GetFontSize(FrameNode* frameNode)
 {
     Dimension value;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextLayoutProperty, FontSize, value, frameNode, Dimension());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontSize, value, frameNode, Dimension());
     return value;
 }
 
 Ace::FontWeight TextModelNG::GetFontWeight(FrameNode* frameNode)
 {
     Ace::FontWeight value = Ace::FontWeight::NORMAL;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextLayoutProperty, FontWeight, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontWeight, value, frameNode, value);
     return value;
 }
 
 Ace::FontStyle TextModelNG::GetItalicFontStyle(FrameNode* frameNode)
 {
     Ace::FontStyle value = Ace::FontStyle::NORMAL;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextLayoutProperty, ItalicFontStyle, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, ItalicFontStyle, value, frameNode, value);
     return value;
+}
+
+Color TextModelNG::GetDefaultColor()
+{
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, Color::BLACK);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, Color::BLACK);
+    return theme->GetTextStyle().GetTextColor();
+}
+
+Color TextModelNG::GetFontColor(FrameNode* frameNode)
+{
+    auto defaultColor = GetDefaultColor();
+    CHECK_NULL_RETURN(frameNode, defaultColor);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultColor);
+    return layoutProperty->GetTextColor().value_or(defaultColor);
+}
+
+Dimension TextModelNG::GetTextBaselineOffset(FrameNode* frameNode)
+{
+    Dimension defaultOffset(0);
+    CHECK_NULL_RETURN(frameNode, defaultOffset);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultOffset);
+    return layoutProperty->GetBaselineOffset().value_or(defaultOffset);
+}
+
+std::vector<Shadow> TextModelNG::GetTextShadow(FrameNode* frameNode)
+{
+    std::vector<Shadow> defaultShadow;
+    CHECK_NULL_RETURN(frameNode, defaultShadow);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultShadow);
+    return layoutProperty->GetTextShadow().value_or(defaultShadow);
 }
 } // namespace OHOS::Ace::NG

@@ -78,11 +78,12 @@ private:
     OffsetF AdjustChildPosition(
         OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const;
 
-    SizeF UpdateHeightWithSafeArea(SizeF size);
+    void UpdateSafeArea();
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;
+    SafeAreaInsets safeAreaInsets_;
 
     int32_t gridCount_ = -1;
     int32_t subWindowId_ = -1;

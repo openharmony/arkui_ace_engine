@@ -73,12 +73,7 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textfieldPaintProperty);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
-    auto renderContext = frameNode->GetRenderContext();
-    renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
-    auto radius = textFieldTheme->GetBorderRadius();
     SetCaretColor(textFieldTheme->GetCursorColor());
-    BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
-    renderContext->UpdateBorderRadius(borderRadius);
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
@@ -971,5 +966,228 @@ void TextFieldModelNG::SetOnSubmit(FrameNode* frameNode, std::function<void(int3
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSubmit(std::move(func));
+}
+
+void TextFieldModelNG::SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCut(std::move(func));
+}
+
+void TextFieldModelNG::SetOnPasteWithEvent(FrameNode* frameNode,
+    std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPasteWithEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetCleanNodeStyle(FrameNode* frameNode, CleanNodeStyle cleanNodeStyle)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, cleanNodeStyle, frameNode);
+}
+
+void TextFieldModelNG::SetIsShowCancelButton(FrameNode* frameNode, bool isShowCancelButton)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowCancelButton, isShowCancelButton, frameNode);
+}
+
+void TextFieldModelNG::SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize, frameNode);
+}
+
+void TextFieldModelNG::SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc, frameNode);
+}
+
+void TextFieldModelNG::SetCancelIconColor(FrameNode* frameNode, const Color& iconColor)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor, frameNode);
+}
+
+std::string TextFieldModelNG::GetPlaceholderText(FrameNode* frameNode)
+{
+    std::string value;
+    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, Placeholder, value, frameNode);
+    return value;
+}
+
+std::string TextFieldModelNG::GetTextFieldText(FrameNode* frameNode)
+{
+    std::string value;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    return pattern->GetTextValue();
+}
+
+Color TextFieldModelNG::GetCaretColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, value, frameNode);
+    return value;
+}
+
+Dimension TextFieldModelNG::GetCaretStyle(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value, frameNode);
+    return value;
+}
+
+bool TextFieldModelNG::GetShowUnderline(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowUnderline, value, frameNode);
+    return value;
+}
+
+uint32_t TextFieldModelNG::GetMaxLength(FrameNode* frameNode)
+{
+    uint32_t value = 0;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, MaxLength, value, frameNode, value);
+    return value;
+}
+
+TextInputAction TextFieldModelNG::GetEnterKeyType(FrameNode* frameNode)
+{
+    TextInputAction value = TextInputAction::UNSPECIFIED;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    return pattern->GetTextInputActionValue(
+        frameNode->GetTag() == V2::TEXTAREA_ETS_TAG ? TextInputAction::NEW_LINE : TextInputAction::DONE);
+}
+
+Color TextFieldModelNG::GetPlaceholderColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, PlaceholderTextColor, value, frameNode, value);
+    return value;
+}
+
+Font TextFieldModelNG::GetPlaceholderFont(FrameNode* frameNode)
+{
+    std::vector<std::string> fontFamilies;
+    Dimension fontSize;
+    Ace::FontStyle fontStyle = Ace::FontStyle::NORMAL;
+    Ace::FontWeight fontWeight = Ace::FontWeight::NORMAL;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, PlaceholderFontSize, fontSize, frameNode, Dimension());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, PlaceholderItalicFontStyle, fontStyle, frameNode, fontStyle);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, PlaceholderFontWeight, fontWeight, frameNode, fontWeight);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, PlaceholderFontFamily, fontFamilies, frameNode, fontFamilies);
+    Font value { fontWeight, fontSize, fontStyle, fontFamilies};
+    return value;
+}
+
+bool TextFieldModelNG::GetRequestKeyboardOnFocus(FrameNode* frameNode)
+{
+    bool value = false;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    return pattern->GetNeedToRequestKeyboardOnFocus();
+}
+
+TextInputType TextFieldModelNG::GetType(FrameNode* frameNode)
+{
+    TextInputType value = TextInputType::UNSPECIFIED;
+    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value, frameNode);
+    return value;
+}
+
+Color TextFieldModelNG::GetSelectedBackgroundColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, value, frameNode);
+    return value;
+}
+
+bool TextFieldModelNG::GetShowPasswordIcon(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordIcon, value, frameNode);
+    return value;
+}
+
+bool TextFieldModelNG::GetTextFieldEditing(FrameNode* frameNode)
+{
+    bool value = false;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    return pattern->HasFocus();
+}
+
+bool TextFieldModelNG::GetShowCancelButton(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowCancelButton, value, frameNode);
+    return value;
+}
+
+CalcDimension TextFieldModelNG::GetCancelIconSize(FrameNode* frameNode)
+{
+    CalcDimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, value, frameNode);
+    return value;
+}
+
+std::string TextFieldModelNG::GetCanacelIconSrc(FrameNode* frameNode)
+{
+    std::string value;
+    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, value, frameNode);
+    return value;
+}
+
+Color TextFieldModelNG::GetCancelIconColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, value, frameNode);
+    return value;
+}
+
+TextAlign TextFieldModelNG::GetTextAlign(FrameNode* frameNode)
+{
+    TextAlign value = TextAlign::START;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, TextAlign, value, frameNode, value);
+    return value;
+}
+Color TextFieldModelNG::GetTextColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, TextColor, value, frameNode, value);
+    return value;
+}
+Ace::FontStyle TextFieldModelNG::GetFontStyle(FrameNode* frameNode)
+{
+    Ace::FontStyle value = Ace::FontStyle::NORMAL;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, ItalicFontStyle, value, frameNode, value);
+    return value;
+}
+FontWeight TextFieldModelNG::GetFontWeight(FrameNode* frameNode)
+{
+    FontWeight value = FontWeight::NORMAL;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, FontWeight, value, frameNode, value);
+    return value;
+}
+Dimension TextFieldModelNG::GetFontSize(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, FontSize, value, frameNode, Dimension());
+    return value;
+}
+
+CleanNodeStyle TextFieldModelNG::GetCleanNodeStyle(FrameNode* frameNode)
+{
+    CleanNodeStyle value = CleanNodeStyle::INPUT;
+    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, value, frameNode);
+    return value;
 }
 } // namespace OHOS::Ace::NG

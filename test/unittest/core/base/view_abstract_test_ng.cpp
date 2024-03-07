@@ -20,7 +20,6 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "core/interfaces/native/node/node_api.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -39,6 +38,7 @@
 #include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/property/property.h"
+#include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "frameworks/core/components_ng/pattern/panel/sliding_panel_model_ng.h"
@@ -1107,6 +1107,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
      */
     ViewAbstract::BindPopup(param, targetNode, customNode);
     ViewAbstract::BindPopup(param, targetNode, customNode);
+    overlayManager->HidePopup(targetNode->GetId(), info);
     auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
     auto popupNode = popupInfo.popupNode;
     ASSERT_NE(popupNode, nullptr);

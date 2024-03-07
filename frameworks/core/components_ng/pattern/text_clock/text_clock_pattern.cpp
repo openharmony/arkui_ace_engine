@@ -38,7 +38,7 @@ constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
 constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
 constexpr bool ON_TIME_CHANGE = true;
-const std::string DEFAULT_FORMAT = "hms";
+const std::string DEFAULT_FORMAT = "aa h:m:s";
 const std::string FORM_FORMAT = "hm";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
@@ -245,30 +245,28 @@ void TextClockPattern::UpdateTimeText(bool isTimeChange)
     if (!isStart_ || !isSetVisible_ || !isInVisibleArea_ || !isFormVisible_) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textNode = GetTextNode();
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-
+    RequestUpdateForNextSecond();
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty()) {
         return;
     }
-
-    textLayoutProperty->UpdateContent(currentTime); // update time text.
-    auto textContext = textNode->GetRenderContext();
-    CHECK_NULL_VOID(textContext);
-    textContext->SetClipToFrame(false);
-    textContext->UpdateClipEdge(false);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    textNode->MarkModifyDone();
-    RequestUpdateForNextSecond();
     if (currentTime != prevTime_ || isTimeChange) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto textNode = GetTextNode();
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateContent(currentTime); // update time text.
+        auto textContext = textNode->GetRenderContext();
+        CHECK_NULL_VOID(textContext);
+        textContext->SetClipToFrame(false);
+        textContext->UpdateClipEdge(false);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        textNode->MarkModifyDone();
+        prevTime_ = currentTime;
         FireChangeEvent();
     }
-    prevTime_ = currentTime;
 }
 
 void TextClockPattern::RequestUpdateForNextSecond()
@@ -383,7 +381,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
 
 void TextClockPattern::ParseInputFormat(bool& is24H)
 {
-    std::string inputFormat = (GetFormat() == DEFAULT_FORMAT) ? "aa h:m:s" : GetFormat();
+    std::string inputFormat = GetFormat();
     if (inputFormat == FORM_FORMAT && isForm_) {
         inputFormat = "h:m";
     }

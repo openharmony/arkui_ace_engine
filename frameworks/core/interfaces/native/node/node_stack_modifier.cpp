@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_stack_modifier.h"
+#include <cstdint>
 
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
@@ -32,7 +33,7 @@ constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
 constexpr int NUM_8 = 8;
-
+constexpr int32_t DEFAULT_ALIGNMENT_INDEX = 4;
 void SetAlignContent(ArkUINodeHandle node, ArkUI_Int32 align)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -78,12 +79,39 @@ void ResetAlignContent(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     StackModelNG::SetAlignment(frameNode, DEFAULT_STACK_ALIGNMENT);
 }
+
+int32_t findAlignmentIndex(Alignment& alignment)
+{
+    std::vector<Alignment> alignMents = {
+        Alignment::TOP_LEFT,
+        Alignment::TOP_CENTER,
+        Alignment::TOP_RIGHT,
+        Alignment::CENTER_LEFT,
+        Alignment::CENTER,
+        Alignment::CENTER_RIGHT,
+        Alignment::BOTTOM_LEFT,
+        Alignment::BOTTOM_CENTER,
+        Alignment::BOTTOM_RIGHT,
+    };
+    auto iterator = std::find(alignMents.begin(), alignMents.end(), alignment);
+    if (iterator == alignMents.end()) {
+        return DEFAULT_ALIGNMENT_INDEX;
+    }
+    return iterator - alignMents.begin();
 }
 
+int32_t GetAlignContent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_ALIGNMENT_INDEX);
+    auto currentAlignment = StackModelNG::GetAlignment(frameNode);
+    return findAlignmentIndex(currentAlignment);
+}
+} // namespace
 namespace NodeModifier {
 const ArkUIStackModifier* GetStackModifier()
 {
-    static const ArkUIStackModifier modifier = {SetAlignContent, ResetAlignContent};
+    static const ArkUIStackModifier modifier = { SetAlignContent, ResetAlignContent, GetAlignContent };
 
     return &modifier;
 }

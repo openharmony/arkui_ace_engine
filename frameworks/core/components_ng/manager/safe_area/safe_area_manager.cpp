@@ -149,6 +149,11 @@ SafeAreaInsets SafeAreaManager::GetSafeArea() const
     return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
 }
 
+SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
+{
+    return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+}
+
 float SafeAreaManager::GetKeyboardOffset() const
 {
     if (keyboardSafeAreaEnabled_) {

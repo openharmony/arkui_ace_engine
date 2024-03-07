@@ -275,18 +275,15 @@ private:
 using InternalRotationXEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationXModifier, float>;
 using InternalRotationYEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationYModifier, float>;
 using InternalRotationZEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationModifier, float>;
-using InternalCameraDistanceEffect = PropertyTransitionEffectTemplate<Rosen::RSCameraDistanceModifier, float>;
 template<>
 InternalRotationXEffect::PropertyTransitionEffectTemplate();
 template<>
 InternalRotationYEffect::PropertyTransitionEffectTemplate();
 template<>
 InternalRotationZEffect::PropertyTransitionEffectTemplate();
-template<>
-InternalCameraDistanceEffect::PropertyTransitionEffectTemplate();
 class RosenRotation3DTransitionEffect final
     : public RosenCompositeTransitionEffect<InternalRotationXEffect, InternalRotationYEffect, InternalRotationZEffect,
-          RosenPivotTransitionEffect, InternalCameraDistanceEffect> {
+          RosenPivotTransitionEffect> {
 public:
     explicit RosenRotation3DTransitionEffect(const RotateOptions& options);
     ~RosenRotation3DTransitionEffect() override = default;

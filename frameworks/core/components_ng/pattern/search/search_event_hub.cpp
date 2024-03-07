@@ -36,7 +36,7 @@ void SearchEventHub::UpdateChangeEvent(const std::string& value) const
     pattern->UpdateChangeEvent(value);
     auto id = host->GetInspectorIdValue("");
     if (!id.empty()) {
-        Recorder::NodeDataCache::Get().PutString(id, value);
+        Recorder::NodeDataCache::Get().PutString(host, id, value);
     }
 }
 } // namespace OHOS::Ace::NG

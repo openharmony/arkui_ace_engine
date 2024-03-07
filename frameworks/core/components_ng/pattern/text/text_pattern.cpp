@@ -805,6 +805,7 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
     auto baseOffset = textSelector_.baseOffset;
     auto destinationOffset = textSelector_.destinationOffset;
     HandleSelectionChange(aiSpan.start, aiSpan.end);
+    parentGlobalOffset_ = GetParentGlobalOffset();
     if (calculateHandleFunc == nullptr) {
         CalculateHandleOffsetAndShowOverlay();
     } else {
@@ -1188,6 +1189,17 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     if (dragResultObjects_.empty() || !gestureHub->GetIsTextDraggable()) {
         return itemInfo;
     }
+    auto data = event->GetData();
+    if (!data) {
+        AddUdmfData(event);
+    }
+    CloseOperate();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return itemInfo;
+}
+
+void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
+{
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     auto resultProcessor = [unifiedData, weak = WeakClaim(this)](const ResultObject& result) {
         auto pattern = weak.Upgrade();
@@ -1217,9 +1229,6 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
         resultProcessor(resultObj);
     }
     event->SetData(unifiedData);
-    CloseOperate();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    return itemInfo;
 }
 
 void TextPattern::CloseOperate()
@@ -1394,9 +1403,7 @@ void TextPattern::InitDragEvent()
             return pattern->OnDragStart(event, extraParams);
         }
     };
-    if (!eventHub->HasOnDragStart()) {
-        eventHub->SetOnDragStart(std::move(onDragStart));
-    }
+    eventHub->SetDefaultOnDragStart(std::move(onDragStart));
     auto onDragMove = [weakPtr = WeakClaim(this)](
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
@@ -1821,7 +1828,7 @@ void TextPattern::OnAfterModifyDone()
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
         auto prop = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        Recorder::NodeDataCache::Get().PutString(inspectorId, prop->GetText());
+        Recorder::NodeDataCache::Get().PutString(host, inspectorId, prop->GetText());
     }
 }
 
@@ -1890,28 +1897,9 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, boo
     }
 }
 
-void TextPattern::RedisplaySelectOverlay()
-{
-    if (!isShowMenu_) {
-        TAG_LOGD(AceLogTag::ACE_TEXT, "Do not redisplaySelectOverlay when drag failed");
-        isShowMenu_ = true;
-        return;
-    }
-    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
-        CalculateHandleOffsetAndShowOverlay();
-        if (selectOverlayProxy_->IsMenuShow()) {
-            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-        } else {
-            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-            selectOverlayProxy_->ShowOrHiddenMenu(true);
-        }
-    }
-}
-
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
-        RedisplaySelectOverlay();
         return false;
     }
 
@@ -1926,8 +1914,6 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
     paragraph_ = paragraph;
-    // The handle calculation needs to be after the paragraph is assigned.
-    RedisplaySelectOverlay();
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
@@ -2003,7 +1989,7 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
             if (item->inspectId.empty()) {
                 continue;
             }
-            Recorder::NodeDataCache::Get().PutString(item->inspectId, item->content);
+            Recorder::NodeDataCache::Get().PutString(host, item->inspectId, item->content);
         }
         CloseSelectOverlay();
         ResetSelection();

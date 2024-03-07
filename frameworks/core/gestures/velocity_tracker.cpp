@@ -65,7 +65,10 @@ inline double GetLinearSlope(const LeastSquareImpl& axis)
     const auto& x = axis.GetXVals();
     const auto& y = axis.GetYVals();
     auto count = axis.GetTrackNum();
-    return (y[count - 1] - y[count - 2]) / (x[count - 1] - x[count - 2]); // 2: const
+    double velocity = (y[count - 1] - y[count - 2]) / (x[count - 1] - x[count - 2]); // 2: const
+    LOGI("Linear velocity:%{public}f, startY:%{public}f, endY:%{public}f, startX:%{public}f, endX:%{public}f",
+        velocity, y[count - 2], y[count - 1], x[count - 2], x[count - 1]);
+    return velocity;
 }
 
 void CorrectMonotonicAxisVelocity(const LeastSquareImpl& axis, double& v, double extremX)
@@ -102,6 +105,14 @@ double UpdateAxisVelocity(LeastSquareImpl& axis)
         velocity = GetLinearSlope(axis);
     }
     return velocity;
+}
+
+inline void DumpHistoryTrack(const std::vector<double>& vals)
+{
+    LOGI("Dump when velocity is zero.");
+    for (double val : vals) {
+        LOGI("History position of zero velocity track:%{public}f", val);
+    }
 }
 } // namespace
 
@@ -181,6 +192,12 @@ void VelocityTracker::UpdateVelocity()
     double yVelocity = UpdateAxisVelocity(yAxis_);
     velocity_.SetOffsetPerSecond({ xVelocity, yVelocity });
     isVelocityDone_ = true;
+
+    if (mainAxis_ == Axis::HORIZONTAL && NearZero(xVelocity)) {
+        DumpHistoryTrack(xAxis_.GetYVals());
+    } else if (mainAxis_ == Axis::VERTICAL && NearZero(yVelocity)) {
+        DumpHistoryTrack(yAxis_.GetYVals());
+    }
 }
 
 } // namespace OHOS::Ace

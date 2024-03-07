@@ -158,6 +158,8 @@ public:
 
     void UpdateGeometryTransition(const std::string& id, bool followWithoutTransition = false);
 
+    void ResetGeometryTransition();
+
     void UpdateAspectRatio(float ratio);
     void ResetAspectRatio();
 

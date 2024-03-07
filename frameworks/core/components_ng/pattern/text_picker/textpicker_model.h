@@ -35,6 +35,12 @@ struct TextPickerDialog {
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
 };
+struct TextPickerDialogEvent {
+    std::function<void()> onDidAppear;
+    std::function<void()> onDidDisappear;
+    std::function<void()> onWillAppear;
+    std::function<void()> onWillDisappear;
+};
 using TextChangeEvent = std::function<void(const std::string&, double)>;
 using TextCascadeChangeEvent = std::function<void(const std::vector<std::string>&, const std::vector<double>&)>;
 using TextCascadeValueChangeEvent = std::function<void(const std::vector<std::string>&)>;
@@ -86,7 +92,8 @@ public:
     virtual RefPtr<AceType> CreateObject() = 0;
     virtual void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog) = 0;
+        std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog,
+        TextPickerDialogEvent& textPickerDialogEvent) = 0;
 
 private:
     static std::unique_ptr<TextPickerDialogModel> textPickerDialogInstance_;

@@ -33,7 +33,7 @@ void ScreenModel::Create(uint64_t screenId)
 
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCREEN_ETS_TAG, nodeId);
+    ACE_SCOPED_TRACE("Create[%s][self:%d][%" PRIu64 "]", V2::SCREEN_ETS_TAG, nodeId, screenSession->GetScreenId());
     auto frameNode = ScreenNode::GetOrCreateScreenNode(V2::SCREEN_ETS_TAG, nodeId,
         [&screenSession]() { return AceType::MakeRefPtr<ScreenPattern>(screenSession); });
     stack->Push(frameNode);

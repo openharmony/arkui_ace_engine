@@ -632,6 +632,12 @@ public:
         isNativeEmbedMode_ = isEnabled;
     }
 
+    void RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
+    {
+        tag_ = tag;
+        tag_type_ = type;
+    }
+
     using OnCommonDialogImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType) const
     {
@@ -836,6 +842,23 @@ public:
         onLoadInterceptImpl_ = onLoadInterceptImpl;
     }
 
+    using OnOverrideUrlLoadingImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnOverrideUrlLoading(const BaseEventInfo* info) const
+    {
+        if (onOverrideUrlLoadingImpl_) {
+            return onOverrideUrlLoadingImpl_(info);
+        }
+        return false;
+    }
+    void SetOnOverrideUrlLoading(OnOverrideUrlLoadingImpl&& onOverrideUrlLoadingImpl)
+    {
+        if (onOverrideUrlLoadingImpl == nullptr) {
+            return;
+        }
+
+        onOverrideUrlLoadingImpl_ = onOverrideUrlLoadingImpl;
+    }
+
     using OnInterceptRequestImpl = std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>;
     RefPtr<WebResponse> OnInterceptRequest(const BaseEventInfo* info) const
     {
@@ -1024,6 +1047,7 @@ private:
     OnFullScreenEnterImpl onFullScreenEnterImpl_;
     OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
     OnLoadInterceptImpl onLoadInterceptImpl_;
+    OnOverrideUrlLoadingImpl onOverrideUrlLoadingImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
     OnSslErrorRequestImpl onSslErrorRequestImpl_;
     OnSslSelectCertRequestImpl onSslSelectCertRequestImpl_;
@@ -1063,6 +1087,8 @@ private:
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
+    std::string tag_;
+    std::string tag_type_;
     OnDragFunc onDragStartId_;
     OnDropFunc onDragEnterId_;
     OnDropFunc onDragMoveId_;

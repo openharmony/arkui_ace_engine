@@ -39,6 +39,13 @@ public:
     static void HandleNavigationStateChange(
         const std::string& navigationId, const std::string& navDestinationName, NG::NavDestinationState state);
 
+    static void RegisterScrollEventCallback(const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterScrollEventCallback(
+        const std::string& id, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterScrollEventCallback(napi_value cb);
+    static void UnRegisterScrollEventCallback(const std::string& id, napi_value cb);
+    static void HandleScrollEventStateChange(const std::string& id, NG::ScrollEventType eventType, float offset);
+
     static void RegisterRouterPageCallback(
         napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener);
     static void RegisterRouterPageCallback(
@@ -47,6 +54,12 @@ public:
     static void UnRegisterRouterPageCallback(int32_t uiContextInstanceId, napi_value callback);
     static void HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_value context, int32_t index,
         const std::string& name, const std::string& path, NG::RouterPageState state);
+    
+    static void RegisterDensityCallback(
+        int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_value callback);
+    static void HandleDensityChange(NG::AbilityContextInfo& info, double density);
+
     static bool ParseStringFromNapi(napi_env env, napi_value val, std::string& str);
     static bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType);
 private:
@@ -56,11 +69,16 @@ private:
     static std::list<std::shared_ptr<UIObserverListener>> unspecifiedNavigationListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedCNavigationListeners_;
+    static std::list<std::shared_ptr<UIObserverListener>> scrollEventListeners_;
+    static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedScrollEventListeners_;
     static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
         abilityContextRouterPageListeners_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedRouterPageListeners_;
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> infos_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedDensityListeners_;
 };
 } // namespace OHOS::Ace::Napi
 #endif // FOUNDATION_ACE_INTERFACES_OBSERVER_H

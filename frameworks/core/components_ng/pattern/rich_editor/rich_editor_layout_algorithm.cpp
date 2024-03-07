@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs)
     : pManager_(paragraphs)
 {
+    allSpans_ = spans;
     // split spans into groups by \newline
     auto it = spans.begin();
     while (it != spans.end()) {
@@ -62,6 +63,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     pManager_->Reset();
+    SetPlaceholder(layoutWrapper);
     if (spans_.empty()) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, std::nullopt);
@@ -127,6 +129,15 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     return SizeF(res.Width(), contentHeight);
 }
 
+void RichEditorLayoutAlgorithm::SetPlaceholder(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPlaceholder(spans_);
+}
+
 float RichEditorLayoutAlgorithm::GetShadowOffset(const std::list<RefPtr<SpanItem>>& group)
 {
     float shadowOffset = 0.0f;
@@ -170,12 +181,7 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(context);
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
 
-    // merge spans
-    std::list<RefPtr<SpanItem>> allSpans;
-    for (auto&& group : spans_) {
-        allSpans.splice(allSpans.end(), group);
-    }
-    SetSpans(allSpans);
+    SetSpans(allSpans_);
     TextLayoutAlgorithm::Layout(layoutWrapper);
 }
 

@@ -28,6 +28,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -855,9 +856,15 @@ public:
     {
         ViewAbstract::SetOnDragMove(std::move(onDragMove));
     }
+
     void SetAllowDrop(const std::set<std::string>& allowDrop) override
     {
         ViewAbstract::SetAllowDrop(allowDrop);
+    }
+
+    void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier) override
+    {
+        ViewAbstract::SetDrawModifier(drawModifier);
     }
 
     void SetDragPreview(const NG::DragDropInfo& info) override
@@ -882,6 +889,17 @@ public:
                 Offset(origin.GetX(), origin.GetY()));
         };
         ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
+    }
+
+    void SetOnSizeChanged(
+        std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged) override
+    {
+        ViewAbstract::SetOnSizeChanged(std::move(onSizeChanged));
+    }
+
+    void* GetFrameNode() override
+    {
+        return ViewAbstract::GetFrameNode();
     }
 
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override
@@ -992,6 +1010,11 @@ public:
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
+    void DismissDialog() override
+    {
+        ViewAbstract::DismissDialog();
+    }
+
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
 
     void BindMenuGesture(
@@ -1005,11 +1028,13 @@ public:
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear) override;
+        std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear) override;
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss) override;
+        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear) override;
     void DismissSheet() override;
 
     void SetAccessibilityGroup(bool accessible) override;

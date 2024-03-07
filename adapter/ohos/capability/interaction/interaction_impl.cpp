@@ -28,6 +28,8 @@ namespace OHOS::Ace {
     Msdp::DeviceStatus::DragResult TranslateDragResult(DragRet dragResult);
     Msdp::DeviceStatus::PreviewStyle TranslatePreviewStyle(const OHOS::Ace::PreviewStyle& previewStyle);
     DragRet TranslateDragResult(Msdp::DeviceStatus::DragResult dragResult);
+    Msdp::DeviceStatus::DragBehavior TranslateDragBehavior(OHOS::Ace::DragBehavior dragBehavior);
+    OHOS::Ace::DragBehavior TranslateDragBehavior(Msdp::DeviceStatus::DragBehavior dragBehavior);
 
 InteractionInterface* InteractionInterface::GetInstance()
 {
@@ -57,16 +59,16 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
 {
     std::function<void(const Msdp::DeviceStatus::DragNotifyMsg&)> callbackCore
         = [=](const Msdp::DeviceStatus::DragNotifyMsg& dragNotifyMsg) {
-        OHOS::Ace::DragNotifyMsg msg { dragNotifyMsg.displayX,
-            dragNotifyMsg.displayY, dragNotifyMsg.targetPid, TranslateDragResult(dragNotifyMsg.result) };
+        OHOS::Ace::DragNotifyMsg msg { dragNotifyMsg.displayX, dragNotifyMsg.displayY, dragNotifyMsg.targetPid,
+            TranslateDragResult(dragNotifyMsg.result), TranslateDragBehavior(dragNotifyMsg.dragBehavior) };
         if (callback) {
             callback(msg);
         }
     };
-    Msdp::DeviceStatus::DragData msdpDragData { {},
-        dragData.buffer, dragData.udKey, dragData.extraInfo, dragData.filterInfo,
-        dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX, dragData.displayY,
-        dragData.displayId, dragData.hasCanceledAnimation, dragData.hasCoordinateCorrected, dragData.summarys };
+    Msdp::DeviceStatus::DragData msdpDragData { {}, dragData.buffer, dragData.udKey, dragData.extraInfo,
+    dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX,
+    dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
+    dragData.hasCoordinateCorrected, dragData.summarys };
     for (auto& shadowInfo: dragData.shadowInfos) {
         if (shadowInfo.pixelMap) {
             msdpDragData.shadowInfos.push_back({ shadowInfo.pixelMap->GetPixelMapSharedPtr(),
@@ -100,11 +102,8 @@ int32_t InteractionImpl::UpdatePreviewStyleWithAnimation(const OHOS::Ace::Previe
 
 int32_t InteractionImpl::StopDrag(DragDropRet result)
 {
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("InteractionImpl StopDrag, DragResult is %{public}d.", result.result);
-    }
-    Msdp::DeviceStatus::DragDropResult dragDropResult {
-        TranslateDragResult(result.result), result.hasCustomAnimation, result.windowId };
+    Msdp::DeviceStatus::DragDropResult dragDropResult { TranslateDragResult(result.result), result.hasCustomAnimation,
+    result.mainWindow, TranslateDragBehavior(result.dragBehavior) };
     return InteractionManager::GetInstance()->StopDrag(dragDropResult);
 }
 
@@ -261,6 +260,29 @@ int32_t InteractionImpl::GetDragState(DragState& dragState) const
             break;
     }
     return ret;
+}
+
+Msdp::DeviceStatus::DragBehavior TranslateDragBehavior(OHOS::Ace::DragBehavior dragBehavior)
+{
+    switch (dragBehavior) {
+        case OHOS::Ace::DragBehavior::COPY:
+            return Msdp::DeviceStatus::DragBehavior::COPY;
+        case OHOS::Ace::DragBehavior::MOVE:
+            return Msdp::DeviceStatus::DragBehavior::MOVE;
+        default:
+            return Msdp::DeviceStatus::DragBehavior::UNKNOWN;
+    }
+}
+OHOS::Ace::DragBehavior TranslateDragBehavior(Msdp::DeviceStatus::DragBehavior dragBehavior)
+{
+    switch (dragBehavior) {
+        case Msdp::DeviceStatus::DragBehavior::COPY:
+            return OHOS::Ace::DragBehavior::COPY;
+        case Msdp::DeviceStatus::DragBehavior::MOVE:
+            return OHOS::Ace::DragBehavior::MOVE;
+        default:
+            return OHOS::Ace::DragBehavior::UNKNOWN;
+    }
 }
 
 } // namespace OHOS::Ace

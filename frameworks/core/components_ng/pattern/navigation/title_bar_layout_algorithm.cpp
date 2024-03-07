@@ -22,7 +22,9 @@
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -176,6 +178,42 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
     }
     return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
+}
+
+float TitleBarLayoutAlgorithm::WidthAfterAvoidMenubar(const RefPtr<TitleBarNode>& titleBarNode, float width)
+{
+    float afterAvoidWidth = width;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, afterAvoidWidth);
+    if (!pipeline->GetInstallationFree()) {
+        LOGI("xhq:: not install free");
+        return afterAvoidWidth;
+    }
+    
+    auto titlebarRect = titleBarNode->GetParentGlobalOffsetDuringLayout();
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, afterAvoidWidth);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_RETURN(appBar, afterAvoidWidth);
+    auto appBarRect = appBar->GetAppBarRect();
+    CHECK_NULL_RETURN(appBarRect, afterAvoidWidth);
+    auto appBarOffset = appBarRect->GetOffset();
+    auto appBarSize = appBarRect->GetSize();
+
+    auto titleBarGeo = titleBarNode->GetGeometryNode();
+    CHECK_NULL_RETURN(titleBarGeo, afterAvoidWidth);
+
+    auto avoidArea = titlebarRect.GetX() + titleBarGeo->GetFrameSize().Width() - appBarOffset.GetX();
+    auto buttonTop = appBarOffset.GetY() + appBarSize.Height();
+    if (LessOrEqual(titlebarRect.GetY(), buttonTop) && GreatOrEqual(avoidArea, 0.0)) {
+        afterAvoidWidth = afterAvoidWidth - avoidArea;
+    }
+
+    if (LessOrEqual(afterAvoidWidth, 0.0)) {
+        return 0.0f;
+    }
+    return afterAvoidWidth;
 }
 
 void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
@@ -672,6 +710,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     auto geometryNode = menuWrapper->GetGeometryNode();
     auto menuWidth = geometryNode->GetMarginFrameSize().Width();
     auto maxWidth = geometryNode->GetParentLayoutConstraint()->maxSize.Width();
+    maxWidth = WidthAfterAvoidMenubar(titleBarNode, maxWidth);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
     auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
@@ -751,6 +790,7 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureBackButton(layoutWrapper, titleBarNode, layoutProperty);
     MeasureMenu(layoutWrapper, titleBarNode, layoutProperty);
     auto titleMaxWidth = GetTitleWidth(titleBarNode, layoutProperty, size);
+    titleMaxWidth = WidthAfterAvoidMenubar(titleBarNode, titleMaxWidth);
     MeasureSubtitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
     MeasureTitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
     titlePattern->SetCurrentTitleBarHeight(size.Height());
@@ -759,6 +799,11 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline && pipeline->GetInstallationFree()) {
+        //TitleBar run measure again during Layout in atomic service for avoiding menuBar
+        Measure(layoutWrapper);
+    }
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(titleBarNode);
     auto layoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(layoutWrapper->GetLayoutProperty());

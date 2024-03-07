@@ -19,11 +19,10 @@
 #include "core/common/recorder/node_data_cache.h"
 
 namespace OHOS::Ace::Recorder {
-ExposureProcessor::ExposureProcessor(const std::string& inspectorId)
+ExposureProcessor::ExposureProcessor(const std::string& pageUrl, const std::string& inspectorId) : pageUrl_(pageUrl)
 {
     if (!inspectorId.empty()) {
-        NodeDataCache::Get().GetExposureCfg(inspectorId, cfg_);
-        IsNeedRecord();
+        NodeDataCache::Get().GetExposureCfg(pageUrl, inspectorId, cfg_);
     }
 }
 
@@ -37,18 +36,18 @@ double ExposureProcessor::GetRatio() const
     return cfg_.ratio;
 }
 
-void ExposureProcessor::OnVisibleChange(bool isVisible)
+void ExposureProcessor::OnVisibleChange(bool isVisible, const std::string& param)
 {
     auto current = GetCurrentTimestamp();
     if (isVisible) {
         startTime_ = current;
-        pageUrl_ = EventRecorder::Get().GetPageUrl();
         navDstName_ = EventRecorder::Get().GetNavDstName();
     } else if (startTime_ > 0) {
         auto duration = current - startTime_;
         if (duration >= cfg_.duration) {
             EventParamsBuilder builder;
             builder.SetId(cfg_.id)
+                .SetDescription(param)
                 .SetPageUrl(pageUrl_)
                 .SetNavDst(navDstName_)
                 .SetExtra(KEY_DURATION, std::to_string(duration));

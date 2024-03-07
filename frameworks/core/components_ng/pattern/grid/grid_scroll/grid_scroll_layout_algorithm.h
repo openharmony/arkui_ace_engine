@@ -193,6 +193,7 @@ private:
     float crossPaddingOffset_ = 0;
     int32_t lastCross_ = 0;
     bool isChildrenUpdated_ = false;
+    bool canSkipMeasure_ = false;
     bool canOverScroll_ = false;
     bool enableSkipping_ = true; // enables skipping lines on a large offset change.
     GridLayoutInfo scrollGridLayoutInfo_;

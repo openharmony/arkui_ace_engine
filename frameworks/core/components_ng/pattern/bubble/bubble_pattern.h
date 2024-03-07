@@ -94,6 +94,11 @@ public:
         return childOffset_;
     }
 
+    SizeF GetChildSize()
+    {
+        return childSize_;
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -184,6 +189,7 @@ private:
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 
     bool delayShow_ = false;
+    std::function<void()> finish_;
 
     std::optional<OffsetF> targetOffset_;
     std::optional<SizeF> targetSize_;

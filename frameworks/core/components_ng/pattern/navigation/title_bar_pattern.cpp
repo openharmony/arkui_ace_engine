@@ -262,6 +262,19 @@ void TitleBarPattern::OnModifyDone()
     MountBackButton(hostNode);
     MountTitle(hostNode);
     MountSubTitle(hostNode);
+    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+        isInitialTitle_ || !isTitleChanged_) {
+        return;
+    }
+    isTitleChanged_ = false;
+    if (NearEqual(tempTitleBarHeight_, static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) ||
+        NearEqual(tempTitleBarHeight_, static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()))) {
+        tempTitleBarHeight_ =
+            hostNode->GetSubtitle() ? static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())
+                                    : static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    }
 }
 
 void TitleBarPattern::ProcessTitleDragStart(float offset)

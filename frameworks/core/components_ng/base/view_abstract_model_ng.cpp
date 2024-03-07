@@ -161,6 +161,57 @@ void ViewAbstractModelNG::BindMenu(
     }
 }
 
+void CreateCustomMenuWithPreview(
+    std::function<void()>& buildFunc, const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+{
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
+        auto context = targetNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        auto pixelMap = context->GetThumbnailPixelMap();
+        gestureHub->SetPixelMap(pixelMap);
+    }
+    ViewAbstractModelNG::CreateCustomMenu(buildFunc, targetNode, menuParam.positionOffset, previewBuildFunc, menuParam);
+}
+
+void BindContextMenuSingle(
+    std::function<void()>& buildFunc, const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+{
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+    auto targetId = targetNode->GetId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    if (subwindow) {
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto menuNode = overlayManager->GetMenuNode(targetId);
+        if (menuNode) {
+            auto pattern = menuNode->GetPattern<MenuWrapperPattern>();
+            if (pattern->GetShow() && !menuParam.isShow) {
+                SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
+            } else if (!pattern->GetShow() && menuParam.isShow) {
+                CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
+            }
+        } else if (menuParam.isShow && buildFunc) {
+            CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
+        }
+    } else {
+        //first response for build subwindow and menu
+        if (menuParam.isShow && buildFunc) {
+            CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
+        }
+    }
+}
+
 void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void()>& buildFunc,
     const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
@@ -168,34 +219,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     CHECK_NULL_VOID(targetNode);
 
     if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-        auto targetId = targetNode->GetId();
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
-        if (menuParam.isShow && buildFunc) {
-            if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
-                auto context = targetNode->GetRenderContext();
-                CHECK_NULL_VOID(context);
-                auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
-                CHECK_NULL_VOID(gestureHub);
-                auto pixelMap = context->GetThumbnailPixelMap();
-                gestureHub->SetPixelMap(pixelMap);
-            }
-            CreateCustomMenu(buildFunc, targetNode, menuParam.positionOffset, previewBuildFunc, menuParam);
-        } else if (subwindow) {
-            auto childContainerId = subwindow->GetChildContainerId();
-            auto childContainer = AceEngine::Get().GetContainer(childContainerId);
-            CHECK_NULL_VOID(childContainer);
-            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            auto menuNode = overlayManager->GetMenuNode(targetId);
-            CHECK_NULL_VOID(menuNode);
-            auto pattern = menuNode->GetPattern<MenuWrapperPattern>();
-            if (pattern->GetShow() && !menuParam.isShow) {
-                SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
-            }
-        }
+        BindContextMenuSingle(buildFunc, menuParam, previewBuildFunc);
     } else {
         auto hub = targetNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(hub);
@@ -322,7 +346,7 @@ void ViewAbstractModelNG::SetScale(float x, float y, float z)
 
 void ViewAbstractModelNG::BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
-    std::function<void()>&& onDisappear)
+    std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
@@ -348,7 +372,8 @@ void ViewAbstractModelNG::BindContentCover(bool isShow, std::function<void(const
     targetNode->PushDestroyCallback(destructor);
 
     overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), modalStyle,
-        std::move(onAppear), std::move(onDisappear), targetNode);
+        std::move(onAppear), std::move(onDisappear),
+        std::move(onWillAppear), std::move(onWillDisappear), targetNode);
 }
 
 void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
@@ -378,7 +403,8 @@ void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
 
 void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
-    std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss)
+    std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
@@ -411,7 +437,8 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     targetNode->PushDestroyCallback(destructor);
 
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),
-        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), targetNode);
+        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillAppear),
+        std::move(onWillDisappear), targetNode);
 }
 
 void ViewAbstractModelNG::DismissSheet()

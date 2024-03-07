@@ -79,10 +79,10 @@ public:
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
     WebPattern();
-    WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, WebType type = WebType::SURFACE,
-               bool incognitoMode = false);
-    WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, WebType type = WebType::SURFACE,
-               bool incognitoMode = false);
+    WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
+                RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+    WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback,
+                RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
 
     ~WebPattern() override;
 
@@ -94,7 +94,7 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        if (type_ == WebType::TEXTURE) {
+        if (renderMode_ == RenderMode::SYNC_RENDER) {
             return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
         } else {
         return RenderContext::ContextParam { RenderContext::ContextType::SURFACE, "RosenWeb" };
@@ -108,7 +108,7 @@ public:
         return true;
     }
 
-    void UpdateScrollOffset(SizeF frameSize) override;
+    void UpdateSlideOffset(SizeF frameSize) override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -194,14 +194,14 @@ public:
         return setWebIdCallback_;
     }
 
-    void SetWebType(WebType type)
+    void SetRenderMode(RenderMode renderMode)
     {
-        type_ = type;
+        renderMode_ = renderMode;
     }
 
-    WebType GetWebType()
+    RenderMode GetRenderMode()
     {
-        return type_;
+        return renderMode_;
     }
 
     void SetIncognitoMode(bool incognitoMode)
@@ -316,6 +316,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebStandardFont, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DefaultFixedFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DefaultFontSize, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DefaultTextEncodingFormat, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MinFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MinLogicalFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlockNetwork, bool);
@@ -418,6 +419,7 @@ private:
     void OnWebStandardFontUpdate(const std::string& value);
     void OnDefaultFixedFontSizeUpdate(int32_t value);
     void OnDefaultFontSizeUpdate(int32_t value);
+    void OnDefaultTextEncodingFormatUpdate(const std::string& value);
     void OnMinFontSizeUpdate(int32_t value);
     void OnMinLogicalFontSizeUpdate(int32_t value);
     void OnBlockNetworkUpdate(bool value);
@@ -446,8 +448,8 @@ private:
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
     void ResetDragAction();
-    RefPtr<ScrollPattern> SearchParent();
-    void InitScrollUpdateListener();
+    void UpdateRelativeOffset();
+    void InitSlideUpdateListener();
     void CalculateHorizontalDrawRect(const SizeF frameSize);
     void CalculateVerticalDrawRect(const SizeF frameSize);
     int onDragMoveCnt = 0;
@@ -485,7 +487,7 @@ private:
     std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
-    WebType type_;
+    RenderMode renderMode_;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;

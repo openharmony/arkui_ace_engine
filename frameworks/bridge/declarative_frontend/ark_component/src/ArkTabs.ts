@@ -76,7 +76,7 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   divider(value: DividerStyle | null): TabsAttribute {
-    modifierWithKey(this._modifiersWithKeys, DividerModifier.identity, DividerModifier, value);
+    modifierWithKey(this._modifiersWithKeys, TabsDividerModifier.identity, TabsDividerModifier, value);
     return this;
   }
   barOverlap(value: boolean): TabsAttribute {
@@ -121,11 +121,11 @@ class BarGridAlignModifier extends ModifierWithKey<BarGridColumnOptions> {
   }
 }
 
-class DividerModifier extends ModifierWithKey<DividerStyle> {
+class TabsDividerModifier extends ModifierWithKey<DividerStyle> {
   constructor(value: DividerStyle) {
     super(value);
   }
-  static identity: Symbol = Symbol('Divider');
+  static identity: Symbol = Symbol('tabsDivider');
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

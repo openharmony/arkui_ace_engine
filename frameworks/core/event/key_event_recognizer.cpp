@@ -491,7 +491,8 @@ KeyIntention keyItemsTransKeyIntention(const std::vector<KeyCode> &items)
 }
 
 std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(int32_t keyCode, int32_t keyAction, int32_t repeatTime,
-    int64_t timeStamp, int64_t timeStampStart, int32_t metaKey, int32_t keySource, int64_t deviceId)
+    int64_t timeStamp, int64_t timeStampStart, int32_t metaKey, int32_t keySource, int64_t deviceId,
+    std::string msg)
 {
     if (timeStamp == 0) {
         timeStamp = clock();
@@ -522,6 +523,7 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(int32_t keyCode, int32_t 
     }
     event.pressedCodes = getPressedKeys();
     event.key = KeyCodeToString(keyCode);
+    event.msg = msg;
 
     keyEvents.emplace_back(event);
     auto result = keyMap_.try_emplace(keyCode, false);

@@ -56,14 +56,15 @@ void PaintWrapper::FlushOverlayModifier()
     renderContext->FlushOverlayModifier(overlayModifier);
 }
 
-void PaintWrapper::FlushRender()
+void PaintWrapper::FlushRender(const RefPtr<NG::DrawModifier>& drawModifier)
 {
     CHECK_NULL_VOID(nodePaintImpl_);
 
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
-    auto contentModifier = nodePaintImpl_->GetContentModifier(this);
+    auto contentModifier = DynamicCast<ContentModifier>(nodePaintImpl_->GetContentModifier(this));
     if (contentModifier) {
+        contentModifier->SetDrawModifier(drawModifier);
         nodePaintImpl_->UpdateContentModifier(this);
     }
 
@@ -76,8 +77,27 @@ void PaintWrapper::FlushRender()
 
     // first set content paint function.
     auto contentDraw = nodePaintImpl_->GetContentDrawFunction(this);
-    if (contentDraw && !contentModifier) {
-        renderContext->FlushContentDrawFunction(std::move(contentDraw));
+    auto contentDrawModifier = [drawModifier, contentDraw, weak = WeakClaim(this)](RSCanvas& canvas) -> void {
+        auto wrapper = weak.Upgrade();
+        auto layoutSize = wrapper->GetContentSize();
+        NG::DrawingContext context = { .canvas = canvas, .width = layoutSize.Width(), .height = layoutSize.Height() };
+        if (drawModifier && drawModifier->jsDrawBehindFunc) {
+            drawModifier->jsDrawBehindFunc(context);
+        }
+        
+        if (drawModifier && drawModifier->jsDrawContentFunc) {
+            drawModifier->jsDrawContentFunc(context);
+        } else if (contentDraw) {
+            contentDraw(canvas);
+        }
+        
+        if (drawModifier && drawModifier->jsDrawFrontFunc) {
+            drawModifier->jsDrawFrontFunc(context);
+        }
+    };
+
+    if (!contentModifier) {
+        renderContext->FlushContentDrawFunction(std::move(contentDrawModifier));
     }
 
     // then set foreground paint function.

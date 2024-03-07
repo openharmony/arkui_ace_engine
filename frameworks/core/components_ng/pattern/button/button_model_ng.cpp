@@ -172,7 +172,7 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
 }
 
-void ButtonModelNG::SetButtonLabel(FrameNode* frameNode, const char* label)
+void ButtonModelNG::SetLabel(FrameNode* frameNode, const char* label)
 {
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
@@ -436,5 +436,33 @@ void ButtonModelNG::SetSize(
     if (height.has_value()) {
         NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height.value()));
     }
+}
+
+std::string ButtonModelNG::GetLabel(FrameNode* frameNode)
+{
+    std::string value;
+    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Label, value, frameNode);
+    return value;
+}
+
+Dimension ButtonModelNG::GetFontSize(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, value, frameNode);
+    return value;
+}
+
+Ace::FontWeight ButtonModelNG::GetFontWeight(FrameNode* frameNode)
+{
+    Ace::FontWeight value = Ace::FontWeight::NORMAL;
+    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, value, frameNode);
+    return value;
+}
+
+Color ButtonModelNG::GetFontColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, value, frameNode);
+    return value;
 }
 } // namespace OHOS::Ace::NG

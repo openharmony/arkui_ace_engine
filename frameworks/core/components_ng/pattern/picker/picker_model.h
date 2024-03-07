@@ -41,6 +41,12 @@ struct PickerDialogInfo {
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
 };
+struct PickerDialogEvent {
+    std::function<void()> onDidAppear;
+    std::function<void()> onDidDisappear;
+    std::function<void()> onWillAppear;
+    std::function<void()> onWillDisappear;
+};
 class DatePickerModel {
 public:
     static DatePickerModel* GetInstance();
@@ -75,7 +81,8 @@ public:
     virtual void SetDatePickerDialogShow(PickerDialogInfo& pickerDialog, NG::DatePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
         std::function<void(const std::string&)>&& onChange, std::function<void(const std::string&)>&& onDateAccept,
-        std::function<void(const std::string&)>&& onDateChange, DatePickerType pickerType) = 0;
+        std::function<void(const std::string&)>&& onDateChange, DatePickerType pickerType,
+        PickerDialogEvent& dialogEvent) = 0;
 
 private:
     static std::unique_ptr<DatePickerDialogModel> datePickerDialogInstance_;

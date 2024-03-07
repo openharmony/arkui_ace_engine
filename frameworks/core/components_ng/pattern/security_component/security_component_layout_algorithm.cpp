@@ -222,7 +222,7 @@ double SecurityComponentLayoutAlgorithm::ShrinkHeight(double diff)
     }
     isNeedReadaptWidth_ = true;
     MeasureIntegralSize();
-    return componentWidth_;
+    return componentHeight_;
 }
 
 double SecurityComponentLayoutAlgorithm::EnlargeHeight(double diff)
@@ -234,7 +234,7 @@ double SecurityComponentLayoutAlgorithm::EnlargeHeight(double diff)
         middle_.EnlargeHeight(remain);
     }
     MeasureIntegralSize();
-    return componentWidth_;
+    return componentHeight_;
 }
 
 void SecurityComponentLayoutAlgorithm::AdaptWidth()

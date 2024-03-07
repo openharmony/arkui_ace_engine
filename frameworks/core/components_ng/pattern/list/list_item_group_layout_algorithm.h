@@ -203,21 +203,25 @@ public:
         return layoutedItemInfo_;
     }
 
+    const LayoutConstraintF& GetLayoutConstraint() const
+    {
+        return childLayoutConstraint_;
+    }
+
+    static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     void LayoutListItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
     void LayoutListItemAll(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, float startPos);
     void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
+    void UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWrapper);
     void LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
         float crossSize, float startPos);
     inline RefPtr<LayoutWrapper> GetListItem(LayoutWrapper* layoutWrapper, int32_t index) const
     {
         return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_);
-    }
-    inline void RecycleListItem(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index) const
-    {
-        layoutWrapper->RemoveChildInRenderTree(index + itemStartIndex_);
     }
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis);
@@ -243,6 +247,8 @@ private:
     void MeasureStart(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureEnd(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
+    void MeasureHeaderFooter(LayoutWrapper* layoutWrapper);
+    void SetActiveChildRange(LayoutWrapper* layoutWrapper);
     float UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty, bool forwardLayout, float referencePos);
     bool NeedMeasureItem() const;
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
@@ -250,6 +256,7 @@ private:
     bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);
     float GetListItemGroupMaxWidth(const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty);
     void AdjustItemPosition();
+    bool IsConstraintChanged(LayoutWrapper* layoutWrapper) const;
 
     bool isCardStyle_ = false;
     int32_t headerIndex_;
@@ -286,6 +293,8 @@ private:
     bool needAllLayout_ = false;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
+    LayoutConstraintF childLayoutConstraint_;
+    bool constraintChanged_ = true;
 };
 } // namespace OHOS::Ace::NG
 

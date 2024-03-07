@@ -1662,7 +1662,7 @@ HWTEST_F(ListScrollerTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1)
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
     EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
-    EXPECT_EQ(didOffset.Value(), 0);
+    EXPECT_EQ(didOffset.Value(), -ITEM_HEIGHT);
 
     isWillTrigger = false;
     isDidTrigger = false;

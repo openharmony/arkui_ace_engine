@@ -51,11 +51,13 @@ public:
     virtual bool CancelPopup(const std::string& id) = 0;
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
-    virtual void ClearMenuNG(bool inWindow = true, bool showAnimation = false) = 0;
+    virtual void ClearMenuNG(int32_t targetId = -1, bool inWindow = true, bool showAnimation = false) = 0;
     virtual void ClearPopupNG() = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
     virtual void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) = 0;
+    virtual void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) = 0;
+    virtual void CloseCustomDialogNG(int32_t dialogId) = 0;
     virtual void HideSubWindowNG() = 0;
     virtual int32_t GetChildContainerId() const = 0;
     virtual bool GetShown() = 0;
@@ -64,7 +66,9 @@ public:
     virtual void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
     virtual void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
     virtual void DeleteHotAreas(int32_t overlayId) {};
-	
+    virtual void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
+    virtual void DeletePopupHotAreas(int32_t overlayId) {};
+
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
 

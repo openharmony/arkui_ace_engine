@@ -197,6 +197,14 @@ public:
         return scrollable->IsStopped();
     }
 
+    bool GetIsDragging() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->GetIsDragging();
+    }
+
     void StopScrollable()
     {
         CHECK_NULL_VOID(scrollableEvent_);
@@ -269,7 +277,7 @@ public:
 
     void SetMaxFlingVelocity(double max);
 
-    void StopAnimate();
+    virtual void StopAnimate();
     bool AnimateRunning() const
     {
         return (animator_ && animator_->IsRunning()) || !isAnimationStop_;
@@ -463,6 +471,8 @@ public:
     {
         animateCanOverScroll_ = animateCanOverScroll;
     }
+
+    void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

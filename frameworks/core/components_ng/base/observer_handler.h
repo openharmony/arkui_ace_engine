@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_OBSERVER_HANDLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_OBSERVER_HANDLER_H
 
+#include <functional>
 #include <string>
 #include <utility>
 
@@ -38,6 +39,21 @@ struct NavDestinationInfo {
 
     NavDestinationInfo(std::string id, std::string name, NavDestinationState state)
         : navigationId(std::move(id)), name(std::move(name)), state(state)
+    {}
+};
+
+enum class ScrollEventType {
+    SCROLL_START = 0,
+    SCROLL_STOP = 1,
+};
+
+struct ScrollEventInfo {
+    std::string id;
+    ScrollEventType scrollEvent;
+    float offset;
+
+    ScrollEventInfo(std::string id, ScrollEventType scrollEvent, float offset)
+        : id(std::move(id)), scrollEvent(scrollEvent), offset(offset)
     {}
 };
 
@@ -79,17 +95,27 @@ public:
     ~UIObserverHandler() = default;
     static UIObserverHandler& GetInstance();
     void NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
+    void NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType scrollEvent);
     void NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state);
+    void NotifyDensityChange(double density);
     std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
+    std::shared_ptr<ScrollEventInfo> GetScrollEventState(const RefPtr<AceType>& node);
     std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
     using NavigationHandleFunc = void (*)(const std::string&, const std::string&, NavDestinationState);
+    using ScrollEventHandleFunc = void (*)(const std::string&, ScrollEventType, float);
     using RouterPageHandleFunc = void (*)(
         AbilityContextInfo&, napi_value, int32_t, const std::string&, const std::string&, RouterPageState);
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
+    void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
+    using DensityHandleFunc = std::function<void(AbilityContextInfo&, double)>;
+    void SetHandleDensityChangeFunc(const DensityHandleFunc& func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
+    ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
+    DensityHandleFunc densityHandleFunc_;
+
     napi_value GetUIContextValue();
 };
 } // namespace OHOS::Ace::NG

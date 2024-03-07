@@ -89,9 +89,9 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_MOVE_HOME, KEY_SHIFT), [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::LineBegin); } },
     { KeyComb(KeyCode::KEY_MOVE_END, KEY_SHIFT), [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::LineEnd); } },
     { KeyComb(KeyCode::KEY_DPAD_LEFT, KEY_CTRL | KEY_SHIFT),
-        [](tic* c) -> void { c->CursorMove(CaretMoveIntent::LeftWord); } },
+        [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::LeftWord); } },
     { KeyComb(KeyCode::KEY_DPAD_RIGHT, KEY_CTRL | KEY_SHIFT),
-        [](tic* c) -> void { c->CursorMove(CaretMoveIntent::RightWord); } },
+        [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::RightWord); } },
     { KeyComb(KeyCode::KEY_DPAD_UP, KEY_CTRL | KEY_SHIFT),
         [](tic* c) -> void { c->CursorMove(CaretMoveIntent::ParagraghBegin); } },
     { KeyComb(KeyCode::KEY_DPAD_DOWN, KEY_CTRL | KEY_SHIFT),
@@ -106,6 +106,13 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
+    }
+    uint32_t ctrlFlag =
+        (keyEvent.HasKey(KeyCode::KEY_CTRL_LEFT) || keyEvent.HasKey(KeyCode::KEY_CTRL_RIGHT) ? KEY_CTRL : KEY_NULL);
+    bool vFlag = keyEvent.HasKey(KeyCode::KEY_V);
+    if (!keyEvent.msg.empty() && ctrlFlag == KEY_CTRL && vFlag) {
+        InsertValue(keyEvent.msg);
+        return true;
     }
     uint32_t modKeyFlags =
         (keyEvent.HasKey(KeyCode::KEY_ALT_LEFT) || keyEvent.HasKey(KeyCode::KEY_ALT_RIGHT) ? KEY_ALT : KEY_NULL) |

@@ -33,6 +33,13 @@ void SetImageSpanVerticalAlign(ArkUINodeHandle node, int32_t value)
     ImageSpanView::SetVerticalAlign(frameNode, static_cast<VerticalAlign>(value));
 }
 
+int32_t GetImageSpanVerticalAlign(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, static_cast<int32_t>(DEFAULT_VERTICAL_ALIGN));
+    return static_cast<int32_t>(ImageSpanView::GetVerticalAlign(frameNode));
+}
+
 void ResetImageSpanVerticalAlign(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -47,6 +54,14 @@ void SetImageSpanObjectFit(ArkUINodeHandle node, int32_t value)
     ImageModelNG::SetImageFit(frameNode, static_cast<ImageFit>(value));
 }
 
+int32_t GetImageSpanObjectFit(ArkUINodeHandle node)
+{
+    int32_t defaultObjectFit = static_cast<int32_t>(DEFAULT_OBJECT_FIT);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultObjectFit);
+    return static_cast<int32_t>(ImageModelNG::GetObjectFit(frameNode));
+}
+
 void ResetImageSpanObjectFit(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -59,7 +74,7 @@ namespace NodeModifier {
 const ArkUIImageSpanModifier* GetImageSpanModifier()
 {
     static const ArkUIImageSpanModifier modifier = { SetImageSpanVerticalAlign, ResetImageSpanVerticalAlign,
-        SetImageSpanObjectFit, ResetImageSpanObjectFit };
+        SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit};
     return &modifier;
 }
 } // namespace NodeModifier

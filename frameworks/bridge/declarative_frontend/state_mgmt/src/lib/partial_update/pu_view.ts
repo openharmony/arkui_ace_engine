@@ -52,9 +52,9 @@ type UIClassObject = { prototype: Object, pop?: () => void };
 class UpdateFuncRecord {
   private updateFunc_: UpdateFunc;
   private classObject_: UIClassObject;
-  private node_?: Object
+  private node_?: ArkComponent
 
-  constructor(params: { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: Object }) {
+  constructor(params: { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: ArkComponent }) {
     this.updateFunc_ = params.updateFunc;
     this.classObject_ = params.classObject;
     this.node_ = params.node;
@@ -76,11 +76,11 @@ class UpdateFuncRecord {
     return (this.classObject_ && "pop" in this.classObject_) ? this.classObject_.pop! : () => { };
   }
 
-  public getNode(): Object | undefined {
+  public getNode(): ArkComponent | undefined {
     return this.node_;
   }
 
-  public setNode(node: Object | undefined): void {
+  public setNode(node: ArkComponent | undefined): void {
     this.node_ = node;
   }
 }
@@ -244,9 +244,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.setCardId(parent.getCardId());
       // Call below will set this.parent_ to parent as well
       parent.addChild(this);
-    } else if (localStorage) {
+    }
+    if (localStorage) {
       this.localStorage_ = localStorage;
-      stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry.`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry or view instance creation.`);
     }
     this.isCompFreezeAllowed = this.isCompFreezeAllowed || (this.parent_ && this.parent_.isCompFreezeAllowed);
 
@@ -846,13 +847,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // ascending order ensures parent nodes will be updated before their children
       // prior cleanup ensure no already deleted Elements have their update func executed
       const dirtElmtIdsFromRootNode= Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
-      this.dirtDescendantElementIds_= new Set<number>();
       dirtElmtIdsFromRootNode.forEach(elmtId => {
         if (this.hasRecycleManager()) {
           this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
         } else {
           this.UpdateElement(elmtId);
         }
+        this.dirtDescendantElementIds_.delete(elmtId);
       });
 
       if (this.dirtDescendantElementIds_.size) {
@@ -953,6 +954,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       if (!isFirstRender) {
         _popFunc();
+      }
+
+      let node = this.getNodeById(elmtId);
+      if (node !== undefined) {
+        (node as ArkComponent).cleanStageValue();
       }
 
       if (ConfigureStateMgmt.instance.needsV3Observe()) {
@@ -1174,7 +1180,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const arr = itemArray; // just to trigger a 'get' onto the array
 
     // ID gen is with index.
-    if (idGenFuncUsesIndex) {
+    if (idGenFuncUsesIndex || idGenFunc.length > 1) {
       // Create array of new ids.
       arr.forEach((item, indx) => {
         newIdArray.push(idGenFunc(item, indx));
@@ -1286,7 +1292,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     return localStorageProp;
   }
 
-  public createOrGetNode(elmtId: number, builder: () => object): object {
+  public createOrGetNode(elmtId: number, builder: () => ArkComponent): object {
     const entry = this.updateFuncByElmtId.get(elmtId);
     if (entry === undefined) {
       throw new Error(`${this.debugInfo__()} fail to create node, elmtId is illegal`);
@@ -1297,6 +1303,16 @@ abstract class ViewPU extends NativeViewPartialUpdate
       entry.setNode(nodeInfo);
     }
     return nodeInfo;
+  }
+
+  /**
+   * getNodeById is used to get ArkComponent stored updateFuncByElmtId
+   * @param elmtId -  the id of the component
+   * @returns ArkComponent | undefined
+   */
+  public getNodeById(elmtId: number): ArkComponent | undefined {
+    const entry = this.updateFuncByElmtId.get(elmtId);
+    return entry ? entry.getNode() : undefined;
   }
 
   /**
@@ -1534,7 +1550,7 @@ class UpdateFuncsByElmtId {
     return this.map_.delete(elmtId);
   }
 
-  public set(elmtId: number, params: UpdateFunc | { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: Object }): void {
+  public set(elmtId: number, params: UpdateFunc | { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: ArkComponent }): void {
     (typeof params === 'object') ?
       this.map_.set(elmtId, new UpdateFuncRecord(params)) :
       this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params as UpdateFunc }));

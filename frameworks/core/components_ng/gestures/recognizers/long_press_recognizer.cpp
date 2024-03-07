@@ -52,6 +52,16 @@ LongPressRecognizer::LongPressRecognizer(
 
 void LongPressRecognizer::OnAccepted()
 {
+    int64_t acceptTime = GetSysTimestamp();
+    int64_t inputTime = acceptTime;
+    if (firstInputTime_.has_value()) {
+        inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+    }
+    if (SystemProperties::GetTraceInputEventEnabled()) {
+        ACE_SCOPED_TRACE("UserEvent InputTime:%lld AcceptTime:%lld InputType:LongPressGesture",
+            static_cast<long long>(inputTime), static_cast<long long>(acceptTime));
+    }
+    
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press gesture has been accepted, node tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
@@ -82,6 +92,7 @@ void LongPressRecognizer::OnAccepted()
 void LongPressRecognizer::OnRejected()
 {
     refereeState_ = RefereeState::FAIL;
+    firstInputTime_.reset();
 }
 
 void LongPressRecognizer::ThumbnailTimer(int32_t time)
@@ -107,6 +118,10 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    if (!firstInputTime_.has_value()) {
+        firstInputTime_ = event.time;
+    }
+
     if (isDisableMouseLeft_ && event.sourceType == SourceType::MOUSE) {
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Mouse left button is disabled for long press recognizer");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -173,6 +188,16 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         SendCallbackMsg(onActionUpdate_, false);
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
             SendCallbackMsg(onActionEnd_, false);
+            int64_t overTime = GetSysTimestamp();
+            int64_t inputTime = overTime;
+            if (firstInputTime_.has_value()) {
+                inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+            }
+            if (SystemProperties::GetTraceInputEventEnabled()) {
+                ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:LongPressGesture",
+                    static_cast<long long>(inputTime), static_cast<long long>(overTime));
+            }
+            firstInputTime_.reset();
         }
     } else {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -199,7 +224,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE, "long press recognizer receives touch cancel event");
-    if (IsRefereeFinished()) {
+    if (refereeState_ == RefereeState::FAIL) {
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {

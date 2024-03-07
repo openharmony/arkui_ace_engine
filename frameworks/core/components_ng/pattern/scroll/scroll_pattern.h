@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/web/scroll_update_listener.h"
+#include "core/components_ng/pattern/web/slide_update_listener.h"
 
 namespace OHOS::Ace::NG {
 
@@ -247,7 +247,7 @@ public:
         return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     }
 
-    void registerScrollUpdateListener(const std::shared_ptr<IScrollUpdateCallback>& listener);
+    void registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener);
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -299,7 +299,24 @@ public:
     }
 
     void TriggerModifyDone();
-    
+
+    void SetInitialOffset(const OffsetT<CalcDimension>& offset)
+    {
+        initialOffset_ = offset;
+    }
+
+    OffsetT<CalcDimension> GetInitialOffset()
+    {
+        return initialOffset_;
+    }
+
+    bool IsInitialized()
+    {
+        return isInitialized_;
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
@@ -341,7 +358,7 @@ private:
     SizeF viewSize_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
-    std::vector<std::shared_ptr<IScrollUpdateCallback>> listenerVector_;
+    std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 
     // scrollSnap
     std::vector<float> snapOffsets_;
@@ -359,6 +376,9 @@ private:
     float lastPageLength_ = 0.0f;
     float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
     float GetPagingDelta(float dragDistance, float velocity, float pageLength) const;
+
+    //initialOffset
+    OffsetT<CalcDimension> initialOffset_;
 };
 
 } // namespace OHOS::Ace::NG

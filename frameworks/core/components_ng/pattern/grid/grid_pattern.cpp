@@ -77,7 +77,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
         result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     } else if (SystemProperties::GetGridIrregularLayoutEnabled()) {
-        return MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_);
+        return MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, CanOverScroll(GetScrollSource()));
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }
@@ -477,6 +477,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     CHECK_NULL_VOID(gridEventHub);
 
     auto onScroll = gridEventHub->GetOnScroll();
+    PrintOffsetLog(AceLogTag::ACE_GRID, host->GetId(), finalOffset);
     if (onScroll) {
         FireOnScroll(finalOffset, onScroll);
     }
@@ -531,7 +532,6 @@ void GridPattern::MarkDirtyNodeSelf()
 void GridPattern::OnScrollEndCallback()
 {
     isSmoothScrolling_ = false;
-    SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
@@ -1777,9 +1777,9 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
     float targetPos = 0.0f;
     // Based on the index, align gets the position to scroll to
 
-    auto sucess = scrollGridLayoutInfo_.GetGridItemAnimatePos(
+    auto success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
         gridLayoutInfo_, targetIndex_.value(), align, GetMainGap(), targetPos);
-    CHECK_NULL_RETURN(sucess, false);
+    CHECK_NULL_RETURN(success, false);
 
     isSmoothScrolling_ = true;
     AnimateTo(targetPos, -1, nullptr, true);
@@ -1807,6 +1807,12 @@ std::vector<RefPtr<FrameNode>> GridPattern::GetVisibleSelectedItems()
         children.emplace_back(itemFrameNode);
     }
     return children;
+}
+
+void GridPattern::StopAnimate()
+{
+    ScrollablePattern::StopAnimate();
+    isSmoothScrolling_ = false;
 }
 
 } // namespace OHOS::Ace::NG

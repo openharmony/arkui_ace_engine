@@ -41,6 +41,31 @@ void UIObserverListener::OnNavigationStateChange(
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
 }
 
+void UIObserverListener::OnScrollEventStateChange(
+    const std::string& id, NG::ScrollEventType eventType, float offset)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle scrollEvent state change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value objValue = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_value scrollId = nullptr;
+    napi_value scrollEventType = nullptr;
+    napi_value scrollOffset = nullptr;
+    napi_create_string_utf8(env_, id.c_str(), id.length(), &scrollId);
+    napi_create_int32(env_, static_cast<int32_t>(eventType), &scrollEventType);
+    napi_create_double(env_, offset, &scrollOffset);
+    napi_set_named_property(env_, objValue, "id", scrollId);
+    napi_set_named_property(env_, objValue, "eventType", scrollEventType);
+    napi_set_named_property(env_, objValue, "offset", scrollOffset);
+    napi_value argv[] = { objValue };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+}
+
 void UIObserverListener::OnRouterPageStateChange(napi_value context, int32_t index,
     const std::string& name, const std::string& path, NG::RouterPageState state)
 {
@@ -67,6 +92,24 @@ void UIObserverListener::OnRouterPageStateChange(napi_value context, int32_t ind
     napi_set_named_property(env_, objValue, "name", napiName);
     napi_set_named_property(env_, objValue, "path", napiPath);
     napi_set_named_property(env_, objValue, "state", napiState);
+    napi_value argv[] = { objValue };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+}
+
+void UIObserverListener::OnDensityChange(double density)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle density change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value objValue = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_value napiDensity = nullptr;
+    napi_create_double(env_, density, &napiDensity);
+    napi_set_named_property(env_, objValue, "density", napiDensity);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
 }

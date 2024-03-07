@@ -16,6 +16,7 @@
 #include "node_model.h"
 
 #include <cstdint>
+#include <unordered_map>
 
 #include "event_converter.h"
 #include "native_node.h"
@@ -110,6 +111,15 @@ ArkUIFullNodeAPI* GetFullImpl()
     return GetAnyFullNodeImpl(ARKUI_NODE_API_VERSION);
 }
 
+struct InnerEventExtraParam {
+    int32_t eventId;
+    ArkUI_NodeHandle nodePtr;
+};
+
+struct ExtraData {
+    std::unordered_map<int64_t, InnerEventExtraParam*> eventMap;
+};
+
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
 {
     static const ArkUINodeType nodes[] = { ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE, ARKUI_TOGGLE,
@@ -126,7 +136,7 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
     }
 
     ArkUI_Int32 id = -1;
-    if (nodeType == ARKUI_NODE_LOADING_PROGRESS || nodeType == ARKUI_NODE_TEXT) {
+    if (nodeType == ARKUI_NODE_LOADING_PROGRESS || nodeType == ARKUI_NODE_TEXT || nodeType == ARKUI_NODE_TEXT_INPUT) {
         id = ARKUI_AUTO_GENERATE_NODE_ID;
     }
     auto* uiNode = impl->getBasicAPI()->createNode(nodes[nodeType - 1], id, 0);
@@ -210,14 +220,41 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
     }
     // already check in entry point.
     auto* impl = GetFullImpl();
+    auto* extraParam = new InnerEventExtraParam({eventId});
+    if (nodePtr->extraData) {
+        auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
+        auto result = extraData->eventMap.try_emplace(eventType, extraParam);
+        if (!result.second) {
+            result.first->second->eventId = eventId;
+            delete extraParam;
+        }
+    } else {
+        nodePtr->extraData = new ExtraData();
+        auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
+        extraData->eventMap[eventType] = extraParam;
+    }
     impl->getBasicAPI()->registerNodeAsyncEvent(
-        nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), eventId, nodePtr);
+        nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), reinterpret_cast<int64_t>(nodePtr));
     return ERROR_CODE_NO_ERROR;
 }
 
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType)
 {
-    // TODO.
+    if (!nodePtr->extraData) {
+        return;
+    }
+    auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
+    auto& eventMap = extraData->eventMap;
+    auto innerEventExtraParam = eventMap.find(eventType);
+    if (innerEventExtraParam == eventMap.end()) {
+        return;
+    }
+    delete innerEventExtraParam->second;
+    eventMap.erase(innerEventExtraParam);
+    if (eventMap.empty()) {
+        delete extraData;
+        nodePtr->extraData = nullptr;
+    }
 }
 
 void (*g_eventReceiver)(ArkUI_NodeEvent* event) = nullptr;
@@ -229,11 +266,24 @@ void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event))
         auto* impl = GetFullImpl();
         auto innerReceiver = [](ArkUINodeEvent* origin) {
             if (g_eventReceiver) {
-                auto event = reinterpret_cast<ArkUI_NodeEvent*>(origin);
-                event->node = reinterpret_cast<ArkUI_NodeHandle>(origin->extraParam);
-                event->kind = ConvertToNodeEventType(static_cast<ArkUIAsyncEventKind>(origin->kind));
-                event->stringEvent.pStr = origin->stringAsyncEvent.pStr;
-                g_eventReceiver(event);
+                ArkUI_NodeEvent event;
+                auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(origin->extraParam);
+                if (!nodePtr->extraData) {
+                    return;
+                }
+                
+                auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
+                auto eventType = ConvertToNodeEventType(static_cast<ArkUIAsyncEventKind>(origin->kind));
+                auto innerEventExtraParam = extraData->eventMap.find(eventType);
+                if (innerEventExtraParam == extraData->eventMap.end()) {
+                    return;
+                }
+                event.node = nodePtr;
+                event.eventId = innerEventExtraParam->second->eventId;
+                if (ConvertEvent(origin, &event)) {
+                    g_eventReceiver(&event);
+                    ConvertEventResult(&event, origin);
+                }
             }
         };
         impl->getBasicAPI()->registerNodeAsyncEventReceiver(innerReceiver);

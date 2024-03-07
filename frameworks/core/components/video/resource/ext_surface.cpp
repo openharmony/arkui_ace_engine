@@ -28,6 +28,7 @@ const char SURFACE_ERRORMSG_CREATEFAIL[] = "Unable to initialize video player.";
 
 const char SURFACE_METHOD_ONCREATE[] = "onCreate";
 const char SURFACE_METHOD_ONCHANGED[] = "onChanged";
+const char SURFACE_METHOD_ONDESTROYED[] = "onDestroyed";
 
 const char SET_SURFACE_BOUNDS[] = "setSurfaceBounds";
 const char SURFACE_ID[] = "surfaceId";
@@ -37,6 +38,8 @@ const char SURFACE_HEIGHT[] = "surfaceHeight";
 const char SURFACE_WIDTH[] = "surfaceWidth";
 const char SET_IS_FULLSCREEN[] = "setIsFullScreen";
 const char IS_FULLSCREEN[] = "isFullScreen";
+const char ATTACH_NATIVE_WINDOW[] = "attachNativeWindow";
+const char NATIVE_WINDOW[] = "nativeWindow";
 
 ExtSurface::~ExtSurface()
 {
@@ -103,6 +106,14 @@ void ExtSurface::CreateExtSurface(const std::function<void(int64_t)>& onCreate)
             }
         });
 
+    resRegister->RegisterEvent(
+        MakeEventHash(SURFACE_METHOD_ONDESTROYED), [weak = WeakClaim(this)](const std::string& param) {
+            auto surface = weak.Upgrade();
+            if (surface) {
+                surface->OnSurfaceDestroyed();
+            }
+        });
+
     if (onCreate) {
         onCreate(id_);
     }
@@ -142,6 +153,28 @@ void ExtSurface::OnSurfaceChanged(int32_t width, int32_t height)
     if (onSurfaceChanged_) {
         onSurfaceChanged_(width, height);
     }
+}
+
+void ExtSurface::OnSurfaceDestroyed()
+{
+    LOGI("OnSurfaceDestroyed.");
+    if (onSurfaceDestroyed_) {
+        onSurfaceDestroyed_();
+    }
+}
+
+void* ExtSurface::AttachNativeWindow()
+{
+    LOGI("AttachNativeWindow called.");
+    std::stringstream paramStream;
+
+    void* nativeWindow = nullptr;
+    CallSyncResRegisterMethod(MakeMethodHash(ATTACH_NATIVE_WINDOW), PARAM_NONE,
+        [this, &nativeWindow](std::string& result) mutable {
+            nativeWindow = reinterpret_cast<void*>(GetInt64Param(result, NATIVE_WINDOW));
+    });
+
+    return nativeWindow;
 }
 
 } // namespace OHOS::Ace

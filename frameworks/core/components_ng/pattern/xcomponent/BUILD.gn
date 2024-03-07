@@ -31,5 +31,7 @@ build_component_ng("xcomponent_pattern_ng") {
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
     ]
+  } else if (is_arkui_x) {
+    deps = [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
   }
 }

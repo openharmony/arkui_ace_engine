@@ -936,17 +936,6 @@ HWTEST_F(CustomTestNg, CustomTest020, TestSize.Level1)
     auto geo = AceType::MakeRefPtr<GeometryTransition>(TEST_TAG, true);
     frameNode2->layoutProperty_->geometryTransition_ = AceType::WeakClaim(AceType::RawPtr(geo));
     customNode->AddChild(frameNode2);
-
-    /**
-     * @tc.steps: step3. Create customBase and Call FireRecycleSelf.
-     * @tc.expected: Excute successful.
-     */
-    RefPtr<CustomNodeBase> customBase = customNode;
-    std::string strTest = "";
-    auto callback = [&]() { strTest = "test"; };
-    customBase->SetAppearFunction(callback);
-    customBase->FireRecycleSelf();
-    EXPECT_EQ(customBase->recyclePatterns_.size(), 2);
 }
 
 /**

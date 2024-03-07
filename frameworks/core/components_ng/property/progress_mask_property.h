@@ -44,6 +44,11 @@ public:
         return color_;
     }
 
+    bool GetEnableBreathe() const
+    {
+        return enableBreathe_;
+    }
+
     void SetValue(const float& value)
     {
         value_ = value;
@@ -57,6 +62,11 @@ public:
     void SetColor(const Color& color)
     {
         color_ = color;
+    }
+
+    void SetEnableBreathe(bool enableBreathe)
+    {
+        enableBreathe_ = enableBreathe;
     }
 
     bool operator==(const ProgressMaskProperty& other) const
@@ -80,6 +90,7 @@ private:
     float value_ = 0.0f;
     float maxValue_ = 100.0f;
     Color color_ = Color(0x99182431);
+    bool enableBreathe_ = true;
 };
 } // namespace OHOS::Ace::NG {
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_PROGRESS_MASK_PROPERTY_H

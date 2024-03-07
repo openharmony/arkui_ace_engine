@@ -185,12 +185,9 @@ void GetInspectorChildren(
         if (rect.IsEmpty()) {
             rect.SetRect(0, 0, 0, 0);
         }
-        auto strRec = std::to_string(rect.Left())
-                          .append(",")
-                          .append(std::to_string(rect.Top()))
-                          .append(",")
-                          .append(std::to_string(rect.Width()))
-                          .append(",")
+        auto strRec = std::to_string(rect.Left()).append(",")
+                          .append(std::to_string(rect.Top())).append(",")
+                          .append(std::to_string(rect.Width())).append(",")
                           .append(std::to_string(rect.Height()));
         jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
         jsonNode->Put(INSPECTOR_DEBUGLINE, node->GetDebugLine().c_str());
@@ -203,6 +200,12 @@ void GetInspectorChildren(
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId);
+    }
+    if (node != nullptr) {
+        auto overlayNode = node->GetOverlayNode();
+        if (overlayNode != nullptr) {
+            GetFrameNodeChildren(overlayNode, children, pageId);
+        }
     }
     auto jsonChildrenArray = JsonUtil::CreateArray(true);
     for (auto uiNode : children) {
@@ -275,7 +278,6 @@ void GetInspectorChildren(
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
     auto node = AceType::DynamicCast<FrameNode>(parent);
-    auto ctx = node->GetRenderContext();
 
     RectF rect;
     isActive = isActive && node->IsActive();
@@ -291,6 +293,10 @@ void GetInspectorChildren(
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId);
+    }
+    auto overlayNode = node->GetOverlayNode();
+    if (overlayNode != nullptr) {
+        GetFrameNodeChildren(overlayNode, children, pageId);
     }
     auto jsonChildrenArray = JsonUtil::CreateArray(true);
     for (auto uiNode : children) {
@@ -552,7 +558,6 @@ void GetSimplifiedInspectorChildren(
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     auto node = AceType::DynamicCast<FrameNode>(parent);
-    auto ctx = node->GetRenderContext();
 
     RectF rect;
     isActive = isActive && node->IsActive();

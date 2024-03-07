@@ -64,7 +64,6 @@ WindowScene::~WindowScene()
 {
     CHECK_NULL_VOID(IsMainWindow());
     CHECK_NULL_VOID(session_);
-    session_->SetLeashWinSurfaceNode(nullptr);
     session_->SetShowRecent(false);
     session_->SetNeedSnapshot(false);
     UnregisterLifecycleListener();

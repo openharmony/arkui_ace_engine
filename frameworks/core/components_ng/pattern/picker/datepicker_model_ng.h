@@ -15,6 +15,8 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATE_PICKER_DATE_PICKER_MODEL_NG_VIEW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATE_PICKER_DATE_PICKER_MODEL_NG_VIEW_H
+
+#include "base/i18n/localization.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_base_component.h"
@@ -53,6 +55,15 @@ public:
     static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);
     static void SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& onChange);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
+    static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
+    static PickerTextStyle getDisappearTextStyle(FrameNode* frameNode);
+    static int32_t getLunar(FrameNode* frameNode);
+    static LunarDate getStartDate(FrameNode* frameNode);
+    static LunarDate getEndDate(FrameNode* frameNode);
+    static LunarDate getSelectedDate(FrameNode* frameNode);
+    static uint32_t getBackgroundColor(FrameNode* frameNode);
+    static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
@@ -65,7 +76,8 @@ public:
     void SetDatePickerDialogShow(PickerDialogInfo& pickerDialog, NG::DatePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
         std::function<void(const std::string&)>&& onChange, std::function<void(const std::string&)>&& onDateAccept,
-        std::function<void(const std::string&)>&& onDateChange, DatePickerType pickerType) override;
+        std::function<void(const std::string&)>&& onDateChange, DatePickerType pickerType,
+        PickerDialogEvent& pickerDialogEvent) override;
 };
 } // namespace OHOS::Ace::NG
 

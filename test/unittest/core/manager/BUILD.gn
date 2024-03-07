@@ -61,12 +61,19 @@ ace_unittest("display_sync_manager_test_ng") {
   sources = [ "display_sync_manager_test.cpp" ]
 }
 
+ace_unittest("frame_rate_manager_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "frame_rate_manager_test.cpp" ]
+}
+
 group("core_manager_unittest") {
   testonly = true
   deps = [
     ":display_sync_manager_test_ng",
     ":drag_drop_manager_test_ng",
     ":drag_drop_proxy_test_ng",
+    ":frame_rate_manager_test_ng",
     ":full_screen_manager_test_ng",
     ":post_event_manager_test_ng",
     ":select_overlay_manager_test_ng",

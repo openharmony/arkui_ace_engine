@@ -61,6 +61,16 @@ RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
+void RefreshModelNG::SetPullToRefresh(bool pullToRefresh)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullToRefresh, pullToRefresh);
+}
+
+void RefreshModelNG::SetRefreshOffset(const Dimension& offset)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset);
+}
+
 void RefreshModelNG::SetRefreshing(bool isRefreshing)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefreshing, isRefreshing);
@@ -79,6 +89,11 @@ void RefreshModelNG::SetFriction(int32_t friction)
 void RefreshModelNG::SetProgressColor(const Color& progressColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ProgressColor, progressColor);
+}
+
+void RefreshModelNG::SetLoadingText(const std::string& loadingText)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, loadingText);
 }
 
 void RefreshModelNG::SetOnStateChange(StateChangeEvent&& stateChange)
@@ -141,9 +156,7 @@ void RefreshModelNG::SetRefreshing(FrameNode* frameNode, bool isRefreshing)
 bool RefreshModelNG::GetRefreshing(FrameNode* frameNode)
 {
     bool value = false;
-    ACE_GET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefreshing, value, frameNode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, IsRefreshing, value, frameNode, value);
     return value;
 }
-
-
 } // namespace OHOS::Ace::NG

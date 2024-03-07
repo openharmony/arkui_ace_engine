@@ -26,12 +26,13 @@ class RecycleDummyNode : public UINode {
     DECLARE_ACE_TYPE(RecycleDummyNode, UINode);
 
 public:
-    static RefPtr<RecycleDummyNode> CreateRecycleDummyNode(int32_t nodeId);
+    static RefPtr<RecycleDummyNode> CreateRecycleDummyNode(int32_t nodeId = -1);
+    static RefPtr<AceType> WrapRecycleDummyNode(RefPtr<AceType>& customNode);
     explicit RecycleDummyNode(int32_t nodeId);
     ~RecycleDummyNode() override;
     bool IsAtomicNode() const override
     {
-        return false;
+        return true;
     }
 };
 } // namespace OHOS::Ace::NG

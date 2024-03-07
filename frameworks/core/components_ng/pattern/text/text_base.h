@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_BASE_H
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -163,14 +164,11 @@ public:
     {
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-#ifdef WINDOW_SCENE_SUPPORTED
-        auto uiExtMgr = context->GetUIExtensionManager();
-        if (uiExtMgr && uiExtMgr->IsWindowTypeUIExtension(context)) {
+        if (container->IsUIExtensionWindow()) {
             return;
         }
-#endif
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
         auto keyboardArea = container->GetKeyboardSafeArea();
         auto keyboardLength = keyboardArea.bottom_.Length();
         Rect keyboardRect;
@@ -181,12 +179,48 @@ public:
     virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
 
     virtual void OnVirtualKeyboardAreaChanged() {}
+
+    const RectF& GetContentRect() const
+    {
+        return contentRect_;
+    }
+
+    virtual int32_t GetContentWideTextLength()
+    {
+        return 0;
+    }
+
+    virtual int32_t GetCaretIndex() const
+    {
+        return 0;
+    }
+
+    virtual OffsetF GetCaretOffset() const
+    {
+        return OffsetF();
+    }
+
+    virtual OffsetF GetTextPaintOffset() const
+    {
+        return OffsetF();
+    }
+
+    virtual OffsetF GetFirstHandleOffset() const
+    {
+        return OffsetF();
+    }
+
+    virtual OffsetF GetSecondHandleOffset() const
+    {
+        return OffsetF();
+    }
     
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;
     std::vector<std::string> dragContents_;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
+    RectF contentRect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextBase);
 };
 } // namespace OHOS::Ace::NG

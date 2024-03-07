@@ -23,10 +23,11 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navrouter/navdestination_context.h"
 
 namespace OHOS::Ace::NG {
 using NavPathList = std::vector<std::pair<std::string, RefPtr<UINode>>>;
-
+class NavDestinationContext;
 class RouteInfo : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RouteInfo, AceType)
 public:
@@ -147,6 +148,11 @@ public:
     {
         return "";
     }
+
+    virtual void FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
+        const RefPtr<NG::NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) {}
+
+    virtual void FireNavigationModeChange(NavigationMode mode) {}
 
     virtual void OnAttachToParent(RefPtr<NavigationStack> parent) {}
     virtual void OnDetachFromParent() {}

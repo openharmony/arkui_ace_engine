@@ -172,5 +172,4 @@ void VideoModelImpl::SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange)
     videoComponent->SetFullscreenChangeEventId(
         EventMarker([func = std::move(onFullScreenChange)](const std::string& param) { func(param); }));
 }
-
 } // namespace OHOS::Ace::Framework

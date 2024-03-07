@@ -95,9 +95,9 @@ namespace {
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_debugger.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_debugger.z.so";
 #endif
 const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
@@ -1395,8 +1395,10 @@ void JsiDeclarativeEngine::LoadJsWithModule(
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
-    const std::string assetPath = ASSET_PATH_PREFIX + container->GetModuleName() + "/" + FORM_ES_MODULE_PATH;
+    const std::string moduleName = container->GetModuleName();
+    const std::string assetPath = ASSET_PATH_PREFIX + moduleName + "/" + FORM_ES_MODULE_PATH;
     runtime->SetAssetPath(assetPath);
+    runtime->SetModuleName(moduleName);
     if (urlName.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
         urlName = container->GetModuleName() + "/ets/" + urlName;
     }
@@ -1407,13 +1409,7 @@ void JsiDeclarativeEngine::LoadJsWithModule(
 bool JsiDeclarativeEngine::LoadFaAppSource()
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadFaAppSource");
-    if (!ExecuteAbc("commons.abc")) {
-        return false;
-    }
-    if (!ExecuteAbc("vendors.abc")) {
-        return false;
-    }
-    if (!ExecuteAbc("app.abc")) {
+    if (!ExecuteAbc("commons.abc") || !ExecuteAbc("vendors.abc") || !ExecuteAbc("app.abc")) {
         return false;
     }
     CallAppFunc("onCreate");

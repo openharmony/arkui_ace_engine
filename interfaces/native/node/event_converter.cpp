@@ -14,6 +14,9 @@
  */
 #include "node/event_converter.h"
 
+#include <cstdint>
+
+#include "native_event.h"
 #include "native_node.h"
 #include "securec.h"
 
@@ -62,6 +65,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_DATE_PICKER_DATE_CHANGE;
         case NODE_TIME_PICKER_EVENT_ON_CHANGE:
             return ON_TIME_PICKER_CHANGE;
+        case NODE_CALENDAR_PICKER_EVENT_ON_CHANGE:
+            return ON_CALENDAR_PICKER_CHANGE;
         case NODE_TOUCH_EVENT:
             return ON_TOUCH;
         case NODE_ON_CLICK:
@@ -70,6 +75,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_CHECKBOX_CHANGE;
         case NODE_SLIDER_EVENT_ON_CHANGE:
             return ON_SLIDER_CHANGE;
+        case NODE_TEXT_INPUT_ON_CUT:
+            return ON_TEXT_INPUT_CUT;
+        case NODE_TEXT_INPUT_ON_PASTE:
+            return ON_TEXT_INPUT_PASTE;
         default:
             return -1;
     }
@@ -116,6 +125,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE;
         case ON_TIME_PICKER_CHANGE:
             return NODE_TIME_PICKER_EVENT_ON_CHANGE;
+        case ON_CALENDAR_PICKER_CHANGE:
+            return NODE_CALENDAR_PICKER_EVENT_ON_CHANGE;
         case ON_TOUCH:
             return NODE_TOUCH_EVENT;
         case ON_CLICK:
@@ -124,24 +135,80 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_CHECKBOX_EVENT_ON_CHANGE;
         case ON_SLIDER_CHANGE:
             return NODE_SLIDER_EVENT_ON_CHANGE;
+        case ON_TEXT_INPUT_CUT:
+            return NODE_TEXT_INPUT_ON_CUT;
+        case ON_TEXT_INPUT_PASTE:
+            return NODE_TEXT_INPUT_ON_PASTE;
         default:
             return -1;
     }
 }
 
+bool IsStringEvent(ArkUI_Int32 type)
+{
+    switch (type) {
+        case NODE_TEXT_INPUT_ON_CHANGE:
+        case NODE_TEXT_INPUT_ON_CUT:
+        case NODE_TEXT_INPUT_ON_PASTE:
+        case NODE_TEXT_AREA_ON_CHANGE:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool IsTouchEvent(ArkUI_Int32 type)
+{
+    switch (type) {
+        case NODE_TOUCH_EVENT:
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
 {
-    if (memcpy_sp(event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM, origin->componentAsyncEvent.data,
-            MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
-        return false;
-    }
     event->kind = ConvertToNodeEventType(static_cast<ArkUIAsyncEventKind>(origin->kind));
     if (event->kind == -1) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event. %{public}d", origin->kind);
         return false;
     }
-    event->eventId = origin->eventId;
+    if (IsStringEvent(event->kind)) {
+        event->stringEvent.pStr = origin->stringAsyncEvent.pStr;
+        return true;
+    }
+    if (IsTouchEvent(event->kind)) {
+        if (memcpy_sp(&(event->touchEvent), sizeof(ArkUI_NodeTouchEvent), &(origin->touchEvent),
+                sizeof(ArkUITouchEvent)) != 0) {
+            TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
+            return false;
+        }
+        return true;
+    }
+    if (memcpy_sp(event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM, origin->componentAsyncEvent.data,
+            MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
+        return false;
+    }
     return true;
 }
+
+bool ConvertEventResult(ArkUI_NodeEvent* event, ArkUINodeEvent* origin)
+{
+    if (IsTouchEvent(event->kind)) {
+        origin->touchEvent.preventDefault = event->touchEvent.preventDefault;
+        origin->touchEvent.stopPropagation = event->touchEvent.stopPropagation;
+        return true;
+    }
+    if (!IsStringEvent(event->kind)) {
+        if (memcpy_sp(origin->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM, event->componentEvent.data,
+                MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
+            TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert event result data");
+            return false;
+        }
+    }
+    return true;
+}
+
 }; // namespace OHOS::Ace::NodeModel

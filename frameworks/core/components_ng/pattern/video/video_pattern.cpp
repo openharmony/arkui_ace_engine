@@ -196,7 +196,7 @@ void VideoPattern::ResetMediaPlayer()
 
     RegisterMediaPlayerEvent();
     PrepareSurface();
-    if (mediaPlayer_->PrepareAsync() != 0) {
+    if (mediaPlayer_ && mediaPlayer_->PrepareAsync() != 0) {
         TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
     }
 }
@@ -409,19 +409,8 @@ void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
     eventHub->FireUpdateEvent(param);
 }
 
-void VideoPattern::OnPlayerStatus(PlaybackStatus status)
+void VideoPattern::ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status)
 {
-    PrintPlayerStatus(status);
-    bool isPlaying = (status == PlaybackStatus::STARTED);
-    if (isPlaying_ != isPlaying) {
-        isPlaying_ = isPlaying;
-        ChangePlayButtonTag();
-    }
-
-    if (isInitialState_) {
-        isInitialState_ = !isPlaying;
-    }
-
     if (isPlaying) {
         auto json = JsonUtil::Create(true);
         json->Put("start", "");
@@ -438,6 +427,15 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
         auto eventHub = GetEventHub<VideoEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FirePauseEvent(param);
+    }
+
+    if (status == PlaybackStatus::STOPPED) {
+        auto json = JsonUtil::Create(true);
+        json->Put("stop", "");
+        auto param = json->ToString();
+        auto eventHub = GetEventHub<VideoEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireStopEvent(param);
     }
 
     if (status == PlaybackStatus::PREPARED) {
@@ -458,6 +456,22 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
     if (status == PlaybackStatus::PLAYBACK_COMPLETE) {
         OnCompletion();
     }
+}
+
+void VideoPattern::OnPlayerStatus(PlaybackStatus status)
+{
+    PrintPlayerStatus(status);
+    bool isPlaying = (status == PlaybackStatus::STARTED);
+    if (isPlaying_ != isPlaying) {
+        isPlaying_ = isPlaying;
+        ChangePlayButtonTag();
+    }
+
+    if (isInitialState_) {
+        isInitialState_ = !isPlaying;
+    }
+
+    ChangePlayerStatus(isPlaying, status);
 }
 
 void VideoPattern::OnError(const std::string& errorId)

@@ -183,6 +183,9 @@ class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttrib
   onError(callback: () => void): VideoAttribute {
     throw new Error('Method not implemented.');
   }
+  onStop(callback: () => void): VideoAttribute {
+    throw new Error('Method not implemented.');
+  }
 }
 // @ts-ignore
 globalThis.Video.attributeModifier = function (modifier) {

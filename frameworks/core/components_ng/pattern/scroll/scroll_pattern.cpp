@@ -104,6 +104,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
+    PrintOffsetLog(AceLogTag::ACE_SCROLL, host->GetId(), prevOffset_ - currentOffset_);
     FireOnDidScroll(prevOffset_ - currentOffset_);
     auto onReachStart = eventHub->GetOnReachStart();
     if (onReachStart) {
@@ -482,7 +483,9 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     CHECK_NULL_RETURN(host, false);
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
     for (auto listenerItem : listenerVector_) {
-        listenerItem->OnScrollUpdate(frameSize);
+        if (listenerItem) {
+            listenerItem->OnSlideUpdate(frameSize);
+        }
     }
     if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewSize_)) {
         if (IsOutOfBoundary()) {
@@ -908,7 +911,7 @@ Rect ScrollPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
-void ScrollPattern::registerScrollUpdateListener(const std::shared_ptr<IScrollUpdateCallback>& listener)
+void ScrollPattern::registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener)
 {
     listenerVector_.emplace_back(listener);
 }
@@ -988,5 +991,14 @@ float ScrollPattern::GetPagingDelta(float dragDistance, float velocity, float pa
 void ScrollPattern::TriggerModifyDone()
 {
     OnModifyDone();
+}
+
+void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    ScrollablePattern::ToJsonValue(json);
+    auto initialOffset = JsonUtil::Create(true);
+    initialOffset->Put("xOffset", initialOffset_.GetX().ToString().c_str());
+    initialOffset->Put("yOffset", initialOffset_.GetY().ToString().c_str());
+    json->Put("initialOffset", initialOffset);
 }
 } // namespace OHOS::Ace::NG

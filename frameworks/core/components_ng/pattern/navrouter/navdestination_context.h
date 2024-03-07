@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 
 namespace OHOS::Ace::NG {
+class NavigationStack;
 class NavPathInfo : public virtual AceType {
     DECLARE_ACE_TYPE(NavPathInfo, AceType)
 public:

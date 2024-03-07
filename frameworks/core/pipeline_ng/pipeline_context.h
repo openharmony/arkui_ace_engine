@@ -277,6 +277,9 @@ public:
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
+    void UpdateSizeChangeReason(
+        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+
     void UpdateDisplayAvailableRect(const Rect& displayAvailableRect)
     {
         displayAvailableRect_ = displayAvailableRect;
@@ -292,6 +295,8 @@ public:
         return safeAreaManager_;
     }
     virtual SafeAreaInsets GetSafeArea() const;
+
+    virtual SafeAreaInsets GetSafeAreaWithoutProcess() const;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 

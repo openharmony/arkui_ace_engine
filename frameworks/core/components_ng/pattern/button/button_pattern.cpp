@@ -200,7 +200,7 @@ void ButtonPattern::OnAfterModifyDone()
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
         auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
-        Recorder::NodeDataCache::Get().PutString(inspectorId, text);
+        Recorder::NodeDataCache::Get().PutString(host, inspectorId, text);
     }
 }
 

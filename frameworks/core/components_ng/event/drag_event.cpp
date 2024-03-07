@@ -81,10 +81,10 @@ DragEventActuator::DragEventActuator(
 
     panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
     panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
-    longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, false);
+    longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, true);
     longPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
     previewLongPressRecognizer_ =
-        AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, false);
+        AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, true);
     previewLongPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
     isNotInPreviewState_ = false;
 }
@@ -393,7 +393,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->HideEventColumn();
-        actuator->HidePixelMap();
+        actuator->HidePixelMap(true, 0, 0, false);
         actuator->HideFilter();
         actuator->SetIsNotInPreviewState(false);
     };
@@ -744,13 +744,17 @@ void DragEventActuator::HideFilter()
     manager->RemoveFilterAnimation();
 }
 
-void DragEventActuator::HidePixelMap(bool startDrag, double x, double y)
+void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    manager->RemovePixelMapAnimation(startDrag, x, y);
+    if (showAnimation) {
+        manager->RemovePixelMapAnimation(startDrag, x, y);
+    } else {
+        manager->RemovePixelMap();
+    }
 }
 
 void DragEventActuator::HideEventColumn()

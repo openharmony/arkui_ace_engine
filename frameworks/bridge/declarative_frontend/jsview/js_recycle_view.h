@@ -25,6 +25,7 @@ class JSRecycleView : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void Pop(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 

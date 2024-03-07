@@ -125,6 +125,7 @@ const uint32_t RENDER_STRATEGY_SINGLE = 0;
 const uint32_t RENDER_STRATEGY_MULTI_COLOR = 1;
 const uint32_t EFFECT_STRATEGY_NONE = 0;
 const uint32_t EFFECT_STRATEGY_SCALE = 1;
+const SizeF CONTAINER_SIZE(720.0f, 1136.0f);
 } // namespace
 
 class RichEditorTestNg : public testing::Test {
@@ -550,6 +551,165 @@ HWTEST_F(RichEditorTestNg, RichEditorModel010, TestSize.Level1)
     richEditorPattern->HandleOnSelectAll();
     EXPECT_EQ(testSelectionRange.start_, 0);
     EXPECT_EQ(testSelectionRange.end_, 9);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: RichEditorModel011
+ * @tc.desc: test placeholder appear and disappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorModel011, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    PlaceholderOptions options;
+    options.value = INIT_VALUE_1;
+    richEditorModel.SetPlaceholder(options);
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode, AceType::MakeRefPtr<GeometryNode>(), richEditorNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    // test placeholder appear when there is nothing in richEditor
+    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    auto spanItemChildren = layoutAlgorithm->GetSpans();
+    EXPECT_EQ(spanItemChildren.size(), 1);
+    EXPECT_EQ(spanItemChildren.back()->GetSpanContent(), INIT_VALUE_1);
+
+    // test add Text then placeholder disappear
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_2;
+    richEditorController->AddTextSpan(textOptions);
+    layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    spanItemChildren = layoutAlgorithm->GetSpans();
+    EXPECT_EQ(spanItemChildren.size(), 1);
+    EXPECT_EQ(spanItemChildren.back()->GetSpanContent(), INIT_VALUE_2);
+
+    // test when richEitor empty again,placeholder Appear again
+    RangeOptions rangeoptions;
+    richEditorController->DeleteSpans(rangeoptions);
+    richEditorPattern->BeforeCreateLayoutWrapper();
+    layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    spanItemChildren = layoutAlgorithm->GetSpans();
+    EXPECT_EQ(spanItemChildren.size(), 1);
+    EXPECT_EQ(spanItemChildren.back()->GetSpanContent(), INIT_VALUE_1);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: RichEditorModel012
+ * @tc.desc: test placeholder styel value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorModel012, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    PlaceholderOptions options;
+    options.value = INIT_VALUE_1;
+    options.fontColor = TEXT_COLOR_VALUE;
+    options.fontSize = FONT_SIZE_VALUE;
+    options.fontStyle = ITALIC_FONT_STYLE_VALUE;
+    options.fontWeight = FONT_WEIGHT_VALUE;
+    options.fontFamilies = FONT_FAMILY_VALUE;
+    richEditorModel.SetPlaceholder(options);
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode, AceType::MakeRefPtr<GeometryNode>(), richEditorNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    // test placeholder value and style is correct
+    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    auto spanItemChildren = layoutAlgorithm->GetSpans();
+    auto spanItem = spanItemChildren.back();
+    EXPECT_EQ(spanItemChildren.size(), 1);
+    EXPECT_EQ(spanItem->GetSpanContent(), INIT_VALUE_1);
+    EXPECT_EQ(spanItem->fontStyle->propTextColor, TEXT_COLOR_VALUE);
+    EXPECT_EQ(spanItem->fontStyle->propFontSize, FONT_SIZE_VALUE);
+    EXPECT_EQ(spanItem->fontStyle->propItalicFontStyle, ITALIC_FONT_STYLE_VALUE);
+    EXPECT_EQ(spanItem->fontStyle->propFontWeight, FONT_WEIGHT_VALUE);
+    EXPECT_EQ(spanItem->fontStyle->propFontFamily, FONT_FAMILY_VALUE);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: RichEditorModel013
+ * @tc.desc: test placeholder styel value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorModel013, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    PlaceholderOptions options;
+    options.value = INIT_VALUE_1;
+    richEditorModel.SetPlaceholder(options);
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode, AceType::MakeRefPtr<GeometryNode>(), richEditorNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    // test placeholder value and style is correct
+    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    auto spanItemChildren = layoutAlgorithm->GetSpans();
+    auto spanItem = spanItemChildren.back();
+    EXPECT_EQ(spanItemChildren.size(), 1);
+    EXPECT_EQ(spanItem->GetSpanContent(), INIT_VALUE_1);
+    ASSERT_FALSE(spanItem->fontStyle->propTextColor.has_value());
+    ASSERT_FALSE(spanItem->fontStyle->propFontSize.has_value());
+    ASSERT_FALSE(spanItem->fontStyle->propItalicFontStyle.has_value());
+    ASSERT_FALSE(spanItem->fontStyle->propFontWeight.has_value());
+    ASSERT_FALSE(spanItem->fontStyle->propFontFamily.has_value());
 
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -3387,5 +3547,109 @@ HWTEST_F(RichEditorTestNg, RichEditorController016, TestSize.Level1)
     EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 500);
 
     ClearSpan();
+}
+
+/**
+ * @tc.name: RichEditorDragTest001
+ * @tc.desc: test the drag of RichEditor without developer's onDragStart function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDragTest001, TestSize.Level1)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    host->draggable_ = true;
+    auto eventHub = host->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    EXPECT_TRUE(gesture->GetTextDraggable());
+    gesture->SetIsTextDraggable(true);
+    pattern->InitDragDropEvent();
+    EXPECT_TRUE(eventHub->HasDefaultOnDragStart());
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+    TextStyle style;
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.style = style;
+    auto index = controller->AddTextSpan(options);
+    EXPECT_EQ(index, 0);
+    ImageSpanOptions imageOptions;
+    imageOptions.image = IMAGE_VALUE;
+    controller->AddImageSpan(imageOptions);
+    pattern->textSelector_.Update(0, 6);
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
+    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto dragDropInfo = onDragStart(event, "");
+    EXPECT_EQ(dragDropInfo.extraInfo, "");
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_EQ(pattern->status_, Status::DRAGGING);
+    eventHub->FireOnDragMove(event, "");
+    auto onDragEnd = eventHub->GetOnDragEnd();
+    onDragEnd(event);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: RichEditorDragTest002
+ * @tc.desc: test the drag of RichEditor with developer's onDragStart function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDragTest002, TestSize.Level1)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    host->draggable_ = true;
+    auto eventHub = host->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    EXPECT_TRUE(gesture->GetTextDraggable());
+    gesture->SetIsTextDraggable(true);
+    auto dragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> NG::DragDropInfo {
+        NG::DragDropInfo info;
+        info.extraInfo = INIT_VALUE_1;
+        return info;
+    };
+    eventHub->SetOnDragStart(std::move(dragStart));
+    EXPECT_TRUE(eventHub->HasOnDragStart());
+    pattern->InitDragDropEvent();
+    EXPECT_TRUE(eventHub->HasDefaultOnDragStart());
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    controller->AddTextSpan(options);
+    ImageSpanOptions imageOptions;
+    imageOptions.image = IMAGE_VALUE;
+    controller->AddImageSpan(imageOptions);
+    pattern->textSelector_.Update(0, 6);
+    auto onDragStart = eventHub->GetOnDragStart();
+    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto dragDropInfo = onDragStart(event, "");
+    EXPECT_EQ(dragDropInfo.extraInfo, INIT_VALUE_1);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 6);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+    eventHub->FireOnDragMove(event, "");
+    auto onDragEnd = eventHub->GetOnDragEnd();
+    onDragEnd(event);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
 }
 } // namespace OHOS::Ace::NG

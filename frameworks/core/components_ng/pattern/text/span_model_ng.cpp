@@ -270,4 +270,88 @@ void SpanModelNG::SetTextBackgroundStyle(const TextBackgroundStyle& style)
     CHECK_NULL_VOID(baseSpan);
     baseSpan->SetTextBackgroundStyle(style);
 }
+
+std::string SpanModelNG::GetContent(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, "");
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_RETURN(spanItem, "");
+    return spanItem->GetSpanContent();
+}
+
+Ace::TextDecoration SpanModelNG::GetTextDecoration(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, TextDecoration::NONE);
+    return spanNode->GetTextDecoration().value_or(TextDecoration::NONE);
+}
+
+Color SpanModelNG::GetTextDecorationColor(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, Color::BLACK);
+    return spanNode->GetTextDecorationColor().value_or(Color::BLACK);
+}
+
+TextStyle SpanModelNG::GetDefaultTextStyle()
+{
+    TextStyle textStyle;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, textStyle);
+    return pipelineContext->GetTheme<TextTheme>()->GetTextStyle();
+}
+
+Color SpanModelNG::GetFontColor(UINode* uiNode)
+{
+    auto defaultColor = GetDefaultTextStyle().GetTextColor();
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, defaultColor);
+    return spanNode->GetTextColor().value_or(defaultColor);
+}
+
+Dimension SpanModelNG::GetFontSize(UINode* uiNode)
+{
+    const Dimension& defaultFontSize = GetDefaultTextStyle().GetFontSize();
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, defaultFontSize);
+    return spanNode->GetFontSize().value_or(defaultFontSize);
+}
+
+Ace::FontStyle SpanModelNG::GetFontStyle(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, Ace::FontStyle::NORMAL);
+    return spanNode->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL);
+}
+
+FontWeight SpanModelNG::GetFontWeight(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, FontWeight::NORMAL);
+    return spanNode->GetFontWeight().value_or(FontWeight::NORMAL);
+}
+
+Dimension SpanModelNG::GetTextLineHeight(UINode* uiNode)
+{
+    Dimension defaultLineHeight(0);
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, Dimension(0));
+    return spanNode->GetLineHeight().value_or(defaultLineHeight);
+}
+
+Ace::TextCase SpanModelNG::GetTextCase(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, TextCase::NORMAL);
+    return spanNode->GetTextCase().value_or(TextCase::NORMAL);
+}
+
+Dimension SpanModelNG::GetLetterSpacing(UINode* uiNode)
+{
+    Dimension defaultLetterSpacing(0);
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, defaultLetterSpacing);
+    return spanNode->GetLetterSpacing().value_or(defaultLetterSpacing);
+}
 } // namespace OHOS::Ace::NG

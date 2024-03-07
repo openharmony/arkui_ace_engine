@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,6 +237,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg004, TestSize.Level1)
     ASSERT_NE(navRouterGroupNode, nullptr);
 
     auto navigationPattern = AceType::MakeRefPtr<NavigationPattern>();
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
     auto parentNode = AceType::MakeRefPtr<NavigationGroupNode>("NavigationGroupNode", 11, navigationPattern);
     navRouterGroupNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
     ASSERT_NE(navRouterGroupNode->GetParent(), nullptr);
@@ -561,6 +563,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0015, TestSize.Level1)
 
     auto contentNode = NavigationGroupNode::GetOrCreateGroupNode(
         "contentNode", 33, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    contentNode->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     auto child = NavDestinationGroupNode::GetOrCreateGroupNode(
         "child", 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     contentNode->children_.push_back(child);
@@ -857,6 +861,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0023, TestSize.Level1)
     ASSERT_NE(navRouterGroupNode, nullptr);
     auto parent = NavigationGroupNode::GetOrCreateGroupNode(
         "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    parent->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
@@ -2414,5 +2420,628 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0046, TestSize.Level1)
     layoutWrapper->AppendChild(backButtonWrapper);
     algorithm->MeasureBackButton(AceType::RawPtr(layoutWrapper), titleBarNode, titleBarLayoutProperty);
     ASSERT_EQ(pipeline->minPlatformVersion_, 10);
+}
+
+/**
+ * @tc.name: UpdateNameIfNeeded001
+ * @tc.desc: Test UpdateNameIfNeede and enter pathInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, UpdateNameIfNeeded001, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(pattern);
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+    EXPECT_TRUE(navDestinationPattern->name_.empty());
+
+    // Make GetNavPathInfo return not NULL.
+    auto context = AceType::MakeRefPtr<NG::NavDestinationContext>();
+    auto navPathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    context->SetNavPathInfo(navPathInfo);
+    navDestinationPattern->SetNavDestinationContext(context);
+
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+    EXPECT_NE(navDestinationPattern->GetNavPathInfo(), nullptr);
+    navDestinationPattern->UpdateNameIfNeeded(hostNode);
+}
+
+/**
+ * @tc.name: UpdateBackgroundColorIfNeeded001
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and enter GetNavDestinationMode returning DIALOG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, UpdateBackgroundColorIfNeeded001, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(pattern);
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    // Make GetBackgroundColor->has_value return true.
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+    auto renderContext = hostNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_FALSE(renderContext->GetBackgroundColor().has_value());
+
+    // Make GetNavDestinationMode return DIALOG.
+    hostNode->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    EXPECT_EQ(hostNode->GetNavDestinationMode(), NavDestinationMode::DIALOG);
+    navDestinationPattern->UpdateBackgroundColorIfNeeded(hostNode);
+}
+
+/**
+ * @tc.name: UpdateTitlebarVisibility001
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and make opts return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, UpdateTitlebarVisibility001, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(pattern);
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+    // Make titleBarNode not NULL
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 33, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    // Make opts return false
+    hostNode->titleBarNode_ = titleBarNode;
+    hostNode->GetLayoutProperty()->safeAreaExpandOpts_ = nullptr;
+
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_NE(navDestinationLayoutProperty, nullptr);
+    auto hostTitleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    ASSERT_NE(hostTitleBarNode, nullptr);
+    ASSERT_NE(hostTitleBarNode->GetLayoutProperty<TitleBarLayoutProperty>(), nullptr);
+    ASSERT_EQ(hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts(), nullptr);
+    // There is a second branch in UpdateTitlebarVisibility
+    EXPECT_FALSE(navDestinationLayoutProperty->GetHideTitleBar().value_or(false));
+    navDestinationPattern->UpdateTitlebarVisibility(hostNode);
+}
+
+/**
+ * @tc.name: UpdateTitlebarVisibility002
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and make opts return true and Expansive return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, UpdateTitlebarVisibility002, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(pattern);
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+    // Make titleBarNode not NULL
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 33, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    hostNode->titleBarNode_ = titleBarNode;
+    // Make opts return true
+    SafeAreaExpandOpts opts;
+    hostNode->GetLayoutProperty()->safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>(opts);
+
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_NE(navDestinationLayoutProperty, nullptr);
+    auto hostTitleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    ASSERT_NE(hostTitleBarNode, nullptr);
+    ASSERT_NE(hostTitleBarNode->GetLayoutProperty<TitleBarLayoutProperty>(), nullptr);
+    auto&& hostOpts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    ASSERT_NE(hostOpts, nullptr);
+    ASSERT_FALSE(hostOpts->Expansive());
+    // There is a second branch in UpdateTitlebarVisibility
+    EXPECT_FALSE(navDestinationLayoutProperty->GetHideTitleBar().value_or(false));
+    navDestinationPattern->UpdateTitlebarVisibility(hostNode);
+}
+
+/**
+ * @tc.name: UpdateTitlebarVisibility003
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and make opts and Expansive return true
+ *           and navDestinationContentNode return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, UpdateTitlebarVisibility003, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(pattern);
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+    // Make titleBarNode not NULL
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 33, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    hostNode->titleBarNode_ = titleBarNode;
+    // Make opts and Expansive return true
+    SafeAreaExpandOpts opts;
+    opts.type = SAFE_AREA_TYPE_SYSTEM;
+    opts.edges = SAFE_AREA_EDGE_TOP;
+    hostNode->GetLayoutProperty()->safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>(opts);
+    // Make navDestinationContentNode return false
+    hostNode->contentNode_ = nullptr;
+
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_NE(navDestinationLayoutProperty, nullptr);
+    auto hostTitleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    ASSERT_NE(hostTitleBarNode, nullptr);
+    ASSERT_NE(hostTitleBarNode->GetLayoutProperty<TitleBarLayoutProperty>(), nullptr);
+    auto&& hostOpts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    ASSERT_NE(hostOpts, nullptr);
+    ASSERT_TRUE(hostOpts->Expansive());
+    ASSERT_EQ(AceType::DynamicCast<FrameNode>(hostNode->GetContentNode()), nullptr);
+    // There is a second branch in UpdateTitlebarVisibility
+    EXPECT_FALSE(navDestinationLayoutProperty->GetHideTitleBar().value_or(false));
+    navDestinationPattern->UpdateTitlebarVisibility(hostNode);
+}
+
+/**
+ * @tc.name: UpdateTitlebarVisibility004
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and make opts and Expansive return true
+ *           and navDestinationContentNode return true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, UpdateTitlebarVisibility004, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(pattern);
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+    // Make titleBarNode not NULL
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 33, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    hostNode->titleBarNode_ = titleBarNode;
+    // Make opts and Expansive return true
+    SafeAreaExpandOpts opts;
+    opts.type = SAFE_AREA_TYPE_SYSTEM;
+    opts.edges = SAFE_AREA_EDGE_TOP;
+    hostNode->GetLayoutProperty()->safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>(opts);
+    // Make navDestinationContentNode return true
+    auto navigationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, 12,
+        []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
+    hostNode->SetContentNode(navigationContentNode);
+
+    ASSERT_NE(hostNode->GetLayoutProperty<NavDestinationLayoutProperty>(), nullptr);
+    auto hostTitleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    ASSERT_NE(hostTitleBarNode, nullptr);
+    ASSERT_NE(hostTitleBarNode->GetLayoutProperty<TitleBarLayoutProperty>(), nullptr);
+    auto&& hostOpts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    ASSERT_NE(hostOpts, nullptr);
+    ASSERT_TRUE(hostOpts->Expansive());
+    ASSERT_NE(AceType::DynamicCast<FrameNode>(hostNode->GetContentNode()), nullptr);
+    navDestinationPattern->UpdateTitlebarVisibility(hostNode);
+}
+
+/**
+ * @tc.name: UpdateTitlebarVisibility005
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and make GetIndex return 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, UpdateTitlebarVisibility005, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(pattern);
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    // Make GetIndex return 0
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    hostNode->index_ = 0;
+    EXPECT_EQ(hostNode->GetIndex(), 0);
+    navDestinationPattern->UpdateTitlebarVisibility(hostNode);
+}
+
+/**
+ * @tc.name: GetBackButtonState001
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and make GetHideTitleBarValue return true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, GetBackButtonState001, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(pattern);
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    // Make GetHideTitleBarValue return true
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_TRUE(navDestinationLayoutProperty);
+    navDestinationLayoutProperty->propHideTitleBar_ = true;
+
+    ASSERT_TRUE(navDestinationLayoutProperty->GetHideTitleBarValue(false));
+    navDestinationPattern->GetBackButtonState();
+}
+
+/**
+ * @tc.name: GetBackButtonState002
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and make parent return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, GetBackButtonState002, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(pattern);
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    // Make parent return false
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_TRUE(navDestinationLayoutProperty);
+    ASSERT_FALSE(navDestinationLayoutProperty->GetHideTitleBarValue(false));
+    auto parent = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
+    ASSERT_FALSE(parent);
+    navDestinationPattern->GetBackButtonState();
+}
+
+/**
+ * @tc.name: GetBackButtonState003
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and make parent and IsRootNode return true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, GetBackButtonState003, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(pattern);
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    // Make parent and IsRootNode return true
+    auto navRouterNode = NavRouterGroupNode::GetOrCreateGroupNode(
+        "navRouterNode", 11, []() { return AceType::MakeRefPtr<NavRouterPattern>(); });
+    ASSERT_TRUE(navRouterNode);
+    navRouterNode->isRoot_ = true;
+    navDestinationNode->parent_ = navRouterNode;
+
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_TRUE(navDestinationLayoutProperty);
+    ASSERT_FALSE(navDestinationLayoutProperty->GetHideTitleBarValue(false));
+    auto parent = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
+    ASSERT_TRUE(parent);
+    ASSERT_TRUE(parent->IsRootNode());
+    navDestinationPattern->GetBackButtonState();
+}
+
+/**
+ * @tc.name: GetBackButtonState004
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and make parent return true and IsRootNode
+ *           and navigationNode return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, GetBackButtonState004, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>(
+        "navDestinationNode", 11, AceType::MakeRefPtr<NavDestinationPattern>());
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    // Make parent return true and IsRootNode return false
+    auto navRouterNode = NavRouterGroupNode::GetOrCreateGroupNode(
+        "navRouterNode", 11, []() { return AceType::MakeRefPtr<NavRouterPattern>(); });
+    ASSERT_TRUE(navRouterNode);
+    navRouterNode->isRoot_ = false;
+    navDestinationNode->parent_ = navRouterNode;
+
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_TRUE(navDestinationLayoutProperty);
+    ASSERT_FALSE(navDestinationLayoutProperty->GetHideTitleBarValue(false));
+    auto parent = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
+    ASSERT_TRUE(parent);
+    ASSERT_FALSE(parent->IsRootNode());
+    // Make navigationNode return false
+    RefPtr<NavigationGroupNode> navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
+    ASSERT_FALSE(navigationNode);
+    navDestinationPattern->GetBackButtonState();
+}
+
+/**
+ * @tc.name: GetBackButtonState005
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and make the logic as follows:
+ *               parent is true
+ *               IsRootNode return false
+ *               navigationNode is true
+ *               index is not 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, GetBackButtonState005, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(pattern) << "2797";
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    ASSERT_TRUE(navDestinationNode) << "2799";
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    // Make parent return true and IsRootNode return false
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationNode->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    navigationNode->isRoot_ = false;
+    navDestinationNode->parent_ = navigationNode;
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    navDestinationNode->titleBarNode_ = titleBarNode;
+
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_TRUE(navDestinationLayoutProperty);
+    ASSERT_FALSE(navDestinationLayoutProperty->GetHideTitleBarValue(false));
+    auto parent = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
+    ASSERT_TRUE(parent);
+    ASSERT_FALSE(parent->IsRootNode());
+    // Make sure navigationNode return true
+    RefPtr<NavigationGroupNode> navigationNodeTest = AceType::DynamicCast<NavigationGroupNode>(parent);
+    ASSERT_TRUE(navigationNodeTest);
+    // Make sure index is not 0
+    auto patternTest = navigationNodeTest->GetPattern<NavigationPattern>();
+    ASSERT_TRUE(patternTest);
+    auto stackTest = patternTest->GetNavigationStack();
+    ASSERT_TRUE(stackTest);
+    ASSERT_NE(stackTest->FindIndex(navDestinationPattern->name_, navDestinationPattern->customNode_, true), 0);
+    navDestinationPattern->GetBackButtonState();
+}
+
+/**
+ * @tc.name: GetBackButtonState006
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and make the logic as follows:
+ *               parent is true
+ *               IsRootNode return false
+ *               navigationNode is true
+ *               index is 0
+ *               GetNavigationMode return not SPLIT
+ *               GetHideNavBarValue return false
+ *               isCustomTitle is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, GetBackButtonState006, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>(
+        "navDestinationNode", 11, AceType::MakeRefPtr<NavDestinationPattern>());
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    // Make parent return true and IsRootNode return false
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    //  Make index 0
+    navDestinationPattern->name_ = "Page01";
+    navDestinationPattern->customNode_ = navDestinationNode;
+    auto routeInfo = AceType::MakeRefPtr<RouteInfo>();
+    navigationStack->Add(
+        "Page01", navDestinationNode, NavRouteMode::PUSH, routeInfo);
+    navigationNode->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    // Make GetNavigationMode return not SPLIT
+    navigationNode->GetPattern<NavigationPattern>()->navigationMode_ = NavigationMode::AUTO;
+    // Make GetHideNavBarValue return false
+    navigationNode->GetLayoutProperty<NavigationLayoutProperty>()->propHideNavBar_ = false;
+    navigationNode->isRoot_ = false;
+    navDestinationNode->parent_ = navigationNode;
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_TRUE(titleBarNode);
+    auto titleNode = FrameNode::CreateFrameNode("menuNode", 2, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_TRUE(titleNode);
+    titleBarNode->title_ = titleNode;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    // Make isCustomTitle false
+    navDestinationNode->propPrevTitleIsCustom_ = false;
+    
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_TRUE(navDestinationLayoutProperty);
+    ASSERT_FALSE(navDestinationLayoutProperty->GetHideTitleBarValue(false));
+    auto parent = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
+    ASSERT_TRUE(parent);
+    ASSERT_FALSE(parent->IsRootNode());
+    // Make sure navigationNode return true
+    RefPtr<NavigationGroupNode> navigationNodeTest = AceType::DynamicCast<NavigationGroupNode>(parent);
+    ASSERT_TRUE(navigationNodeTest);
+    // Make sure index is 0
+    auto patternTest = navigationNodeTest->GetPattern<NavigationPattern>();
+    ASSERT_TRUE(patternTest);
+    auto stackTest = patternTest->GetNavigationStack();
+    ASSERT_TRUE(stackTest);
+    ASSERT_EQ(stackTest->FindIndex(navDestinationPattern->name_, navDestinationPattern->customNode_, true), 0);
+    // Make sure GetNavigationMode return not SPLIT
+    ASSERT_NE(patternTest->GetNavigationMode(), NavigationMode::SPLIT);
+    auto navigationLayoutProperty = navigationNodeTest->GetLayoutProperty<NavigationLayoutProperty>();
+    // Make sure GetHideNavBarValue return false
+    ASSERT_FALSE(navigationLayoutProperty->GetHideNavBarValue(false));
+    // Make sure isCustomTitle false
+    ASSERT_FALSE(hostNode->GetPrevTitleIsCustomValue(false));
+    navDestinationPattern->GetBackButtonState();
+}
+
+/**
+ * @tc.name: GetBackButtonState007
+ * @tc.desc: Test UpdateBackgroundColorIfNeeded and make the logic as follows:
+ *               parent is true
+ *               IsRootNode return false
+ *               navigationNode is true
+ *               index is 0
+ *               GetNavigationMode return SPLIT
+ *               GetHideNavBarValue return true
+ *               isCustomTitle is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, GetBackButtonState007, TestSize.Level1)
+{
+    // Create NavDestinationGroupNode to make GetHost return not NULL.
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>(
+        "navDestinationNode", 11, AceType::MakeRefPtr<NavDestinationPattern>());
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    // Make parent return true and IsRootNode return false
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    //  Make index 0
+    navDestinationPattern->name_ = "Page01";
+    navDestinationPattern->customNode_ = navDestinationNode;
+    auto routeInfo = AceType::MakeRefPtr<RouteInfo>();
+    navigationStack->Add(
+        "Page01", navDestinationNode, NavRouteMode::PUSH, routeInfo);
+    navigationNode->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    // Make GetNavigationMode return SPLIT
+    navigationNode->GetPattern<NavigationPattern>()->navigationMode_ = NavigationMode::SPLIT;
+    // Make GetHideNavBarValue return true
+    navigationNode->GetLayoutProperty<NavigationLayoutProperty>()->propHideNavBar_ = true;
+    navigationNode->isRoot_ = false;
+    navDestinationNode->parent_ = navigationNode;
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    // Make isCustomTitle true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(hostNode);
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_TRUE(navDestinationLayoutProperty);
+    ASSERT_FALSE(navDestinationLayoutProperty->GetHideTitleBarValue(false));
+    auto parent = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
+    ASSERT_TRUE(parent);
+    ASSERT_FALSE(parent->IsRootNode());
+    // Make sure navigationNode return true
+    RefPtr<NavigationGroupNode> navigationNodeTest = AceType::DynamicCast<NavigationGroupNode>(parent);
+    ASSERT_TRUE(navigationNodeTest);
+    // Make sure index is 0
+    auto patternTest = navigationNodeTest->GetPattern<NavigationPattern>();
+    ASSERT_TRUE(patternTest);
+    auto stackTest = patternTest->GetNavigationStack();
+    ASSERT_TRUE(stackTest);
+    ASSERT_EQ(stackTest->FindIndex(navDestinationPattern->name_, navDestinationPattern->customNode_, true), 0);
+    // Make sure GetNavigationMode return SPLIT
+    ASSERT_EQ(patternTest->GetNavigationMode(), NavigationMode::SPLIT);
+    auto navigationLayoutProperty = navigationNodeTest->GetLayoutProperty<NavigationLayoutProperty>();
+    // Make sure GetHideNavBarValue return true
+    ASSERT_TRUE(navigationLayoutProperty->GetHideNavBarValue(false));
+    // Make sure isCustomTitle true
+    ASSERT_TRUE(hostNode->GetPrevTitleIsCustomValue(false));
+    navDestinationPattern->GetBackButtonState();
+}
+
+/**
+ * @tc.name: OnAttachToMainTree001
+ * @tc.desc: Test OnAttachToMainTree and make node return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, OnAttachToMainTree001, TestSize.Level1)
+{
+    // Make node return false.
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+
+    RefPtr<UINode> node = AceType::DynamicCast<UINode>(navDestinationPattern->GetHost());
+    ASSERT_FALSE(node);
+    navDestinationPattern->OnAttachToMainTree();
+}
+
+/**
+ * @tc.name: OnAttachToMainTree002
+ * @tc.desc: Test OnAttachToMainTree and make node and GetTag return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, OnAttachToMainTree002, TestSize.Level1)
+{
+    // Make node return true.
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>(
+        "navDestinationNode", 11, AceType::MakeRefPtr<NavDestinationPattern>());
+    ASSERT_TRUE(navDestinationNode);
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    RefPtr<UINode> node = AceType::DynamicCast<UINode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(node);
+    ASSERT_NE(node->GetTag(), V2::NAVIGATION_VIEW_ETS_TAG);
+    navDestinationPattern->OnAttachToMainTree();
+}
+
+/**
+ * @tc.name: OnAttachToMainTree003
+ * @tc.desc: Test OnAttachToMainTree and make node and GetTag return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, OnAttachToMainTree003, TestSize.Level1)
+{
+    // Make node return true.
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>(
+        "navDestinationNode", 11, AceType::MakeRefPtr<NavDestinationPattern>());
+    ASSERT_TRUE(navDestinationNode);
+    navDestinationNode->tag_ = V2::NAVIGATION_VIEW_ETS_TAG;
+    auto navDestinationPattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    navDestinationPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(navDestinationNode));
+
+    RefPtr<UINode> node = AceType::DynamicCast<UINode>(navDestinationPattern->GetHost());
+    ASSERT_TRUE(node);
+    ASSERT_EQ(node->GetTag(), V2::NAVIGATION_VIEW_ETS_TAG);
+    navDestinationPattern->OnAttachToMainTree();
 }
 } // namespace OHOS::Ace::NG

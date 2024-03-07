@@ -152,6 +152,38 @@ void JSBaseNode::CreateRenderNode(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
 }
 
+void JSBaseNode::CreateFrameNode(const JSCallbackInfo& info)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    std::string nodeTag = "FrameNode";
+    auto node = NG::FrameNode::GetOrCreateFrameNode(
+        nodeTag, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
+    viewNode_ = node;
+    void* ptr = AceType::RawPtr(viewNode_);
+
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
+}
+
+void JSBaseNode::ConvertToFrameNode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto obj = info[0];
+    CHECK_NULL_VOID(!obj.IsEmpty());
+    auto* node = obj->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* uiNode = reinterpret_cast<NG::UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    CHECK_NULL_VOID(AceType::InstanceOf<NG::UINode>(uiNode));
+    viewNode_ = AceType::Claim(uiNode);
+    void* ptr = AceType::RawPtr(viewNode_);
+    info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
+}
+
 void JSBaseNode::ConstructorCallback(const JSCallbackInfo& info)
 {
     std::string surfaceId;
@@ -313,6 +345,8 @@ void JSBaseNode::JSBind(BindingTarget globalObj)
 
     JSClass<JSBaseNode>::CustomMethod("create", &JSBaseNode::Create);
     JSClass<JSBaseNode>::CustomMethod("createRenderNode", &JSBaseNode::CreateRenderNode);
+    JSClass<JSBaseNode>::CustomMethod("createFrameNode", &JSBaseNode::CreateFrameNode);
+    JSClass<JSBaseNode>::CustomMethod("convertToFrameNode", &JSBaseNode::ConvertToFrameNode);
     JSClass<JSBaseNode>::CustomMethod("finishUpdateFunc", &JSBaseNode::FinishUpdateFunc);
     JSClass<JSBaseNode>::CustomMethod("postTouchEvent", &JSBaseNode::PostTouchEvent);
     JSClass<JSBaseNode>::CustomMethod("dispose", &JSBaseNode::Dispose);

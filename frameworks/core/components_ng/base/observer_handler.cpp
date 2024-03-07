@@ -16,8 +16,8 @@
 #include "core/components_ng/base/observer_handler.h"
 
 #include "base/utils/utils.h"
-#include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -51,6 +51,19 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     navigationHandleFunc_(navigationId, navDestinationName, state);
 }
 
+void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType eventType)
+{
+    auto ref = weakPattern.Upgrade();
+    CHECK_NULL_VOID(ref);
+    auto pattern = AceType::DynamicCast<ScrollablePattern>(ref);
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    std::string id = host->GetInspectorId().value_or("");
+    float offset = pattern->GetTotalOffset();
+    CHECK_NULL_VOID(scrollEventHandleFunc_);
+    scrollEventHandleFunc_(id, eventType, offset);
+}
+
 void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
 {
     CHECK_NULL_VOID(pageInfo);
@@ -61,10 +74,21 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
         AceApplicationInfo::GetInstance().GetProcessName(),
         Container::Current()->GetModuleName()
     };
+    int32_t index = pageInfo->GetPageIndex();
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
-    int32_t index = EngineHelper::GetCurrentDelegate()->GetIndexByUrl(name);
     routerPageHandleFunc_(info, context, index, name, path, state);
+}
+
+void UIObserverHandler::NotifyDensityChange(double density)
+{
+    CHECK_NULL_VOID(densityHandleFunc_);
+    AbilityContextInfo info = {
+        AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(),
+        Container::Current()->GetModuleName()
+    };
+    densityHandleFunc_(info, density);
 }
 
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
@@ -88,6 +112,28 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
         pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN);
 }
 
+std::shared_ptr<ScrollEventInfo> UIObserverHandler::GetScrollEventState(const RefPtr<AceType>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto current = AceType::DynamicCast<UINode>(node);
+    while (current) {
+        if (current->GetTag() == V2::SCROLL_ETS_TAG) {
+            break;
+        }
+        current = current->GetParent();
+    }
+    CHECK_NULL_RETURN(current, nullptr);
+    auto nav = AceType::DynamicCast<FrameNode>(current);
+    CHECK_NULL_RETURN(nav, nullptr);
+    std::string id = std::to_string(nav->GetId());
+    auto pattern = nav->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return std::make_shared<ScrollEventInfo>(
+        id,
+        ScrollEventType::SCROLL_START,
+        pattern->GetTotalOffset());
+}
+
 std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const RefPtr<AceType>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -104,9 +150,9 @@ std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const Re
     auto pattern = routerPage->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     auto pageInfo = pattern->GetPageInfo();
+    int32_t index = pageInfo->GetPageIndex();
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
-    int32_t index = EngineHelper::GetCurrentDelegate()->GetIndexByUrl(name);
     return std::make_shared<RouterPageInfoNG>(
         GetUIContextValue(),
         index,
@@ -120,9 +166,19 @@ void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
     navigationHandleFunc_ = func;
 }
 
+void UIObserverHandler::SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func)
+{
+    scrollEventHandleFunc_ = func;
+}
+
 void UIObserverHandler::SetHandleRouterPageChangeFunc(RouterPageHandleFunc func)
 {
     routerPageHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleDensityChangeFunc(const DensityHandleFunc& func)
+{
+    densityHandleFunc_ = func;
 }
 
 napi_value UIObserverHandler::GetUIContextValue()

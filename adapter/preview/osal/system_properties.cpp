@@ -41,6 +41,7 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::svgTraceEnable_ = false;
 bool SystemProperties::layoutTraceEnable_ = false;
+bool SystemProperties::traceInputEventEnable_ = false;
 bool SystemProperties::stateManagerEnable_ = false;
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
@@ -69,6 +70,7 @@ bool SystemProperties::unZipHap_ = true;
 bool SystemProperties::windowAnimationEnabled_ = false;
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::debugAutoUIEnabled_ = false;
+bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
 bool SystemProperties::isHookModeEnabled_ = false;
@@ -88,6 +90,7 @@ bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
+bool SystemProperties::acePerformanceMonitorEnable_ = false;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {
@@ -271,6 +274,11 @@ bool SystemProperties::GetGridCacheEnabled()
 }
 
 bool SystemProperties::GetGridIrregularLayoutEnabled()
+{
+    return false;
+}
+
+bool SystemProperties::WaterFlowUseSegmentedLayout()
 {
     return false;
 }

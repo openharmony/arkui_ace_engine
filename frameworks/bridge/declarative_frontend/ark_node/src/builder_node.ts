@@ -17,7 +17,7 @@
 
 class BuilderNode {
   private _JSBuilderNode: JSBuilderNode;
-  private nodePtr_: number | null;
+  private nodePtr_: NodePtr;
   constructor(uiContext: UIContext, options: RenderOptions) {
     let jsBuilderNode = new JSBuilderNode(uiContext, options);
     this._JSBuilderNode = jsBuilderNode;
@@ -86,9 +86,8 @@ class JSBuilderNode extends BaseNode {
     if (entry === undefined) {
       throw new Error(`fail to create node, elmtId is illegal`);
     }
-    let updateFuncRecord : UpdateFuncRecord = (typeof entry === 'object') ? entry : undefined;
-    if(updateFuncRecord === undefined)
-    {
+    let updateFuncRecord: UpdateFuncRecord = (typeof entry === 'object') ? entry : undefined;
+    if (updateFuncRecord === undefined) {
       throw new Error(`fail to create node, the api level of app does not supported`);
     }
     let nodeInfo = updateFuncRecord.node;
@@ -112,11 +111,13 @@ class JSBuilderNode extends BaseNode {
   }
   public update(param: Object) {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    this.updateStart();
     this.purgeDeletedElmtIds();
     this.params_ = param;
     Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
       return (a < b) ? -1 : (a > b) ? 1 : 0;
     }).forEach(elmtId => this.UpdateElement(elmtId));
+    this.updateEnd();
     __JSScopeUtil__.restoreInstanceId();
   }
   private UpdateElement(elmtId: number): void {
@@ -288,7 +289,7 @@ class JSBuilderNode extends BaseNode {
 
     branchfunc();
   }
-  public getNodePtr(): number | null {
+  public getNodePtr(): NodePtr {
     return this.nodePtr_;
   }
   public dispose() {

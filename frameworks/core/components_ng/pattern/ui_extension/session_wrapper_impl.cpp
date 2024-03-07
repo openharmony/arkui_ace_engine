@@ -30,6 +30,11 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "transaction/rs_sync_transaction_controller.h"
+
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/transaction/rs_transaction.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -444,9 +449,29 @@ void SessionWrapperImpl::RefreshDisplayArea(const RectF& displayArea)
     CHECK_NULL_VOID(pipeline);
     auto curWindow = pipeline->GetCurrentWindowRect();
     displayArea_ = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
+    std::shared_ptr<Rosen::RSTransaction> transaction;
+    if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+        transaction = transactionController->GetRSTransaction();
+#ifdef ENABLE_ROSEN_BACKEND
+        if (transaction) {
+            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+        }
+#endif
+    }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
-                                std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
-        Rosen::SizeChangeReason::UNDEFINED);
+        std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
+        session_->GetSizeChangeReason(), transaction);
+}
+
+void SessionWrapperImpl::OnSizeChanged(WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    CHECK_NULL_VOID(session_);
+    auto reason = static_cast<Rosen::SizeChangeReason>(type);
+    session_->UpdateSizeChangeReason(reason);
+    if (rsTransaction && (type == WindowSizeChangeReason::ROTATION)) {
+        session_->UpdateRect(session_->GetSessionRect(), reason, rsTransaction);
+    }
 }
 /************************************************ End: The interface to control the display area **********************/
 

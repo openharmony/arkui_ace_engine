@@ -78,9 +78,11 @@ namespace {
 constexpr double ICON_SIZE = 24;
 constexpr double ICON_HOT_ZONE_SIZE = 40;
 constexpr double FONT_SIZE = 16;
+constexpr float OFFSET = 3;
 constexpr int32_t DEFAULT_NODE_ID = 1;
 constexpr int32_t MIN_PLATFORM_VERSION = 10;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
+const std::string DEFAULT_TEXT_THREE_LINE = "abcdef\nghijkl\nmnopqr\n";
 const std::string HELLO_TEXT = "hello";
 const std::string DEFAULT_PLACE_HOLDER = "please input text here";
 const std::string LOWERCASE_FILTER = "[a-z]";
@@ -259,5 +261,299 @@ HWTEST_F(TextFieldUXTest, PerformAction001, TestSize.Level1)
     EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
     pattern_->PerformAction(textInputAction, false);
     EXPECT_EQ(pattern_->TextInputActionToString(), "EnterKeyType.Done");
+}
+
+/**
+ * @tc.name: CursorInContentRegion001
+ * @tc.desc: Test function CursorInContentRegion.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CursorInContentRegion001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.expected: Cursor realy in the content region
+     */
+    GetFocus();
+    EXPECT_EQ(pattern_->GetTextOrPlaceHolderFontSize(), FONT_SIZE);
+    EXPECT_TRUE(pattern_->CursorInContentRegion());
+}
+
+/**
+ * @tc.name: OnTextAreaScroll001
+ * @tc.desc: Test textfield to create paint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnTextAreaScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call OnTextAreaScroll
+     * tc.expected: step2. Check if the currentOffset_ is right.
+     */
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
+
+    /**
+     * @tc.steps: step3.set contentRect_.GetY() = 1
+     */
+    pattern_->contentRect_ = RectF(1.0f, 1.0f, 1.0f, 1.0f);
+    FlushLayoutTask(frameNode_);
+    pattern_->OnTextAreaScroll(OFFSET);
+    EXPECT_EQ(pattern_->currentOffset_, 1);
+}
+
+/**
+ * @tc.name: CursorOperation001
+ * @tc.desc: Test cursor move
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CursorOperation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with three lines of text.
+     */
+    CreateTextField(DEFAULT_TEXT_THREE_LINE);
+
+    /**
+     * @tc.expected: Current caret position at 2nd line.
+     */
+    GetFocus();
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(10);
+    EXPECT_EQ(pattern_->GetCaretIndex(), 10);
+
+    /**
+     * @tc.steps: set InputOperation CURSOR_UP and call BeforeCreateLayoutWrapper
+     * @tc.expected: caret will move up
+     */
+    pattern_->inputOperations_.push(InputOperation::CURSOR_UP);
+    auto ret = pattern_->CursorMoveUp();
+    EXPECT_FALSE(ret);
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern_->GetCaretIndex(), 0);
+}
+
+/**
+ * @tc.name: CursorOperation002
+ * @tc.desc: Test cursor move
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CursorOperation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with three lines of text.
+     */
+    CreateTextField(DEFAULT_TEXT_THREE_LINE);
+
+    /**
+     * @tc.expected: Current caret position at 2nd line.
+     */
+    GetFocus();
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(10);
+    EXPECT_EQ(pattern_->GetCaretIndex(), 10);
+
+    /**
+     * @tc.steps: set InputOperation CURSOR_DOWN and call BeforeCreateLayoutWrapper
+     * @tc.expected: caret will move down
+     */
+    pattern_->inputOperations_.push(InputOperation::CURSOR_DOWN);
+    auto ret = pattern_->CursorMoveDown();
+    EXPECT_FALSE(ret);
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern_->GetCaretIndex(), 0);
+}
+
+/**
+ * @tc.name: CursorOperation003
+ * @tc.desc: Test cursor move
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CursorOperation003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with three lines of text.
+     */
+    CreateTextField(DEFAULT_TEXT_THREE_LINE);
+
+    /**
+     * @tc.expected: Current caret position at 2nd line.
+     */
+    GetFocus();
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(10);
+    EXPECT_EQ(pattern_->GetCaretIndex(), 10);
+
+    /**
+     * @tc.steps: set InputOperation CURSOR_LEFT and call BeforeCreateLayoutWrapper
+     * @tc.expected: caret will move left
+     */
+    pattern_->inputOperations_.push(InputOperation::CURSOR_LEFT);
+    auto ret = pattern_->CursorMoveLeft();
+    EXPECT_FALSE(ret);
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern_->GetCaretIndex(), 8);
+}
+
+/**
+ * @tc.name: CursorOperation004
+ * @tc.desc: Test cursor move
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CursorOperation004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with three lines of text.
+     */
+    CreateTextField(DEFAULT_TEXT_THREE_LINE);
+
+    /**
+     * @tc.expected: Current caret position at 2nd line.
+     */
+    GetFocus();
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(10);
+    EXPECT_EQ(pattern_->GetCaretIndex(), 10);
+
+    /**
+     * @tc.steps: set InputOperation CURSOR_RIGHT and call BeforeCreateLayoutWrapper
+     * @tc.expected: caret will move right
+     */
+    pattern_->inputOperations_.push(InputOperation::CURSOR_RIGHT);
+    auto ret = pattern_->CursorMoveRight();
+    EXPECT_FALSE(ret);
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern_->GetCaretIndex(), 12);
+}
+
+/**
+ * @tc.name: CursorOperation004
+ * @tc.desc: Test delete text with ControllerSelected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, DeleteTextWithControllerSelected001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize text input node and call delete backward
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: getFocus and set controller
+     * @tc.steps: firsthandle 5 secondhandle 10
+     */
+    GetFocus();
+    pattern_->HandleSetSelection(5, 10, false);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: call DeleteBackward
+     * @tc.expected: text will be reduced by five characters
+     */
+    pattern_->DeleteBackward(5);
+    EXPECT_EQ(pattern_->GetTextValue().compare("abcdeklmnopqrstuvwxyz"), 0) << "Text is " + pattern_->GetTextValue();
+    EXPECT_EQ(pattern_->GetCaretIndex(), 5);
+}
+
+/**
+ * @tc.name: InitSurfaceChangedCallback001
+ * @tc.desc: Test init syrface change and callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, InitSurfaceChangedCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create textfield node
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.expected: Verify is the callback successful
+     */
+    GetFocus();
+    FlushLayoutTask(frameNode_);
+    pattern_->HandleSurfaceChanged(0, 0, 0, 0);
+    EXPECT_NE(pattern_->surfaceChangedCallbackId_, std::nullopt);
+    EXPECT_TRUE(pattern_->HasSurfaceChangedCallback());
+
+    /**
+     * @tc.expected: set selectOverlay
+     */
+    TouchLocationInfo touchLocationInfo1(0);
+    touchLocationInfo1.touchType_ = TouchType::DOWN;
+    touchLocationInfo1.localLocation_ = Offset(0.0f, 0.0f);
+
+    /**
+     * @tc.steps: step3. create touch info, touch type DOWN
+     */
+    TouchEventInfo touchInfo1("");
+    touchInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
+
+    /**
+     * @tc.steps: step4. test touch down
+     */
+    pattern_->ProcessOverlay(true, true, true);
+    pattern_->HandleSurfaceChanged(0, 0, 0, 0);
+    pattern_->processOverlayDelayTask_.operator()();
+    EXPECT_FALSE(pattern_->GetOriginIsMenuShow());
+}
+
+/**
+ * @tc.name: InitSurfacePositionChangedCallback001
+ * @tc.desc: Test init syrface Position change and callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, InitSurfacePositionChangedCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create textfield node
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.expected: Verify is the callback successful
+     */
+    GetFocus();
+    FlushLayoutTask(frameNode_);
+    pattern_->HandleSurfacePositionChanged(1, 1);
+    EXPECT_NE(pattern_->surfacePositionChangedCallbackId_, std::nullopt);
+    EXPECT_TRUE(pattern_->HasSurfacePositionChangedCallback());
+}
+
+/**
+ * @tc.name: OnHandleMove004
+ * @tc.desc: Test get Select HandleInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnHandleMove004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Create selectOverlayProxy.
+     */
+    pattern_->ProcessOverlay(true, true, true);
+
+    /**
+     * @tc.steps: step2. set two handle and call OnHandleMove
+     * tc.expected: step2. Check if the value is created.
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    pattern_->isSingleHandle_ = false;
+    RectF handleRect;
+    pattern_->OnHandleMove(handleRect, true);
 }
 }

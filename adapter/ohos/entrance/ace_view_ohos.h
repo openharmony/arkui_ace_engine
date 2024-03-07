@@ -43,6 +43,7 @@ public:
     static AceViewOhos* CreateView(
         int32_t instanceId, bool useCurrentEventRunner = false, bool usePlatformThread = false);
     static void SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Window> window);
+    static void ChangeViewSize(AceViewOhos* view, int32_t width, int32_t height);
     static void SurfaceChanged(AceViewOhos* view, int32_t width, int32_t height, int32_t orientation,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -161,6 +162,12 @@ private:
         if (viewChangeCallback_) {
             viewChangeCallback_(width, height, type, rsTransaction);
         }
+    }
+
+    void ChangeSize(int width, int height)
+    {
+        width_ = width;
+        height_ = height;
     }
 
     void NotifySurfacePositionChanged(int32_t posX, int32_t posY)

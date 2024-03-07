@@ -345,15 +345,13 @@ class Router {
         }
     }
 
-    back(options) {
+    back(options, params) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_router.back(options);
-        __JSScopeUtil__.restoreInstanceId();
-    }
-
-    back(index, params) {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_router.back(index, params);
+        if (typeof options === 'number' || arguments.length === 2) {
+            this.ohos_router.back(options, params);
+        } else {
+            this.ohos_router.back(options);
+        }
         __JSScopeUtil__.restoreInstanceId();
     }
 

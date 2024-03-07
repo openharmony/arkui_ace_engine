@@ -62,7 +62,27 @@ void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameN
 
 RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
 {
-    auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_);
+    int32_t headerIndex = -1;
+    int32_t footerIndex = -1;
+    int32_t itemStartIndex = 0;
+    auto header = header_.Upgrade();
+    if (header) {
+        auto count = header->FrameCount();
+        if (count > 0) {
+            headerIndex = itemStartIndex;
+            itemStartIndex += count;
+        }
+    }
+    auto footer = footer_.Upgrade();
+    if (footer) {
+        int32_t count = footer->FrameCount();
+        if (count > 0) {
+            footerIndex = itemStartIndex;
+            itemStartIndex += count;
+        }
+    }
+    itemStartIndex_ = itemStartIndex;
+    auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex, footerIndex, itemStartIndex_);
     layoutAlgorithm->SetItemsPosition(itemPosition_);
     layoutAlgorithm->SetLayoutedItemInfo(layoutedItemInfo_);
     return layoutAlgorithm;
@@ -98,6 +118,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     headerMainSize_ = layoutAlgorithm->GetHeaderMainSize();
     footerMainSize_ = layoutAlgorithm->GetFooterMainSize();
     layoutedItemInfo_ = layoutAlgorithm->GetLayoutedItemInfo();
+    layoutConstraint_ = layoutAlgorithm->GetLayoutConstraint();
     layouted_ = true;
     CheckListDirectionInCardStyle();
     auto host = GetHost();

@@ -30,10 +30,10 @@ namespace OHOS::Ace::NG {
 void IconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     RefPtr<LayoutWrapper>& iconWrap)
 {
-    secCompProperty_ = property;
-    iconWrap_ = iconWrap;
     CHECK_NULL_VOID(property);
     CHECK_NULL_VOID(iconWrap);
+    secCompProperty_ = property;
+    iconWrap_ = iconWrap;
     if (property->GetIconStyle().value_or(-1) ==
         static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
         return;

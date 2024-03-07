@@ -851,18 +851,12 @@ HWTEST_F(SelectTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     ASSERT_NE(selectTheme, nullptr);
     /**
-     * @tc.steps: step3. Set the background color of select theme to be BLACK and call OnColorConfigurationUpdate()
-     * of select pattern.
-     * @tc.expected: Property is setted successfully.
-     */
-    selectTheme->backgroundColor_ = Color::BLACK;
-    selectPattern->OnColorConfigurationUpdate();
-    EXPECT_TRUE(selectPattern->isColorConfigurationUpdate_);
-    /**
-     * @tc.steps: step4. Get menu frame node, menu pattern, render context and verify if the color of render context
+     * @tc.steps: step3. Get menu frame node, menu pattern, render context and verify if the color of render context
      * is the same as the original input.
      * @tc.expected: Property is setted successfully and obejects should not be null.
      */
+    selectTheme->backgroundColor_ = Color::BLACK;
+    selectPattern->OnColorConfigurationUpdate();
     auto menuNode = selectPattern->GetMenuNode();
     ASSERT_NE(menuNode, nullptr);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();

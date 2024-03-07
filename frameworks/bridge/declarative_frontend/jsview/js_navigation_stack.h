@@ -100,6 +100,9 @@ public:
     int32_t CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo);
     void ClearPreBuildNodeList() override;
     std::vector<std::string> DumpStackInfo() const override;
+        void FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
+        const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated) override;
+    void FireNavigationModeChange(NG::NavigationMode mode) override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
@@ -122,6 +125,7 @@ private:
     bool GetFlagByIndex(int32_t index) const;
     void SaveNodeToPreBuildList(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
     RefPtr<NG::UINode> GetNodeFromPreBuildList(const std::string& name, const JSRef<JSVal>& param);
+    bool CheckAndGetInterceptionFunc(const std::string& name, JSRef<JSFunc>& func);
 
 private:
     std::vector<NavPathInfoUINode> preBuildNodeList_;

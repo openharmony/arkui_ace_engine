@@ -43,6 +43,9 @@ constexpr int32_t ANIMATION_BASE_DURATION = 256;
 constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
 constexpr double VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
+constexpr int32_t ANIMATOR_MIN_FRAME_RATE = 60;
+constexpr int32_t ANIMATOR_MAX_FRAME_RATE = 120;
+constexpr int32_t ANIMATOR_EXPECTED_FRAME_RATE = 120;
 
 } // namespace
 
@@ -86,10 +89,27 @@ void SlidingPanelPattern::OnModifyDone()
             SetCloseIconCallBack();
         }
     }
+    UpdatePanelRenderContext();
+}
 
-    auto isShow = layoutProperty->GetIsShowValue(false);
+void SlidingPanelPattern::UpdatePanelRenderContext()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasBorderRadius()) {
+        auto child = host->GetChildAtIndex(0);
+        CHECK_NULL_VOID(child);
+        auto node = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(node);
+        auto panelRenderContext = node->GetRenderContext();
+        CHECK_NULL_VOID(panelRenderContext);
+        panelRenderContext->UpdateBorderRadius(renderContext->GetBorderRadius().value());
+    }
+    auto isShow = layoutProperty->GetIsShowValue(false);
     auto backgroundMask = layoutProperty->GetBackgroundMaskValue(Color::TRANSPARENT);
     renderContext->UpdateBackgroundColor(isShow ? backgroundMask : Color::TRANSPARENT);
     if (isShow_.has_value() && isShow != isShow_.value_or(false)) {
@@ -605,6 +625,8 @@ void SlidingPanelPattern::AnimateTo(float targetLocation, PanelMode mode)
     isAnimating_ = true;
     animator_->ClearInterpolators();
     animator_->ClearAllListeners();
+    FrameRateRange frameRateRange(ANIMATOR_MIN_FRAME_RATE, ANIMATOR_MAX_FRAME_RATE, ANIMATOR_EXPECTED_FRAME_RATE);
+    animator_->SetExpectedFrameRateRange(frameRateRange);
     if (animator_->IsRunning()) {
         animator_->Stop();
     }
@@ -625,6 +647,7 @@ void SlidingPanelPattern::AnimateTo(float targetLocation, PanelMode mode)
             panel->invisibleFlag_ = true;
             panelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
+        AceAsyncTraceEnd(0, TRAILING_ANIMATION);
         panel->OnAnimationStop();
         panel->preAnimateFlag_ = false;
     });
@@ -658,7 +681,13 @@ void SlidingPanelPattern::AppendBlankHeightAnimation(float targetLocation, Panel
                     dragBarPattern->ShowInPanelMode(mode);
                 }
             }
-            panel->UpdateCurrentOffsetOnAnimate((end - start) * value + start);
+            auto currentOffset = (end - start) * value + start;
+            auto lastOffset = panel->GetLastOffset();
+            if (NearEqual(currentOffset, lastOffset, 1.0)) {
+                AceAsyncTraceBegin(0, TRAILING_ANIMATION);
+            }
+            panel->SetLastOffset(currentOffset);
+            panel->UpdateCurrentOffsetOnAnimate(currentOffset);
             panel->FireHeightChangeEvent();
             panel->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         });

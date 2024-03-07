@@ -164,7 +164,7 @@ stateMgmtProfiler.instance = undefined;
  * limitations under the License.
  */
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -190,10 +190,19 @@ stateMgmtProfiler.instance = undefined;
  * @since 9
  */
 class LocalStorage extends NativeLocalStorage {
+    /*
+      get access to provded LocalStorage instance thru Stake model
+      @StageModelOnly
+      @form
+      @since 10
+    */
+    static getShared() {
+        return LocalStorage.GetShared();
+    }
     /**
      * Construct new instance of LocalStorage
      * initialzie with all properties and their values that Object.keys(params) returns
-     * Property values must not be undefined.
+     * Property values must not be undefined for API 9 and lower, undefined allowed for API10
      * @param initializingProperties Object containing keys and values. @see set() for valid values
      *
      * @since 9
@@ -215,15 +224,6 @@ class LocalStorage extends NativeLocalStorage {
             this.initializeProps(initializingProperties);
         }
     }
-    /*
-      get access to provded LocalStorage instance thru Stake model
-      @StageModelOnly
-      @form
-      @since 10
-    */
-    static getShared() {
-        return LocalStorage.GetShared();
-    }
     /**
      * clear storage and init with given properties
      * @param initializingProperties
@@ -233,7 +233,9 @@ class LocalStorage extends NativeLocalStorage {
     initializeProps(initializingProperties = {}) {
         
         this.storage_.clear();
-        Object.keys(initializingProperties).filter((propName) => initializingProperties[propName] != undefined).forEach((propName) => this.addNewPropertyInternal(propName, initializingProperties[propName]));
+        Object.keys(initializingProperties)
+            .filter((propName) => (initializingProperties[propName] != null || Utils.isApiVersionEQAbove(12)))
+            .forEach((propName) => this.addNewPropertyInternal(propName, initializingProperties[propName]));
     }
     /**
      * Use before deleting owning Ability, window, or service UI
@@ -304,7 +306,7 @@ class LocalStorage extends NativeLocalStorage {
      */
     set(propName, newValue) {
         
-        if (newValue == undefined) {
+        if (newValue == undefined && !Utils.isApiVersionEQAbove(12)) {
             stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
             
             return false;
@@ -332,7 +334,7 @@ class LocalStorage extends NativeLocalStorage {
      */
     setOrCreate(propName, newValue) {
         
-        if (newValue == undefined) {
+        if (newValue == undefined && !Utils.isApiVersionEQAbove(12)) {
             stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
             
             return false;
@@ -593,7 +595,8 @@ class LocalStorage extends NativeLocalStorage {
         if (p == undefined) {
             // property named 'storagePropName' not yet in storage
             // add new property to storage
-            if (defaultValue === undefined) {
+            // We do not want to add undefined to older API verions, but null is added
+            if (defaultValue === undefined && !Utils.isApiVersionEQAbove(12)) {
                 stateMgmtConsole.error(`${this.constructor.name}.__createSync(${storagePropName}, non-existing property and undefined default value. ERROR.`);
                 return undefined;
             }
@@ -627,13 +630,6 @@ class LocalStorage extends NativeLocalStorage {
  * @since 7
  */
 class AppStorage extends LocalStorage {
-    /** singleton class, app can not create instances
-    *
-    * not a public / sdk function
-    */
-    constructor(initializingProperties) {
-        super(initializingProperties);
-    }
     /**
     * create and initialize singleton
     * initialzie with all properties and their values that Object.keys(params) returns
@@ -1035,6 +1031,13 @@ class AppStorage extends LocalStorage {
         }
         return AppStorage.instance_;
     }
+    /** singleton class, app can not create instances
+    *
+    * not a public / sdk function
+    */
+    constructor(initializingProperties) {
+        super(initializingProperties);
+    }
 }
 // instance functions below:
 // Should all be protected, but TS lang does not allow access from static member to protected member
@@ -1058,16 +1061,6 @@ AppStorage.instance_ = undefined;
  * public API to manage IPropertySubscriber
  */
 class SubscriberManager {
-    /**
-     * SubscriberManager is a singleton created by the framework
-     * do not use
-     *
-     * internal method
-     */
-    constructor() {
-        this.subscriberById_ = new Map();
-        
-    }
     /**
       * check subscriber is known
       * same as ES6 Map.prototype.has()
@@ -1244,6 +1237,16 @@ class SubscriberManager {
      */
     makeId() {
         return ViewStackProcessor.MakeUniqueId();
+    }
+    /**
+     * SubscriberManager is a singleton created by the framework
+     * do not use
+     *
+     * internal method
+     */
+    constructor() {
+        this.subscriberById_ = new Map();
+        
     }
 }
 /*
@@ -1463,6 +1466,97 @@ class SubscribaleAbstract extends SubscribableAbstract {
  * limitations under the License.
  */
 /**
+ * MapInfo
+ *
+ * Helper class to persist Map in Persistent storage
+ *
+ */
+class MapInfo {
+    constructor(mapReplacer, keys, values) {
+        this.mapReplacer = mapReplacer;
+        this.keys = keys;
+        this.values = values;
+    }
+    // Check if the given object is of type MapInfo
+    static isObject(obj) {
+        const typedObject = obj;
+        if ('mapReplacer' in typedObject && typedObject.mapReplacer === MapInfo.replacer) {
+            return true;
+        }
+        return false;
+    }
+    // Convert Map to Object
+    static toObject(map) {
+        const keys = Array.from(map.keys());
+        const values = Array.from(map.values());
+        return new MapInfo(MapInfo.replacer, keys, values);
+    }
+    // Convert Object to Map
+    static toMap(obj) {
+        return new Map(obj.keys.map((key, i) => [key, obj.values[i]]));
+    }
+}
+MapInfo.replacer = "ace_engine_state_mgmt_map_replacer";
+/**
+ * SetInfo
+ *
+ * Helper class to persist Set in Persistent storage
+ *
+ */
+class SetInfo {
+    constructor(setReplacer, values) {
+        this.setReplacer = setReplacer;
+        this.values = values;
+    }
+    // Check if the given object is of type SetInfo
+    static isObject(obj) {
+        const typedObject = obj;
+        if ('setReplacer' in typedObject && typedObject.setReplacer === SetInfo.replacer) {
+            return true;
+        }
+        return false;
+    }
+    // Convert Set to Object
+    static toObject(set) {
+        const values = Array.from(set.values());
+        return new SetInfo(SetInfo.replacer, values);
+    }
+    // Convert Object to Set
+    static toSet(obj) {
+        return new Set(obj.values);
+    }
+}
+SetInfo.replacer = "ace_engine_state_mgmt_set_replacer";
+/**
+ * DateInfo
+ *
+ * Helper class to persist Date in Persistent storage
+ *
+ */
+class DateInfo {
+    constructor(dateReplacer, date) {
+        this.dateReplacer = dateReplacer;
+        this.date = date;
+    }
+    // Check if the given object is of type DateInfo
+    static isObject(obj) {
+        const typedObject = obj;
+        if ('dateReplacer' in typedObject && typedObject.dateReplacer === DateInfo.replacer) {
+            return true;
+        }
+        return false;
+    }
+    // Convert Date to Object
+    static toObject(date) {
+        return new DateInfo(DateInfo.replacer, date.toISOString());
+    }
+    // Convert Object to Date
+    static toDate(obj) {
+        return new Date(obj.date);
+    }
+}
+DateInfo.replacer = "ace_engine_state_mgmt_date_replacer";
+/**
  * PersistentStorage
  *
  * Keeps current values of select AppStorage property properties persisted to file.
@@ -1470,14 +1564,6 @@ class SubscribaleAbstract extends SubscribableAbstract {
  * since 9
  */
 class PersistentStorage {
-    /**
-     * all following methods are framework internal
-     */
-    constructor() {
-        this.links_ = new Map();
-        this.id_ = SubscriberManager.MakeId();
-        SubscriberManager.Add(this);
-    }
     /**
      *
      * @param storage method to be used by the framework to set the backend
@@ -1607,7 +1693,7 @@ class PersistentStorage {
       */
     static notifyHasChanged(propName) {
         
-        PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
+        PersistentStorage.getOrCreate().writeToPersistentStorage(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
     }
     /**
      * @see notifyHasChanged
@@ -1615,7 +1701,15 @@ class PersistentStorage {
      */
     static NotifyHasChanged(propName) {
         
-        PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
+        PersistentStorage.getOrCreate().writeToPersistentStorage(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
+    }
+    /**
+     * all following methods are framework internal
+     */
+    constructor() {
+        this.links_ = new Map();
+        this.id_ = SubscriberManager.MakeId();
+        SubscriberManager.Add(this);
     }
     keys() {
         return this.links_.keys();
@@ -1624,14 +1718,14 @@ class PersistentStorage {
         if (this.persistProp1(propName, defaultValue)) {
             // persist new prop
             
-            PersistentStorage.storage_.set(propName, this.links_.get(propName).get());
+            this.writeToPersistentStorage(propName, this.links_.get(propName).get());
         }
     }
     // helper function to persist a property
     // does everything except writing prop to disk
     persistProp1(propName, defaultValue) {
         
-        if (defaultValue == null || defaultValue == undefined) {
+        if (defaultValue == null && !Utils.isApiVersionEQAbove(12)) {
             stateMgmtConsole.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
             return false;
         }
@@ -1645,14 +1739,13 @@ class PersistentStorage {
             this.links_.set(propName, link);
         }
         else {
-            let newValue = PersistentStorage.storage_.get(propName);
             let returnValue;
-            if (newValue == undefined || newValue == null) {
+            if (!PersistentStorage.storage_.has(propName)) {
                 
                 returnValue = defaultValue;
             }
             else {
-                returnValue = newValue;
+                returnValue = this.readFromPersistentStorage(propName);
             }
             link = AppStorage.setAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
@@ -1679,8 +1772,39 @@ class PersistentStorage {
     write() {
         this.links_.forEach((link, propName, map) => {
             
-            PersistentStorage.storage_.set(propName, link.get());
+            this.writeToPersistentStorage(propName, link.get());
         });
+    }
+    // helper function to write to the persistent storage
+    // any additional check and formatting can to be done here
+    writeToPersistentStorage(propName, value) {
+        if (value instanceof Map) {
+            value = MapInfo.toObject(value);
+        }
+        else if (value instanceof Set) {
+            value = SetInfo.toObject(value);
+        }
+        else if (value instanceof Date) {
+            value = DateInfo.toObject(value);
+        }
+        PersistentStorage.storage_.set(propName, value);
+    }
+    // helper function to read from the persistent storage
+    // any additional check and formatting can to be done here
+    readFromPersistentStorage(propName) {
+        let newValue = PersistentStorage.storage_.get(propName);
+        if (newValue instanceof Object) {
+            if (MapInfo.isObject(newValue)) {
+                newValue = MapInfo.toMap(newValue);
+            }
+            else if (SetInfo.isObject(newValue)) {
+                newValue = SetInfo.toSet(newValue);
+            }
+            else if (DateInfo.isObject(newValue)) {
+                newValue = DateInfo.toDate(newValue);
+            }
+        }
+        return newValue;
     }
     // FU code path method
     propertyHasChanged(info) {
@@ -1730,10 +1854,6 @@ PersistentStorage.instance_ = undefined;
  *
  */
 class Environment {
-    constructor() {
-        this.props_ = new Map();
-        Environment.envBackend_.onValueChanged(this.onValueChanged.bind(this));
-    }
     static getOrCreate() {
         if (Environment.instance_) {
             // already initialized
@@ -1795,6 +1915,10 @@ class Environment {
      */
     static Keys() {
         return Environment.getOrCreate().keys();
+    }
+    constructor() {
+        this.props_ = new Map();
+        Environment.envBackend_.onValueChanged(this.onValueChanged.bind(this));
     }
     envProp(key, value) {
         let prop = AppStorage.prop(key);
@@ -2331,23 +2455,6 @@ class ExtendableProxy {
 }
 class ObservedObject extends ExtendableProxy {
     /**
-     * To create a new ObservableObject use CreateNew function
-     *
-     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
-     * notifications
-     * @param obj  raw Object, if obj is a ObservableOject throws an error
-     * @param objectOwner
-     */
-    constructor(obj, handler, objectOwningProperty) {
-        super(obj, handler);
-        if (ObservedObject.IsObservedObject(obj)) {
-            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
-        }
-        if (objectOwningProperty != undefined) {
-            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
-        }
-    } // end of constructor
-    /**
      * Factory function for ObservedObjects /
      *  wrapping of objects for proxying
      *
@@ -2503,6 +2610,23 @@ class ObservedObject extends ExtendableProxy {
             ? Object.getPrototypeOf(proto.constructor.prototype)
             : proto;
     }
+    /**
+     * To create a new ObservableObject use CreateNew function
+     *
+     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
+     * notifications
+     * @param obj  raw Object, if obj is a ObservableOject throws an error
+     * @param objectOwner
+     */
+    constructor(obj, handler, objectOwningProperty) {
+        super(obj, handler);
+        if (ObservedObject.IsObservedObject(obj)) {
+            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+        }
+        if (objectOwningProperty != undefined) {
+            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
+        }
+    } // end of constructor
 }
 ObservedObject.__IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
 ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT = Symbol("_____raw_object__");
@@ -2695,6 +2819,38 @@ class CustomDialogController extends NativeCustomDialogController {
         super(arg, view);
         this.arg_ = arg;
         this.view_ = view;
+    }
+}
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+class Utils {
+    static getApiVersion() {
+        return typeof ViewStackProcessor["getApiVersion"] == "function"
+            ? ViewStackProcessor["getApiVersion"]()
+            : undefined;
+    }
+    static isApiVersionEQAbove(target) {
+        var version = Utils.getApiVersion();
+        if (version == null) {
+            return false;
+        }
+        if (typeof version == "number") {
+            version = version % 1000;
+        }
+        return version >= target;
     }
 }
 /*
@@ -3309,6 +3465,23 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class View extends NativeViewFullUpdate {
+    get localStorage_() {
+        if (!this.localStoragebackStore_) {
+            
+            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
+        }
+        return this.localStoragebackStore_;
+    }
+    set localStorage_(instance) {
+        if (!instance) {
+            // setting to undefined not allowed
+            return;
+        }
+        if (this.localStoragebackStore_) {
+            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+        }
+        this.localStoragebackStore_ = instance;
+    }
     /**
      * Create a View
      *
@@ -3351,23 +3524,6 @@ class View extends NativeViewFullUpdate {
         }
         SubscriberManager.Add(this);
         
-    }
-    get localStorage_() {
-        if (!this.localStoragebackStore_) {
-            
-            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
-        }
-        return this.localStoragebackStore_;
-    }
-    set localStorage_(instance) {
-        if (!instance) {
-            // setting to undefined not allowed
-            return;
-        }
-        if (this.localStoragebackStore_) {
-            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
-        }
-        this.localStoragebackStore_ = instance;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -5046,6 +5202,51 @@ class UpdateFuncRecord {
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class ViewPU extends NativeViewPartialUpdate {
+    get ownObservedPropertiesStore_() {
+        if (!this.ownObservedPropertiesStore__) {
+            // lazy init
+            this.ownObservedPropertiesStore__ = new Set();
+            this.obtainOwnObservedProperties();
+        }
+        return this.ownObservedPropertiesStore__;
+    }
+    obtainOwnObservedProperties() {
+        Object.getOwnPropertyNames(this)
+            .filter((propName) => {
+            return propName.startsWith("__");
+        })
+            .forEach((propName) => {
+            const stateVar = Reflect.get(this, propName);
+            if (stateVar && typeof stateVar === 'object' && "notifyPropertyHasChangedPU" in stateVar) {
+                
+                this.ownObservedPropertiesStore_.add(stateVar);
+            }
+            else {
+                
+            }
+        });
+    }
+    get localStorage_() {
+        if (!this.localStoragebackStore_ && this.parent_) {
+            
+            this.localStoragebackStore_ = this.parent_.localStorage_;
+        }
+        if (!this.localStoragebackStore_) {
+            
+            this.localStoragebackStore_ = new LocalStorage({ /* empty */});
+        }
+        return this.localStoragebackStore_;
+    }
+    set localStorage_(instance) {
+        if (!instance) {
+            // setting to undefined not allowed
+            return;
+        }
+        if (this.localStoragebackStore_) {
+            stateMgmtConsole.applicationError(`${this.debugInfo__()}: constructor: is setting LocalStorage instance twice. Application error.`);
+        }
+        this.localStoragebackStore_ = instance;
+    }
     /**
      * Create a View
      *
@@ -5110,58 +5311,13 @@ class ViewPU extends NativeViewPartialUpdate {
             // Call below will set this.parent_ to parent as well
             parent.addChild(this);
         }
-        else if (localStorage) {
+        if (localStorage) {
             this.localStorage_ = localStorage;
             
         }
         this.isCompFreezeAllowed = this.isCompFreezeAllowed || (this.parent_ && this.parent_.isCompFreezeAllowed);
         SubscriberManager.Add(this);
         
-    }
-    get ownObservedPropertiesStore_() {
-        if (!this.ownObservedPropertiesStore__) {
-            // lazy init
-            this.ownObservedPropertiesStore__ = new Set();
-            this.obtainOwnObservedProperties();
-        }
-        return this.ownObservedPropertiesStore__;
-    }
-    obtainOwnObservedProperties() {
-        Object.getOwnPropertyNames(this)
-            .filter((propName) => {
-            return propName.startsWith("__");
-        })
-            .forEach((propName) => {
-            const stateVar = Reflect.get(this, propName);
-            if (stateVar && typeof stateVar === 'object' && "notifyPropertyHasChangedPU" in stateVar) {
-                
-                this.ownObservedPropertiesStore_.add(stateVar);
-            }
-            else {
-                
-            }
-        });
-    }
-    get localStorage_() {
-        if (!this.localStoragebackStore_ && this.parent_) {
-            
-            this.localStoragebackStore_ = this.parent_.localStorage_;
-        }
-        if (!this.localStoragebackStore_) {
-            
-            this.localStoragebackStore_ = new LocalStorage({ /* empty */});
-        }
-        return this.localStoragebackStore_;
-    }
-    set localStorage_(instance) {
-        if (!instance) {
-            // setting to undefined not allowed
-            return;
-        }
-        if (this.localStoragebackStore_) {
-            stateMgmtConsole.applicationError(`${this.debugInfo__()}: constructor: is setting LocalStorage instance twice. Application error.`);
-        }
-        this.localStoragebackStore_ = instance;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -5678,7 +5834,6 @@ class ViewPU extends NativeViewPartialUpdate {
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
             const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
-            this.dirtDescendantElementIds_ = new Set();
             dirtElmtIdsFromRootNode.forEach(elmtId => {
                 if (this.hasRecycleManager()) {
                     this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
@@ -5686,6 +5841,7 @@ class ViewPU extends NativeViewPartialUpdate {
                 else {
                     this.UpdateElement(elmtId);
                 }
+                this.dirtDescendantElementIds_.delete(elmtId);
             });
             if (this.dirtDescendantElementIds_.size) {
                 stateMgmtConsole.applicationError(`${this.debugInfo__()}: New UINode objects added to update queue while re-render! - Likely caused by @Component state change during build phase, not allowed. Application error!`);
@@ -5775,6 +5931,10 @@ class ViewPU extends NativeViewPartialUpdate {
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
                 _popFunc();
+            }
+            let node = this.getNodeById(elmtId);
+            if (node !== undefined) {
+                node.cleanStageValue();
             }
             if (ConfigureStateMgmt.instance.needsV3Observe()) {
                 // FIXME dito
@@ -5967,7 +6127,7 @@ class ViewPU extends NativeViewPartialUpdate {
         let idDuplicates = [];
         const arr = itemArray; // just to trigger a 'get' onto the array
         // ID gen is with index.
-        if (idGenFuncUsesIndex) {
+        if (idGenFuncUsesIndex || idGenFunc.length > 1) {
             // Create array of new ids.
             arr.forEach((item, indx) => {
                 newIdArray.push(idGenFunc(item, indx));
@@ -6072,6 +6232,15 @@ class ViewPU extends NativeViewPartialUpdate {
             entry.setNode(nodeInfo);
         }
         return nodeInfo;
+    }
+    /**
+     * getNodeById is used to get ArkComponent stored updateFuncByElmtId
+     * @param elmtId -  the id of the component
+     * @returns object | undefined
+     */
+    getNodeById(elmtId) {
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        return entry ? entry.getNode() : undefined;
     }
     /**
      * onDumpInfo is used to process commands delivered by the hidumper process

@@ -28,6 +28,7 @@
 #include "base/error/error_code.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -103,22 +104,11 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
     UpdateWant(want);
 }
 
-bool UIExtensionPattern::CheckCascadeStatus()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto uiExtensionManager = pipeline->GetUIExtensionManager();
-    CHECK_NULL_RETURN(uiExtensionManager, false);
-    bool isUIExtProcess = uiExtensionManager->IsWindowTypeUIExtension(pipeline);
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Current process type is uiextension: %{private}d.",
-        isUIExtProcess);
-    return isUIExtProcess && IsEmbeddedComponentType();
-}
-
 void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
     CHECK_NULL_VOID(sessionWrapper_);
-    if (CheckCascadeStatus()) {
+    auto container = Container::GetContainer(instanceId_);
+    if (container && container->IsUIExtensionWindow() && embeddedType_ == EmbeddedType::UI_EXTENSION) {
         TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "This is embedded component, not allowed to pull up another.");
         std::string name = "extension_pulling_up_fail";
         std::string message = "pulling another embedded component failed, not allowed to cascade.";
@@ -168,12 +158,11 @@ void UIExtensionPattern::OnConnect()
     surfaceNode->CreateNodeInRenderThread();
     surfaceNode->SetForeground(isModal_);
     FireOnRemoteReadyCallback();
-    if (isModal_) {
-        auto focusHub = host->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
+    auto focusHub = host->GetFocusHub();
+    if (isModal_ && focusHub) {
         focusHub->RequestFocusImmediately();
     }
-    bool isFocused = IsCurrentFocus();
+    bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -288,6 +277,13 @@ void UIExtensionPattern::OnWindowHide()
     if (isVisible_) {
         NotifyBackground();
     }
+}
+
+void UIExtensionPattern::OnSizeChanged(WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->OnSizeChanged(type, rsTransaction);
 }
 
 void UIExtensionPattern::NotifyForeground()
@@ -464,6 +460,8 @@ void UIExtensionPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 {
+    DispatchFocusActiveEvent(true);
+    DispatchFocusState(true);
     return DispatchKeyEventSync(event.rawKeyEvent);
 }
 
@@ -835,15 +833,6 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 
-bool UIExtensionPattern::IsCurrentFocus() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_RETURN(focusHub, false);
-    return focusHub->IsCurrentFocus();
-}
-
 void UIExtensionPattern::OnLanguageConfigurationUpdate()
 {
     CHECK_NULL_VOID(sessionWrapper_);
@@ -881,11 +870,6 @@ void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidAr
 {
     CHECK_NULL_VOID(sessionWrapper_);
     sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type);
-}
-
-bool UIExtensionPattern::IsEmbeddedComponentType()
-{
-    return embeddedType_ == EmbeddedType::UI_EXTENSION;
 }
 
 void UIExtensionPattern::SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)

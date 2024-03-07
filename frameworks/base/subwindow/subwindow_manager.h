@@ -75,14 +75,18 @@ public:
     bool CancelPopup(const std::string& id);
     void CloseMenu();
     void ClearMenu();
-    void ClearMenuNG(int32_t instanceId = -1, bool inWindow = true, bool showAnimation = false);
+    void ClearMenuNG(int32_t instanceId = -1, int32_t targetId = -1, bool inWindow = true, bool showAnimation = false);
     void ClearPopupInSubwindow(int32_t instanceId = -1);
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);
+    void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
+    void CloseCustomDialogNG(int32_t dialogId);
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
     void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);
     void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId = -1, int32_t instanceId = -1);
+    void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);
+    void DeletePopupHotAreas(int32_t overlayId, int32_t instanceId);
     int32_t GetDialogSubWindowId()
     {
         return dialogSubWindowId_;
@@ -113,7 +117,7 @@ public:
     void RequestFocusSubwindow(int32_t instanceId);
     void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback);
     void CloseCustomDialog(const int32_t dialogId);
-    
+
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
 private:

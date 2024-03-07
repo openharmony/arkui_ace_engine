@@ -354,6 +354,8 @@ private:
     void DoAnimation(NavigationMode usrNavigationMode);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
     RefPtr<FrameNode> GetDividerNode() const;
+    void FireInterceptionEvent(bool isBefore,
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
@@ -403,6 +405,7 @@ private:
     OnNavigationAnimation onTransition_;
     bool needSyncWithJsStack_ = false;
     std::optional<std::pair<std::string, RefPtr<UINode>>> preTopNavPath_;
+    RefPtr<NavDestinationContext> preContext_;
     int32_t preStackSize_ = 0;
 };
 

@@ -39,6 +39,7 @@ public:
     virtual void SetAlignment(Alignment alignment) = 0;
     virtual void SetEnableAnimation(bool IsEnableAnimation) = 0;
     virtual void SetAutoHalfFold(bool IsAutoHalfFold) = 0;
+    virtual void SetOnHoverStatusChange(std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange) = 0;
 
 private:
     static std::unique_ptr<FolderStackModel> instance_;

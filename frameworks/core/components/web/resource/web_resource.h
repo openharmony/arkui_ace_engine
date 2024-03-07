@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-constexpr int64_t INVALID_ID = -1;
+constexpr int64_t WEB_INVALID_ID = -1;
 
 extern const char WEB_PARAM_NONE[];
 extern const char WEB_PARAM_AND[];
@@ -71,7 +71,7 @@ protected:
 
     void OnError(const std::string& errorCode, const std::string& errorMsg);
 
-    int64_t id_ = INVALID_ID;
+    int64_t id_ = WEB_INVALID_ID;
     std::string hash_;
     std::string type_;
     WeakPtr<PipelineBase> context_;

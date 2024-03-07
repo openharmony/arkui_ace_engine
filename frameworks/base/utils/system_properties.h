@@ -237,6 +237,11 @@ public:
         return debugBoundaryEnabled_;
     }
 
+    static bool GetDebugOffsetLogEnabled()
+    {
+        return debugOffsetLogEnabled_;
+    }
+
     static bool GetDebugAutoUIEnabled()
     {
         return debugAutoUIEnabled_;
@@ -260,6 +265,11 @@ public:
     static bool GetLayoutTraceEnabled()
     {
         return layoutTraceEnable_;
+    }
+
+    static bool GetTraceInputEventEnabled()
+    {
+        return traceInputEventEnable_;
     }
 
     static bool GetStateManagerEnabled()
@@ -430,6 +440,8 @@ public:
 
     static bool GetGridIrregularLayoutEnabled();
 
+    static bool WaterFlowUseSegmentedLayout();
+
     static bool GetSideBarContainerBlurEnable();
 
     using EnableSystemParameterCallback = void (*)(const char* key, const char* value, void* context);
@@ -446,10 +458,16 @@ public:
 
     static void SetDebugBoundaryEnabled(bool debugBoundaryEnabled);
 
+    static bool GetAcePerformanceMonitorEnabled()
+    {
+        return acePerformanceMonitorEnable_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
     static bool layoutTraceEnable_;
+    static bool traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
@@ -479,6 +497,7 @@ private:
     static bool debugEnabled_;
     static bool debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
+    static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
@@ -494,6 +513,7 @@ private:
     static bool gridCacheEnabled_;
     static bool sideBarContainerBlurEnable_;
     static bool stateManagerEnable_;
+    static bool acePerformanceMonitorEnable_;
 };
 
 } // namespace OHOS::Ace

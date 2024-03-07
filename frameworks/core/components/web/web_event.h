@@ -710,8 +710,11 @@ class ACE_EXPORT FullScreenEnterEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(FullScreenEnterEvent, BaseEventInfo);
 
 public:
-    FullScreenEnterEvent(const RefPtr<FullScreenExitHandler>& handler)
-        : BaseEventInfo("FullScreenEnterEvent"), handler_(handler) {}
+    FullScreenEnterEvent(
+        const RefPtr<FullScreenExitHandler>& handler, int videoNaturalWidth, int videoNaturalHeight)
+        : BaseEventInfo("FullScreenEnterEvent"), handler_(handler), videoNaturalWidth_(videoNaturalWidth),
+          videoNaturalHeight_(videoNaturalHeight)
+    {}
     ~FullScreenEnterEvent() = default;
 
     const RefPtr<FullScreenExitHandler>& GetHandler() const
@@ -719,8 +722,20 @@ public:
         return handler_;
     }
 
+    int GetVideoNaturalWidth() const
+    {
+        return videoNaturalWidth_;
+    }
+
+    int GetVideoNaturalHeight() const
+    {
+        return videoNaturalHeight_;
+    }
+
 private:
     RefPtr<FullScreenExitHandler> handler_;
+    int videoNaturalWidth_;
+    int videoNaturalHeight_;
 };
 
 class ACE_EXPORT FullScreenExitEvent : public BaseEventInfo {
@@ -763,6 +778,23 @@ public:
     explicit LoadInterceptEvent(const RefPtr<WebRequest>& request) :
         BaseEventInfo("LoadInterceptEvent"), request_(request) {}
     ~LoadInterceptEvent() = default;
+
+    const RefPtr<WebRequest>& GetRequest() const
+    {
+        return request_;
+    }
+
+private:
+    RefPtr<WebRequest> request_;
+};
+
+class ACE_EXPORT LoadOverrideEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadOverrideEvent, BaseEventInfo);
+
+public:
+    explicit LoadOverrideEvent(const RefPtr<WebRequest>& request) :
+        BaseEventInfo("LoadOverrideEvent"), request_(request) {}
+    ~LoadOverrideEvent() = default;
 
     const RefPtr<WebRequest>& GetRequest() const
     {
@@ -1498,13 +1530,41 @@ private:
     bool didReplaceEntry_ = false;
 };
 
+class ACE_EXPORT IntelligentTrackingPreventionResultEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(IntelligentTrackingPreventionResultEvent, BaseEventInfo);
+
+public:
+    IntelligentTrackingPreventionResultEvent(
+        const std::string& websiteHost, const std::string& trackerHost)
+        : BaseEventInfo("IntelligentTrackingPreventionResultEvent"),
+          host_(websiteHost), trackerHost_(trackerHost) {}
+
+    ~IntelligentTrackingPreventionResultEvent() = default;
+
+    const std::string& GetHost() const
+    {
+        return host_;
+    }
+
+    const std::string& GetTrackerHost() const
+    {
+        return trackerHost_;
+    }
+
+private:
+    std::string host_;
+    std::string trackerHost_;
+};
+
 struct EmbedInfo final {
     std::string id = "";
     std::string type = "";
     std::string src = "";
     std::string url = "";
+    std::string tag = "";
     int32_t width = 0;
     int32_t height = 0;
+    std::map<std::string, std::string> params;
 };
 
 class ACE_EXPORT NativeEmbedDataInfo : public BaseEventInfo {

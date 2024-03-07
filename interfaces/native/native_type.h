@@ -104,9 +104,9 @@ typedef enum {
 typedef enum {
     /** The image is not repeatedly drawn. */
     ARKUI_IMAGE_REPEAT_NONE = 0,
-    /** The image is repeatedly drawn only along the horizontal axis. */
+    /** The image is repeatedly drawn only along the x-axis. */
     ARKUI_IMAGE_REPEAT_X,
-    /** The image is repeatedly drawn only along the vertical axis. */
+    /** The image is repeatedly drawn only along the y-axis. */
     ARKUI_IMAGE_REPEAT_Y,
     /** The image is repeatedly drawn along both axes. */
     ARKUI_IMAGE_REPEAT_XY,
@@ -251,8 +251,8 @@ typedef enum {
     /** The custom content of EGL/OpenGL ES and media data is displayed individually on the screen. */
     ARKUI_XCOMPONENT_TYPE_SURFACE = 0,
     /** The custom content of EGL/OpenGL ES and media data is grouped and displayed together with content
-     * of the component.
-     */
+      * of the component.
+      */
     ARKUI_XCOMPONENT_TYPE_TEXTURE = 2,
 } ArkUI_XComponentType;
 
@@ -263,17 +263,22 @@ typedef enum {
  */
 typedef enum {
     /** Linear style. */
-    ARKUI_PROGRESS_LINEAR = 0,
+    ARKUI_PROGRESS_TYPE_LINEAR = 0,
     /** Indeterminate ring style. */
-    ARKUI_PROGRESS_RING,
+    ARKUI_PROGRESS_TYPE_RING,
     /** Eclipse style. */
-    ARKUI_PROGRESS_ECLIPSE,
+    ARKUI_PROGRESS_TYPE_ECLIPSE,
     /** Determinate ring style. */
-    ARKUI_PROGRESS_SCALERING,
+    ARKUI_PROGRESS_TYPE_SCALE_RING,
     /** Capsule style. */
-    ARKUI_PROGRESS_CAPSULE,
+    ARKUI_PROGRESS_TYPE_CAPSULE,
 }ArkUI_ProgressType;
 
+/**
+ * @brief Enumerates the text decoration styles.
+ *
+ * @since 12
+ */
 typedef enum {
     /** No text decoration. */
     ARKUI_TEXT_DECORATION_TYPE_NONE = 0,
@@ -285,6 +290,11 @@ typedef enum {
     ARKUI_TEXT_DECORATION_TYPE_LINE_THROUGH,
 } ArkUI_TextDecorationType;
 
+/**
+ * @brief Enumerates the text cases.
+ *
+ * @since 12
+ */
 typedef enum {
     /** The original case of the text is retained. */
     ARKUI_TEXT_CASE_NORMAL = 0,
@@ -294,6 +304,11 @@ typedef enum {
     ARKUI_TEXT_CASE_UPPER,
 } ArkUI_TextCase;
 
+/**
+ * @brief Enumerates the text copy and paste modes.
+ *
+ * @since 12
+ */
 typedef enum {
     /** Copy is not allowed. */
     ARKUI_COPY_OPTIONS_NONE = 0,
@@ -305,6 +320,11 @@ typedef enum {
     ARKUI_COPY_OPTIONS_CROSS_DEVICE,
 } ArkUI_CopyOptions;
 
+/**
+ * @brief Enumerates the shadow types.
+ *
+ * @since 12
+ */
 typedef enum {
     /** Color. */
     ARKUI_SHADOW_TYPE_COLOR = 0,
@@ -323,7 +343,7 @@ typedef enum {
     /** Multi-column text picker. */
     ARKUI_TEXTPICKER_RANGETYPE_MULTI,
     /** Single-column text picker with image resources. */
-    ARKUI_TEXTPICKER_RANGETYPE_RANGE_C0NTENT,
+    ARKUI_TEXTPICKER_RANGETYPE_RANGE_CONTENT,
     /** Interconnected multi-column text picker. */
     ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT,
 } ArkUI_TextPickerRangeType;
@@ -372,6 +392,20 @@ typedef enum {
 } ArkUI_EdgeEffect;
 
 /**
+ * @brief Enumerates the scroll directions for the <b><Scroll></b> component.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Only vertical scrolling is supported. */
+    ARKUI_SCROLL_DIRECTION_VERTICAL = 0,
+    /** Only horizontal scrolling is supported. */
+    ARKUI_SCROLL_DIRECTION_HORIZONTAL,
+    /** Scrolling is not allowed. */
+    ARKUI_SCROLL_DIRECTION_NONE = 3,
+} ArkUI_ScrollDirection;
+
+/**
  * @brief Enumerates the alignment modes of list items when scrolling ends.
  *
  * @since 12
@@ -402,7 +436,7 @@ typedef enum {
 } ArkUI_ScrollBarDisplayMode;
 
 /**
- * @brief Enumerates the scroll directions.
+ * @brief Enumerates the scroll directions for the <b><List></b> component.
  *
  * @since 12
  */
@@ -536,20 +570,20 @@ typedef enum {
 
 
 /**
- * @brief Defines the accessibility level.
+ * @brief Enumerates the accessibility modes.
  *
  * @since 12
  */
 typedef enum {
-    /** The value can be changed to yes or no based on the component. */
-    ARKUI_ACCESSIBILITY_LEVEL_AUTO = 0,
+    /** Whether the component can be identified by the accessibility service is dependent on the component. */
+    ARKUI_ACCESSIBILITY_MODE_AUTO = 0,
     /** The component can be identified by the accessibility service. */
-    ARKUI_ACCESSIBILITY_LEVEL_YES,
+    ARKUI_ACCESSIBILITY_MODE_ENABLED,
     /** The component cannot be identified by the accessibility service. */
-    ARKUI_ACCESSIBILITY_LEVEL_NO,
+    ARKUI_ACCESSIBILITY_MODE_DISABLED,
     /** The component and all its child components cannot be identified by the accessibility service. */
-    ARKUI_ACCESSIBILITY_LEVEL_NO_HIDE_DESCENDANTS,
-} ArkUI_AccessibilityLevel;
+    ARKUI_ACCESSIBILITY_MODE_DISABLED_FOR_DESCENDANTS,
+} ArkUI_AccessibilityMode;
 
 /**
  * @brief Defines whether copy and paste is allowed for text content.
@@ -594,7 +628,7 @@ typedef enum {
      */
     ARKUI_SCROLL_NESTED_MODE_SELF_ONLY = 0,
     /** The component scrolls first, and when it hits the boundary, the parent component scrolls.
-     * When the parent component hits the boundary, its edge effect is displayed. If no edge effect is specified for
+    * When the parent component hits the boundary, its edge effect is displayed. If no edge effect is specified for
      * the parent component, the edge effect of the child component is displayed instead.
      */
     ARKUI_SCROLL_NESTED_MODE_SELF_FIRST,
@@ -619,16 +653,10 @@ typedef enum {
 typedef enum {
     /** Top edge in the vertical direction. */
     ARKUI_SCROLL_EDGE_TOP = 0,
-    /** Center position in the vertical direction. */
-    ARKUI_SCROLL_EDGE_CENTER,
     /** Bottom edge in the vertical direction. */
     ARKUI_SCROLL_EDGE_BOTTOM,
-    /** Text baseline position in the cross axis direction. */
-    ARKUI_SCROLL_EDGE_BASELINE,
     /** Start position in the horizontal direction. */
     ARKUI_SCROLL_EDGE_START,
-    /** Center position in the horizontal direction. */
-    ARKUI_SCROLL_EDGE_MIDDLE,
     /** End position in the horizontal direction. */
     ARKUI_SCROLL_EDGE_END,
 } ArkUI_ScrollEdge;
@@ -946,32 +974,27 @@ typedef enum {
     ARKUI_BLEND_MODE_HARD_LIGHT,
     /** The LIGHTEN or DARKEN mode is used, depending on the source pixels. */
     ARKUI_BLEND_MODE_SOFT_LIGHT,
-    /** rc = s + d - 2 * (min(s * da, d * sa)), ra =  kSrcOver: The final pixel is the result of subtracting the darker
-     * of the two pixels (source and target) from the lighter one.
-     */
+    /** rc = s + d - 2 * (min(s * da, d * sa)), ra =
+       kSrcOver: The final pixel is the result of subtracting the darker of the two pixels (source and target) from
+       the lighter one. */
     ARKUI_BLEND_MODE_DIFFERENCE,
     /** rc = s + d - two(s * d), ra = kSrcOver: The final pixel is similar to <b>DIFFERENCE</b>, but with less contrast.
      */
     ARKUI_BLEND_MODE_EXCLUSION,
-    /** r = s * (1 - da) + d * (1 - sa) + s * d: The final pixel is the result of multiplying the source pixel by
-     * the target pixel.
-     */
+    /** r = s * (1 - da) + d * (1 - sa) + s * d: The final pixel is the result of multiplying the source pixel
+     *  by the target pixel.	 */
     ARKUI_BLEND_MODE_MULTIPLY,
-    /** The resultant image is created with the luminance and saturation of the source image and the hue of the
-     * target image.
-     */
+    /** The resultant image is created with the luminance and saturation of the source image and the hue of the target
+     *  image. */
     ARKUI_BLEND_MODE_HUE,
-    /** The resultant image is created with the luminance and hue of the target image and the saturation of the
-     * source image.
-     */
+    /** The resultant image is created with the luminance and hue of the target image and the saturation of the source
+     *  image. */
     ARKUI_BLEND_MODE_SATURATION,
-    /** The resultant image is created with the saturation and hue of the source image and the luminance of the
-     * target image.
-     */
+    /** The resultant image is created with the saturation and hue of the source image and the luminance of the target
+     *  image. */
     ARKUI_BLEND_MODE_COLOR,
-    /** The resultant image is created with the saturation and hue of the target image and the luminance of the
-     * source image.
-     */
+    /** The resultant image is created with the saturation and hue of the target image and the luminance of the source
+     *  image. */
     ARKUI_BLEND_MODE_LUMINOSITY,
 } ArkUI_BlendMode;
 
@@ -996,20 +1019,20 @@ typedef enum {
  */
 typedef enum {
     /** The default configuration in the container is used. */
-    ARKUI_ITEM_ALIGN_AUTO = 0,
+    ARKUI_ITEM_ALIGNMENT_AUTO = 0,
     /** The items in the container are aligned with the cross-start edge. */
-    ARKUI_ITEM_ALIGN_START,
+    ARKUI_ITEM_ALIGNMENT_START,
     /** The items in the container are centered along the cross axis. */
-    ARKUI_ITEM_ALIGN_CENTER,
+    ARKUI_ITEM_ALIGNMENT_CENTER,
     /** The items in the container are aligned with the cross-end edge. */
-    ARKUI_ITEM_ALIGN_END,
+    ARKUI_ITEM_ALIGNMENT_END,
     /** The items in the container are stretched and padded along the cross axis. */
-    ARKUI_ITEM_ALIGN_STRETCH,
+    ARKUI_ITEM_ALIGNMENT_STRETCH,
     /** The items in the container are aligned in such a manner that their text baselines are aligned along the
      * cross axis.
      */
-    ARKUI_ITEM_ALIGN_BASELINE,
-} ArkUI_ItemAlign;
+    ARKUI_ITEM_ALIGNMENT_BASELINE,
+} ArkUI_ItemAlignment;
 
 /**
  * @brief Enumerates the foreground colors.
@@ -1032,27 +1055,27 @@ typedef enum {
  */
 typedef enum {
     /** The child components are aligned with the start edge of the main axis. */
-    ARKUI_FLEX_ALIGN_START = 1,
+    ARKUI_FLEX_ALIGNMENT_START = 1,
     /** The child components are aligned in the center of the main axis. */
-    ARKUI_FLEX_ALIGN_CENTER = 2,
+    ARKUI_FLEX_ALIGNMENT_CENTER = 2,
     /** The child components are aligned with the end edge of the main axis. */
-    ARKUI_FLEX_ALIGN_END = 3,
+    ARKUI_FLEX_ALIGNMENT_END = 3,
     /** The child components are evenly distributed along the main axis. The space between any two adjacent components
-     * is the same. The first component is aligned with the main-start, and the last component is aligned with the
-     * main-end.
+     * is the same. The first component is aligned with the main-start, and the last component is aligned with
+     * the main-end.
      */
-    ARKUI_FLEX_ALIGN_SPACE_BETWEEN = 6,
+    ARKUI_FLEX_ALIGNMENT_SPACE_BETWEEN = 6,
     /** The child components are evenly distributed along the main axis. The space between any two adjacent components
      * is the same. The space between the first component and main-start, and that between the last component and
      * cross-main are both half the size of the space between two adjacent components.
      */
-    ARKUI_FLEX_ALIGN_SPACE_AROUND = 7,
-    /** The child components are evenly distributed along the main axis. The space between the first component and
-     * main-start, the space between the last component and main-end, and the space between any two adjacent components
-     * are the same.
+    ARKUI_FLEX_ALIGNMENT_SPACE_AROUND = 7,
+    /** The child components are evenly distributed along the main axis. The space between the first component
+     * and main-start, the space between the last component and main-end, and the space between any two adjacent
+     * components are the same.
      */
-    ARKUI_FLEX_ALIGN_SPACE_EVENLY = 8,
-} ArkUI_FlexAlign;
+    ARKUI_FLEX_ALIGNMENT_SPACE_EVENLY = 8,
+} ArkUI_FlexAlignment;
 
 /**
  * @brief Enumerates the directions of the main axis in the flex container.
@@ -1113,68 +1136,95 @@ typedef enum {
 } ArkUI_CalendarAlignment;
 
 /**
- * @brief 遮罩类型枚举。
+ * @brief Enumerates the mask types.
  *
  * @since 12
  */
 typedef enum {
-    /** 矩形类型。 */
-    ARKUI_MASK_TYPE_RECT = 0,
-    /** 圆形类型。 */
+    /** Rectangle. */
+    ARKUI_MASK_TYPE_RECTANGLE = 0,
+    /** Circle. */
     ARKUI_MASK_TYPE_CIRCLE,
-    /** 椭圆形类型。 */
+    /** Ellipse. */
     ARKUI_MASK_TYPE_ELLIPSE,
-    /** 路径类型。 */
+    /** Path. */
     ARKUI_MASK_TYPE_PATH,
-    /** 进度类型。 */
+    /** Progress indicator. */
     ARKUI_MASK_TYPE_PROGRESS,
 } ArkUI_MaskType;
 
 /**
- * @brief 裁剪类型枚举。
+ * @brief Enumerates the clipping region types.
  *
  * @since 12
  */
 typedef enum {
-    /** 矩形类型。 */
-    ARKUI_CLIP_TYPE_RECT = 0,
-    /** 圆形类型。 */
+    /** Rectangle. */
+    ARKUI_CLIP_TYPE_RECTANGLE = 0,
+    /** Circle. */
     ARKUI_CLIP_TYPE_CIRCLE,
-    /** 椭圆形类型。 */
+    /** Ellipse. */
     ARKUI_CLIP_TYPE_ELLIPSE,
-    /** 路径类型。 */
+    /** Path. */
     ARKUI_CLIP_TYPE_PATH,
 } ArkUI_ClipType;
 
 /**
- * @brief 定义渐变色结构。
+ * @brief Defines the gradient color stop structure.
  *
  * @since 12
  */
 typedef struct {
-    /** 颜色数组。*/
+    /** Color array. */
     const uint32_t* colors;
-    /** 位置数组。*/
+    /** Position array. */
     float* stops;
-    /** 数组长度。*/
+    /** Length array. */
     int size;
 } ArkUI_ColorStop;
 
 /**
- * @brief 自定义形状。
+ * @brief Enumerates the custom shapes.
  *
  * @since 12
  */
 typedef enum {
-    /** 矩形类型。 */
-    ARKUI_SHAPE_TYPE_RECT = 0,
-    /** 圆形类型。 */
+    /** Rectangle. */
+    ARKUI_SHAPE_TYPE_RECTANGLE = 0,
+    /** Circle. */
     ARKUI_SHAPE_TYPE_CIRCLE,
-    /** 椭圆形类型。 */
+    /** Ellipse. */
     ARKUI_SHAPE_TYPE_ELLIPSE,
-    /** 路径类型。 */
+    /** Path. */
     ARKUI_SHAPE_TYPE_PATH,
 } ArkUI_ShapeType;
+
+/**
+ * @brief Enumerates the gradient directions.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** From right to left. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_LEFT = 0,
+    /** From bottom to top. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_TOP,
+    /** From left to right. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_RIGHT,
+    /** From top to bottom. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_BOTTOM,
+    /** From lower right to upper left. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_LEFT_TOP,
+    /** From upper right to lower left. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_LEFT_BOTTOM,
+    /** From lower left to upper right. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_RIGHT_TOP,
+    /** From upper left to lower right. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_RIGHT_BOTTOM,
+    /** No gradient. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_NONE,
+} ArkUI_LinearGradientDirection;
+
 #ifdef __cplusplus
 };
 #endif

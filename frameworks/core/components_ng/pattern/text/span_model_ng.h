@@ -56,7 +56,17 @@ public:
     static void SetTextColor(UINode* uiNode, const Color& value);
     static void SetLetterSpacing(UINode* uiNode, const Dimension& value);
     static void SetFont(UINode* uiNode, const Font& value);
-
+    static std::string GetContent(UINode* uiNode);
+    static Ace::TextDecoration GetTextDecoration(UINode* uiNode);
+    static Color GetTextDecorationColor(UINode* uiNode);
+    static Color GetFontColor(UINode* uiNode);
+    static Dimension GetFontSize(UINode* uiNode);
+    static Ace::FontStyle GetFontStyle(UINode* uiNode);
+    static FontWeight GetFontWeight(UINode* uiNode);
+    static Dimension GetTextLineHeight(UINode* uiNode);
+    static Ace::TextCase GetTextCase(UINode* uiNode);
+    static Dimension GetLetterSpacing(UINode* uiNode);
+    static TextStyle GetDefaultTextStyle();
     void CreateContainSpan() override;
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
 };

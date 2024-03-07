@@ -25,10 +25,10 @@ namespace OHOS::Ace::Framework {
 class WebModelImpl : public OHOS::Ace::WebModel {
 public:
     void Create(const std::string& src, const RefPtr<WebController>& webController,
-        WebType type = WebType::SURFACE, bool incognitoMode = false) override;
+        RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false) override;
     void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
         std::function<void(const std::string&)>&& setHapPathCallback,
-        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE,
+        int32_t parentWebId, bool popup, RenderMode renderMode = RenderMode::ASYNC_RENDER,
         bool incognitoMode = false) override;
     void SetCustomScheme(const std::string& cmdLine) override;
     void SetFocusable(bool focusable) override;
@@ -105,8 +105,10 @@ public:
     void SetOverScrollMode(OverScrollMode mode) override;
     void SetCopyOptionMode(CopyOptions mode) override;
     void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) override;
+    void RegisterNativeEmbedRule(const std::string& tag, const std::string& type) override;
     void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WEB_MODEL_IMPL_H

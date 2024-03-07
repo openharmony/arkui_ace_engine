@@ -432,18 +432,18 @@ void ScrollBar::CalcReservedHeight()
     float endRadiusHeight = 0.0;
     switch (positionMode_) {
         case PositionMode::LEFT:
-            startRadius = hostBorderRadius_.radiusTopLeft->ConvertToPx();
-            endRadius = hostBorderRadius_.radiusBottomLeft->ConvertToPx();
+            startRadius = hostBorderRadius_.radiusTopLeft.value_or(Dimension()).ConvertToPx();
+            endRadius = hostBorderRadius_.radiusBottomLeft.value_or(Dimension()).ConvertToPx();
             padding = NormalizeToPx(padding_.Left());
             break;
         case PositionMode::RIGHT:
-            startRadius = hostBorderRadius_.radiusTopRight->ConvertToPx();
-            endRadius = hostBorderRadius_.radiusBottomRight->ConvertToPx();
+            startRadius = hostBorderRadius_.radiusTopRight.value_or(Dimension()).ConvertToPx();
+            endRadius = hostBorderRadius_.radiusBottomRight.value_or(Dimension()).ConvertToPx();
             padding = NormalizeToPx(padding_.Right());
             break;
         case PositionMode::BOTTOM:
-            startRadius = hostBorderRadius_.radiusBottomLeft->ConvertToPx();
-            endRadius = hostBorderRadius_.radiusBottomRight->ConvertToPx();
+            startRadius = hostBorderRadius_.radiusBottomLeft.value_or(Dimension()).ConvertToPx();
+            endRadius = hostBorderRadius_.radiusBottomRight.value_or(Dimension()).ConvertToPx();
             padding = NormalizeToPx(padding_.Bottom());
             break;
         default:

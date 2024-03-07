@@ -37,8 +37,11 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "frameworks/core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::Framework {
+const CalcDimension EMBEDDED_COMPONENT_MIN_WIDTH(10.0f, DimensionUnit::VP);
+const CalcDimension EMBEDDED_COMPONENT_MIN_HEIGHT(10.0f, DimensionUnit::VP);
 
 void JSEmbeddedComponent::JSBind(BindingTarget globalObj)
 {
@@ -47,6 +50,12 @@ void JSEmbeddedComponent::JSBind(BindingTarget globalObj)
     JSClass<JSEmbeddedComponent>::StaticMethod("create", &JSEmbeddedComponent::Create, opt);
     JSClass<JSEmbeddedComponent>::StaticMethod("onTerminated", &JSEmbeddedComponent::OnTerminated);
     JSClass<JSEmbeddedComponent>::StaticMethod("onError", &JSEmbeddedComponent::OnError);
+    JSClass<JSEmbeddedComponent>::StaticMethod("constraintSize", &JSEmbeddedComponent::JsConstraintSize);
+    JSClass<JSEmbeddedComponent>::StaticMethod("aspectRatio", &JSEmbeddedComponent::JsAspectRatio);
+    JSClass<JSEmbeddedComponent>::StaticMethod("layoutWeight", &JSEmbeddedComponent::JsLayoutWeight);
+    JSClass<JSEmbeddedComponent>::StaticMethod("flexBasis", &JSEmbeddedComponent::JsFlexBasis);
+    JSClass<JSEmbeddedComponent>::StaticMethod("flexGrow", &JSEmbeddedComponent::JsFlexGrow);
+    JSClass<JSEmbeddedComponent>::StaticMethod("flexShrink", &JSEmbeddedComponent::JsFlexShrink);
     JSClass<JSEmbeddedComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -69,6 +78,10 @@ void JSEmbeddedComponent::Create(const JSCallbackInfo& info)
     }
 
     UIExtensionModel::GetInstance()->Create(want, embeddedType);
+    ViewAbstractModel::GetInstance()->SetWidth(EMBEDDED_COMPONENT_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetHeight(EMBEDDED_COMPONENT_MIN_HEIGHT);
+    ViewAbstractModel::GetInstance()->SetMinWidth(EMBEDDED_COMPONENT_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetMinHeight(EMBEDDED_COMPONENT_MIN_HEIGHT);
 }
 
 void JSEmbeddedComponent::OnTerminated(const JSCallbackInfo& info)
@@ -129,5 +142,4 @@ void JSEmbeddedComponent::OnError(const JSCallbackInfo& info)
         };
     UIExtensionModel::GetInstance()->SetOnError(std::move(onError));
 }
-
 } // namespace OHOS::Ace::Framework

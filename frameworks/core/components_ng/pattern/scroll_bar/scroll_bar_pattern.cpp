@@ -184,7 +184,7 @@ bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source)
     currentOffset_ += delta;
     ValidateOffset(source);
     if (scrollBarProxy_ && lastOffset_ != currentOffset_) {
-        scrollBarProxy_->NotifyScrollableNode(-delta, AceType::WeakClaim(this));
+        scrollBarProxy_->NotifyScrollableNode(-delta, source, AceType::WeakClaim(this));
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     return true;

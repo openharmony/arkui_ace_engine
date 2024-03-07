@@ -82,6 +82,8 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    void OnColorConfigurationUpdate() override;
+
 private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(bool isDrag = true, float mainSpeed = 0.0f);
@@ -121,6 +123,11 @@ private:
     void FireRefreshing();
     void FireChangeEvent(const std::string& value);
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
+    void UpdateLoadTextScale(float ratio);
+    void UpdateRefreshBorderWidth(float ratio);
+    void InitProgressColumn();
+    bool HasLoadingText();
+    void UpdateLoadingTextOpacity(float opacity);
 
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
@@ -129,9 +136,13 @@ private:
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;
     RefPtr<FrameNode> progressChild_;
+    RefPtr<FrameNode> loadingTextNode_;
+    RefPtr<FrameNode> columnNode_;
     RefPtr<FrameNode> customBuilder_;
     bool isCustomBuilderExist_ = false;
     float builderMeasureBaseHeight_ = 0.0f;
+    Dimension refreshOffset_ = 64.0_vp;
+    bool pullToRefresh_ = true;
     RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
     // API version 10

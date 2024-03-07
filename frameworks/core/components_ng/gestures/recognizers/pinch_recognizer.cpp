@@ -49,6 +49,16 @@ PinchRecognizer::PinchRecognizer(int32_t fingers, double distance)
 
 void PinchRecognizer::OnAccepted()
 {
+    int64_t acceptTime = GetSysTimestamp();
+    int64_t inputTime = acceptTime;
+    if (firstInputTime_.has_value()) {
+        inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+    }
+    if (SystemProperties::GetTraceInputEventEnabled()) {
+        ACE_SCOPED_TRACE("UserEvent InputTime:%lld AcceptTime:%lld InputType:PinchGesture",
+            static_cast<long long>(inputTime), static_cast<long long>(acceptTime));
+    }
+    
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch gesture has been accepted, node tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
@@ -63,6 +73,7 @@ void PinchRecognizer::OnRejected()
         return;
     }
     refereeState_ = RefereeState::FAIL;
+    firstInputTime_.reset();
 }
 
 bool PinchRecognizer::IsCtrlBeingPressed()
@@ -74,6 +85,10 @@ bool PinchRecognizer::IsCtrlBeingPressed()
 
 void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    if (!firstInputTime_.has_value()) {
+        firstInputTime_ = event.time;
+    }
+
     if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
         return;
     }
@@ -96,6 +111,9 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    if (!firstInputTime_.has_value()) {
+        firstInputTime_ = event.time;
+    }
     if (event.isRotationEvent) {
         return;
     }
@@ -130,6 +148,16 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
         SendCallbackMsg(onActionEnd_);
+        int64_t overTime = GetSysTimestamp();
+        int64_t inputTime = overTime;
+        if (firstInputTime_.has_value()) {
+            inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+        }
+        if (SystemProperties::GetTraceInputEventEnabled()) {
+            ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PinchGesture",
+                static_cast<long long>(inputTime), static_cast<long long>(overTime));
+        }
+        firstInputTime_.reset();
     }
     activeFingers_.remove(event.id);
 }
@@ -147,6 +175,16 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCallbackMsg(onActionEnd_);
         isPinchEnd_ = true;
+        int64_t overTime = GetSysTimestamp();
+        int64_t inputTime = overTime;
+        if (firstInputTime_.has_value()) {
+            inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+        }
+        if (SystemProperties::GetTraceInputEventEnabled()) {
+            ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PinchGesture",
+                static_cast<long long>(inputTime), static_cast<long long>(overTime));
+        }
+        firstInputTime_.reset();
     }
 }
 
@@ -226,6 +264,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     touchPoints_[event.id].y = event.y;
     touchPoints_[event.id].sourceType = event.sourceType;
     touchPoints_[event.id].sourceTool = event.sourceTool;
+    lastTouchEvent_ = touchPoints_[event.id];
     time_ = event.time;
     if (refereeState_ == RefereeState::DETECTING || refereeState_ == RefereeState::SUCCEED) {
         if (event.pinchAxisScale != 0.0) {

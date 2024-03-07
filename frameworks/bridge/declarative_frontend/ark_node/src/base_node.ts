@@ -25,22 +25,24 @@ declare interface RenderOptions {
 }
 
 declare class DrawContext {}
-
+declare type NodePtr = Object | null;
 declare class __JSBaseNode__ {
   constructor(options?: RenderOptions);
-  create(builder: (...args: Object[]) => void, params: Object): number | null;
-  createRenderNode(node: FrameNode | RenderNode): number | null;
+  create(builder: (...args: Object[]) => void, params: Object): NodePtr;
+  createRenderNode(node: BaseNode | RenderNode): NodePtr;
   finishUpdateFunc(): void;
   postTouchEvent(touchEvent: TouchEvent): boolean;
   dispose(): void;
   updateStart(): void;
   updateEnd(): void;
+  createFrameNode(frameNode: FrameNode): NodePtr;
   draw(drawContext: DrawContext): void;
+  convertToFrameNode(nodePtr: NodePtr): NodePtr;
 }
 
 class BaseNode extends __JSBaseNode__ {
   protected instanceId_?: number;
-  protected nodePtr_: number | null;
+  protected nodePtr_: NodePtr;
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(options);
     let instanceId: number = -1;

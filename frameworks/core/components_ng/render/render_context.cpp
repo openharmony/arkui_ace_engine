@@ -127,6 +127,7 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("total", propProgressMask_.value()->GetMaxValue());
         json->Put("updateProgress", propProgressMask_.value()->GetValue());
         json->Put("updateColor", propProgressMask_.value()->GetColor().ColorToString().c_str());
+        json->Put("enableBreathe", propProgressMask_.value()->GetEnableBreathe());
     }
     json->Put("lightUpEffect", propLightUpEffect_.value_or(0.0));
     json->Put("sphericalEffect", propSphericalEffect_.value_or(0.0));

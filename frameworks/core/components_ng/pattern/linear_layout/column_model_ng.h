@@ -31,6 +31,8 @@ public:
     static void SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign);
     static void SetAlignItems(FrameNode* frameNode, FlexAlign flexAlign);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static FlexAlign GetJustifyContent(FrameNode* frameNode);
+    static FlexAlign GetAlignItems(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

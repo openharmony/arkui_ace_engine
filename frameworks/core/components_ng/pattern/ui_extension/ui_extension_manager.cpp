@@ -59,14 +59,6 @@ bool UIExtensionManager::IsWrapExtensionAbilityId(int64_t elementId)
     return elementId > UI_EXTENSION_OFFSET_MIN;
 }
 
-bool UIExtensionManager::IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pipeline)
-{
-    auto instanceId = pipeline->GetInstanceId();
-    auto window = Platform::AceContainer::GetUIWindow(instanceId);
-    CHECK_NULL_RETURN(window, false);
-    return window->GetType() == OHOS::Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
-}
-
 bool UIExtensionManager::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
     int64_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline)
 {
@@ -134,5 +126,16 @@ bool UIExtensionManager::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::Occupied
 {
     auto sessionWrapper = sessionWrapper_.Upgrade();
     return sessionWrapper && sessionWrapper->NotifyOccupiedAreaChangeInfo(info);
+}
+
+void UIExtensionManager::OnSizeChanged(WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->OnSizeChanged(type, rsTransaction);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -305,16 +305,31 @@ void JsDragEvent::GetDragInfo(const JSCallbackInfo& args)
     args.SetReturnValue(jsValue);
 }
 
+OHOS::Ace::DragBehavior convertDragBehavior(int32_t dragBehavior)
+{
+    switch (dragBehavior) {
+        case 0:
+            return OHOS::Ace::DragBehavior::COPY;
+        case 1:
+            return OHOS::Ace::DragBehavior::MOVE;
+        default:
+            return OHOS::Ace::DragBehavior::UNKNOWN;
+    }
+}
+
 void JsDragEvent::SetDragBehavior(const JSCallbackInfo& args)
 {
     if (args[0]->IsNumber()) {
         dragEvent_->SetCopy(!static_cast<bool>(args[0]->ToNumber<int32_t>()));
+        dragEvent_->SetDragBehavior(convertDragBehavior(args[0]->ToNumber<int32_t>()));
     }
 }
 
 void JsDragEvent::GetDragBehavior(const JSCallbackInfo& args)
 {
-    auto dragBehavior = JSVal(ToJSValue(static_cast<int32_t>(!dragEvent_->IsCopy())));
+    auto dragBehavior = JSVal(ToJSValue(static_cast<int32_t>(
+        dragEvent_->GetDragBehavior() == OHOS::Ace::DragBehavior::MOVE ? OHOS::Ace::DragBehavior::MOVE
+                                                                       : OHOS::Ace::DragBehavior::COPY)));
     auto dragBehaviorRef = JSRef<JSVal>::Make(dragBehavior);
     args.SetReturnValue(dragBehaviorRef);
 }

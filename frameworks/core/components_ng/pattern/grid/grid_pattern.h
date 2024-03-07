@@ -219,6 +219,7 @@ public:
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
 
+    void StopAnimate() override;
 private:
     float GetEndOffset();
     float GetMainGap() const;

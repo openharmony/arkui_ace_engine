@@ -22,6 +22,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
@@ -792,7 +793,7 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
             if (!pattern || pattern->GetAxis() == Axis::NONE) {
                 return false;
             }
-            return pattern->UpdateCurrentOffset(offset, SCROLL_FROM_BAR);
+            return pattern->UpdateCurrentOffset(offset, source);
         }
         return true;
     };
@@ -1043,7 +1044,6 @@ void ScrollablePattern::PlayCurveAnimation(
 {
     AnimationOption option;
     InitOption(option, duration, curve);
-    SetAnimateCanOverScroll(canOverScroll);
     if (!curveOffsetProperty_) {
         InitCurveOffsetProperty(position);
     }
@@ -1053,6 +1053,7 @@ void ScrollablePattern::PlayCurveAnimation(
         return pattern->GetCurrentVelocity();
     });
     isAnimationStop_ = false;
+    SetAnimateCanOverScroll(canOverScroll);
     curveOffsetProperty_->Set(GetTotalOffset());
     curveAnimation_ = AnimationUtils::StartAnimation(
         option,
@@ -1065,7 +1066,6 @@ void ScrollablePattern::PlayCurveAnimation(
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->SetAnimateCanOverScroll(false);
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(), SceneStatus::END);
             ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         });
@@ -1173,6 +1173,7 @@ void ScrollablePattern::InitOption(AnimationOption &option, float duration, cons
 
 void ScrollablePattern::StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation)
 {
+    SetAnimateCanOverScroll(false);
     isAnimationStop_ = true;
     currentVelocity_ = 0.0;
     if (!animation) {
@@ -1184,6 +1185,7 @@ void ScrollablePattern::StopAnimation(std::shared_ptr<AnimationUtils::Animation>
 
 void ScrollablePattern::PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation)
 {
+    SetAnimateCanOverScroll(false);
     isAnimationStop_ = true;
     currentVelocity_ = 0.0;
     if (!animation) {
@@ -1944,6 +1946,8 @@ void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velo
 
 void ScrollablePattern::FireOnScrollStart()
 {
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
+        ScrollEventType::SCROLL_START);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
@@ -1986,6 +1990,8 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
 void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
 {
     if (scrollStop_) {
+        UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
+            ScrollEventType::SCROLL_STOP);
         if (!GetScrollAbort()) {
             auto host = GetHost();
             if (host != nullptr) {
@@ -2312,5 +2318,14 @@ void ScrollablePattern::AddHotZoneSenceInterface(SceneStatus scene)
     CHECK_NULL_VOID(velocityMotion_);
     auto velocity = velocityMotion_->GetCurrentVelocity();
     NotifyFRCSceneInfo(SCROLL_IN_HOTZONE_SCENE, velocity, scene);
+}
+
+
+void ScrollablePattern::PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset)
+{
+    if (SystemProperties::GetDebugOffsetLogEnabled()) {
+        TAG_LOGD(tag, "Scrollable id:%{public}d, scrollSource:%{public}d, scrollOffset:%{public}f",
+            id, scrollSource_, finalOffset);
+    }
 }
 } // namespace OHOS::Ace::NG

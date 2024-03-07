@@ -15,26 +15,57 @@
 
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 
+#include <string>
+
 #include "base/geometry/dimension.h"
+#include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "frameworks/core/components/common/properties/text_style.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
+#include "frameworks/core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int POS_0 = 0;
-constexpr int POS_1 = 1;
-constexpr int POS_2 = 2;
+constexpr int32_t POS_0 = 0;
+constexpr int32_t POS_1 = 1;
+constexpr int32_t POS_2 = 2;
 const char DEFAULT_DELIMITER = '|';
+const int32_t ERROR_INT_CODE = -1;
+std::string g_strValue;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
-void SetSelectedTextStyle(
-    ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style)
+
+ArkUI_CharPtr GetSelectedTextStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    PickerTextStyle pickerTextStyle = DatePickerModelNG::getSelectedTextStyle(frameNode);
+    std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
+    std::string families;
+    //set index start
+    int index = 0;
+    for (auto& family : fontFamilies) {
+        families += family;
+        if (index != fontFamilies.size() - 1) {
+            families += ",";
+        }
+        index++;
+    }
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue =
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
+    g_strValue = g_strValue + families + ",";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL)));
+    return g_strValue.c_str();
+}
+
+void SetSelectedTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -47,8 +78,7 @@ void SetSelectedTextStyle(
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
-    textStyle.fontSize =
-        StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
         textStyle.fontStyle = FONT_STYLES[style];
     } else {
@@ -77,8 +107,32 @@ void ResetSelectedTextStyle(ArkUINodeHandle node)
     DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
 }
 
-void SetDatePickerTextStyle(
-    ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style)
+ArkUI_CharPtr GetDatePickerTextStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    PickerTextStyle pickerTextStyle = DatePickerModelNG::getNormalTextStyle(frameNode);
+    std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
+    std::string families;
+    //set index start
+    int index = 0;
+    for (auto& family : fontFamilies) {
+        families += family;
+        if (index != fontFamilies.size() - 1) {
+            families += ",";
+        }
+        index++;
+    }
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue =
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
+    g_strValue = g_strValue + families + ",";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL)));
+    return g_strValue.c_str();
+}
+
+void SetDatePickerTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -91,16 +145,15 @@ void SetDatePickerTextStyle(
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
-    
-    textStyle.fontSize =
-        StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
         textStyle.fontStyle = FONT_STYLES[style];
     } else {
         textStyle.fontStyle = FONT_STYLES[0];
     }
     textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
-    textStyle.fontWeight=StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
     textStyle.textColor = Color(color);
     DatePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
 }
@@ -122,8 +175,32 @@ void ResetDatePickerTextStyle(ArkUINodeHandle node)
     DatePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
 }
 
-void SetDisappearTextStyle(
-    ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style)
+ArkUI_CharPtr GetDisappearTextStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    PickerTextStyle pickerTextStyle = DatePickerModelNG::getDisappearTextStyle(frameNode);
+    std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
+    std::string families;
+    //set index start
+    int index = 0;
+    for (auto& family : fontFamilies) {
+        families += family;
+        if (index != fontFamilies.size() - 1) {
+            families += ",";
+        }
+        index++;
+    }
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue =
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
+    g_strValue = g_strValue + families + ",";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL)));
+    return g_strValue.c_str();
+}
+
+void SetDisappearTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t color, int32_t style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -136,16 +213,15 @@ void SetDisappearTextStyle(
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
-    
-    textStyle.fontSize =
-        StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
         textStyle.fontStyle = FONT_STYLES[style];
     } else {
         textStyle.fontStyle = FONT_STYLES[0];
     }
     textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
-    textStyle.fontWeight=StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
     textStyle.textColor = Color(color);
     DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
 }
@@ -167,6 +243,13 @@ void ResetDisappearTextStyle(ArkUINodeHandle node)
     DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
 }
 
+ArkUI_Int32 GetLunar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return DatePickerModelNG::getLunar(frameNode);
+}
+
 void SetLunar(ArkUINodeHandle node, int lunar)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -179,6 +262,13 @@ void ResetLunar(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DatePickerModelNG::SetShowLunar(frameNode, false);
+}
+
+ArkUI_Uint32 GetDatePickerBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return DatePickerModelNG::getBackgroundColor(frameNode);
 }
 
 void SetDatePickerBackgroundColor(ArkUINodeHandle node, uint32_t color)
@@ -195,6 +285,17 @@ void ResetDatePickerBackgroundColor(ArkUINodeHandle node)
     DatePickerModelNG::SetBackgroundColor(frameNode, Color(Color::TRANSPARENT));
 }
 
+ArkUI_CharPtr GetStartDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    LunarDate lunarDate = DatePickerModelNG::getStartDate(frameNode);
+    g_strValue = std::to_string(static_cast<uint32_t>(lunarDate.year)) + ",";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.month)) + ",";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.day));
+    return g_strValue.c_str();
+}
+
 void SetStartDate(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -209,6 +310,17 @@ void ResetStartDate(ArkUINodeHandle node)
     DatePickerModelNG::SetStartDate(frameNode, PickerDate(1970, 1, 1));
 }
 
+ArkUI_CharPtr GetEndDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    LunarDate lunarDate = DatePickerModelNG::getEndDate(frameNode);
+    g_strValue = std::to_string(static_cast<uint32_t>(lunarDate.year)) + ",";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.month)) + ",";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.day));
+    return g_strValue.c_str();
+}
+
 void SetEndDate(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -221,6 +333,17 @@ void ResetEndDate(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DatePickerModelNG::SetEndDate(frameNode, PickerDate(2100, 12, 31));
+}
+
+ArkUI_CharPtr GetSelectedDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    LunarDate lunarDate = DatePickerModelNG::getSelectedDate(frameNode);
+    g_strValue = std::to_string(static_cast<uint32_t>(lunarDate.year)) + ",";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.month)) + ",";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.day));
+    return g_strValue.c_str();
 }
 
 void SetSelectedDate(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
@@ -245,13 +368,12 @@ void ResetSelectedDate(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIDatePickerModifier* GetDatePickerModifier()
 {
-    static const ArkUIDatePickerModifier modifier = {
-        SetSelectedTextStyle, ResetSelectedTextStyle, SetDatePickerTextStyle,
-        ResetDatePickerTextStyle, SetDisappearTextStyle, ResetDisappearTextStyle,
-        SetLunar, ResetLunar, SetStartDate, ResetStartDate, SetEndDate, ResetEndDate,
-        SetSelectedDate, ResetSelectedDate, SetDatePickerBackgroundColor,
-        ResetDatePickerBackgroundColor
-    };
+    static const ArkUIDatePickerModifier modifier = { GetSelectedTextStyle, SetSelectedTextStyle,
+        ResetSelectedTextStyle, GetDatePickerTextStyle, SetDatePickerTextStyle, ResetDatePickerTextStyle,
+        GetDisappearTextStyle, SetDisappearTextStyle, ResetDisappearTextStyle, GetLunar, SetLunar, ResetLunar,
+        GetStartDate, SetStartDate, ResetStartDate, GetEndDate, SetEndDate, ResetEndDate, GetSelectedDate,
+        SetSelectedDate, ResetSelectedDate, GetDatePickerBackgroundColor, SetDatePickerBackgroundColor,
+        ResetDatePickerBackgroundColor };
 
     return &modifier;
 }
@@ -263,8 +385,7 @@ void SetDatePickerOnDateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* 
     auto onDateChange = [eventId, extraParam](const BaseEventInfo* info) {
         ArkUINodeEvent event;
         event.kind = ON_DATE_PICKER_DATE_CHANGE;
-        event.eventId = eventId;
-        event.extraParam= extraParam;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
         std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo->GetSelectedStr());
         if (!argsPtr) {
@@ -298,5 +419,5 @@ void SetDatePickerOnDateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* 
     };
     DatePickerModelNG::SetOnDateChange(frameNode, std::move(onDateChange));
 }
-}
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

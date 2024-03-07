@@ -40,7 +40,10 @@ constexpr float HALF = 0.5f;
 constexpr float DOUBLE = 2.0f;
 constexpr int32_t SKEWY = 3;
 constexpr int32_t SCALEY = 4;
-constexpr int32_t RING_ALPHA = 200;
+constexpr float RING_ALPHA = 200 / 255.0f;
+constexpr int32_t RING_ALPHA_DARK = 255;
+constexpr int32_t RING_ALPHA_DARK_BACKGROUNG = 150;
+constexpr Color DEFAULT_COLOR_DARK = Color(0x99FFFFFF);
 constexpr int32_t TOTAL_POINTS_COUNT = 20;
 constexpr int32_t TAIL_ANIAMTION_DURATION = 400;
 constexpr int32_t TRANS_DURATION = 100;
@@ -67,8 +70,9 @@ constexpr float SIZE_SCALE3 = 0.93f;
 constexpr float MOVE_STEP = 0.06f;
 constexpr float TRANS_OPACITY_SPAN = 0.3f;
 constexpr float FULL_OPACITY = 255.0f;
-constexpr float FAKE_DELTA = 0.01f; 
+constexpr float FAKE_DELTA = 0.01f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
+constexpr float REFRESH_DARK_MODE_RING_BLUR_RADIUS = 0.4f;
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
     : enableLoading_(AceType::MakeRefPtr<PropertyBool>(true)),
@@ -106,6 +110,9 @@ void LoadingProgressModifier::onDraw(DrawingContext& context)
     ringParam.radius = LoadingProgressUtill::GetRingRadius(diameter) * sizeScale_->Get();
     ringParam.movement =
         (ringParam.radius * DOUBLE + ringParam.strokeWidth) * centerDeviation_->Get() * sizeScale_->Get();
+    ringParam.darkRingRadius = LoadingProgressUtill::GetRingDarkRadius(diameter) * sizeScale_->Get();
+    ringParam.darkBackgroundWidth = LoadingProgressUtill::GetRingDarkBackgroundWidth(diameter) * sizeScale_->Get();
+    ringParam.darkBackgroundRadius = LoadingProgressUtill::GetRingDarkBackgroundRadius(diameter) * sizeScale_->Get();
 
     CometParam cometParam;
     cometParam.radius = LoadingProgressUtill::GetCometRadius(diameter) * sizeScale_->Get();
@@ -128,18 +135,33 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     auto& canvas = context.canvas;
     canvas.Save();
     RSPen pen;
+    RSFilter filter;
     auto ringColor = color_->Get();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
-    CHECK_NULL_VOID(progressTheme);
-    auto defaultColor = progressTheme->GetLoadingColor();
-    if (ringColor.GetValue() == defaultColor.GetValue()) {
-        pen.SetColor(
-            ToRSColor(Color::FromARGB(RING_ALPHA, ringColor.GetRed(), ringColor.GetGreen(), ringColor.GetBlue())));
-    } else {
-        pen.SetColor(ToRSColor(
-            Color::FromARGB(ringColor.GetAlpha(), ringColor.GetRed(), ringColor.GetGreen(), ringColor.GetBlue())));
+    ringColor.BlendOpacity(RING_ALPHA);
+    pen.SetColor(ToRSColor(ringColor));
+    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        if (ringColor.GetValue() == DEFAULT_COLOR_DARK.GetValue()) {
+            ringColor = LinearColor::WHITE;
+        }
+        // draw ring background
+        DrawRingBackground(context, ringParam, ringColor);
+
+        ringColor.BlendOpacity(RING_ALPHA_DARK / FULL_OPACITY);
+        pen.SetColor(ToRSColor(ringColor));
+
+#ifndef USE_ROSEN_DRAWING
+        filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(
+            ringParam.darkRingRadius, ringParam.darkRingRadius, RSTileMode::DECAL, nullptr));
+#else
+        filter.SetImageFilter(RSRecordingImageFilter::CreateBlurImageFilter(
+            ringParam.darkRingRadius, ringParam.darkRingRadius, RSTileMode::DECAL, nullptr));
+#endif
+        pen.SetFilter(filter);
+    }
+    if (loadingProgressOwner_ == LoadingProgressOwner::REFRESH && SystemProperties::GetColorMode() == ColorMode::DARK) {
+        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+            RSBlurType::NORMAL, PipelineBase::GetCurrentDensity() * REFRESH_DARK_MODE_RING_BLUR_RADIUS));
+        pen.SetFilter(filter);
     }
     pen.SetWidth(ringParam.strokeWidth);
     pen.SetAntiAlias(true);
@@ -147,6 +169,35 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     canvas.DrawCircle(
         { offset_->Get().GetX() + contentSize_->Get().Width() * HALF,
             offset_->Get().GetY() + contentSize_->Get().Height() * HALF + ringParam.movement },
+        ringParam.radius);
+    canvas.DetachPen();
+    canvas.Restore();
+}
+
+void LoadingProgressModifier::DrawRingBackground(
+    DrawingContext& context, const RingParam& ringParam, LinearColor& ringColor)
+{
+    auto& canvas = context.canvas;
+    canvas.Save();
+    RSPen pen;
+
+    ringColor.BlendOpacity(RING_ALPHA_DARK_BACKGROUNG / FULL_OPACITY);
+    pen.SetColor(ToRSColor(ringColor));
+
+    RSFilter filter;
+#ifndef USE_ROSEN_DRAWING
+    filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(
+        ringParam.darkBackgroundRadius, ringParam.darkBackgroundRadius, RSTileMode::DECAL, nullptr));
+#else
+    filter.SetImageFilter(RSRecordingImageFilter::CreateBlurImageFilter(
+        ringParam.darkBackgroundRadius, ringParam.darkBackgroundRadius, RSTileMode::DECAL, nullptr));
+#endif
+    pen.SetFilter(filter);
+    pen.SetWidth(ringParam.darkBackgroundWidth);
+    pen.SetAntiAlias(true);
+    canvas.AttachPen(pen);
+    canvas.DrawCircle({ offset_->Get().GetX() + contentSize_->Get().Width() * HALF,
+                          offset_->Get().GetY() + contentSize_->Get().Height() * HALF + ringParam.movement },
         ringParam.radius);
     canvas.DetachPen();
     canvas.Restore();
@@ -181,6 +232,9 @@ void LoadingProgressModifier::DrawOrbit(
     matrix.MapPoints(distPoints, points, points.size());
     auto cometColor = color_->Get();
     float colorAlpha = cometColor.GetAlpha() / FULL_OPACITY;
+    if (SystemProperties::GetColorMode() == ColorMode::DARK && cometColor.GetValue() == DEFAULT_COLOR_DARK.GetValue()) {
+        colorAlpha = OPACITY3;
+    }
     auto baseAlpha = colorAlpha * cometParam.alphaScale;
     for (uint32_t i = 0; i < distPoints.size(); i++) {
         RSPoint pointCenter = distPoints[i];
@@ -373,7 +427,7 @@ void LoadingProgressModifier::StartRecycle()
         isLoading_ = true;
         date_->Set(0.0f);
         AnimationOption option = AnimationOption();
-        RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
+        RefPtr<Curve> curve = AceType::MakeRefPtr<CubicCurve>(0.25f, 0.15f, 0.32f, 0.48f);
         option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
         option.SetDelay(0);
         option.SetCurve(curve);
