@@ -132,7 +132,7 @@ bool SystemProperties::GetGridCacheEnabled()
 
 bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
-    return false;
+    return true;
 }
 
 bool SystemProperties::WaterFlowUseSegmentedLayout()
