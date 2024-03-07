@@ -4422,8 +4422,8 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
                 if (!node) {
                     continue;
                 }
-                auto image = node->GetPattern<ImagePattern>();
-                if (image) {
+                auto tag = node->GetTag();
+                if (tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
                     imageChildren.emplace_back(node);
                 }
             }
