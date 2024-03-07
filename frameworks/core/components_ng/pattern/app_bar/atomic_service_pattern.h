@@ -23,6 +23,7 @@
 namespace OHOS::Ace::NG {
 class AtomicServicePattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(AtomicServicePattern, LinearLayoutPattern);
+    ACE_DISALLOW_COPY_AND_MOVE(AtomicServicePattern);
 
 public:
     AtomicServicePattern() : LinearLayoutPattern(true) {};
@@ -43,10 +44,13 @@ public:
     RefPtr<FrameNode> GetMenuIcon();
     RefPtr<FrameNode> GetCloseIcon();
     void UpdateColor();
-    void UpdateRowLayout();
-    void SetEachIconColor(
-        RefPtr<FrameNode> icon, const std::optional<Color>& color, InternalResource::ResourceId image);
-    ACE_DISALLOW_COPY_AND_MOVE(AtomicServicePattern);
+    void UpdateMenuBarColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& menuBar);
+    void UpdateButtonColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button);
+    void UpdateIconColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon);
+    void UpdateLayout();
+    void UpdateMenuBarLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& menuBar, bool isRtl);
+    void UpdateButtonLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button, bool isLeft);
+    void UpdateIconLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon, bool isLeft);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H
