@@ -514,16 +514,15 @@ void FrontendDelegateImpl::FireSyncEvent(
         args.append(",").append(jsonArgs); // method args
     }
     taskExecutor_->PostSyncTask(
-        [weak = AceType::WeakClaim(this), eventId, args = std::move(args)] {
+        [weak = AceType::WeakClaim(this), eventId, args = std::move(args), callbackId, &result] {
             auto delegate = weak.Upgrade();
             if (delegate) {
                 delegate->syncEvent_(eventId, args);
+                result = delegate->jsCallBackResult_[callbackId];
+                delegate->jsCallBackResult_.erase(callbackId);
             }
         },
         TaskExecutor::TaskType::JS);
-
-    result = jsCallBackResult_[callbackId];
-    jsCallBackResult_.erase(callbackId);
 }
 
 void FrontendDelegateImpl::FireExternalEvent(
