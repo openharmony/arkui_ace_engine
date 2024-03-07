@@ -1205,7 +1205,7 @@ void XComponentPattern::OnWindowHide()
 void XComponentPattern::OnWindowShow()
 {
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_PLATFORM)
-    if (!hasXComponentInit_ || hasReleasedSurface_) {
+    if (!hasXComponentInit_ || !hasReleasedSurface_) {
         return;
     }
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
