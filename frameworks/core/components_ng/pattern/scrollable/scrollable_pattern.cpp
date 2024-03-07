@@ -1045,7 +1045,7 @@ void ScrollablePattern::PlayCurveAnimation(
     AnimationOption option;
     InitOption(option, duration, curve);
     if (!curveOffsetProperty_) {
-        InitCurveOffsetProperty(position);
+        InitCurveOffsetProperty();
     }
     scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto pattern = weakScroll.Upgrade();
@@ -1108,13 +1108,13 @@ void ScrollablePattern::InitSpringOffsetProperty()
     renderContext->AttachNodeAnimatableProperty(springOffsetProperty_);
 }
 
-void ScrollablePattern::InitCurveOffsetProperty(float position)
+void ScrollablePattern::InitCurveOffsetProperty()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto propertyCallback = [weak = AceType::WeakClaim(this), position](float offset) {
+    auto propertyCallback = [weak = AceType::WeakClaim(this)](float offset) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->isAnimationStop_) {
@@ -1147,8 +1147,9 @@ void ScrollablePattern::InitCurveOffsetProperty(float position)
                 context->MarkNeedFlushAnimationStartTime();
                 pattern->PauseAnimation(pattern->curveAnimation_);
                 pattern->HandleOverScroll(pauseVelocity);
-            } else if (stopAnimation || (pattern->IsAtTop() && LessOrEqual(position, pattern->GetTotalOffset())) ||
-                       (pattern->IsAtBottom() && GreatOrEqual(position, pattern->GetTotalOffset()))) {
+            } else if (stopAnimation ||
+                       (pattern->IsAtTop() && LessOrEqual(pattern->finalPosition_, pattern->GetTotalOffset())) ||
+                       (pattern->IsAtBottom() && GreatOrEqual(pattern->finalPosition_, pattern->GetTotalOffset()))) {
                 pattern->StopAnimation(pattern->curveAnimation_);
             }
         }
