@@ -175,6 +175,16 @@ public:
         return layoutConstraint_;
     }
 
+    void SetItemPressed(bool isPressed, int32_t id)
+    {
+        for (auto& child : itemPosition_) {
+            if (child.second.id == id) {
+                child.second.isPressed = isPressed;
+                break;
+            }
+        }
+    }
+
 private:
     bool IsNeedInitClickEventRecorder() const override
     {

@@ -1424,7 +1424,8 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
     if (it == itemsPosInGroup.end()) {
         return false;
     }
-    std::optional<std::pair<float, float>> itemPosInGroup = it->second;
+    auto groupStartPos = it->second.startPos;
+    auto groupEndPos = it->second.endPos;
     auto padding = groupWrapper->GetGeometryNode()->GetPadding()->top;
     float paddingBeforeContent = 0.0f;
     if (padding) {
@@ -1433,7 +1434,7 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
     switch (align) {
         case ScrollAlign::START:
         case ScrollAlign::NONE:
-            targetPos = paddingBeforeContent + startPos + itemPosInGroup.value().first;
+            targetPos = paddingBeforeContent + startPos + groupStartPos;
             if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
                 targetPos -= groupPattern->GetHeaderMainSize();
             }
@@ -1443,11 +1444,11 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
             break;
         case ScrollAlign::CENTER:
             targetPos = paddingBeforeContent + startPos +
-                (itemPosInGroup.value().first + itemPosInGroup.value().second) / 2.0f -
+                (groupStartPos + groupEndPos) / 2.0f -
                 contentMainSize_ / 2.0f;
             break;
         case ScrollAlign::END:
-            targetPos = paddingBeforeContent + startPos + itemPosInGroup.value().second - contentMainSize_;
+            targetPos = paddingBeforeContent + startPos + groupEndPos - contentMainSize_;
             if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
                 targetPos += groupPattern->GetFooterMainSize();
             }
@@ -1456,8 +1457,8 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
             }
             break;
         case ScrollAlign::AUTO:
-            float itemStartPos = paddingBeforeContent + startPos + itemPosInGroup.value().first;
-            float itemEndPos = paddingBeforeContent + startPos + itemPosInGroup.value().second;
+            float itemStartPos = paddingBeforeContent + startPos + groupStartPos;
+            float itemEndPos = paddingBeforeContent + startPos + groupEndPos;
             if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
                 itemStartPos -= groupPattern->GetHeaderMainSize();
             }
