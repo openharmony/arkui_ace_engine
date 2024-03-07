@@ -1668,6 +1668,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
+    JSClass<JSWeb>::StaticMethod("onFirstMeaningfulPaint", &JSWeb::OnFirstMeaningfulPaint);
+    JSClass<JSWeb>::StaticMethod("onLargestContentfulPaint", &JSWeb::OnLargestContentfulPaint);
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckResult", &JSWeb::OnSafeBrowsingCheckResult);
     JSClass<JSWeb>::StaticMethod("onNavigationEntryCommitted", &JSWeb::OnNavigationEntryCommitted);
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
@@ -3826,6 +3828,74 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
         });
     };
     WebModel::GetInstance()->SetFirstContentfulPaintId(std::move(uiCallback));
+}
+
+JSRef<JSVal> FirstMeaningfulPaintEventToJSValue(const FirstMeaningfulPaintEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("navigationStartTime", eventInfo.GetNavigationStartTime());
+    obj->SetProperty("firstMeaningfulPaintTime", eventInfo.GetFirstMeaningfulPaintTime());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnFirstMeaningfulPaint(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FirstMeaningfulPaintEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), FirstMeaningfulPaintEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const std::shared_ptr<BaseEventInfo>& info) {
+        ContainerScope scope(instanceId);
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto* eventInfo = TypeInfoHelper::DynamicCast<FirstMeaningfulPaintEvent>(info.get());
+            postFunc->Execute(*eventInfo);
+        });
+    };
+    WebModel::GetInstance()->SetFirstMeaningfulPaintId(std::move(uiCallback));
+}
+
+JSRef<JSVal> LargestContentfulPaintEventToJSValue(const LargestContentfulPaintEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("navigationStartTime", eventInfo.GetNavigationStartTime());
+    obj->SetProperty("largestImagePaintTime", eventInfo.GetLargestImagePaintTime());
+    obj->SetProperty("largestTextPaintTime", eventInfo.GetLargestTextPaintTime());
+    obj->SetProperty("largestImageLoadStartTime", eventInfo.GetLargestImageLoadStartTime());
+    obj->SetProperty("largestImageLoadEndTime", eventInfo.GetLargestImageLoadEndTime());
+    obj->SetProperty("imageBPP", eventInfo.GetImageBPP());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnLargestContentfulPaint(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LargestContentfulPaintEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LargestContentfulPaintEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const std::shared_ptr<BaseEventInfo>& info) {
+        ContainerScope scope(instanceId);
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto* eventInfo = TypeInfoHelper::DynamicCast<LargestContentfulPaintEvent>(info.get());
+            postFunc->Execute(*eventInfo);
+        });
+    };
+    WebModel::GetInstance()->SetLargestContentfulPaintId(std::move(uiCallback));
 }
 
 JSRef<JSVal> SafeBrowsingCheckResultEventToJSValue(const SafeBrowsingCheckResultEvent& eventInfo)

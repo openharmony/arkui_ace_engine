@@ -1712,6 +1712,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
         onAudioStateChangedV2_ = GetAudioStateChangedCallback(useNewPipe, eventHub);
         onFirstContentfulPaintV2_ = useNewPipe ? eventHub->GetOnFirstContentfulPaintEvent() : nullptr;
+        OnFirstMeaningfulPaintV2_ = useNewPipe ? eventHub->GetOnFirstMeaningfulPaintEvent() : nullptr;
+        OnLargestContentfulPaintV2_ = useNewPipe ? eventHub->GetOnLargestContentfulPaintEvent() : nullptr;
         onSafeBrowsingCheckResultV2_ = useNewPipe ? eventHub->GetOnSafeBrowsingCheckResultEvent() : nullptr;
         onOverScrollV2_ = useNewPipe ? eventHub->GetOnOverScrollEvent()
                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
@@ -4946,6 +4948,23 @@ void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t fi
     if (onFirstContentfulPaintV2_) {
         onFirstContentfulPaintV2_(
             std::make_shared<FirstContentfulPaintEvent>(navigationStartTick, firstContentfulPaintMs));
+    }
+}
+
+void WebDelegate::OnFirstMeaningfulPaint(std::shared_ptr<OHOS::NWeb::NWebFirstMeaningfulPaintDetails> details)
+{
+    if (OnFirstMeaningfulPaintV2_) {
+        OnFirstMeaningfulPaintV2_(std::make_shared<FirstMeaningfulPaintEvent>(
+            details->GetNavigationStartTime(), details->GetFirstMeaningfulPaintTime()));
+    }
+}
+
+void WebDelegate::OnLargestContentfulPaint(std::shared_ptr<OHOS::NWeb::NWebLargestContentfulPaintDetails> details)
+{
+    if (OnLargestContentfulPaintV2_) {
+        OnLargestContentfulPaintV2_(std::make_shared<LargestContentfulPaintEvent>(details->GetNavigationStartTime(),
+            details->GetLargestImagePaintTime(), details->GetLargestTextPaintTime(),
+            details->GetLargestImageLoadStartTime(), details->GetLargestImageLoadEndTime(), details->GetImageBPP()));
     }
 }
 

@@ -1416,6 +1416,86 @@ private:
     int64_t firstContentfulPaintMs_;
 };
 
+class ACE_EXPORT FirstMeaningfulPaintEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FirstMeaningfulPaintEvent, BaseEventInfo);
+
+public:
+    FirstMeaningfulPaintEvent(int64_t navigationStartTime, int64_t firstMeaningfulPaintTime)
+        : BaseEventInfo("FirstMeaningfulPaintEvent"), navigationStartTime_(navigationStartTime),
+          firstMeaningfulPaintTime_(firstMeaningfulPaintTime)
+    {}
+
+    ~FirstMeaningfulPaintEvent() = default;
+
+    int64_t GetNavigationStartTime() const
+    {
+        return navigationStartTime_;
+    }
+
+    int64_t GetFirstMeaningfulPaintTime() const
+    {
+        return firstMeaningfulPaintTime_;
+    }
+
+private:
+    int64_t navigationStartTime_;
+    int64_t firstMeaningfulPaintTime_;
+};
+
+class ACE_EXPORT LargestContentfulPaintEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LargestContentfulPaintEvent, BaseEventInfo);
+
+public:
+    LargestContentfulPaintEvent(int64_t navigationStartTime, int64_t largestImagePaintTime,
+        int64_t largestTextPaintTime, int64_t largestImageLoadStartTime, int64_t largestImageLoadEndTime,
+        double_t imageBPP)
+        : BaseEventInfo("LargestContentfulPaintEvent"), navigationStartTime_(navigationStartTime),
+          largestImagePaintTime_(largestImagePaintTime), largestTextPaintTime_(largestTextPaintTime),
+          largestImageLoadStartTime_(largestImageLoadStartTime), largestImageLoadEndTime_(largestImageLoadEndTime),
+          imageBPP_(imageBPP)
+    {}
+
+    ~LargestContentfulPaintEvent() = default;
+
+    int64_t GetNavigationStartTime() const
+    {
+        return navigationStartTime_;
+    }
+
+    int64_t GetLargestImagePaintTime() const
+    {
+        return largestImagePaintTime_;
+    }
+
+    int64_t GetLargestTextPaintTime() const
+    {
+        return largestTextPaintTime_;
+    }
+
+    int64_t GetLargestImageLoadStartTime() const
+    {
+        return largestImageLoadStartTime_;
+    }
+
+    int64_t GetLargestImageLoadEndTime() const
+    {
+        return largestImageLoadEndTime_;
+    }
+
+    double_t GetImageBPP() const
+    {
+        return imageBPP_;
+    }
+
+private:
+    int64_t navigationStartTime_;
+    int64_t largestImagePaintTime_;
+    int64_t largestTextPaintTime_;
+    int64_t largestImageLoadStartTime_;
+    int64_t largestImageLoadEndTime_;
+    double_t imageBPP_;
+};
+
 class ACE_EXPORT SafeBrowsingCheckResultEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(SafeBrowsingCheckResultEvent, BaseEventInfo);
 

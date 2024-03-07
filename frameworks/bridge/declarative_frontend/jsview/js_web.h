@@ -128,6 +128,8 @@ public:
     static void OnAudioStateChanged(const JSCallbackInfo& args);
     static void MediaOptions(const JSCallbackInfo& args);
     static void OnFirstContentfulPaint(const JSCallbackInfo& args);
+    static void OnFirstMeaningfulPaint(const JSCallbackInfo& args);
+    static void OnLargestContentfulPaint(const JSCallbackInfo& args);
     static void OnSafeBrowsingCheckResult(const JSCallbackInfo& args);
     static void OnNavigationEntryCommitted(const JSCallbackInfo& args);
     static void OnControllerAttached(const JSCallbackInfo& args);

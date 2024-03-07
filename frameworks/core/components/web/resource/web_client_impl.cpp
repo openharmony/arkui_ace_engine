@@ -796,6 +796,27 @@ void WebClientImpl::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t 
     delegate->OnFirstContentfulPaint(navigationStartTick, firstContentfulPaintMs);
 }
 
+void WebClientImpl::OnFirstMeaningfulPaint(
+    std::shared_ptr<NWeb::NWebFirstMeaningfulPaintDetails> details)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    CHECK_NULL_VOID(details);
+    delegate->OnFirstMeaningfulPaint(details);
+}
+
+void WebClientImpl::OnLargestContentfulPaint(
+    std::shared_ptr<NWeb::NWebLargestContentfulPaintDetails> details)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    CHECK_NULL_VOID(details);
+    delegate->OnLargestContentfulPaint(details);
+}
+
+
 void WebClientImpl::OnSafeBrowsingCheckResult(int threat_type)
 {
     ContainerScope scope(instanceId_);
