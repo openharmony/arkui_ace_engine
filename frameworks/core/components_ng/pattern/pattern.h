@@ -137,6 +137,11 @@ public:
         return nullptr;
     }
 
+    virtual RefPtr<NodePaintMethod> CreateDefaultNodePaintMethod()
+    {
+        return MakeRefPtr<NodePaintMethod>();
+    }
+
     virtual std::optional<RectF> GetOverridePaintRect() const
     {
         return std::nullopt;

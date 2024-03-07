@@ -481,6 +481,10 @@ public:
     void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
     {
         drawModifier_ = drawModifier;
+        auto contentModifier = GetContentModifier();
+        if (contentModifier) {
+            contentModifier->SetDrawModifier(drawModifier);
+        }
     }
 
     void SetDragPreview(const NG::DragDropInfo& info)

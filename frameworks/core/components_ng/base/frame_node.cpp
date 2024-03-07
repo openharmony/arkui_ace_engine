@@ -1320,6 +1320,9 @@ RefPtr<ContentModifier> FrameNode::GetContentModifier()
 {
     auto wrapper = CreatePaintWrapper();
     auto paintMethod = pattern_->CreateNodePaintMethod();
+    if (!paintMethod && drawModifier_) {
+        paintMethod = pattern_->CreateDefaultNodePaintMethod();
+    }
     auto contentModifier = DynamicCast<ContentModifier>(paintMethod->GetContentModifier(AceType::RawPtr(wrapper)));
     return contentModifier;
 }
@@ -1329,6 +1332,9 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     pattern_->BeforeCreatePaintWrapper();
     isRenderDirtyMarked_ = false;
     auto paintMethod = pattern_->CreateNodePaintMethod();
+    if (!paintMethod && drawModifier_) {
+        paintMethod = pattern_->CreateDefaultNodePaintMethod();
+    }
     // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being
     // modified during the paint process, resulting in the problem of judging whether the front-end setting value
     // changes the next time js is executed.
@@ -2905,7 +2911,7 @@ void FrameNode::SyncGeometryNode(bool needSkipSync)
     // TODO: temp use and need to delete.
     needRerender =
         needRerender || pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config.skipMeasure, config.skipLayout);
-    if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
+    if (needRerender || drawModifier_ || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
 
