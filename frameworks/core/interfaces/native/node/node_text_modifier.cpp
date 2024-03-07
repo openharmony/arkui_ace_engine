@@ -156,9 +156,7 @@ void ResetFontColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color textColor;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    auto theme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     textColor = theme->GetTextStyle().GetTextColor();
     TextModelNG::SetTextColor(frameNode, textColor);
@@ -179,9 +177,7 @@ void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit)
 
     if (fontSize < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC ||
         unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
+        auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
         TextModelNG::SetFontSize(frameNode, fontSize);
@@ -194,9 +190,7 @@ void ResetFontSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    auto theme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
     TextModelNG::SetFontSize(frameNode, fontSize);
@@ -469,17 +463,11 @@ void ResetTextHeightAdaptivePolicy(ArkUINodeHandle node)
     TextModelNG::SetHeightAdaptivePolicy(frameNode, TextHeightAdaptivePolicy::MAX_LINES_FIRST);
 }
 
-void SetTextTextIndent(ArkUINodeHandle node, const struct ArkUIStringAndFloat* textIndentStruct)
+void SetTextTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result;
-    if (textIndentStruct->valueStr != nullptr) {
-        result = StringUtils::StringToCalcDimension(textIndentStruct->valueStr, true, DimensionUnit::FP);
-    } else {
-        result = CalcDimension(textIndentStruct->value, DimensionUnit::FP);
-    }
-    TextModelNG::SetTextIndent(frameNode, result);
+    TextModelNG::SetTextIndent(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
 float GetTextTextIndent(ArkUINodeHandle node)
@@ -496,15 +484,11 @@ void ResetTextTextIndent(ArkUINodeHandle node)
     TextModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::FP));
 }
 
-void SetTextBaselineOffset(ArkUINodeHandle node, const struct ArkUIStringAndFloat* offset)
+void SetTextBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result(offset->value, DimensionUnit::FP);
-    if (offset->valueStr != nullptr) {
-        result = StringUtils::StringToCalcDimension(offset->valueStr, false, DimensionUnit::FP);
-    }
-    TextModelNG::SetBaselineOffset(frameNode, result);
+    TextModelNG::SetBaselineOffset(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
 void ResetTextBaselineOffset(ArkUINodeHandle node)
@@ -521,24 +505,11 @@ ArkUI_Float32 GetTextBaselineOffset(ArkUINodeHandle node)
     return TextModelNG::GetTextBaselineOffset(frameNode).ConvertToVp();
 }
 
-void SetTextLetterSpacing(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingStruct)
+void SetTextLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-
-    CalcDimension letterSpacing;
-    if (letterSpacingStruct->valueStr != nullptr) {
-        if (std::string(letterSpacingStruct->valueStr).back() == '%') {
-            TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
-            return;
-        } else {
-            letterSpacing = StringUtils::StringToCalcDimension(
-                std::string(letterSpacingStruct->valueStr), false, DimensionUnit::FP);
-        }
-    } else {
-        letterSpacing = CalcDimension(letterSpacingStruct->value, DimensionUnit::FP);
-    }
-    TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
+    TextModelNG::SetLetterSpacing(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
 ArkUI_Float32 GetTextLetterSpacing(ArkUINodeHandle node)

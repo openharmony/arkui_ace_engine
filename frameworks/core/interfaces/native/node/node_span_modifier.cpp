@@ -121,9 +121,12 @@ float GetSpanLineHeight(ArkUINodeHandle node)
     return SpanModelNG::GetTextLineHeight(uiNode).ConvertToVp();
 }
 
-void ReSetSpanLineHeight(ArkUINodeHandle node)
+void ResetSpanLineHeight(ArkUINodeHandle node)
 {
-    return;
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    Dimension value(0.0f);
+    SpanModelNG::SetLineHeight(uiNode, value);
 }
 
 void SetSpanFontStyle(ArkUINodeHandle node, int32_t value)
@@ -141,7 +144,7 @@ int32_t GetSpanFontStyle(ArkUINodeHandle node)
     return static_cast<int32_t>(SpanModelNG::GetFontStyle(uiNode));
 }
 
-void ReSetSpanFontStyle(ArkUINodeHandle node)
+void ResetSpanFontStyle(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
@@ -314,7 +317,7 @@ namespace NodeModifier {
 const ArkUISpanModifier* GetSpanModifier()
 {
     static const ArkUISpanModifier modifier = { SetSpanContent, SetSpanTextCase, ResetSpanTextCase, SetSpanFontWeight,
-        ResetSpanFontWeight, SetSpanLineHeight, ReSetSpanLineHeight, SetSpanFontStyle, ReSetSpanFontStyle,
+        ResetSpanFontWeight, SetSpanLineHeight, ResetSpanLineHeight, SetSpanFontStyle, ResetSpanFontStyle,
         SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily, SetSpanDecoration,
         ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing, ResetSpanLetterSpacing,
         SetSpanFont, ResetSpanFont, SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor,

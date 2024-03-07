@@ -287,14 +287,14 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
-
     CalcDimension strokeWidth;
 
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, strokeWidth)) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, strokeWidth)) {
         strokeWidth = theme->GetThickness();
     }
 
-    if (jsValue->IsString() && jsValue->ToString(vm)->ToString().empty()) {
+    if (jsValue->IsString() && (jsValue->ToString(vm)->ToString().empty()|| !StringUtils::StringToDimensionWithUnitNG(
+        jsValue->ToString(vm)->ToString(), strokeWidth))) {
         strokeWidth = theme->GetThickness();
     }
 
@@ -303,7 +303,7 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
     }
 
     GetArkUINodeModifiers()->getDataPanelModifier()->setDataPanelStrokeWidth(
-        nativeNode, strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
+        nativeNode, strokeWidth.Value(), static_cast<int32_t>(strokeWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
