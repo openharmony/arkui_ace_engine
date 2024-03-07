@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/memory/type_info_base.h"
 
@@ -93,11 +94,12 @@ void DumpElementTree(
 
 TouchEvent GetUpPoint(const TouchEvent& downPoint)
 {
-    return { .x = downPoint.x,
-        .y = downPoint.y,
-        .type = TouchType::UP,
-        .time = std::chrono::high_resolution_clock::now(),
-        .sourceType = SourceType::TOUCH };
+    return TouchEvent {}
+        .SetX(downPoint.x)
+        .SetY(downPoint.y)
+        .SetType(TouchType::UP)
+        .SetTime(std::chrono::high_resolution_clock::now())
+        .SetSourceType(SourceType::TOUCH);
 }
 #ifdef PREVIEW
 void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<NG::UINode>>& children, int32_t pageId)
@@ -648,12 +650,12 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
             if (!context) {
                 return;
             }
-
-            TouchEvent point { .x = (rect.Left() + rect.Width() / 2),
-                .y = (rect.Top() + rect.Height() / 2),
-                .type = TouchType::DOWN,
-                .time = std::chrono::high_resolution_clock::now(),
-                .sourceType = SourceType::TOUCH };
+            TouchEvent point;
+            point.SetX(static_cast<float>(rect.Left() + rect.Width() / 2))
+                .SetY(static_cast<float>(rect.Top() + rect.Height() / 2))
+                .SetType(TouchType::DOWN)
+                .SetTime(std::chrono::high_resolution_clock::now())
+                .SetSourceType(SourceType::TOUCH);
             context->OnTouchEvent(point.UpdatePointers());
 
             switch (action) {

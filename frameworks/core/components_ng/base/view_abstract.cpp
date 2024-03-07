@@ -824,6 +824,13 @@ void ViewAbstract::SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc)
     gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
 }
 
+void ViewAbstract::SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchIntercept(std::move(touchInterceptFunc));
+}
+
 void ViewAbstract::SetOnTouch(TouchEventFunc &&touchEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();

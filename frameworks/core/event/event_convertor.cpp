@@ -30,40 +30,52 @@ void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>
     while (current < end) {
         std::chrono::microseconds micros(current->timeStamp);
         TimeStamp time(micros);
-        TouchEvent point { static_cast<int32_t>(current->actionId), static_cast<float>(current->physicalX),
-            static_cast<float>(current->physicalY), static_cast<float>(current->physicalX),
-            static_cast<float>(current->physicalY), TouchType::UNKNOWN, TouchType::UNKNOWN, time, current->size,
-            static_cast<float>(current->pressure), static_cast<int64_t>(current->sourceDeviceId) };
-        point.sourceType = static_cast<SourceType>(current->sourceDevice);
-        switch (current->actionType) {
-            case AceActionData::ActionType::CANCEL:
-                point.type = TouchType::CANCEL;
-                events.push_back(point);
-                break;
-            case AceActionData::ActionType::ADD:
-            case AceActionData::ActionType::REMOVE:
-            case AceActionData::ActionType::HOVER:
-                break;
-            case AceActionData::ActionType::DOWN:
-                point.type = TouchType::DOWN;
-                events.push_back(point);
-                break;
-            case AceActionData::ActionType::MOVE:
-                point.type = TouchType::MOVE;
-                events.push_back(point);
-                break;
-            case AceActionData::ActionType::UP:
-                point.type = TouchType::UP;
-                events.push_back(point);
-                break;
-            case AceActionData::ActionType::UNKNOWN:
-                break;
-            default:
-                break;
-        }
+        TouchEvent point;
+        point.SetId(static_cast<int32_t>(current->actionId))
+            .SetX(static_cast<float>(current->physicalX))
+            .SetY(static_cast<float>(current->physicalY))
+            .SetScreenX(static_cast<float>(current->physicalX))
+            .SetScreenY(static_cast<float>(current->physicalY))
+            .SetType(TouchType::UNKNOWN)
+            .SetPullType(TouchType::UNKNOWN)
+            .SetTime(time)
+            .SetSize(current->size)
+            .SetForce(static_cast<float>(current->pressure))
+            .SetDeviceId(static_cast<int64_t>(current->sourceDeviceId))
+            .SetSourceType(static_cast<SourceType>(current->sourceDevice));
+        SetTouchEventType(current->actionType, point, events);
         current++;
     }
     UpdateTouchEvent(events);
+}
+
+void SetTouchEventType(AceActionData::ActionType actionType, TouchEvent& point, std::vector<TouchEvent>& events)
+{
+    switch (actionType) {
+        case AceActionData::ActionType::CANCEL:
+            point.type = TouchType::CANCEL;
+            events.push_back(point);
+            return;
+        case AceActionData::ActionType::ADD:
+        case AceActionData::ActionType::REMOVE:
+        case AceActionData::ActionType::HOVER:
+            return;
+        case AceActionData::ActionType::DOWN:
+            point.type = TouchType::DOWN;
+            events.push_back(point);
+            return;
+        case AceActionData::ActionType::MOVE:
+            point.type = TouchType::MOVE;
+            events.push_back(point);
+            return;
+        case AceActionData::ActionType::UP:
+            point.type = TouchType::UP;
+            events.push_back(point);
+            return;
+        case AceActionData::ActionType::UNKNOWN:
+        default:
+            return;
+    }
 }
 
 void UpdateTouchEvent(std::vector<TouchEvent>& events)

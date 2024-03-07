@@ -158,5 +158,9 @@
     {
         "first_introduced": "12",
         "name": "OH_NativeXComponent_SetNeedSoftKeyboard"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_RegisterOnTouchInterceptCallback"
     }
 ]

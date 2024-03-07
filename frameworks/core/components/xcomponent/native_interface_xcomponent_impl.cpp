@@ -278,3 +278,13 @@ int32_t OH_NativeXComponent::SetNeedSoftKeyboard(bool needSoftKeyboard)
     xcomponentImpl_->SetNeedSoftKeyboard(needSoftKeyboard);
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
+
+int32_t OH_NativeXComponent::RegisterOnTouchInterceptCallback(
+    HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event))
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    xcomponentImpl_->SetOnTouchInterceptCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
