@@ -58,6 +58,7 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t SUBSTR_LENGTH = 3;
 const char DIMENSION_UNIT_VP[] = "vp";
 const char FORM_COMPONENT_TAG[] = "FormComponent";
+constexpr int32_t SIZE_CHANGE_DUMP_SIZE = 5;
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -570,6 +571,18 @@ void FrameNode::DumpCommonInfo()
     }
 }
 
+void FrameNode::DumpOnSizeChangeInfo()
+{
+    for (auto it = onSizeChangeDumpInfos.rbegin(); it != onSizeChangeDumpInfos.rend(); ++it) {
+        DumpLog::GetInstance().AddDesc(std::string("onSizeChange Time: ")
+            .append(ConvertTimestampToStr(it->onSizeChangeTimeStamp))
+            .append(" lastFrameRect: ")
+            .append(it->lastFrameRect.ToString())
+            .append(" currFrameRect: ")
+            .append(it->currFrameRect.ToString()));
+    }
+}
+
 void FrameNode::DumpOverlayInfo()
 {
     if (!layoutProperty_->IsOverlayNode()) {
@@ -585,6 +598,7 @@ void FrameNode::DumpOverlayInfo()
 void FrameNode::DumpInfo()
 {
     DumpCommonInfo();
+    DumpOnSizeChangeInfo();
     if (pattern_) {
         pattern_->DumpInfo();
     }
@@ -596,6 +610,7 @@ void FrameNode::DumpInfo()
 void FrameNode::DumpAdvanceInfo()
 {
     DumpCommonInfo();
+    DumpOnSizeChangeInfo();
     if (pattern_) {
         pattern_->DumpInfo();
         pattern_->DumpAdvanceInfo();
@@ -1033,6 +1048,11 @@ void FrameNode::TriggerOnSizeChangeCallback()
     if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
         if (currFrameRect != *lastFrameNodeRect_) {
+            onSizeChangeDumpInfo dumpInfo { GetCurrentTimestamp(), *lastFrameNodeRect_, currFrameRect };
+            if (onSizeChangeDumpInfos.size() >= SIZE_CHANGE_DUMP_SIZE) {
+                onSizeChangeDumpInfos.erase(onSizeChangeDumpInfos.begin());
+            }
+            onSizeChangeDumpInfos.emplace_back(dumpInfo);
             eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
             *lastFrameNodeRect_ = currFrameRect;
         }

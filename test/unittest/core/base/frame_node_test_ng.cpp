@@ -2517,4 +2517,71 @@ HWTEST_F(FrameNodeTestNg, FindChildByNameTest002, TestSize.Level1)
     auto noHaveResult = FrameNode::FindChildByName(nodeParent, nodeTwoChildName);
     EXPECT_EQ(noHaveResult, nullptr);
 }
+
+/**
+ * @tc.name: SetOnSizeChangeCallback001
+ * @tc.desc: Test SetOnSizeChangeCallback 
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, SetOnSizeChangeCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build a object to SetOnSizeChangeCallback
+     * @tc.expected: expect cover branch lastFrameNodeRect_ non null and function is run ok.
+     */
+    OnSizeChangedFunc callback = [](const RectF& oldRect, const RectF& rect) {};
+    FRAME_NODE2->SetOnSizeChangeCallback(std::move(callback));
+    EXPECT_NE(FRAME_NODE2->lastFrameNodeRect_, nullptr);
+    auto eventHub = FRAME_NODE2->GetEventHub<NG::EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    EXPECT_TRUE(eventHub->HasOnSizeChanged());
+
+    /**
+     * @tc.steps: step2.test while callback is nullptr
+     * @tc.expected:expect cover branch lastFrameNodeRect_ non null and function is run ok.
+     */
+    FRAME_NODE2->lastFrameNodeRect_ = std::make_unique<RectF>();
+    FRAME_NODE2->SetOnSizeChangeCallback(nullptr);
+    EXPECT_NE(FRAME_NODE2->lastFrameNodeRect_, nullptr);
+    EXPECT_NE(eventHub, nullptr);
+    EXPECT_FALSE(eventHub->HasOnSizeChanged());
+}
+
+/**
+ * @tc.name: TriggerOnSizeChangeCallback001
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TriggerOnSizeChangeCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set a flag and init a callback(onSizeChanged)
+     */
+    bool flag = false;
+    OnSizeChangedFunc onSizeChanged = [&flag](const RectF& oldRect, const RectF& rect) { flag = !flag; };
+
+    /**
+     * @tc.steps: step2. call TriggerOnSizeChangeCallback before set callback
+     * @tc.expected: expect flag is still false
+     */
+    FRAME_NODE2->TriggerOnSizeChangeCallback();
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step3.set callback and release lastFrameNodeRect_
+     * @tc.expected: expect flag is still false
+     */
+    FRAME_NODE2->eventHub_->SetOnSizeChanged(std::move(onSizeChanged));
+    FRAME_NODE2->lastFrameNodeRect_ = nullptr;
+    FRAME_NODE2->TriggerOnSizeChangeCallback();
+    EXPECT_FALSE(flag);
+
+    /**
+     * @tc.steps: step4.set lastFrameNodeRect_
+     * @tc.expected: expect flag is still false
+     */
+    FRAME_NODE2->lastFrameNodeRect_ = std::make_unique<RectF>();
+    FRAME_NODE2->TriggerOnSizeChangeCallback();
+    EXPECT_FALSE(flag);
+}
 } // namespace OHOS::Ace::NG
