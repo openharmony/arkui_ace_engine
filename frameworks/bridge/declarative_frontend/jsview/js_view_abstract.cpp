@@ -6655,6 +6655,7 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
         JSRef<JSVal> positionY = lightSource->GetProperty("positionY");
         JSRef<JSVal> positionZ = lightSource->GetProperty("positionZ");
         JSRef<JSVal> intensity = lightSource->GetProperty("intensity");
+        JSRef<JSVal> color = lightSource->GetProperty("color");
 
         CalcDimension dimPositionX, dimPositionY, dimPositionZ;
         if (ParseJsDimensionVp(positionX, dimPositionX) && ParseJsDimensionVp(positionY, dimPositionY) &&
@@ -6665,6 +6666,11 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
         if (intensity->IsNumber()) {
             float intensityValue = intensity->ToNumber<float>();
             ViewAbstractModel::GetInstance()->SetLightIntensity(intensityValue);
+        }
+
+        Color lightColor;
+        if (ParseJsColor(color, lightColor)) {
+            ViewAbstractModel::GetInstance()->SetLightColor(lightColor);
         }
     }
 
