@@ -357,9 +357,6 @@ export struct AlertDialog {
   primaryButton?: ButtonOptions | null = null;
   secondaryButton?: ButtonOptions | null = null;
   buttons?: ButtonOptions[] | undefined = undefined;
-  @State textAlignment: TextAlign = TextAlign.Start;
-  @State textMarginOffset: number = 0;
-  @State marginOffset: number = 0;
 
   build() {
     CustomDialogContentComponent({
@@ -380,21 +377,19 @@ export struct AlertDialog {
           .fontWeight(FontWeight.Medium)
           .fontColor($r('sys.color.font_primary'))
           .margin({ right: $r('sys.float.padding_level8'), })
-          .width(`calc(100% - ${this.textMarginOffset}vp)`)
-          .textAlign(this.textAlignment)
+          .width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`)
+          .textAlign(this.getTextAlign())
       }
       .width('100%')
     }
-    .margin({ right: `${this.marginOffset}vp`, })
+    .margin({ right: `${this.getMargin()}vp`, })
   }
 
   aboutToAppear(): void {
-    this.initTextAlign();
     this.initButtons();
-    this.initMargin();
   }
 
-  private initTextAlign(): void {
+  private getTextAlign(): TextAlign {
     let contentSize: SizeOptions = measure.measureTextSize({
       textContent: this.content,
       fontSize: $r('sys.float.Body_L'),
@@ -405,8 +400,9 @@ export struct AlertDialog {
     });
 
     if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
-      this.textAlignment = TextAlign.Center;
+      return TextAlign.Center;
     }
+    return TextAlign.Start;
   }
 
   private getTextHeight(textSize: SizeOptions): number {
@@ -429,9 +425,8 @@ export struct AlertDialog {
     }
   }
 
-  private initMargin(): void {
-    this.textMarginOffset = getNumberByResource('padding_level8');
-    this.marginOffset = 0 - this.textMarginOffset;
+  private getMargin(): number {
+    return 0 - getNumberByResource('padding_level8');
   }
 }
 
