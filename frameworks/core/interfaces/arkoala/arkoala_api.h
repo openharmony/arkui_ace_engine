@@ -3000,8 +3000,8 @@ struct ArkUIRenderNodeModifier {
 
 struct ArkUIFrameNodeModifier {
     ArkUI_Bool (*isModifiable)(ArkUINodeHandle node);
-    void (*appendChild)(ArkUINodeHandle node, ArkUINodeHandle child);
-    void (*insertChildAfter)(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling);
+    ArkUI_Bool (*appendChild)(ArkUINodeHandle node, ArkUINodeHandle child);
+    ArkUI_Bool (*insertChildAfter)(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling);
     void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*clearChildren)(ArkUINodeHandle node);
     ArkUI_Int32 (*getChildrenNumber)(ArkUINodeHandle node);

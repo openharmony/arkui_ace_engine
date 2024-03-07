@@ -26,26 +26,36 @@ ArkUI_Bool IsModifiable(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, false);
     return frameNode->GetTag() == "FrameNode";
 }
-void AppendChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
+ArkUI_Bool AppendChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(currentNode);
+    CHECK_NULL_RETURN(currentNode, true);
     auto* childNode = reinterpret_cast<UINode*>(child);
     auto childRef = Referenced::Claim<UINode>(childNode);
+    CHECK_NULL_RETURN(childRef, true);
+    if (childRef->GetParent() != nullptr && childRef->GetParent() != currentNode) {
+        return false;
+    }
     currentNode->AddChild(childRef);
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+    return true;
 }
 
-void InsertChildAfterInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling)
+ArkUI_Bool InsertChildAfterInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(currentNode);
+    CHECK_NULL_RETURN(currentNode, true);
     auto* childNode = reinterpret_cast<UINode*>(child);
+    CHECK_NULL_RETURN(childNode, true);
+    if (childNode->GetParent() != nullptr && childNode->GetParent() != currentNode) {
+        return false;
+    }
     auto index = -1;
     auto* siblingNode = reinterpret_cast<UINode*>(sibling);
     index = currentNode->GetChildIndex(Referenced::Claim<UINode>(siblingNode));
     currentNode->AddChild(Referenced::Claim<UINode>(childNode), index + 1);
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+    return true;
 }
 
 void RemoveChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
