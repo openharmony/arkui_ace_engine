@@ -39,7 +39,7 @@ using BeginListFlingFunc = void (*)();
 using EndListFlingFunc = void (*)();
 using FlushBeginFunc = void (*)();
 using FlushEndFunc = void (*)();
-using SetFrameParamFunc = void(*)(int, int, int, int);
+using SetFrameParamFunc = void (*)(int, int, int, int);
 
 class ACE_EXPORT FrameReport final {
 public:
