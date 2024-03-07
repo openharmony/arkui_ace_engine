@@ -1210,6 +1210,7 @@ void XComponentPattern::OnWindowHide()
         return;
     }
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
+        CHECK_NULL_VOID(renderSurface_);
         NativeSurfaceHide();
         renderSurface_->releaseSurfaceBuffers();
         hasReleasedSurface_ = true;
