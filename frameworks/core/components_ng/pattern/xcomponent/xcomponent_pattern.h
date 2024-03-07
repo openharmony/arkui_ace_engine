@@ -355,9 +355,9 @@ private:
     // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     uint64_t exportTextureSurfaceId_ = 0U;
+    bool hasReleasedSurface_ = false;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
-    bool hasReleasedSurface_ = false;
 #endif
 };
 } // namespace OHOS::Ace::NG
