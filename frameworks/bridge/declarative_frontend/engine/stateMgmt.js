@@ -3740,7 +3740,6 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     constructor(subscriber, viewName) {
         super(subscriber, viewName);
         this.owningView_ = undefined;
-        this.dependentElementIds_ = new Set();
         // when owning ViewPU is inActive, delay notifying changes
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
         // install when current value is ObservedObject and the value type is not using compatibility mode
@@ -3796,8 +3795,8 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         result += "\n  }";
         return result;
     }
-    debugInfoDependentElmtIds() {
-        return this.dependentElmtIdsByProperty_.dumpInfoDependencies();
+    debugInfoDependentElmtIds(dumpDependantElements = false) {
+        return this.dependentElmtIdsByProperty_.dumpInfoDependencies(this.owningView_, dumpDependantElements);
     }
     debugInfoElmtId(elmtId) {
         if (this.owningView_) {
@@ -3807,7 +3806,9 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     }
     debugInfoDependentComponents() {
         let result = `|--Dependent elements: `;
-        let sepa = "";
+        let sepa = "; ";
+        let sepaDiff = "";
+        const dumpDependantElements = true;
         let queue = [this];
         let seen = new Set();
         while (queue.length) {
@@ -3815,15 +3816,9 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             seen.add(item);
             if (item != this) {
                 result += `${sepa}${item.debugInfoOwningView()}`;
-                sepa = ", ";
             }
-            if (item.owningView_) {
-                item.dependentElementIds_.forEach((elmtId) => {
-                    const owningViewInfo = item.owningView_.debugInfoElmtId(elmtId);
-                    result += `${owningViewInfo ? sepa : ""}${owningViewInfo}`;
-                    sepa = ", ";
-                });
-            }
+            result += `${sepaDiff}${item.debugInfoDependentElmtIds(dumpDependantElements)}`; // new dependent elements
+            sepaDiff = ", ";
             item.subscriberRefs_.forEach((subscriber) => {
                 if ((subscriber instanceof ObservedPropertyAbstractPU)) {
                     if (!seen.has(subscriber)) {
@@ -4164,10 +4159,14 @@ class PropertyDependencies {
         
         return dependentElmtIds;
     }
-    dumpInfoDependencies() {
-        let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))} \n`;
+    dumpInfoDependencies(owningView = undefined, dumpDependantElements) {
+        const formatElmtId = owningView ? (elmtId => owningView.debugInfoElmtId(elmtId)) : (elmtId => elmtId);
+        let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${Array.from(this.propertyDependencies_).map(formatElmtId).join(', ')}`;
+        const arr = Array.from(this.propertyDependencies_).map(formatElmtId);
+        if (dumpDependantElements)
+            return (arr.length > 1 ? arr.join(', ') : arr[0]);
         this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
-            result += `  property '@Track ${propertyName}' change affects elmtIds: ${JSON.stringify(Array.from(propertyElmtId))} \n`;
+            result += `  property '@Track ${propertyName}' change affects elmtIds: ${Array.from(propertyElmtId).map(formatElmtId).join(', ')}`;
         });
         return result;
     }
