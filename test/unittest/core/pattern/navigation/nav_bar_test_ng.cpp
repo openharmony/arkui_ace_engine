@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
+#include "core/components_ng/pattern/navigation/inner_navigation_controller.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
@@ -834,5 +835,935 @@ HWTEST_F(NavBarTestNg, NavBarPattern011, TestSize.Level1)
     info.SetSourceDevice(SourceType::TOUCH);
     firstClickListener->callback_(info);
     EXPECT_FALSE(isClick);
+}
+
+/**
+ * @tc.name: NavBarNode001
+ * @tc.desc: Test GetTitleString function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarNode001, TestSize.Level1)
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
+    RefPtr<NavBarNode> navBarNode = barNode->GetOrCreateNavBarNode(barTag, nodeId, nullptr);
+    EXPECT_NE(navBarNode, nullptr);
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    titleBarNode->SetTitle(frameNode);
+    navBarNode->SetTitleBarNode(titleBarNode);
+    EXPECT_EQ(navBarNode->GetTitleString(), "");
+}
+
+/**
+ * @tc.name: NavBarNode002
+ * @tc.desc: Test GetTitleString function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarNode002, TestSize.Level1)
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
+    RefPtr<NavBarNode> navBarNode = barNode->GetOrCreateNavBarNode(barTag, nodeId, nullptr);
+    EXPECT_NE(navBarNode, nullptr);
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    frameNode->tag_ = V2::TEXT_ETS_TAG;
+    titleBarNode->SetTitle(frameNode);
+    navBarNode->SetTitleBarNode(titleBarNode);
+    EXPECT_EQ(navBarNode->GetTitleString(), "");
+}
+
+/**
+ * @tc.name: NavBarNode003
+ * @tc.desc: Test GetSubtitleString function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarNode003, TestSize.Level1)
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
+    RefPtr<NavBarNode> navBarNode = barNode->GetOrCreateNavBarNode(barTag, nodeId, nullptr);
+    EXPECT_NE(navBarNode, nullptr);
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    titleBarNode->SetSubtitle(frameNode);
+    navBarNode->SetTitleBarNode(titleBarNode);
+    EXPECT_EQ(navBarNode->GetSubtitleString(), "");
+}
+
+/**
+ * @tc.name: NavBarNode004
+ * @tc.desc: Test GetSubtitleString function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarNode004, TestSize.Level1)
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
+    RefPtr<NavBarNode> navBarNode = barNode->GetOrCreateNavBarNode(barTag, nodeId, nullptr);
+    EXPECT_NE(navBarNode, nullptr);
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    frameNode->tag_ = V2::TEXT_ETS_TAG;
+    titleBarNode->SetSubtitle(frameNode);
+    navBarNode->SetTitleBarNode(titleBarNode);
+    EXPECT_EQ(navBarNode->GetSubtitleString(), "");
+}
+
+/**
+ * @tc.name: NavBarNode005
+ * @tc.desc: Test AddChildToGroup function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarNode005, TestSize.Level1)
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
+    RefPtr<NavBarNode> navBarNode = barNode->GetOrCreateNavBarNode(barTag, nodeId, nullptr);
+    EXPECT_NE(navBarNode, nullptr);
+    navBarNode->pattern_ = AceType::MakeRefPtr<NavigationPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    navBarNode->SetNavBarContentNode(frameNode);
+    navBarNode->AddChildToGroup(nullptr);
+}
+
+/**
+ * @tc.name: NavBarNode006
+ * @tc.desc: Test AddChildToGroup function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarNode006, TestSize.Level1)
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
+    RefPtr<NavBarNode> navBarNode = barNode->GetOrCreateNavBarNode(barTag, nodeId, nullptr);
+    EXPECT_NE(navBarNode, nullptr);
+    navBarNode->pattern_ = AceType::MakeRefPtr<NavigationPattern>();
+    navBarNode->AddChildToGroup(nullptr);
+}
+
+/**
+ * @tc.name: NavBarPattern012
+ * @tc.desc: Test OnCoordScrollStart function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern012, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navBarPattern = frameNode->GetPattern<NavBarPattern>();
+    EXPECT_NE(navBarPattern, nullptr);
+    navBarPattern->isHideTitlebar_ = true;
+    navBarPattern->titleMode_ = NavigationTitleMode::MINI;
+    navBarPattern->OnCoordScrollStart();
+}
+
+/**
+ * @tc.name: NavBarPattern013
+ * @tc.desc: Test OnCoordScrollStart function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern013, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navBarPattern = frameNode->GetPattern<NavBarPattern>();
+    EXPECT_NE(navBarPattern, nullptr);
+    navBarPattern->isHideTitlebar_ = false;
+    navBarPattern->titleMode_ = NavigationTitleMode::FREE;
+    navBarPattern->OnCoordScrollStart();
+}
+
+/**
+ * @tc.name: NavBarPattern014
+ * @tc.desc: Test OnCoordScrollUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern014, TestSize.Level1)
+{
+    float offset = 0.001;
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navBarPattern = frameNode->GetPattern<NavBarPattern>();
+    EXPECT_NE(navBarPattern, nullptr);
+    navBarPattern->isHideTitlebar_ = true;
+    navBarPattern->titleMode_ = NavigationTitleMode::MINI;
+    navBarPattern->OnCoordScrollUpdate(offset);
+}
+
+/**
+ * @tc.name: NavBarPattern015
+ * @tc.desc: Test OnCoordScrollUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern015, TestSize.Level1)
+{
+    float offset = 0.001;
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navBarPattern = frameNode->GetPattern<NavBarPattern>();
+    EXPECT_NE(navBarPattern, nullptr);
+    navBarPattern->isHideTitlebar_ = false;
+    navBarPattern->titleMode_ = NavigationTitleMode::FREE;
+    navBarPattern->OnCoordScrollUpdate(offset);
+}
+
+/**
+ * @tc.name: NavBarPattern016
+ * @tc.desc: Test OnCoordScrollEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern016, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navBarPattern = frameNode->GetPattern<NavBarPattern>();
+    EXPECT_NE(navBarPattern, nullptr);
+    navBarPattern->isHideTitlebar_ = true;
+    navBarPattern->titleMode_ = NavigationTitleMode::MINI;
+    navBarPattern->OnCoordScrollEnd();
+}
+
+/**
+ * @tc.name: NavBarPattern017
+ * @tc.desc: Test OnCoordScrollEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern017, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navBarPattern = frameNode->GetPattern<NavBarPattern>();
+    EXPECT_NE(navBarPattern, nullptr);
+    navBarPattern->isHideTitlebar_ = false;
+    navBarPattern->titleMode_ = NavigationTitleMode::FREE;
+    navBarPattern->OnCoordScrollEnd();
+}
+
+/**
+ * @tc.name: NavBarPattern018
+ * @tc.desc: Test OnCoordScrollEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern018, TestSize.Level1)
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
+        barTag, navBarNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::NavBarPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarpattern = navBarNode->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarpattern, nullptr);
+
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    navBarNode->SetNavBarContentNode(frameNode);
+
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    EXPECT_NE(navBarLayoutProperty, nullptr);
+    navBarLayoutProperty->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+
+    navBarpattern->OnModifyDone();
+}
+
+/**
+ * @tc.name: NavBarPattern019
+ * @tc.desc: Test OnCoordScrollEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern019, TestSize.Level1)
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
+        barTag, navBarNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::NavBarPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarpattern = navBarNode->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarpattern, nullptr);
+
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    EXPECT_NE(navBarLayoutProperty, nullptr);
+    navBarLayoutProperty->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_NONE, .edges = SAFE_AREA_EDGE_NONE });
+
+    navBarpattern->OnModifyDone();
+}
+
+/**
+ * @tc.name: NavBarPattern020
+ * @tc.desc: Test OnCoordScrollEnd function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern020, TestSize.Level1)
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
+        barTag, navBarNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::NavBarPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarpattern = navBarNode->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarpattern, nullptr);
+
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    EXPECT_NE(navBarLayoutProperty, nullptr);
+
+    navBarpattern->OnModifyDone();
+}
+
+/**
+ * @tc.name: NavBarPattern021
+ * @tc.desc: Test InitPanEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern021, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navBarPattern = frameNode->GetPattern<NavBarPattern>();
+    EXPECT_NE(navBarPattern, nullptr);
+    navBarPattern->isHideTitlebar_ = true;
+    navBarPattern->titleMode_ = NavigationTitleMode::MINI;
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    navBarPattern->InitPanEvent(gestureHub);
+}
+
+/**
+ * @tc.name: InnerNavigationController001
+ * @tc.desc: Test InitPanEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    EXPECT_EQ(innerNavigationController->GetTopHandle(), RET_OK);
+}
+
+/**
+ * @tc.name: InnerNavigationController002
+ * @tc.desc: Test InitPanEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", frameNode));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    EXPECT_EQ(innerNavigationController->GetTopHandle(), RET_OK);
+}
+
+/**
+ * @tc.name: InnerNavigationController003
+ * @tc.desc: Test SetInPIPMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageTwo", frameNode));
+    navigationPattern->navigationStack_->cacheNodes_ = navPathList;
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    int32_t handle = 0;
+    innerNavigationController->SetInPIPMode(handle);
+}
+
+/**
+ * @tc.name: InnerNavigationController004
+ * @tc.desc: Test SetInPIPMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", frameNode));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    int32_t handle = 33;
+    innerNavigationController->SetInPIPMode(handle);
+}
+
+/**
+ * @tc.name: InnerNavigationController005
+ * @tc.desc: Test SetInPIPMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController005, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageFour", nullptr));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    int32_t handle = 33;
+    innerNavigationController->SetInPIPMode(handle);
+}
+
+/**
+ * @tc.name: InnerNavigationController006
+ * @tc.desc: Test SetInPIPMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController006, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageThree", frameNode));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    int32_t handle = 2;
+    innerNavigationController->SetInPIPMode(handle);
+}
+
+/**
+ * @tc.name: InnerNavigationController007
+ * @tc.desc: Test PopInPIP function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController007, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    bool destroy = true;
+    innerNavigationController->PopInPIP(destroy);
+}
+
+/**
+ * @tc.name: InnerNavigationController008
+ * @tc.desc: Test PopInPIP function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController008, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", frameNode));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    bool destroy = true;
+    innerNavigationController->PopInPIP(destroy);
+}
+
+/**
+ * @tc.name: InnerNavigationController009
+ * @tc.desc: Test PopInPIP function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController009, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", nullptr));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    bool destroy = false;
+    innerNavigationController->PopInPIP(destroy);
+}
+
+/**
+ * @tc.name: InnerNavigationController010
+ * @tc.desc: Test PushInPIP function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController010, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    int32_t handle = 0;
+    innerNavigationController->PushInPIP(handle);
+}
+
+/**
+ * @tc.name: InnerNavigationController012
+ * @tc.desc: Test PushInPIP function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController012, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageThree", frameNode));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    int32_t handle = 33;
+    innerNavigationController->PushInPIP(handle);
+}
+
+/**
+ * @tc.name: InnerNavigationController013
+ * @tc.desc: Test PushInPIP function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController013, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageThree", nullptr));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    int32_t handle = 33;
+    innerNavigationController->PushInPIP(handle);
+}
+
+/**
+ * @tc.name: InnerNavigationController014
+ * @tc.desc: Test PushInPIP function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, InnerNavigationController014, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageThree", frameNode));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+    auto innerNavigationController = navigationPattern->navigationController_;
+    EXPECT_NE(innerNavigationController, nullptr);
+    int32_t handle = 0;
+    innerNavigationController->PushInPIP(handle);
+}
+
+/**
+ * @tc.name: NavigationStack001
+ * @tc.desc: Test GetFromPreBackup function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack001, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    std::string name = "pageOne";
+    EXPECT_EQ(navigationStack->GetFromPreBackup(name), nullptr);
+}
+
+/**
+ * @tc.name: NavigationStack002
+ * @tc.desc: Test GetFromPreBackup function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack002, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageThree", frameNode));
+    navigationStack->SetNavPathList(navPathList);
+    std::string name = "pageOne";
+    EXPECT_EQ(navigationStack->GetFromPreBackup(name), nullptr);
+}
+
+/**
+ * @tc.name: NavigationStack003
+ * @tc.desc: Test AddCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack003, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    std::string name = "";
+    auto frameNode = nullptr;
+    navigationStack->AddCacheNode(name, frameNode);
+}
+
+/**
+ * @tc.name: NavigationStack004
+ * @tc.desc: Test AddCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack004, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    std::string name = "pageOne";
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    navigationStack->AddCacheNode(name, tempNode);
+}
+
+/**
+ * @tc.name: NavigationStack005
+ * @tc.desc: Test RemoveCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack005, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    int32_t handle = 0;
+    navigationStack->RemoveCacheNode(handle);
+}
+
+/**
+ * @tc.name: NavigationStack006
+ * @tc.desc: Test RemoveCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack006, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    int32_t handle = 2;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageThree", tempNode));
+    navigationStack->cacheNodes_ = navPathList;
+    navigationStack->RemoveCacheNode(handle);
+}
+
+/**
+ * @tc.name: NavigationStack007
+ * @tc.desc: Test RemoveCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack007, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    int32_t handle = 44;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageThree", tempNode));
+    navigationStack->cacheNodes_ = navPathList;
+    navigationStack->RemoveCacheNode(handle);
+}
+
+/**
+ * @tc.name: NavigationStack008
+ * @tc.desc: Test RemoveCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack008, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    NavPathList cacheNodes;
+    std::string name = "";
+    navigationStack->RemoveCacheNode(cacheNodes, name, nullptr);
+}
+
+/**
+ * @tc.name: NavigationStack009
+ * @tc.desc: Test RemoveCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack009, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    cacheNodes.emplace_back(std::make_pair("pageThree", tempNode));
+    std::string name = "pageThree";
+    navigationStack->RemoveCacheNode(cacheNodes, name, tempNode);
+}
+
+/**
+ * @tc.name: NavigationStack010
+ * @tc.desc: Test RemoveCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack010, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    cacheNodes.emplace_back(std::make_pair("pageThree", tempNode));
+    std::string name = "pageOne";
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    navigationStack->RemoveCacheNode(cacheNodes, name, frameNode);
+}
+
+/**
+ * @tc.name: NavigationStack011
+ * @tc.desc: Test ReOrderCache function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack011, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    std::string name = "";
+    navigationStack->ReOrderCache(name, nullptr);
+}
+
+/**
+ * @tc.name: NavigationStack012
+ * @tc.desc: Test ReOrderCache function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack012, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    std::string name = "pageOne";
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+
+    NavPathList cacheNodes;
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    cacheNodes.emplace_back(std::make_pair("pageThree", frameNode));
+    navigationStack->cacheNodes_ = cacheNodes;
+    navigationStack->ReOrderCache(name, tempNode);
+}
+
+/**
+ * @tc.name: NavigationStack013
+ * @tc.desc: Test ReOrderCache function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack013, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    std::string name = "pageOne";
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+
+    NavPathList cacheNodes;
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationStack->cacheNodes_ = cacheNodes;
+    navigationStack->ReOrderCache(name, tempNode);
+}
+
+/**
+ * @tc.name: NavigationStack014
+ * @tc.desc: Test GetFromCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack014, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    NavPathList cacheNodes;
+    std::string name = "";
+    EXPECT_EQ(navigationStack->GetFromCacheNode(cacheNodes, name), nullptr);
+}
+
+/**
+ * @tc.name: NavigationStack015
+ * @tc.desc: Test GetFromCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack015, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    std::string name = "pageOne";
+    EXPECT_NE(navigationStack->GetFromCacheNode(cacheNodes, name), nullptr);
+}
+
+/**
+ * @tc.name: NavigationStack016
+ * @tc.desc: Test GetFromCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack016, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    std::string name = "pageThree";
+    EXPECT_EQ(navigationStack->GetFromCacheNode(cacheNodes, name), nullptr);
+}
+
+/**
+ * @tc.name: NavigationStack017
+ * @tc.desc: Test GetFromCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack017, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    std::string name = "";
+    EXPECT_EQ(navigationStack->GetFromCacheNode(name), nullptr);
+}
+
+/**
+ * @tc.name: NavigationStack018
+ * @tc.desc: Test GetFromCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack018, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    std::string name = "pageOne";
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+
+    NavPathList cacheNodes;
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationStack->cacheNodes_ = cacheNodes;
+    EXPECT_NE(navigationStack->GetFromCacheNode(name), nullptr);
+}
+
+/**
+ * @tc.name: NavigationStack019
+ * @tc.desc: Test GetFromCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack019, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    std::string name = "pageTwo";
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+
+    NavPathList cacheNodes;
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationStack->cacheNodes_ = cacheNodes;
+    EXPECT_EQ(navigationStack->GetFromCacheNode(name), nullptr);
+}
+
+/**
+ * @tc.name: NavigationStack020
+ * @tc.desc: Test GetFromCacheNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack020, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+
+    NavPathList cacheNodes;
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationStack->cacheNodes_ = cacheNodes;
+    int32_t handle = 44;
+    EXPECT_NE(navigationStack->GetFromCacheNode(handle), std::nullopt);
 }
 } // namespace OHOS::Ace::NG
