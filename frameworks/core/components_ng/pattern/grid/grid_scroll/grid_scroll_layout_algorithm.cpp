@@ -63,8 +63,6 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Step2: Measure children that can be displayed in viewport of Grid
     float mainSize = GetMainAxisSize(idealSize, axis);
     float crossSize = GetCrossAxisSize(idealSize, axis);
-    canSkipMeasure_ = (gridLayoutInfo_.lastCrossSize_ == crossSize) && (gridLayoutInfo_.lastMainSize_ == mainSize) &&
-        (gridLayoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_MEASURE_SELF);
     if (!NearEqual(mainSize, gridLayoutInfo_.lastMainSize_)) {
         gridLayoutInfo_.ResetPositionFlags();
         UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
@@ -1649,16 +1647,29 @@ int32_t GridScrollLayoutAlgorithm::MeasureChildPlaced(const SizeF& frameSize, in
     return crossSpan;
 }
 
+bool GridScrollLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper,
+    const LayoutConstraintF& layoutConstraint) const
+{
+    if (layoutWrapper->CheckNeedForceMeasureAndLayout()) {
+        return true;
+    }
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+    auto constraint = geometryNode->GetParentLayoutConstraint();
+    CHECK_NULL_RETURN(constraint, true);
+    return constraint.value() != layoutConstraint;
+}
+
 void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const SizeF& frameSize,
     const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t crossStart, int32_t crossSpan)
 {
-    if (canSkipMeasure_ && !childLayoutWrapper->CheckNeedForceMeasureAndLayout()) {
-        return;
-    }
     auto gridLayoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto mainSize = GetMainAxisSize(frameSize, gridLayoutInfo_.axis_);
     auto crossSize = GetCrossAxisSize(frameSize, gridLayoutInfo_.axis_);
     auto childConstraint = CreateChildConstraint(mainSize, crossSize, gridLayoutProperty, crossStart, crossSpan);
+    if (!CheckNeedMeasure(childLayoutWrapper, childConstraint)) {
+        return;
+    }
     auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
     if (!childLayoutProperty) {
         childLayoutWrapper->Measure(childConstraint);

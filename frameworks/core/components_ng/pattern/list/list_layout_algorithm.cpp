@@ -134,7 +134,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
         // calculate child layout constraint.
         UpdateListItemConstraint(axis_, contentIdealSize, childLayoutConstraint_);
-        constraintChanged_ = IsConstraintChanged(layoutWrapper);
         MeasureList(layoutWrapper);
     } else {
         itemPosition_.clear();
@@ -169,13 +168,16 @@ void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t ca
     layoutWrapper->SetCacheCount(cacheCount);
 }
 
-bool ListLayoutAlgorithm::IsConstraintChanged(LayoutWrapper* layoutWrapper) const
+bool ListLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto pattern = host->GetPattern<ListPattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    return pattern->GetLayoutConstraint() != childLayoutConstraint_;
+    if (layoutWrapper->CheckNeedForceMeasureAndLayout()) {
+        return true;
+    }
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+    auto constraint = geometryNode->GetParentLayoutConstraint();
+    CHECK_NULL_RETURN(constraint, true);
+    return constraint.value() != childLayoutConstraint_;
 }
 
 float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis) const
@@ -804,7 +806,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
         SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
         wrapper->Measure(childLayoutConstraint_);
-    } else if (constraintChanged_ || wrapper->CheckNeedForceMeasureAndLayout()) {
+    } else if (CheckNeedMeasure(wrapper)) {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
         wrapper->Measure(childLayoutConstraint_);
     }
@@ -831,7 +833,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
         SetListItemGroupParam(wrapper, currentIndex, endPos, false, listLayoutProperty, false);
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
         wrapper->Measure(childLayoutConstraint_);
-    } else if (constraintChanged_ || wrapper->CheckNeedForceMeasureAndLayout()) {
+    } else if (CheckNeedMeasure(wrapper)) {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
         wrapper->Measure(childLayoutConstraint_);
     }
@@ -1466,7 +1468,7 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     for (int32_t i = 0; i < cacheCount && currIndex + i < totalItemCount_; i++) {
         int32_t index = currIndex + i;
         auto wrapper = layoutWrapper->GetChildByIndex(index);
-        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+        if (!wrapper || CheckNeedMeasure(wrapper)) {
             predictBuildList.emplace_back(index);
             continue;
         }
@@ -1487,7 +1489,7 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     for (int32_t i = 0; i < cacheCount && currIndex - i >= 0; i++) {
         int32_t index = currIndex - i;
         auto wrapper = layoutWrapper->GetChildByIndex(index);
-        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+        if (!wrapper || CheckNeedMeasure(wrapper)) {
             predictBuildList.emplace_back(index);
             continue;
         }

@@ -210,11 +210,6 @@ public:
         return layoutedItemInfo_;
     }
 
-    const LayoutConstraintF& GetLayoutConstraint() const
-    {
-        return childLayoutConstraint_;
-    }
-
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
 
 private:
@@ -263,7 +258,7 @@ private:
     bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);
     float GetListItemGroupMaxWidth(const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty);
     void AdjustItemPosition();
-    bool IsConstraintChanged(LayoutWrapper* layoutWrapper) const;
+    bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
 
     bool isCardStyle_ = false;
     int32_t headerIndex_;
@@ -301,7 +296,6 @@ private:
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;
-    bool constraintChanged_ = true;
 };
 } // namespace OHOS::Ace::NG
 

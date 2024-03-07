@@ -102,7 +102,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
             SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
             wrapper->Measure(groupLayoutConstraint_);
-        } else if (constraintChanged_ || wrapper->CheckNeedForceMeasureAndLayout()) {
+        } else if (CheckNeedMeasure(wrapper)) {
             if (wrapper->GetHostNode()) {
                 ACE_SCOPED_TRACE("[MeasureListForwardItem:%d][self:%d][parent:%d]", currentIndex,
                     wrapper->GetHostNode()->GetId(), wrapper->GetHostNode()->GetParent() ?
@@ -162,7 +162,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
             SetListItemGroupParam(wrapper, currentIndex, endPos, false, listLayoutProperty, false);
             wrapper->Measure(groupLayoutConstraint_);
-        } else if (constraintChanged_ || wrapper->CheckNeedForceMeasureAndLayout()) {
+        } else if (CheckNeedMeasure(wrapper)) {
             if (wrapper->GetHostNode()) {
                 ACE_SCOPED_TRACE("[MeasureListBackwardItem:%d][self:%d][parent:%d]", currentIndex,
                     wrapper->GetHostNode()->GetId(), wrapper->GetHostNode()->GetParent() ?
@@ -392,7 +392,7 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineForward(LayoutWrap
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (int32_t i = 0; i < lanes && index + i <= GetMaxListItemIndex(); i++) {
         auto wrapper = layoutWrapper->GetChildByIndex(index + i);
-        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+        if (!wrapper || CheckNeedMeasure(wrapper)) {
             predictBuildList.emplace_back(index + i);
             continue;
         }
@@ -441,7 +441,7 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineBackward(LayoutWra
     for (int32_t i = 0; i < lanes && index >= 0; i++) {
         auto idx = index - i;
         auto wrapper = layoutWrapper->GetChildByIndex(idx);
-        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+        if (!wrapper || CheckNeedMeasure(wrapper)) {
             predictBuildList.emplace_back(idx);
             continue;
         }
