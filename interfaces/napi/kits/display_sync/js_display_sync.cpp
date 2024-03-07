@@ -163,7 +163,7 @@ napi_value JSSetExpectedFrameRateRange(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
 
-    uiDisplaySync->SetExpectedFrameRateRange(std::move(frameRateRange));
+    uiDisplaySync->SetExpectedFrameRateRange(frameRateRange);
     return NapiGetUndefined(env);
 }
 
@@ -261,6 +261,7 @@ void DisplaySync::UnregisterOnFrameCallback(napi_env env, size_t argc, napi_ref&
 {
     if (argc >= 1) {
         napi_delete_reference(env, onFrameRef);
+        onFrameRef = nullptr;
         GetUIDisplaySync()->UnregisterOnFrame();
     }
     return;
