@@ -354,6 +354,14 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
 #endif
 }
 
+void RosenRenderSurface::releaseSurfaceBuffers()
+{
+#ifdef OHOS_PLATFORM
+    CHECK_NULL_VOID(producerSurface_);
+    producerSurface_->CleanCache();
+#endif
+}
+
 void RosenRenderSurface::DrawBufferForXComponent(
     RSCanvas& canvas, float width, float height, float offsetX, float offsetY)
 {

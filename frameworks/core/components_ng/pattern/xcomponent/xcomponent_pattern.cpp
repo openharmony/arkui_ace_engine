@@ -37,7 +37,6 @@
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
-#include "core/components_ng/render/adapter/rosen_render_surface.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -1189,22 +1188,18 @@ void XComponentPattern::NativeSurfaceShow()
 
 void XComponentPattern::OnWindowHide()
 {
-#if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_PLATFORM)
     if (!hasXComponentInit_ || hasReleasedSurface_) {
         return;
     }
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         NativeSurfaceHide();
-        auto renderSurface = DynamicCast<RosenRenderSurface>(renderSurface_);
-        renderSurface->GetSurface()->CleanCache();
+        renderSurface_->releaseSurfaceBuffers();
         hasReleasedSurface_ = true;
     }
-#endif
 }
 
 void XComponentPattern::OnWindowShow()
 {
-#if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_PLATFORM)
     if (!hasXComponentInit_ || !hasReleasedSurface_) {
         return;
     }
@@ -1212,6 +1207,5 @@ void XComponentPattern::OnWindowShow()
         NativeSurfaceShow();
         hasReleasedSurface_ = false;
     }
-#endif
 }
 } // namespace OHOS::Ace::NG
