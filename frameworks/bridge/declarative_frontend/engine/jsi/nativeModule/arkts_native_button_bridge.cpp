@@ -527,7 +527,7 @@ ArkUINativeModuleValue ButtonBridge::SetButtonSize(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> heightArgs = runtimeCallInfo->GetCallArgRef(2); // 2:height value
     CalcDimension width;
     std::string widthStr;
-    if (widthArgs->IsUndefined() || widthArgs->IsNull()) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, widthArgs, width)) {
         widthStr = "undefined";
     } else {
         ArkTSUtils::ParseJsDimensionVp(vm, widthArgs, width);
@@ -535,10 +535,9 @@ ArkUINativeModuleValue ButtonBridge::SetButtonSize(ArkUIRuntimeCallInfo* runtime
     }
     CalcDimension height;
     std::string heightStr;
-    if (heightArgs->IsUndefined() || heightArgs->IsNull()) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, heightArgs, height)) {
         heightStr = "undefined";
     } else {
-        ArkTSUtils::ParseJsDimensionVp(vm, heightArgs, height);
         heightStr = std::to_string(height.Value());
     }
     GetArkUINodeModifiers()->getButtonModifier()->setButtonSize(nativeNode, widthStr.c_str(),

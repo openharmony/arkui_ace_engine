@@ -553,22 +553,13 @@ void JSButton::JsAspectRatio(const JSCallbackInfo& info)
 void JSButton::JsSize(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
+        JSViewAbstract::JsWidth(JSVal::Undefined());
+        JSViewAbstract::JsHeight(JSVal::Undefined());
         return;
     }
-
-    std::optional<CalcDimension> widthInfo;
-    std::optional<CalcDimension> heightInfo;
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    CalcDimension width;
-    if (ParseJsDimensionVp(sizeObj->GetProperty("width"), width)) {
-        widthInfo = width;
-    }
-    CalcDimension height;
-    if (ParseJsDimensionVp(sizeObj->GetProperty("height"), height)) {
-        heightInfo = height;
-    }
-
-    ButtonModel::GetInstance()->SetSize(widthInfo, heightInfo);
+    JSViewAbstract::JsWidth(sizeObj->GetProperty("width"));
+    JSViewAbstract::JsHeight(sizeObj->GetProperty("height"));
 }
 
 void JSButton::JsRadius(const JSCallbackInfo& info)

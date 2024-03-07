@@ -2201,9 +2201,10 @@ struct ArkUICheckboxGroupModifier {
     void (*resetCheckboxGroupUnSelectedColor)(ArkUINodeHandle node);
     void (*setCheckboxGroupSelectAll)(ArkUINodeHandle node, ArkUI_Bool isSelected);
     void (*resetCheckboxGroupSelectAll)(ArkUINodeHandle node);
-    void (*setCheckboxGroupWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setCheckboxGroupWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetCheckboxGroupWidth)(ArkUINodeHandle node);
-    void (*setCheckboxGroupHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setCheckboxGroupHeight)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetCheckboxGroupHeight)(ArkUINodeHandle node);
     void (*setCheckboxGroupMark)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue);
@@ -2784,9 +2785,9 @@ struct ArkUIRadioModifier {
     void (*setRadioStyle)(ArkUINodeHandle node, ArkUI_Uint32 checkedBackgroundColor, ArkUI_Uint32 uncheckedBorderColor,
         ArkUI_Uint32 indicatorColor);
     void (*resetRadioStyle)(ArkUINodeHandle node);
-    void (*setRadioWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Uint32 unit);
+    void (*setRadioWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetRadioWidth)(ArkUINodeHandle node);
-    void (*setRadioHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Uint32 unit);
+    void (*setRadioHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetRadioHeight)(ArkUINodeHandle node);
     void (*setRadioSize)(ArkUINodeHandle node, ArkUI_Float32 widthValue, ArkUI_Int32 widthUnit,
         ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit);

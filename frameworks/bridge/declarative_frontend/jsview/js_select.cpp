@@ -108,8 +108,6 @@ void JSSelect::JSBind(BindingTarget globalObj)
 
     // API7 onSelected deprecated
     JSClass<JSSelect>::StaticMethod("onSelected", &JSSelect::OnSelected, opt);
-    JSClass<JSSelect>::StaticMethod("width", &JSSelect::JsWidth);
-    JSClass<JSSelect>::StaticMethod("height", &JSSelect::JsHeight);
     JSClass<JSSelect>::StaticMethod("size", &JSSelect::JsSize);
     JSClass<JSSelect>::StaticMethod("padding", &JSSelect::JsPadding);
     JSClass<JSSelect>::StaticMethod("paddingTop", &JSSelect::SetPaddingTop, opt);
@@ -490,33 +488,6 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
-void JSSelect::JsWidth(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
-
-    SelectModel::GetInstance()->SetWidth(value);
-}
-
-void JSSelect::JsHeight(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-
-    CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
-
-    SelectModel::GetInstance()->SetHeight(value);
-}
-
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
 {
@@ -564,24 +535,14 @@ bool CheckJSCallbackInfo(
 
 void JSSelect::JsSize(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("JsSize", info, checkList)) {
+    if (!info[0]->IsObject()) {
+        JSViewAbstract::JsWidth(JSVal::Undefined());
+        JSViewAbstract::JsHeight(JSVal::Undefined());
         return;
     }
-
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-
-    CalcDimension width;
-    if (!ParseJsDimensionVp(sizeObj->GetProperty("width"), width)) {
-        return;
-    }
-
-    CalcDimension height;
-    if (!ParseJsDimensionVp(sizeObj->GetProperty("height"), height)) {
-        return;
-    }
-
-    SelectModel::GetInstance()->SetSize(width, height);
+    JSViewAbstract::JsWidth(sizeObj->GetProperty("width"));
+    JSViewAbstract::JsHeight(sizeObj->GetProperty("height"));
 }
 
 void JSSelect::JsPadding(const JSCallbackInfo& info)
@@ -761,15 +722,14 @@ bool JSSelect::IsPercentStr(std::string& percent)
 
 void JSSelect::SetOptionWidth(const JSCallbackInfo& info)
 {
-    SelectModel::GetInstance()->SetHasOptionWidth(true);
     CalcDimension value;
-    if (info[0]->IsUndefined()) {
-        LOGE("OptionWidth is undefined");
-        return;
-    } else if (info[0]->IsNull()) {
-        LOGE("OptionWidth is null");
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        LOGE("OptionWidth is null or undefined");
+        SelectModel::GetInstance()->SetHasOptionWidth(false);
+        SelectModel::GetInstance()->SetOptionWidth(value);
         return;
     } else if (info[0]->IsString()) {
+        SelectModel::GetInstance()->SetHasOptionWidth(true);
         std::string modeFlag = info[0]->ToString();
         if (modeFlag.compare("fit_content") == 0) {
             SelectModel::GetInstance()->SetOptionWidthFitTrigger(false);
@@ -786,6 +746,7 @@ void JSSelect::SetOptionWidth(const JSCallbackInfo& info)
             SelectModel::GetInstance()->SetOptionWidth(value);
         }
     } else {
+        SelectModel::GetInstance()->SetHasOptionWidth(true);
         ParseJsDimensionVpNG(info[0], value);
         if (value.IsNegative()) {
             value.Reset();

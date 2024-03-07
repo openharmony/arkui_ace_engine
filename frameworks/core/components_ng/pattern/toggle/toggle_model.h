@@ -47,7 +47,7 @@ public:
     virtual void OnChange(NG::ChangeEvent&& onChange) = 0;
     virtual void SetWidth(const Dimension& width) = 0;
     virtual void SetHeight(const Dimension& height) = 0;
-    virtual void SetBackgroundColor(const Color& color) = 0;
+    virtual void SetBackgroundColor(const Color& color, bool flag) {};
     virtual bool IsToggle() = 0;
     virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) = 0;
     virtual void OnChangeEvent(NG::ChangeEvent&& onChangeEvent) = 0;
