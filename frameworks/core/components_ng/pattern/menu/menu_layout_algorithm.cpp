@@ -729,8 +729,8 @@ void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenu(const RefPtr<Geometry
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
     float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
-    float screenHeight = wrapperSize_.Height();
-    if (!NearEqual(wrapperSize_.Height(), windowGlobalRect.Height())) {
+    float screenHeight = wrapperSize_.Height() + wrapperRect_.Top();
+    if (!NearEqual(screenHeight, windowGlobalRect.Height())) {
         screenHeight += bottom;
     }
     SizeF windowGlobalSizeF(windowGlobalRect.Width(), screenHeight - windowsOffsetY);
@@ -850,8 +850,8 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenu(const RefPtr<Geometry
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
     float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
-    float screenHeight = wrapperSize_.Height();
-    if (!NearEqual(wrapperSize_.Height(), windowGlobalRect.Height())) {
+    float screenHeight = wrapperSize_.Height() + wrapperRect_.Top();
+    if (!NearEqual(screenHeight, windowGlobalRect.Height())) {
         screenHeight += bottom;
     }
     SizeF windowGlobalSizeF(windowGlobalRect.Width(), screenHeight - windowsOffsetY);
@@ -1112,8 +1112,8 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenu(const RefPtr<Geo
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
     float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
-    float screenHeight = wrapperSize_.Height();
-    if (!NearEqual(wrapperSize_.Height(), windowGlobalRect.Height())) {
+    float screenHeight = wrapperSize_.Height() + wrapperRect_.Top();
+    if (!NearEqual(screenHeight, windowGlobalRect.Height())) {
         screenHeight += bottom;
     }
     SizeF windowGlobalSizeF(windowGlobalRect.Width(), screenHeight - windowsOffsetY);

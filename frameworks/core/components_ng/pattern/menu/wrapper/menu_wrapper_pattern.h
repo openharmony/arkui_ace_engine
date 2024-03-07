@@ -220,6 +220,10 @@ private:
     {
         return false;
     }
+    bool AvoidBottom() const override
+    {
+        return false;
+    }
     bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
     void OnAttachToFrameNode() override;
     void RegisterOnTouch();
