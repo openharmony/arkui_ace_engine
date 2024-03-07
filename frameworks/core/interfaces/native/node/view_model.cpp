@@ -305,24 +305,22 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createRowNode,
         createFlexNode,
         createListItemNode,
-        nullptr,
-        nullptr,
-        nullptr,
+        nullptr, // Tabs
+        nullptr, // Navigator
+        nullptr, // Web
         createSliderNode,
-        nullptr,
-        nullptr,
-        nullptr,
+        nullptr, // Canvas
+        nullptr, // Radio
+        nullptr, // Grid
 #ifdef XCOMPONENT_SUPPORTED
         createXComponentNode,
 #else
         nullptr,
 #endif
-        nullptr,
+        nullptr, // SideBar
         createRefreshNode,
         createRootNode,
         createComponentRootNode,
-        nullptr,
-        nullptr,
         createListItemGroupNode,
         createDatePickerNode,
         createTimePickerNode,
@@ -457,7 +455,7 @@ ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_F
 {
     auto node = GetCompanion(nodePtr);
     CHECK_NULL_RETURN(node, 0);
-    return node->layout(context, data, callbacks);
+    return node->measure(context, data, callbacks);
 }
 
 ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
@@ -471,7 +469,7 @@ ArkUI_Int32 DrawNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Floa
 {
     auto node = GetCompanion(nodePtr);
     CHECK_NULL_RETURN(node, 0);
-    return node->layout(context, data, callbacks);
+    return node->draw(context, data, callbacks);
 }
 
 } // namespace OHOS::Ace::NG::ViewModel
