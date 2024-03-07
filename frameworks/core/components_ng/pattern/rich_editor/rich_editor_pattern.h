@@ -329,7 +329,22 @@ public:
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
     {
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+            // close customKeyboard and request system keyboard
             CloseCustomKeyboard();
+            customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+            RequestKeyboard(false, true, true);
+            return;
+        }
+        if (!customKeyboardBuilder_ && keyboardBuilder) {
+            // close system keyboard and request custom keyboard
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+            if (imeShown_) {
+                CloseKeyboard(true);
+                customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+                RequestKeyboard(false, true, true);
+                return;
+            }
+#endif
         }
         customKeyboardBuilder_ = keyboardBuilder;
     }
