@@ -1355,14 +1355,30 @@ void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
 
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto node = overlayManager->GetMenuNode(targetId);
-    CHECK_NULL_VOID(node);
-    rootNode->RemoveChild(node);
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    for (const auto& child : rootNode->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        if (node && node->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
+            continue;
+        }
+
+        auto menuWrapperPattern = node->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        if (menuWrapperPattern->GetTargetId() != targetId) {
+            continue;
+        }
+
+        for (auto& childNode : node->GetChildren()) {
+            auto frameNode = DynamicCast<FrameNode>(childNode);
+            if (frameNode &&
+                (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
+                node->RemoveChild(frameNode);
+                break;
+            }
+        }
+        rootNode->RemoveChild(node);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        break;
+    }
 
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
