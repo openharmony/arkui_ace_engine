@@ -76,7 +76,7 @@ public:
 
     bool PrintVsyncInfoIfNeed() const;
 
-    void SetExpectedFrameRateRange(FrameRateRange& frameRateRange);
+    void SetExpectedFrameRateRange(const FrameRateRange& frameRateRange);
 
 private:
     int32_t scheduleId_ = 0;

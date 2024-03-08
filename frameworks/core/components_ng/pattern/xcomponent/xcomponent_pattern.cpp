@@ -979,10 +979,8 @@ void XComponentPattern::HandleSetExpectedRateRangeEvent()
     OH_NativeXComponent_ExpectedRateRange* range = nativeXComponentImpl_->GetRateRange();
     CHECK_NULL_VOID(range);
     FrameRateRange frameRateRange;
-    frameRateRange.preferred_ = range->expected;
-    frameRateRange.max_ = range->max;
-    frameRateRange.min_ = range->min;
-    displaySync_->SetExpectedFrameRateRange(std::move(frameRateRange));
+    frameRateRange.Set(range->min, range->max, range->expected);
+    displaySync_->SetExpectedFrameRateRange(frameRateRange);
 }
 
 void XComponentPattern::HandleOnFrameEvent()
