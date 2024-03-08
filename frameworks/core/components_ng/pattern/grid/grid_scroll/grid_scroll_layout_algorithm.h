@@ -104,6 +104,7 @@ private:
     // Measure grid item which exist in grid matrix already, needn't to place it again.
     int32_t MeasureChildPlaced(const SizeF& frameSize, int32_t itemIndex, int32_t crossStart,
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childLayoutWrapper);
+    bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstraint) const;
     void MeasureChild(LayoutWrapper* layoutWrapper, const SizeF& frameSize,
         const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t crossStart, int32_t crossSpan);
 
@@ -193,7 +194,6 @@ private:
     float crossPaddingOffset_ = 0;
     int32_t lastCross_ = 0;
     bool isChildrenUpdated_ = false;
-    bool canSkipMeasure_ = false;
     bool canOverScroll_ = false;
     bool enableSkipping_ = true; // enables skipping lines on a large offset change.
     GridLayoutInfo scrollGridLayoutInfo_;
