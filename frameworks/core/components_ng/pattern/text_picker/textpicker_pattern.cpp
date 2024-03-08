@@ -113,11 +113,6 @@ void TextPickerPattern::SetButtonIdeaSize()
 
 void TextPickerPattern::OnModifyDone()
 {
-    if (isFiredSelectsChange_) {
-        isFiredSelectsChange_ = false;
-        return;
-    }
-
     OnColumnsBuilding();
     FlushOptions();
     CalculateHeight();
@@ -140,6 +135,8 @@ void TextPickerPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitDisabled();
+    isFirstUpdate_ = false;
+    isContentUpdateOnly_ = false;
 }
 
 void TextPickerPattern::SetEventCallback(EventCallback&& value)
@@ -165,14 +162,12 @@ void TextPickerPattern::FireChangeEvent(bool refresh)
     auto frameNodes = GetColumnNodes();
     std::vector<std::string> value;
     std::vector<double> index;
-    std::vector<uint32_t> selectedIdx;
     for (auto it : frameNodes) {
         CHECK_NULL_VOID(it.second);
         auto textPickerColumnPattern = it.second->GetPattern<TextPickerColumnPattern>();
         if (refresh) {
             auto currentIndex = textPickerColumnPattern->GetCurrentIndex();
             index.emplace_back(currentIndex);
-            selectedIdx.emplace_back(currentIndex);
             auto currentValue = textPickerColumnPattern->GetOption(currentIndex);
             value.emplace_back(currentValue);
         }
@@ -181,9 +176,6 @@ void TextPickerPattern::FireChangeEvent(bool refresh)
     CHECK_NULL_VOID(textPickerEventHub);
     textPickerEventHub->FireChangeEvent(value, index);
     textPickerEventHub->FireDialogChangeEvent(GetSelectedObject(true, 1));
-    std::string idx_str;
-    idx_str.assign(selectedIdx.begin(), selectedIdx.end());
-    firedSelectsStr_ = idx_str;
 }
 
 void TextPickerPattern::InitDisabled()
@@ -304,10 +296,7 @@ void TextPickerPattern::OnColumnsBuilding()
 
 void TextPickerPattern::SetSelecteds(const std::vector<uint32_t>& values)
 {
-    std::string values_str;
-    values_str.assign(values.begin(), values.end());
-    isFiredSelectsChange_ = firedSelectsStr_.has_value() && firedSelectsStr_.value() == values_str;
-    firedSelectsStr_.reset();
+    isContentUpdateOnly_ = !isFirstUpdate_;
     selecteds_.clear();
     for (auto& value : values) {
         selecteds_.emplace_back(value);
@@ -334,7 +323,7 @@ void TextPickerPattern::FlushOptions()
         CHECK_NULL_VOID(it.second);
         auto columnPattern = it.second->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_VOID(columnPattern);
-        columnPattern->FlushCurrentOptions();
+        columnPattern->FlushCurrentOptions(false, isContentUpdateOnly_);
         it.second->MarkModifyDone();
         it.second->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
