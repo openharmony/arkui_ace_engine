@@ -880,7 +880,7 @@ void JSRichEditorController::ParseJsTextStyle(
     CalcDimension lineHigh;
     
     if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, lineHigh) &&
-        !lineHigh.IsNegative() && lineHigh.Unit() != DimensionUnit::PERCENT) {
+        lineHigh.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLineHeight = lineHigh;
         style.SetLineHeight(lineHigh);
     } else if (lineHigh.IsNegative() || lineHigh.Unit() == DimensionUnit::PERCENT) {
@@ -973,7 +973,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     JSRef<JSVal> letterSpacing = styleObject->GetProperty("letterSpacing");
     CalcDimension letters;
     if (!letterSpacing->IsNull() && JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters) &&
-        !letters.IsNegative() && letters.Unit() != DimensionUnit::PERCENT) {
+        letters.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
     } else if (letters.IsNegative() || letters.Unit() == DimensionUnit::PERCENT) {
