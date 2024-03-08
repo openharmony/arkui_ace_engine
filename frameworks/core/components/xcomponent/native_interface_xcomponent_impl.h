@@ -29,6 +29,8 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
+using NativeSurfaceCallback = void (*)(OH_NativeXComponent*, void*);
+
 struct XComponentTouchPoint {
     float tiltX = 0.0f;
     float tiltY = 0.0f;
@@ -144,22 +146,22 @@ public:
         return mouseEventCallback_;
     }
 
-    NativeXComponent_Callback GetSurfaceShowCallback() const
+    NativeSurfaceCallback GetSurfaceShowCallback() const
     {
         return surfaceShowCallback_;
     }
 
-    void SetSurfaceShowCallback(NativeXComponent_Callback callback)
+    void SetSurfaceShowCallback(NativeSurfaceCallback callback)
     {
         surfaceShowCallback_ = callback;
     }
 
-    NativeXComponent_Callback GetSurfaceHideCallback() const
+    NativeSurfaceCallback GetSurfaceHideCallback() const
     {
         return surfaceHideCallback_;
     }
 
-    void SetSurfaceHideCallback(NativeXComponent_Callback callback)
+    void SetSurfaceHideCallback(NativeSurfaceCallback callback)
     {
         surfaceHideCallback_ = callback;
     }
@@ -384,8 +386,8 @@ private:
     OH_NativeXComponent_KeyEvent keyEvent_;
     OH_NativeXComponent_Callback* callback_ = nullptr;
     OH_NativeXComponent_MouseEvent_Callback* mouseEventCallback_ = nullptr;
-    NativeXComponent_Callback surfaceShowCallback_ = nullptr;
-    NativeXComponent_Callback surfaceHideCallback_ = nullptr;
+    NativeSurfaceCallback surfaceShowCallback_ = nullptr;
+    NativeSurfaceCallback surfaceHideCallback_ = nullptr;
     NativeXComponent_Callback focusEventCallback_ = nullptr;
     NativeXComponent_Callback keyEventCallback_ = nullptr;
     NativeXComponent_Callback blurEventCallback_ = nullptr;
@@ -403,7 +405,6 @@ private:
 } // namespace OHOS::Ace
 
 struct OH_NativeXComponent {
-    using NativeSurfaceCallback = void (*)(OH_NativeXComponent*, void*);
     explicit OH_NativeXComponent(OHOS::Ace::NativeXComponentImpl* xComponentImpl) : xcomponentImpl_(xComponentImpl) {}
     ~OH_NativeXComponent() {}
     int32_t GetXComponentId(char* id, uint64_t* size);
