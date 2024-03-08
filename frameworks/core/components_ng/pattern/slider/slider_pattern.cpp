@@ -1056,11 +1056,6 @@ void SliderPattern::UpdateValue(float value)
     sliderPaintProperty->UpdateValue(value);
 }
 
-void SliderPattern::OnAttachToFrameNode()
-{
-    RegisterVisibleAreaChange();
-}
-
 void SliderPattern::OnVisibleChange(bool isVisible)
 {
     isVisible_ = isVisible;
@@ -1093,28 +1088,6 @@ void SliderPattern::StopAnimation()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void SliderPattern::RegisterVisibleAreaChange()
-{
-    if (hasVisibleChangeRegistered_) {
-        return;
-    }
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->isVisibleArea_ = visible;
-        visible ? pattern->StartAnimation() : pattern->StopAnimation();
-    };
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    std::vector<double> ratioList = {0.0};
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
-    pipeline->AddWindowStateChangedCallback(host->GetId());
-    hasVisibleChangeRegistered_ = true;
-}
-
 void SliderPattern::OnWindowHide()
 {
     isShow_ = false;
@@ -1129,7 +1102,7 @@ void SliderPattern::OnWindowShow()
 
 bool SliderPattern::IsSliderVisible()
 {
-    return isVisibleArea_ && isVisible_ && isShow_;
+    return isVisible_ && isShow_;
 }
 
 void SliderPattern::UpdateTipState()
@@ -1189,14 +1162,5 @@ void SliderPattern::RemoveIsFocusActiveUpdateEvent()
     auto pipline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipline);
     pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
-}
-
-void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
-    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
-    hasVisibleChangeRegistered_ = false;
 }
 } // namespace OHOS::Ace::NG
