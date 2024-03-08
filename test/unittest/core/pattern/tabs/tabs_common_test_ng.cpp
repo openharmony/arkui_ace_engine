@@ -31,10 +31,13 @@ AssertionResult TabsCommonTestNg::IsEqualNextFocusNode(FocusStep step,
     RefPtr<FocusHub> currentFocusNode = currentNode->GetOrCreateFocusHub();
     currentFocusNode->RequestFocusImmediately();
     RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNode(step, currentFocusNode).Upgrade();
-    if (nextFocusNode == expectNextNode->GetOrCreateFocusHub()) {
-        return AssertionSuccess();
+    if (expectNextNode == nullptr && nextFocusNode != nullptr) {
+        return AssertionFailure() << "Next focusNode is not null";
     }
-    return AssertionFailure() << "Next focusNode is not as expected";
+    if (expectNextNode != nullptr && nextFocusNode != expectNextNode->GetOrCreateFocusHub()) {
+        return AssertionFailure() << "Next focusNode is not as expected";
+    }
+    return AssertionSuccess();
 }
 
 /**
@@ -44,9 +47,106 @@ AssertionResult TabsCommonTestNg::IsEqualNextFocusNode(FocusStep step,
  */
 HWTEST_F(TabsCommonTestNg, FocusStep001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    /**
+     * @tc.cases: BarPosition::START, Vertical:false
+     */
+    CreateWithItem([](TabsModelNG model) {
+        model.SetIsVertical(false);
+    }, BarPosition::START);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, tabBarNode_, swiperNode_));
-    // to do...
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, tabBarNode_, nullptr));
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, swiperNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, swiperNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, swiperNode_, tabBarNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, swiperNode_, nullptr));
+
+    /**
+     * @tc.cases: from swiperNode_ to itself
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, tabBarNode_, nullptr));
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, swiperNode_, swiperNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, swiperNode_, swiperNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, swiperNode_, swiperNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, swiperNode_, swiperNode_));
+}
+
+/**
+ * @tc.name: FocusStep002
+ * @tc.desc: Test Tabs FocusStep
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, FocusStep002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: BarPosition::START, Vertical:true
+     */
+    CreateWithItem([](TabsModelNG model) {
+        model.SetIsVertical(true);
+    }, BarPosition::START);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, swiperNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, tabBarNode_, nullptr));
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, swiperNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, swiperNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, swiperNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, swiperNode_, tabBarNode_));
+}
+
+/**
+ * @tc.name: FocusStep003
+ * @tc.desc: Test Tabs FocusStep
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, FocusStep003, TestSize.Level1)
+{
+    /**
+     * @tc.cases: BarPosition::END, Vertical:false
+     */
+    CreateWithItem([](TabsModelNG model) {
+        model.SetIsVertical(false);
+    }, BarPosition::END);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, tabBarNode_, swiperNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, tabBarNode_, nullptr));
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, swiperNode_, tabBarNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, swiperNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, swiperNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, swiperNode_, nullptr));
+}
+
+/**
+ * @tc.name: FocusStep004
+ * @tc.desc: Test Tabs FocusStep
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, FocusStep004, TestSize.Level1)
+{
+    /**
+     * @tc.cases: BarPosition::END, Vertical:true
+     */
+    CreateWithItem([](TabsModelNG model) {
+        model.SetIsVertical(true);
+    }, BarPosition::END);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, tabBarNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, tabBarNode_, swiperNode_));
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, swiperNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, swiperNode_, tabBarNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, swiperNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, swiperNode_, nullptr));
 }
 
 /**
@@ -133,7 +233,7 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityProperty005, TestSize.Level1)
      * @tc.steps: step2. swipe to item(index:1)
      * @tc.expected: CurrentIndex is 1
      */
-    SwipeTo(1);
+    SwipeToWithoutAnimation(1);
     EXPECT_EQ(tabBarAccessibilityProperty_->GetCurrentIndex(), 1);
 }
 
