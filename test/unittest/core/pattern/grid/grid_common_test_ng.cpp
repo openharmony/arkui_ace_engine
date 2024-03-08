@@ -27,7 +27,7 @@ const Offset RIGHT_BOTTOM = Offset(ITEM_WIDTH * 1.5, ITEM_HEIGHT * 1.5); // (180
 class GridCommonTestNg : public GridTestNg {
 public:
     void MouseSelect(Offset start, Offset end);
-    int32_t findFocusNodeIndex(RefPtr<FocusHub>& focusNode);
+    int32_t FindFocusNodeIndex(RefPtr<FocusHub>& focusNode);
     AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex);
 };
 
@@ -46,7 +46,7 @@ void GridCommonTestNg::MouseSelect(Offset start, Offset end)
     pattern_->HandleDragEnd(info);
 }
 
-int32_t GridCommonTestNg::findFocusNodeIndex(RefPtr<FocusHub>& focusNode)
+int32_t GridCommonTestNg::FindFocusNodeIndex(RefPtr<FocusHub>& focusNode)
 {
     auto children = frameNode_->GetChildren();
     int32_t size = static_cast<int32_t>(children.size());
@@ -67,7 +67,7 @@ AssertionResult GridCommonTestNg::IsEqualNextFocusNode(
     if (expectNextIndex != NULL_VALUE && nextFocusNode == nullptr) {
         return AssertionFailure() << "Next FocusNode is null";
     }
-    int32_t nextIndex = findFocusNodeIndex(nextFocusNode);
+    int32_t nextIndex = FindFocusNodeIndex(nextFocusNode);
     return IsEqual(nextIndex, expectNextIndex);
 }
 
@@ -296,7 +296,7 @@ HWTEST_F(GridCommonTestNg, MouseSelect005, TestSize.Level1)
     Create([option](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(option);
-        CreateColItem(10);
+        CreateFixedItem(10);
     });
     MouseSelect(RIGHT_BOTTOM, LEFT_TOP);
     EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
@@ -361,11 +361,11 @@ HWTEST_F(GridCommonTestNg, MouseSelect007, TestSize.Level1)
 }
 
 /**
- * @tc.name: Drag001
+ * @tc.name: HandleDrag001
  * @tc.desc: Verify drag func
  * @tc.type: FUNC
  */
-HWTEST_F(GridCommonTestNg, Drag001, TestSize.Level1)
+HWTEST_F(GridCommonTestNg, HandleDrag001, TestSize.Level1)
 {
     auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
         auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
@@ -390,8 +390,7 @@ HWTEST_F(GridCommonTestNg, Drag001, TestSize.Level1)
     eventHub_->HandleOnItemDragStart(info);
     EXPECT_EQ(eventHub_->draggedIndex_, 1);
     ASSERT_NE(eventHub_->dragDropProxy_, nullptr);
-    auto itemFrameNode = GetChildFrameNode(frameNode_, 1);
-    EXPECT_EQ(eventHub_->draggingItem_, itemFrameNode);
+    EXPECT_EQ(eventHub_->draggingItem_, GetChildFrameNode(frameNode_, 1));
     eventHub_->HandleOnItemDragUpdate(info);
     eventHub_->HandleOnItemDragEnd(info);
     EXPECT_EQ(eventHub_->draggedIndex_, 0);
@@ -411,11 +410,60 @@ HWTEST_F(GridCommonTestNg, Drag001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Drag002
+ * @tc.name: HandleDrag002
+ * @tc.desc: Verify drag func with Editable false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, HandleDrag002, TestSize.Level1)
+{
+    auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
+        auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
+        return AceType::DynamicCast<UINode>(dragItem);
+    };
+    Create([onItemDragStart](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetEditable(false); // set false
+        model.SetOnItemDragStart(onItemDragStart);
+        CreateFixedItem(8);
+    });
+    eventHub_->onItemDragStart_ = onItemDragStart;
+
+    GestureEvent info;
+    Point globalPoint = Point(ITEM_WIDTH * 1.5, ITEM_HEIGHT / 2); // Point at the second item.
+    info.SetGlobalPoint(globalPoint);
+
+    /**
+     * @tc.steps: step1. Trigger HandleOnItemDragStart, HandleOnItemDragUpdate, HandleOnItemDragEnd.
+     * @tc.expected: Do nothing
+     */
+    eventHub_->HandleOnItemDragStart(info);
+    EXPECT_EQ(eventHub_->draggedIndex_, 0);
+    EXPECT_EQ(eventHub_->dragDropProxy_, nullptr);
+    EXPECT_EQ(eventHub_->draggingItem_, nullptr);
+    eventHub_->HandleOnItemDragUpdate(info);
+    eventHub_->HandleOnItemDragEnd(info);
+    EXPECT_EQ(eventHub_->draggedIndex_, 0);
+    EXPECT_EQ(eventHub_->dragDropProxy_, nullptr);
+    EXPECT_EQ(eventHub_->draggingItem_, nullptr);
+
+    /**
+     * @tc.steps: step2. Trigger HandleOnItemDragStart, HandleOnItemDragUpdate, HandleOnItemDragCancel.
+     * @tc.expected: Do nothing
+     */
+    eventHub_->HandleOnItemDragStart(info);
+    eventHub_->HandleOnItemDragUpdate(info);
+    eventHub_->HandleOnItemDragCancel();
+    EXPECT_EQ(eventHub_->draggedIndex_, 0);
+    EXPECT_EQ(eventHub_->dragDropProxy_, nullptr);
+    EXPECT_EQ(eventHub_->draggingItem_, nullptr);
+}
+
+/**
+ * @tc.name: FireDrag001
  * @tc.desc: Verify drag func
  * @tc.type: FUNC
  */
-HWTEST_F(GridCommonTestNg, Drag002, TestSize.Level1)
+HWTEST_F(GridCommonTestNg, FireDrag001, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
@@ -494,11 +542,11 @@ HWTEST_F(GridCommonTestNg, Drag002, TestSize.Level1)
 }
 
 /**
- * @tc.name: Drag003
+ * @tc.name: FireDrag002
  * @tc.desc: Verify drag func with SetLayoutDirection
  * @tc.type: FUNC
  */
-HWTEST_F(GridCommonTestNg, Drag003, TestSize.Level1)
+HWTEST_F(GridCommonTestNg, FireDrag002, TestSize.Level1)
 {
     const int32_t itemCount = 8;
     Create([itemCount](GridModelNG model) {
@@ -578,21 +626,84 @@ HWTEST_F(GridCommonTestNg, Drag003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FireDrag003
+ * @tc.desc: Test drag enter, mover, leave, drop event
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FireDrag003, TestSize.Level1)
+{
+    bool isEnter = false;
+    bool isMove = false;
+    bool isLeave = false;
+    bool isDrop = false;
+    auto onItemDragEnter = [&isEnter](const ItemDragInfo&) { isEnter = true; };
+    auto onItemDragMove = [&isMove](const ItemDragInfo&, int32_t, int32_t) { isMove = true; };
+    auto onItemDragLeave = [&isLeave](const ItemDragInfo&, int32_t) { isLeave = true; };
+    auto onItemDragDrop = [&isDrop](const ItemDragInfo&, int32_t, int32_t, bool) { isDrop = true; };
+    Create([=](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetEditable(true);
+        model.SetSupportAnimation(false);
+        model.SetOnItemDragEnter(onItemDragEnter);
+        model.SetOnItemDragMove(onItemDragMove);
+        model.SetOnItemDragLeave(onItemDragLeave);
+        model.SetOnItemDrop(onItemDragDrop);
+        CreateBigColItem(2, 3);
+        CreateBigColItem(0, 2);
+        CreateBigColItem(2, 1);
+        CreateFixedItem(8);
+    });
+    auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
+        auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
+        return AceType::DynamicCast<UINode>(dragItem);
+    };
+    eventHub_->onItemDragStart_ = onItemDragStart;
+
+    GestureEvent info;
+    Point globalPoint = Point(270.f, 50.f);
+    info.SetGlobalPoint(globalPoint);
+    eventHub_->HandleOnItemDragStart(info);
+
+    /**
+     * @tc.steps: step1. Drag 2nd item to 3rd item, Drag 3 item to 2 item.
+     * @tc.expected: GetOriginalIndex changed.
+     */
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(0.f);
+    dragInfo.SetY(0.f);
+    eventHub_->FireOnItemDragEnter(dragInfo);
+    EXPECT_TRUE(isEnter);
+    eventHub_->FireOnItemDragMove(dragInfo, 1, 2);
+    EXPECT_TRUE(isMove);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), -1); // Not SupportAnimation
+    eventHub_->FireOnItemDragLeave(dragInfo, NULL_VALUE);
+    EXPECT_TRUE(isLeave);
+    eventHub_->FireOnItemDragEnter(dragInfo);
+    // 3 to 2
+    eventHub_->FireOnItemDragMove(dragInfo, 2, 1);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), -1); // Not SupportAnimation
+    // SupportAnimation, ClearDragState
+    eventHub_->FireOnItemDrop(dragInfo, 0, 1, true);
+    EXPECT_TRUE(isDrop);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), NULL_VALUE);
+    FlushLayoutTask(frameNode_);
+}
+
+/**
  * @tc.name:FocusStep001
- * @tc.desc: Test GetNextFocusNode func
+ * @tc.desc: Test GetNextFocusNode in ColumnsTemplate Grid
  * @tc.type: FUNC
  */
 HWTEST_F(GridCommonTestNg, FocusStep001, TestSize.Level1)
 {
+    /**
+     * @tc.cases: Set ColumnsTemplate, GetNextFocusNode from left_top.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateFixedItem(10);
     });
-
-    /**
-     * @tc.steps: step1. GetNextFocusNode from left_top.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
     int32_t currentIndex = 0;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
@@ -605,110 +716,24 @@ HWTEST_F(GridCommonTestNg, FocusStep001, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 1));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step2. GetNextFocusNode from right_top.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 3;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 2));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 7));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
-
-    /**
-     * @tc.steps: step3. GetNextFocusNode from left_bottom.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 8;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 9));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 9));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 7));
-
-    /**
-     * @tc.steps: step4. GetNextFocusNode from right_bottom.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 9;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 8));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 8));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 8));
-
-    /**
-     * @tc.steps: step5. GetNextFocusNode from middle.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 5;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 9));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 7));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
 }
 
 /**
  * @tc.name:FocusStep002
- * @tc.desc: Test GetNextFocusNode() with FlexDirection::COLUMN
+ * @tc.desc: Test GetNextFocusNode in RowsTemplate Grid
  * @tc.type: FUNC
  */
 HWTEST_F(GridCommonTestNg, FocusStep002, TestSize.Level1)
 {
+    /**
+     * @tc.cases: Set RowsTemplate, GetNextFocusNode from right_top.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
     Create([](GridModelNG model) {
         model.SetRowsTemplate("1fr 1fr 1fr 1fr");
         CreateFixedItem(10);
     });
-
-    /**
-     * @tc.steps: step1. GetNextFocusNode from left_top.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    int32_t currentIndex = 0;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step2. GetNextFocusNode from right_top.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 8;
+    int32_t currentIndex = 8; // In RowsTemplate grid, item(index:8) is right_top
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 4));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
@@ -720,29 +745,24 @@ HWTEST_F(GridCommonTestNg, FocusStep002, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 9));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 7));
+}
 
+/**
+ * @tc.name:FocusStep003
+ * @tc.desc: Test GetNextFocusNode in RowsTemplate Grid
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FocusStep003, TestSize.Level1)
+{
     /**
-     * @tc.steps: step3. GetNextFocusNode from left_bottom.
+     * @tc.cases: Set RowsTemplate, GetNextFocusNode from last item.
      * @tc.expected: Verify all condition of FocusStep.
      */
-    currentIndex = 3;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 2));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 7));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
-
-    /**
-     * @tc.steps: step4. GetNextFocusNode from right_bottom.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 9;
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        CreateFixedItem(10);
+    });
+    int32_t currentIndex = 9;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 5));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 8));
@@ -754,77 +774,25 @@ HWTEST_F(GridCommonTestNg, FocusStep002, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 8));
-
-    /**
-     * @tc.steps: step5. GetNextFocusNode from middle.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 5;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 9));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 7));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
 }
 
 /**
- * @tc.name:FocusStep003
- * @tc.desc: Test GetNextFocusNode() with colTemplate/rowTemplate
+ * @tc.name:FocusStep004
+ * @tc.desc: Test GetNextFocusNode with colTemplate and rowTemplate
  * @tc.type: FUNC
  */
-HWTEST_F(GridCommonTestNg, FocusStep003, TestSize.Level1)
+HWTEST_F(GridCommonTestNg, FocusStep004, TestSize.Level1)
 {
+    /**
+     * @tc.cases: Set RowsTemplate and ColumnsTemplate, GetNextFocusNode from left_bottom.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
     Create([](GridModelNG model) {
         model.SetRowsTemplate("1fr 1fr 1fr 1fr");
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateItem(10, NULL_VALUE, NULL_VALUE);
+        CreateItem(10, NULL_VALUE, NULL_VALUE); // Grid calculate its own size
     });
-
-    /**
-     * @tc.steps: step1. GetNextFocusNode from left_top.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    int32_t currentIndex = 0;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step2. GetNextFocusNode from right_top.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 3;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 2));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 7));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
-
-    /**
-     * @tc.steps: step3. GetNextFocusNode from left_bottom.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 8;
+    int32_t currentIndex = 8;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
@@ -836,49 +804,19 @@ HWTEST_F(GridCommonTestNg, FocusStep003, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 9));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 7));
-
-    /**
-     * @tc.steps: step4. GetNextFocusNode from right_bottom.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 9;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 8));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 8));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 9));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 8));
-
-    /**
-     * @tc.steps: step5. GetNextFocusNode from middle.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 5;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 1));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 9));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 7));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
 }
 
 /**
- * @tc.name: FocusStep004
+ * @tc.name: FocusStep005
  * @tc.desc: Test GetNextFocusNode func when exist big item
  * @tc.type: FUNC
  */
-HWTEST_F(GridCommonTestNg, FocusStep004, TestSize.Level1)
+HWTEST_F(GridCommonTestNg, FocusStep005, TestSize.Level1)
 {
+    /**
+     * @tc.cases: GetNextFocusNode from BigItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateBigColItem(2, 3);
@@ -886,11 +824,6 @@ HWTEST_F(GridCommonTestNg, FocusStep004, TestSize.Level1)
         CreateBigColItem(2, 1);
         CreateFixedItem(7);
     });
-
-    /**
-     * @tc.steps: step1. GetNextFocusNode from BigItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
     int32_t currentIndex = 0;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 5));
@@ -903,175 +836,6 @@ HWTEST_F(GridCommonTestNg, FocusStep004, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step2. GetNextFocusNode from BigItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 1;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step3. GetNextFocusNode from BigItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 2;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step4. GetNextFocusNode from NormalItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 3;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 7));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step5. GetNextFocusNode from NormalItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 5;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 7));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
-}
-
-/**
- * @tc.name: FocusStep005
- * @tc.desc: Test GetNextFocusNode func when exist big item with RowsTemplate
- * @tc.type: FUNC
- */
-HWTEST_F(GridCommonTestNg, FocusStep005, TestSize.Level1)
-{
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        CreateBigRowItem(1, 2);
-        CreateBigRowItem(0, 2);
-        CreateBigRowItem(2, 3);
-        CreateFixedItem(7);
-    });
-
-    /**
-     * @tc.steps: step1. GetNextFocusNode from BigItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    int32_t currentIndex = 0;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step2. GetNextFocusNode from BigItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 1;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step3. GetNextFocusNode from BigItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 2;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step4. GetNextFocusNode from NormalItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 3;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step5. GetNextFocusNode from NormalItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 5;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
 }
 
 /**
@@ -1081,6 +845,10 @@ HWTEST_F(GridCommonTestNg, FocusStep005, TestSize.Level1)
  */
 HWTEST_F(GridCommonTestNg, FocusStep006, TestSize.Level1)
 {
+    /**
+     * @tc.cases: Set RowsTemplate and ColumnsTemplate, GetNextFocusNode from BigItem.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
     Create([](GridModelNG model) {
         model.SetRowsTemplate("1fr 1fr 1fr 1fr");
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
@@ -1089,11 +857,6 @@ HWTEST_F(GridCommonTestNg, FocusStep006, TestSize.Level1)
         CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
         CreateItem(7, NULL_VALUE, NULL_VALUE);
     });
-
-    /**
-     * @tc.steps: step1. GetNextFocusNode from BigItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
     int32_t currentIndex = 0;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 3));
@@ -1106,74 +869,6 @@ HWTEST_F(GridCommonTestNg, FocusStep006, TestSize.Level1)
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 5));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 3));
-
-    /**
-     * @tc.steps: step2. GetNextFocusNode from BigItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 1;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 8));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step3. GetNextFocusNode from BigItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 2;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, 7));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 8));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 5));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 7));
-
-    /**
-     * @tc.steps: step4. GetNextFocusNode from NormalItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 3;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, NULL_VALUE));
-
-    /**
-     * @tc.steps: step5. GetNextFocusNode from NormalItem.
-     * @tc.expected: Verify all condition of FocusStep.
-     */
-    currentIndex = 5;
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 4));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, currentIndex, 8));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, currentIndex, NULL_VALUE));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 6));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 4));
 }
 
 /**
@@ -1295,17 +990,16 @@ HWTEST_F(GridCommonTestNg, Focus001, TestSize.Level1)
  */
 HWTEST_F(GridCommonTestNg, GridAccessibilityTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Run accessibilityfunc.
+     * @tc.expected: The return_value is correct.
+     */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetMultiSelectable(true);
         model.SetEditable(true);
         CreateFixedItem(14);
     });
-
-    /**
-     * @tc.steps: step1. Run accessibilityfunc.
-     * @tc.expected: The return_value is correct.
-     */
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
     EXPECT_TRUE(accessibilityProperty_->IsEditable());
     EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 0);
@@ -1318,13 +1012,14 @@ HWTEST_F(GridCommonTestNg, GridAccessibilityTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridAccessibilityTest002
+ * @tc.name: GetCollectionInfo001
  * @tc.desc: Test AccessibilityGetCollectionInfo func with non-scrollable Grid
  * @tc.type: FUNC
  */
-HWTEST_F(GridCommonTestNg, GridAccessibilityTest002, TestSize.Level1)
+HWTEST_F(GridCommonTestNg, GetCollectionInfo001, TestSize.Level1)
 {
     Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateItem(8, ITEM_WIDTH, ITEM_HEIGHT, GridItemStyle::NONE);
     });
 
@@ -1339,15 +1034,35 @@ HWTEST_F(GridCommonTestNg, GridAccessibilityTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridAccessibilityTest003
- * @tc.desc: Test AccessibilitySetSpecificSupportAction func with
- * scrollable Grid and scroll the Grid to the middle
+ * @tc.name: GetCollectionInfo002
+ * @tc.desc: Test AccessibilityGetCollectionInfo func with empty GridItem
  * @tc.type: FUNC
  */
-HWTEST_F(GridCommonTestNg, GridAccessibilityTest003, TestSize.Level1)
+HWTEST_F(GridCommonTestNg, GetCollectionInfo002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Scroll to Top.
+     * @tc.cases: Create with empty items
+     * @tc.expected: columns is zero
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    });
+    AceCollectionInfo info = accessibilityProperty_->GetCollectionInfo();
+    EXPECT_EQ(info.rows, 0);
+    EXPECT_EQ(info.columns, 0);
+    EXPECT_EQ(info.selectMode, 0);
+}
+
+/**
+ * @tc.name: SetSpecificSupportAction001
+ * @tc.desc: Test SetSpecificSupportAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, SetSpecificSupportAction001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Grid is at top.
+     * @tc.expected: Check actions value
      */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
@@ -1355,51 +1070,91 @@ HWTEST_F(GridCommonTestNg, GridAccessibilityTest003, TestSize.Level1)
     });
     EXPECT_TRUE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
+
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_1 = 0;
     exptectActions_1 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
     EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions_1);
+}
 
+/**
+ * @tc.name: SetSpecificSupportAction002
+ * @tc.desc: Test SetSpecificSupportAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, SetSpecificSupportAction002, TestSize.Level1)
+{
     /**
-     * @tc.steps: step2. Scroll to middle.
+     * @tc.cases: Grid is at middle.
+     * @tc.expected: Check actions value
      */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateFixedItem(24);
+    });
     UpdateCurrentOffset(-ITEM_HEIGHT);
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
+
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_2 = 0;
     exptectActions_2 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
     exptectActions_2 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
     EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions_2);
+}
 
+/**
+ * @tc.name: SetSpecificSupportAction003
+ * @tc.desc: Test SetSpecificSupportAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, SetSpecificSupportAction003, TestSize.Level1)
+{
     /**
-     * @tc.steps: step3. Scroll to bottom.
+     * @tc.cases: Grid is at bottom.
+     * @tc.expected: Check actions value
      */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateFixedItem(24);
+    });
     UpdateCurrentOffset(-ITEM_HEIGHT * 2);
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_TRUE(pattern_->IsAtBottom());
+
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_3 = 0;
     exptectActions_3 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
     EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions_3);
+}
 
+/**
+ * @tc.name: SetSpecificSupportAction004
+ * @tc.desc: Test SetSpecificSupportAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, SetSpecificSupportAction004, TestSize.Level1)
+{
     /**
-     * @tc.steps: step4. UnScrollable.
+     * @tc.cases: Grid is unscrollable.
+     * @tc.expected: Check actions value
      */
     Create([](GridModelNG model) {
         CreateFixedItem(14);
     });
+    EXPECT_FALSE(accessibilityProperty_->IsScrollable());
+
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_4 = 0;
     EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions_4);
 }
 
 /**
- * @tc.name: GridAccessibilityTest007
+ * @tc.name: GridItemAccessibilityTest001
  * @tc.desc: Test GridItem Accessibilityfunc
  * @tc.type: FUNC
  */
-HWTEST_F(GridCommonTestNg, GridAccessibilityTest007, TestSize.Level1)
+HWTEST_F(GridCommonTestNg, GridItemAccessibilityTest001, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
@@ -1431,11 +1186,11 @@ HWTEST_F(GridCommonTestNg, GridAccessibilityTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridAccessibilityTest008
+ * @tc.name: GridItemAccessibilityTest002
  * @tc.desc: Test GridItem AccessibilityGetCollectionItemInfo func with has heading GridItem
  * @tc.type: FUNC
  */
-HWTEST_F(GridCommonTestNg, GridAccessibilityTest008, TestSize.Level1)
+HWTEST_F(GridCommonTestNg, GridItemAccessibilityTest002, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
@@ -1472,25 +1227,50 @@ HWTEST_F(GridCommonTestNg, EventHub001, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateFixedItem(8);
     });
-    RectF gridRect(0.f, 0.f, GRID_WIDTH, GRID_HEIGHT);
     auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_);
-    mockRenderContext->rect_ = gridRect;
+    mockRenderContext->rect_ = RectF(0.f, 0.f, GRID_WIDTH, GRID_HEIGHT);
 
     /**
-     * @tc.steps: step1. call GetInsertPosition func.
+     * @tc.cases: case1. Position out of grid
+     * @tc.expected: Return -1
      */
-    EXPECT_EQ(eventHub_->GetInsertPosition(GRID_WIDTH + 1, GRID_HEIGHT), NULL_VALUE); // out of grid
-    EXPECT_EQ(eventHub_->GetInsertPosition(0.f, 0.f), 0); // 0, 0
-    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH / 2, ITEM_HEIGHT / 2), 0); // first item
-    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH * 2, ITEM_HEIGHT / 2), 1); // between the second and third
-    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH * 2, ITEM_HEIGHT), 1); // between the 2nd, 3rd, 6th, 7th
-    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH, GRID_HEIGHT), 8); // in grid but not on item
-    pattern_->GetGridLayoutInfo().currentRect_ = RectF(0.f, 0.f, 180.f, 300.f);
-    EXPECT_EQ(eventHub_->GetInsertPosition(180.f, 300.f), 5); // on currentRect_
-
+    EXPECT_EQ(eventHub_->GetInsertPosition(GRID_WIDTH + 1.f, GRID_HEIGHT), NULL_VALUE);
+    
     /**
-     * @tc.steps: step2. call GetFrameNodeChildSize func.
+     * @tc.cases: case2. Position in item
+     * @tc.expected: Return item index
      */
+    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH / 2, ITEM_HEIGHT / 2), 0);
+    
+    /**
+     * @tc.cases: case3. Position in grid but not in item
+     * @tc.expected: Return items count:8
+     */
+    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH, GRID_HEIGHT), 8);
+        
+    /**
+     * @tc.cases: case4. Position in grid but not in item and in currentRect_
+     * @tc.expected: Return -1
+     */
+    pattern_->gridLayoutInfo_.currentRect_ = RectF(0.f, 0.f, GRID_WIDTH, GRID_HEIGHT);
+    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH, GRID_HEIGHT), NULL_VALUE);
+}
+
+/**
+ * @tc.name: EventHub002
+ * @tc.desc: Test GetFrameNodeChildSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, EventHub002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Create 8 items
+     * @tc.expected: Has 8 items
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateFixedItem(8);
+    });
     EXPECT_EQ(eventHub_->GetFrameNodeChildSize(), 8);
 }
 
@@ -1570,22 +1350,19 @@ HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
  */
 HWTEST_F(GridCommonTestNg, GridDistributed001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Init Grid node
-     */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     });
 
     /**
-     * @tc.steps: step2. get pattern .
+     * @tc.steps: step1. get pattern .
      * @tc.expected: function ProvideRestoreInfo is called.
      */
     pattern_->gridLayoutInfo_.startIndex_ = 1;
     std::string ret = pattern_->ProvideRestoreInfo();
 
     /**
-     * @tc.steps: step3. function OnRestoreInfo is called.
+     * @tc.steps: step2. function OnRestoreInfo is called.
      * @tc.expected: Passing JSON format.
      */
     pattern_->OnRestoreInfo(ret);

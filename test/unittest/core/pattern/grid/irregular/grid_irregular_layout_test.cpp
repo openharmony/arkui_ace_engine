@@ -354,7 +354,7 @@ HWTEST_F(GridIrregularLayoutTest, LayoutChildren001, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr");
-        CreateRowItem(10);
+        CreateFixedItem(10);
     });
 
     frameNode_->GetGeometryNode()->UpdatePaddingWithBorder(PaddingPropertyF { .left = 5.0f, .top = 3.0f });
@@ -404,7 +404,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure001, TestSize.Level1)
         model.SetLayoutOptions(GetOptionDemo11());
         model.SetColumnsGap(Dimension { 5.0f });
         model.SetRowsGap(Dimension { 1.0f });
-        CreateRowItem(10);
+        CreateItem(10, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
     });
     LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
     layoutProperty_->layoutConstraint_ = constraint;
@@ -905,7 +905,7 @@ HWTEST_F(GridIrregularLayoutTest, Layout001, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr");
-        CreateRowItem(10);
+        CreateFixedItem(10);
     });
     frameNode_->GetGeometryNode()->UpdatePaddingWithBorder(PaddingPropertyF { .left = 1.0f, .top = 1.0f });
     frameNode_->GetGeometryNode()->SetFrameSize(SizeF { 200.0f, 500.0f });
@@ -1159,7 +1159,7 @@ HWTEST_F(GridIrregularLayoutTest, PrepareLineHeights001, TestSize.Level1)
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr");
         model.SetLayoutOptions({});
-        CreateColItem(15);
+        CreateFixedItem(15);
     });
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});

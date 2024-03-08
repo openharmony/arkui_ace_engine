@@ -96,18 +96,6 @@ void GridTestNg::CreateItem(
     }
 }
 
-void GridTestNg::CreateColItem(
-    int32_t itemNumber, GridItemStyle gridItemStyle)
-{
-    CreateItem(itemNumber, NULL_VALUE, ITEM_HEIGHT, gridItemStyle);
-}
-
-void GridTestNg::CreateRowItem(
-    int32_t itemNumber, GridItemStyle gridItemStyle)
-{
-    CreateItem(itemNumber, ITEM_WIDTH, NULL_VALUE, gridItemStyle);
-}
-
 void GridTestNg::CreateFixedItem(
     int32_t itemNumber, GridItemStyle gridItemStyle)
 {
