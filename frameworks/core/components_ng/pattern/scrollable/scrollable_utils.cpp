@@ -47,21 +47,34 @@ std::vector<RefPtr<LazyForEachNode>> GetLazyForEachNodes(RefPtr<FrameNode>& host
     return lazyNodes;
 }
 
-bool OutOfBottomBoundary(RefPtr<GeometryNode>& childGeoNode, float offset, RefPtr<GeometryNode>& hostGeoNode)
+bool OutOfBottomOrRightBoundary(
+    Axis axis, RefPtr<GeometryNode>& childGeoNode, float offset, RefPtr<GeometryNode>& hostGeoNode)
 {
     auto nodeOffset = childGeoNode->GetFrameOffset();
     auto hostSize = hostGeoNode->GetFrameSize();
-    return (nodeOffset.GetY() + offset) > hostSize.Height();
+    if (axis == Axis::VERTICAL) {
+        return (nodeOffset.GetY() + offset) > hostSize.Height();
+    } else if (axis == Axis::HORIZONTAL) {
+        return (nodeOffset.GetX() + offset) > hostSize.Width();
+    } else {
+        return false;
+    }
 }
 
-bool OutOfTopBoundary(RefPtr<GeometryNode>& geoNode, float offset)
+bool OutOfTopOrLeftBoundary(Axis axis, RefPtr<GeometryNode>& geoNode, float offset)
 {
     auto nodeSize = geoNode->GetFrameSize();
     auto nodeOffset = geoNode->GetFrameOffset();
-    return nodeSize.Height() + nodeOffset.GetY() + offset < 0;
+    if (axis == Axis::VERTICAL) {
+        return nodeSize.Height() + nodeOffset.GetY() + offset < 0;
+    } else if (axis == Axis::HORIZONTAL) {
+        return nodeSize.Width() + nodeOffset.GetX() + offset < 0;
+    } else {
+        return false;
+    }
 }
 
-int32_t GetScrollDownItemIndex(float offset, int32_t start, int32_t end, RefPtr<FrameNode>& host)
+int32_t GetScrollDownOrRightItemIndex(Axis axis, float offset, int32_t start, int32_t end, RefPtr<FrameNode>& host)
 {
     auto inIndex = end;
     auto hostGeoNode = host->GetGeometryNode();
@@ -71,14 +84,14 @@ int32_t GetScrollDownItemIndex(float offset, int32_t start, int32_t end, RefPtr<
             continue;
         }
         auto childGeoNode = child->GetGeometryNode();
-        if (!OutOfBottomBoundary(childGeoNode, offset, hostGeoNode)) {
+        if (!OutOfBottomOrRightBoundary(axis, childGeoNode, offset, hostGeoNode)) {
             break;
         }
     }
     return inIndex;
 }
 
-int32_t GetScrollUpItemIndex(float offset, int32_t start, int32_t end, RefPtr<FrameNode>& host)
+int32_t GetScrollUpOrLeftItemIndex(Axis axis, float offset, int32_t start, int32_t end, RefPtr<FrameNode>& host)
 {
     auto outIndex = start;
     for (; outIndex <= end; outIndex++) {
@@ -87,7 +100,7 @@ int32_t GetScrollUpItemIndex(float offset, int32_t start, int32_t end, RefPtr<Fr
             continue;
         }
         auto geoNode = child->GetGeometryNode();
-        if (!OutOfTopBoundary(geoNode, offset)) {
+        if (!OutOfTopOrLeftBoundary(axis, geoNode, offset)) {
             break;
         }
     }
@@ -101,24 +114,29 @@ void RecycleItemsByIndex(int32_t start, int32_t end, std::vector<RefPtr<LazyForE
     }
 }
 
-void ScrollableUtils::RecycleItemsOutOfBoundary(float offset, int32_t start, int32_t end, LayoutWrapper* wrapper)
+void ScrollableUtils::RecycleItemsOutOfBoundary(
+    Axis axis, float offset, int32_t start, int32_t end, LayoutWrapper* wrapper)
 {
     if (start >= end || start < 0 || end < 0 || offset == 0) {
         return;
     }
+    if (axis != Axis::HORIZONTAL && axis != Axis::VERTICAL) {
+        return;
+    }
+
     auto host = wrapper->GetHostNode();
     std::vector<RefPtr<LazyForEachNode>> lazyNodes = GetLazyForEachNodes(host);
     if (lazyNodes.empty()) {
         return;
     }
     if (offset >= 0) {
-        int32_t inIndex = GetScrollDownItemIndex(offset, start, end, host);
+        int32_t inIndex = GetScrollDownOrRightItemIndex(axis, offset, start, end, host);
         if (inIndex >= end) {
             return;
         }
         RecycleItemsByIndex(inIndex + 1, end + 1, lazyNodes);
     } else {
-        int32_t outIndex = GetScrollUpItemIndex(offset, start, end, host);
+        int32_t outIndex = GetScrollUpOrLeftItemIndex(axis, offset, start, end, host);
         if (outIndex <= start) {
             return;
         }
