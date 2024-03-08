@@ -22,7 +22,10 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/indexer_model_impl.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 
 namespace OHOS::Ace {
@@ -54,6 +57,10 @@ const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALI
 const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::AlignStyle::RIGHT };
 const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::AlignStyle::RIGHT };
 constexpr Dimension DEFAULT_ITEM_SIZE = 16.0_vp;
+constexpr double ZERO_RADIUS = 0.0;
+constexpr double POPUP_ITEM_DEFAULT_RADIUS = 24.0;
+constexpr double ITEM_DEFAULT_RADIUS = 8.0;
+constexpr double RADIUS_OFFSET = 4.0;
 }; // namespace
 
 void JSIndexer::ParseIndexerSelectedObject(
@@ -442,6 +449,79 @@ void JSIndexer::SetAutoCollapse(bool state)
     IndexerModel::GetInstance()->SetAutoCollapse(state);
 }
 
+void JSIndexer::SetPopupItemBorderRadius(const JSCallbackInfo& args)
+{
+    auto radius = Dimension(ZERO_RADIUS, DimensionUnit::VP);
+    auto popupRadius = Dimension(ZERO_RADIUS, DimensionUnit::VP);
+    if (args.Length() > 0 && args[0]->IsNumber()) {
+        auto radiusValue = args[0]->ToNumber<double>();
+        if (radiusValue >= 0) {
+            radius.SetValue(radiusValue);
+            radius.SetUnit(DimensionUnit::VP);
+            popupRadius.SetValue(radiusValue + RADIUS_OFFSET);
+            popupRadius.SetUnit(DimensionUnit::VP);
+        }
+    } else {
+        radius.SetValue(POPUP_ITEM_DEFAULT_RADIUS);
+        radius.SetUnit(DimensionUnit::VP);
+        popupRadius.SetValue(radius.Value() + RADIUS_OFFSET);
+        popupRadius.SetUnit(DimensionUnit::VP);
+    }
+    IndexerModel::GetInstance()->SetPopupItemBorderRadius(radius);
+    IndexerModel::GetInstance()->SetPopupBorderRadius(popupRadius);
+}
+
+void JSIndexer::SetItemBorderRadius(const JSCallbackInfo& args)
+{
+    auto radius = Dimension(ZERO_RADIUS, DimensionUnit::VP);
+    auto indexerRadius = Dimension(ZERO_RADIUS, DimensionUnit::VP);
+    if (args.Length() > 0 && args[0]->IsNumber()) {
+        auto radiusValue = args[0]->ToNumber<double>();
+        if (radiusValue >= 0) {
+            radius.SetValue(radiusValue);
+            radius.SetUnit(DimensionUnit::VP);
+            indexerRadius.SetValue(radiusValue + RADIUS_OFFSET);
+            indexerRadius.SetUnit(DimensionUnit::VP);
+        }
+    } else {
+        radius.SetValue(ITEM_DEFAULT_RADIUS);
+        radius.SetUnit(DimensionUnit::VP);
+        indexerRadius.SetValue(radius.Value() + RADIUS_OFFSET);
+        indexerRadius.SetUnit(DimensionUnit::VP);
+    }
+    IndexerModel::GetInstance()->SetItemBorderRadius(radius);
+    IndexerModel::GetInstance()->SetIndexerBorderRadius(indexerRadius);
+}
+
+void JSIndexer::SetPopupBackgroundBlurStyle(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        return;
+    }
+
+    BlurStyleOption styleOption;
+    if (args[0]->IsNumber()) {
+        auto blurStyle = args[0]->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+        } else {
+            styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
+        }
+    } else {
+        styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
+    }
+    IndexerModel::GetInstance()->SetPopupBackgroundBlurStyle(styleOption);
+}
+
+void JSIndexer::SetPopupTitleBackground(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        return;
+    }
+    IndexerModel::GetInstance()->SetPopupTitleBackground(PaseColor(args));
+}
+
 void JSIndexer::JSBind(BindingTarget globalObj)
 {
     MethodOptions opt = MethodOptions::NONE;
@@ -469,6 +549,10 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("popupItemFont", &JSIndexer::SetPopupItemFont);
     JSClass<JSIndexer>::StaticMethod("popupItemBackgroundColor", &JSIndexer::SetPopupItemBackgroundColor, opt);
     JSClass<JSIndexer>::StaticMethod("autoCollapse", &JSIndexer::SetAutoCollapse, opt);
+    JSClass<JSIndexer>::StaticMethod("popupItemBorderRadius", &JSIndexer::SetPopupItemBorderRadius);
+    JSClass<JSIndexer>::StaticMethod("itemBorderRadius", &JSIndexer::SetItemBorderRadius);
+    JSClass<JSIndexer>::StaticMethod("popupBackgroundBlurStyle", &JSIndexer::SetPopupBackgroundBlurStyle);
+    JSClass<JSIndexer>::StaticMethod("popupTitleBackground", &JSIndexer::SetPopupTitleBackground, opt);
     // keep compatible, need remove after
     JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);

@@ -2416,6 +2416,16 @@ struct ArkUIAlphabetIndexerModifier {
     void (*setPopupPosition)(
         ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue, ArkUI_Int32 yUnit);
     void (*resetPopupPosition)(ArkUINodeHandle node);
+    void (*setPopupItemBorderRadius)(ArkUINodeHandle node, ArkUI_Float32 radiusValue, ArkUI_Int32 radiusUnit,
+        ArkUI_Float32 popupValue, ArkUI_Int32 popupUnit);
+    void (*resetPopupItemBorderRadius)(ArkUINodeHandle node);
+    void (*setItemBorderRadius)(ArkUINodeHandle node, ArkUI_Float32 radiusValue, ArkUI_Int32 radiusUnit,
+        ArkUI_Float32 indexerValue, ArkUI_Int32 indexerUnit);
+    void (*resetItemBorderRadius)(ArkUINodeHandle node);
+    void (*setPopupBackgroundBlurStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetPopupBackgroundBlurStyle)(ArkUINodeHandle node);
+    void (*setPopupTitleBackground)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetPopupTitleBackground)(ArkUINodeHandle node);
 };
 
 struct ArkUILoadingProgressModifier {
