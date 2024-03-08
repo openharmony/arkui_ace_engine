@@ -356,7 +356,7 @@ void NavigationPattern::CheckTopNavPathChange(
     if (preTopNavPath.has_value()) {
         // pre page is not in the current stack
         lastPreIndex = navigationStack_->FindIndex(preTopNavPath->first, preTopNavPath->second, true);
-        isPopPage |= lastPreIndex == -1;
+        isPopPage &= lastPreIndex == -1;
         preTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(preTopNavPath->second));
         if (preTopNavDestination) {
