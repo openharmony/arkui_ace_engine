@@ -125,8 +125,11 @@ public:
     }
 
     int32_t GetIndexByUINode(const RefPtr<UINode>& uiNode) const;
-    void SetLazyStartIndex(int32_t start);
-    void SetLazyCount(int32_t count);
+    void SetNodeIndexOffset(int32_t start, int32_t count) override
+    {
+        startIndex_ = start;
+        count_ = count;
+    }
     void RecycleItems(int32_t from, int32_t to);
 
 private:
