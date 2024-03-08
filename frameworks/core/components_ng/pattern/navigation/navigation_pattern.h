@@ -374,6 +374,8 @@ private:
     RefPtr<NavigationPattern> GetParentNavigationPattern();
     void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBar);
 
+    void UpdateIsAnimation(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath);
+
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
@@ -400,6 +402,8 @@ private:
     bool isCustomAnimation_ = false; // custom animation
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
+    bool isAnimated_ = false;
+    bool isReplace_ = false;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
     OnNavigationAnimation onTransition_;

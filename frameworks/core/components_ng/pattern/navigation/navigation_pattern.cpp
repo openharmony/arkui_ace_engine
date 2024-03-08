@@ -224,21 +224,21 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack");
     preTopNavPath_ = navigationStack_->GetPreTopNavPath();
     preStackSize_ = navigationStack_->PreSize();
+    preContext_ = nullptr;
     if (preTopNavPath_.has_value()) {
-        auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-            hostNode->GetNavDestinationNode(preTopNavPath_->second));
+            NavigationGroupNode::GetNavDestinationNode(preTopNavPath_->second));
         if (preDestination) {
             auto pattern = AceType::DynamicCast<NavDestinationPattern>(preDestination->GetPattern());
             preContext_ = pattern->GetNavDestinationContext();
         }
-    } else {
-        preContext_ = nullptr;
     }
     UpdateNavPathList();
     auto newTopNavPath = navigationStack_->GetTopNavPath();
     auto replaceValue = navigationStack_->GetReplaceValue();
     if (preTopNavPath_ != newTopNavPath || replaceValue == 1) {
+        isReplace_ = replaceValue != 0;
+        UpdateIsAnimation(preTopNavPath_);
         FireInterceptionEvent(true, newTopNavPath);
         if (needSyncWithJsStack_) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack in before interception");
@@ -312,8 +312,6 @@ void NavigationPattern::RefreshNavDestination()
         CHECK_NULL_VOID(firstNavDesNode);
         firstNavDesNode->MarkModifyDone();
     }
-
-    preStackSize_ = 0;
 }
 
 void NavigationPattern::CheckTopNavPathChange(
@@ -340,6 +338,8 @@ void NavigationPattern::CheckTopNavPathChange(
 #endif
 
     isChanged_ = true;
+    UpdateIsAnimation(preTopNavPath);
+    isReplace_ = replaceValue != 0;
     if (replaceValue == 1) {
         const int32_t replaceAnimation = 2;
         navigationStack_->UpdateReplaceValue(replaceAnimation);
@@ -1633,15 +1633,51 @@ void NavigationPattern::FireInterceptionEvent(bool isBefore,
         }
     }
     NavigationOperation operation;
-    auto replaceValue = navigationStack_->GetReplaceValue();
-    if (replaceValue == 1) {
+    if (isReplace_ != 0) {
         operation = NavigationOperation::REPLACE;
     } else {
         operation = preStackSize_ > size ? NavigationOperation::POP : NavigationOperation::PUSH;
     }
-    bool disableAllAnimation = navigationStack_->GetDisableAnimation();
-    bool animated = navigationStack_->GetAnimatedValue();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    // mode is split and stack size is one,don't need to do animation.
+    if ((layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT
+        || navigationMode_ == NavigationMode::SPLIT) && !preContext_) {
+        isAnimated_ = false;
+    }
     navigationStack_->FireNavigationInterception(isBefore, preContext_, to, operation,
-        !disableAllAnimation || animated);
+        isAnimated_);
+}
+
+void NavigationPattern::UpdateIsAnimation(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath)
+{
+    auto disAbleAnimation = navigationStack_->GetDisableAnimation();
+    auto animated = navigationStack_->GetAnimatedValue();
+    // current animation flag is false
+    if (disAbleAnimation || !animated) {
+        isAnimated_ = false;
+        return;
+    }
+    // check is dialog mode
+    bool isDialog = false;
+    if (preTopNavPath.has_value()) {
+        auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(preTopNavPath->second));
+        if (preDestination) {
+            isDialog |= preDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG;
+        }
+    }
+    auto topNode = navigationStack_->Get();
+    if (topNode) {
+        auto newTopDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(topNode));
+        if (newTopDestination) {
+            isDialog |= newTopDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG;
+        }
+    }
+    if (!isDialog) {
+        isAnimated_ = true;
+        return;
+    }
+    isAnimated_ = isCustomAnimation_;
 }
 } // namespace OHOS::Ace::NG
