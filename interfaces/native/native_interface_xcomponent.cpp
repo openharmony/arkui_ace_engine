@@ -271,13 +271,15 @@ int32_t OH_NativeXComponent_SetNeedSoftKeyboard(OH_NativeXComponent* component, 
 int32_t OH_NativeXComponent_RegisterSurfaceShowCallback(
     OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window))
 {
-    return (component && callback) ? component->RegisterSurfaceShowCallback(callback) : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    return (component && callback) ? component->RegisterSurfaceShowCallback(callback)
+        : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
 }
 
 int32_t OH_NativeXComponent_RegisterSurfaceHideCallback(
     OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window))
 {
-    return (component && callback) ? component->RegisterSurfaceHideCallback(callback) : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    return (component && callback) ? component->RegisterSurfaceHideCallback(callback)
+        : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
 }
 
 int32_t OH_NativeXComponent_RegisterOnTouchInterceptCallback(
