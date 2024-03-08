@@ -35,6 +35,8 @@ const LOADING_MAX_LINES: number = 10;
 const LOADING_TEXT_LAYOUT_WEIGHT: number = 1;
 const LOADING_TEXT_MARGIN_LEFT: number = 12;
 const LOADING_MIN_HEIGHT: number = 48;
+const LIST_MIN_HEIGHT: number = 48
+const CHECKBOX_CONTAINER_LENGTH: number = 20
 export declare type ButtonOptions = {
   value: ResourceStr;
   action?: () => void;
@@ -159,37 +161,34 @@ export struct TipsDialog{
 
 @CustomDialog
 export struct SelectDialog{
-  controller: CustomDialogController
-  title: ResourceStr = ''
-  content?: ResourceStr = ''
-  selectedIndex?: number = -1
-  confirm?: ButtonOptions = {value: ""}
-  radioContent: Array<SheetInfo> = []
+  title: ResourceStr = '';
+  content?: ResourceStr = '';
+  selectedIndex?: number = -1;
+  confirm?: ButtonOptions = {value: ""};
+  radioContent: Array<SheetInfo> = [];
+  @BuilderParam contentBuilder: () => void = this.buildContent;
+  controller: CustomDialogController = new CustomDialogController({
+    builder: CustomContentDialog({
+      primaryTitle: this.title,
+      contentBuilder: () => {
+        this.contentBuilder();
+      },
+      buttons: (this.confirm === undefined || this.confirm?.value === "") ? [] : [this.confirm],
+    })
+  });
 
-  build() {
+  @Builder
+  buildContent() : void {
+    Scroll() {
       Column() {
-        Row() {
-          Text(this.title)
-            .fontSize($r('sys.float.ohos_id_text_size_dialog_tittle'))
-            .fontWeight(FontWeight.Medium)
-            .maxLines(CONTENT_MAX_LINES)
-            .minFontSize(15)
-            .textOverflow({ overflow: TextOverflow.Ellipsis})
-            .fontColor($r('sys.color.ohos_id_color_text_primary'))
-            .textAlign(TextAlign.Start)
-            .width('100%')
-        }.padding({ left: 24, right: 24, top: 24 })
-        .constraintSize({minHeight: 56})
         if (this.content) {
           Row() {
             Text(this.content)
-              .fontSize($r('sys.float.ohos_id_text_size_body2'))
-              .fontWeight(FontWeight.Medium)
-              .fontColor($r('sys.color.ohos_id_color_text_primary'))
-              .maxLines(CONTENT_MAX_LINES)
-              .textOverflow({ overflow: TextOverflow.Ellipsis})
-              .minFontSize($r('sys.float.ohos_id_text_size_body3'))
-          }.padding({ left: 24, right: 24, top: 8, bottom: 8 })
+              .fontSize($r('sys.float.Body_M'))
+              .fontWeight(FontWeight.Regular)
+              .fontColor($r('sys.color.font_primary'))
+              .textOverflow({overflow: TextOverflow.Ellipsis})
+          }.padding({bottom: $r('sys.float.padding_level4')})
           .width('100%')
         }
         List({space: 1}) {
@@ -198,54 +197,44 @@ export struct SelectDialog{
               Column() {
                 Row() {
                   Text(item.title)
-                    .fontSize(ITEM_TEXT_SIZE)
+                    .fontSize($r('sys.float.Body_L'))
                     .fontWeight(FontWeight.Medium)
-                    .maxLines(CONTENT_MAX_LINES)
-                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                    .fontColor($r('sys.color.font_primary'))
                     .layoutWeight(1)
-                  Radio({ value: 'item.title', group: 'radioGroup'})
-                    .size({ width : 20, height : 20})
+                  Radio({value: 'item.title', group: 'radioGroup'})
+                    .size({width : CHECKBOX_CONTAINER_LENGTH, height : CHECKBOX_CONTAINER_LENGTH})
                     .checked(this.selectedIndex == index)
                     .onClick(() => {
                       item.action && item.action()
                       this.controller.close()
                     })
-                }.constraintSize({minHeight: 48}).clip(false)
+                }.constraintSize({minHeight: LIST_MIN_HEIGHT}).clip(false)
+                .padding({ top: $r('sys.float.padding_level4'), bottom: $r('sys.float.padding_level4') })
                 .onClick(() => {
                   item.action && item.action()
                   this.controller.close()
                 })
                 if (index < this.radioContent.length - 1) {
-                  Divider().color($r('sys.color.ohos_id_color_list_separator'))
+                  Divider().color($r('sys.color.comp_divider'))
                 }
               }
             }
           })
-        }.width('100%').padding({ left: 24, right: 24, top: 8, bottom: 8 }).clip(false)
-        Row() {
-          if (this.confirm.value) {
-            Button(this.confirm.value)
-              .fontSize($r('sys.float.ohos_id_text_size_button1'))
-              .fontWeight(FontWeight.Medium)
-              .layoutWeight(1)
-              .backgroundColor(this.confirm.background? this.confirm.background: $r('sys.color.ohos_id_color_background_transparent'))
-              .fontColor(this.confirm.fontColor ? this.confirm.fontColor: $r('sys.color.ohos_id_color_text_primary_activated'))
-              .onClick(() => {
-                this.confirm.action && this.confirm.action()
-                this.controller.close()
-              })
-          }
-        }.width('100%').padding({ left: 16, right: 16, top: 16, bottom: 16 })
-      }
-      .backgroundBlurStyle(BlurStyle.Thick)
-      .borderRadius($r('sys.float.ohos_id_corner_radius_dialog'))
-      .margin({
-        left: $r('sys.float.ohos_id_dialog_margin_start'),
-        right: $r('sys.float.ohos_id_dialog_margin_end'),
-        bottom: $r('sys.float.ohos_id_dialog_margin_bottom')
-      })
-      // 1.backgroundcolor use in blur enable mod mast set this color: colorDialogBgBlur. but now it is not found
-      .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
+        }.width('100%').clip(false)
+      }.padding({right: $r('sys.float.padding_level8')})
+    }.margin({right: -getNumberByResource('padding_level8')})
+    .scrollBar(BarState.Auto)
+  }
+
+  build() {
+    CustomDialogContentComponent({
+      controller: this.controller,
+      primaryTitle: this.title,
+      contentBuilder: () => {
+        this.contentBuilder();
+      },
+      buttons: (this.confirm === undefined || this.confirm.value === "") ? [] : [this.confirm],
+    })
   }
 }
 
