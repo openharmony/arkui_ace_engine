@@ -71,6 +71,10 @@ const float CHILD_OFFSET_WIDTH = 50.0f;
 const float CHILD_OFFSET_HEIGHT = 0.0f;
 TestProperty testProperty;
 bool isFocus = false;
+const float SURFACE_WIDTH = 250.0f;
+const float SURFACE_HEIGHT = 150.0f;
+const float SURFACE_OFFSETX = 10.0f;
+const float SURFACE_OFFSETY = 20.0f;
 
 TouchType ConvertXComponentTouchType(const OH_NativeXComponent_TouchEventType& type)
 {
@@ -791,5 +795,75 @@ HWTEST_F(XComponentTestNg, XComponentTextureTypeTest011, TestSize.Level1)
         AdjustNativeWindowSize(MAX_WIDTH, MAX_HEIGHT))
         .WillOnce(Return());
     pattern->InitNativeWindow(MAX_WIDTH, MAX_HEIGHT);
+}
+
+/**
+ * @tc.name: XComponentControllerTest
+ * @tc.desc: Test XComponentController's interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE_VALUE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    EXPECT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->hasXComponentInit_ = true;
+    EXPECT_EQ(pattern->type_, XCOMPONENT_SURFACE_TYPE_VALUE);
+    EXPECT_TRUE(pattern->IsAtomicNode());
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    pattern->handlingSurfaceRenderContext_ = renderContext;
+
+    /**
+     * @tc.steps: step2. call XcomponentController's interface releative to SetSurfaceRect
+     * @tc.expected: handlingSurfaceRenderContext_->SetBounds(SURFACE_OFFSETX, SURFACE_OFFSETY,
+     *               SURFACE_WIDTH, SURFACE_HEIGHT) is called
+     */
+    auto xcomponentController = pattern->xcomponentController_;
+    EXPECT_TRUE(xcomponentController);
+    pattern->drawSize_ = MAX_SIZE;
+    xcomponentController->SetIdealSurfaceWidth(SURFACE_WIDTH);
+    xcomponentController->SetIdealSurfaceHeight(SURFACE_HEIGHT);
+    xcomponentController->SetIdealSurfaceOffsetX(SURFACE_OFFSETX);
+    xcomponentController->SetIdealSurfaceOffsetY(SURFACE_OFFSETY);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_),
+        SetBounds(SURFACE_OFFSETX, SURFACE_OFFSETY, SURFACE_WIDTH, SURFACE_HEIGHT))
+        .WillOnce(Return());
+    xcomponentController->UpdateSurfaceBounds();
+
+    /**
+     * @tc.steps: step3. call XcomponentController's interface releative to GetSurfaceRect
+     * @tc.expected: the rect get from GetSurfaceRect equals the rect set by SetSurfaceRect
+     */
+    auto surfaceWidth = 0.0f;
+    auto surfaceHeight = 0.0f;
+    auto surfaceOffsetX = 0.0f;
+    auto surfaceOffsetY = 0.0f;
+    xcomponentController->GetSurfaceSize(surfaceWidth, surfaceHeight);
+    xcomponentController->GetLocalLocation(surfaceOffsetX, surfaceOffsetY);
+    EXPECT_EQ(surfaceOffsetX, SURFACE_OFFSETX);
+    EXPECT_EQ(surfaceOffsetY, SURFACE_OFFSETY);
+    EXPECT_EQ(surfaceWidth, SURFACE_WIDTH);
+    EXPECT_EQ(surfaceHeight, SURFACE_HEIGHT);
+
+    /**
+     * @tc.steps: step4. call XcomponentController's ClearIdealSurfaceOffset
+     * @tc.expected: handlingSurfaceRenderContext_->SetBounds(newSurfaceOffsetX, newSurfaceOffsetY,
+     *               SURFACE_WIDTH, SURFACE_HEIGHT) is called
+     */
+    auto newSurfaceOffsetX = (MAX_WIDTH - SURFACE_WIDTH) / 2.0f;
+    auto newSurfaceOffsetY = (MAX_HEIGHT - SURFACE_HEIGHT) / 2.0f;
+    xcomponentController->ClearIdealSurfaceOffset(true);
+    xcomponentController->ClearIdealSurfaceOffset(false);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_),
+        SetBounds(newSurfaceOffsetX, newSurfaceOffsetY, SURFACE_WIDTH, SURFACE_HEIGHT))
+        .WillOnce(Return());
+    xcomponentController->UpdateSurfaceBounds();
 }
 } // namespace OHOS::Ace::NG
