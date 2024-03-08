@@ -972,7 +972,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
 
     JSRef<JSVal> letterSpacing = styleObject->GetProperty("letterSpacing");
     CalcDimension letters;
-    if (!letterSpacing->IsNull() && JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters) &&
+    if (!letterSpacing->IsNull() && JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters, false) &&
         letters.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
