@@ -80,8 +80,8 @@ frameworks/core/components_ng/pattern/grid_col/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_container/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_row/  @xiexiyun
 frameworks/core/components_ng/pattern/hyperlink/  @techbuilding
-frameworks/core/components_ng/pattern/image/  @xiexiyun
-frameworks/core/components_ng/pattern/image_animator/  @hehongyang9
+frameworks/core/components_ng/pattern/image/  @wu-yinxiao
+frameworks/core/components_ng/pattern/image_animator/  @wu-yinxiao
 frameworks/core/components_ng/pattern/indexer/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/linear_layout/  @xiexiyun
 frameworks/core/components_ng/pattern/linear_split/  @xiexiyun
@@ -185,7 +185,7 @@ frameworks/core/components/grid/  @zcdqs
 frameworks/core/components/grid_layout/  @zcdqs
 frameworks/core/components/hyperlink/  @techbuilding
 frameworks/core/components/ifelse/  @yan-shuifeng
-frameworks/core/components/image/  @xiexiyun
+frameworks/core/components/image/  @wu-yinxiao
 frameworks/core/components/indexer/  @Zhang-Dong-hui
 frameworks/core/components/list/  @yeyinglong_admin
 frameworks/core/components/marquee/  @liyujie43
@@ -281,9 +281,9 @@ frameworks/core/gestures/  @zheng-qiyi
 frameworks/core/components_ng/gestures/  @zheng-qiyi
 
 [Image source]
-frameworks/core/image/  @xiexiyun
-frameworks/core/components_ng/image_provider/  @xiexiyun
-frameworks/core/components_ng/svg/  @xiexiyun
+frameworks/core/image/  @wu-yinxiao
+frameworks/core/components_ng/image_provider/  @wu-yinxiao
+frameworks/core/components_ng/svg/  @wu-yinxiao
 
 [Advanced UI Components]
 advanced_ui_component/ @youzhi92
