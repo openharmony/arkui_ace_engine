@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,6 +89,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_refresh_bridge.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h"
 #endif
@@ -1297,6 +1298,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterTextClockAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
+    RegisterRefreshAttributes(object, vm);
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     RegisterPluginAttributes(object, vm);
 #endif
@@ -2372,6 +2374,20 @@ void ArkUINativeModule::RegisterTabContentAttributes(Local<panda::ObjectRef> obj
     tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabContentSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabContentSize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabContent"), tabContent);
+}
+
+void ArkUINativeModule::RegisterRefreshAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto refresh = panda::ObjectRef::New(vm);
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRefreshOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetRefreshOffset));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRefreshOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetRefreshOffset));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPullToRefresh"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetPullToRefresh));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPullToRefresh"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetPullToRefresh));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "refresh"), refresh);
 }
 
 void ArkUINativeModule::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

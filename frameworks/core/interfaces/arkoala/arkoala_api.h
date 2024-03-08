@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 72
+#define ARKUI_FULL_API_VERSION 73
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 72
+#define ARKUI_NODE_API_VERSION 73
 
 #define ARKUI_BASIC_API_VERSION 6
 #define ARKUI_EXTENDED_API_VERSION 6
@@ -2369,6 +2369,10 @@ struct ArkUIBadgeModifier {
 struct ArkUIRefreshModifier {
     void (*setRefreshing)(ArkUINodeHandle node, ArkUI_Bool value);
     ArkUI_Bool (*getRefreshing)(ArkUINodeHandle node);
+    void (*setRefreshOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetRefreshOffset)(ArkUINodeHandle node);
+    void (*setPullToRefresh)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetPullToRefresh)(ArkUINodeHandle node);
 };
 
 struct ArkUIHyperlinkModifier {
