@@ -73,6 +73,8 @@ public:
 
     bool OnDataMoved(size_t from, size_t to);
 
+    void RecycleChildByIndex(int32_t index);
+
     void InvalidIndexOfChangedData(size_t index)
     {
         for (auto& [key, child] : expiringItem_) {

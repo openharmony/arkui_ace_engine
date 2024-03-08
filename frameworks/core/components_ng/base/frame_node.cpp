@@ -104,6 +104,7 @@ public:
         int32_t count = 0;
         for (const auto& child : children) {
             count = child->FrameCount();
+            child->SetNodeIndexOffset(startIndex, count);
             children_.push_back({ child, startIndex, count });
             startIndex += count;
             totalCount_ += count;

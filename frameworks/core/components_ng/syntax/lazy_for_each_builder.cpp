@@ -197,4 +197,19 @@ namespace OHOS::Ace::NG {
         }
         return true;
     }
+
+    void LazyForEachBuilder::RecycleChildByIndex(int32_t index)
+    {
+        auto iter = cachedItems_.find(index);
+        if (iter != cachedItems_.end()) {
+            if (!iter->second.second) {
+                return;
+            }
+            auto keyIter = expiringItem_.find(iter->second.first);
+            if (keyIter != expiringItem_.end() && keyIter->second.second) {
+                expiringItem_.erase(keyIter);
+            }
+            cachedItems_.erase(index);
+        }
+    }
 }

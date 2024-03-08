@@ -37,6 +37,8 @@
 namespace OHOS::Ace::NG {
 void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    ScrollableUtils::RecycleItemsOutOfBoundary(gridLayoutInfo_.axis_, gridLayoutInfo_.originOffset_,
+        gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, layoutWrapper);
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
 
@@ -192,7 +194,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     childFrameOffset_ = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     childFrameOffset_ += gridLayoutProperty->IsVertical() ? OffsetF(0.0f, gridLayoutInfo_.currentOffset_)
                                                           : OffsetF(gridLayoutInfo_.currentOffset_, 0.0f);
-
+    layoutWrapper->RemoveAllChildInRenderTree();
     float prevLineHeight = 0.0f;
     int32_t startIndex = -1;
     int32_t endIndex = -1;

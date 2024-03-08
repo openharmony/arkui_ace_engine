@@ -529,6 +529,8 @@ public:
 
     virtual bool SetParentLayoutConstraint(const SizeF& size) const;
 
+    virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
+
     void PaintDebugBoundaryTreeAll(bool flag);
 
 protected:
