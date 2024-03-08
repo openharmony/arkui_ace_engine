@@ -2837,8 +2837,8 @@ void RosenRenderContext::PaintFocusState(
     frameRect.SetRect(RectF(0, 0, bounds.z_, bounds.w_));
     frameRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, radius.x_, radius.x_);
     frameRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, radius.y_, radius.y_);
-    frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, radius.z_, radius.z_);
-    frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radius.w_, radius.w_);
+    frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radius.z_, radius.z_);
+    frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, radius.w_, radius.w_);
 
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth);
 }
