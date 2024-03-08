@@ -880,7 +880,7 @@ void JSRichEditorController::ParseJsTextStyle(
     CalcDimension lineHigh;
     
     if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, lineHigh) &&
-        lineHigh.Unit() != DimensionUnit::PERCENT) {
+        !lineHigh.IsNegative() && lineHigh.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLineHeight = lineHigh;
         style.SetLineHeight(lineHigh);
     } else if (lineHigh.IsNegative() || lineHigh.Unit() == DimensionUnit::PERCENT) {
@@ -895,7 +895,7 @@ void JSRichEditorController::ParseJsTextStyle(
     CalcDimension letters;
     
     if (!letterSpacing->IsNull() && JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters) &&
-        !letters.IsNegative() && letters.Unit() != DimensionUnit::PERCENT) {
+        letters.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
     } else if (letters.IsNegative() || letters.Unit() == DimensionUnit::PERCENT) {
