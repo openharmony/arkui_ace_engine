@@ -181,6 +181,8 @@ public:
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void UpdateTextStyle(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+    virtual void UpdateContentTextStyle(
+        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);

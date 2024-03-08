@@ -316,11 +316,19 @@ void SpanItem::UpdateTextStyleForAISpan(
         if (preEnd < aiSpanStartInSpan) {
             auto beforeContent =
                 StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, aiSpanStartInSpan - preEnd));
-            UpdateTextStyle(beforeContent, builder, textStyle);
+            UpdateContentTextStyle(beforeContent, builder, textStyle);
         }
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        TextStyle normalStyle =
+            !pipelineContext ? TextStyle()
+                                : CreateTextStyleUsingTheme(nullptr, nullptr, pipelineContext->GetTheme<TextTheme>());
+        TextStyle selectedTextStyle = textStyle.value_or(normalStyle);
+        Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
+        selectedTextStyle.SetTextColor(color);
+        auto midTextStyle = !IsDragging() ? aiSpanTextStyle : selectedTextStyle;
         auto displayContent = StringUtils::ToWstring(
             aiSpan.content).substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
-        UpdateTextStyle(StringUtils::ToString(displayContent), builder, aiSpanTextStyle);
+        UpdateContentTextStyle(StringUtils::ToString(displayContent), builder, midTextStyle);
         preEnd = aiSpanEndInSpan;
         if (aiSpan.end > position) {
             return;
@@ -330,7 +338,7 @@ void SpanItem::UpdateTextStyleForAISpan(
     }
     if (preEnd < position) {
         auto afterContent = StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, position - preEnd));
-        UpdateTextStyle(afterContent, builder, textStyle);
+        UpdateContentTextStyle(afterContent, builder, textStyle);
     }
 }
 
@@ -389,23 +397,8 @@ void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const Te
 void SpanItem::UpdateTextStyle(
     const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle)
 {
-    auto textCase = fontStyle ? fontStyle->GetTextCase().value_or(TextCase::NORMAL) : TextCase::NORMAL;
-    auto updateTextAction = [builder, textCase](const std::string& content, const std::optional<TextStyle>& textStyle) {
-        if (content.empty()) {
-            return;
-        }
-        auto displayText = content;
-        StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
-        if (textStyle.has_value()) {
-            builder->PushStyle(textStyle.value());
-        }
-        builder->AddText(StringUtils::Str8ToStr16(displayText));
-        if (textStyle.has_value()) {
-            builder->PopStyle();
-        }
-    };
     if (!IsDragging()) {
-        updateTextAction(content, textStyle);
+        UpdateContentTextStyle(content, builder, textStyle);
     } else {
         if (content.empty()) {
             return;
@@ -413,8 +406,7 @@ void SpanItem::UpdateTextStyle(
         auto displayContent = StringUtils::Str8ToStr16(content);
         auto contentLength = static_cast<int32_t>(displayContent.length());
         auto beforeSelectedText = displayContent.substr(0, selectedStart);
-        updateTextAction(StringUtils::Str16ToStr8(beforeSelectedText), textStyle);
-
+        UpdateContentTextStyle(StringUtils::Str16ToStr8(beforeSelectedText), builder, textStyle);
         if (selectedStart < contentLength) {
             auto pipelineContext = PipelineContext::GetCurrentContext();
             TextStyle normalStyle =
@@ -424,13 +416,31 @@ void SpanItem::UpdateTextStyle(
             Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextColor(color);
             auto selectedText = displayContent.substr(selectedStart, selectedEnd - selectedStart);
-            updateTextAction(StringUtils::Str16ToStr8(selectedText), selectedTextStyle);
+            UpdateContentTextStyle(StringUtils::Str16ToStr8(selectedText), builder, selectedTextStyle);
         }
 
         if (selectedEnd < contentLength) {
             auto afterSelectedText = displayContent.substr(selectedEnd);
-            updateTextAction(StringUtils::Str16ToStr8(afterSelectedText), textStyle);
+            UpdateContentTextStyle(StringUtils::Str16ToStr8(afterSelectedText), builder, textStyle);
         }
+    }
+}
+
+void SpanItem::UpdateContentTextStyle(
+    const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle)
+{
+    if (content.empty()) {
+        return;
+    }
+    auto displayText = content;
+    auto textCase = fontStyle ? fontStyle->GetTextCase().value_or(TextCase::NORMAL) : TextCase::NORMAL;
+    StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
+    if (textStyle.has_value()) {
+        builder->PushStyle(textStyle.value());
+    }
+    builder->AddText(StringUtils::Str8ToStr16(displayText));
+    if (textStyle.has_value()) {
+        builder->PopStyle();
     }
 }
 
