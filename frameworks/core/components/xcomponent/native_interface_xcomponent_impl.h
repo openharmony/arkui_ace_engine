@@ -403,6 +403,7 @@ private:
 } // namespace OHOS::Ace
 
 struct OH_NativeXComponent {
+    using NativeSurfaceCallback = void (*)(OH_NativeXComponent*, void*);
     explicit OH_NativeXComponent(OHOS::Ace::NativeXComponentImpl* xComponentImpl) : xcomponentImpl_(xComponentImpl) {}
     ~OH_NativeXComponent() {}
     int32_t GetXComponentId(char* id, uint64_t* size);
@@ -414,8 +415,8 @@ struct OH_NativeXComponent {
     int32_t GetHistoryPoints(const void* window, int32_t* size, OH_NativeXComponent_HistoricalPoint** historicalPoints);
     int32_t RegisterCallback(OH_NativeXComponent_Callback* callback);
     int32_t RegisterMouseEventCallback(OH_NativeXComponent_MouseEvent_Callback* callback);
-    int32_t RegisterSurfaceShowCallback(void (*callback)(OH_NativeXComponent* component, void* window));
-    int32_t RegisterSurfaceHideCallback(void (*callback)(OH_NativeXComponent* component, void* window));
+    int32_t RegisterSurfaceShowCallback(NativeSurfaceCallback callback);
+    int32_t RegisterSurfaceHideCallback(NativeSurfaceCallback callback);
     int32_t GetToolType(size_t pointIndex, OH_NativeXComponent_TouchPointToolType* toolType);
     int32_t GetTiltX(size_t pointIndex, float* tiltX);
     int32_t GetTiltY(size_t pointIndex, float* tiltY);
