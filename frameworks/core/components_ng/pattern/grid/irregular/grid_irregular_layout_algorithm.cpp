@@ -214,10 +214,14 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
 
     if (!overScroll_ && info.endIndex_ == info.childrenCount_ - 1) {
         float overDis = mainSize - info.contentEndPadding_ - (info.GetTotalHeightOfItemsInView(mainGap_) + res.pos);
-        if (GreatNotEqual(overDis, 0.0f)) {
-            info.currentOffset_ += overDis;
-            res = solver.FindStartingRow(mainGap_);
-            UpdateStartInfo(info, res);
+        if (LessOrEqual(overDis, 0.0f)) {
+            return;
+        }
+        info.currentOffset_ += overDis;
+        res = solver.FindStartingRow(mainGap_);
+        UpdateStartInfo(info, res);
+        if (info.startIndex_ == 0) {
+            info.currentOffset_ = std::min(info.currentOffset_, 0.0f);
         }
     }
 }

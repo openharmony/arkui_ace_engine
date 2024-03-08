@@ -15,6 +15,9 @@
 
 #include "grid_test_ng.h"
 
+#ifndef TEST_IRREGULAR_GRID
+#include "test/mock/base/mock_system_properties.h"
+#endif
 namespace OHOS::Ace::NG {
 void GridTestNg::SetUpTestSuite()
 {
@@ -32,6 +35,10 @@ void GridTestNg::SetUpTestSuite()
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), DrawFrameNode(_)).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), MoveTo(_, _)).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), Destroy()).Times(AnyNumber());
+
+#ifndef TEST_IRREGULAR_GRID
+    g_irregularGrid = false;
+#endif
 }
 
 void GridTestNg::TearDownTestSuite()
@@ -75,8 +82,7 @@ void GridTestNg::Create(const std::function<void(GridModelNG)>& callback)
     FlushLayoutTask(frameNode_);
 }
 
-void GridTestNg::CreateItem(
-    int32_t itemNumber, float width, float height, GridItemStyle gridItemStyle)
+void GridTestNg::CreateItem(int32_t itemNumber, float width, float height, GridItemStyle gridItemStyle)
 {
     for (int32_t i = 0; i < itemNumber; i++) {
         GridItemModelNG itemModel;
@@ -105,27 +111,27 @@ void GridTestNg::CreateFixedItem(
 void GridTestNg::CreateBigItem(
     int32_t rowStart, int32_t rowEnd, int32_t colStart, int32_t colEnd, float width, float height)
 {
-        GridItemModelNG itemModel;
-        itemModel.Create(GridItemStyle::NONE);
-        if (rowStart != NULL_VALUE) {
-            itemModel.SetRowStart(rowStart);
-        }
-        if (rowEnd != NULL_VALUE) {
-            itemModel.SetRowEnd(rowEnd);
-        }
-        if (colStart != NULL_VALUE) {
-            itemModel.SetColumnStart(colStart);
-        }
-        if (colEnd != NULL_VALUE) {
-            itemModel.SetColumnEnd(colEnd);
-        }
-        if (width != NULL_VALUE) {
-            ViewAbstract::SetWidth(CalcLength(width));
-        }
-        if (height != NULL_VALUE) {
-            ViewAbstract::SetHeight(CalcLength(height));
-        }
-        ViewStackProcessor::GetInstance()->Pop();
+    GridItemModelNG itemModel;
+    itemModel.Create(GridItemStyle::NONE);
+    if (rowStart != NULL_VALUE) {
+        itemModel.SetRowStart(rowStart);
+    }
+    if (rowEnd != NULL_VALUE) {
+        itemModel.SetRowEnd(rowEnd);
+    }
+    if (colStart != NULL_VALUE) {
+        itemModel.SetColumnStart(colStart);
+    }
+    if (colEnd != NULL_VALUE) {
+        itemModel.SetColumnEnd(colEnd);
+    }
+    if (width != NULL_VALUE) {
+        ViewAbstract::SetWidth(CalcLength(width));
+    }
+    if (height != NULL_VALUE) {
+        ViewAbstract::SetHeight(CalcLength(height));
+    }
+    ViewStackProcessor::GetInstance()->Pop();
 }
 
 void GridTestNg::CreateBigColItem(int32_t colStart, int32_t colEnd)
