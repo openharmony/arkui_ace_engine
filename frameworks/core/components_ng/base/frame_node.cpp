@@ -58,6 +58,7 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t SUBSTR_LENGTH = 3;
 const char DIMENSION_UNIT_VP[] = "vp";
 const char FORM_COMPONENT_TAG[] = "FormComponent";
+constexpr int32_t SIZE_CHANGE_DUMP_SIZE = 5;
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -108,6 +109,8 @@ public:
             totalCount_ += count;
         }
         cursor_ = children_.begin();
+        startIndex_ = -1;
+        endIndex_ = -1;
     }
 
     static void AddFrameNode(const RefPtr<UINode>& UiNode, std::list<RefPtr<LayoutWrapper>>& allFrameNodeChildren,
@@ -252,6 +255,11 @@ public:
 
     void SetActiveChildRange(int32_t start, int32_t end)
     {
+        if (startIndex_ == start && endIndex_ == end) {
+            return;
+        }
+        startIndex_ = start;
+        endIndex_ = end;
         for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
             int32_t index = itor->first;
             if ((start <= end && index >= start && index <= end) ||
@@ -336,6 +344,8 @@ private:
     bool inUse_ = false;
     bool delayReset_ = false;
     bool needResetChild_ = false;
+    int32_t startIndex_ = -1;
+    int32_t endIndex_ = -1;
 }; // namespace OHOS::Ace::NG
 
 FrameNode::FrameNode(
@@ -479,6 +489,27 @@ void FrameNode::InitializePatternAndContext()
     }
 }
 
+void FrameNode::DumpSafeAreaInfo()
+{
+    if (layoutProperty_->GetSafeAreaExpandOpts()) {
+        DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaExpandOpts()->ToString());
+    }
+    if (layoutProperty_->GetSafeAreaInsets()) {
+        DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaInsets()->ToString());
+    }
+    CHECK_NULL_VOID(GetTag() == V2::PAGE_ETS_TAG);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    DumpLog::GetInstance().AddDesc(std::string("ignoreSafeArea: ")
+                                    .append(std::to_string(manager->IsIgnoreAsfeArea()))
+                                    .append(std::string(", isNeedAvoidWindow: ").c_str())
+                                    .append(std::to_string(manager->IsNeedAvoidWindow()))
+                                    .append(std::string(", isFullScreen: ").c_str())
+                                    .append(std::to_string(manager->IsFullScreen())));
+}
+
 void FrameNode::DumpCommonInfo()
 {
     if (!geometryNode_->GetFrameRect().ToString().compare(renderContext_->GetPaintRectWithoutTransform().ToString())) {
@@ -519,6 +550,7 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("Margin: ").append(layoutProperty_->GetMarginProperty()->ToString().c_str()));
     }
+    DumpSafeAreaInfo();
     if (layoutProperty_->GetCalcLayoutConstraint()) {
         DumpLog::GetInstance().AddDesc(std::string("User defined constraint: ")
                                            .append(layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()));
@@ -539,6 +571,18 @@ void FrameNode::DumpCommonInfo()
     }
 }
 
+void FrameNode::DumpOnSizeChangeInfo()
+{
+    for (auto it = onSizeChangeDumpInfos.rbegin(); it != onSizeChangeDumpInfos.rend(); ++it) {
+        DumpLog::GetInstance().AddDesc(std::string("onSizeChange Time: ")
+            .append(ConvertTimestampToStr(it->onSizeChangeTimeStamp))
+            .append(" lastFrameRect: ")
+            .append(it->lastFrameRect.ToString())
+            .append(" currFrameRect: ")
+            .append(it->currFrameRect.ToString()));
+    }
+}
+
 void FrameNode::DumpOverlayInfo()
 {
     if (!layoutProperty_->IsOverlayNode()) {
@@ -554,6 +598,7 @@ void FrameNode::DumpOverlayInfo()
 void FrameNode::DumpInfo()
 {
     DumpCommonInfo();
+    DumpOnSizeChangeInfo();
     if (pattern_) {
         pattern_->DumpInfo();
     }
@@ -565,6 +610,7 @@ void FrameNode::DumpInfo()
 void FrameNode::DumpAdvanceInfo()
 {
     DumpCommonInfo();
+    DumpOnSizeChangeInfo();
     if (pattern_) {
         pattern_->DumpInfo();
         pattern_->DumpAdvanceInfo();
@@ -961,6 +1007,14 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
     if ((eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
         lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
+        if (renderContext_ && renderContext_->GetPositionProperty()) {
+            if (renderContext_->GetPositionProperty()->HasPosition()) {
+                auto renderPosition = ContextPositionConvertToPX(
+                    renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+                currFrameRect.SetOffset(
+                    { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
+            }
+        }
         auto currParentOffsetToWindow = CalculateOffsetRelativeToWindow(nanoTimestamp) - currFrameRect.GetOffset();
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             if (eventHub_->HasInnerOnAreaChanged()) {
@@ -994,6 +1048,11 @@ void FrameNode::TriggerOnSizeChangeCallback()
     if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
         if (currFrameRect != *lastFrameNodeRect_) {
+            onSizeChangeDumpInfo dumpInfo { GetCurrentTimestamp(), *lastFrameNodeRect_, currFrameRect };
+            if (onSizeChangeDumpInfos.size() >= SIZE_CHANGE_DUMP_SIZE) {
+                onSizeChangeDumpInfos.erase(onSizeChangeDumpInfos.begin());
+            }
+            onSizeChangeDumpInfos.emplace_back(dumpInfo);
             eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
             *lastFrameNodeRect_ = currFrameRect;
         }
@@ -1336,6 +1395,9 @@ RefPtr<ContentModifier> FrameNode::GetContentModifier()
 {
     auto wrapper = CreatePaintWrapper();
     auto paintMethod = pattern_->CreateNodePaintMethod();
+    if (!paintMethod && drawModifier_) {
+        paintMethod = pattern_->CreateDefaultNodePaintMethod();
+    }
     auto contentModifier = DynamicCast<ContentModifier>(paintMethod->GetContentModifier(AceType::RawPtr(wrapper)));
     return contentModifier;
 }
@@ -1345,6 +1407,9 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     pattern_->BeforeCreatePaintWrapper();
     isRenderDirtyMarked_ = false;
     auto paintMethod = pattern_->CreateNodePaintMethod();
+    if (!paintMethod && drawModifier_) {
+        paintMethod = pattern_->CreateDefaultNodePaintMethod();
+    }
     // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being
     // modified during the paint process, resulting in the problem of judging whether the front-end setting value
     // changes the next time js is executed.
@@ -1768,28 +1833,32 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto subRevertPoint = revertPoint - origRect.GetOffset();
     bool consumed = false;
 
-    std::vector<TouchTestInfo> touchInfos;
-    CollectTouchInfos(globalPoint, subRevertPoint, touchInfos);
-    TouchResult touchRes = GetOnChildTouchTestRet(touchInfos);
-    if ((touchRes.strategy != TouchTestStrategy::DEFAULT) && touchRes.id.empty()) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest result is: id = %{public}s, strategy = %{public}d.",
-            touchRes.id.c_str(), static_cast<int32_t>(touchRes.strategy));
-        touchRes.strategy = TouchTestStrategy::DEFAULT;
-    }
-
-    auto childNode = GetDispatchFrameNode(touchRes);
-    if (childNode != nullptr) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s do TouchTest, parameter isDispatch is true.",
-            childNode->GetInspectorId()->c_str());
-        auto hitResult = childNode->TouchTest(
-            globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId, true);
-        if (hitResult == HitTestResult::STOP_BUBBLING) {
-            preventBubbling = true;
-            consumed = true;
+    auto onTouchInterceptresult = TriggerOnTouchIntercept(touchRestrict.touchEvent);
+    TouchResult touchRes;
+    if (onTouchInterceptresult != HitTestMode::HTMBLOCK) {
+        std::vector<TouchTestInfo> touchInfos;
+        CollectTouchInfos(globalPoint, subRevertPoint, touchInfos);
+        touchRes = GetOnChildTouchTestRet(touchInfos);
+        if ((touchRes.strategy != TouchTestStrategy::DEFAULT) && touchRes.id.empty()) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest result is: id = %{public}s, strategy = %{public}d.",
+                touchRes.id.c_str(), static_cast<int32_t>(touchRes.strategy));
+            touchRes.strategy = TouchTestStrategy::DEFAULT;
         }
 
-        if (hitResult == HitTestResult::BUBBLING) {
-            consumed = true;
+        auto childNode = GetDispatchFrameNode(touchRes);
+        if (childNode != nullptr) {
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s do TouchTest, parameter isDispatch is true.",
+                childNode->GetInspectorId()->c_str());
+            auto hitResult = childNode->TouchTest(
+                globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId, true);
+            if (hitResult == HitTestResult::STOP_BUBBLING) {
+                preventBubbling = true;
+                consumed = true;
+            }
+
+            if (hitResult == HitTestResult::BUBBLING) {
+                consumed = true;
+            }
         }
     }
 
@@ -1797,21 +1866,24 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
             break;
         }
-        if (touchRes.strategy == TouchTestStrategy::FORWARD) {
-            break;
+        if (onTouchInterceptresult != HitTestMode::HTMBLOCK) {
+            if (touchRes.strategy == TouchTestStrategy::FORWARD) {
+                break;
+            }
         }
 
         const auto& child = iter->Upgrade();
         if (!child) {
             continue;
         }
-
-        std::string id;
-        if (child->GetInspectorId().has_value()) {
-            id = child->GetInspectorId().value();
-        }
-        if (touchRes.strategy == TouchTestStrategy::FORWARD_COMPETITION && touchRes.id == id) {
-            continue;
+        if (onTouchInterceptresult != HitTestMode::HTMBLOCK) {
+            std::string id;
+            if (child->GetInspectorId().has_value()) {
+                id = child->GetInspectorId().value();
+            }
+            if (touchRes.strategy == TouchTestStrategy::FORWARD_COMPETITION && touchRes.id == id) {
+                continue;
+            }
         }
 
         auto childHitResult =
@@ -2309,6 +2381,22 @@ void FrameNode::OnAccessibilityEvent(
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibility(event);
     }
+}
+
+void FrameNode::OnRecycle()
+{
+    for (const auto& destroyCallback : destroyCallbacks_) {
+        destroyCallback();
+    }
+    layoutProperty_->ResetGeometryTransition();
+    pattern_->OnRecycle();
+    UINode::OnRecycle();
+}
+
+void FrameNode::OnReuse()
+{
+    pattern_->OnReuse();
+    UINode::OnReuse();
 }
 
 bool FrameNode::MarkRemoving()
@@ -2932,7 +3020,7 @@ void FrameNode::SyncGeometryNode(bool needSkipSync)
     // TODO: temp use and need to delete.
     needRerender =
         needRerender || pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config.skipMeasure, config.skipLayout);
-    if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
+    if (needRerender || drawModifier_ || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
 
@@ -3151,6 +3239,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end)
 
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
+    renderContext_->UpdateNodeName(id);
     RecordExposureIfNeed(id);
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
@@ -3444,4 +3533,87 @@ void FrameNode::SetCachedTransformRelativeOffset(const std::pair<uint64_t, Offse
 {
     cachedTransformRelativeOffset_ = timestampOffset;
 }
+
+void FrameNode::PaintDebugBoundary(bool flag)
+{
+    if (!isActive_) {
+        return;
+    }
+    if (renderContext_) {
+        renderContext_->PaintDebugBoundary(flag);
+    }
+}
+
+HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, HitTestMode::HTMDEFAULT);
+    auto onTouchIntercept = gestureHub->GetOnTouchIntercept();
+    CHECK_NULL_RETURN(onTouchIntercept, HitTestMode::HTMDEFAULT);
+    TouchEventInfo event("touchEvent");
+    event.SetTimeStamp(touchEvent.time);
+    event.SetPointerEvent(touchEvent.pointerEvent);
+    TouchLocationInfo changedInfo("onTouch", touchEvent.id);
+    PointF lastLocalPoint(touchEvent.x, touchEvent.y);
+    NGGestureRecognizer::Transform(lastLocalPoint, Claim(this), false, false);
+    auto localX = static_cast<float>(lastLocalPoint.GetX());
+    auto localY = static_cast<float>(lastLocalPoint.GetY());
+    changedInfo.SetLocalLocation(Offset(localX, localY));
+    changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
+    changedInfo.SetScreenLocation(Offset(touchEvent.screenX, touchEvent.screenY));
+    changedInfo.SetTouchType(touchEvent.type);
+    changedInfo.SetForce(touchEvent.force);
+    if (touchEvent.tiltX.has_value()) {
+        changedInfo.SetTiltX(touchEvent.tiltX.value());
+    }
+    if (touchEvent.tiltY.has_value()) {
+        changedInfo.SetTiltY(touchEvent.tiltY.value());
+    }
+    changedInfo.SetSourceTool(touchEvent.sourceTool);
+    event.AddChangedTouchLocationInfo(std::move(changedInfo));
+
+    AddTouchEventAllFingersInfo(event, touchEvent);
+    event.SetSourceDevice(touchEvent.sourceType);
+    event.SetForce(touchEvent.force);
+    if (touchEvent.tiltX.has_value()) {
+        event.SetTiltX(touchEvent.tiltX.value());
+    }
+    if (touchEvent.tiltY.has_value()) {
+        event.SetTiltY(touchEvent.tiltY.value());
+    }
+    event.SetSourceTool(touchEvent.sourceTool);
+    auto result = onTouchIntercept(event);
+    SetHitTestMode(result);
+    return result;
+}
+
+void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent)
+{
+    // all fingers collection
+    for (const auto& item : touchEvent.pointers) {
+        float globalX = item.x;
+        float globalY = item.y;
+        float screenX = item.screenX;
+        float screenY = item.screenY;
+        PointF localPoint(globalX, globalY);
+        NGGestureRecognizer::Transform(localPoint, Claim(this), false, false);
+        auto localX = static_cast<float>(localPoint.GetX());
+        auto localY = static_cast<float>(localPoint.GetY());
+        TouchLocationInfo info("onTouch", item.id);
+        info.SetGlobalLocation(Offset(globalX, globalY));
+        info.SetLocalLocation(Offset(localX, localY));
+        info.SetScreenLocation(Offset(screenX, screenY));
+        info.SetTouchType(touchEvent.type);
+        info.SetForce(item.force);
+        if (item.tiltX.has_value()) {
+            info.SetTiltX(item.tiltX.value());
+        }
+        if (item.tiltY.has_value()) {
+            info.SetTiltY(item.tiltY.value());
+        }
+        info.SetSourceTool(item.sourceTool);
+        event.AddTouchLocationInfo(std::move(info));
+    }
+}
+
 } // namespace OHOS::Ace::NG

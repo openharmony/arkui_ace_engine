@@ -49,7 +49,7 @@ public:
     virtual void SetOnSeeked(VideoEventFunc&& onSeeked) = 0;
     virtual void SetOnUpdate(VideoEventFunc&& onUpdate) = 0;
     virtual void SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange) = 0;
-
+    virtual void SetOnStop(VideoEventFunc&& onStop) {};
 private:
     static std::unique_ptr<VideoModel> instance_;
     static std::mutex mutex_;

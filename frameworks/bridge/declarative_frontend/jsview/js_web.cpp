@@ -1163,6 +1163,11 @@ public:
         args.SetReturnValue(headers);
     }
 
+    void SetLoadOverrideEvent(const LoadOverrideEvent& eventInfo)
+    {
+        request_ = eventInfo.GetRequest();
+    }
+
 private:
     static void Constructor(const JSCallbackInfo& args)
     {
@@ -1596,6 +1601,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
     JSClass<JSWeb>::StaticMethod("enableNativeEmbedMode", &JSWeb::EnableNativeEmbedMode);
+    JSClass<JSWeb>::StaticMethod("registerNativeEmbedRule", &JSWeb::RegisterNativeEmbedRule);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
     JSClass<JSWeb>::StaticMethod("javaScriptProxy", &JSWeb::JavaScriptProxy);
@@ -1670,6 +1676,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckResult", &JSWeb::OnSafeBrowsingCheckResult);
     JSClass<JSWeb>::StaticMethod("onNavigationEntryCommitted", &JSWeb::OnNavigationEntryCommitted);
+    JSClass<JSWeb>::StaticMethod("onIntelligentTrackingPreventionResult",
+        &JSWeb::OnIntelligentTrackingPreventionResult);
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
     JSClass<JSWeb>::StaticMethod("onNativeEmbedLifecycleChange", &JSWeb::OnNativeEmbedLifecycleChange);
@@ -1680,6 +1688,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("nestedScroll", &JSWeb::SetNestedScroll);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentStart", &JSWeb::JavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentEnd", &JSWeb::JavaScriptOnDocumentEnd);
+    JSClass<JSWeb>::StaticMethod("onOverrideUrlLoading", &JSWeb::OnOverrideUrlLoading);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -1757,6 +1766,8 @@ JSRef<JSVal> FullScreenEnterEventToJSValue(const FullScreenEnterEvent& eventInfo
     jsFullScreenExitHandler->SetHandler(eventInfo.GetHandler());
 
     obj->SetPropertyObject("handler", resultObj);
+    obj->SetProperty("videoWidth", eventInfo.GetVideoNaturalWidth());
+    obj->SetProperty("videoHeight", eventInfo.GetVideoNaturalHeight());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -1904,6 +1915,14 @@ JSRef<JSVal> SearchResultReceiveEventToJSValue(const SearchResultReceiveEvent& e
     obj->SetProperty("numberOfMatches", eventInfo.GetNumberOfMatches());
     obj->SetProperty("isDoneCounting", eventInfo.GetIsDoneCounting());
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> LoadOverrideEventToJSValue(const LoadOverrideEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    requestEvent->SetLoadOverrideEvent(eventInfo);
+    return JSRef<JSVal>::Cast(requestObj);
 }
 
 void JSWeb::ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc)
@@ -2781,6 +2800,11 @@ void JSWeb::ZoomAccessEnabled(bool isZoomAccessEnabled)
 void JSWeb::EnableNativeEmbedMode(bool isEmbedModeEnabled)
 {
     WebModel::GetInstance()->SetNativeEmbedModeEnabled(isEmbedModeEnabled);
+}
+
+void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
+{
+    WebModel::GetInstance()->RegisterNativeEmbedRule(tag, type);
 }
 
 void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
@@ -3896,6 +3920,40 @@ void JSWeb::OnNavigationEntryCommitted(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetNavigationEntryCommittedId(std::move(uiCallback));
 }
 
+JSRef<JSVal> IntelligentTrackingPreventionResultEventToJSValue(
+    const IntelligentTrackingPreventionResultEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("host", eventInfo.GetHost());
+    obj->SetProperty("trackerHost", eventInfo.GetTrackerHost());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnIntelligentTrackingPreventionResult(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<IntelligentTrackingPreventionResultEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), IntelligentTrackingPreventionResultEventToJSValue);
+
+    auto instanceId = Container::CurrentId();
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const std::shared_ptr<BaseEventInfo>& info) {
+        ContainerScope scope(instanceId);
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto* eventInfo = TypeInfoHelper::DynamicCast<IntelligentTrackingPreventionResultEvent>(info.get());
+            postFunc->Execute(*eventInfo);
+        });
+    };
+    WebModel::GetInstance()->SetIntelligentTrackingPreventionResultId(std::move(uiCallback));
+}
+
 void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
@@ -3929,9 +3987,11 @@ JSRef<JSVal> EmbedLifecycleChangeToJSValue(const NativeEmbedDataInfo& eventInfo)
     requestObj->SetProperty("id", eventInfo.GetEmebdInfo().id);
     requestObj->SetProperty("type", eventInfo.GetEmebdInfo().type);
     requestObj->SetProperty("src", eventInfo.GetEmebdInfo().src);
+    requestObj->SetProperty("tag", eventInfo.GetEmebdInfo().tag);
     requestObj->SetProperty("width", eventInfo.GetEmebdInfo().width);
     requestObj->SetProperty("height", eventInfo.GetEmebdInfo().height);
     requestObj->SetProperty("url", eventInfo.GetEmebdInfo().url);
+    requestObj->SetProperty("params", eventInfo.GetEmebdInfo().params);
     obj->SetPropertyObject("info", requestObj);
 
     return JSRef<JSVal>::Cast(obj);
@@ -4165,6 +4225,33 @@ void JSWeb::JavaScriptOnDocumentEnd(const JSCallbackInfo& args)
     ScriptItems scriptItems;
     ParseScriptItems(args, scriptItems);
     WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
+}
+
+void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadOverrideEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadOverrideEventToJSValue);
+    auto instanceId = Container::CurrentId();
+
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) -> bool {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadOverrideEvent>(info);
+        JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+        if (message->IsBoolean()) {
+            return message->ToBoolean();
+        }
+        return false;
+    };
+    WebModel::GetInstance()->SetOnOverrideUrlLoading(std::move(uiCallback));
 }
 
 void JSWeb::CopyOption(int32_t copyOption)

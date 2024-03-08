@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -261,6 +261,20 @@ int32_t OH_NativeXComponent_RegisterUIInputEventCallback(OH_NativeXComponent* co
         return component->RegisterUIAxisEventCallback(callback);
     }
     return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+}
+
+int32_t OH_NativeXComponent_SetNeedSoftKeyboard(OH_NativeXComponent* component, bool needSoftKeyboard)
+{
+    return component ? component->SetNeedSoftKeyboard(needSoftKeyboard) : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+}
+
+int32_t OH_NativeXComponent_RegisterOnTouchInterceptCallback(
+    OH_NativeXComponent* component, HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event))
+{
+    if ((component == nullptr) || (callback == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    return component->RegisterOnTouchInterceptCallback(callback);
 }
 
 #ifdef __cplusplus

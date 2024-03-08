@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ struct ButtonProperties {
 };
 
 using StateChangeFunc = std::function<void(const std::string&)>;
-
+using OnWillDismiss = std::function<void(int32_t)>;
 class PopupParam : public AceType {
     DECLARE_ACE_TYPE(PopupParam, AceType)
 
@@ -430,6 +430,25 @@ public:
         return blurStyle_;
     }
 
+    void SetInteractiveDismiss(bool interactiveDismiss)
+    {
+        interactiveDismiss_ = interactiveDismiss;
+    }
+
+    bool GetInteractiveDismiss() const
+    {
+        return interactiveDismiss_;
+    }
+
+    void SetOnWillDismiss(const OnWillDismiss&& onWillDismiss)
+    {
+        onWillDismiss_ = std::move(onWillDismiss);
+    }
+
+    OnWillDismiss GetOnWillDismiss() const
+    {
+        return onWillDismiss_;
+    }
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -443,6 +462,7 @@ private:
     bool setErrorArrowHeight_ = false;
     bool setErrorRadius_ = false;
     bool focusable_ = false;
+    bool interactiveDismiss_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
@@ -472,6 +492,7 @@ private:
     StateChangeFunc onStateChange_;
     ButtonProperties primaryButtonProperties_;   // first button.
     ButtonProperties secondaryButtonProperties_; // second button.
+    OnWillDismiss onWillDismiss_;
 };
 
 } // namespace OHOS::Ace

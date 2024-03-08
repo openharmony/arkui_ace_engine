@@ -69,7 +69,7 @@ RefPtr<FrameNode> AppBarView::Create(const RefPtr<FrameNode>& stage)
     auto pattern = atom->GetPattern<AtomicServicePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->UpdateColor();
-    pattern->UpdateRowLayout();
+    pattern->UpdateLayout();
     return atom;
 }
 
@@ -77,25 +77,27 @@ RefPtr<FrameNode> AppBarView::BuildMenuBarRow()
 {
     auto menuBarRow = FrameNode::CreateFrameNode(V2::APP_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    // get theme
-    auto appBarTheme = GetAppBarTheme();
-    CHECK_NULL_RETURN(appBarTheme, nullptr);
-    // add children
+    auto theme = GetAppBarTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
+
     auto menuBar = BuildMenuBar();
     menuBarRow->AddChild(menuBar);
-    // init
+
     auto layoutProperty = menuBarRow->GetLayoutProperty<LinearLayoutProperty>();
     auto renderContext = menuBarRow->GetRenderContext();
-
+    // size
     layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(appBarTheme->GetMenuBarHeight())));
-
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(theme->GetMenuBarHeight())));
+    // main axis align
     layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
-    renderContext->UpdatePosition(OffsetT<Dimension>(0.0_vp, appBarTheme->GetMenuBarTopMargin()));
+    // position
+    renderContext->UpdatePosition(OffsetT<Dimension>(0.0_vp, theme->GetMenuBarTopMargin()));
+    // background color
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    // hit test mode
     menuBarRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
-    menuBarRow->MarkModifyDone();
 
+    menuBarRow->MarkModifyDone();
     return menuBarRow;
 }
 
@@ -103,10 +105,9 @@ RefPtr<FrameNode> AppBarView::BuildMenuBar()
 {
     auto menuBar = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    // get theme
-    auto appBarTheme = GetAppBarTheme();
-    CHECK_NULL_RETURN(appBarTheme, nullptr);
-    // add child
+    auto theme = GetAppBarTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
+
     auto menuButton = BuildButton(true);
     BindMenuCallback(menuButton);
     menuBar->AddChild(menuButton);
@@ -115,104 +116,76 @@ RefPtr<FrameNode> AppBarView::BuildMenuBar()
     auto closeButton = BuildButton(false);
     BindCloseCallback(closeButton);
     menuBar->AddChild(closeButton);
-    // init
+
     auto layoutProperty = menuBar->GetLayoutProperty<LinearLayoutProperty>();
     auto renderContext = menuBar->GetRenderContext();
-
+    // main axis align
     layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-
+    // border width
     BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth(appBarTheme->GetBorderWidth());
+    borderWidth.SetBorderWidth(theme->GetBorderWidth());
     layoutProperty->UpdateBorderWidth(borderWidth);
     renderContext->UpdateBorderWidth(borderWidth);
-
-    auto bent = appBarTheme->GetBentRadius();
+    // border radius
+    auto bent = theme->GetBentRadius();
     renderContext->UpdateBorderRadius(BorderRadiusProperty(bent));
 
-    MarginProperty margin;
-    margin.left = CalcLength(appBarTheme->GetMenuBarLeftMargin());
-    margin.right = CalcLength(appBarTheme->GetMenuBarRightMargin());
-    layoutProperty->UpdateMargin(margin);
     menuBar->MarkModifyDone();
-
     return menuBar;
 }
 
 RefPtr<FrameNode> AppBarView::BuildButton(bool isMenuButton)
 {
-    auto appBarTheme = GetAppBarTheme();
-    CHECK_NULL_RETURN(appBarTheme, nullptr);
-    auto icon = BuildIcon(isMenuButton);
-    // create button
     auto button = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
     auto renderContext = button->GetRenderContext();
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    // init
-    auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
-    layoutProperty->UpdateType(ButtonType::CUSTOM);
-    layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(appBarTheme->GetButtonWidth()), CalcLength(appBarTheme->GetButtonHeight())));
-    auto buttonRenderContext = button->GetRenderContext();
-    auto bent = appBarTheme->GetBentRadius();
-    auto rightAngle = appBarTheme->GetRightAngle();
-    if (isMenuButton) {
-        buttonRenderContext->UpdateBorderRadius(BorderRadiusProperty(bent, rightAngle, bent, rightAngle));
-    } else {
-        buttonRenderContext->UpdateBorderRadius(BorderRadiusProperty(rightAngle, bent, rightAngle, bent));
-    }
-    auto focus = button->GetFocusHub();
-    auto focusPattern = button->GetPattern<FocusPattern>();
-    if (focus) {
-        focus->SetFocusable(true);
-    }
-    if (focusPattern) {
-        focusPattern->SetStyleType(FocusStyleType::INNER_BORDER);
-    }
-    auto buttonPattern = button->GetPattern<ButtonPattern>();
-    if (buttonPattern) {
-        buttonPattern->SetClickedColor(appBarTheme->GetClickEffectColor());
-    }
-    button->AddChild(icon);
-    button->MarkModifyDone();
+    auto theme = GetAppBarTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
 
+    auto icon = BuildIcon(isMenuButton);
+    button->AddChild(icon);
+
+    auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    // type
+    layoutProperty->UpdateType(ButtonType::NORMAL);
+    // size
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(theme->GetButtonWidth()), CalcLength(theme->GetButtonHeight())));
+    // focus style type
+    auto focusHub = button->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    focusHub->SetFocusStyleType(FocusStyleType::INNER_BORDER);
+    // focus border width
+    auto buttonPattern = button->GetPattern<ButtonPattern>();
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+    buttonPattern->SetFocusBorderWidth(theme->GetFocusedOutlineWidth());
+
+    button->MarkModifyDone();
     return button;
 }
 
 RefPtr<FrameNode> AppBarView::BuildIcon(bool isMenuIcon)
 {
-    // create image
     auto icon = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    // set icon
+    auto theme = GetAppBarTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
+
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(
         isMenuIcon ? InternalResource::ResourceId::APP_BAR_MENU_SVG : InternalResource::ResourceId::APP_BAR_CLOSE_SVG);
     auto layoutProperty = icon->GetLayoutProperty<ImageLayoutProperty>();
     layoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    // set size
-    auto appBarTheme = GetAppBarTheme();
-    CHECK_NULL_RETURN(appBarTheme, nullptr);
+    // size
     layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(appBarTheme->GetNewIconSize()), CalcLength(appBarTheme->GetNewIconSize())));
-    // set margin
-    MarginProperty margin;
-    margin.top = CalcLength(appBarTheme->GetIconVerticalMargin());
-    margin.bottom = CalcLength(appBarTheme->GetIconVerticalMargin());
-    if (isMenuIcon) {
-        margin.left = CalcLength(appBarTheme->GetIconOutsideMargin());
-        margin.right = CalcLength(appBarTheme->GetIconInsideMargin());
-    } else {
-        margin.left = CalcLength(appBarTheme->GetIconInsideMargin());
-        margin.right = CalcLength(appBarTheme->GetIconOutsideMargin());
-    }
-    auto focus = icon->GetFocusHub();
-    if (focus) {
-        focus->SetFocusable(false);
-    }
-    layoutProperty->UpdateMargin(margin);
-    icon->MarkModifyDone();
+        CalcSize(CalcLength(theme->GetNewIconSize()), CalcLength(theme->GetNewIconSize())));
+    // focusable
+    auto focusHub = icon->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    focusHub->SetFocusable(true);
 
+    icon->MarkModifyDone();
     return icon;
 }
 
@@ -220,20 +193,27 @@ RefPtr<FrameNode> AppBarView::BuildDivider()
 {
     auto divider = FrameNode::CreateFrameNode(
         V2::DIVIDER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
-    // get theme
-    auto appBarTheme = GetAppBarTheme();
-    CHECK_NULL_RETURN(appBarTheme, nullptr);
-    // init
-    auto layoutProperty = divider->GetLayoutProperty<DividerLayoutProperty>();
-    layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(appBarTheme->GetDividerWidth()), CalcLength(appBarTheme->GetDividerHeight())));
-    layoutProperty->UpdateVertical(true);
-    layoutProperty->UpdateStrokeWidth(appBarTheme->GetDividerWidth());
+    auto theme = GetAppBarTheme();
+    CHECK_NULL_RETURN(theme, nullptr);
 
+    auto layoutProperty = divider->GetLayoutProperty<DividerLayoutProperty>();
+    // size
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(theme->GetDividerWidth()), CalcLength(theme->GetDividerHeight())));
+    // direction
+    layoutProperty->UpdateVertical(true);
+    // stroke width
+    layoutProperty->UpdateStrokeWidth(theme->GetDividerWidth());
+    // marigin
+    MarginProperty margin;
+    margin.left = CalcLength(-(theme->GetDividerWidth()));
     auto renderProperty = divider->GetPaintProperty<DividerRenderProperty>();
-    renderProperty->UpdateDividerColor(appBarTheme->GetDividerColor());
+    // color
+    renderProperty->UpdateDividerColor(theme->GetDividerColor());
+    // line cap
     renderProperty->UpdateLineCap(LineCap::ROUND);
 
+    divider->MarkModifyDone();
     return divider;
 }
 
@@ -246,12 +226,12 @@ void AppBarView::BindMenuCallback(const RefPtr<FrameNode>& menuButton)
 #else
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-        CHECK_NULL_VOID(appBarTheme);
+        auto theme = pipeline->GetTheme<AppBarTheme>();
+        CHECK_NULL_VOID(theme);
         if (SystemProperties::GetExtSurfaceEnabled()) {
-            LOGI("start panel bundleName is %{public}s, abilityName is %{public}s",
-                appBarTheme->GetBundleName().c_str(), appBarTheme->GetAbilityName().c_str());
-            pipeline->FireSharePanelCallback(appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
+            LOGI("start panel bundleName is %{public}s, abilityName is %{public}s", theme->GetBundleName().c_str(),
+                theme->GetAbilityName().c_str());
+            pipeline->FireSharePanelCallback(theme->GetBundleName(), theme->GetAbilityName());
         } else {
             auto menuButton = weakButton.Upgrade();
             CHECK_NULL_VOID(menuButton);
@@ -259,9 +239,9 @@ void AppBarView::BindMenuCallback(const RefPtr<FrameNode>& menuButton)
         }
 #endif
     };
-    auto buttonEventHub = menuButton->GetOrCreateGestureEventHub();
-    if (buttonEventHub) {
-        buttonEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback)));
+    auto eventHub = menuButton->GetOrCreateGestureEventHub();
+    if (eventHub) {
+        eventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback)));
     }
 }
 
@@ -274,9 +254,9 @@ void AppBarView::BindCloseCallback(const RefPtr<FrameNode>& closeButton)
         CHECK_NULL_VOID(windowManager);
         windowManager->WindowMinimize();
     };
-    auto buttonEventHub = closeButton->GetOrCreateGestureEventHub();
-    if (buttonEventHub) {
-        buttonEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback)));
+    auto eventHub = closeButton->GetOrCreateGestureEventHub();
+    if (eventHub) {
+        eventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback)));
     }
 }
 
@@ -293,9 +273,9 @@ void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
     CHECK_NULL_VOID(overlayManager);
 
     std::string stageAbilityName = "";
-    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
-    if (appBarTheme) {
-        stageAbilityName = appBarTheme->GetStageAbilityName();
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    if (theme) {
+        stageAbilityName = theme->GetStageAbilityName();
     }
     NG::ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
@@ -311,18 +291,7 @@ void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
         };
 
         // Create parameters of UIExtension.
-        auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
-        std::map<std::string, std::string> params;
-        params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
-        params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
-        params.try_emplace("module", Container::Current()->GetModuleName());
-        if (missionId != -1) {
-            params.try_emplace("missionId", std::to_string(missionId));
-        }
-        params.try_emplace("ability.want.params.uiExtensionType", "sys/commonUI");
-        LOGI("BundleName: %{public}s, AbilityName: %{public}s, Module: %{public}s",
-            AceApplicationInfo::GetInstance().GetProcessName().c_str(),
-            AceApplicationInfo::GetInstance().GetAbilityName().c_str(), Container::Current()->GetModuleName().c_str());
+        std::map<std::string, std::string> params = CreateUIExtensionParams();
 
         // Create UIExtension node.
         auto appGalleryBundleName = OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName();
@@ -343,6 +312,23 @@ void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
         true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, nullptr, targetNode);
 }
 
+std::map<std::string, std::string> AppBarView::CreateUIExtensionParams()
+{
+    auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
+    std::map<std::string, std::string> params;
+    params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
+    params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
+    params.try_emplace("module", Container::Current()->GetModuleName());
+    if (missionId != -1) {
+        params.try_emplace("missionId", std::to_string(missionId));
+    }
+    params.try_emplace("ability.want.params.uiExtensionType", "sys/commonUI");
+    LOGI("BundleName: %{public}s, AbilityName: %{public}s, Module: %{public}s",
+        AceApplicationInfo::GetInstance().GetProcessName().c_str(),
+        AceApplicationInfo::GetInstance().GetAbilityName().c_str(), Container::Current()->GetModuleName().c_str());
+    return params;
+}
+
 std::optional<RectF> AppBarView::GetAppBarRect()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -351,14 +337,26 @@ std::optional<RectF> AppBarView::GetAppBarRect()
     }
     auto theme = GetAppBarTheme();
     CHECK_NULL_RETURN(theme, std::nullopt);
-    SizeF size(theme->GetMenuBarWidth().ConvertToPx(), theme->GetMenuBarHeight().ConvertToPx());
     auto atom = atomicService_.Upgrade();
     CHECK_NULL_RETURN(atom, std::nullopt);
     auto pattern = atom->GetPattern<AtomicServicePattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto menuBar = pattern->GetMenuBar();
     CHECK_NULL_RETURN(menuBar, std::nullopt);
-    auto offset = menuBar->GetParentGlobalOffsetDuringLayout();
+    auto size = menuBar->GetGeometryNode()->GetMarginFrameSize();
+    auto offset = menuBar->GetGeometryNode()->GetMarginFrameOffset();
+    auto parent = menuBar->GetParent();
+    while (parent) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (frameNode) {
+            offset += frameNode->GetGeometryNode()->GetFrameOffset();
+        }
+        parent = parent->GetParent();
+    }
+    offset.AddY(theme->GetMenuBarTopMargin().ConvertToPx());
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(manager, std::nullopt);
+    offset.AddY(manager->GetSystemSafeArea().top_.Length());
     return RectF(offset, size);
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,13 @@
 #include <unistd.h>
 #include <vector>
 
+#include "interfaces/native/native_event.h"
 #include "interfaces/native/native_interface_xcomponent.h"
 #include "interfaces/native/ui_input_event.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 
 struct XComponentTouchPoint {
     float tiltX = 0.0f;
@@ -42,6 +44,8 @@ struct OH_NativeXComponent_KeyEvent {
     int64_t deviceId {};
     int64_t timestamp {};
 };
+
+using OnTouchIntercept_Callback = HitTestMode (*)(OH_NativeXComponent*, ArkUI_UIInputEvent*);
 
 namespace OHOS::Ace {
 class NativeXComponentImpl : public virtual AceType {
@@ -239,6 +243,16 @@ public:
         return blurEventCallback_;
     }
 
+    void SetOnTouchInterceptCallback(OnTouchIntercept_Callback callback)
+    {
+        onTouchInterceptCallback_ = callback;
+    }
+
+    OnTouchIntercept_Callback GetOnTouchInterceptCallback()
+    {
+        return onTouchInterceptCallback_;
+    }
+
     void SetFocusEventCallback(NativeXComponent_Callback callback)
     {
         focusEventCallback_ = callback;
@@ -328,6 +342,16 @@ public:
         detachNativeNodeCallback_(container_, root);
     }
 
+    void SetNeedSoftKeyboard(bool needSoftKeyboard)
+    {
+        needSoftKeyboard_ = needSoftKeyboard;
+    }
+
+    bool IsNeedSoftKeyboard() const
+    {
+        return needSoftKeyboard_;
+    }
+
 private:
     std::string xcomponentId_;
     void* window_ = nullptr;
@@ -350,7 +374,9 @@ private:
     OH_NativeXComponent_ExpectedRateRange* rateRange_ = nullptr;
     NativeNode_Callback attachNativeNodeCallback_ = nullptr;
     NativeNode_Callback detachNativeNodeCallback_ = nullptr;
+    OnTouchIntercept_Callback onTouchInterceptCallback_ = nullptr;
     void* container_;
+    bool needSoftKeyboard_ = false;
 };
 } // namespace OHOS::Ace
 
@@ -381,6 +407,9 @@ struct OH_NativeXComponent {
     int32_t DetachNativeRootNode(void* root);
     int32_t RegisterUIAxisEventCallback(
         void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type));
+    int32_t SetNeedSoftKeyboard(bool needSoftKeyboard);
+    int32_t RegisterOnTouchInterceptCallback(
+        HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event));
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

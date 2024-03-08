@@ -569,9 +569,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         PaintOverlayText();
     }
 
-    if (NeedDebugBoundary() && SystemProperties::GetDebugBoundaryEnabled()) {
-        PaintDebugBoundary();
-    }
+    PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
 
     if (propParticleOptionArray_.has_value()) {
         if (!measureTriggered_ || particleAnimationPlaying_) {
@@ -581,15 +579,19 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     }
 }
 
-void RosenRenderContext::PaintDebugBoundary()
+void RosenRenderContext::PaintDebugBoundary(bool flag)
 {
+    CHECK_NULL_VOID(NeedDebugBoundary());
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     auto paintTask = [contentSize = geometryNode->GetFrameSize(), frameSize = geometryNode->GetMarginFrameSize(),
-                         offset = geometryNode->GetMarginFrameOffset(),
-                         frameOffset = geometryNode->GetFrameOffset()](RSCanvas& rsCanvas) mutable {
+                         offset = geometryNode->GetMarginFrameOffset(), frameOffset = geometryNode->GetFrameOffset(),
+                         flag](RSCanvas& rsCanvas) mutable {
+        if (!flag) {
+            return;
+        }
         DebugBoundaryPainter painter(contentSize, frameSize);
         painter.SetFrameOffset(frameOffset);
         painter.DrawDebugBoundaries(rsCanvas, offset);
@@ -614,7 +616,7 @@ void RosenRenderContext::PaintDebugBoundary()
             std::make_shared<Rosen::RectF>(marginOffset.GetX() - rect.GetX(), marginOffset.GetY() - rect.GetY(),
                 geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
         rsNode_->SetDrawRegion(drawRect);
-        debugBoundaryModifier_->SetCustomData(true);
+        debugBoundaryModifier_->SetCustomData(flag);
     }
 }
 
@@ -3649,6 +3651,7 @@ void RosenRenderContext::PaintProgressMask()
         progress->SetValue(moonProgressModifier_->GetMaxValue());
     }
     moonProgressModifier_->SetValue(progress->GetValue());
+    moonProgressModifier_->SetEnableBreathe(progress->GetEnableBreathe());
 }
 
 void RosenRenderContext::SetClipBoundsWithCommands(const std::string& commands)
@@ -4818,6 +4821,12 @@ void RosenRenderContext::UpdateRenderGroup(bool isRenderGroup, bool isForced, bo
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->MarkNodeGroup(isRenderGroup, isForced, includeProperty);
+}
+
+void RosenRenderContext::OnNodeNameUpdate(const std::string& id)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetNodeName(id);
 }
 
 void RosenRenderContext::OnSuggestedRenderGroupUpdate(bool isRenderGroup)

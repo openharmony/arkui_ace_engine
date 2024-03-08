@@ -12,6 +12,7 @@
     "src/lib/common/local_storage_native.d.ts",
     "src/lib/common/lazy_foreach.d.ts",
     "src/lib/common/ifelse_native.d.ts",
+    "src/lib/common/ark_component.d.ts",
 
     // internal interfaces
     "src/lib/common/i_environment_backend.ts",

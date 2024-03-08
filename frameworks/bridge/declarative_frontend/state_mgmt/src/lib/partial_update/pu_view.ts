@@ -38,9 +38,6 @@ type ProfileRecursionCounter = { total: number };
 
 type ProvidedVarsMapPU = Map<string, ObservedPropertyAbstractPU<any>>;
 
-// denotes a missing elemntId, this is the case during initial render
-const UndefinedElmtId = -1;
-
 // function type of partial update function
 type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 type UIClassObject = { prototype: Object, pop?: () => void };
@@ -52,9 +49,9 @@ type UIClassObject = { prototype: Object, pop?: () => void };
 class UpdateFuncRecord {
   private updateFunc_: UpdateFunc;
   private classObject_: UIClassObject;
-  private node_?: Object
+  private node_?: ArkComponent
 
-  constructor(params: { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: Object }) {
+  constructor(params: { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: ArkComponent }) {
     this.updateFunc_ = params.updateFunc;
     this.classObject_ = params.classObject;
     this.node_ = params.node;
@@ -76,11 +73,11 @@ class UpdateFuncRecord {
     return (this.classObject_ && "pop" in this.classObject_) ? this.classObject_.pop! : () => { };
   }
 
-  public getNode(): Object | undefined {
+  public getNode(): ArkComponent | undefined {
     return this.node_;
   }
 
-  public setNode(node: Object | undefined): void {
+  public setNode(node: ArkComponent | undefined): void {
     this.node_ = node;
   }
 }
@@ -116,12 +113,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private isInitialRenderDone: boolean = false;
 
   // indicates the currently rendered or rendered UINode's elmtIds
-  // or -1 if none is currently rendering
+  // or UINodeRegisterProxy.notRecordingDependencies if none is currently rendering
   // isRenderInProgress == true always when currentlyRenderedElmtIdStack_.length >= 0 
   private currentlyRenderedElmtIdStack_: Array<number> = new Array<number>();
 
   // static flag for paused rendering
-  // when paused, getCurrentlyRenderedElmtId() will return -1
+  // when paused, getCurrentlyRenderedElmtId() will return UINodeRegisterProxy.notRecordingDependencies
   private static renderingPaused: boolean = false;
 
   // flag if active of inActive
@@ -173,19 +170,30 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
   protected obtainOwnObservedProperties(): void {
+    let usesStateMgmtVersion = 0;
     Object.getOwnPropertyNames(this)
       .filter((propName) => {
-        return propName.startsWith("__")
+        return (propName.startsWith("__") && !propName.startsWith(ObserveV3.OB_PREFIX))
       })
       .forEach((propName) => {
         const stateVar = Reflect.get(this, propName) as Object;
         if (stateVar && typeof stateVar === 'object' && "notifyPropertyHasChangedPU" in stateVar) {
           stateMgmtConsole.debug(`... add state variable ${propName} to ${stateVar}`)
           this.ownObservedPropertiesStore_.add(stateVar as unknown as ObservedPropertyAbstractPU<any>);
+          usesStateMgmtVersion = 2;
         } else {
           stateMgmtConsole.debug(`${this.debugInfo__()} ${propName} application may use an unregular naming style, or stateVar may be Non-Object.`);
         }
       });
+
+    if (this.isViewV3==true) {
+      if (usesStateMgmtVersion==2) {
+        const error = `${this.debugInfo__()}: mixed use of stateMgmt V2 and V3 variable decorators. Application error!`;
+        stateMgmtConsole.applicationError(error);
+        throw new Error(error);
+      }
+    }
+    stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV3==true ? 3 : 2}`);
   }
 
   protected get localStorage_() {
@@ -212,6 +220,17 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.localStoragebackStore_ = instance;
   }
 
+  // FIXME 
+  // indicate if this is  V2 or a V3 component
+  // V2 by default, changed to V3 by the first V3 decorated variable
+  // when splitting ViewPU and ViewV3
+  // use instanceOf. Until then, this is a workaround.
+  // @state, @track, etc V3 decorator functions modify isViewV3 to return true
+  // (decorator can modify functions in prototype)
+  private get isViewV3() : boolean {
+    return false;
+  }
+
   /**
    * Create a View
    *
@@ -227,12 +246,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
    *    - localStorage do not specify, will inherit from parent View.
    *
   */
-  constructor(parent: ViewPU, localStorage: LocalStorage, elmtId: number = -1, extraInfo: ExtraInfo = undefined) {
+  constructor(parent: ViewPU, localStorage: LocalStorage, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super();
     // if set use the elmtId also as the ViewPU object's subscribable id.
     // these matching is requirement for updateChildViewById(elmtId) being able to
     // find the child ViewPU object by given elmtId
-    this.id_ = elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
+    this.id_ = elmtId == UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
 
     this.localStoragebackStore_ = undefined;
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
@@ -555,10 +574,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const updateFunc = entry ? entry.getUpdateFunc() : undefined;
 
     if (typeof updateFunc !== "function") {
-      stateMgmtConsole.debug(`${this.debugInfo__()}: update function of elmtId ${elmtId} not found, internal error!`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: update function of elmtId ${elmtId} not found, internal error!`);
     } else {
       const componentName = entry.getComponentName();
-      stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements: re-render of ${componentName} elmtId ${elmtId} start ...`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${componentName} elmtId ${elmtId} start ...`);
       this.isRenderInProgress = true;
       stateMgmtProfiler.begin("ViewPU.updateFunc");
       updateFunc(elmtId, /* isFirstRender */ false);
@@ -567,7 +586,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.finishUpdateFunc(elmtId);
       stateMgmtProfiler.end();
       this.isRenderInProgress = false;
-      stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements: re-render of ${componentName} elmtId ${elmtId} - DONE`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${componentName} elmtId ${elmtId} - DONE`);
     }
     stateMgmtProfiler.end();
   }
@@ -698,16 +717,15 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
 
     stateMgmtProfiler.begin(`ViewPU.uiNodeNeedUpdate ${this.debugInfoElmtId(elmtId)}`);
-
-    // FIXME Its slow to make native calls: what is this for, is this really needed ?
-    // this.syncInstanceId();
-
-      if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
-        // mark ComposedElement dirty when first elmtIds are added
-        // do not need to do this every time
-        this.markNeedUpdate();
-      }
-      if (this.hasRecycleManager()) {
+    
+    if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
+      // mark ComposedElement dirty when first elmtIds are added
+      // do not need to do this every time
+      this.syncInstanceId();
+      this.markNeedUpdate();
+      this.restoreInstanceId();
+    }
+    if (this.hasRecycleManager()) {
         this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
       } else {
         this.dirtDescendantElementIds_.add(elmtId);
@@ -847,6 +865,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // ascending order ensures parent nodes will be updated before their children
       // prior cleanup ensure no already deleted Elements have their update func executed
       const dirtElmtIdsFromRootNode= Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
+      // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added 
+      // to newly created this.dirtDescendantElementIds_ Set
       dirtElmtIdsFromRootNode.forEach(elmtId => {
         if (this.hasRecycleManager()) {
           this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
@@ -886,11 +906,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   /**
    * return its elmtId if currently rendering or re-rendering an UINode
-   * otherwise return -1
+   * otherwise return UINodeRegisterProxy.notRecordingDependencies
    * set in observeComponentCreation(2)
    */
   public getCurrentlyRenderedElmtId() {
-    return ViewPU.renderingPaused || this.currentlyRenderedElmtIdStack_.length == 0 ? -1 : this.currentlyRenderedElmtIdStack_.slice(-1)[0];
+    return ViewPU.renderingPaused || this.currentlyRenderedElmtIdStack_.length == 0 
+      ? UINodeRegisterProxy.notRecordingDependencies 
+      : this.currentlyRenderedElmtIdStack_[this.currentlyRenderedElmtIdStack_.length-1];
   }
 
   public static pauseRendering() {
@@ -943,23 +965,27 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const updateFunc = (elmtId: number, isFirstRender: boolean) => {
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] start ....`);
-      
-      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);     
+
+      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+      // FIXME: Because ReactNative dynamic viewer app library uses V3 @observe within V2 @Component, 
+      // the framework needs to enable both V2 recording and 
+      // V3 recording with startBind as well.
       this.currentlyRenderedElmtIdStack_.push(elmtId);
-      if (ConfigureStateMgmt.instance.needsV3Observe()) {
-        // FIXME - we probably need the same stack-based solution for startBind as for old system
-        ObserveV3.getObserve().startBind(this, elmtId);
-      }
+      // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
+      // update + initial render calls, ike in if and ForEach case, convert to stack as well
+      ObserveV3.getObserve().startBind(this, elmtId);
 
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       if (!isFirstRender) {
         _popFunc();
       }
 
-      if (ConfigureStateMgmt.instance.needsV3Observe()) {
-        // FIXME dito
-        ObserveV3.getObserve().startBind(null, -1);
+      let node = this.getNodeById(elmtId);
+      if (node !== undefined) {
+        (node as ArkComponent).cleanStageValue();
       }
+
+      ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
       this.currentlyRenderedElmtIdStack_.pop();
       ViewStackProcessor.StopGetAccessRecording();
 
@@ -1175,7 +1201,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const arr = itemArray; // just to trigger a 'get' onto the array
 
     // ID gen is with index.
-    if (idGenFuncUsesIndex) {
+    if (idGenFuncUsesIndex || idGenFunc.length > 1) {
       // Create array of new ids.
       arr.forEach((item, indx) => {
         newIdArray.push(idGenFunc(item, indx));
@@ -1287,7 +1313,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     return localStorageProp;
   }
 
-  public createOrGetNode(elmtId: number, builder: () => object): object {
+  public createOrGetNode(elmtId: number, builder: () => ArkComponent): object {
     const entry = this.updateFuncByElmtId.get(elmtId);
     if (entry === undefined) {
       throw new Error(`${this.debugInfo__()} fail to create node, elmtId is illegal`);
@@ -1298,6 +1324,16 @@ abstract class ViewPU extends NativeViewPartialUpdate
       entry.setNode(nodeInfo);
     }
     return nodeInfo;
+  }
+
+  /**
+   * getNodeById is used to get ArkComponent stored updateFuncByElmtId
+   * @param elmtId -  the id of the component
+   * @returns ArkComponent | undefined
+   */
+  public getNodeById(elmtId: number): ArkComponent | undefined {
+    const entry = this.updateFuncByElmtId.get(elmtId);
+    return entry ? entry.getNode() : undefined;
   }
 
   /**
@@ -1379,7 +1415,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
             let input: string[] = command.split('=');
             if (input[1]) {
               let viewId: number = Number.parseInt(input[1]);
-              dfxCommand.viewId = Number.isNaN(viewId) ? -1 : viewId;
+              dfxCommand.viewId = Number.isNaN(viewId) ? UINodeRegisterProxy.notRecordingDependencies : viewId;
             }
           }
         } else if (command.match("-r")) {
@@ -1535,7 +1571,7 @@ class UpdateFuncsByElmtId {
     return this.map_.delete(elmtId);
   }
 
-  public set(elmtId: number, params: UpdateFunc | { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: Object }): void {
+  public set(elmtId: number, params: UpdateFunc | { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: ArkComponent }): void {
     (typeof params === 'object') ?
       this.map_.set(elmtId, new UpdateFuncRecord(params)) :
       this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params as UpdateFunc }));

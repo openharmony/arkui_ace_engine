@@ -78,6 +78,9 @@ public:
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo);
     void OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo);
+    void OnDragDrop(const RefPtr<FrameNode>& dragFrameNode, const Point& point);
+    void ResetDragDropStatus(const Point& point, const DragDropRet& dragDropRet, int32_t windowId);
+    bool CheckRemoteData(const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent);
     void OnDragMoveOut(const PointerEvent& pointerEvent);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();

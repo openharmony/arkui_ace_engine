@@ -222,6 +222,7 @@ RefPtr<FrameNode> TextPickerModelNG::CreateFrameNode(int32_t nodeId)
     CHECK_NULL_RETURN(pickerTheme, textPickerNode);
     showCount_ = BUFFER_NODE_NUMBER + pickerTheme->GetShowOptionCount();
     rangeValue_.clear();
+    SetDefaultAttributes(textPickerNode, pickerTheme);
     return textPickerNode;
 }
 
@@ -987,6 +988,38 @@ PickerTextStyle TextPickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
 int32_t TextPickerModelNG::getTextPickerSelectedIndex(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    return frameNode->GetLayoutProperty<TextPickerLayoutProperty>()->GetSelectedValue();
+    return frameNode->GetLayoutProperty<TextPickerLayoutProperty>()->GetSelectedValue(0);
+}
+
+std::string TextPickerModelNG::getTextPickerValue(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    return frameNode->GetLayoutProperty<TextPickerLayoutProperty>()->GetValueValue("");
+}
+
+std::string TextPickerModelNG::getTextPickerRange(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    std::string result;
+    if (isSingleRange_) {
+        for (auto range : rangeValue_) {
+            result.append(range.text_ + ";");
+        }
+        if (result.length() > 0) {
+            result = result.substr(0, result.length() - 1);
+        }
+    } else {
+        for (auto option : options_) {
+            for (auto range : option.rangeResult) {
+                result.append(range + ",");
+            }
+            result = result.substr(0, result.length() - 1);
+            result.append(";");
+        }
+        if (result.length() > 0) {
+            result = result.substr(0, result.length() - 1);
+        }
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

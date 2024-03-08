@@ -44,9 +44,9 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
         case NODE_TEXT_AREA_ON_CHANGE:
             return ON_TEXTAREA_CHANGE;
         case NODE_TEXT_AREA_ON_PASTE:
-            return ON_TEXTAREA_PASTE;                   
+            return ON_TEXTAREA_PASTE;
         case NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE:
-            return ON_TEXTAREA_TEXT_SELECTION_CHANGE; 
+            return ON_TEXTAREA_TEXT_SELECTION_CHANGE;
         case NODE_ON_FOCUS:
             return ON_FOCUS;
         case NODE_ON_BLUR:
@@ -84,13 +84,13 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
         case NODE_TEXT_INPUT_ON_PASTE:
             return ON_TEXT_INPUT_PASTE;
         case NODE_TEXT_INPUT_ON_TEXT_SELECTION_CHANGE:
-            return ON_TEXT_INPUT_TEXT_SELECTION_CHANGE;             
+            return ON_TEXT_INPUT_TEXT_SELECTION_CHANGE;
         default:
             return -1;
     }
 }
 
-ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
+ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
 {
     switch (type) {
         case ON_TEXT_INPUT_CHANGE:
@@ -106,7 +106,7 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
         case ON_APPEAR:
             return NODE_EVENT_ON_APPEAR;
         case ON_DISAPPEAR:
-            return NODE_EVENT_ON_DISAPPEAR;            
+            return NODE_EVENT_ON_DISAPPEAR;
         case ON_AREA_CHANGE:
             return NODE_EVENT_ON_AREA_CHANGE;
         case ON_TEXTAREA_CHANGE:
@@ -179,28 +179,37 @@ bool IsTouchEvent(ArkUI_Int32 type)
 
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
 {
-    event->kind = ConvertToNodeEventType(static_cast<ArkUIAsyncEventKind>(origin->kind));
-    if (event->kind == -1) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event. %{public}d", origin->kind);
-        return false;
-    }
-    if (IsStringEvent(event->kind)) {
-        event->stringEvent.pStr = origin->stringAsyncEvent.pStr;
-        return true;
-    }
-    if (IsTouchEvent(event->kind)) {
-        if (memcpy_sp(&(event->touchEvent), sizeof(ArkUI_NodeTouchEvent), &(origin->touchEvent),
-                sizeof(ArkUITouchEvent)) != 0) {
-            TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
-            return false;
+    ArkUIEventCategory eventCategory = static_cast<ArkUIEventCategory>(origin->kind);
+    switch (eventCategory) {
+        case COMPONENT_ASYNC_EVENT: {
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->componentAsyncEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            if (memcpy_sp(event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM, origin->componentAsyncEvent.data,
+                MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
+                return false;
+            }
+            return true;
         }
-        return true;
+        case TEXT_INPUT: {
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->textInputEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            event->stringEvent.pStr = reinterpret_cast<ArkUI_CharPtr>(origin->textInputEvent.nativeStringPtr);
+            return true;
+        }
+        case TOUCH_EVENT:
+            event->kind = ConvertToNodeEventType(ON_TOUCH);
+            if (memcpy_sp(&(event->touchEvent), sizeof(ArkUI_NodeTouchEvent), &(origin->touchEvent),
+                sizeof(ArkUITouchEvent)) != 0) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
+                return false;
+            }
+            return true;
+        default:
+            TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "failed to convert origin event data");
+            return false;
     }
-    if (memcpy_sp(event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM, origin->componentAsyncEvent.data,
-            MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
-        return false;
-    }
+
     return true;
 }
 

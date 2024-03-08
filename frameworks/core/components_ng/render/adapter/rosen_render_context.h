@@ -347,6 +347,7 @@ public:
     void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void ResetSurface() override;
+    void PaintDebugBoundary(bool flag) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
 
 private:
@@ -420,6 +421,7 @@ private:
     void OnRenderGroupUpdate(bool isRenderGroup) override;
     void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;
     void OnRenderFitUpdate(RenderFit renderFit) override;
+    void OnNodeNameUpdate(const std::string& id) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
@@ -516,7 +518,6 @@ private:
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
     void BdImagePaintTask(RSCanvas& canvas);
 
-    void PaintDebugBoundary();
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
     void SetContentRectToFrame(RectF rect) override;

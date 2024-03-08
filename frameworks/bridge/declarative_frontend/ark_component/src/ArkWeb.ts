@@ -294,6 +294,9 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   nestedScroll(value: NestedScrollOptions): this {
     throw new Error('Method not implemented.');
   }
+  onOverrideUrlLoading(callback: OnOverrideUrlLoadingCallback): this {
+    throw new Error('Method not implemented.');
+  }
 }
 
 // @ts-ignore

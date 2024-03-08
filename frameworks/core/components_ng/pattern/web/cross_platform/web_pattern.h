@@ -108,7 +108,7 @@ public:
         return true;
     }
 
-    void UpdateScrollOffset(SizeF frameSize) override;
+    void UpdateSlideOffset(SizeF frameSize) override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -448,8 +448,8 @@ private:
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
     void ResetDragAction();
-    RefPtr<ScrollPattern> SearchParent();
-    void InitScrollUpdateListener();
+    void UpdateRelativeOffset();
+    void InitSlideUpdateListener();
     void CalculateHorizontalDrawRect(const SizeF frameSize);
     void CalculateVerticalDrawRect(const SizeF frameSize);
     int onDragMoveCnt = 0;

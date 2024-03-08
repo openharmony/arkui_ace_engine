@@ -852,6 +852,7 @@ export class SubHeader extends ViewPU {
       Image.width(12);
       Image.height(24);
       Image.focusable(!0);
+      Image.draggable(!1);
       t || Image.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));

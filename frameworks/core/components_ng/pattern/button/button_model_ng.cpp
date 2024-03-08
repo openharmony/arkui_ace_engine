@@ -108,8 +108,29 @@ void ButtonModelNG::SetButtonStyle(const std::optional<ButtonStyleMode>& buttonS
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, buttonStyle.value());
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
-        auto bgColor = buttonTheme->GetBgColor(buttonStyle.value());
-        auto textColor = buttonTheme->GetTextColor(buttonStyle.value());
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+        auto bgColor = buttonTheme->GetBgColor(buttonStyle.value(), buttonRole);
+        auto textColor = buttonTheme->GetTextColor(buttonStyle.value(), buttonRole);
+        BackgroundColor(bgColor, true);
+        SetFontColor(textColor);
+    }
+}
+
+void ButtonModelNG::SetRole(const std::optional<ButtonRole>& buttonRole)
+{
+    if (buttonRole.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonRole, buttonRole.value());
+        auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        ButtonStyleMode buttonStyleMode = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+        auto bgColor = buttonTheme->GetBgColor(buttonStyleMode, buttonRole.value());
+        auto textColor = buttonTheme->GetTextColor(buttonStyleMode, buttonRole.value());
         BackgroundColor(bgColor, true);
         SetFontColor(textColor);
     }
@@ -136,6 +157,7 @@ void ButtonModelNG::CreateWithLabel(const CreateWithPara& para, std::list<RefPtr
     SetTypeAndStateEffect(para.type, para.stateEffect);
     SetButtonStyle(para.buttonStyleMode);
     SetControlSize(para.controlSize);
+    SetRole(para.buttonRole);
 }
 
 void ButtonModelNG::CreateWithLabel(const std::string& label)
@@ -210,6 +232,7 @@ void ButtonModelNG::CreateWithChild(const CreateWithPara& para)
         SetTypeAndStateEffect(para.type, para.stateEffect);
         SetButtonStyle(para.buttonStyleMode);
         SetControlSize(para.controlSize);
+        SetRole(para.buttonRole);
     }
 }
 
@@ -293,7 +316,6 @@ void ButtonModelNG::SetBorderRadius(FrameNode* frameNode, const Dimension& radiu
     borderRadius.multiValued = true;
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius, frameNode);
 }
-
 
 void ButtonModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,

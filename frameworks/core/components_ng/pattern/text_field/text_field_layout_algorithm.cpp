@@ -563,7 +563,12 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     CHECK_NULL_VOID(paragraph_);
     paragraph_->PushStyle(textStyle);
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition, needObscureText);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition,
+        needObscureText, theme->IsShowPasswordDirectly());
     paragraph_->AddText(displayText);
     paragraph_->Build();
 }
@@ -619,7 +624,12 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     CHECK_NULL_VOID(paragraph_);
     inlineParagraph_->PushStyle(textStyle);
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition, needObscureText);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition,
+        needObscureText, theme->IsShowPasswordDirectly());
     inlineParagraph_->AddText(displayText);
     inlineParagraph_->Build();
 }

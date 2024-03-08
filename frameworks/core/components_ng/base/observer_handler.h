@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_OBSERVER_HANDLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_OBSERVER_HANDLER_H
 
+#include <functional>
 #include <string>
 #include <utility>
 
@@ -96,6 +97,7 @@ public:
     void NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
     void NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType scrollEvent);
     void NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state);
+    void NotifyDensityChange(double density);
     std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
     std::shared_ptr<ScrollEventInfo> GetScrollEventState(const RefPtr<AceType>& node);
     std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
@@ -106,10 +108,14 @@ public:
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
+    using DensityHandleFunc = std::function<void(AbilityContextInfo&, double)>;
+    void SetHandleDensityChangeFunc(const DensityHandleFunc& func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
+    DensityHandleFunc densityHandleFunc_;
+
     napi_value GetUIContextValue();
 };
 } // namespace OHOS::Ace::NG

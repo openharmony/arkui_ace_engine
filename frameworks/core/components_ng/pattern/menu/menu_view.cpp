@@ -348,6 +348,12 @@ void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
     AnimationOption option;
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
+    option.SetOnFinishEvent([] {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto manager = pipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        manager->SetFilterActive(false);
+    });
     filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
     AnimationUtils::Animate(
         option,

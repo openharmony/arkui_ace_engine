@@ -3548,4 +3548,108 @@ HWTEST_F(RichEditorTestNg, RichEditorController016, TestSize.Level1)
 
     ClearSpan();
 }
+
+/**
+ * @tc.name: RichEditorDragTest001
+ * @tc.desc: test the drag of RichEditor without developer's onDragStart function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDragTest001, TestSize.Level1)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    host->draggable_ = true;
+    auto eventHub = host->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    EXPECT_TRUE(gesture->GetTextDraggable());
+    gesture->SetIsTextDraggable(true);
+    pattern->InitDragDropEvent();
+    EXPECT_TRUE(eventHub->HasDefaultOnDragStart());
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+    TextStyle style;
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.style = style;
+    auto index = controller->AddTextSpan(options);
+    EXPECT_EQ(index, 0);
+    ImageSpanOptions imageOptions;
+    imageOptions.image = IMAGE_VALUE;
+    controller->AddImageSpan(imageOptions);
+    pattern->textSelector_.Update(0, 6);
+    auto onDragStart = eventHub->GetDefaultOnDragStart();
+    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto dragDropInfo = onDragStart(event, "");
+    EXPECT_EQ(dragDropInfo.extraInfo, "");
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_EQ(pattern->status_, Status::DRAGGING);
+    eventHub->FireOnDragMove(event, "");
+    auto onDragEnd = eventHub->GetOnDragEnd();
+    onDragEnd(event);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: RichEditorDragTest002
+ * @tc.desc: test the drag of RichEditor with developer's onDragStart function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDragTest002, TestSize.Level1)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    host->draggable_ = true;
+    auto eventHub = host->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    EXPECT_TRUE(gesture->GetTextDraggable());
+    gesture->SetIsTextDraggable(true);
+    auto dragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> NG::DragDropInfo {
+        NG::DragDropInfo info;
+        info.extraInfo = INIT_VALUE_1;
+        return info;
+    };
+    eventHub->SetOnDragStart(std::move(dragStart));
+    EXPECT_TRUE(eventHub->HasOnDragStart());
+    pattern->InitDragDropEvent();
+    EXPECT_TRUE(eventHub->HasDefaultOnDragStart());
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    controller->AddTextSpan(options);
+    ImageSpanOptions imageOptions;
+    imageOptions.image = IMAGE_VALUE;
+    controller->AddImageSpan(imageOptions);
+    pattern->textSelector_.Update(0, 6);
+    auto onDragStart = eventHub->GetOnDragStart();
+    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto dragDropInfo = onDragStart(event, "");
+    EXPECT_EQ(dragDropInfo.extraInfo, INIT_VALUE_1);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 6);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+    eventHub->FireOnDragMove(event, "");
+    auto onDragEnd = eventHub->GetOnDragEnd();
+    onDragEnd(event);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
 } // namespace OHOS::Ace::NG

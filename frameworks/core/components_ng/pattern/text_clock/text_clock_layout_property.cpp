@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 inline constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
-inline const std::string DEFAULT_FORMAT = "hms";
+inline const std::string DEFAULT_FORMAT = "aa h:m:s";
 inline int32_t GetSystemTimeZone()
 {
     struct timeval currentTime {};

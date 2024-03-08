@@ -411,7 +411,7 @@ public:
     void Handle(bool key) override;
 
 private:
-    WeakPtr<PipelineBase> context_;
+    WeakPtr<PipelineBase> context_ = nullptr;
 };
 
 class WebDelegateObserver : public virtual AceType {
@@ -533,6 +533,8 @@ public:
     void UpdateScrollBarColor(const std::string& colorValue);
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
+    void UpdateNativeEmbedRuleTag(const std::string& tag);
+    void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
@@ -618,7 +620,8 @@ public:
     void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
-    void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler);
+    void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler, int videoNaturalWidth,
+        int videoNaturalHeight);
     bool OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message);
     void OnRouterPush(const std::string& param);
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason);
@@ -720,6 +723,9 @@ public:
     void SetAccessibilityState(bool state);
     void UpdateAccessibilityState(bool state);
     OHOS::NWeb::NWebPreference::CopyOptionMode GetCopyOptionMode() const;
+    void OnIntelligentTrackingPreventionResult(
+        const std::string& websiteHost, const std::string& trackerHost);
+    bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -821,7 +827,7 @@ private:
     State state_ { State::WAITINGFORSIZE };
 #ifdef OHOS_STANDARD_SYSTEM
     std::shared_ptr<OHOS::NWeb::NWeb> nweb_;
-    std::shared_ptr<OHOS::NWeb::NWebCookieManager> cookieManager_;
+    std::shared_ptr<OHOS::NWeb::NWebCookieManager> cookieManager_ = nullptr;
     sptr<Rosen::Window> window_;
     bool isCreateWebView_ = false;
     int32_t callbackId_ = 0;
@@ -855,6 +861,7 @@ private:
     EventCallbackV2 onSafeBrowsingCheckResultV2_;
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
+    EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
 
     int32_t renderMode_;
     std::string bundlePath_;
@@ -894,6 +901,8 @@ private:
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;
     bool isEmbedModeEnabled_ = false;
+    std::string tag_;
+    std::string tag_type_;
 #endif
 };
 

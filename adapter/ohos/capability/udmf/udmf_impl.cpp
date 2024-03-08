@@ -134,6 +134,19 @@ int32_t UdmfClientImpl::GetSummary(std::string& key, std::map<std::string, int64
     return ret;
 }
 
+bool UdmfClientImpl::GetRemoteStatus(std::string& key)
+{
+    auto client = UDMF::UdmfClient::GetInstance();
+    bool isRemoteData = false;
+    UDMF::QueryOption queryOption;
+    queryOption.key = key;
+    int32_t ret = client.IsRemoteData(queryOption, isRemoteData);
+    if (ret != 0) {
+        return false;
+    }
+    return isRemoteData;
+}
+
 int64_t UnifiedDataImpl::GetSize()
 {
     CHECK_NULL_RETURN(unifiedData_, 0);

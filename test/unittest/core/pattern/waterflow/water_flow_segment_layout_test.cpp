@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 
 #define protected public
@@ -769,6 +770,38 @@ HWTEST_F(WaterFlowSegmentTest, Reset004, TestSize.Level1)
     EXPECT_EQ(GetChildFrameNode(frameNode_, info.footerIndex_), footer);
     EXPECT_EQ(info.startIndex_, 25);
     EXPECT_EQ(info.currentOffset_, -2000.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 25), 237.5f);
+}
+
+/**
+ * @tc.name: Reset005
+ * @tc.desc: Test Changing cross gap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Reset005, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsGap(Dimension(5.0f));
+        model.SetRowsGap(Dimension(1.0f));
+        model.SetFooter(GetDefaultHeaderBuilder());
+        CreateItem(200);
+        ViewStackProcessor::GetInstance()->Pop();
+    });
+    auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 21);
+    for (int i = 0; i <= 21; ++i) {
+        EXPECT_EQ(GetChildWidth(frameNode_, i), 116.25f);
+    }
+
+    layoutProperty_->UpdateColumnsGap(Dimension(1.0f));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 21);
+    for (int i = 0; i <= 21; ++i) {
+        EXPECT_EQ(GetChildWidth(frameNode_, i), 119.25f);
+    }
 }
 
 /**
@@ -1071,6 +1104,50 @@ HWTEST_F(WaterFlowSegmentTest, Segmented006, TestSize.Level1)
     EXPECT_EQ(info.endIndex_, 6);
     EXPECT_EQ(info.segmentStartPos_[0], 5.0f);
     EXPECT_EQ(info.segmentStartPos_[1], 441.0f);
+}
+
+/**
+ * @tc.name: CheckHeight001
+ * @tc.desc: Layout WaterFlow and check if callback height is used
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, CheckHeight001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(37);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+
+    auto& info = pattern_->layoutInfo_;
+
+    UpdateCurrentOffset(-10000.0f);
+    EXPECT_EQ(info.currentOffset_, -3074.0f);
+    EXPECT_EQ(info.startIndex_, 31);
+    EXPECT_EQ(info.endIndex_, 36);
+    for (int i = 31; i <= 36; ++i) {
+        EXPECT_EQ(GetChildHeight(frameNode_, i), 100.0f);
+    }
+
+    for (auto child : frameNode_->GetChildren()) {
+        auto node = AceType::DynamicCast<FrameNode>(child);
+        node->GetGeometryNode()->SetFrameSize({});
+        node->GetLayoutProperty()->UpdateUserDefinedIdealSize({ CalcLength(50.0f), CalcLength(50.0f) });
+    }
+
+    UpdateCurrentOffset(10000.0f);
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 6);
+    for (int i = 0; i <= 6; ++i) {
+        EXPECT_EQ(GetChildHeight(frameNode_, i), 100.0f);
+    }
 }
 
 /**

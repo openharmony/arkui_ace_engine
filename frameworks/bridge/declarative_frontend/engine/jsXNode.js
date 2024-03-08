@@ -479,7 +479,10 @@ class FrameNode {
         if (node.type_ === 'ArkTsNode') {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
-        getUINativeModule().frameNode.appendChild(this.nodePtr_, node.nodePtr_);
+        let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, node.nodePtr_);
+        if (!flag) {
+            throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+        }
     }
     insertChildAfter(child, sibling) {
         this.checkType();
@@ -489,11 +492,15 @@ class FrameNode {
         if (child.type_ === 'ArkTsNode') {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
+        let flag = true;
         if (sibling === undefined || sibling === null) {
-            getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, null);
+            flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, null);
         }
         else {
-            getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, sibling.nodePtr_);
+            flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, sibling.nodePtr_);
+        }
+        if (!flag) {
+            throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
     }
     removeChild(node) {
@@ -570,6 +577,49 @@ class FrameNode {
     getChildrenCount() {
         const number = getUINativeModule().frameNode.getChildNumber(this.nodePtr_);
         return number;
+    }
+    getPositionToParent() {
+        const position = getUINativeModule().frameNode.getPositionToParent(this.nodePtr_);
+        if (position) {
+            return {x: position[0], y: position[1]};
+        }
+        return null;
+    }
+    getPositionToWindow() {
+        const position = getUINativeModule().frameNode.getPositionToWindow(this.nodePtr_);
+        if (position) {
+            return {x: position[0], y: position[1]};
+        }
+        return null;
+    }
+}
+class FrameNodeUtils {
+    static searchNodeInRegisterProxy(nodePtr) {
+        let nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+        if (nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+        let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return null;
+    }
+
+    static createFrameNode(uiContext, nodePtr) {
+        if (!getUINativeModule().frameNode.isModifiable(nodePtr)) {
+            let frameNode = new FrameNode(uiContext, 'ArkTsNode');
+            let baseNode = new BaseNode(uiContext);
+            let node = baseNode.convertToFrameNode(nodePtr);
+            let nodeId = getUINativeModule().frameNode.getIdByNodePtr(node);
+            if (nodeId !== getUINativeModule().frameNode.getIdByNodePtr(node)) {
+                return null;
+            }
+            frameNode.setNodePtr(nodePtr);
+            frameNode.setBaseNode(baseNode);
+            return frameNode;
+        }
+        return null;
     }
 }
 /*
@@ -1094,4 +1144,4 @@ class XComponentNode extends FrameNode {
     }
 }
 
-export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, NodeRenderType, XComponentNode, ShapeMask, edgeColors, edgeWidths, borderStyles, borderRadiuses };
+export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils, NodeRenderType, XComponentNode, ShapeMask, edgeColors, edgeWidths, borderStyles, borderRadiuses };

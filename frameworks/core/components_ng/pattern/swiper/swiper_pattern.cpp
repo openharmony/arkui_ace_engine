@@ -243,15 +243,18 @@ void SwiperPattern::InitCapture()
     }
 
     if (!hasCachedCapture_ && hasCachedCapture) {
+        // Screenshot nodes need to be added at the forefront of all special nodes to display at the bottom
+        uint32_t number = static_cast<uint32_t>(HasIndicatorNode()) + static_cast<uint32_t>(HasLeftButtonNode()) +
+                          static_cast<uint32_t>(HasRightButtonNode()) + 1;
         auto leftCaptureNode = FrameNode::GetOrCreateFrameNode(
             V2::SWIPER_LEFT_CAPTURE_ETS_TAG, GetLeftCaptureId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
         leftCaptureNode->MarkModifyDone();
-        host->AddChild(leftCaptureNode);
+        host->AddChild(leftCaptureNode, -number);
 
         auto rightCaptureNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_CAPTURE_ETS_TAG, GetRightCaptureId(),
             []() { return AceType::MakeRefPtr<ImagePattern>(); });
         rightCaptureNode->MarkModifyDone();
-        host->AddChild(rightCaptureNode);
+        host->AddChild(rightCaptureNode, -number);
     }
     if (hasCachedCapture_ && !hasCachedCapture) {
         RemoveAllCaptureNode();
@@ -272,7 +275,6 @@ void SwiperPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    // Screenshots need to be added first for display under other special nodes
     InitCapture();
     InitIndicator();
     InitArrow();
@@ -442,18 +444,18 @@ void SwiperPattern::UpdateTargetCapture(bool forceUpdate)
     }
 }
 
-void SwiperPattern::CreateCaptureCallback(int32_t targetCaptureIndex, int32_t captureId, bool forceUpdate)
+void SwiperPattern::CreateCaptureCallback(int32_t targetIndex, int32_t captureId, bool forceUpdate)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto targetNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(targetCaptureIndex));
+    auto targetNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(targetIndex));
     CHECK_NULL_VOID(targetNode);
-    auto callback = [weak = WeakClaim(this), id = Container::CurrentId(), captureId](
+    auto callback = [weak = WeakClaim(this), id = Container::CurrentId(), captureId, targetIndex](
                         std::shared_ptr<Media::PixelMap> pixelMap) {
         ContainerScope scope(id);
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
-        swiper->UpdateCaptureSource(pixelMap, captureId);
+        swiper->UpdateCaptureSource(pixelMap, captureId, targetIndex);
     };
     if (forceUpdate) {
         // The size changes caused by layout need to wait for rendering before taking a screenshot
@@ -469,15 +471,28 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetCaptureIndex, int32_t ca
     }
 }
 
-void SwiperPattern::UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId)
+void SwiperPattern::UpdateCaptureSource(
+    std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId, int32_t targetIndex)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto targetNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(targetIndex));
+    CHECK_NULL_VOID(targetNode);
+    auto targetLayoutProperty = targetNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(targetLayoutProperty);
+    auto targetMargin = targetLayoutProperty->CreateMargin();
+    MarginProperty margin;
+    margin.left = CalcLength(targetMargin.left.has_value() ? targetMargin.left.value() : 0.0f);
+    margin.right = CalcLength(targetMargin.right.has_value() ? targetMargin.right.value() : 0.0f);
+    margin.top = CalcLength(targetMargin.top.has_value() ? targetMargin.top.value() : 0.0f);
+    margin.bottom = CalcLength(targetMargin.bottom.has_value() ? targetMargin.bottom.value() : 0.0f);
+
     auto captureNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(captureId)));
     CHECK_NULL_VOID(captureNode);
     auto imageLayoutProperty = captureNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap)));
+    imageLayoutProperty->UpdateMargin(margin);
     captureNode->MarkModifyDone();
     captureNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -2512,9 +2527,6 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
     auto curve = GetCurve();
     auto container = Container::Current();
     bool isLauncherFeature = container ? container->IsLauncherContainer() : false;
-    if (!curve && !isLauncherFeature) {
-        curve = Curves::LINEAR;
-    }
 
     if (isLauncherFeature) {
         finishCallbackType_ = FinishCallbackType::LOGICALLY;

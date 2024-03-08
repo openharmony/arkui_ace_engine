@@ -579,6 +579,13 @@ void WebModelImpl::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
     webComponent->SetNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
+void WebModelImpl::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->RegisterNativeEmbedRule(tag, type);
+}
+
 void WebModelImpl::SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -595,6 +602,13 @@ void WebModelImpl::SetNativeEmbedGestureEventId(std::function<void(const BaseEve
     auto eventMarker = EventMarker(std::move(jsCallback));
 
     webComponent->SetNativeEmbedGestureEventId(eventMarker);
+}
+
+void WebModelImpl::SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOnOverrideUrlLoading(std::move(jsCallback));
 }
 
 } // namespace OHOS::Ace::Framework

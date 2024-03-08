@@ -53,6 +53,9 @@ function uiNodeCleanUpIdleTask(): void {
 }
 
 class UINodeRegisterProxy {
+    public static readonly notRecordingDependencies : number = -1;
+    public static readonly monitorIllegalV2V3StateAccess : number = -2;
+
     public static obtainDeletedElmtIds(): void {
         stateMgmtConsole.debug(`UINodeRegisterProxy. static obtainDeletedElmtIds:`);
         if ((!UINodeRegisterProxy.instance_.obtainDeletedElmtIds) || typeof UINodeRegisterProxy.instance_.obtainDeletedElmtIds != "function") {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include <utility>
 #include <vector>
 #include <unordered_map>
+#include "interfaces/native/native_event.h"
 
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
@@ -51,6 +52,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -3621,8 +3623,7 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
             borderRadius.Reset();
         }
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
-    }
-    if (args->IsObject()) {
+    } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension topLeft;
         CalcDimension topRight;
@@ -3630,7 +3631,7 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
         CalcDimension bottomRight;
         ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
         ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
-    } 
+    }
 }
 
 void JSViewAbstract::ParseOuterBorderRadius(const JSRef<JSVal>& args)
@@ -5242,6 +5243,7 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     }
     // Set popup to popupParam
     auto popupObj = JSRef<JSObject>::Cast(info[1]);
+    SetPopupDismiss(info, popupObj, popupParam);
     if (popupObj->GetProperty("message")->IsString()) {
         ParsePopupParam(info, popupObj, popupParam); // Parse PopupOptions param
         ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
@@ -5270,6 +5272,57 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     } else {
         return;
     }
+}
+
+void JSViewAbstract::SetPopupDismiss(
+    const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
+{
+    auto onWillDismissFunc = popupObj->GetProperty("onWillDismiss");
+    if (onWillDismissFunc->IsBoolean()) {
+        bool onWillDismissBool = onWillDismissFunc->ToBoolean();
+        popupParam->SetInteractiveDismiss(onWillDismissBool);
+        popupParam->SetOnWillDismiss(nullptr);
+        if (onWillDismissBool) {
+            TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss");
+        }
+    } else if (onWillDismissFunc->IsFunction()) {
+        auto onWillDismissCallback = ParsePopupCallback(info, popupObj);
+        popupParam->SetOnWillDismiss(std::move(onWillDismissCallback));
+        popupParam->SetInteractiveDismiss(false);
+        if (onWillDismissCallback != nullptr) {
+            TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss");
+        }
+    }
+}
+
+PopupOnWillDismiss JSViewAbstract::ParsePopupCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
+{
+    auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
+    RefPtr<JsFunction> jsFunc =
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onWillDismiss = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                          node = frameNode](int32_t reason) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Bindpopup.dismiss");
+        PipelineContext::SetCallBackNode(node);
+
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(ON_WILL_DISMISS_FIELD_COUNT);
+        JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
+        dismissObj->SetPropertyObject("dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissPopup));
+        dismissObj->SetProperty<int32_t>("reason", reason);
+        JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+
+        func->ExecuteJS(1, &newJSVal);
+    };
+    return onWillDismiss;
+}
+
+panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissPopup(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ViewAbstractModel::GetInstance()->DismissPopup();
+    return JSValueRef::Undefined(runtimeCallInfo->GetVM());
 }
 #endif
 
@@ -5754,6 +5807,10 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
         } else {
             RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
             progressMask->SetColor(theme->GetMaskColor());
+        }
+        JSRef<JSVal> jEnableBreathe = paramObject->GetProperty("breathe");
+        if (jEnableBreathe->IsBoolean()) {
+            progressMask->SetEnableBreathe(jEnableBreathe->ToBoolean());
         }
         ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
     } else {
@@ -6839,6 +6896,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
     JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
+    JSClass<JSViewAbstract>::StaticMethod("onTouchIntercept", &JSViewAbstract::JsOnTouchIntercept);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
@@ -6900,9 +6958,17 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier)
         return panda::JSValueRef::Undefined(vm);
     };
     auto jsInvalidate = JSRef<JSFunc>::New<FunctionCallback>(invalidate);
-    auto frameNode = ViewAbstractModel::GetInstance()->GetFrameNode();
+    auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
+    if (frameNode) {
+        auto contentModifier = frameNode->GetContentModifier();
+        if (contentModifier) {
+            contentModifier->SetContentChange();
+        } else {
+            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+        }
+    }
     jsInvalidate->GetHandle()->SetNativePointerFieldCount(jsInvalidate->GetEcmaVM(), 1);
-    jsInvalidate->GetHandle()->SetNativePointerField(jsInvalidate->GetEcmaVM(), 0, frameNode);
+    jsInvalidate->GetHandle()->SetNativePointerField(jsInvalidate->GetEcmaVM(), 0, static_cast<void*>(frameNode));
     jsDrawModifier->SetPropertyObject("invalidate", jsInvalidate);
 }
 
@@ -6955,8 +7021,8 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
     drawModifier->jsDrawContentFunc = getDrawModifierFunc("drawContent");
     drawModifier->jsDrawFrontFunc = getDrawModifierFunc("drawFront");
 
-    AddInvalidateFunc(jsDrawModifier);
     ViewAbstractModel::GetInstance()->SetDrawModifier(drawModifier);
+    AddInvalidateFunc(jsDrawModifier);
 }
 
 void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
@@ -7752,6 +7818,25 @@ void JSViewAbstract::JsOnGestureJudgeBegin(const JSCallbackInfo& info)
         return func->Execute(gestureInfo, info);
     };
     ViewAbstractModel::GetInstance()->SetOnGestureJudgeBegin(std::move(onGestureJudgefunc));
+}
+
+void JSViewAbstract::JsOnTouchIntercept(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetOnTouchIntercept(nullptr);
+        return;
+    }
+
+    auto jsOnTouchInterceptFunc = AceType::MakeRefPtr<JsTouchInterceptFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onTouchInterceptfunc = [execCtx = info.GetExecutionContext(), func = jsOnTouchInterceptFunc, node = frameNode](
+                                    TouchEventInfo& info) -> NG::HitTestMode {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, NG::HitTestMode::HTMDEFAULT);
+        ACE_SCORING_EVENT("onTouchIntercept");
+        PipelineContext::SetCallBackNode(node);
+        return func->Execute(info);
+    };
+    ViewAbstractModel::GetInstance()->SetOnTouchIntercept(std::move(onTouchInterceptfunc));
 }
 
 void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)

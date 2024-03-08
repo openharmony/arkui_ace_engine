@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +14,27 @@
  */
 #include "core/components_ng/pattern/xcomponent/xcomponent_paint_method.h"
 
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+
 namespace OHOS::Ace::NG {
 CanvasDrawFunction XComponentPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    auto paintRect = renderContext->GetPaintRectWithTransform();
-    auto width = paintRect.Width();
-    auto height = paintRect.Height();
-    return [weak = WeakClaim(this), width, height](RSCanvas& canvas) {
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto surfaceSize = pattern->GetSurfaceSize();
+    auto localPostion = pattern->GetLocalPosition();
+    auto width = surfaceSize.Width();
+    auto height = surfaceSize.Height();
+    auto offsetX = localPostion.GetX();
+    auto offsetY = localPostion.GetY();
+    return [weak = WeakClaim(this), width, height, offsetX, offsetY](RSCanvas& canvas) {
         auto painter = weak.Upgrade();
         CHECK_NULL_VOID(painter);
         auto surface = painter->renderSuface_;
         if (surface) {
-            surface->DrawBufferForXComponent(canvas, width, height);
+            surface->DrawBufferForXComponent(canvas, width, height, offsetX, offsetY);
         }
     };
 }

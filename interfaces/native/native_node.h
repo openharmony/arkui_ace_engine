@@ -1353,6 +1353,17 @@ typedef enum {
      *
      */
     NODE_FOCUS_STATUS,
+    /**
+     * @brief Defines the aspect ratio attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: aspect ratio of the component, in width/height format. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: aspect ratio of the component, in width/height format. \n
+     *
+     */
+    NODE_ASPECT_RATIO,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -1617,6 +1628,28 @@ typedef enum {
      */
     NODE_TEXT_INDENT,
     /**
+     * @brief Defines the line break rule. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_WordBreak}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_WordBreak}. \n
+     *
+     */
+    NODE_TEXT_WORD_BREAK,
+    /**
+     * @brief Defines the ellipsis position. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_EllipsisMode}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_EllipsisMode}. \n
+     *
+     */
+    NODE_TEXT_ELLIPSIS_MODE,
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -1627,6 +1660,28 @@ typedef enum {
      *
      */
     NODE_SPAN_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SPAN,
+    /**
+     * @brief Defines the text background style.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32: color of the text background, in 0xARGB format, for example, <b>0xFFFF0000</b> indicating red. \n
+     * The second parameter indicates the rounded corners of the text background. Two setting modes are available: \n
+     * 1: .value[1].f32: radius of the four corners, in vp. \n
+     * 2: .value[1].f32: radius of the upper left corner, in vp. \n
+     * .value[2].f32: radius of the upper right corner, in vp. \n
+     * .value[3].f32: radius of the lower left corner, in vp. \n
+     * .value[4].f32: radius of the lower right corner, in vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: color of the text background, in 0xARGB format. \n
+     * .value[1].f32: radius of the upper left corner, in vp. \n
+     * .value[2].f32: radius of the upper right corner, in vp. \n
+     * .value[3].f32: radius of the lower left corner, in vp. \n
+     * .value[4].f32: radius of the lower right corner, in vp. \n
+     *
+     */
+    NODE_SPAN_TEXT_BACKGROUND_STYLE,
     /**
      * @brief Defines the image source of the image span.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -1738,6 +1793,29 @@ typedef enum {
      *
      */
     NODE_IMAGE_ALT,
+    /**
+     * @brief Defines whether the image is draggable.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the image is draggable. The value <b>true</b> means that the image is draggable. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the image is draggable. \n
+     *
+     */
+    NODE_IMAGE_DRAGGABLE,
+    /**
+     * @brief Defines the image rendering mode. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_RenderMode}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_RenderMode}. \n
+     *
+     */
+    NODE_IMAGE_RENDER_MODE,
     /**
      * @brief Defines the color of the component when it is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -2101,6 +2179,27 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_TYPE,
+    /**
+     * @brief Defines the counter settings. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to show a character counter. The value <b>true</b> means to show a character counter. \n
+     * .value[1]?.f32: threshold percentage for displaying the character counter. The character counter is displayed
+     * when the number of characters that have been entered is greater than the maximum number of characters multiplied
+     * by the threshold percentage value. The value range is 1 to 100. If the value is a decimal, it is rounded down. \n
+     * .value[2]?.i32: whether to highlight the border when the number of entered characters reaches the maximum. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to show a character counter. \n
+     * .value[1].f32: threshold percentage for displaying the character counter. The character counter is displayed
+     * when the number of characters that have been entered is greater than the maximum number of characters multiplied
+     * by the threshold percentage value. The value range is 1 to 100. \n
+     * .value[2].i32: whether to highlight the border when the number of entered characters reaches the maximum.
+     * The default value is <b>true</b>. \n
+     *
+     */
+    NODE_TEXT_AREA_SHOW_COUNTER,
+
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3469,7 +3568,7 @@ typedef enum {
      * .value[1].i32: how the flex items are wrapped. \n
      * .value[2].i32: alignment mode along the main axis. \n
      * .value[3].i32: alignment mode along the cross axis. \n
-     * .value[4]?.i32: alignment mode along the cross axis for multi-line content.\n
+     * .value[4].i32: alignment mode along the cross axis for multi-line content.\n
      *
      */
     NODE_FLEX_OPTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_FLEX,
@@ -3531,13 +3630,13 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} does not contain parameters.
      */
     NODE_EVENT_ON_APPEAR,
-
     /**
-     * @brief 卸载事件。
+     * @brief Defines the unmount event.
      *
-     * 触发该事件的条件 ：组件卸载时触发此回调。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中不包含参数。
+     * This event is triggered when the component is unmounted and hidden. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} does not contain parameters.
      */
     NODE_EVENT_ON_DISAPPEAR,
 

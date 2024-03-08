@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,16 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+bool ParseSurfaceRectParam(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    if (!jsValue->IsNumber()) {
+        return false;
+    }
+    result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::PX);
+    return true;
+}
+} // namespace
 void JSXComponentController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSXComponentController>::Declare("XComponentController");
@@ -30,6 +40,10 @@ void JSXComponentController::JSBind(BindingTarget globalObj)
         "getXComponentContext", &JSXComponentController::GetXComponentContext);
     JSClass<JSXComponentController>::CustomMethod(
         "setXComponentSurfaceSize", &JSXComponentController::SetSurfaceConfig);
+    JSClass<JSXComponentController>::CustomMethod(
+        "getXComponentSurfaceRect", &JSXComponentController::GetXComponentSurfaceRect);
+    JSClass<JSXComponentController>::CustomMethod(
+        "setXComponentSurfaceRect", &JSXComponentController::SetXComponentSurfaceRect);
     JSClass<JSXComponentController>::Bind(
         globalObj, JSXComponentController::Constructor, JSXComponentController::Destructor);
 }
@@ -88,5 +102,65 @@ void JSXComponentController::SetSurfaceConfig(const JSCallbackInfo& args)
     if (xcomponentController_) {
         xcomponentController_->ConfigSurface(surfaceWidth, surfaceHeight);
     }
+}
+
+void JSXComponentController::GetXComponentSurfaceRect(const JSCallbackInfo& args)
+{
+    if (!xcomponentController_) {
+        return;
+    }
+    auto retObj = JSRef<JSObject>::New();
+    float offsetX = 0.0f;
+    float offsetY = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+    xcomponentController_->GetLocalLocation(offsetX, offsetY);
+    xcomponentController_->GetSurfaceSize(width, height);
+    retObj->SetProperty("offsetX", offsetX);
+    retObj->SetProperty("offsetY", offsetY);
+    retObj->SetProperty("surfaceWidth", width);
+    retObj->SetProperty("surfaceHeight", height);
+    args.SetReturnValue(retObj);
+}
+
+void JSXComponentController::SetXComponentSurfaceRect(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+    if (!xcomponentController_) {
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    auto jsSurfaceWidth = obj->GetProperty("surfaceWidth");
+    CalcDimension surfaceWidth;
+    if (!ParseSurfaceRectParam(jsSurfaceWidth, surfaceWidth) || !surfaceWidth.IsValid()) {
+        return;
+    }
+    auto jsSurfaceHeight = obj->GetProperty("surfaceHeight");
+    CalcDimension surfaceHeight;
+    if (!ParseSurfaceRectParam(jsSurfaceHeight, surfaceHeight) || !surfaceHeight.IsValid()) {
+        return;
+    }
+    xcomponentController_->SetIdealSurfaceWidth(static_cast<float>(surfaceWidth.ConvertToPx()));
+    xcomponentController_->SetIdealSurfaceHeight(static_cast<float>(surfaceHeight.ConvertToPx()));
+
+    auto jsOffsetX = obj->GetProperty("offsetX");
+    CalcDimension offsetX;
+    if (ParseSurfaceRectParam(jsOffsetX, offsetX)) {
+        xcomponentController_->SetIdealSurfaceOffsetX(static_cast<float>(offsetX.ConvertToPx()));
+    } else {
+        xcomponentController_->ClearIdealSurfaceOffset(true);
+    }
+    auto jsOffsetY = obj->GetProperty("offsetY");
+    CalcDimension offsetY;
+    if (ParseSurfaceRectParam(jsOffsetY, offsetY)) {
+        xcomponentController_->SetIdealSurfaceOffsetY(static_cast<float>(offsetY.ConvertToPx()));
+    } else {
+        xcomponentController_->ClearIdealSurfaceOffset(false);
+    }
+
+    xcomponentController_->UpdateSurfaceBounds();
 }
 } // namespace OHOS::Ace::Framework

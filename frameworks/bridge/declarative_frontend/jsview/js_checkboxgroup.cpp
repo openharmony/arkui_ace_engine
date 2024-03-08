@@ -77,8 +77,6 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
     JSClass<JSCheckboxGroup>::StaticMethod("selectedColor", &JSCheckboxGroup::SelectedColor);
     JSClass<JSCheckboxGroup>::StaticMethod("unselectedColor", &JSCheckboxGroup::UnSelectedColor);
     JSClass<JSCheckboxGroup>::StaticMethod("mark", &JSCheckboxGroup::Mark);
-    JSClass<JSCheckboxGroup>::StaticMethod("width", &JSCheckboxGroup::JsWidth);
-    JSClass<JSCheckboxGroup>::StaticMethod("height", &JSCheckboxGroup::JsHeight);
     JSClass<JSCheckboxGroup>::StaticMethod("size", &JSCheckboxGroup::JsSize);
     JSClass<JSCheckboxGroup>::StaticMethod("padding", &JSCheckboxGroup::JsPadding);
     JSClass<JSCheckboxGroup>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -177,71 +175,16 @@ void JSCheckboxGroup::JsResponseRegion(const JSCallbackInfo& info)
     CheckBoxGroupModel::GetInstance()->SetResponseRegion(result);
 }
 
-void JSCheckboxGroup::JsWidth(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-
-    JsWidth(info[0]);
-}
-
-void JSCheckboxGroup::JsWidth(const JSRef<JSVal>& jsValue)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-    auto defaultWidth = checkBoxTheme->GetDefaultWidth();
-    auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
-    auto width = defaultWidth - horizontalPadding * 2;
-    CalcDimension value(width);
-    ParseJsDimensionVp(jsValue, value);
-    if (value.IsNegative()) {
-        value = width;
-    }
-    CheckBoxGroupModel::GetInstance()->SetWidth(value);
-}
-
-void JSCheckboxGroup::JsHeight(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-
-    JsHeight(info[0]);
-}
-
-void JSCheckboxGroup::JsHeight(const JSRef<JSVal>& jsValue)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-    auto defaultHeight = checkBoxTheme->GetDefaultHeight();
-    auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
-    auto height = defaultHeight - verticalPadding * 2;
-    CalcDimension value(height);
-    ParseJsDimensionVp(jsValue, value);
-    if (value.IsNegative()) {
-        value = height;
-    }
-    CheckBoxGroupModel::GetInstance()->SetHeight(value);
-}
-
 void JSCheckboxGroup::JsSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
-
     if (!info[0]->IsObject()) {
+        JSViewAbstract::JsWidth(JSVal::Undefined());
+        JSViewAbstract::JsHeight(JSVal::Undefined());
         return;
     }
-
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    JsWidth(sizeObj->GetProperty("width"));
-    JsHeight(sizeObj->GetProperty("height"));
+    JSViewAbstract::JsWidth(sizeObj->GetProperty("width"));
+    JSViewAbstract::JsHeight(sizeObj->GetProperty("height"));
 }
 
 void JSCheckboxGroup::SelectedColor(const JSCallbackInfo& info)

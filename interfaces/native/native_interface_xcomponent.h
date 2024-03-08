@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "native_event.h"
 #include "native_type.h"
 #include "native_xcomponent_key_event.h"
 #include "ui_input_event.h"
@@ -661,6 +662,29 @@ int32_t OH_NativeXComponent_DetachNativeRootNode(OH_NativeXComponent* component,
 int32_t OH_NativeXComponent_RegisterUIInputEventCallback(OH_NativeXComponent* component,
     void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type),
     ArkUI_UIInputEvent_Type type);
+
+/**
+ * @brief Set whether the <b>OH_NativeXComponent</b> instance needs soft keyboard.
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param needSoftKeyboard Indicates whether the <b>OH_NativeXComponent</b> instance needs soft keyboard or not.
+ *                           Default value is false.
+ * @return Returns the status code of the execution.
+ * @since 12
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_SetNeedSoftKeyboard(OH_NativeXComponent* component, bool needSoftKeyboard);
+
+/**
+ * @brief Registers a callback for this <b>OH_NativeXComponent</b> instance.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to a key event callback.
+ * @return Returns the status code of the execution.
+ * @since 10
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_RegisterOnTouchInterceptCallback(
+    OH_NativeXComponent* component, HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event));
 
 #ifdef __cplusplus
 };

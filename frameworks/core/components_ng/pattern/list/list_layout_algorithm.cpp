@@ -464,8 +464,8 @@ bool ListLayoutAlgorithm::CheckNoNeedJumpListItemGroup(LayoutWrapper* layoutWrap
     if (jumpIndex >= startIndex && jumpIndex <= endIndex) {
         auto it = groupItemPosition.find(jumpIndexInGroup);
         if (it != groupItemPosition.end()) {
-            auto topPos = jumpIndexStartPos + it->second.first - contentStartOffset_;
-            auto bottomPos = jumpIndexStartPos + it->second.second + contentEndOffset_;
+            auto topPos = jumpIndexStartPos + it->second.startPos - contentStartOffset_;
+            auto bottomPos = jumpIndexStartPos + it->second.endPos + contentEndOffset_;
             if (JudgeInOfScreenScrollAutoType(wrapper, listLayoutProperty, topPos, bottomPos)) {
                 return true;
             }

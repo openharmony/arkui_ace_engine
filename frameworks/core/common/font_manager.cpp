@@ -138,24 +138,22 @@ bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
     Rosen::TextEngine::FontParser fontParser;
-    std::vector<Rosen::TextEngine::FontParser::FontDescriptor> systemFontList;
+    std::unique_ptr<Rosen::TextEngine::FontParser::FontDescriptor> systemFontDesc;
     auto locale = Localization::GetInstance()->GetFontLocale();
-    systemFontList = fontParser.GetVisibilityFonts(locale);
-    for (size_t i = 0; i < systemFontList.size(); ++i) {
-        if (fontName == systemFontList[i].fullName) {
-            fontInfo.path = systemFontList[i].path;
-            fontInfo.postScriptName = systemFontList[i].postScriptName;
-            fontInfo.fullName = systemFontList[i].fullName;
-            fontInfo.family = systemFontList[i].fontFamily;
-            fontInfo.subfamily = systemFontList[i].fontSubfamily;
-            fontInfo.weight = systemFontList[i].weight;
-            fontInfo.width = systemFontList[i].width;
-            fontInfo.italic = systemFontList[i].italic;
-            fontInfo.monoSpace = systemFontList[i].monoSpace;
-            fontInfo.symbolic = systemFontList[i].symbolic;
-            isGetFont = true;
-            break;
-        }
+    systemFontDesc = fontParser.GetVisibilityFontByName(fontName, locale);
+    CHECK_NULL_RETURN(systemFontDesc, false);
+    if (fontName == systemFontDesc->fullName) {
+        fontInfo.path = systemFontDesc->path;
+        fontInfo.postScriptName = systemFontDesc->postScriptName;
+        fontInfo.fullName = systemFontDesc->fullName;
+        fontInfo.family = systemFontDesc->fontFamily;
+        fontInfo.subfamily = systemFontDesc->fontSubfamily;
+        fontInfo.weight = systemFontDesc->weight;
+        fontInfo.width = systemFontDesc->width;
+        fontInfo.italic = systemFontDesc->italic;
+        fontInfo.monoSpace = systemFontDesc->monoSpace;
+        fontInfo.symbolic = systemFontDesc->symbolic;
+        isGetFont = true;
     }
 #endif
 #endif

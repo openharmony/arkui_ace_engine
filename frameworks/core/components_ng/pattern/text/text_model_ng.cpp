@@ -520,9 +520,11 @@ std::string TextModelNG::GetContent(FrameNode* frameNode)
 float TextModelNG::GetLineHeight(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(pattern, 0.0f);
-    return pattern->GetLineHeight();
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    Dimension defaultLineHeight(0);
+    auto value = layoutProperty->GetLineHeight().value_or(defaultLineHeight);
+    return static_cast<float>(value.Value());
 }
 
 TextDecoration TextModelNG::GetDecoration(FrameNode* frameNode)
@@ -694,5 +696,19 @@ std::vector<Shadow> TextModelNG::GetTextShadow(FrameNode* frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultShadow);
     return layoutProperty->GetTextShadow().value_or(defaultShadow);
+}
+
+Ace::WordBreak TextModelNG::GetWordBreak(FrameNode* frameNode)
+{
+    Ace::WordBreak value = Ace::WordBreak::BREAK_WORD;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, WordBreak, value, frameNode, value);
+    return value;
+}
+
+EllipsisMode TextModelNG::GetEllipsisMode(FrameNode* frameNode)
+{
+    EllipsisMode value = EllipsisMode::TAIL;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, EllipsisMode, value, frameNode, value);
+    return value;
 }
 } // namespace OHOS::Ace::NG

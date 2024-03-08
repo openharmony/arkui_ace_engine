@@ -40,7 +40,7 @@ float GetHintRadius(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0.0f);
-    return CalendarPickerModelNG::GetHintRadius(frameNode).ConvertToVp();
+    return CalendarPickerModelNG::GetHintRadius(frameNode).Value();
 }
 
 void SetSelectedDate(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
@@ -282,16 +282,17 @@ void ParseDateByStr(const std::string& date, ArkUISelectedDateType& selectedDate
     }
 }
 
-void SetCalendarPickerOnChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetCalendarPickerOnChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam](const std::string& dateStr) {
+    auto onEvent = [node, extraParam](const std::string& dateStr) {
         ArkUINodeEvent event;
-        event.kind = ON_CALENDAR_PICKER_CHANGE;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         ArkUISelectedDateType selectedDate;
         ParseDateByStr(dateStr, selectedDate);
+        event.componentAsyncEvent.subKind = ON_CALENDAR_PICKER_CHANGE;
         event.componentAsyncEvent.data[NUM_0].u32 = selectedDate.year;
         event.componentAsyncEvent.data[NUM_1].u32 = selectedDate.month;
         event.componentAsyncEvent.data[NUM_2].u32 = selectedDate.day;

@@ -27,6 +27,15 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 
 namespace OHOS::Ace::NG {
+struct DividerGroupInfo {
+    int32_t lanes = 1;
+    float crossSize = 0.0f;
+    float constrainStrokeWidth = 0.0f;
+    float halfSpaceWidth = 0.0f;
+    float startMargin = 0.0f;
+    float endMargin = 0.0f;
+};
+
 class ACE_EXPORT ListItemGroupPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ListItemGroupPaintMethod, NodePaintMethod)
 public:
@@ -46,12 +55,16 @@ public:
 
     void PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas);
 
+    void UpdateDividerList(const DividerGroupInfo& dividerInfo,
+        DividerPainter dividerPainter, OffsetF paddingOffset, RSCanvas& canvas);
+
 private:
     V2::ItemDivider divider_;
     bool vertical_ = false;
     int32_t lanes_ = 1;
     float spaceWidth_ = 0.0f;
     float laneGutter_ = 0.0f;
+    float fSpacingTotal_ = 0.0f;
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     int32_t totalItemCount_ = 0;
 };

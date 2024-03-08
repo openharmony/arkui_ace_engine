@@ -204,10 +204,6 @@ void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
         layoutPropertyIn_ = hostNode->GetLayoutProperty()->Clone();
         ModifyLayoutConstraint(layoutWrapper, true);
     } else if (IsNodeOutAndActive(hostNode)) {
-        if (hasInAnim_) {
-            MarkLayoutDirty(hostNode);
-            return;
-        }
         layoutPropertyOut_ = hostNode->GetLayoutProperty()->Clone();
         ModifyLayoutConstraint(layoutWrapper, false);
     }

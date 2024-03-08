@@ -93,18 +93,20 @@ ArkUINativeModuleValue RadioBridge::SetRadioWidth(ArkUIRuntimeCallInfo* runtimeC
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); //0 is node arguments
-    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1); //1 is JsValue
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-
     CalcDimension width;
-    double valueResult = jsValue->ToNumber(vm)->Value();
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, width) || LessNotEqual(valueResult, 0.0)) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, widthArg, width)) {
         GetArkUINodeModifiers()->getRadioModifier()->resetRadioWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(0.0);
+    }
+    std::string widthCalc = width.CalcValue();
     GetArkUINodeModifiers()->getRadioModifier()->setRadioWidth(
-        nativeNode, width.Value(), static_cast<int>(width.Unit()));
+        nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), widthCalc.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -122,17 +124,20 @@ ArkUINativeModuleValue RadioBridge::SetRadioHeight(ArkUIRuntimeCallInfo* runtime
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); //0 is node arguments
-    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1); //1 is Jsvalue
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-
     CalcDimension height;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, heightArg, height)) {
         GetArkUINodeModifiers()->getRadioModifier()->resetRadioHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(0.0);
+    }
+    std::string heightCalc = height.CalcValue();
     GetArkUINodeModifiers()->getRadioModifier()->setRadioHeight(
-        nativeNode, height.Value(), static_cast<int>(height.Unit()));
+        nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), heightCalc.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -151,21 +156,31 @@ ArkUINativeModuleValue RadioBridge::SetRadioSize(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);     //0 is node arguments
-    Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1);  //1 is width value
-    Local<JSValueRef> heightValue = runtimeCallInfo->GetCallArgRef(2); //2 is height value
+    Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(1);  //1 is width value
+    Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(2); //2 is height value
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
-    CalcDimension width = 0.0_vp;
-    CalcDimension height = 0.0_vp;
-    bool hasWidth = (!widthValue->IsNull() && !widthValue->IsUndefined() &&
-        ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width));
-    bool hasHeight = (!heightValue->IsNull() && !heightValue->IsUndefined() &&
-        ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height));
-    if (!hasWidth && !hasHeight) {
-        GetArkUINodeModifiers()->getRadioModifier()->resetRadioSize(nativeNode);
+    CalcDimension width;
+    CalcDimension height;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, widthArg, width)) {
+        GetArkUINodeModifiers()->getRadioModifier()->resetRadioWidth(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getRadioModifier()->setRadioSize(nativeNode,
-            width.Value(), static_cast<int>(width.Unit()), height.Value(), static_cast<int>(height.Unit()));
+        std::string widthCalc = width.CalcValue();
+        if (LessNotEqual(width.Value(), 0.0)) {
+            width.SetValue(0.0);
+        }
+        GetArkUINodeModifiers()->getRadioModifier()->setRadioWidth(
+            nativeNode, width.Value(), static_cast<int>(width.Unit()), widthCalc.c_str());
+    }
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, heightArg, height)) {
+        GetArkUINodeModifiers()->getRadioModifier()->resetRadioHeight(nativeNode);
+    } else {
+        std::string heightCalc = height.CalcValue();
+        if (LessNotEqual(height.Value(), 0.0)) {
+            height.SetValue(0.0);
+        }
+        GetArkUINodeModifiers()->getRadioModifier()->setRadioHeight(
+            nativeNode, height.Value(), static_cast<int>(height.Unit()), heightCalc.c_str());
     }
     return panda::JSValueRef::Undefined(vm);
 }

@@ -140,7 +140,6 @@ void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, FrameNode* customBui
     pattern->AddCustomBuilderNode(AceType::Claim<UINode>(customBuilder));
 }
 
-
 void RefreshModelNG::SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange)
 {
     CHECK_NULL_VOID(frameNode);

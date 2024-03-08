@@ -138,7 +138,7 @@ public:
     static void SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize);
     static void SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& iconColor);
-    static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool tmp);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static std::string GetPlaceholderText(FrameNode* frameNode);
     static std::string GetTextFieldText(FrameNode* frameNode);
     static Color GetCaretColor(FrameNode* frameNode);
@@ -162,6 +162,7 @@ public:
     static Ace::FontStyle GetFontStyle(FrameNode* frameNode);
     static FontWeight GetFontWeight(FrameNode* frameNode);
     static Dimension GetFontSize(FrameNode* frameNode);
+    static CleanNodeStyle GetCleanNodeStyle(FrameNode* frameNode);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

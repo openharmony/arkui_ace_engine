@@ -477,6 +477,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     CHECK_NULL_VOID(gridEventHub);
 
     auto onScroll = gridEventHub->GetOnScroll();
+    PrintOffsetLog(AceLogTag::ACE_GRID, host->GetId(), finalOffset);
     if (onScroll) {
         FireOnScroll(finalOffset, onScroll);
     }
@@ -1776,9 +1777,9 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
     float targetPos = 0.0f;
     // Based on the index, align gets the position to scroll to
 
-    auto sucess = scrollGridLayoutInfo_.GetGridItemAnimatePos(
+    auto success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
         gridLayoutInfo_, targetIndex_.value(), align, GetMainGap(), targetPos);
-    CHECK_NULL_RETURN(sucess, false);
+    CHECK_NULL_RETURN(success, false);
 
     isSmoothScrolling_ = true;
     AnimateTo(targetPos, -1, nullptr, true);

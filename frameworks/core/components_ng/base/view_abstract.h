@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -224,6 +224,7 @@ public:
     // event
     static void SetOnClick(GestureEventFunc &&clickEventFunc);
     static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
+    static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
     static void SetOnTouch(TouchEventFunc &&touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
@@ -281,6 +282,7 @@ public:
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
     static void DismissDialog();
+    static void DismissPopup();
     static void BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
         const NG::OffsetF &offset, const MenuParam &menuParam);
     static void BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,
@@ -515,14 +517,15 @@ public:
     static int GetZIndex(FrameNode* frameNode);
     static VisibleType GetVisibility(FrameNode* frameNode);
     static bool GetClip(FrameNode* frameNode);
-    static std::optional<RefPtr<BasicShape>> GetClipShape(FrameNode* frameNode);
+    static RefPtr<BasicShape> GetClipShape(FrameNode* frameNode);
     static Matrix4 GetTransform(FrameNode* frameNode);
     static HitTestMode GetHitTestBehavior(FrameNode* frameNode);
     static OffsetT<Dimension> GetPosition(FrameNode* frameNode);
     static std::optional<Shadow> GetShadow(FrameNode* frameNode);
-    static NG::Gradient GetGradient(FrameNode* frameNode);
-    static std::optional<RefPtr<BasicShape>> GetMask(FrameNode* frameNode);
-    static const std::optional<RefPtr<ProgressMaskProperty>> GetMaskProgress(FrameNode* frameNode);
+    static NG::Gradient GetSweepGradient(FrameNode* frameNode);
+    static NG::Gradient GetRadialGradient(FrameNode* frameNode);
+    static RefPtr<BasicShape> GetMask(FrameNode* frameNode);
+    static RefPtr<ProgressMaskProperty> GetMaskProgress(FrameNode* frameNode);
     static BlendMode GetBlendMode(FrameNode* frameNode);
     static TextDirection GetDirection(FrameNode* frameNode);
     static std::map<AlignDirection, AlignRule> GetAlignRules(FrameNode* frameNode);
@@ -548,6 +551,16 @@ public:
     static Dimension GetBrightness(FrameNode* frameNode);
     static Dimension GetSaturate(FrameNode* frameNode);
     static BackgroundImagePosition GetBackgroundImagePosition(FrameNode* frameNode);
+    static float GetWidth(FrameNode* frameNode);
+    static float GetHeight(FrameNode* frameNode);
+    static Color GetBackgroundColor(FrameNode* frameNode);
+    static std::string GetBackgroundImageSrc(FrameNode* frameNode);
+    static ImageRepeat GetBackgroundImageRepeat(FrameNode* frameNode);
+    static PaddingProperty GetPadding(FrameNode* frameNode);
+    static std::string GetKey(FrameNode* frameNode);
+    static bool GetEnabled(FrameNode* frameNode);
+    static MarginProperty GetMargin(FrameNode* frameNode);
+    static TranslateOptions GetTranslate(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

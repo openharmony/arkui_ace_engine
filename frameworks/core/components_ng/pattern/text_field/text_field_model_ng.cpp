@@ -409,6 +409,14 @@ void TextFieldModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int3
     eventHub->SetOnSelectionChange(std::move(func));
 }
 
+void TextFieldModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(func));
+}
+
 void TextFieldModelNG::SetOnContentScroll(std::function<void(float, float)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
@@ -580,6 +588,12 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 
     NG::ViewAbstract::SetBackgroundColor(color);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color);
+}
+
+void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    NG::ViewAbstract::SetBackgroundColor(color);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color, frameNode);
 }
 
 void TextFieldModelNG::SetHeight(const Dimension& value) {}
@@ -1181,6 +1195,13 @@ Dimension TextFieldModelNG::GetFontSize(FrameNode* frameNode)
 {
     Dimension value;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, FontSize, value, frameNode, Dimension());
+    return value;
+}
+
+CleanNodeStyle TextFieldModelNG::GetCleanNodeStyle(FrameNode* frameNode)
+{
+    CleanNodeStyle value = CleanNodeStyle::INPUT;
+    ACE_GET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, value, frameNode);
     return value;
 }
 } // namespace OHOS::Ace::NG

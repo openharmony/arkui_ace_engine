@@ -47,6 +47,7 @@ constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
+constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
@@ -72,6 +73,11 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 bool IsDebugAutoUIEnabled()
 {
     return (system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true");
+}
+
+bool IsDebugOffsetLogEnabled()
+{
+    return (system::GetParameter(ENABLE_DEBUG_OFFSET_LOG_KEY, "false") == "true");
 }
 
 bool IsDebugBoundaryEnabled()
@@ -313,6 +319,7 @@ ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
+bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
@@ -445,9 +452,8 @@ void SystemProperties::InitDeviceInfo(
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     isHookModeEnabled_ = IsHookModeEnabled();
-    debugBoundaryEnabled_ = system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
     debugAutoUIEnabled_ = system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true";
-
+    debugOffsetLogEnabled_ = system::GetParameter(ENABLE_DEBUG_OFFSET_LOG_KEY, "false") == "true";
     downloadByNetworkEnabled_ = system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
@@ -628,47 +634,15 @@ bool SystemProperties::GetSideBarContainerBlurEnable()
     return sideBarContainerBlurEnable_;
 }
 
-void SystemProperties::AddWatchSystemParameter(void *context)
+void SystemProperties::AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback)
 {
-    WatchParameter("persist.ace.trace.layout.enabled", EnableSystemParameterCallback, context);
-    WatchParameter("const.security.developermode.state", EnableSystemParameterCallback, context);
-    WatchParameter("persist.ace.debug.statemgr.enabled", EnableSystemParameterCallback, context);
+    WatchParameter(key, callback, context);
 }
 
-void SystemProperties::EnableSystemParameterCallback(const char* key, const char* value, void* context)
+void SystemProperties::RemoveWatchSystemParameter(
+    const char* key, void* context, EnableSystemParameterCallback callback)
 {
-    if (context == nullptr) {
-        LOGE("context is nullprt");
-    }
-
-    if (strcmp(key, "persist.ace.trace.layout.enabled") == 0) {
-        if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
-            layoutTraceEnable_ = strcmp(value, "true") == 0 && IsDeveloperModeOn();
-        }
-        return;
-    }
-
-    if (strcmp(key, "const.security.developermode.state") == 0) {
-        if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
-            layoutTraceEnable_ = strcmp(value, "true") == 0 && IsLayoutTraceEnabled();
-        }
-        return;
-    }
-
-    if (strcmp(key, "persist.ace.debug.statemgr.enabled") == 0) {
-        if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
-            stateManagerEnable_ = strcmp(value, "true") == 0;
-        }
-        return;
-    }
-    LOGE("key %{public}s or value %{public}s mismatch", key, value);
-}
-
-void SystemProperties::RemoveWatchSystemParameter(void *context)
-{
-    RemoveParameterWatcher("persist.ace.trace.layout.enabled", nullptr, context);
-    RemoveParameterWatcher("const.security.developermode.state", nullptr, context);
-    RemoveParameterWatcher("persist.ace.debug.statemgr.enabled", nullptr, context);
+    RemoveParameterWatcher(key, callback, context);
 }
 
 float SystemProperties::GetDefaultResolution()
@@ -679,5 +653,20 @@ float SystemProperties::GetDefaultResolution()
         density = defaultDisplay->GetVirtualPixelRatio();
     }
     return density;
+}
+
+void SystemProperties::SetLayoutTraceEnabled(bool layoutTraceEnable)
+{
+    layoutTraceEnable_ = layoutTraceEnable && IsDeveloperModeOn();
+}
+
+void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTraceEnable)
+{
+    layoutTraceEnable_ = layoutTraceEnable && IsLayoutTraceEnabled();
+}
+
+void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
+{
+    debugBoundaryEnabled_ = debugBoundaryEnabled && IsDeveloperModeOn();
 }
 } // namespace OHOS::Ace

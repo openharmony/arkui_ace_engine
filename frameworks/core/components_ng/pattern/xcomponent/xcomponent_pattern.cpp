@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,17 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
+#include "interfaces/native/native_event.h"
 #include "interfaces/native/ui_input_event.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/log/log_wrapper.h"
+#include "base/memory/ace_type.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/event/axis_event.h"
 #ifdef NG_BUILD
@@ -165,16 +168,16 @@ void XComponentPattern::Initialize(int32_t instanceId)
 #endif
             }
             handlingSurfaceRenderContext_ = renderContextForSurface_;
-            auto* controllerNG = static_cast<XComponentControllerNG*>(xcomponentController_.get());
-            if (controllerNG) {
-                controllerNG->SetPattern(AceType::Claim(this));
-            }
         } else if (type_ == XComponentType::TEXTURE) {
             renderSurface_->SetRenderContext(renderContext);
             renderSurface_->SetIsTexture(true);
         }
+        auto* controllerNG = static_cast<XComponentControllerNG*>(xcomponentController_.get());
+        if (controllerNG) {
+            controllerNG->SetPattern(AceType::Claim(this));
+        }
         renderSurface_->InitSurface();
-        renderSurface_->UpdateXComponentConfig();
+        renderSurface_->UpdateSurfaceConfig();
         InitEvent();
         SetMethodCall();
     } else if (type_ == XComponentType::NODE) {
@@ -340,7 +343,7 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     drawSize_ = geometryNode->GetContentSize();
-    if (drawSize_.IsNonPositive()) {
+    if (!drawSize_.IsPositive()) {
         return false;
     }
 
@@ -363,28 +366,19 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             }
         }
     }
-    localposition_ = geometryNode->GetContentOffset();
+    localPosition_ = geometryNode->GetContentOffset();
 #if !(defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED))
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
         renderSurface_->SetExtSurfaceBounds(
-            static_cast<int32_t>(transformRelativeOffset.GetX() + localposition_.GetX()),
-            static_cast<int32_t>(transformRelativeOffset.GetY() + localposition_.GetY()),
+            static_cast<int32_t>(transformRelativeOffset.GetX() + localPosition_.GetX()),
+            static_cast<int32_t>(transformRelativeOffset.GetY() + localPosition_.GetY()),
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
     }
 #endif
-    if (handlingSurfaceRenderContext_) {
-        handlingSurfaceRenderContext_->SetBounds(
-            localposition_.GetX(), localposition_.GetY(), drawSize_.Width(), drawSize_.Height());
-#ifdef ENABLE_ROSEN_BACKEND
-        auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
-        }
-#endif
-    }
+    UpdateSurfaceBounds();
     // XComponentType::SURFACE has set surface default size in RSSurfaceNode->SetBounds()
     if (type_ == XComponentType::TEXTURE) {
         renderSurface_->SetSurfaceDefaultSize(
@@ -550,6 +544,7 @@ void XComponentPattern::InitEvent()
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitTouchEvent(gestureHub);
+    InitOnTouchIntercept(gestureHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     InitMouseEvent(inputHub);
     InitAxisEvent(inputHub);
@@ -647,6 +642,20 @@ void XComponentPattern::InitAxisEvent(const RefPtr<InputEventHub>& inputHub)
 
     axisEvent_ = MakeRefPtr<InputEvent>(std::move(axisTask));
     inputHub->AddOnAxisEvent(axisEvent_);
+}
+
+void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gestureHub)
+{
+    gestureHub->SetOnTouchIntercept(
+        [pattern = Claim(this)](
+            const TouchEventInfo& touchEvent) -> HitTestMode {
+            auto event = touchEvent.ConvertToTouchEvent();
+            auto* uiEvent = static_cast<ArkUI_UIInputEvent*>(&event);
+            CHECK_NULL_RETURN(uiEvent, NG::HitTestMode::HTMDEFAULT);
+            const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
+            CHECK_NULL_RETURN(onTouchInterceptCallback, NG::HitTestMode::HTMDEFAULT);
+            return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), uiEvent));
+        });
 }
 
 void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
@@ -918,7 +927,7 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     handlingSurfaceRenderContext_->SetBounds(
-        localposition_.GetX(), localposition_.GetY(), drawSize_.Width(), drawSize_.Height());
+        localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height());
 }
 
 OffsetF XComponentPattern::GetOffsetRelativeToWindow()
@@ -1092,5 +1101,69 @@ bool XComponentPattern::ChangeRenderType(NodeRenderType renderType)
 void XComponentPattern::SetExportTextureSurfaceId(const std::string& surfaceId)
 {
     exportTextureSurfaceId_ = StringUtils::StringToLongUint(surfaceId);
+}
+
+void XComponentPattern::SetIdealSurfaceWidth(float surfaceWidth)
+{
+    selfIdealSurfaceWidth_ = surfaceWidth;
+}
+
+void XComponentPattern::SetIdealSurfaceHeight(float surfaceHeight)
+{
+    selfIdealSurfaceHeight_ = surfaceHeight;
+}
+
+void XComponentPattern::SetIdealSurfaceOffsetX(float offsetX)
+{
+    selfIdealSurfaceOffsetX_ = offsetX;
+}
+
+void XComponentPattern::SetIdealSurfaceOffsetY(float offsetY)
+{
+    selfIdealSurfaceOffsetY_ = offsetY;
+}
+
+void XComponentPattern::ClearIdealSurfaceOffset(bool isXAxis)
+{
+    if (isXAxis) {
+        selfIdealSurfaceOffsetX_.reset();
+    } else {
+        selfIdealSurfaceOffsetY_.reset();
+    }
+}
+
+void XComponentPattern::UpdateSurfaceBounds(bool needForceRender)
+{
+    if (!drawSize_.IsPositive()) {
+        return;
+    }
+    if (selfIdealSurfaceWidth_.has_value() && Positive(selfIdealSurfaceWidth_.value()) &&
+        selfIdealSurfaceHeight_.has_value() && Positive(selfIdealSurfaceHeight_.value())) {
+        localPosition_.SetX(selfIdealSurfaceOffsetX_.has_value()
+                                ? selfIdealSurfaceOffsetX_.value()
+                                : (drawSize_.Width() - selfIdealSurfaceWidth_.value()) / 2.0f);
+
+        localPosition_.SetY(selfIdealSurfaceOffsetY_.has_value()
+                                ? selfIdealSurfaceOffsetY_.value()
+                                : (drawSize_.Height() - selfIdealSurfaceHeight_.value()) / 2.0f);
+        surfaceSize_ = { selfIdealSurfaceWidth_.value(), selfIdealSurfaceHeight_.value() };
+    } else {
+        surfaceSize_ = drawSize_;
+    }
+    if (handlingSurfaceRenderContext_) {
+        handlingSurfaceRenderContext_->SetBounds(
+            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
+#ifdef ENABLE_ROSEN_BACKEND
+        auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->FlushImplicitTransaction();
+        }
+#endif
+    }
+    if (needForceRender) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkNeedRenderOnly();
+    }
 }
 } // namespace OHOS::Ace::NG

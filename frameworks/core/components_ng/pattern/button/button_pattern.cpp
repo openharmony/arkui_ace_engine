@@ -112,7 +112,8 @@ void ButtonPattern::UpdateTextStyle(
     CHECK_NULL_VOID(buttonTheme);
     if (!textLayoutProperty->HasTextColor()) {
         ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
-        Color fontColor = buttonTheme->GetTextColor(buttonStyle);
+        ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+        Color fontColor = buttonTheme->GetTextColor(buttonStyle, buttonRole);
         textLayoutProperty->UpdateTextColor(fontColor);
     }
     if (!textLayoutProperty->HasFontSize()) {
@@ -310,11 +311,12 @@ void ButtonPattern::HandleBackgroundColor()
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
     if (!renderContext->HasBackgroundColor()) {
-        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle));
+        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
     }
-    themeBgColor_ = buttonTheme->GetBgColor(buttonStyle);
-    themeTextColor_ = buttonTheme->GetTextColor(buttonStyle);
+    themeBgColor_ = buttonTheme->GetBgColor(buttonStyle, buttonRole);
+    themeTextColor_ = buttonTheme->GetTextColor(buttonStyle, buttonRole);
 }
 
 void ButtonPattern::HandleEnabled()
@@ -366,8 +368,9 @@ void ButtonPattern::OnColorConfigurationUpdate()
     auto buttonLayoutProperty = node->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
     ButtonStyleMode buttonStyle = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
     if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
-        auto color = buttonTheme->GetBgColor(buttonStyle);
+        auto color = buttonTheme->GetBgColor(buttonStyle, buttonRole);
         renderContext->UpdateBackgroundColor(color);
     }
     auto textNode = DynamicCast<FrameNode>(node->GetFirstChild());
@@ -375,7 +378,7 @@ void ButtonPattern::OnColorConfigurationUpdate()
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     if (textLayoutProperty->GetTextColor().value_or(themeTextColor_) == themeTextColor_) {
-        textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle));
+        textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
         textNode->MarkDirtyNode();
     }
 }

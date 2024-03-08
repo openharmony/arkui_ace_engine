@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <stdint.h>
 
+#include "base/geometry/axis.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/render/ext_surface_callback_interface.h"
@@ -41,7 +42,7 @@ public:
 
     virtual void InitSurface() {}
 
-    virtual void UpdateXComponentConfig() {}
+    virtual void UpdateSurfaceConfig() {}
 
     virtual void* GetNativeWindow()
     {
@@ -94,11 +95,15 @@ public:
 
     virtual void SetWebMessage(OffsetF offset) {}
 
+    virtual void SetWebSlideAxis(Axis axis) {}
+
+    virtual void SetWebOffset(float webOffset) {}
+
     virtual void SetPatternType(const std::string& type) {}
 
     virtual void SetSurfaceQueueSize(int32_t queueSize) {}
 
-    virtual void DrawBufferForXComponent(RSCanvas& canvas, float width, float height) {};
+    virtual void DrawBufferForXComponent(RSCanvas& canvas, float width, float height, float offsetX, float offsetY) {};
 
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);

@@ -41,6 +41,8 @@ enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
 
 enum class ControlSize { SMALL, NORMAL };
 
+enum class ButtonRole { NORMAL, ERROR };
+
 // Flex Styles
 enum class FlexDirection {
     ROW = 0,

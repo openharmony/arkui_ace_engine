@@ -799,6 +799,20 @@ void UINode::UpdateChildrenVisible(bool isVisible) const
     }
 }
 
+void UINode::OnRecycle()
+{
+    for (const auto& child: GetChildren()) {
+        child->OnRecycle();
+    }
+}
+
+void UINode::OnReuse()
+{
+    for (const auto& child: GetChildren()) {
+        child->OnReuse();
+    }
+}
+
 std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
 {
     if (GetId() == id) {
@@ -1069,6 +1083,14 @@ void UINode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>
     if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
         // add CustomNode but do not recurse into its children
         CollectRemovedChildren(child->GetChildren(), removedElmtId);
+    }
+}
+
+void UINode::PaintDebugBoundaryTreeAll(bool flag)
+{
+    PaintDebugBoundary(flag);
+    for (const auto& child : GetChildren()) {
+        child->PaintDebugBoundaryTreeAll(flag);
     }
 }
 } // namespace OHOS::Ace::NG

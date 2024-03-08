@@ -68,7 +68,9 @@ public:
 
     void OnDataReloaded() override;
     void OnDataAdded(size_t index) override;
+    void OnDataBulkAdded(size_t index, size_t count) override;
     void OnDataDeleted(size_t index) override;
+    void OnDataBulkDeleted(size_t index, size_t count) override;
     void OnDataChanged(size_t index) override;
     void OnDataMoved(size_t from, size_t to) override;
 

@@ -509,7 +509,7 @@ void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetBackgroundColor(frameNode, Color(color), false);
+    TextFieldModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
 void ResetTextAreaBackgroundColor(ArkUINodeHandle node)
@@ -522,7 +522,7 @@ void ResetTextAreaBackgroundColor(ArkUINodeHandle node)
     auto buttonTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(buttonTheme);
     backgroundColor = buttonTheme->GetBgColor();
-    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor, true);
+    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 
 void SetTextAreaType(ArkUINodeHandle node, ArkUI_Int32 type)
@@ -575,47 +575,50 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
     return &modifier;
 }
 
-void SetOnTextAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnTextAreaChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node, eventId, extraParam](const std::string& str) {
+    auto onChange = [node, extraParam](const std::string& str) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXTAREA_CHANGE;
+        event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.stringAsyncEvent.pStr = str.c_str();
+        event.textInputEvent.subKind = ON_TEXTAREA_CHANGE;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 
-void SetOnTextSelectionChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnTextAreaPaste(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onSelectionChange = [node, eventId, extraParam](int start, int end) {
+    auto onPaste = [node, extraParam](const std::string& str, NG::TextCommonEvent& commonEvent) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXTAREA_TEXT_SELECTION_CHANGE;
+        event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.data[0].i32 = static_cast<int>(start);
-        event.componentAsyncEvent.data[1].i32 = static_cast<int>(end);        
-        SendArkUIAsyncEvent(&event);
-    };
-    TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));
-}
-
-void SetOnTextAreaPaste(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto onPaste = [node, eventId, extraParam](const std::string& str, NG::TextCommonEvent& commonEvent) {
-        ArkUINodeEvent event;
-        event.kind = ON_TEXTAREA_PASTE;
-        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.stringAsyncEvent.pStr = str.c_str();
+        event.textInputEvent.subKind = ON_TEXTAREA_PASTE;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
+}
+
+void SetOnTextAreaSelectionChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onSelectionChange = [node, extraParam](int start, int end) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_TEXTAREA_TEXT_SELECTION_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = static_cast<int>(start);
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(end);
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

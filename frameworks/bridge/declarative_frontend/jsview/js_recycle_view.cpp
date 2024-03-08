@@ -46,9 +46,12 @@ RecycleViewModel* RecycleViewModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSRecycleView::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        RecycleViewModel::GetInstance()->Create();
-    }
+    return;
+}
+
+void JSRecycleView::Pop(const JSCallbackInfo& info)
+{
+    return;
 }
 
 void JSRecycleView::JSBind(BindingTarget globalObj)
@@ -56,6 +59,7 @@ void JSRecycleView::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSRecycleView>::Declare("__Recycle__");
     JSClass<JSRecycleView>::StaticMethod("create", &JSRecycleView::Create, opt);
+    JSClass<JSRecycleView>::StaticMethod("pop", &JSRecycleView::Pop, opt);
 
     JSClass<JSRecycleView>::InheritAndBind<JSContainerBase>(globalObj);
 }

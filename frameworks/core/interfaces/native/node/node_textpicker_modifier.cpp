@@ -195,6 +195,20 @@ void ResetTextPickerDefaultPickerItemHeight(ArkUINodeHandle node)
     TextPickerModelNG::SetDefaultPickerItemHeight(frameNode, height);
 }
 
+ArkUI_CharPtr GetTextPickerRangeStr(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    g_strValue = TextPickerModelNG::getTextPickerRange(frameNode);
+    return g_strValue.c_str();
+}
+
+ArkUI_Int32 GetTextPickerSingleRange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return !TextPickerModelNG::isSingleRange();
+}
 
 void SetTextPickerRangeStr(ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange)
 {
@@ -221,6 +235,14 @@ void SetTextPickerRangeStr(ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_B
         }
         TextPickerModelNG::SetColumns(frameNode, multiResult);
     }
+}
+
+ArkUI_CharPtr GetTextPickerValue(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    g_strValue = TextPickerModelNG::getTextPickerValue(frameNode);
+    return g_strValue.c_str();
 }
 
 void SetTextPickerValue(ArkUINodeHandle node, ArkUI_CharPtr valueStr)
@@ -325,7 +347,8 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         SetTextPickerDisappearTextStyle, SetTextPickerDefaultPickerItemHeight, ResetTextPickerCanLoop,
         ResetTextPickerSelectedIndex, ResetTextPickerTextStyle, ResetTextPickerSelectedTextStyle,
         ResetTextPickerDisappearTextStyle, ResetTextPickerDefaultPickerItemHeight, ResetTextPickerBackgroundColor,
-        SetTextPickerRangeStr, SetTextPickerValue };
+        GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr,
+        GetTextPickerValue, SetTextPickerValue};
 
     return &modifier;
 }

@@ -57,7 +57,6 @@ bool SetToggleDimension(
     optDimension = dimensionValue;
     return true;
 }
-} // namespace
 
 void SetToggleSelectedColor(ArkUINodeHandle node, ArkUI_Uint32 selectedColor)
 {
@@ -253,33 +252,27 @@ void ResetToggleHoverEffect(ArkUINodeHandle node)
     ToggleModelNG::SetHoverEffect(frameNode, OHOS::Ace::HoverEffectType::AUTO);
 }
 
-void SetToggleIsOn(ArkUINodeHandle node, ArkUI_Uint32 switchPointColor)
+void SetToggleIsOn(ArkUINodeHandle node, ArkUI_Bool switchPointColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ToggleModelNG::SetSwitchPointColor(frameNode, Color(switchPointColor));
+    ToggleModelNG::SetSwitchIsOn(frameNode, static_cast<bool>(switchPointColor));
 }
 
 void ResetToggleIsOn(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SwitchTheme>();
-    Color color;
-    if (theme) {
-        color = theme->GetPointColor();
-    }
-    ToggleModelNG::SetSwitchPointColor(frameNode, Color(color));
+    ToggleModelNG::SetSwitchIsOn(frameNode, false);
 }
 
-ArkUI_Uint32 GetToggleIsOn(ArkUINodeHandle node)
+ArkUI_Bool GetToggleIsOn(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
-    return ToggleModelNG::GetSelectedColor(frameNode).GetValue();
+    return static_cast<ArkUI_Bool>(ToggleModelNG::GetSwitchIsOn(frameNode));
 }
+} // namespace
 namespace NodeModifier {
 const ArkUIToggleModifier* GetToggleModifier()
 {
@@ -300,19 +293,23 @@ const ArkUIToggleModifier* GetToggleModifier()
         ResetToggleHoverEffect,
         GetToggleSelectedColor,
         GetToggleSwitchPointColor,
+        SetToggleIsOn,
+        ResetToggleIsOn,
+        GetToggleIsOn
     };
 
     return &modifier;
 }
 
-void SetOnToggleChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnToggleChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node, eventId, extraParam](const bool isOn) {
+    auto onChange = [node, extraParam](const bool isOn) {
         ArkUINodeEvent event;
-        event.kind = ON_TOGGLE_CHANGE;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TOGGLE_CHANGE;
         event.componentAsyncEvent.data[0].u32 = isOn;
         SendArkUIAsyncEvent(&event);
     };

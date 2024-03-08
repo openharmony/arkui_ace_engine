@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,8 @@ public:
     void RemoveIndexerPopup();
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
     RefPtr<FrameNode> HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
-    void ShowPopup(int32_t targetId, const PopupInfo& popupInfo);
+    void ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
+        const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = false);
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();
@@ -111,7 +112,7 @@ public:
     void HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId);
     RefPtr<FrameNode> GetMenuNode(int32_t targetId);
     void HideMenuInSubWindow(bool showPreviewAnimation = true, bool startDrag = false);
-    void CleanMenuInSubWindow();
+    void CleanMenuInSubWindow(int32_t targetId);
     void CleanPreviewInSubWindow();
     void CleanPopupInSubWindow();
     void CleanMenuInSubWindowWithAnimation();
@@ -257,6 +258,7 @@ public:
     void SetHasFilter(bool hasFilter)
     {
         hasFilter_ = hasFilter;
+        hasFilterActived = true;
     }
 
     bool GetHasEvent()
@@ -410,6 +412,17 @@ public:
 
     void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
+    void SetFilterActive(bool actived)
+    {
+        hasFilterActived = actived;
+    }
+
+    void SetDismissPopupId(int32_t targetId)
+    {
+        dismissPopupId_ = targetId;
+    }
+
+    void DismissPopup();
 private:
     void PopToast(int32_t targetId);
 
@@ -467,7 +480,19 @@ private:
     RefPtr<FrameNode> GetModalNodeInStack(std::stack<WeakPtr<FrameNode>>& stack);
     void PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn);
     void CheckReturnFocus(RefPtr<FrameNode> node);
-    void MountPopup(int32_t targetId, const PopupInfo& popupInfo);
+    void MountPopup(int32_t targetId, const PopupInfo& popupInfo,
+        const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = false);
+
+    int32_t GetPopupIdByNode(const RefPtr<FrameNode>& overlay);
+    bool PopupInteractiveDismiss(const RefPtr<FrameNode>& overlay);
+    bool PopupCallBackOnWillDismiss(const RefPtr<FrameNode>& overlay);
+    bool RemovePopupInSubwindow(const RefPtr<Pattern>& pattern, const RefPtr<FrameNode>& overlay,
+        const RefPtr<UINode>& rootNode);
+    bool UpdatePopupMap(int32_t targetId, const PopupInfo& popupInfo);
+    void PlayDefaultModalIn(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
+        AnimationOption option, float showHeight);
+    void PlayDefaultModalOut(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
+        AnimationOption option, float showHeight);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
@@ -511,6 +536,10 @@ private:
     std::unordered_map<int32_t, WeakPtr<FrameNode>> uiExtNodes_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
+
+    bool hasFilterActived {false};
+
+    int32_t dismissPopupId_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

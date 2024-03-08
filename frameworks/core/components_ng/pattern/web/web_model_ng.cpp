@@ -299,6 +299,15 @@ void WebModelNG::SetOnLoadIntercept(std::function<bool(const BaseEventInfo* info
     webEventHub->SetOnLoadInterceptEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) -> bool { return func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnOverrideUrlLoadingEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetOnInterceptRequest(std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -809,6 +818,17 @@ void WebModelNG::SetSafeBrowsingCheckResultId(
     webEventHub->SetOnSafeBrowsingCheckResultEvent(std::move(safeBrowsingCheckResultId));
 }
 
+void WebModelNG::SetIntelligentTrackingPreventionResultId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
+        intelligentTrackingPreventionResultId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->
+        GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnIntelligentTrackingPreventionResultEvent(
+        std::move(intelligentTrackingPreventionResultId));
+}
+
 void WebModelNG::SetDarkMode(WebDarkMode mode)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -842,6 +862,14 @@ void WebModelNG::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateNativeEmbedModeEnabled(isEmbedModeEnabled);
+}
+
+void WebModelNG::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateNativeEmbedRuleTag(tag);
+    webPattern->UpdateNativeEmbedRuleType(type);
 }
 
 void WebModelNG::SetOnControllerAttached(std::function<void()>&& callback)

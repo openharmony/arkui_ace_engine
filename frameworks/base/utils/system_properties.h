@@ -237,6 +237,11 @@ public:
         return debugBoundaryEnabled_;
     }
 
+    static bool GetDebugOffsetLogEnabled()
+    {
+        return debugOffsetLogEnabled_;
+    }
+
     static bool GetDebugAutoUIEnabled()
     {
         return debugAutoUIEnabled_;
@@ -270,6 +275,11 @@ public:
     static bool GetStateManagerEnabled()
     {
         return stateManagerEnable_;
+    }
+
+    static void SetStateManagerEnabled(bool stateManagerEnable)
+    {
+        stateManagerEnable_ = stateManagerEnable;
     }
 
     static bool GetBuildTraceEnabled()
@@ -434,13 +444,19 @@ public:
 
     static bool GetSideBarContainerBlurEnable();
 
-    static void AddWatchSystemParameter(void *context);
+    using EnableSystemParameterCallback = void (*)(const char* key, const char* value, void* context);
 
-    static void EnableSystemParameterCallback(const char *key, const char *value, void *context);
+    static void AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
 
-    static void RemoveWatchSystemParameter(void *context);
+    static void RemoveWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
 
     static float GetDefaultResolution();
+
+    static void SetLayoutTraceEnabled(bool layoutTraceEnable);
+
+    static void SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTraceEnable);
+
+    static void SetDebugBoundaryEnabled(bool debugBoundaryEnabled);
 
     static bool GetAcePerformanceMonitorEnabled()
     {
@@ -481,6 +497,7 @@ private:
     static bool debugEnabled_;
     static bool debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
+    static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;

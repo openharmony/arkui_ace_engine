@@ -142,7 +142,6 @@ class ModifierWithKey {
       this.value = this.stageValue;
       this.applyPeer(node, false);
     }
-    this.stageValue = undefined;
     return false;
   }
   applyPeer(node, reset) { }
@@ -2216,7 +2215,7 @@ class AccessibilityGroupModifier extends ModifierWithKey {
   }
 }
 AccessibilityGroupModifier.identity = Symbol('accessibilityGroup');
-class HoverEffectModifier extends Modifier {
+class HoverEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -2358,6 +2357,14 @@ class ArkComponent {
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
+  }
+  cleanStageValue(){
+    if (!this._modifiersWithKeys){
+      return;
+    }
+    this._modifiersWithKeys.forEach((value, key) => {
+        value.stageValue = undefined;
+    });
   }
   applyModifierPatch() {
     let expiringItems = [];
@@ -2709,7 +2716,7 @@ class ArkComponent {
     throw new Error('Method not implemented.');
   }
   hoverEffect(value) {
-    modifier(this._modifiers, HoverEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, HoverEffectModifier.identity, HoverEffectModifier, value);
     return this;
   }
   onMouse(event) {
@@ -8614,6 +8621,9 @@ class ArkVideoComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onError(callback) {
+    throw new Error('Method not implemented.');
+  }
+  onStop(callback) {
     throw new Error('Method not implemented.');
   }
 }
@@ -15821,6 +15831,9 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   nestedScroll(value) {
+    throw new Error('Method not implemented.');
+  }
+  onOverrideUrlLoading(callback) {
     throw new Error('Method not implemented.');
   }
 }

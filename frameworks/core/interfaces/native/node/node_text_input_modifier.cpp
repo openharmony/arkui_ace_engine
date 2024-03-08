@@ -720,6 +720,13 @@ ArkUI_Bool GetTextInputShowCancelButton(ArkUINodeHandle node)
     return TextFieldModelNG::GetShowCancelButton(frameNode);
 }
 
+ArkUI_Int32 GetTextInputCancelButtonStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetCleanNodeStyle(frameNode));
+}
+
 ArkUI_Float32 GetTextInputCancelIconSize(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -777,11 +784,11 @@ ArkUI_Float32 GetTextInputFontSize(ArkUINodeHandle node)
     return TextFieldModelNG::GetFontSize(frameNode).Value();
 }
 
-void SetTextInputBackgroundColor(ArkUINodeHandle node, uint32_t color)
+void SetTextInputBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetBackgroundColor(frameNode, Color(color), false);
+    TextFieldModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
 void ResetTextInputBackgroundColor(ArkUINodeHandle node)
@@ -794,7 +801,7 @@ void ResetTextInputBackgroundColor(ArkUINodeHandle node)
     auto buttonTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(buttonTheme);
     backgroundColor = buttonTheme->GetBgColor();
-    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor, true);
+    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 
 } // namespace
@@ -823,76 +830,82 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputSelectedBackgroundColor, GetTextInputShowPasswordIcon, GetTextInputEditing,
         GetTextInputShowCancelButton, GetTextInputCancelIconSize, GetTextInputTextCanacelIconSrc,
         GetTextInputTextCanacelIconColor, GetTextInputTextAlign, GetTextInputFontColor, GetTextInputFontStyle,
-        GetTextInputFontWeight, GetTextInputFontSize, SetTextInputBackgroundColor, ResetTextInputBackgroundColor };
+        GetTextInputFontWeight, GetTextInputFontSize, GetTextInputCancelButtonStyle, SetTextInputBackgroundColor,
+        ResetTextInputBackgroundColor };
     return &modifier;
 }
 
-void SetOnTextInputChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnTextInputChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node, eventId, extraParam](const std::string& str) {
+    auto onChange = [node, extraParam](const std::string& str) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXT_INPUT_CHANGE;
+        event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.stringAsyncEvent.pStr = str.c_str();
+        event.textInputEvent.subKind = ON_TEXT_INPUT_CHANGE;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 
-void SetTextInputOnSubmit(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetTextInputOnSubmit(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId, extraParam](int32_t value, NG::TextFieldCommonEvent& commonEvent) {
+    auto onEvent = [node, extraParam](int32_t value, NG::TextFieldCommonEvent& commonEvent) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXT_INPUT_SUBMIT;
+        event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXT_INPUT_SUBMIT;
         event.componentAsyncEvent.data[0].i32 = value;
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onEvent));
 }
 
-void SetOnTextInputCut(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnTextInputCut(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onCut = [node, eventId, extraParam](const std::string& str) {
+    auto onCut = [node, extraParam](const std::string& str) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXT_INPUT_CUT;
+        event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.stringAsyncEvent.pStr = str.c_str();
+        event.textInputEvent.subKind = ON_TEXT_INPUT_CUT;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnCut(frameNode, std::move(onCut));
 }
 
-void SetOnTextInputPaste(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnTextInputPaste(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onPaste = [node, eventId, extraParam](const std::string& str, NG::TextCommonEvent& commonEvent) {
+    auto onPaste = [node, extraParam](const std::string& str, NG::TextCommonEvent& commonEvent) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXT_INPUT_PASTE;
+        event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.stringAsyncEvent.pStr = str.c_str();
+        event.textInputEvent.subKind = ON_TEXT_INPUT_PASTE;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
 
-void SetOnTextSelectionChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+void SetOnTextInputSelectionChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onSelectionChange = [node, eventId, extraParam](int start, int end) {
+    auto onSelectionChange = [node, extraParam](int32_t start, int32_t end) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXT_INPUT_TEXT_SELECTION_CHANGE;
+        event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_TEXT_INPUT_TEXT_SELECTION_CHANGE;
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(start);
-        event.componentAsyncEvent.data[1].i32 = static_cast<int>(end);        
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(end);
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));

@@ -163,7 +163,6 @@ class ModifierWithKey<T extends number | string | boolean | object> {
       this.value = this.stageValue;
       this.applyPeer(node, false);
     }
-    this.stageValue = undefined;
     return false;
   }
 
@@ -2277,7 +2276,7 @@ class AccessibilityGroupModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class HoverEffectModifier extends Modifier<HoverEffect> {
+class HoverEffectModifier extends ModifierWithKey<HoverEffect> {
   constructor(value: HoverEffect) {
     super(value);
   }
@@ -2405,6 +2404,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
+  }
+
+  cleanStageValue(){
+    if (!this._modifiersWithKeys){
+      return;
+    }
+    this._modifiersWithKeys.forEach((value, key) => {
+        value.stageValue = undefined;
+    });
   }
 
   applyModifierPatch(): void {
@@ -2785,7 +2793,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   hoverEffect(value: HoverEffect): this {
-    modifier(this._modifiers, HoverEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, HoverEffectModifier.identity, HoverEffectModifier, value);
     return this;
   }
 

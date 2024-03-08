@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_I_SCROLL_UPDATE_CALLBACK_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_I_SCROLL_UPDATE_CALLBACK_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_I_SLIDE_UPDATE_CALLBACK_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_I_SLIDE_UPDATE_CALLBACK_H
 
 #include "base/geometry/ng/size_t.h"
 
 namespace OHOS::Ace::NG {
-class IScrollUpdateCallback {
+class ISlideUpdateCallback {
 public:
-    IScrollUpdateCallback() = default;
-    virtual ~IScrollUpdateCallback() = default;
-    virtual void OnScrollUpdate(const SizeF& frameSize) = 0;
+    ISlideUpdateCallback() = default;
+    virtual ~ISlideUpdateCallback() = default;
+    virtual void OnSlideUpdate(const SizeF& frameSize) = 0;
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_I_SCROLL_UPDATE_CALLBACK_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_I_SLIDE_UPDATE_CALLBACK_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,12 @@ enum class TransitionStatus {
     ENTERING,
     NORMAL,
     EXITING,
+};
+
+enum class DismissReason {
+    BACK_PRESSED = 0,
+    TOUCH_OUTSIDE,
+    CLOSE_BUTTON,
 };
 class BubblePattern : public PopupBasePattern {
     DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern);
@@ -132,6 +138,38 @@ public:
         return transitionStatus_;
     }
 
+    void SetInteractiveDismiss(bool interactiveDismiss)
+    {
+        interactiveDismiss_ = interactiveDismiss;
+    }
+
+    bool GetInteractiveDismiss()
+    {
+        if (interactiveDismiss_) {
+            return true;
+        }
+        return false;
+    }
+
+    void UpdateOnWillDismiss(const std::function<void(int32_t)>&& onWillDismiss)
+    {
+        onWillDismiss_ = std::move(onWillDismiss);
+    }
+
+    bool HasOnWillDismiss()
+    {
+        if (onWillDismiss_) {
+            return true;
+        }
+        return false;
+    }
+
+    void CallOnWillDismiss(int32_t reason)
+    {
+        if (onWillDismiss_) {
+            onWillDismiss_(reason);
+        }
+    }
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -173,7 +211,8 @@ private:
     bool mouseEventInitFlag_ = false;
     bool touchEventInitFlag_ = false;
     bool isHover_ = false;
-
+    bool interactiveDismiss_ = false;
+    std::function<void(int32_t)> onWillDismiss_;
     OffsetF childOffset_;
     OffsetF arrowPosition_;
     SizeF childSize_;

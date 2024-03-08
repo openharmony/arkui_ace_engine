@@ -27,7 +27,9 @@ class DataChangeListener : virtual public Referenced {
 public:
     virtual void OnDataReloaded() = 0;
     virtual void OnDataAdded(size_t index) = 0;
+    virtual void OnDataBulkAdded(size_t index, size_t count) = 0;
     virtual void OnDataDeleted(size_t index) = 0;
+    virtual void OnDataBulkDeleted(size_t index, size_t count) = 0;
     virtual void OnDataChanged(size_t index) = 0;
     virtual void OnDataMoved(size_t from, size_t to) = 0;
 };

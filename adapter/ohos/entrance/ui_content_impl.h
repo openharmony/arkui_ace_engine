@@ -271,6 +271,12 @@ private:
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
 
     static void RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId);
+    void RenderLayoutBoundary(bool isDebugBoundary);
+    static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
+    void AddWatchSystemParameter();
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;

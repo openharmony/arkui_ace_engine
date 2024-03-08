@@ -273,6 +273,18 @@ class UIContext {
         Context.keyframeAnimateTo(param, keyframes);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    getFrameNodeById(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeByKey(id);
+        let xNode = globalThis.requireNapi('arkui.node');
+        let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
+        if (!node) {
+            node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return node;
+    }
 }
 class ComponentUtils {
     /**

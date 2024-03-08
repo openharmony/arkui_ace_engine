@@ -38,7 +38,7 @@ constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
 constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
 constexpr bool ON_TIME_CHANGE = true;
-const std::string DEFAULT_FORMAT = "hms";
+const std::string DEFAULT_FORMAT = "aa h:m:s";
 const std::string FORM_FORMAT = "hm";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
@@ -381,7 +381,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
 
 void TextClockPattern::ParseInputFormat(bool& is24H)
 {
-    std::string inputFormat = (GetFormat() == DEFAULT_FORMAT) ? "aa h:m:s" : GetFormat();
+    std::string inputFormat = GetFormat();
     if (inputFormat == FORM_FORMAT && isForm_) {
         inputFormat = "h:m";
     }

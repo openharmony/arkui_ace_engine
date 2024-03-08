@@ -235,7 +235,17 @@ void WebClientImpl::OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHa
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     CHECK_NULL_VOID(handler);
-    delegate->OnFullScreenEnter(handler);
+    delegate->OnFullScreenEnter(handler, 0, 0);
+}
+
+void WebClientImpl::OnFullScreenEnterWithVideoSize(
+    std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler, int videoNaturalWidth, int videoNaturalHeight)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    CHECK_NULL_VOID(handler);
+    delegate->OnFullScreenEnter(handler, videoNaturalWidth, videoNaturalHeight);
 }
 
 void WebClientImpl::OnGeolocationHide()
@@ -903,4 +913,25 @@ bool WebClientImpl::FilterScrollEvent(const float x, const float y, const float 
     return delegate->FilterScrollEvent(x, y, xVelocity, yVelocity);
 }
 
+void WebClientImpl::OnIntelligentTrackingPreventionResult(
+    const std::string& websiteHost, const std::string& trackerHost)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnIntelligentTrackingPreventionResult(websiteHost, trackerHost);
+}
+
+bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+
+    bool result = delegate->OnHandleOverrideLoading(request);
+    
+    return result;
+}
 } // namespace OHOS::Ace

@@ -75,52 +75,44 @@ void ResetCheckboxGroupSelectAll(ArkUINodeHandle node)
     CheckBoxGroupModelNG::SetSelectAll(frameNode, false);
 }
 
-void SetCheckboxGroupWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
+void SetCheckboxGroupWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
-    CheckBoxGroupModelNG::SetWidth(frameNode, width);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetWidth(
+            frameNode, CalcLength(CalcLength(std::string(calcValue))));
+    } else {
+        ViewAbstract::SetWidth(frameNode, CalcLength(value, unitEnum));
+    }
 }
 
 void ResetCheckboxGroupWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto checkBoxTheme = themeManager->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-    auto defaultWidth = checkBoxTheme->GetDefaultWidth();
-    auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
-    auto width = defaultWidth - horizontalPadding * 2;
-    CheckBoxGroupModelNG::SetWidth(frameNode, width);
+    ViewAbstract::ClearWidthOrHeight(frameNode, true);
 }
 
-void SetCheckboxGroupHeight(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
+void SetCheckboxGroupHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension height = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
-    CheckBoxGroupModelNG::SetHeight(frameNode, height);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    if (unitEnum == DimensionUnit::CALC) {
+        ViewAbstract::SetHeight(
+            frameNode, CalcLength(CalcLength(std::string(calcValue))));
+    } else {
+        ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
+    }
 }
 
 void ResetCheckboxGroupHeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto checkBoxTheme = themeManager->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-    auto defaultHeight = checkBoxTheme->GetDefaultHeight();
-    auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
-    auto height = defaultHeight - verticalPadding * 2;
-    CheckBoxGroupModelNG::SetHeight(frameNode, height);
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
 void SetCheckboxGroupMark(ArkUINodeHandle node, uint32_t color, ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue)

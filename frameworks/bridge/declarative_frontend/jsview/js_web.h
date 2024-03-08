@@ -130,12 +130,14 @@ public:
     static void OnFirstContentfulPaint(const JSCallbackInfo& args);
     static void OnSafeBrowsingCheckResult(const JSCallbackInfo& args);
     static void OnNavigationEntryCommitted(const JSCallbackInfo& args);
+    static void OnIntelligentTrackingPreventionResult(const JSCallbackInfo& args);
     static void OnControllerAttached(const JSCallbackInfo& args);
     static void OnOverScroll(const JSCallbackInfo& args);
     static void SetLayoutMode(int32_t layoutMode);
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void OverScrollMode(int overScrollMode);
     static void EnableNativeEmbedMode(bool isEmbedModeEnabled);
+    static void RegisterNativeEmbedRule(const std::string& tag, const std::string& type);
     static void OnNativeEmbedLifecycleChange(const JSCallbackInfo& args);
     static void OnNativeEmbedGestureEvent(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
@@ -144,6 +146,7 @@ public:
     static bool webDebuggingAccess_;
     static JSwebEventCallback OnControllerAttachedCallback_;
     static void CopyOption(int32_t copyOption);
+    static void OnOverrideUrlLoading(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

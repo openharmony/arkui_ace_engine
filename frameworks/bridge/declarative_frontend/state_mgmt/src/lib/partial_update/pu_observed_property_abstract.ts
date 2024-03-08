@@ -30,8 +30,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   };
   
   private owningView_ : ViewPU = undefined;
-
-  private dependentElementIds_: Set<number> = new Set<number>();
   
   // PU code stores object references to dependencies directly as class variable
   // SubscriberManager is not used for lookup in PU code path to speedup updates
@@ -47,7 +45,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
     super(subscriber, viewName);
-    ConfigureStateMgmt.instance.intentUsingV2(`V2 Decorated variable`, this.debugInfo());
     Object.defineProperty(this, 'owningView_', {writable: true, enumerable: false});
     Object.defineProperty(this, 'subscriberRefs_',
       {writable: true, enumerable: false, value: new Set<IPropertySubscriber>()});
@@ -58,6 +55,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         this.subscriberRefs_.add(subscriber);
       }
     }
+    ConfigureStateMgmt.instance.intentUsingV2(`V2 Decorated variable`, this.debugInfo());
   }
 
   aboutToBeDeleted() {
@@ -106,8 +104,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return result;
   }
 
-  public debugInfoDependentElmtIds(): string {
-    return this.dependentElmtIdsByProperty_.dumpInfoDependencies();
+  public debugInfoDependentElmtIds(dumpDependantElements: boolean = false): string {
+    return this.dependentElmtIdsByProperty_.dumpInfoDependencies(this.owningView_, dumpDependantElements);
   }
 
   public debugInfoElmtId(elmtId: number): string {
@@ -117,9 +115,11 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return "<unknown element id " + elmtId + ", missing owning view>";
   }
 
-  public debugInfoDependentComponents(): string {
+  public debugInfoDependentComponents(): string | Object {
     let result: string = `|--Dependent elements: `;
-    let sepa: string = "";
+    let sepa: string = "; ";
+    let sepaDiff: string = ""
+    const dumpDependantElements = true;
 
     let queue: Array<ObservedPropertyAbstractPU<any>> = [this];
     let seen = new Set<ObservedPropertyAbstractPU<any>>();
@@ -130,16 +130,9 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
       if (item != this) {
         result += `${sepa}${item.debugInfoOwningView()}`;
-        sepa = ", ";
       }
-
-      if (item.owningView_) {
-        item.dependentElementIds_.forEach((elmtId: number) => {
-          const owningViewInfo = item.owningView_.debugInfoElmtId(elmtId);
-          result += `${owningViewInfo ? sepa : ""}${owningViewInfo}`;
-          sepa = ", ";
-        });
-      }
+      result += `${sepaDiff}${item.debugInfoDependentElmtIds(dumpDependantElements)}`; // new dependent elements
+      sepaDiff = ", "
 
       item.subscriberRefs_.forEach((subscriber: IPropertySubscriber) => {
         if ((subscriber instanceof ObservedPropertyAbstractPU)) {
@@ -305,11 +298,11 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   protected checkIsSupportedValue(value: T): boolean {
     return this.checkNewValue(
-      `undefined, null, number, boolean, string, or Object but not function`,
+      `undefined, null, number, boolean, string, or Object but not function, not V3 @observed / @track class`,
       value,
-      () => ((typeof value == "object" && typeof value != "function")
-        || typeof value == "number" || typeof value == "string" || typeof value == "boolean")
-        || (value == undefined || value == null)
+      () => ((typeof value == "object" && typeof value != "function" && !ObserveV3.IsObservedObjectV3(value))
+        || typeof value == "number" || typeof value == "string" || typeof value == "boolean"
+        || value == undefined || value == null)
     );
   }
 
@@ -321,9 +314,10 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
   protected checkIsObject(value: T): boolean {
     return this.checkNewValue(
-      `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function, Set, and Map`,
+      `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V3 @observed/@track object`,
       value,
-      () => (value == undefined || value == null || (typeof value == "object"))
+      () => ((typeof value == "object" && typeof value != "function" && !ObserveV3.IsObservedObjectV3(value))
+        || value == undefined || value == null)
     );
   }
 
@@ -379,12 +373,12 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   /**
    * If owning viewPU is currently rendering or re-rendering a UINode, return its elmtId
-   * return -1 otherwise
+   * return notRecordingDependencies (-1) otherwise
    * ViewPU caches the info, it does not request the info from C++ side (by calling 
    * ViewStackProcessor.GetElmtIdToAccountFor(); as done in earlier implementation
    */
   protected getRenderingElmtId() : number {
-    return (this.owningView_) ? this.owningView_.getCurrentlyRenderedElmtId() : -1;
+    return (this.owningView_) ? this.owningView_.getCurrentlyRenderedElmtId() : UINodeRegisterProxy.notRecordingDependencies;
   }
 
 
@@ -394,10 +388,16 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
   protected recordPropertyDependentUpdate() : void {
     const elmtId = this.getRenderingElmtId();
-    if (elmtId < 0) {
+    if (elmtId == UINodeRegisterProxy.notRecordingDependencies) {
       // not access recording 
       return;
     }
+    if (elmtId == UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
+      const error = `${this.debugInfo()}: recordPropertyDependentUpdate trying to use V2 state to init/update child V3 @Component. Application error`;
+      stateMgmtConsole.applicationError(error);
+      throw new TypeError(error);
+    }
+
     stateMgmtConsole.debug(`${this.debugInfo()}: recordPropertyDependentUpdate: add (state) variable dependency for elmtId ${elmtId}.`)
     this.dependentElmtIdsByProperty_.addPropertyDependency(elmtId);
   }
@@ -532,10 +532,13 @@ class PropertyDependencies {
     return dependentElmtIds;
   }
 
-  public dumpInfoDependencies(): string {
-    let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))} \n`;
+  public dumpInfoDependencies(owningView: ViewPU|undefined = undefined, dumpDependantElements): string {
+    const formatElmtId = owningView ? (elmtId => owningView.debugInfoElmtId(elmtId)) : (elmtId => elmtId);
+    let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${Array.from(this.propertyDependencies_).map(formatElmtId).join(', ')}`;
+    const arr = Array.from(this.propertyDependencies_).map(formatElmtId)
+    if (dumpDependantElements) return (arr.length > 1 ? arr.join(', ') : arr[0]);
     this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
-      result += `  property '@Track ${propertyName}' change affects elmtIds: ${JSON.stringify(Array.from(propertyElmtId))} \n`;
+      result += `  property '@Track ${propertyName}' change affects elmtIds: ${Array.from(propertyElmtId).map(formatElmtId).join(', ')}`;
     });
     return result;
   }

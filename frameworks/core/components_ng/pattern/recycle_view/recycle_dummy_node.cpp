@@ -25,7 +25,14 @@ namespace OHOS::Ace::NG {
 RefPtr<RecycleDummyNode> RecycleDummyNode::CreateRecycleDummyNode(int32_t nodeId)
 {
     auto node = MakeRefPtr<RecycleDummyNode>(nodeId);
-    ElementRegister::GetInstance()->AddUINode(node);
+    return node;
+}
+
+RefPtr<AceType> RecycleDummyNode::WrapRecycleDummyNode(RefPtr<AceType>& customNode)
+{
+    auto node = CreateRecycleDummyNode();
+    auto uiNode = AceType::DynamicCast<UINode>(customNode);
+    node->AddChild(uiNode);
     return node;
 }
 
