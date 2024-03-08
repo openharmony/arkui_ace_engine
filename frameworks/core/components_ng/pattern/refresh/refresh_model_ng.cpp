@@ -132,6 +132,15 @@ void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
     pattern->AddCustomBuilderNode(customBuilder);
 }
 
+void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddCustomBuilderNode(AceType::Claim<UINode>(customBuilder));
+}
+
+
 void RefreshModelNG::SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange)
 {
     CHECK_NULL_VOID(frameNode);

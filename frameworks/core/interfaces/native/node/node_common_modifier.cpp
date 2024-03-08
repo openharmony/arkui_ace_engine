@@ -28,6 +28,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/curves.h"
+#include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
@@ -4504,6 +4505,84 @@ ArkUI_Int32 GetAlign(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return ConvertAlignmentToInt(ViewAbstract::GetAlign(frameNode));
 }
+
+ArkUI_Float32 GetWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetWidth(frameNode);
+}
+
+ArkUI_Float32 GetHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetHeight(frameNode);
+}
+
+ArkUI_Uint32 GetBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return ViewAbstract::GetBackgroundColor(frameNode).GetValue();
+}
+
+void GetBackgroundImage(ArkUINodeHandle node, ArkUIBackgroundImage* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    options->src = ViewAbstract::GetBackgroundImageSrc(frameNode).c_str();
+    options->repeat = static_cast<int>(ViewAbstract::GetBackgroundImageRepeat(frameNode));
+}
+
+void GetPadding(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto padding = ViewAbstract::GetPadding(frameNode);
+    values[NUM_0] = padding.top->GetDimension().Value();
+    values[NUM_1] = padding.right->GetDimension().Value();
+    values[NUM_2] = padding.bottom->GetDimension().Value();
+    values[NUM_3] = padding.left->GetDimension().Value();
+    length = NUM_4;
+}
+
+ArkUI_CharPtr GetKey(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = ViewAbstract::GetKey(frameNode);
+    return g_strValue.c_str();
+}
+
+int GetEnabled(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(ViewAbstract::GetEnabled(frameNode));
+}
+
+void GetMargin(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto margin = ViewAbstract::GetMargin(frameNode);
+    values[NUM_0] = margin.top->GetDimension().Value();
+    values[NUM_1] = margin.right->GetDimension().Value();
+    values[NUM_2] = margin.bottom->GetDimension().Value();
+    values[NUM_3] = margin.left->GetDimension().Value();
+    length = NUM_4;
+}
+
+void GetTranslate(ArkUINodeHandle node, ArkUI_Float32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto translate = ViewAbstract::GetTranslate(frameNode);
+    values[NUM_0] = translate.x.Value();
+    values[NUM_1] = translate.y.Value();
+    values[NUM_2] = translate.z.Value();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -4557,9 +4636,10 @@ const ArkUICommonModifier* GetCommonModifier()
         GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
         GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules,
         GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, GetScale, GetRotate,
-        GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow,
-        GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale, GetInvert,
-        GetSepia, GetContrast, GetForegroundColor, GetBlur, GetLinearGradient, GetAlign};
+        GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis,
+        GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur,
+        GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetKey,
+        GetEnabled, GetMargin, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask };
 
     return &modifier;
 }
@@ -4577,6 +4657,21 @@ void SetOnAppear(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
 }
+
+void SetOnDisappear(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onDisappear = [frameNode, eventId, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = ON_DISAPPEAR;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnDisappear(frameNode, std::move(onDisappear));
+}
+
 
 void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
 {

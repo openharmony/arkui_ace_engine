@@ -465,5 +465,11 @@ ImageSourceInfo ImageModelNG::GetAlt(FrameNode* frameNode)
     CHECK_NULL_RETURN(layoutProperty, defaultImageSourceInfo);
     return layoutProperty->GetAlt().value_or(defaultImageSourceInfo);
 }
+
+bool ImageModelNG::GetDraggable(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return frameNode->IsDraggable();
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

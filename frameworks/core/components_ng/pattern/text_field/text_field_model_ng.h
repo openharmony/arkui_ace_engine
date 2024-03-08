@@ -125,6 +125,7 @@ public:
     static void SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void SetTextFieldText(FrameNode* frameNode, const std::string& value);
     static void SetTextFieldPlaceHolder(FrameNode* frameNode, const std::string& placeholder);
     static void StopTextFieldEditing(FrameNode* frameNode);
@@ -137,6 +138,7 @@ public:
     static void SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize);
     static void SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& iconColor);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool tmp);
     static std::string GetPlaceholderText(FrameNode* frameNode);
     static std::string GetTextFieldText(FrameNode* frameNode);
     static Color GetCaretColor(FrameNode* frameNode);

@@ -76,5 +76,14 @@ void SetOnRefreshing(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam
     };
     RefreshModelNG::SetOnRefreshing(frameNode, std::move(onEvent));
 }
+
+void ListItemGroupSetHeader(ArkUINodeHandle node, ArkUINodeHandle content)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto contentNode = reinterpret_cast<FrameNode*>(content);
+    CHECK_NULL_VOID(contentNode);
+    RefreshModelNG::SetCustomBuilder(frameNode, contentNode);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

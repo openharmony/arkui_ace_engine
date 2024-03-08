@@ -800,7 +800,18 @@ typedef enum {
      *
      */
     NODE_TRANSLATE_TRANSITION,
-
+    /**
+     * @brief Defines the slide-in and slide-out of the component from the screen edge during transition.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     *
+     */
+    NODE_MOVE_TRANSITION,
     /**
      * @brief Defines the focus attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -2078,7 +2089,18 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_EDITING,
-
+    /**
+     * @brief Defines the text box type. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: text box type {@link ArkUI_TextAreaType}.
+     * The default value is <b>ARKUI_TEXTAREA_TYPE_NORMAL</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: text box type {@link ArkUI_TextAreaType}. \n
+     *
+     */
+    NODE_TEXT_AREA_TYPE,
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3511,6 +3533,15 @@ typedef enum {
     NODE_EVENT_ON_APPEAR,
 
     /**
+     * @brief 卸载事件。
+     *
+     * 触发该事件的条件 ：组件卸载时触发此回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中不包含参数。
+     */
+    NODE_EVENT_ON_DISAPPEAR,
+
+    /**
      * @brief Defines the area change event.
      *
      * This event is triggered when the component's size, position, or any other attribute that may
@@ -3685,6 +3716,17 @@ typedef enum {
      */
     NODE_TEXT_INPUT_ON_PASTE,
     /**
+     * @brief 文本选择的位置发生变化时，触发该回调。
+     *
+     * 触发该事件的条件：文本选择的位置发生变化时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示所选文本的起始位置。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示所选文本的结束位置。\n
+     *
+     */
+    NODE_TEXT_INPUT_ON_TEXT_SELECTION_CHANGE,
+    /**
      * @brief Defines the event triggered when the input in the text box changes.
      *
       \n
@@ -3695,7 +3737,27 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_AREA,
-
+    /**
+     * @brief 长按输入框内部区域弹出剪贴板后，点击剪切板粘贴按钮，触发该回调。
+     *
+     * 触发该事件的条件：长按输入框内部区域弹出剪贴板后，点击剪切板粘贴按钮。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
+     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>：粘贴的文本内容。
+     *
+     */
+    NODE_TEXT_AREA_ON_PASTE,
+    /**
+     * @brief 文本选择的位置发生变化时，触发该回调。
+     *
+     * 触发该事件的条件：文本选择的位置发生变化时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示所选文本的起始位置。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示所选文本的结束位置。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE,
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
      *

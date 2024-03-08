@@ -535,4 +535,45 @@ Color ToggleModelNG::GetSwitchPointColor(FrameNode* frameNode)
     return value;
 }
 
+void ToggleModelNG::SetIsOn(FrameNode* frameNode, bool isOn)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();;
+    if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
+        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isOn, frameNode);
+    }
+    if (AceType::InstanceOf<SwitchPattern>(pattern)) {
+        auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn, frameNode);
+    }
+    if (AceType::InstanceOf<ToggleButtonPattern>(pattern)) {
+        auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, IsOn, isOn, frameNode);
+    }
+}
+
+bool ToggleModelNG::GetIsOn(FrameNode* frameNode)
+{
+    bool value = false;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pattern = frameNode->GetPattern();
+    ;
+    if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
+        ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(CheckBoxPaintProperty, CheckBoxSelect, value, frameNode, value);
+    }
+    if (AceType::InstanceOf<SwitchPattern>(pattern)) {
+        ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SwitchPaintProperty, IsOn, value, frameNode, value);
+    }
+    if (AceType::InstanceOf<ToggleButtonPattern>(pattern)) {
+        ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ToggleButtonPaintProperty, IsOn, value, frameNode, value);
+    }
+    return value;
+}
 } // namespace OHOS::Ace::NG

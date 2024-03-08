@@ -23,4 +23,5 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetTextInputOnSubmit(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
     void SetOnTextInputCut(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
     void SetOnTextInputPaste(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+    void SetOnTextSelectionChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier

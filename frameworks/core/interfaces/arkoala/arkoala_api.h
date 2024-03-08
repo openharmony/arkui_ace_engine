@@ -550,6 +550,11 @@ struct ArkUITranslateTransitionType {
     ArkUIAnimationOptionType animation;
 };
 
+struct ArkUIMoveTransitionType {
+    ArkUI_Int32 edgeType;
+    ArkUIAnimationOptionType animation;
+};
+
 struct ArkUIOffsetType {
     ArkUI_Float32 xComponent;
     ArkUI_Float32 yComponent;
@@ -630,6 +635,14 @@ struct ArkUIEdgeAlignType {
     ArkUI_Int32 alignType;
     ArkUI_Float32 offsetX;
     ArkUI_Float32 offsetY;
+};
+
+struct ArkUITextBackgroundStyleOptions {
+    ArkUI_Uint32 color;
+    ArkUI_Float32 topLeft;
+    ArkUI_Float32 topRight;
+    ArkUI_Float32 bottomLeft;
+    ArkUI_Float32 bottomRight;
 };
 
 enum ArkUINodeType {
@@ -718,10 +731,13 @@ enum ArkUIAsyncEventKind {
     ON_TEXT_INPUT_CHANGE,
     ON_TEXT_INPUT_CUT,
     ON_TEXT_INPUT_PASTE,
+    ON_TEXT_INPUT_TEXT_SELECTION_CHANGE,
 
     ON_TEXTAREA_EDIT_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXTAREA,
     ON_TEXTAREA_SUBMIT,
     ON_TEXTAREA_CHANGE,
+    ON_TEXTAREA_PASTE,
+    ON_TEXTAREA_TEXT_SELECTION_CHANGE,
 
     ON_SWIPER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SWIPER,
     ON_SWIPER_ANIMATION_START,
@@ -1251,6 +1267,18 @@ struct ArkUICommonModifier {
     ArkUI_Int32 (*getLinearGradient)(
         ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Uint32* colors, ArkUI_Float32* stop);
     ArkUI_Int32 (*getAlign)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getWidth)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getHeight)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getBackgroundColor)(ArkUINodeHandle node);
+    void (*getBackgroundImage)(ArkUINodeHandle node, ArkUITextBackgroundStyleOptions* options);
+    void (*getPadding)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length);
+    ArkUI_CharPtr (*getKey)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getEnabled)(ArkUINodeHandle node);
+    void (*getMargin)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length);
+    void (*getTranslate)(ArkUINodeHandle node, ArkUI_Float32* values);
+    void (*setMoveTransition)(ArkUINodeHandle node, ArkUI_Int32 edgeType, const ArkUIAnimationOptionType* moveOption);
+    ArkUIMoveTransitionType (*getMoveTransition)(ArkUINodeHandle node);
+     void (*resetMask)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -1490,6 +1518,7 @@ struct ArkUIImageModifier {
     ArkUI_Int32 (*getImageInterpolation)(ArkUINodeHandle node);
     ArkUIFilterColorType (*getColorFilter)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getAlt)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getImageDraggable)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {
@@ -2048,7 +2077,6 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
     void (*setTextAreaPlaceholderFontEnum)(ArkUINodeHandle node, const struct ArkUIResourceLength* size,
         ArkUI_Int32 weight, ArkUI_CharPtr family, ArkUI_Int32 style);
-
     ArkUI_CharPtr (*getTextAreaPlaceholder)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextAreaText)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextAreaCaretColor)(ArkUINodeHandle node);
@@ -2056,6 +2084,12 @@ struct ArkUITextAreaModifier {
     ArkUI_Uint32 (*getTextAreaPlaceholderColor)(ArkUINodeHandle node);
     void (*getTextAreaPlaceholderFont)(ArkUINodeHandle node, ArkUITextFont* font);
     ArkUI_Bool (*getTextAreaEditing)(ArkUINodeHandle node);
+    void (*setTextAreaBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetTextAreaBackgroundColor)(ArkUINodeHandle node);
+    void (*setTextAreaType)(ArkUINodeHandle node, ArkUI_Int32 type);
+    void (*resetTextAreaType)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextAreaType)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextAreaTextAlign)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2116,7 +2150,6 @@ struct ArkUITextInputModifier {
     void (*setTextInputCancelButton)(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
         ArkUI_Uint32 color, ArkUI_CharPtr src);
     void (*resetTextinputCancelButton)(ArkUINodeHandle node);
-
     ArkUI_CharPtr (*getTextInputPlaceholder)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextInputText)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextInputCaretColor)(ArkUINodeHandle node);
@@ -2140,6 +2173,8 @@ struct ArkUITextInputModifier {
     ArkUI_Int32 (*getTextInputFontStyle)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputFontWeight)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputFontSize)(ArkUINodeHandle node);
+    void (*setTextInputBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetTextInputBackgroundColor)(ArkUINodeHandle node);    
 };
 
 struct ArkUIWebModifier {
@@ -2306,6 +2341,9 @@ struct ArkUIToggleModifier {
     void (*resetToggleHoverEffect)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getToggleSelectedColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getToggleSwitchPointColor)(ArkUINodeHandle node);
+    void (*setToggleIsOn)(ArkUINodeHandle node, ArkUI_Bool isOn);
+    void (*resetToggleIsOn)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getToggleIsOn)(ArkUINodeHandle node);    
 };
 
 struct ArkUINavigationModifier {
@@ -2378,6 +2416,7 @@ struct ArkUIBadgeModifier {
 struct ArkUIRefreshModifier {
     void (*setRefreshing)(ArkUINodeHandle node, ArkUI_Bool value);
     ArkUI_Bool (*getRefreshing)(ArkUINodeHandle node);
+    void (*setRefreshContent)(ArkUINodeHandle node, ArkUINodeHandle content);
 };
 
 struct ArkUIHyperlinkModifier {
@@ -2695,6 +2734,13 @@ struct ArkUISpanModifier {
     ArkUI_Float32 (*getSpanLineHeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSpanTextCase)(ArkUINodeHandle node);
     ArkUI_Float32 (*getSpanLetterSpacing)(ArkUINodeHandle node);
+    void (*setSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 Length);
+    void (*resetSpanTextBackgroundStyle)(ArkUINodeHandle node);
+    void (*getSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUITextBackgroundStyleOptions* options);
+    void (*setTextShadow)(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length);
+    void (*resetTextShadow)(ArkUINodeHandle node);
+    void (*getTextShadows)(ArkUINodeHandle node, ArkUITextShadowStruct* textShadow, ArkUI_Uint32 size);
 };
 
 struct ArkUISelectModifier {

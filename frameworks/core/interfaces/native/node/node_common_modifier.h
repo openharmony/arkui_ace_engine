@@ -21,6 +21,7 @@ namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICommonModifier* GetCommonModifier();
 
 void SetOnAppear(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+void SetOnDisappear(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 void SetOnBlur(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 void SetOnAreaChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
