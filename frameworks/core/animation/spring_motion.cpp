@@ -55,7 +55,7 @@ double SpringMotion::GetEndValue() const
 
 bool SpringMotion::IsCompleted(double value, double velocity) const
 {
-    return NearZero(value - endPosition_, accuracy_) && NearZero(velocity, accuracy_);
+    return NearZero(value - endPosition_, accuracy_) && NearZero(velocity, velocityAccuracy_);
 }
 
 bool SpringMotion::IsCompleted()
@@ -66,6 +66,11 @@ bool SpringMotion::IsCompleted()
 void SpringMotion::SetAccuracy(double accuracy)
 {
     accuracy_ = std::abs(accuracy);
+}
+
+void SpringMotion::SetVelocityAccuracy(double velocityAccuracy)
+{
+    velocityAccuracy_ = std::abs(velocityAccuracy);
 }
 
 void SpringMotion::Reset(double start, double end, double velocity, const RefPtr<SpringProperty>& spring)
