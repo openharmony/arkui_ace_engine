@@ -1238,7 +1238,7 @@ export class ConfirmDialog extends ViewPU {
 export class AlertDialog extends ViewPU {
   constructor(a8, b8, c8, d8 = -1, e8 = undefined, f8) {
       super(a8, c8, d8, f8);
-      if (typeof e8 === "function") {
+      if (typeof e8 === 'function') {
           this.paramsGenerator_ = e8;
       }
       this.controller = undefined;
@@ -1288,7 +1288,7 @@ export class AlertDialog extends ViewPU {
                           this.AlertDialogContentBuilder();
                       },
                       buttons: this.buttons,
-                  }, undefined, q7, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 375 });
+                  }, undefined, q7, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 375 });
                   ViewPU.create(s7);
                   let t7 = () => {
                       return {
@@ -1330,10 +1330,10 @@ export class AlertDialog extends ViewPU {
       this.observeComponentCreation((j7, k7) => {
           ViewStackProcessor.StartGetAccessRecordingFor(j7);
           Text.create(this.content);
-          Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.Body_L'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+          Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
           Text.fontWeight(FontWeight.Medium);
-          Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-          Text.margin({ right: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, });
+          Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
+          Text.margin({ right: { id: -1, type: 10002, params: ['sys.float.padding_level8'], bundleName: '', moduleName: '' }, });
           Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
           Text.textAlign(this.getTextAlign());
           if (!k7) {
@@ -1351,11 +1351,11 @@ export class AlertDialog extends ViewPU {
   getTextAlign() {
       let d7 = measure.measureTextSize({
           textContent: this.content,
-          fontSize: { "id": -1, "type": 10002, params: ['sys.float.Body_L'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+          fontSize: { id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' },
       });
       let e7 = measure.measureTextSize({
           textContent: '1',
-          fontSize: { "id": -1, "type": 10002, params: ['sys.float.Body_L'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+          fontSize: { id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' },
       });
       if (this.getTextHeight(d7) <= this.getTextHeight(e7)) {
           return TextAlign.Center;
