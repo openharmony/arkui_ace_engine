@@ -118,6 +118,10 @@ public:
     }
     virtual void GetRectangleById(const std::string& key, NG::Rectangle& rectangle);
 
+    virtual void ResetFocus();
+
+    virtual bool RequestFocus(const std::string& value);
+
     // distribute
     virtual std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo)
     {
