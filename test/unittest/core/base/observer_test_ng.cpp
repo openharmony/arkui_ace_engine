@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
@@ -91,5 +92,20 @@ HWTEST_F(ObserverTestNg, ObserverTestNg002, TestSize.Level1)
     ASSERT_EQ(info->name, "test_name");
     ASSERT_EQ(info->navigationId, "");
     ASSERT_EQ(info->state, NavDestinationState::ON_SHOWN);
+}
+
+/**
+ * @tc.name: ObserverTestNg003
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SCROLL_ETS_TAG, 12, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(Referenced::RawPtr(pattern)),
+                                                                 ScrollEventType::SCROLL_START);
+    ASSERT_EQ(UIObserverHandler::GetInstance().scrollEventHandleFunc_, nullptr);
 }
 }
