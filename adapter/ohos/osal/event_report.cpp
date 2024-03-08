@@ -78,6 +78,9 @@ constexpr char STATECHANGE[] = "STATECHANGE";
 constexpr char MAXMENUITEM[] = "MAXMENUITEM";
 constexpr char CHANGEDEFAULTSETTING[] = "CHANGEDEFAULTSETTING";
 constexpr char SCENE_BOARD_UE_DOMAIN[] = "SCENE_BOARD_UE";
+#ifdef VSYNC_TIMEOUT_CHECK
+constexpr char EXECPTION_VSYNC[] = "VSYNC_EXCEPTION";
+#endif
 
 void StrTrim(std::string& str)
 {
@@ -221,6 +224,17 @@ void EventReport::SendFormException(FormExcepType type)
 
     SendEventInner(eventInfo);
 }
+#ifdef VSYNC_TIMEOUT_CHECK
+void EventReport::SendVsyncException(VsyncExcepType type)
+{
+    EventInfo eventInfo = {
+        .eventType = EXECPTION_VSYNC,
+        .errorType = static_cast<int32_t>(type),
+    };
+
+    SendEventInner(eventInfo);
+}
+#endif
 
 void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr)
 {
