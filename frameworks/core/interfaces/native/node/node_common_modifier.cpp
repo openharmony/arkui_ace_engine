@@ -975,8 +975,12 @@ void SetOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        opacity = 1.0f;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (opacity > 1.0f || LessNotEqual(opacity, 0.0f)) {
+            opacity = 1.0f;
+        }
+    } else {
+        opacity = std::clamp(opacity, 0.0f, 1.0f);
     }
     ViewAbstract::SetOpacity(frameNode, opacity);
 }
@@ -1724,13 +1728,13 @@ void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkU
     if (LessNotEqual(valueWidth, 0.0f)) {
         bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(GetBackgroundImageSizeType(typeWidth)));
     } else {
-        bgImgSize.SetSizeValueX(Dimension(valueWidth, DimensionUnit::VP).ConvertToPx());
+        bgImgSize.SetSizeValueX(valueWidth);
         bgImgSize.SetSizeTypeX(BackgroundImageSizeType::LENGTH);
     }
     if (LessNotEqual(valueHeight, 0.0f)) {
         bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(GetBackgroundImageSizeType(typeHeight)));
     } else {
-        bgImgSize.SetSizeValueY(Dimension(valueHeight, DimensionUnit::VP).ConvertToPx());
+        bgImgSize.SetSizeValueY(valueHeight);
         bgImgSize.SetSizeTypeY(BackgroundImageSizeType::LENGTH);
     }
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
