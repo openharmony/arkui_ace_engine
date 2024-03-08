@@ -295,6 +295,7 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
         model.SetShowUnderline(true);
         model.SetSelectAllValue(true);
         model.SetShowCounterBorder(true);
+        model.SetWordBreak(WordBreak::BREAK_ALL);
     });
 
     /**
@@ -319,6 +320,7 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("caretPosition"), "");
     EXPECT_TRUE(json->GetBool("showUnderline"));
     EXPECT_TRUE(json->GetBool("selectAll"));
+    EXPECT_EQ(json->GetString("wordBreak"), "break-all");
 }
 
 /**
@@ -3609,6 +3611,43 @@ HWTEST_F(TextFieldUXTest, testTextAlign001, TestSize.Level1)
     layoutProperty_->UpdateTextAlign(TextAlign::END);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetTextAlign(), TextAlign::END);
+}
+
+/**
+ * @tc.name: testWordBreak001
+ * @tc.desc: test testInput text WordBreak
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testWordBreak001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::NORMAL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::NORMAL);
+
+    /**
+     * @tc.step: step2. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_ALL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_ALL);
+
+    /**
+     * @tc.step: step2. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_WORD);
 }
 
 /**
