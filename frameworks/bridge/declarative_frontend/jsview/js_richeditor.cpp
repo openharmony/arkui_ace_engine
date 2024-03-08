@@ -962,7 +962,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         !lineHigh.IsNegative() && lineHigh.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLineHeight = lineHigh;
         style.SetLineHeight(lineHigh);
-    } else if (size.IsNegative() || lineHigh.Unit() == DimensionUnit::PERCENT) {
+    } else if (lineHeight.IsNegative() || lineHigh.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         lineHigh = theme->GetTextStyle().GetLineHeight();
