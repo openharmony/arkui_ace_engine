@@ -608,7 +608,7 @@ RefPtr<PipelineContext> UINode::GetContext()
 }
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     bool isDispatch)
 {
     auto children = GetChildren();

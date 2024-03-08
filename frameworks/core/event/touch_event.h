@@ -100,6 +100,8 @@ struct TouchEvent final : public UIInputEvent {
     // historical points
     std::vector<TouchEvent> history;
 
+    std::list<std::string> childTouchTestList;
+
     // Coordinates relative to the upper-left corner of the current component
     float localX = 0.0f;
     float localY = 0.0f;
@@ -424,6 +426,8 @@ struct TouchRestrict final {
     SourceType hitTestType = SourceType::TOUCH;
 
     TouchEvent touchEvent;
+
+    std::list<std::string> childTouchTestList;
 };
 
 class TouchCallBackInfo : public BaseEventInfo {
