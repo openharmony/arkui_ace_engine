@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -158,5 +158,15 @@ bool RefreshModelNG::GetRefreshing(FrameNode* frameNode)
     bool value = false;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, IsRefreshing, value, frameNode, value);
     return value;
+}
+
+void RefreshModelNG::SetRefreshOffset(FrameNode* frameNode, const Dimension& offset)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset, frameNode);
+}
+
+void RefreshModelNG::SetPullToRefresh(FrameNode* frameNode, bool pullToRefresh)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullToRefresh, pullToRefresh, frameNode);
 }
 } // namespace OHOS::Ace::NG

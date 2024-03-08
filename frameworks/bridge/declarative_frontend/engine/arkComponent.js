@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -9912,7 +9912,43 @@ class ArkRefreshComponent extends ArkComponent {
   onRefreshing(callback) {
     throw new Error('Method not implemented.');
   }
+  refreshOffset(value) {
+    modifierWithKey(this._modifiersWithKeys, RefreshOffsetModifier.identity, RefreshOffsetModifier, value);
+    return this;
+  }
+  pullToRefresh(value) {
+    modifierWithKey(this._modifiersWithKeys, PullToRefreshModifier.identity, PullToRefreshModifier, value);
+    return this;
+  }
 }
+class RefreshOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetRefreshOffset(node);
+    }
+    else {
+      getUINativeModule().refresh.setRefreshOffset(node, this.value);
+    }
+  }
+}
+RefreshOffsetModifier.identity = Symbol('refreshOffset');
+class PullToRefreshModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetPullToRefresh(node);
+    }
+    else {
+      getUINativeModule().refresh.setPullToRefresh(node, this.value);
+    }
+  }
+}
+PullToRefreshModifier.identity = Symbol('pullToRefresh');
 // @ts-ignore
 globalThis.Refresh.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
