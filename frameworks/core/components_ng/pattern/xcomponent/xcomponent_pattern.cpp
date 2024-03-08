@@ -1206,25 +1206,23 @@ void XComponentPattern::NativeSurfaceShow()
 
 void XComponentPattern::OnWindowHide()
 {
-    if (!hasXComponentInit_ || hasReleasedSurface_) {
+    if (!hasXComponentInit_ || hasReleasedSurface_
+        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
         return;
     }
-    if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
-        CHECK_NULL_VOID(renderSurface_);
-        NativeSurfaceHide();
-        renderSurface_->releaseSurfaceBuffers();
-        hasReleasedSurface_ = true;
-    }
+    CHECK_NULL_VOID(renderSurface_);
+    NativeSurfaceHide();
+    renderSurface_->releaseSurfaceBuffers();
+    hasReleasedSurface_ = true;
 }
 
 void XComponentPattern::OnWindowShow()
 {
-    if (!hasXComponentInit_ || !hasReleasedSurface_) {
+    if (!hasXComponentInit_ || !hasReleasedSurface_
+        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
         return;
     }
-    if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
-        NativeSurfaceShow();
-        hasReleasedSurface_ = false;
-    }
+    NativeSurfaceShow();
+    hasReleasedSurface_ = false;
 }
 } // namespace OHOS::Ace::NG
