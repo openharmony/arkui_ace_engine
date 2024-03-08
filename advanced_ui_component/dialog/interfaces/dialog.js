@@ -15,6 +15,7 @@
 
 const hilog = requireNapi('hilog');
 const resourceManager = requireNapi('resourceManager');
+const measure = requireNapi('measure');
 
 const TITLE_MAX_LINES = 2;
 const HORIZON_BUTTON_MAX_COUNT = 2;
@@ -1235,260 +1236,155 @@ export class ConfirmDialog extends ViewPU {
 }
 
 export class AlertDialog extends ViewPU {
-  constructor(e, o, t, r = -1) {
-    super(e, t, r);
-    this.controller = void 0;
-    this.content = '';
-    this.primaryButton = { value: '' };
-    this.secondaryButton = { value: '' };
-    this.setInitiallyProvidedValue(o);
+  constructor(a8, b8, c8, d8 = -1, e8 = undefined, f8) {
+      super(a8, c8, d8, f8);
+      if (typeof e8 === 'function') {
+          this.paramsGenerator_ = e8;
+      }
+      this.controller = undefined;
+      this.content = '';
+      this.primaryButton = null;
+      this.secondaryButton = null;
+      this.buttons = undefined;
+      this.setInitiallyProvidedValue(b8);
+      this.finalizeConstruction();
   }
-
-  setInitiallyProvidedValue(e) {
-    void 0 !== e.controller && (this.controller = e.controller);
-    void 0 !== e.content && (this.content = e.content);
-    void 0 !== e.primaryButton && (this.primaryButton = e.primaryButton);
-    void 0 !== e.secondaryButton && (this.secondaryButton = e.secondaryButton);
+  setInitiallyProvidedValue(z7) {
+      if (z7.controller !== undefined) {
+          this.controller = z7.controller;
+      }
+      if (z7.content !== undefined) {
+          this.content = z7.content;
+      }
+      if (z7.primaryButton !== undefined) {
+          this.primaryButton = z7.primaryButton;
+      }
+      if (z7.secondaryButton !== undefined) {
+          this.secondaryButton = z7.secondaryButton;
+      }
+      if (z7.buttons !== undefined) {
+          this.buttons = z7.buttons;
+      }
   }
-
-  updateStateVars(e) {
+  updateStateVars(y7) {
   }
-
-  purgeVariableDependenciesOnElmtId(e) {
+  purgeVariableDependenciesOnElmtId(x7) {
   }
-
   aboutToBeDeleted() {
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
+      SubscriberManager.Get().delete(this.id__());
+      this.aboutToBeDeletedInternal();
   }
-
-  setController(e) {
-    this.controller = e;
+  setController(w7) {
+      this.controller = w7;
   }
-
   initialRender() {
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Column.create();
-      Column.backgroundBlurStyle(BlurStyle.Thick);
-      Column.borderRadius({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_corner_radius_dialog'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Column.margin({
-        left: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_start'],
-          bundleName: '',
-          moduleName: ''
-        },
-        right: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_end'],
-          bundleName: '',
-          moduleName: ''
-        },
-        bottom: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_bottom'],
-          bundleName: '',
-          moduleName: ''
-        }
-      });
-      Column.backgroundColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_dialog_bg'],
-        bundleName: '',
-        moduleName: ''
-      });
-      o || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.padding({
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: this.secondaryButton.value || this.primaryButton.value ? 0 : 24
-      });
-      o || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Text.create(this.content);
-      Text.fontSize({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_body1'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Text.fontWeight(FontWeight.Medium);
-      Text.fontColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_text_primary'],
-        bundleName: '',
-        moduleName: ''
-      });
-      o || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    Text.pop();
-    Row.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.width('100%');
-      Row.padding({ left: 16, right: 16, top: 16, bottom: 16 });
-      o || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.primaryButton.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Button.createWithLabel(this.primaryButton.value);
-          Button.fontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_button1'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontWeight(FontWeight.Medium);
-          Button.layoutWeight(1);
-          Button.backgroundColor(this.primaryButton.background ? this.primaryButton.background : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_background_transparent'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_text_primary_activated'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.onClick((() => {
-            this.primaryButton.action && this.primaryButton.action();
-            this.controller.close();
-          }));
-          o || Button.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        Button.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.secondaryButton.value && this.primaryButton.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Column.create();
-          Column.width(DIVIDER_CONTAINER_WIDTH);
-          Column.alignItems(HorizontalAlign.Center);
-          o || Column.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          If.create();
-          this.secondaryButton.background ? If.branchId(1) : this.ifElseBranchUpdateFunction(0, (() => {
-            this.observeComponentCreation(((e, o) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              Divider.create();
-              Divider.width(DIVIDER_WIDTH);
-              Divider.height(DIVIDER_HEIGHT);
-              Divider.color({
-                id: -1,
-                type: 10001,
-                params: ['sys.color.ohos_id_color_list_separator'],
-                bundleName: '',
-                moduleName: ''
-              });
-              Divider.vertical(!0);
-              o || Divider.pop();
+      {
+          this.observeComponentCreation((q7, r7) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(q7);
+              if (r7) {
+                  let s7 = new CustomDialogContentComponent(this, {
+                      controller: this.controller,
+                      contentBuilder: () => {
+                          this.AlertDialogContentBuilder();
+                      },
+                      buttons: this.buttons,
+                  }, undefined, q7, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 375 });
+                  ViewPU.create(s7);
+                  let t7 = () => {
+                      return {
+                          controller: this.controller,
+                          contentBuilder: () => {
+                              this.AlertDialogContentBuilder();
+                          },
+                          buttons: this.buttons
+                      };
+                  };
+                  s7.paramsGenerator_ = t7;
+              }
+              else {
+                  this.updateStateVarsOfChildByElmtId(q7, {});
+              }
               ViewStackProcessor.StopGetAccessRecording();
-            }));
-          }));
-          o || If.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        If.pop();
-        Column.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.secondaryButton.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Button.createWithLabel(this.secondaryButton.value);
-          Button.fontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_button1'],
-            bundleName: '',
-            moduleName: ''
           });
-          Button.fontWeight(FontWeight.Medium);
-          Button.layoutWeight(1);
-          Button.backgroundColor(this.secondaryButton.background ? this.secondaryButton.background : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_background_transparent'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontColor(this.secondaryButton.fontColor ? this.secondaryButton.fontColor : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_text_primary_activated'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.onClick((() => {
-            this.secondaryButton.action && this.secondaryButton.action();
-            this.controller.close();
-          }));
-          o || Button.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        Button.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    Row.pop();
-    Column.pop();
+      }
   }
-
+  AlertDialogContentBuilder(f7 = null) {
+      this.observeComponentCreation((n7, o7) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(n7);
+          Column.create();
+          Column.margin({ right: `${this.getMargin()}vp`, });
+          if (!o7) {
+              Column.pop();
+          }
+          ViewStackProcessor.StopGetAccessRecording();
+      });
+      this.observeComponentCreation((l7, m7) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(l7);
+          Scroll.create();
+          Scroll.width('100%');
+          if (!m7) {
+              Scroll.pop();
+          }
+          ViewStackProcessor.StopGetAccessRecording();
+      });
+      this.observeComponentCreation((j7, k7) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(j7);
+          Text.create(this.content);
+          Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
+          Text.fontWeight(FontWeight.Medium);
+          Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
+          Text.margin({ right: { id: -1, type: 10002, params: ['sys.float.padding_level8'], bundleName: '', moduleName: '' }, });
+          Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
+          Text.textAlign(this.getTextAlign());
+          if (!k7) {
+              Text.pop();
+          }
+          ViewStackProcessor.StopGetAccessRecording();
+      });
+      Text.pop();
+      Scroll.pop();
+      Column.pop();
+  }
+  aboutToAppear() {
+      this.initButtons();
+  }
+  getTextAlign() {
+      let d7 = measure.measureTextSize({
+          textContent: this.content,
+          fontSize: { id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' },
+      });
+      let e7 = measure.measureTextSize({
+          textContent: '1',
+          fontSize: { id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' },
+      });
+      if (this.getTextHeight(d7) <= this.getTextHeight(e7)) {
+          return TextAlign.Center;
+      }
+      return TextAlign.Start;
+  }
+  getTextHeight(c7) {
+      if (c7 && c7.height !== null && c7.height !== undefined) {
+          return Number(c7.height);
+      }
+      return 0;
+  }
+  initButtons() {
+      if (!this.primaryButton && !this.secondaryButton) {
+          return;
+      }
+      this.buttons = [];
+      if (this.primaryButton) {
+          this.buttons.push(this.primaryButton);
+      }
+      if (this.secondaryButton) {
+          this.buttons.push(this.secondaryButton);
+      }
+  }
+  getMargin() {
+      return 0 - getNumberByResource('padding_level8');
+  }
   rerender() {
-    this.updateDirtyElements();
+      this.updateDirtyElements();
   }
 }
 
