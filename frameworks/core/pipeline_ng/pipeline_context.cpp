@@ -1759,6 +1759,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
+        if (!touchRestrict.childTouchTestList.empty()) {
+            scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
+        }
         touchTestResults_ = eventManager_->touchTestResults_;
 
         HandleEtsCardTouchEvent(oriPoint, etsSerializedGesture);
