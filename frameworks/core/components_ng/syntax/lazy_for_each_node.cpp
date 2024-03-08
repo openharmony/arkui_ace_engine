@@ -256,16 +256,6 @@ int32_t LazyForEachNode::GetIndexByUINode(const RefPtr<UINode>& uiNode) const
     return -1;
 }
 
-void LazyForEachNode::SetLazyStartIndex(int32_t startIndex)
-{
-    startIndex_ = startIndex;
-}
-
-void LazyForEachNode::SetLazyCount(int32_t count)
-{
-    count_ = count;
-}
-
 void LazyForEachNode::RecycleItems(int32_t from, int32_t to)
 {
     if (!builder_) {
