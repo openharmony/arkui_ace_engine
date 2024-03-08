@@ -49,7 +49,6 @@ void JSTextEditableController::CaretPosition(int32_t caretPosition)
 {
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
-        caretPosition = caretPosition < 0 ? 0 : caretPosition;
         controller->CaretPosition(caretPosition);
     } else {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "CaretPosition: The JSTextEditableController is NULL");
