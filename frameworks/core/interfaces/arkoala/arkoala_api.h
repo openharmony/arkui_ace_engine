@@ -2950,7 +2950,6 @@ struct ArkUIXComponentModifier {
 };
 
 struct ArkUIStateModifier {
-    ArkUINodeHandle (*getFrameNodeById)(ArkUI_Int32 nodeId);
     ArkUI_Int64 (*getUIState)(ArkUINodeHandle node);
     void (*setSupportedUIState)(ArkUINodeHandle node, ArkUI_Int64 state);
 };
@@ -3011,6 +3010,10 @@ struct ArkUIFrameNodeModifier {
     ArkUINodeHandle (*getPreviousSibling)(ArkUINodeHandle node);
     ArkUINodeHandle (*getParent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getIdByNodePtr)(ArkUINodeHandle node);
+    ArkUI_Float32* (*getPositionToParent)(ArkUINodeHandle node);
+    ArkUI_Float32* (*getPositionToWindow)(ArkUINodeHandle node);
+    ArkUINodeHandle (*getFrameNodeById)(ArkUI_Int32 nodeId);
+    ArkUINodeHandle (*getFrameNodeByKey)(ArkUI_CharPtr key);
 };
 
 struct ArkUIAnimation {

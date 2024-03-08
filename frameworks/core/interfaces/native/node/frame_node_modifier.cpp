@@ -16,6 +16,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector.h"
 
 namespace OHOS::Ace::NG {
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
@@ -136,12 +137,50 @@ ArkUI_Bool GetIdByNodePtr(ArkUINodeHandle node)
     return nodeId;
 }
 
+ArkUI_Float32* GetPositionToParent(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    auto geometryNode = currentNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, nullptr);
+    auto frameRect = geometryNode->GetFrameRect();
+    auto offset = frameRect.GetOffset();
+    ArkUI_Float32* ret = new ArkUI_Float32[2];
+    ret[0] = offset.GetX();
+    ret[1] = offset.GetY();
+    return ret;
+}
+
+ArkUI_Float32* GetPositionToWindow(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    auto offset = currentNode->GetTransformRelativeOffset();
+    ArkUI_Float32* ret = new ArkUI_Float32[2];
+    ret[0] = offset.GetX();
+    ret[1] = offset.GetY();
+    return ret;
+}
+
+ArkUINodeHandle GetFrameNodeById(ArkUI_Int32 nodeId)
+{
+    auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
+}
+
+ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
+{
+    auto node = NG::Inspector::GetFrameNodeByKey(key);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
     static const ArkUIFrameNodeModifier modifier = { IsModifiable, AppendChildInFrameNode, InsertChildAfterInFrameNode,
         RemoveChildInFrameNode, ClearChildrenInFrameNode, GetChildrenNumber, GetChild, GetFirst, GetNextSibling,
-        GetPreviousSibling, GetParent, GetIdByNodePtr };
+        GetPreviousSibling, GetParent, GetIdByNodePtr, GetPositionToParent, GetPositionToWindow,
+        GetFrameNodeById, GetFrameNodeByKey };
 
     return &modifier;
 }
