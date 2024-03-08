@@ -1828,4 +1828,39 @@ HWTEST_F(GridLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 16)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
 }
+
+/**
+ * @tc.name: GridLayoutTest001
+ * @tc.desc: Test Grid Measure with GrdiLayoutOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLayoutTest001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.regularSize = { 1, 1 };
+    int32_t gridItems[4][4] = { { 0, 0, 1, 1 }, { 0, 1, 1, 1 }, { 0, 2, 1, 1 }, { 1, 0, 1, 1 } };
+
+    auto onGetRectByIndex = [gridItems](int32_t index) {
+        GridItemRect itemRect;
+        itemRect.rowStart = gridItems[index][0];
+        itemRect.columnStart = gridItems[index][1];
+        itemRect.rowSpan = gridItems[index][2];
+        itemRect.columnSpan = gridItems[index][3];
+        return itemRect;
+    };
+    option.getRectByIndex = std::move(onGetRectByIndex);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetRowsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
+        CreateFixedItem(4);
+    });
+
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startMainLineIndex_, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().endMainLineIndex_, 1);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().endIndex_, 3);
+}
 } // namespace OHOS::Ace::NG
