@@ -104,8 +104,8 @@ public:
     void DeleteHotAreas(int32_t subwindowid, int32_t overlayid);
 
     void ClearToastInSubwindow();
-    void ShowToast(
-        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode);
+    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset);
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);
