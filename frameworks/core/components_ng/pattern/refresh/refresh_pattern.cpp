@@ -438,24 +438,27 @@ void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
     // AccessibilityEventType::SCROLL_START
 }
 
-void RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
+ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 {
+    auto remain = 0.f;
     UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::RUNNING);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         // If dragging does not expand the refresh, there is no need to continue executing the code
         if (NearZero(scrollOffset_) && NonPositive(delta)) {
-            return;
+            return { delta, true };
         }
-        scrollOffset_ = std::clamp(scrollOffset_ + delta * CalculateFriction(), 0.0f, MAX_OFFSET);
+        auto lastScrollOffset = scrollOffset_;
+        auto friction = CalculateFriction();
+        scrollOffset_ = std::clamp(scrollOffset_ + delta * friction, 0.0f, MAX_OFFSET);
+        remain = NearZero(friction) ? delta : delta - (scrollOffset_ - lastScrollOffset) / friction;
         if (!isSourceFromAnimation_) {
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
                 UpdateFirstChildPlacement();
-                return;
+                return { remain, true };
             }
             UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
-            if (LessNotEqual(scrollOffset_, static_cast<float>(refreshOffset_.ConvertToPx())) ||
-                    !pullToRefresh_) {
+            if (LessNotEqual(scrollOffset_, static_cast<float>(refreshOffset_.ConvertToPx())) || !pullToRefresh_) {
                 UpdateRefreshStatus(RefreshStatus::DRAG);
             } else {
                 UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
@@ -465,6 +468,7 @@ void RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
     } else {
         HandleDragUpdateLowVersion(delta);
     }
+    return { remain, true };
 }
 
 void RefreshPattern::HandleDragEnd(float speed)
@@ -789,6 +793,9 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
             CHECK_NULL_VOID(pattern);
             pattern->SpeedAnimationFinish();
         });
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->RequestFrame();
 }
 
 float RefreshPattern::GetTargetOffset()
@@ -859,6 +866,7 @@ void RefreshPattern::ResetAnimation()
     float currentOffset = scrollOffset_;
     AnimationUtils::StopAnimation(animation_);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        CHECK_NULL_VOID(offsetProperty_);
         offsetProperty_->Set(currentOffset);
     } else {
         lowVersionOffset_->Set(currentOffset);
@@ -925,6 +933,7 @@ void RefreshPattern::HandleDragUpdateLowVersion(float delta)
     }
     UpdateLoadingProgress();
     if (GreatNotEqual(scrollOffset_, triggerLoadingDistance_)) {
+        CHECK_NULL_VOID(progressChild_);
         auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
         CHECK_NULL_VOID(progressPaintProperty);
         float triggerRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
@@ -998,6 +1007,7 @@ void RefreshPattern::UpdateLoadingProgress()
                       ? 1.0f
                       : (loadingProgressOffset - triggerLoadingDistance_) /
                             (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - triggerLoadingDistance_);
+    CHECK_NULL_VOID(progressChild_);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateRefreshSizeScaleRatio(ratio);
@@ -1007,7 +1017,6 @@ void RefreshPattern::UpdateLoadingProgress()
     CHECK_NULL_VOID(progressContext);
     progressContext->UpdateOpacity(std::clamp(ratio, 0.0f, 1.0f));
     UpdateLoadingTextOpacity(std::clamp(ratio, 0.0f, 1.0f));
-
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
@@ -1080,6 +1089,7 @@ void RefreshPattern::HandleCustomBuilderDragEndStage()
 
 void RefreshPattern::UpdateLoadingMarginTop(float top)
 {
+    CHECK_NULL_VOID(progressChild_);
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     MarginProperty marginProperty;
@@ -1097,5 +1107,98 @@ float RefreshPattern::GetScrollOffset(float delta)
     auto frictionRatio = static_cast<float>(layoutProperty->GetFriction().value_or(DEFAULT_FRICTION)) * PERCENT;
     auto scrollY = delta * frictionRatio;
     return std::clamp(scrollOffset_ + scrollY, 0.0f, static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx()));
+}
+
+ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
+{
+    ScrollResult result = { offset, true };
+    auto nestedScroll = GetNestedScroll();
+    if (NearZero(offset)) {
+        return result;
+    }
+    auto parent = GetNestedScrollParent();
+    if (state == NestedState::CHILD_SCROLL) {
+        if (Negative(offset) && Positive(scrollOffset_)) {
+            if (parent && nestedScroll.forward == NestedScrollMode::PARENT_FIRST) {
+                result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL, velocity);
+                result = HandleDragUpdate(result.remain, velocity);
+            } else if (parent && nestedScroll.forward == NestedScrollMode::SELF_FIRST) {
+                result = HandleDragUpdate(offset, velocity);
+                result = parent->HandleScroll(result.remain, source, NestedState::CHILD_SCROLL, velocity);
+            } else {
+                result = HandleDragUpdate(offset, velocity);
+            }
+        } else {
+            if (!parent || ((Negative(offset) && (nestedScroll.forward == NestedScrollMode::SELF_ONLY ||
+                                                     nestedScroll.forward == NestedScrollMode::PARALLEL)) ||
+                               (Positive(offset) && (nestedScroll.backward == NestedScrollMode::SELF_ONLY ||
+                                                        nestedScroll.backward == NestedScrollMode::PARALLEL)))) {
+                return result;
+            } else {
+                result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL, velocity);
+            }
+        }
+        return result;
+    } else if (state == NestedState::CHILD_OVER_SCROLL) {
+        if (parent && ((Negative(offset) && nestedScroll.forward == NestedScrollMode::SELF_FIRST) ||
+                          (Positive(offset) && nestedScroll.backward == NestedScrollMode::SELF_FIRST))) {
+            result = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL, velocity);
+            if (!NearZero(result.remain)) {
+                result = HandleDragUpdate(result.remain, velocity);
+            }
+            return { 0.f, true };
+        } else {
+            result = HandleDragUpdate(offset, velocity);
+        }
+    }
+    return result;
+}
+
+void RefreshPattern::OnScrollStartRecursive(float position, float velocity)
+{
+    if (!GetIsFixedNestedScrollMode()) {
+        SetParentScrollable();
+    }
+    auto nestedScroll = GetNestedScroll();
+    HandleDragStart(true, velocity);
+    auto parent = GetNestedScrollParent();
+    if (parent && nestedScroll.NeedParent() &&
+        (nestedScroll.forward != NestedScrollMode::PARALLEL || nestedScroll.backward != NestedScrollMode::PARALLEL)) {
+        parent->OnScrollStartRecursive(position, velocity);
+    }
+}
+
+bool RefreshPattern::HandleScrollVelocity(float velocity)
+{
+    auto parent = GetNestedScrollParent();
+    auto nestedScroll = GetNestedScroll();
+    bool result = false;
+    if (parent && ((Negative(velocity) && nestedScroll.forward == NestedScrollMode::PARENT_FIRST) ||
+                      (Positive(velocity) && nestedScroll.backward == NestedScrollMode::PARENT_FIRST))) {
+        result = parent->HandleScrollVelocity(velocity);
+        if (result) {
+            return true;
+        }
+    }
+    if (Positive(scrollOffset_)) {
+        HandleDragEnd(velocity);
+        result = true;
+    } else if (parent && ((Negative(velocity) && nestedScroll.forward == NestedScrollMode::SELF_FIRST) ||
+                             (Positive(velocity) && nestedScroll.backward == NestedScrollMode::SELF_FIRST))) {
+        result = parent->HandleScrollVelocity(velocity);
+    }
+    return result;
+}
+
+void RefreshPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
+{
+    if (Positive(scrollOffset_)) {
+        HandleDragEnd(velocity.value_or(0.f));
+    }
+    auto parent = GetNestedScrollParent();
+    auto nestedScroll = GetNestedScroll();
+    if (parent && nestedScroll.NeedParent()) {
+        parent->OnScrollEndRecursive(velocity);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -1003,20 +1003,6 @@ HWTEST_F(SwiperTestNg, SwiperModelNg003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperModelNg004
- * @tc.desc: Swiper Model NG.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperModelNg004, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        NestedScrollOptions nestedOpt;
-        model.SetNestedScroll(std::move(nestedOpt));
-    });
-    EXPECT_FALSE(pattern_->enableNestedScroll_);
-}
-
-/**
  * @tc.name: SwiperPaintProperty001
  * @tc.desc: Swiper Paint Property.
  * @tc.type: FUNC
@@ -10361,8 +10347,11 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll002, TestSize.Level1)
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     EXPECT_CALL(*mockScroll, HandleScroll).Times(0);
     pattern_->parent_ = mockScroll;
-    pattern_->enableNestedScroll_ = true;
-
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    pattern_->SetNestedScroll(nestedOpt);
     auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_EQ(res.remain, 0.0f);
 }
@@ -10380,16 +10369,19 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll003, TestSize.Level1)
     pattern_->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
 
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
-    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL))
+    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f))
         .Times(1)
         .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
-    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL))
+    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f))
         .Times(1)
         .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
     pattern_->parent_ = mockScroll;
-    pattern_->enableNestedScroll_ = true;
-
-    auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    pattern_->SetNestedScroll(nestedOpt);
+    auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
     EXPECT_EQ(res.remain, 5.0f);
     EXPECT_TRUE(res.reachEdge);
 }
@@ -10407,16 +10399,20 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll004, TestSize.Level1)
     pattern_->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
 
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
-    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL))
+    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f))
         .Times(1)
         .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
-    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL))
+    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f))
         .Times(1)
         .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
     pattern_->parent_ = mockScroll;
-    pattern_->enableNestedScroll_ = true;
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    pattern_->SetNestedScroll(nestedOpt);
 
-    auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
     EXPECT_EQ(res.remain, 0.0f);
 }
 
@@ -10436,21 +10432,23 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll005, TestSize.Level1)
     swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
     swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
     swiperPattern->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
-
     auto res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_EQ(res.remain, 5.0f);
-
     // three level nesting
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
-    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL))
+    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f))
         .Times(1)
         .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
-    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL))
+    EXPECT_CALL(*mockScroll, HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f))
         .Times(1)
         .WillOnce(Return(ScrollResult { .remain = 5.0f, .reachEdge = true }));
     swiperPattern->parent_ = mockScroll;
-    swiperPattern->enableNestedScroll_ = true;
-    res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    swiperPattern->SetNestedScroll(nestedOpt);
+    res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
     EXPECT_EQ(res.remain, 5.0f);
 }
 
@@ -10519,7 +10517,11 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScrollVelocity002, TestSize.Level1)
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(1).WillOnce(Return(true));
     pattern_->parent_ = mockScroll;
-    pattern_->enableNestedScroll_ = true;
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    pattern_->SetNestedScroll(nestedOpt);
 
     auto res = pattern_->HandleScrollVelocity(5.0f);
     EXPECT_TRUE(res);
@@ -10539,8 +10541,11 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScrollVelocity003, TestSize.Level1)
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(2).WillRepeatedly(Return(false));
     pattern_->parent_ = mockScroll;
-    pattern_->enableNestedScroll_ = true;
-
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    pattern_->SetNestedScroll(nestedOpt);
     auto res = pattern_->HandleScrollVelocity(5.0f);
     EXPECT_FALSE(res);
 
@@ -10572,7 +10577,11 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnScrollStart001, TestSize.Level1)
 
     EXPECT_CALL(*mockScroll, OnScrollStartRecursive).Times(1);
     EXPECT_CALL(*mockScroll, GetAxis).Times(1).WillOnce(Return(Axis::HORIZONTAL));
-    pattern_->enableNestedScroll_ = true;
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    pattern_->SetNestedScroll(nestedOpt);
     pattern_->isDragging_ = false;
     pattern_->currentIndex_ = 3;
     EXPECT_EQ(pattern_->gestureSwipeIndex_, 0);
@@ -10594,7 +10603,11 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnScrollEnd001, TestSize.Level1)
     pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     EXPECT_CALL(*mockScroll, OnScrollEndRecursive).Times(1);
-    pattern_->enableNestedScroll_ = true;
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    pattern_->SetNestedScroll(nestedOpt);
     pattern_->parent_ = mockScroll;
     pattern_->OnScrollEndRecursive(std::nullopt);
     EXPECT_FALSE(pattern_->childScrolling_);
@@ -11214,31 +11227,6 @@ HWTEST_F(SwiperTestNg, SwiperAccessibilitySetSpecificSupportAction008, TestSize.
     GestureSwipeEvent gestureSwipeEvent_;
     model.SetOnGestureSwipe(std::move(gestureSwipeEvent_));
     EXPECT_TRUE(gestureSwipeEvent_ == nullptr);
-}
-
-/**
- * @tc.name: SwiperPatternSetNestedScroll002
- * @tc.desc: Test OnModifyDone
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternSetNestedScroll005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Default value
-     */
-    CreateWithItem([](SwiperModelNG model) {});
-    EXPECT_EQ(GetChildRect(frameNode_, 0).GetX(), 0);
-
-    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto pattern = swiperNode->GetPattern<SwiperPattern>();
-    NestedScrollOptions nestedOpt;
-
-    pattern->SetNestedScroll(std::move(nestedOpt));
-    EXPECT_TRUE(pattern->enableNestedScroll_ == false);
-
-    pattern->enableNestedScroll_ = true;
-    pattern->SetNestedScroll(std::move(nestedOpt));
-    EXPECT_TRUE(pattern->enableNestedScroll_ == false);
 }
 
 HWTEST_F(SwiperTestNg, SwiperPatternOnModifyDone00081, TestSize.Level1)

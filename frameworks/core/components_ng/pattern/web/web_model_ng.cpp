@@ -45,6 +45,10 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
 
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
+    webPattern->SetNestedScroll(NestedScrollOptions({
+            .forward = NestedScrollMode::SELF_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        }));
     webPattern->SetWebSrc(src);
     webPattern->SetWebController(webController);
     webPattern->SetRenderMode(renderMode);
