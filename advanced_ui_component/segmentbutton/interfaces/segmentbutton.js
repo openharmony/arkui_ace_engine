@@ -1679,6 +1679,7 @@ class SegmentButton extends ViewPU {
             TapGesture.create();
             TapGesture.onAction((t => {
                 var e;
+                this.focusIndex = -1;
                 let o = t.fingerList.find(Boolean);
                 if (void 0 === o) return;
                 if (void 0 === this.options || void 0 === this.options.buttons) return;

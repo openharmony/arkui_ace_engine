@@ -976,6 +976,7 @@ export struct SegmentButton {
       GestureGroup(GestureMode.Parallel,
         TapGesture()
           .onAction((event: GestureEvent) => {
+            this.focusIndex = -1
             let fingerInfo = event.fingerList.find(Boolean)
             if (fingerInfo === void 0) {
               return
