@@ -23,6 +23,7 @@
 
 #include "dm_common.h"
 
+#include "display_manager.h"
 #include "locale_config.h"
 #include "parameter.h"
 #include "parameters.h"
@@ -623,5 +624,15 @@ void SystemProperties::RemoveWatchSystemParameter(void *context)
 {
     RemoveParameterWatcher("persist.ace.trace.layout.enabled", nullptr, context);
     RemoveParameterWatcher("const.security.developermode.state", nullptr, context);
+}
+
+float SystemProperties::GetDefaultResolution()
+{
+    float density = 1.0f;
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay) {
+        density = defaultDisplay->GetVirtualPixelRatio();
+    }
+    return density;
 }
 } // namespace OHOS::Ace
