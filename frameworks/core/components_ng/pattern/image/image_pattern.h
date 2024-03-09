@@ -64,7 +64,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_, autoResizeDefault_);
+        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_);
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -185,6 +185,12 @@ private:
 
     void OnLanguageConfigurationUpdate() override;
 
+    /**
+     * @brief Start decoding image after ImageData is ready and dstSize is determined.
+     *
+     * @param dstSize The size of the image to be decoded.
+     */
+    void StartDecoding(const SizeF& dstSize);
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
