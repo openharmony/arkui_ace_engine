@@ -259,6 +259,11 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
         return info->GetWidth(std::min(gridCount_, parentColumns));
     }
 
+    return info->GetWidth(std::min(GetDeviceColumns(type, deviceType), parentColumns));
+}
+
+int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType deviceType)
+{
     int32_t deviceColumns;
     if (deviceType == DeviceType::WATCH) {
         if (type == GridSizeType::SM) {
@@ -284,16 +289,19 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
         } else {
             deviceColumns = 8;
         }
+    } else if (deviceType == DeviceType::TABLET && type == GridSizeType::MD &&
+               Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        deviceColumns = 5;
     } else {
         if (type == GridSizeType::SM) {
             deviceColumns = 2;
-        } else if (type == GridSizeType::MD && deviceType != DeviceType::TABLET) {
+        } else if (type == GridSizeType::MD) {
             deviceColumns = 3;
         } else {
             deviceColumns = 4;
         }
     }
-    return info->GetWidth(std::min(deviceColumns, parentColumns));
+    return deviceColumns;
 }
 
 void DialogLayoutAlgorithm::ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog)
