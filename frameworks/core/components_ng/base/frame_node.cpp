@@ -1449,7 +1449,10 @@ void FrameNode::RebuildRenderContextTree()
     // generate full children list, including disappear children.
     GenerateOneDepthVisibleFrameWithTransition(children);
     if (overlayNode_) {
-        children.push_back(overlayNode_);
+        auto property = overlayNode_->GetLayoutProperty();
+        if (property && property->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+            children.push_back(overlayNode_);
+        }
     }
     for (const auto& child : children) {
         frameChildren_.emplace(child);
