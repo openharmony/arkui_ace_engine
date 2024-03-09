@@ -4871,7 +4871,6 @@ std::pair<CalcDimension, CalcDimension> JSViewAbstract::ParseSize(const JSCallba
         !ParseJsDimensionVp(jsObj->GetProperty("height"), height)) {
         return std::pair<CalcDimension, CalcDimension>();
     }
-    info.SetReturnValue(info.This());
     return std::pair<CalcDimension, CalcDimension>(width, height);
 }
 
