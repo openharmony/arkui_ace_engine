@@ -806,6 +806,7 @@ private:
     RefPtr<FrameNode> GetCurrentFrameNode(int32_t currentIndex) const;
     bool FadeOverScroll(float offset);
     int32_t ComputeSwipePageNextIndex(float velocity, bool onlyDistance = false) const;
+    int32_t ComputeNextIndexInSinglePage(float velocity, bool onlyDistance) const;
     int32_t ComputePageIndex(int32_t index) const;
     void UpdateIndexOnAnimationStop();
     void UpdateIndexOnSwipePageStop(int32_t pauseTargetIndex);

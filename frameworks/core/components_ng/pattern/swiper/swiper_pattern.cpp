@@ -2280,6 +2280,31 @@ int32_t SwiperPattern::ComputeSwipePageNextIndex(float velocity, bool onlyDistan
     return nextIndex;
 }
 
+int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDistance) const
+{
+    auto swiperWidth = CalculateVisibleSize();
+    if (LessOrEqual(swiperWidth, 0)) {
+        return currentIndex_;
+    }
+    // if direction is true, expected index to decrease by 1
+    bool direction = Positive(velocity);
+    bool overTurnPageVelocity =
+        !onlyDistance && (std::abs(velocity) > (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
+                                                       ? NEW_MIN_TURN_PAGE_VELOCITY
+                                                       : MIN_TURN_PAGE_VELOCITY));
+    auto iter = itemPosition_.find(currentIndex_);
+    if (iter == itemPosition_.end() || overTurnPageVelocity) {
+        return direction ? currentIndex_ - 1 : currentIndex_ + 1;
+    }
+    if (-iter->second.startPos > swiperWidth / 2) {
+        return currentIndex_ + 1;
+    }
+    if (iter->second.startPos > swiperWidth / 2) {
+        return currentIndex_ - 1;
+    }
+    return currentIndex_;
+}
+
 int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDistance) const
 {
     if (IsSwipeByGroup()) {
@@ -2308,6 +2333,11 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
         nextIndex = direction ? firstIndex : firstItemInfoInVisibleArea.first + 1;
     } else {
         nextIndex = direction ? firstIndex + 1 : firstItemInfoInVisibleArea.first;
+    }
+
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    if (swiperLayoutProperty && SwiperUtils::IsStretch(swiperLayoutProperty) && GetDisplayCount() == 1) {
+        nextIndex = ComputeNextIndexInSinglePage(velocity, onlyDistance);
     }
 
     if (!IsAutoLinear() && nextIndex > currentIndex_ + GetDisplayCount()) {
@@ -2666,7 +2696,7 @@ void SwiperPattern::OnSpringAnimationStart(float velocity)
     info.velocity = Dimension(velocity, DimensionUnit::PX).ConvertToVp();
     info.currentOffset = GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
 
-    nextIndex_ = ComputeNextIndexByVelocity(velocity);
+    nextIndex_ = ComputeNextIndexByVelocity(velocity, true);
     if (GetLoopIndex(currentIndex_) == GetLoopIndex(nextIndex_)) {
         info.targetOffset = info.currentOffset;
     } else {
