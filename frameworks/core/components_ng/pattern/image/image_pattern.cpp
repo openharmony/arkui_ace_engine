@@ -26,8 +26,12 @@
 #include "base/geometry/ng/vector.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine_ext.h"
+#include "core/common/ai/image_analyzer_adapter.h"
 #include "core/common/ai/image_analyzer_mgr.h"
+#include "core/common/container.h"
 #include "core/common/frontend.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -38,10 +42,6 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/ace_engine_ext.h"
-#include "core/common/ai/image_analyzer_adapter.h"
-#include "core/common/container.h"
-#include "core/common/udmf/udmf_client.h"
 
 namespace OHOS::Ace::NG {
 ImagePattern::ImagePattern()
@@ -252,7 +252,12 @@ void ImagePattern::OnImageDataReady()
         geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(event);
 
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto geo = host->GetGeometryNode();
+    if (geo->GetContent() && !host->CheckNeedForceMeasureAndLayout()) {
+        StartDecoding(geo->GetContentSize());
+    } else {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
@@ -264,6 +269,32 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     CHECK_NULL_VOID(imageEventHub);
     LoadImageFailEvent event(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg);
     imageEventHub->FireErrorEvent(event);
+}
+
+void ImagePattern::StartDecoding(const SizeF& dstSize)
+{
+    // if layout size has not decided yet, resize target can not be calculated
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->GetGeometryNode()->GetContent()) {
+        return;
+    }
+
+    const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
+    bool autoResize = props->GetAutoResize().value_or(autoResizeDefault_);
+
+    ImageFit imageFit = props->GetImageFit().value_or(ImageFit::COVER);
+    const std::optional<SizeF>& sourceSize = props->GetSourceSize();
+    auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
+    bool hasValidSlice = renderProp && renderProp->HasImageResizableSlice();
+
+    if (loadingCtx_) {
+        loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+    }
+    if (altLoadingCtx_) {
+        altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+    }
 }
 
 void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
@@ -318,6 +349,9 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+
+    const auto& dstSize = dirty->GetGeometryNode()->GetContentSize();
+    StartDecoding(dstSize);
 
     if (loadingCtx_) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
