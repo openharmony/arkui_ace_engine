@@ -452,6 +452,16 @@ public:
                PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
     }
 
+    static bool IsLauncherApp()
+    {
+        return isLauncherApp_;
+    }
+    
+    static void SetIsLauncherApp(bool isLauncherApp)
+    {
+        isLauncherApp_ = isLauncherApp;
+    }
+
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar)
     {
         appBar_ = appBar;
@@ -467,6 +477,7 @@ public:
 
 private:
     static bool IsIdAvailable(int32_t id);
+    static bool isLauncherApp_;
 
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;

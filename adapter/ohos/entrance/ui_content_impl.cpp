@@ -476,6 +476,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     auto hapModuleInfo = context->GetHapModuleInfo();
     CHECK_NULL_VOID(hapModuleInfo);
     moduleName_ = hapModuleInfo->name;
+    SetIsLauncherApp();
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -490,12 +491,14 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     SetConfiguration(context->GetConfiguration());
     context_ = context->weak_from_this();
+    SetIsLauncherApp();
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 {
     CHECK_NULL_VOID(ability);
     context_ = ability->GetAbilityContext();
+    SetIsLauncherApp();
 }
 
 void UIContentImpl::DestroyUIDirector()
@@ -2606,6 +2609,16 @@ void UIContentImpl::OnPopupStateChange(
     taskExecutor->PostDelayedTask([config, nodeId]() { RemoveOldPopInfoIfExsited(config.isShowInSubWindow, nodeId); },
         TaskExecutor::TaskType::UI, 100); // delay 100ms
     customPopupConfigMap_.erase(nodeId);
+}
+
+void UIContentImpl::SetIsLauncherApp()
+{
+    auto context = context_.lock();
+    if (context) {
+        auto info = context->GetApplicationInfo();
+        bool isLauncherApp = info ? info->isLauncherApp : false;
+        Container::SetIsLauncherApp(isLauncherApp);
+    }
 }
 
 int32_t UIContentImpl::CreateCustomPopupUIExtension(
