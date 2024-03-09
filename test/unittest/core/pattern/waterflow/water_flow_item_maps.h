@@ -183,6 +183,9 @@ const std::vector<WaterFlowSections::Section> SECTION_8 = {
         .crossCount = 1,
         .margin = MARGIN_2 },
 };
+const std::vector<WaterFlowSections::Section> SECTION_9 = {
+    { .itemsCount = 6, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2, .crossCount = 3 },
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_WATER_FLOW_ITEM_MAPS_H

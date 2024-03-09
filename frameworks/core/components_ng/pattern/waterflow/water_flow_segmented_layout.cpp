@@ -313,7 +313,10 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
 
 void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
 {
-    if (jumpIdx >= info_.childrenCount_ || jumpIdx == LAST_ITEM) {
+    if (jumpIdx >= info_.childrenCount_) {
+        return;
+    }
+    if (jumpIdx == LAST_ITEM) {
         jumpIdx = info_.childrenCount_ - 1;
     }
     if (static_cast<size_t>(jumpIdx) >= info_.itemInfos_.size()) {
