@@ -161,6 +161,14 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_NativeXComponent_RegisterSurfaceShowCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_RegisterSurfaceHideCallback"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_NativeXComponent_RegisterOnTouchInterceptCallback"
     }
 ]

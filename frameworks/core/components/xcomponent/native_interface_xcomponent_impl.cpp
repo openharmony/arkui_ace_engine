@@ -279,6 +279,24 @@ int32_t OH_NativeXComponent::SetNeedSoftKeyboard(bool needSoftKeyboard)
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 
+int32_t OH_NativeXComponent::RegisterSurfaceShowCallback(NativeXComponent_Surface_Callback callback)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetSurfaceShowCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::RegisterSurfaceHideCallback(NativeXComponent_Surface_Callback callback)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetSurfaceHideCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
 int32_t OH_NativeXComponent::RegisterOnTouchInterceptCallback(
     HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event))
 {

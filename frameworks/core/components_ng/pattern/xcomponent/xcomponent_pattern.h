@@ -275,6 +275,10 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnAreaChangedInner() override;
+    void OnWindowHide() override;
+    void OnWindowShow() override;
+    void NativeSurfaceHide();
+    void NativeSurfaceShow();
     void OnModifyDone() override;
 
     void InitNativeNodeCallbacks();
@@ -352,6 +356,7 @@ private:
     // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     uint64_t exportTextureSurfaceId_ = 0U;
+    bool hasReleasedSurface_ = false;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif
