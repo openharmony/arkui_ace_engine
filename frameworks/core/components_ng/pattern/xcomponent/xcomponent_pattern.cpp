@@ -45,6 +45,9 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "ui/rs_surface_node_operation.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 #ifdef OHOS_PLATFORM
@@ -281,6 +284,31 @@ void XComponentPattern::OnAreaChangedInner()
 #endif
 }
 
+void XComponentPattern::SetSurfaceNodeToGraphic()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(rosenRenderContext);
+    std::shared_ptr<Rosen::RSNode> parentNode = rosenRenderContext->GetRSNode();
+    CHECK_NULL_VOID(parentNode);
+    RectF canvasRect = rosenRenderContext->GetPropertyOfPosition();
+
+    CHECK_NULL_VOID(renderContextForSurface_);
+    auto context = AceType::DynamicCast<RosenRenderContext>(renderContextForSurface_);
+    CHECK_NULL_VOID(context);
+    std::shared_ptr<Rosen::RSNode> rsNode = context->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode =
+        std::static_pointer_cast<Rosen::RSSurfaceNode>(rsNode);
+    CHECK_NULL_VOID(rsSurfaceNode);
+
+    Rosen::RSSurfaceNodeOperation::GetInstance().ProcessRSSurfaceNode(GetId(), parentNode->GetId(),
+        canvasRect.GetX(), canvasRect.GetY(), rsSurfaceNode);
+}
+
 void XComponentPattern::OnRebuildFrame()
 {
     if (type_ != XComponentType::SURFACE) {
@@ -295,6 +323,7 @@ void XComponentPattern::OnRebuildFrame()
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    SetSurfaceNodeToGraphic();
 }
 
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
