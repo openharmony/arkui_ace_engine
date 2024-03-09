@@ -4794,7 +4794,7 @@ float RichEditorPattern::GetLineHeight() const
 float RichEditorPattern::GetLetterSpacing() const
 {
     auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-    CHECK_NULL_RETURN(selectedRects.size(), 0.0f);
+    CHECK_NULL_RETURN(!selectedRects.empty(), 0.0f);
     return selectedRects.front().Width();
 }
 
