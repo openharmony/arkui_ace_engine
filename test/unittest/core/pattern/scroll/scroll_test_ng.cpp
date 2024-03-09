@@ -1048,7 +1048,7 @@ HWTEST_F(ScrollTestNg, ScrollBarAnimation002, TestSize.Level1)
     EXPECT_TRUE(scrollBar->NeedPaint());
     ASSERT_NE(scrollBarOverlayModifier, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), UINT8_MAX);
-    EXPECT_EQ(scrollBarOverlayModifier->opacityAnimation_, nullptr);
+    EXPECT_NE(scrollBarOverlayModifier->opacityAnimation_, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->opacityAnimatingType_, OpacityAnimationType::NONE);
 
     /**
