@@ -41,8 +41,6 @@ protected:
 
     void ChangeTitleButtonIcon(
         const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus) override;
-
-    bool CanHideFloatingTitle() override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H
