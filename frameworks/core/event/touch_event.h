@@ -97,6 +97,8 @@ struct TouchEvent final {
     // historical points
     std::vector<TouchEvent> history;
 
+    std::list<std::string> childTouchTestList;
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
         json->Put("id", id);
@@ -267,6 +269,8 @@ struct TouchRestrict final {
     SourceType hitTestType = SourceType::TOUCH;
 
     TouchEvent touchEvent;
+
+    std::list<std::string> childTouchTestList;
 };
 
 class TouchCallBackInfo : public BaseEventInfo {

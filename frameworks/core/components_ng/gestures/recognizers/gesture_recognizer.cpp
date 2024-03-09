@@ -313,21 +313,28 @@ void NGGestureRecognizer::SetEventImportGestureGroup(const WeakPtr<NGGestureReco
 
 bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event)
 {
-    PointF localPoint(event.x, event.y);
+    bool isChildTouchTestResult = false;
     auto frameNode = GetAttachedNode();
-    if (!frameNode.Invalid()) {
-        auto host = frameNode.Upgrade();
-        CHECK_NULL_RETURN(host, false);
-        NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_, isPostEventResult_);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        auto paintRect = renderContext->GetPaintRectWithoutTransform();
-        localPoint = localPoint + paintRect.GetOffset();
-        auto responseRegion = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
-        if (!host->InResponseRegionList(localPoint, responseRegion)) {
-            return false;
-        }
+    if (frameNode.Invalid()) {
+        return true;
     }
-    return true;
+    auto host = frameNode.Upgrade();
+    CHECK_NULL_RETURN(host, true);
+    auto id = host->GetInspectorIdValue("");
+    isChildTouchTestResult = std::any_of(event.childTouchTestList.begin(), event.childTouchTestList.end(),
+        [id](const std::string& inspectorId) {
+            return inspectorId == id;
+        });
+    if (isChildTouchTestResult) {
+        return true;
+    }
+    PointF localPoint(event.x, event.y);
+    NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_, isPostEventResult_);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    localPoint = localPoint + paintRect.GetOffset();
+    auto responseRegion = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
+    return host->InResponseRegionList(localPoint, responseRegion);
 }
 } // namespace OHOS::Ace::NG

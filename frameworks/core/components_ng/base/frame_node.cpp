@@ -1635,7 +1635,7 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     bool isDispatch)
 {
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
@@ -1732,6 +1732,10 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             childNode->GetInspectorId()->c_str());
         auto hitResult = childNode->TouchTest(
             globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId, true);
+        if (touchRes.strategy == TouchTestStrategy::FORWARD ||
+            touchRes.strategy == TouchTestStrategy::FORWARD_COMPETITION) {
+            touchRestrict.childTouchTestList.emplace_back(touchRes.id);
+        }
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
             consumed = true;
