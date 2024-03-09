@@ -875,10 +875,8 @@ void JSRichEditorController::ParseJsTextStyle(
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
-	
     JSRef<JSVal> lineHeight = styleObject->GetProperty("lineHeight");
     CalcDimension lineHigh;
-    
     if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, lineHigh) &&
         !lineHigh.IsNegative() && lineHigh.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLineHeight = lineHigh;
@@ -890,10 +888,8 @@ void JSRichEditorController::ParseJsTextStyle(
         updateSpanStyle.updateLineHeight = lineHigh;
         style.SetLineHeight(lineHigh);
     }
-
     JSRef<JSVal> letterSpacing = styleObject->GetProperty("letterSpacing");
     CalcDimension letters;
-    
     if (!letterSpacing->IsNull() && JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters) &&
         letters.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLetterSpacing = letters;
@@ -905,7 +901,6 @@ void JSRichEditorController::ParseJsTextStyle(
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
     }
-	
     JSRef<JSVal> fontStyle = styleObject->GetProperty("fontStyle");
     if (!fontStyle->IsNull() && fontStyle->IsNumber()) {
         updateSpanStyle.updateItalicFontStyle = static_cast<FontStyle>(fontStyle->ToNumber<int32_t>());
@@ -954,22 +949,20 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         size = theme->GetTextStyle().GetFontSize();
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    }
-	
+    }	
     JSRef<JSVal> lineHeight = styleObject->GetProperty("lineHeight");
     CalcDimension lineHigh;
     if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, lineHigh, false) &&
         !lineHigh.IsNegative() && lineHigh.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateLineHeight = lineHigh;
         style.SetLineHeight(lineHigh);
-    } else if (lineHeight.IsNegative() || lineHigh.Unit() == DimensionUnit::PERCENT) {
+    } else if (lineHigh.IsNegative() || lineHigh.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         lineHigh = theme->GetTextStyle().GetLineHeight();
         updateSpanStyle.updateLineHeight = lineHigh;
         style.SetLineHeight(lineHigh);
     }
-
     JSRef<JSVal> letterSpacing = styleObject->GetProperty("letterSpacing");
     CalcDimension letters;
     if (!letterSpacing->IsNull() && JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters, false) &&
@@ -983,7 +976,6 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
     }
-	
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
     if (!fontWeight->IsNull() && (fontWeight->IsNumber() || JSContainerBase::ParseJsString(fontWeight, weight))) {
