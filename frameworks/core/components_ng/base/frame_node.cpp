@@ -3084,6 +3084,11 @@ int32_t FrameNode::GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const
     return frameProxy_->GetChildIndex(child);
 }
 
+uint32_t FrameNode::GetChildTrueTotalCount() const
+{
+    return frameProxy_->GetTotalCount();
+}
+
 const std::list<RefPtr<LayoutWrapper>>& FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
 {
     const auto& children = frameProxy_->GetAllFrameChildren();
