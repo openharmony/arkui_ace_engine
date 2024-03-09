@@ -6978,9 +6978,10 @@ class ObserveV3 {
     updateDirty2() {
         // process monitors first, because these might add more elmtIds of UINodes to rerender
         this.updateDirtyMonitors(1);
-        this.notifyDirtyElmtIdsToOwningViews();
+        this.updateUINodes();
     }
     updateDirtyMonitors(recursionDepth) {
+        aceTrace.begin(`ObserveV3.updateDirtyMonitors`);
         if (recursionDepth > 20) {
             // limit recursion depth to avoid infinite loops
             // and skip any pending @monitor function executions
@@ -7001,24 +7002,29 @@ class ObserveV3 {
         if (this.monitorIdsChanged_.size) {
             this.updateDirtyMonitors(recursionDepth + 1);
         }
+        aceTrace.end();
     }
-    notifyDirtyElmtIdsToOwningViews() {
+    updateUINodes() {
         
+        aceTrace.begin(`ObserveV3.updateUINodes`);
         // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
         UINodeRegisterProxy.obtainDeletedElmtIds();
-        // unregister the removed elementids requested from the cpp side for all viewpus, it will make the first viewpu slower
-        // than before, but the rest viewpu will be faster
+        // unregister the removed elmtIds 
         UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
         while (this.elmtIdsChanged_.size > 0) {
-            const elmtIds = this.elmtIdsChanged_;
+            const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId2 - elmtId1);
             this.elmtIdsChanged_ = new Set();
+            
+            
             elmtIds.forEach((elmtId) => {
                 const view = this.id2cmp_[elmtId];
                 if (view && view instanceof ViewPU) {
                     view.UpdateElement(elmtId);
                 }
             });
-        }
+            
+        } // while
+        aceTrace.end();
     }
     constructMonitor(target, name) {
         let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + name);

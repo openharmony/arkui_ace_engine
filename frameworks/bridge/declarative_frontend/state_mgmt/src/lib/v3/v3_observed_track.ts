@@ -251,10 +251,12 @@ class ObserveV3 {
   private updateDirty2(): void {
     // process monitors first, because these might add more elmtIds of UINodes to rerender
     this.updateDirtyMonitors(1);
-    this.notifyDirtyElmtIdsToOwningViews();
+    this.updateUINodes();
   }
 
   private updateDirtyMonitors(recursionDepth : number): void {
+    aceTrace.begin(`ObserveV3.updateDirtyMonitors`);
+
     if (recursionDepth>20) {
       // limit recursion depth to avoid infinite loops
       // and skip any pending @monitor function executions
@@ -276,28 +278,31 @@ class ObserveV3 {
     if (this.monitorIdsChanged_.size) {
       this.updateDirtyMonitors(recursionDepth+1);
     }
+    aceTrace.end();
   }
 
-  private notifyDirtyElmtIdsToOwningViews() : void {
+  private updateUINodes() : void {
     stateMgmtConsole.debug(`notifyDirtyElmtIdsToOwningViews ${JSON.stringify(Array.from(this.elmtIdsChanged_))} ...`);
-
+    aceTrace.begin(`ObserveV3.updateUINodes`);
     // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
     UINodeRegisterProxy.obtainDeletedElmtIds();
-    // unregister the removed elementids requested from the cpp side for all viewpus, it will make the first viewpu slower
-    // than before, but the rest viewpu will be faster
+    // unregister the removed elmtIds 
     UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
 
     while (this.elmtIdsChanged_.size > 0) {
-      const elmtIds = this.elmtIdsChanged_;
-      this.elmtIdsChanged_=new Set<number>();
-
+      const elmtIds : Array<number>= Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2)=>elmtId2-elmtId1);
+      this.elmtIdsChanged_= new Set<number>();
+      stateMgmtConsole.debug(`ObserveV3.updateUINodes iteration: ${elmtIds.length} elmtIds`)
+      stateMgmtProfiler.begin(`ObserveV3.updateUINodes iteration: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)}`)
       elmtIds.forEach((elmtId) => {
         const view = this.id2cmp_[elmtId];
         if (view && view instanceof ViewPU) {
           view.UpdateElement(elmtId);
         }
       });
-    }
+      stateMgmtProfiler.end();
+    } // while
+    aceTrace.end();
   }
 
   public constructMonitor(target: any, name: string) : void {
