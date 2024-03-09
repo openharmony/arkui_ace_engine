@@ -676,6 +676,10 @@ private:
 
     void ResetDraggingStatus(const TouchEvent& touchPoint);
 
+    void CompensateTouchMoveEvent(const TouchEvent& event);
+    
+    bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
+
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     void AnimateOnSafeAreaUpdate();
