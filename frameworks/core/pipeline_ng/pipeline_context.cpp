@@ -1842,24 +1842,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
     if (scalePoint.type == TouchType::UP) {
         lastTouchTime_ = GetTimeFromExternalTimer();
-    }
-
-    std::optional<TouchEvent> lastMoveEvent;
-    if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
-        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
-            auto movePoint = (*iter).CreateScalePoint(GetViewScale());
-            if (scalePoint.id == movePoint.id) {
-                lastMoveEvent = movePoint;
-                iter = touchEvents_.erase(iter);
-            } else {
-                ++iter;
-            }
-        }
-        if (lastMoveEvent.has_value()) {
-            eventManager_->SetLastMoveBeforeUp(scalePoint.sourceType == SourceType::MOUSE);
-            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
-            eventManager_->SetLastMoveBeforeUp(false);
-        }
+        CompensateTouchMoveEvent(scalePoint);
     }
 
     eventManager_->DispatchTouchEvent(scalePoint);
@@ -1870,9 +1853,66 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         RemoveEtsCardTouchEventCallback(point.id);
         ResetDraggingStatus(scalePoint);
     }
+    if (scalePoint.type != TouchType::MOVE) {
+        lastDispatchTime_.erase(scalePoint.id);
+        idToTouchPoints_.erase(scalePoint.id);
+    }
 
     hasIdleTasks_ = true;
     RequestFrame();
+}
+
+bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event)
+{
+    std::optional<TouchEvent> lastMoveEvent;
+    if (!touchEvents_.empty()) {
+        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
+            auto movePoint = (*iter).CreateScalePoint(GetViewScale());
+            if (event.id == movePoint.id) {
+                lastMoveEvent = movePoint;
+                iter = touchEvents_.erase(iter);
+            } else {
+                ++iter;
+            }
+        }
+        if (lastMoveEvent.has_value()) {
+            eventManager_->SetLastMoveBeforeUp(event.sourceType == SourceType::MOUSE);
+            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
+            eventManager_->SetLastMoveBeforeUp(false);
+        } else {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+                "Finger id: %{public}d, not found unhandled move event, compensate failed.", event.id);
+        }
+        return true;
+    }
+    return false;
+}
+
+void PipelineContext::CompensateTouchMoveEvent(const TouchEvent& event)
+{
+    if (event.type != TouchType::UP) {
+        // If not up, no need to compensate touch move event.
+        return;
+    }
+    if (!CompensateTouchMoveEventFromUnhandledEvents(event)) {
+        // Compensate touch move event with all touch move Event before up has been handled.
+        auto lastEventIter = idToTouchPoints_.find(event.id);
+        if (lastEventIter != idToTouchPoints_.end()) {
+            auto iter = lastDispatchTime_.find(lastEventIter->first);
+            if (static_cast<uint64_t>(iter != lastDispatchTime_.end() &&
+                                        lastEventIter->second.time.time_since_epoch().count()) > iter->second) {
+                eventManager_->SetLastMoveBeforeUp(event.sourceType == SourceType::MOUSE);
+                eventManager_->DispatchTouchEvent(lastEventIter->second);
+                eventManager_->SetLastMoveBeforeUp(false);
+            }
+        }
+    }
+
+    auto lastEventIter = idToTouchPoints_.find(event.id);
+    if (lastEventIter != idToTouchPoints_.end()) {
+        ACE_SCOPED_TRACE("Finger id: %d process last move event eventId: %d", lastEventIter->first,
+            lastEventIter->second.touchEventId);
+    }
 }
 
 void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint)
@@ -2117,6 +2157,7 @@ void PipelineContext::FlushTouchEvents()
         }
         std::list<TouchEvent> touchPoints;
         for (const auto& iter : idToTouchPoints) {
+            lastDispatchTime_[iter.first] = GetVsyncTime();
             if (newIdTouchPoints.find(iter.first) != newIdTouchPoints.end()) {
                 touchPoints.emplace_back(newIdTouchPoints[iter.first]);
             } else {
@@ -2131,6 +2172,7 @@ void PipelineContext::FlushTouchEvents()
             }
             eventManager_->DispatchTouchEvent(*iter);
         }
+        idToTouchPoints_ = std::move(idToTouchPoints);
     }
 }
 
