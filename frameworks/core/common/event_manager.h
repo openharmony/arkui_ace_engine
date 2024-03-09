@@ -68,19 +68,19 @@ public:
     // After the touch down event is triggered, the touch test is performed to collect the corresponding
     // touch event target list.
     void TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
-        const TouchRestrict& touchRestrict, const Offset& offset = Offset(),
+        TouchRestrict& touchRestrict, const Offset& offset = Offset(),
         float viewScale = 1.0f, bool needAppend = false);
 
     void TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
-        const TouchRestrict& touchRestrict, const Offset& offset = Offset(),
+        TouchRestrict& touchRestrict, const Offset& offset = Offset(),
         float viewScale = 1.0f, bool needAppend = false);
 
     bool PostEventTouchTest(const TouchEvent& touchPoint, const RefPtr<NG::UINode>& uiNode,
-        const TouchRestrict& touchRestrict);
+        TouchRestrict& touchRestrict);
 
-    void TouchTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict);
+    void TouchTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode, TouchRestrict& touchRestrict);
 
-    void TouchTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+    void TouchTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
 
     bool HasDifferentDirectionGesture();
 
@@ -114,7 +114,7 @@ public:
     bool DispatchMouseHoverEvent(const MouseEvent& event);
 
     void LogPrintMouseTest();
-    void MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+    void MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
     bool DispatchMouseEventNG(const MouseEvent& event);
     void DispatchMouseHoverAnimationNG(const MouseEvent& event);
     bool DispatchMouseHoverEventNG(const MouseEvent& event);

@@ -18,7 +18,7 @@
 
 namespace OHOS::Ace::NG {
 HitTestResult ScreenNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     bool isDispatch)
 {
     auto testResult = HitTestResult::OUT_OF_REGION;
