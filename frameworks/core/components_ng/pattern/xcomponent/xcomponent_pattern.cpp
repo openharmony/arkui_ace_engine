@@ -290,14 +290,14 @@ void XComponentPattern::SetSurfaceNodeToGraphic()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(renderContext);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
     CHECK_NULL_VOID(rosenRenderContext);
     std::shared_ptr<Rosen::RSNode> parentNode = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(parentNode);
     RectF canvasRect = rosenRenderContext->GetPropertyOfPosition();
 
     CHECK_NULL_VOID(renderContextForSurface_);
-    auto context = AceType::DynamicCast<RosenRenderContext>(renderContextForSurface_);
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
     CHECK_NULL_VOID(context);
     std::shared_ptr<Rosen::RSNode> rsNode = context->GetRSNode();
     CHECK_NULL_VOID(rsNode);
