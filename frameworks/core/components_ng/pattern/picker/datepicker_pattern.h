@@ -176,7 +176,6 @@ public:
 
     void SetShowLunar(bool value)
     {
-        isForceUpdate_ = true;
         lunar_ = value;
     }
 
@@ -338,8 +337,7 @@ public:
     void SetSelectDate(const PickerDate& value)
     {
         selectedDate_ = value;
-        isFiredDateChange_ = firedDateStr_.has_value() && firedDateStr_.value() == GetSelectedObject(false);
-        firedDateStr_.reset();
+        isContentUpdateOnly_ = !isFirstUpdate_;
         if (selectedDate_.GetYear() <= 0) {
             LOGW("selectedDate error");
             selectedDate_ = PickerDate::Current();
@@ -356,6 +354,7 @@ public:
     void SetStartDate(const PickerDate& value)
     {
         startDateSolar_ = value;
+        isContentUpdateOnly_ = !isFirstUpdate_;
         AdjustSolarDate(startDateSolar_, limitStartDate_, limitEndDate_);
         startDateLunar_ = SolarToLunar(startDateSolar_);
     }
@@ -368,6 +367,7 @@ public:
     void SetEndDate(const PickerDate& value)
     {
         endDateSolar_ = value;
+        isContentUpdateOnly_ = !isFirstUpdate_;
         AdjustSolarDate(endDateSolar_, limitStartDate_, limitEndDate_);
         endDateLunar_ = SolarToLunar(endDateSolar_);
     }
@@ -633,9 +633,8 @@ private:
     WeakPtr<FrameNode> contentRowNode_;
     WeakPtr<FrameNode> buttonTitleNode_;
     bool isPicker_ = false;
-    bool isFiredDateChange_ = false;
-    bool isForceUpdate_ = false;
-    std::optional<std::string> firedDateStr_;
+    bool isFirstUpdate_ = true;
+    bool isContentUpdateOnly_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };
 } // namespace OHOS::Ace::NG
