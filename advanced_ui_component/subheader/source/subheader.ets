@@ -14,7 +14,6 @@
  */
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
-import hilog from '@ohos.hilog';
 
 const IMAGE_WIDTH_NUM: number = 16;
 const IMAGE_HEIGHT_NUM: number = 24;
@@ -79,14 +78,16 @@ class FontStyle {
   alignment?: Alignment;
 }
 
-@Styles function commonMargin() {
+@Styles
+function commonMargin() {
   .margin({
     left: $r('sys.float.margin_left'),
     right: $r('sys.float.margin_right'),
   })
 }
 
-@Styles function commonContentPadding() {
+@Styles
+function commonContentPadding() {
   .padding({
     left: $r('sys.float.padding_level0'),
     right: $r('sys.float.padding_level0'),
@@ -95,7 +96,8 @@ class FontStyle {
   })
 }
 
-@Styles function commonListPadding() {
+@Styles
+function commonListPadding() {
   .padding({
     left: $r('sys.float.padding_level6'),
     right: $r('sys.float.padding_level6'),
@@ -104,7 +106,8 @@ class FontStyle {
   })
 }
 
-@Extend(Text) function secondaryTitleStyles(fontStyle: FontStyle) {
+@Extend(Text)
+function secondaryTitleStyles(fontStyle: FontStyle) {
   .fontSize($r('sys.float.Subtitle_S'))
   .fontColor(fontStyle?.fontColor ?? $r('sys.color.font_secondary'))
   .fontWeight(fontStyle?.fontWeight)
@@ -113,7 +116,8 @@ class FontStyle {
   .align(fontStyle?.alignment)
 }
 
-@Extend(Text) function primaryTitleStyles(fontStyle: FontStyle) {
+@Extend(Text)
+function primaryTitleStyles(fontStyle: FontStyle) {
   .fontSize($r('sys.float.Subtitle_L'))
   .fontColor($r('sys.color.font_primary'))
   .fontWeight(fontStyle?.fontWeight)
@@ -122,11 +126,13 @@ class FontStyle {
   .align(fontStyle?.alignment)
 }
 
-@Styles function pressedStyle() {
+@Styles
+function pressedStyle() {
   .backgroundColor($r('sys.color.interactive_pressed'))
 }
 
-@Styles function disabledStyle() {
+@Styles
+function disabledStyle() {
   .opacity($r('sys.float.interactive_disable'))
 }
 
@@ -161,14 +167,13 @@ export struct SubHeader {
     .onAreaChange((oldValue: Area, newValue: Area) => {
       let flexWidth: number = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
       this.flexWidth = flexWidth;
-      hilog.debug(122, 'tytyty ', `flexWidth :${this.flexWidth}`);
     })
     .height(this.isDuplicateLine ? DOUBLE_LINE_HEIGHT : SINGLE_LINE_HEIGHT)
   }
 
   @Builder
   leftArea(): void {
-    if (this.secondaryTitle != null && this.icon != null) {
+    if (this.secondaryTitle && this.icon) {
       this.IconSecondTitleStyle({
         content: this.secondaryTitle,
         iconOptions: {
@@ -176,13 +181,13 @@ export struct SubHeader {
           symbolicIconOption: this.iconSymbolOptions,
         },
       });
-    } else if (this.secondaryTitle != null && this.primaryTitle != null) {
+    } else if (this.secondaryTitle && this.primaryTitle) {
       this.SubTitleStyle({ content: this.primaryTitle, subContent: this.secondaryTitle });
-    } else if (this.secondaryTitle != null) {
+    } else if (this.secondaryTitle) {
       this.SecondTitleStyle({ content: this.secondaryTitle });
-    } else if (this.select != null) {
+    } else if (this.select) {
       this.SelectStyle(this.select);
-    } else if (this.primaryTitle != null) {
+    } else if (this.primaryTitle) {
       this.PrimaryTitleStyle({ content: this.primaryTitle });
     } else {
       // 其他不支持场景
@@ -192,8 +197,6 @@ export struct SubHeader {
 
   @Builder
   rightArea(): void {
-    if (this.log(`this.operationItem.length ${this.operationItem?.length}`)) {
-    }
     if (this.operationType === OperationType.BUTTON && (this.operationItem && this.operationItem.length > 0)) {
       this.ButtonStyle(this.operationItem[0]);
     }
@@ -443,12 +446,12 @@ export struct SubHeader {
           } else if (index === INDEX_ONE || index === INDEX_TWO) {
             SingleIconStyle({
               item: {
+                action: item.action,
                 iconOptions: {
                   icon: item.value as Resource,
                   symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
                   this.operationSymbolOptions[index] : null,
                 },
-                action: item.action,
               }
             })
               .margin({
@@ -539,7 +542,6 @@ export struct SubHeader {
         })
         .onAreaChange((oldValue: Area, newValue: Area) => {
           this.arrowWidth = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
-          hilog.debug(122, 'tytyty ', `arrowWidth ${this.arrowWidth}`);
         })
         .stateStyles({
           focused: {
@@ -572,7 +574,6 @@ export struct SubHeader {
     .focusable(true)
     .onAreaChange((oldValue: Area, newValue: Area) => {
       this.textArrowWidth = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
-      hilog.debug(122, 'tytyty ', `textArrowWidth ${this.textArrowWidth}`);
     })
     .constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM })
     .justifyContent(FlexAlign.End)
@@ -613,11 +614,6 @@ export struct SubHeader {
     }.onAppear(() => {
       this.changeFlexAlign(FlexAlign.End);
     });
-  }
-
-  log(ss: string): boolean {
-    hilog.debug(111, 'tytyty ', ss);
-    return true;
   }
 
   private changeFlexAlign(flex: FlexAlign): void {
@@ -708,11 +704,9 @@ struct SingleIconStyle {
 class Util {
   public static isSymbolicResource(resourceStr: ResourceStr | Resource | undefined): boolean {
     if (!Util.isResourceType(resourceStr)) {
-      hilog.error(122, 'tytyty ', `isResourceType false`);
       return false;
     }
     let resource = resourceStr as Resource;
-    hilog.error(122, 'tytyty ', `resource.type ${resource.type}  `);
     return resource.type === RESOURCE_TYPE_SYMBOL;
   }
 
@@ -723,7 +717,6 @@ class Util {
     if (typeof resource === 'string' || typeof resource === 'undefined') {
       return false;
     }
-    hilog.error(122, 'tytyty ', `isResourceType true  `);
     return true;
   }
 }
