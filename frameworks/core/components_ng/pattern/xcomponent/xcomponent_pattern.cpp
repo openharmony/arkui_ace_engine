@@ -35,7 +35,7 @@
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "transaction/rs_transaction_proxy.h"
-#include "ui/rs_surface_node_operation.h"
+#include "ui/rs_ext_node_operation.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
 
@@ -305,7 +305,7 @@ void XComponentPattern::SetSurfaceNodeToGraphic()
         std::static_pointer_cast<Rosen::RSSurfaceNode>(rsNode);
     CHECK_NULL_VOID(rsSurfaceNode);
 
-    Rosen::RSSurfaceNodeOperation::GetInstance().ProcessRSSurfaceNode(GetId(), parentNode->GetId(),
+    Rosen::RSExtNodeOperation::GetInstance().ProcessRSExtNode(GetId(), parentNode->GetId(),
         canvasRect.GetX(), canvasRect.GetY(), rsSurfaceNode);
 #endif
 }
