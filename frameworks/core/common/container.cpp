@@ -24,6 +24,8 @@
 
 namespace OHOS::Ace {
 
+bool Container::isLauncherApp_ = false;
+
 int32_t Container::CurrentId()
 {
     return ContainerScope::CurrentId();

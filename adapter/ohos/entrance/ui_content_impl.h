@@ -146,7 +146,7 @@ public:
     void SetActionEventHandler(std::function<void(const std::string& action)>&& actionCallback) override;
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) override;
-
+    void SetIsLauncherApp();
     void OnFormSurfaceChange(float width, float height) override;
 
     void SetFormBackgroundColor(const std::string& color) override;
