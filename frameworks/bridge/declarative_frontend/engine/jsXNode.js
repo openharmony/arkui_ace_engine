@@ -576,23 +576,24 @@ class FrameNode {
         return this.convertToFrameNode(nodePtr);
     }
     getChildrenCount() {
-        const number = getUINativeModule().frameNode.getChildNumber(this.nodePtr_);
+        const number = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_);
         return number;
     }
     getPositionToParent() {
         const position = getUINativeModule().frameNode.getPositionToParent(this.nodePtr_);
         if (position) {
-            return {x: position[0], y: position[1]};
+            return { x: position[0], y: position[1] };
         }
         return null;
     }
     getPositionToWindow() {
         const position = getUINativeModule().frameNode.getPositionToWindow(this.nodePtr_);
         if (position) {
-            return {x: position[0], y: position[1]};
+            return { x: position[0], y: position[1] };
         }
         return null;
     }
+
     get commonAttributes() {
         if (this._commonAttributes === undefined) {
             const CommonModifier = requireNapi('arkui.modifier').CommonModifier;
@@ -607,6 +608,15 @@ class FrameNode {
         applyUIAttributes(this._commonAttributes, this.nodePtr_, this.instance_);
         this.instance_.applyModifierPatch();
     }
+    get commonEvents() {
+        if (this._commonEvents === undefined) {
+            this._commonEvents = new UICommonEvent(this.nodePtr_);
+        }
+        if (this._commonEvents._nodePtr !== this.nodePtr_) {
+            this._commonEvents._nodePtr === this.nodePtr_;
+        }
+        return this._commonEvents;
+    }
 }
 class FrameNodeUtils {
     static searchNodeInRegisterProxy(nodePtr) {
@@ -615,7 +625,7 @@ class FrameNodeUtils {
             return null;
         }
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-        let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
             return frameNode === undefined ? null : frameNode;
         }
         return null;

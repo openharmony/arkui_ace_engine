@@ -291,9 +291,26 @@ public:
         onFocusCallback_ = std::move(onFocusCallback);
     }
 
+    void SetJSFrameNodeOnFocusCallback(OnFocusFunc&& onFocusCallback)
+    {
+        onJSFrameNodeFocusCallback_ = std::move(onFocusCallback);
+    }
+
+    void ClearJSFrameNodeOnFocusCallback()
+    {
+        if (onJSFrameNodeFocusCallback_) {
+            onJSFrameNodeFocusCallback_ = nullptr;
+        }
+    }
+
     const OnFocusFunc& GetOnFocusCallback()
     {
         return onFocusCallback_;
+    }
+
+    const OnFocusFunc& GetOnJSFrameNodeFocusCallback()
+    {
+        return onJSFrameNodeFocusCallback_;
     }
 
     void ClearOnBlurCallback()
@@ -303,14 +320,37 @@ public:
         }
     }
 
+    void ClearJSFrameNodeOnBlurCallback()
+    {
+        if (onJSFrameNodeBlurCallback_) {
+            onJSFrameNodeBlurCallback_ = nullptr;
+        }
+    }
+
     void SetOnBlurCallback(OnBlurFunc&& onBlurCallback)
     {
         onBlurCallback_ = std::move(onBlurCallback);
     }
 
+    void SetJSFrameNodeOnBlurCallback(OnBlurFunc&& onBlurCallback)
+    {
+        onJSFrameNodeBlurCallback_ = std::move(onBlurCallback);
+    }
+
+
     const OnBlurFunc& GetOnBlurCallback()
     {
         return onBlurCallback_;
+    }
+
+    const OnBlurFunc& GetOnJSFrameNodeBlurCallback()
+    {
+        return onJSFrameNodeBlurCallback_;
+    }
+
+    void SetJSFrameNodeOnKeyCallback(OnKeyCallbackFunc&& onKeyEventCallback)
+    {
+        onJSFrameNodeKeyEventCallback_ = std::move(onKeyEventCallback);
     }
 
     void SetOnKeyEventCallback(OnKeyCallbackFunc&& onKeyEventCallback)
@@ -328,6 +368,18 @@ public:
     const OnKeyCallbackFunc& GetOnKeyEventCallback()
     {
         return onKeyEventCallback_;
+    }
+
+    const OnKeyCallbackFunc& GetOnJSFrameNodeKeyCallback()
+    {
+        return onJSFrameNodeKeyEventCallback_;
+    }
+
+    void ClearJSFrameNodeOnKeyCallback()
+    {
+        if (onJSFrameNodeKeyEventCallback_) {
+            onJSFrameNodeKeyEventCallback_ = nullptr;
+        }
     }
 
     void SetOnClickCallback(GestureEventFunc&& onClickEventCallback)
@@ -412,8 +464,11 @@ public:
 
 private:
     OnFocusFunc onFocusCallback_;
+    OnFocusFunc onJSFrameNodeFocusCallback_;
     OnBlurFunc onBlurCallback_;
+    OnBlurFunc onJSFrameNodeBlurCallback_;
     OnKeyCallbackFunc onKeyEventCallback_;
+    OnKeyCallbackFunc onJSFrameNodeKeyEventCallback_;
     GestureEventFunc onClickEventCallback_;
 
     WeakPtr<FocusHub> defaultFocusNode_;
@@ -666,6 +721,24 @@ public:
         return focusCallbackEvents_ ? focusCallbackEvents_->GetOnFocusCallback() : nullptr;
     }
 
+    void ClearJSFrameNodeOnFocusCallback()
+    {
+        if (focusCallbackEvents_) {
+            focusCallbackEvents_->ClearJSFrameNodeOnFocusCallback();
+        }
+    }
+    void SetJSFrameNodeOnFocusCallback(OnFocusFunc&& onFocusCallback)
+    {
+        if (!focusCallbackEvents_) {
+            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+        }
+        focusCallbackEvents_->SetJSFrameNodeOnFocusCallback(std::move(onFocusCallback));
+    }
+    OnFocusFunc GetOnJSFrameNodeFocusCallback()
+    {
+        return focusCallbackEvents_ ? focusCallbackEvents_->GetOnJSFrameNodeFocusCallback() : nullptr;
+    }
+
     void ClearUserOnBlur()
     {
         if (focusCallbackEvents_) {
@@ -686,6 +759,24 @@ public:
         return focusCallbackEvents_ ? focusCallbackEvents_->GetOnBlurCallback() : nullptr;
     }
 
+    void ClearJSFrameNodeOnBlurCallback()
+    {
+        if (focusCallbackEvents_) {
+            focusCallbackEvents_->ClearJSFrameNodeOnBlurCallback();
+        }
+    }
+    void SetJSFrameNodeOnBlurCallback(OnBlurFunc&& onBlurCallback)
+    {
+        if (!focusCallbackEvents_) {
+            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+        }
+        focusCallbackEvents_->SetJSFrameNodeOnBlurCallback(std::move(onBlurCallback));
+    }
+    OnBlurFunc GetOnJSFrameNodeBlurCallback()
+    {
+        return focusCallbackEvents_ ? focusCallbackEvents_->GetOnJSFrameNodeBlurCallback() : nullptr;
+    }
+
     void SetOnKeyCallback(OnKeyCallbackFunc&& onKeyCallback)
     {
         if (!focusCallbackEvents_) {
@@ -704,6 +795,26 @@ public:
     OnKeyCallbackFunc GetOnKeyCallback()
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->GetOnKeyEventCallback() : nullptr;
+    }
+
+    void ClearJSFrameNodeOnKeyCallback()
+    {
+        if (focusCallbackEvents_) {
+            focusCallbackEvents_->ClearJSFrameNodeOnKeyCallback();
+        }
+    }
+
+    void SetJSFrameNodeOnKeyCallback(OnKeyCallbackFunc&& onKeyCallback)
+    {
+        if (!focusCallbackEvents_) {
+            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+        }
+        focusCallbackEvents_->SetJSFrameNodeOnKeyCallback(std::move(onKeyCallback));
+    }
+    
+    OnKeyCallbackFunc GetOnJSFrameNodeKeyCallback()
+    {
+        return focusCallbackEvents_ ? focusCallbackEvents_->GetOnJSFrameNodeKeyCallback() : nullptr;
     }
 
     void SetOnClickCallback(GestureEventFunc&& onClickCallback)

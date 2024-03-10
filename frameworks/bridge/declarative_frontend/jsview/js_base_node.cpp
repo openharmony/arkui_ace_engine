@@ -170,6 +170,7 @@ void JSBaseNode::CreateFrameNode(const JSCallbackInfo& info)
     std::string nodeTag = "FrameNode";
     auto node = NG::FrameNode::GetOrCreateFrameNode(
         nodeTag, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
+    node->SetExclusiveEventForChild(true);
     viewNode_ = node;
     void* ptr = AceType::RawPtr(viewNode_);
 

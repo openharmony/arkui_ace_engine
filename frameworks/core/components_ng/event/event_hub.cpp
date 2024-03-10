@@ -301,4 +301,68 @@ void EventHub::ClearOnAreaChangedInnerCallbacks()
 {
     onAreaChangedInnerCallbacks_.clear();
 }
+
+void EventHub::SetJSFrameNodeOnAppear(std::function<void()>&& onAppear)
+{
+    onJSFrameNodeAppear_ = std::move(onAppear);
+}
+
+void EventHub::ClearJSFrameNodeOnAppear()
+{
+    if (onJSFrameNodeAppear_) {
+        onJSFrameNodeAppear_ = nullptr;
+    }
+}
+
+void EventHub::SetJSFrameNodeOnDisappear(std::function<void()>&& onDisappear)
+{
+    onJSFrameNodeDisappear_ = std::move(onDisappear);
+}
+
+void EventHub::ClearJSFrameNodeOnDisappear()
+{
+    if (onJSFrameNodeDisappear_) {
+        onJSFrameNodeDisappear_ = nullptr;
+    }
+}
+
+void EventHub::FireOnAppear()
+{
+    if (onAppear_ || onJSFrameNodeAppear_) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskScheduler = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto eventHub = weak.Upgrade();
+                CHECK_NULL_VOID(eventHub);
+                if (eventHub->onAppear_) {
+                    // callback may be overwritten in its invoke so we copy it first
+                    auto onAppear = eventHub->onAppear_;
+                    onAppear();
+                }
+                if (eventHub->onJSFrameNodeAppear_) {
+                    // callback may be overwritten in its invoke so we copy it first
+                    auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
+                    onJSFrameNodeAppear();
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    }
+}
+
+void EventHub::FireOnDisappear()
+{
+    if (onDisappear_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onDisappear = onDisappear_;
+        onDisappear();
+    }
+    if (onJSFrameNodeDisappear_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onJSFrameNodeDisappear = onJSFrameNodeDisappear_;
+        onJSFrameNodeDisappear();
+    }
+}
 } // namespace OHOS::Ace::NG

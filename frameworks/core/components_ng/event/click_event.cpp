@@ -32,7 +32,7 @@ ClickEventActuator::ClickEventActuator(const WeakPtr<GestureEventHub>& gestureEv
 void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
-    if (clickEvents_.empty() && !userCallback_) {
+    if (clickEvents_.empty() && !userCallback_ && !jsFrameNodeCallback_) {
         return;
     }
     auto gestureHub = gestureEventHub_.Upgrade();
@@ -79,6 +79,10 @@ GestureEventFunc ClickEventActuator::GetClickEvent()
             // actuator->userCallback_ may be overwritten in its invoke so we copy it first
             auto userCallback = actuator->userCallback_;
             (*userCallback)(info);
+        }
+        if (actuator->jsFrameNodeCallback_) {
+            auto jsFrameNodeCallback = actuator->jsFrameNodeCallback_;
+            (*jsFrameNodeCallback)(info);
         }
         if (actuator->onAccessibilityEventFunc_) {
             actuator->onAccessibilityEventFunc_(AccessibilityEventType::CLICK);

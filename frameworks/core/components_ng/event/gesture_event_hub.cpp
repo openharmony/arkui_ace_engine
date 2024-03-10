@@ -1031,6 +1031,18 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent)
     }
 }
 
+void GestureEventHub::SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent)
+{
+    CheckClickActuator();
+    if (parallelCombineClick) {
+        userParallelClickEventActuator_->SetJSFrameNodeCallback(std::move(clickEvent));
+        SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
+    } else {
+        clickEventActuator_->SetJSFrameNodeCallback(std::move(clickEvent));
+        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+    }
+}
+
 void GestureEventHub::SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc)
 {
     gestureJudgeFunc_ = std::move(gestureJudgeFunc);
@@ -1301,6 +1313,20 @@ void GestureEventHub::ClearUserOnTouch()
     }
 }
 
+void GestureEventHub::ClearJSFrameNodeOnClick()
+{
+    if (clickEventActuator_) {
+        clickEventActuator_->ClearJSFrameNodeCallback();
+    }
+}
+
+void GestureEventHub::ClearJSFrameNodeOnTouch()
+{
+    if (touchEventActuator_) {
+        touchEventActuator_->ClearJSFrameNodeCallback();
+    }
+}
+
 void GestureEventHub::CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub)
 {
     CHECK_NULL_VOID(gestureEventHub);
@@ -1412,18 +1438,34 @@ void GestureEventHub::SetResponseRegion(const std::vector<DimensionRect>& respon
 }
 
 void GestureEventHub::RemoveLastResponseRect()
-    {
-        if (responseRegion_.empty()) {
-            isResponseRegion_ = false;
-            return;
-        }
-        responseRegion_.pop_back();
-        if (responseRegion_.empty()) {
-            isResponseRegion_ = false;
-        }
-
-        if (responseRegionFunc_) {
-            responseRegionFunc_(responseRegion_);
-        }
+{
+    if (responseRegion_.empty()) {
+        isResponseRegion_ = false;
+        return;
     }
+    responseRegion_.pop_back();
+    if (responseRegion_.empty()) {
+        isResponseRegion_ = false;
+    }
+
+    if (responseRegionFunc_) {
+        responseRegionFunc_(responseRegion_);
+    }
+}
+
+void GestureEventHub::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
+}
+
+void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+}
 } // namespace OHOS::Ace::NG
