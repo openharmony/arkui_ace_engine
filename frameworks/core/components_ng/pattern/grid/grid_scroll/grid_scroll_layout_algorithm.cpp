@@ -37,9 +37,6 @@
 namespace OHOS::Ace::NG {
 void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    ScrollableUtils::RecycleItemsOutOfBoundary(gridLayoutInfo_.axis_, gridLayoutInfo_.originOffset_,
-        gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, layoutWrapper);
-    gridLayoutInfo_.originOffset_ = 0.0f;
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
 
