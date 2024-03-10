@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-import { KeyCode } from '@ohos.multimodalInput.keyCode'
+import { KeyCode } from '@ohos.multimodalInput.keyCode';
+import hilog from '@ohos.hilog';
 
-const SPACE_MARGIN: number = 8
-const MARGIN_NUM: number = 4
-const IMAGE_WIDTH_NUM: number = 16
-const IMAGE_HEIGHT_NUM: number = 24
-const BUTTON_SIZE: number = 32
-const SINGLE_LINE_HEIGHT: number = 48
-const DOUBLE_LINE_HEIGHT: number = 64
-const BUTTON_HEIGHT: number = 28
-const IMAGE_WIDTH: number = 12
-const BORDER_WIDTH = 2
-const DIVIDEND_WIDTH = 3
-const SINGLE_LINE_NUM: number = 1
-const DOUBLE_LINE_NUM: number = 2
-const MIN_FONT_SIZE: number = 14
-const MAIN_TEXT_SIZE: number = 10
-const CONSTRAINT_NUM: number = 44
-const CONTENT_NUM: number = 40
+const IMAGE_WIDTH_NUM: number = 16;
+const IMAGE_HEIGHT_NUM: number = 24;
+const BUTTON_SIZE: number = 32;
+const SINGLE_LINE_HEIGHT: number = 56;
+const DOUBLE_LINE_HEIGHT: number = 72;
+const BUTTON_HEIGHT: number = 28;
+const IMAGE_WIDTH: number = 12;
+const BORDER_WIDTH: number = 2;
+const DIVIDEND_NUM: number = 3;
+const SINGLE_LINE_NUM: number = 1;
+const DOUBLE_LINE_NUM: number = 2;
+const INDEX_ZERO: number = 0;
+const INDEX_ONE: number = 1;
+const INDEX_TWO: number = 2;
+const RESOURCE_TYPE_SYMBOL: number = 40000;
+const DEFAULT_VALUE: number = 0;
 
 export enum OperationType {
   TEXT_ARROW = 0,
@@ -40,201 +40,452 @@ export enum OperationType {
   LOADING = 3,
 }
 
-export declare type OperationOption = {
+export declare class OperationOption {
   value: ResourceStr;
   action?: () => void;
 }
 
-export declare type SelectOptions = {
+export declare class SelectOptions {
   options: Array<SelectOption>;
   selected?: number;
   value?: string;
   onSelect?: (index: number, value?: string) => void;
 }
 
-@Component
-struct IconGroup {
-  @State bgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
-  @State isFocus: boolean = false
-  item: OperationOption
-  focusBorderWidth = BORDER_WIDTH
+export declare class SymbolOptions {
+  fontSize?: Length;
+  fontColor?: Array<ResourceColor>;
+  fontWeight?: number | FontWeight | string;
+  effectStrategy?: SymbolEffectStrategy;
+  renderingStrategy?: SymbolRenderingStrategy;
+}
 
-  build() {
-    Row() {
-      Image(this.item.value)
-        .fillColor($r('sys.color.ohos_id_color_primary'))
-        .width(IMAGE_HEIGHT_NUM)
-        .height(IMAGE_HEIGHT_NUM)
-        .focusable(true)
-    }
-    .focusable(true)
-    .width(BUTTON_SIZE)
-    .height(BUTTON_SIZE)
-    .margin({ right: SPACE_MARGIN, bottom: MARGIN_NUM })
-    .justifyContent(FlexAlign.Center)
-    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
-    .backgroundColor(this.bgColor)
-    .onTouch((event) => {
-      if (event.type === TouchType.Down) {
-        this.item.action && this.item.action()
-        this.bgColor = $r('sys.color.ohos_id_color_click_effect')
-      }
-      if (event.type === TouchType.Up) {
-        this.bgColor = $r('sys.color.ohos_id_color_sub_background_transparent')
-      }
-    })
-    .onHover((isHover: boolean) => {
-      if (isHover) {
-        this.bgColor = $r('sys.color.ohos_id_color_hover')
-      } else {
-        this.bgColor = $r('sys.color.ohos_id_color_sub_background_transparent')
-      }
-    })
-    .stateStyles({
-      focused: {
-        .border({
-          radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-          width: this.focusBorderWidth,
-          color: $r('sys.color.ohos_id_color_focused_outline'),
-          style: BorderStyle.Solid
-        })
-      },
-      normal: {
-        .border({
-          radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-          width: 0 })
-      }
-    })
-    .onKeyEvent((event) => {
-      if (event.keyCode === KeyCode.KEYCODE_ENTER || event.keyCode === KeyCode.KEYCODE_SPACE) {
-        this.item.action && this.item.action()
-      }
-    })
-  }
+class IconOptions {
+  icon?: Resource;
+  symbolicIconOption?: SymbolOptions | null;
+}
+
+class ContentIconOption {
+  content?: ResourceStr;
+  subContent?: ResourceStr;
+  iconOptions?: IconOptions;
+  action?: () => void;
+}
+
+class FontStyle {
+  maxLines: number = 0;
+  fontWeight: number = 0;
+  fontColor?: ResourceColor;
+  alignment?: Alignment;
+}
+
+@Styles function commonMargin() {
+  .margin({
+    left: $r('sys.float.margin_left'),
+    right: $r('sys.float.margin_right'),
+  })
+}
+
+@Styles function commonContentPadding() {
+  .padding({
+    left: $r('sys.float.padding_level0'),
+    right: $r('sys.float.padding_level0'),
+    top: $r('sys.float.padding_level4'),
+    bottom: $r('sys.float.padding_level4'),
+  })
+}
+
+@Styles function commonListPadding() {
+  .padding({
+    left: $r('sys.float.padding_level6'),
+    right: $r('sys.float.padding_level6'),
+    top: $r('sys.float.padding_level4'),
+    bottom: $r('sys.float.padding_level4'),
+  })
+}
+
+@Extend(Text) function secondaryTitleStyles(fontStyle: FontStyle) {
+  .fontSize($r('sys.float.Subtitle_S'))
+  .fontColor(fontStyle?.fontColor ?? $r('sys.color.font_secondary'))
+  .fontWeight(fontStyle?.fontWeight)
+  .maxLines(fontStyle?.maxLines)
+  .textOverflow({ overflow: TextOverflow.Ellipsis })
+  .align(fontStyle?.alignment)
+}
+
+@Extend(Text) function primaryTitleStyles(fontStyle: FontStyle) {
+  .fontSize($r('sys.float.Subtitle_L'))
+  .fontColor($r('sys.color.font_primary'))
+  .fontWeight(fontStyle?.fontWeight)
+  .maxLines(fontStyle?.maxLines)
+  .textOverflow({ overflow: TextOverflow.Ellipsis })
+  .align(fontStyle?.alignment)
+}
+
+@Styles function pressedStyle() {
+  .backgroundColor($r('sys.color.interactive_pressed'))
+}
+
+@Styles function disabledStyle() {
+  .opacity($r('sys.float.interactive_disable'))
 }
 
 @Component
 export struct SubHeader {
-  @Prop icon: Resource
-  @Prop primaryTitle: string
-  @Prop secondaryTitle: string
-  @Prop select: SelectOptions
-  @Prop operationType: OperationType = OperationType.BUTTON
-  operationItem: Array<OperationOption>
-  @State isDuplicateLine: boolean = false
-  @State textArrowBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
-  @State buttonBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
-  @State flexWidth: number = 0
-  @State textArrowWidth: number = 0
-  @State textArrowFocus: boolean = false
-  @State buttonFocus: boolean = false
-  @State arrowWidth: number = 0
-  @State buttonWidth: number = 0
-  focusBorderWidth = BORDER_WIDTH
+  @Prop icon: Resource | null = null;
+  iconSymbolOptions?: SymbolOptions | null = null;
+  @Prop primaryTitle: string | null = null;
+  @Prop secondaryTitle: string | null = null;
+  @Prop select: SelectOptions | null = null;
+  @Prop operationType: OperationType = OperationType.BUTTON;
+  operationItem: Array<OperationOption> | null = null;
+  operationSymbolOptions?: Array<SymbolOptions> | null = null;
+  @State isDuplicateLine: boolean = false;
+  @State textArrowBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
+  @State buttonBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
+  @State flexWidth: number = 0;
+  @State textArrowWidth: number = 0;
+  @State textArrowFocus: boolean = false;
+  @State buttonFocus: boolean = false;
+  @State arrowWidth: number = 0;
+  @State buttonWidth: number = 0;
+  focusBorderWidth: number = BORDER_WIDTH;
+  @State flexAlign: FlexAlign = FlexAlign.SpaceBetween;
 
-  @Builder ListTextStyle($$: { content: ResourceStr }) {
-    Text($$.content)
-      .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-      .fontSize($r('sys.float.ohos_id_text_size_sub_title3'))
-      .fontWeight(FontWeight.Medium)
-      .maxLines(DOUBLE_LINE_NUM)
-      .textOverflow({ overflow: TextOverflow.Ellipsis })
-      .margin({ left: $r('sys.float.ohos_id_max_padding_end'), bottom: SPACE_MARGIN, right: MARGIN_NUM })
-  }
-
-  @Builder ListIconStyle($$: { content: ResourceStr }, icon: ResourceStr) {
-    Row() {
-      Image(icon)
-        .width(IMAGE_WIDTH_NUM)
-        .height(IMAGE_WIDTH_NUM)
-        .margin({ right: SPACE_MARGIN })
-      Text($$.content)
-        .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-        .fontSize($r('sys.float.ohos_id_text_size_sub_title3'))
-        .fontWeight(FontWeight.Medium)
-        .maxLines(DOUBLE_LINE_NUM)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
+  build() {
+    Flex({ justifyContent: this.flexAlign, alignItems: ItemAlign.End }) {
+      this.leftArea();
+      this.rightArea();
     }
-    .margin({ left: $r('sys.float.ohos_id_max_padding_end'), bottom: SPACE_MARGIN, right: MARGIN_NUM })
+    .focusable(true)
+    .onAreaChange((oldValue: Area, newValue: Area) => {
+      let flexWidth: number = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
+      this.flexWidth = flexWidth;
+      hilog.debug(122, 'tytyty ', `flexWidth :${this.flexWidth}`);
+    })
+    .height(this.isDuplicateLine ? DOUBLE_LINE_HEIGHT : SINGLE_LINE_HEIGHT)
   }
 
-  @Builder ContentTextStyle($$: { content: ResourceStr }) {
-    Text($$.content)
-      .fontColor($r('sys.color.ohos_id_color_text_primary'))
-      .fontSize($r('sys.float.ohos_id_text_size_sub_title1'))
-      .fontWeight(FontWeight.Medium)
-      .maxLines(DOUBLE_LINE_NUM)
-      .maxFontSize($r('sys.float.ohos_id_text_size_sub_title1'))
-      .minFontSize(MIN_FONT_SIZE)
-      .textOverflow({ overflow: TextOverflow.Ellipsis })
-      .margin({ left: $r('sys.float.ohos_id_max_padding_start'),
-        right: MARGIN_NUM, bottom: SPACE_MARGIN })
+  @Builder
+  leftArea(): void {
+    if (this.secondaryTitle != null && this.icon != null) {
+      this.IconSecondTitleStyle({
+        content: this.secondaryTitle,
+        iconOptions: {
+          icon: this.icon,
+          symbolicIconOption: this.iconSymbolOptions,
+        },
+      });
+    } else if (this.secondaryTitle != null && this.primaryTitle != null) {
+      this.SubTitleStyle({ content: this.primaryTitle, subContent: this.secondaryTitle });
+    } else if (this.secondaryTitle != null) {
+      this.SecondTitleStyle({ content: this.secondaryTitle });
+    } else if (this.select != null) {
+      this.SelectStyle(this.select);
+    } else if (this.primaryTitle != null) {
+      this.PrimaryTitleStyle({ content: this.primaryTitle });
+    } else {
+      // 其他不支持场景
+      this.dummyFunction();
+    }
   }
 
-  @Builder SubTextStyle($$: { content: ResourceStr, subContent: ResourceStr }) {
+  @Builder
+  rightArea(): void {
+    if (this.log(`this.operationItem.length ${this.operationItem?.length}`)) {
+    }
+    if (this.operationType === OperationType.BUTTON && (this.operationItem && this.operationItem.length > 0)) {
+      this.ButtonStyle(this.operationItem[0]);
+    }
+    if (this.operationType === OperationType.ICON_GROUP && (this.operationItem && this.operationItem.length > 0)) {
+      this.IconGroupStyle(this.operationItem);
+    }
+    if (this.operationType === OperationType.TEXT_ARROW && (this.operationItem && this.operationItem.length > 0)) {
+      this.TextArrowStyle(this.operationItem[0]);
+    }
+    if (this.operationType === OperationType.LOADING) {
+      this.LoadingProcessStyle();
+    }
+  }
+
+  @Builder
+  IconSecondTitleStyle($$: ContentIconOption): void {
+    Row() {
+      if (Util.isSymbolicResource($$.iconOptions?.icon)) {
+        SymbolGlyph($$.iconOptions?.icon)
+          .focusable(true)
+          .fontSize($$.iconOptions?.symbolicIconOption?.fontSize ?? IMAGE_WIDTH_NUM)
+          .fontColor($$.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_secondary')])
+          .fontWeight($$.iconOptions?.symbolicIconOption?.fontWeight)
+          .renderingStrategy($$.iconOptions?.symbolicIconOption?.renderingStrategy)
+          .effectStrategy($$.iconOptions?.symbolicIconOption?.effectStrategy)
+          .margin({ right: $r('sys.float.padding_level4') })
+      } else {
+        Image($$.iconOptions?.icon)
+          .width(IMAGE_WIDTH_NUM)
+          .height(IMAGE_WIDTH_NUM)
+          .margin({ right: $r('sys.float.padding_level4') })
+      }
+      Text($$.content)
+        .secondaryTitleStyles({
+          maxLines: DOUBLE_LINE_NUM,
+          fontWeight: FontWeight.Medium,
+          alignment: Alignment.Start,
+        })
+    }
+    .commonListPadding()
+    .commonMargin()
+    .onAppear(() => {
+      this.isDuplicateLine = false;
+      this.changeFlexAlign(FlexAlign.SpaceBetween);
+    })
+  }
+
+  @Builder
+  SubTitleStyle($$: ContentIconOption): void {
     Column() {
       Text($$.content)
-        .fontColor($r('sys.color.ohos_id_color_text_primary'))
-        .fontSize($r('sys.float.ohos_id_text_size_sub_title1'))
-        .fontWeight(FontWeight.Medium)
-        .maxLines(SINGLE_LINE_NUM)
-        .maxFontSize($r('sys.float.ohos_id_text_size_sub_title1'))
-        .minFontSize(MIN_FONT_SIZE)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .primaryTitleStyles({
+          fontWeight: FontWeight.Medium,
+          maxLines: SINGLE_LINE_NUM,
+          alignment: Alignment.Start,
+        })
       Text($$.subContent)
-        .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-        .fontSize($r('sys.float.ohos_id_text_size_sub_title3'))
-        .fontWeight(FontWeight.Medium)
-        .maxLines(SINGLE_LINE_NUM)
-        .maxFontSize($r('sys.float.ohos_id_text_size_sub_title3'))
-        .minFontSize(MAIN_TEXT_SIZE)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .secondaryTitleStyles({
+          maxLines: SINGLE_LINE_NUM,
+          fontWeight: FontWeight.Regular,
+          alignment: Alignment.Start,
+        })
+        .margin({
+          top: $r('sys.float.padding_level1'),
+        })
     }
+    .commonMargin()
+    .commonContentPadding()
     .alignItems(HorizontalAlign.Start)
     .onAppear(() => {
-      this.isDuplicateLine = true
+      this.isDuplicateLine = true;
+      this.changeFlexAlign(FlexAlign.SpaceBetween);
     })
-    .margin({ left: $r('sys.float.ohos_id_max_padding_start'),
-      right: MARGIN_NUM, bottom: SPACE_MARGIN })
   }
 
-  @Builder SelectStyle(selectParam: SelectOptions) {
-    Select(selectParam.options)
-      .selected(selectParam.selected)
-      .value(selectParam.value)
-      .onSelect((index: number, value?: string) => {
-        if (selectParam.onSelect) {
-          selectParam.onSelect(index, value)
+  @Builder
+  SecondTitleStyle($$: ContentIconOption): void {
+    Column() {
+      Text($$.content)
+        .secondaryTitleStyles({
+          maxLines: DOUBLE_LINE_NUM,
+          fontWeight: FontWeight.Medium,
+          alignment: Alignment.Start,
+        })
+        .onAppear(() => {
+          this.isDuplicateLine = false;
+          this.changeFlexAlign(FlexAlign.SpaceBetween);
+        })
+    }
+    .commonListPadding()
+    .commonMargin()
+  }
+
+  @Builder
+  SelectStyle(selectParam: SelectOptions): void {
+    Row() {
+      Select(selectParam.options)
+        .selected(selectParam.selected)
+        .value(selectParam.value)
+        .onSelect((index: number, value?: string) => {
+          if (selectParam.onSelect) {
+            selectParam.onSelect(index, value);
+          }
+        })
+        .font({
+          size: $r('sys.float.Body_L'),
+          weight: FontWeight.Medium,
+        })
+    }
+    .margin({
+      left: $r('sys.float.margin_left'),
+      right: $r('sys.float.margin_right'),
+    })
+    .onAppear(() => {
+      this.isDuplicateLine = false;
+      this.changeFlexAlign(FlexAlign.SpaceBetween);
+    })
+  }
+
+  @Builder
+  PrimaryTitleStyle($$: ContentIconOption): void {
+    Column() {
+      Text($$.content)
+        .primaryTitleStyles({
+          fontWeight: FontWeight.Medium,
+          maxLines: DOUBLE_LINE_NUM,
+          alignment: Alignment.Start,
+        })
+        .onAppear(() => {
+          this.isDuplicateLine = false;
+          this.changeFlexAlign(FlexAlign.SpaceBetween);
+        })
+    }
+    .commonMargin()
+    .commonContentPadding()
+  }
+
+  @Builder
+  ButtonStyle(button: OperationOption): void {
+    Row() {
+      Stack() {
+        if (button) {
+          Row() {
+            Text(button.value)
+              .secondaryTitleStyles({
+                fontWeight: FontWeight.Medium,
+                maxLines: SINGLE_LINE_NUM,
+                fontColor: $r('sys.color.font_emphasize'),
+              })
+              .focusable(true)
+          }
+          .backgroundColor(this.buttonBgColor)
+          .focusable(true)
+          .height(BUTTON_HEIGHT)
+          .justifyContent(FlexAlign.End)
+          .borderRadius($r('sys.float.corner_radius_level4'))
+          .stateStyles({
+            focused: {
+              .border({
+                radius: $r('sys.float.corner_radius_level4'),
+                width: this.buttonWidth,
+                color: $r('sys.color.interactive_focus'),
+                style: BorderStyle.Solid,
+              })
+              .backgroundColor($r('sys.color.interactive_focus'))
+            },
+            pressed: pressedStyle,
+            disabled: disabledStyle,
+          })
+          .onFocus(() => {
+            this.buttonFocus = true;
+            this.buttonBgColor = $r('sys.color.interactive_focus');
+          })
+          .onBlur(() => {
+            this.buttonFocus = false;
+          })
+          .onHover((isHover: boolean) => {
+            if (isHover) {
+              this.buttonBgColor = $r('sys.color.interactive_hover');
+            } else {
+              this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+            }
+          })
+          .onTouch((event) => {
+            if (event.type === TouchType.Down) {
+              if (button.action) {
+                button.action();
+              }
+              this.buttonBgColor = $r('sys.color.interactive_pressed');
+            }
+            if (event.type === TouchType.Up) {
+              this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+            }
+          })
+          .onKeyEvent((event) => {
+            if (event.keyCode === KeyCode.KEYCODE_ENTER || event.keyCode === KeyCode.KEYCODE_SPACE) {
+              if (button.action) {
+                button.action();
+              }
+            }
+          })
+          .onAreaChange((oldValue: Area, newValue: Area) => {
+            let flexWidth = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
+            this.buttonWidth = flexWidth;
+          })
+
+          if (this.buttonFocus) {
+            Row()
+              .height(BUTTON_HEIGHT)
+              .width(this.buttonWidth)
+              .hitTestBehavior(HitTestMode.None)
+              .border({
+                width: $r('sys.float.outline_extra_larger'),
+                color: $r('sys.color.interactive_focus'),
+              })
+              .borderRadius($r('sys.float.corner_radius_level4'))
+          }
         }
-      })
-      .font({
-        size: $r('sys.float.ohos_id_text_size_sub_title1'),
-        weight: FontWeight.Medium
-      })
-      .margin({ left: $r('sys.float.ohos_id_default_padding_start'), right: MARGIN_NUM })
-  }
-
-  @Builder LoadingProcessStyle() {
-    LoadingProgress()
-      .width(IMAGE_HEIGHT_NUM)
-      .height(IMAGE_HEIGHT_NUM)
+      }
       .focusable(true)
-      .margin({ right: $r('sys.float.ohos_id_default_padding_end'), bottom: MARGIN_NUM })
+    }
+    .margin({
+      left: $r('sys.float.padding_level4'),
+      right: $r('sys.float.margin_right'),
+    })
+    .constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM })
+    .justifyContent(FlexAlign.End)
+    .focusable(true)
   }
 
-  @Builder TextArrowStyle(textArrow: OperationOption) {
+  @Builder
+  IconGroupStyle(operationItem: Array<OperationOption>): void {
+    Row() {
+      ForEach(this.operationItem, (item: OperationOption, index?: number) => {
+        if (Util.isResourceType(item.value)) {
+          if (index === INDEX_ZERO) {
+            SingleIconStyle({
+              item: {
+                iconOptions: {
+                  icon: item.value as Resource,
+                  symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
+                  this.operationSymbolOptions[index] : null,
+                },
+                action: item.action,
+              }
+            })
+          } else if (index === INDEX_ONE || index === INDEX_TWO) {
+            SingleIconStyle({
+              item: {
+                iconOptions: {
+                  icon: item.value as Resource,
+                  symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
+                  this.operationSymbolOptions[index] : null,
+                },
+                action: item.action,
+              }
+            })
+              .margin({
+                left: $r('sys.float.padding_level4'),
+              })
+          } else {
+            // 最大支持3个ICON,此场景不支持
+          }
+        }
+      });
+    }
+    .justifyContent(FlexAlign.End)
+    .constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM })
+    .focusable(true)
+    .margin({
+      left: $r('sys.float.padding_level4'),
+      right: $r('sys.float.margin_right'),
+    })
+  }
+
+  @Builder
+  TextArrowStyle(textArrow: OperationOption): void {
     Row() {
       Stack() {
         Row() {
           Row() {
-            if (textArrow != null) {
+            if (textArrow) {
               Text(textArrow.value)
-                .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-                .fontSize($r('sys.float.ohos_id_text_size_body2'))
-                .margin({ right: MARGIN_NUM })
+                .secondaryTitleStyles({
+                  maxLines: SINGLE_LINE_NUM,
+                  fontWeight: FontWeight.Regular,
+                  alignment: Alignment.End,
+                })
+                .margin({
+                  right: $r('sys.float.padding_level2'),
+                })
                 .focusable(true)
-                .maxLines(1)
-                .constraintSize({ maxWidth: this.textArrowWidth - CONTENT_NUM })
             }
             Image($r('sys.media.ohos_ic_public_arrow_right'))
               .fillColor($r('sys.color.ohos_id_color_tertiary'))
@@ -242,196 +493,237 @@ export struct SubHeader {
               .height(IMAGE_HEIGHT_NUM)
               .focusable(true)
               .draggable(false)
-          }.margin({ left: SPACE_MARGIN, right: SPACE_MARGIN })
+          }
         }
+        .borderRadius($r('sys.float.corner_radius_level4'))
+        .focusable(true)
+        .backgroundColor(this.textArrowBgColor)
         .height(BUTTON_SIZE)
         .justifyContent(FlexAlign.End)
         .onFocus(() => {
-          this.textArrowFocus = true
+          this.textArrowFocus = true;
         })
         .onBlur(() => {
-          this.textArrowFocus = false
+          this.textArrowFocus = false;
         })
-        .borderRadius(MARGIN_NUM)
-        .focusable(true)
-        .margin({ left: MARGIN_NUM, right: MARGIN_NUM })
-        .backgroundColor(this.textArrowBgColor)
-        .onTouch((event) => {
-          if (event.type === TouchType.Down) {
-            if (textArrow.action) {
-              textArrow.action()
-            }
-            this.textArrowBgColor = $r('sys.color.ohos_id_color_click_effect')
-          }
-          if (event.type === TouchType.Up) {
-            this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent')
-          }
+        .padding({
+          left: $r('sys.float.padding_level2'),
+          right: $r('sys.float.padding_level2'),
+          top: $r('sys.float.padding_level2'),
+          bottom: $r('sys.float.padding_level2'),
         })
         .onHover((isHover: boolean) => {
           if (isHover) {
-            this.textArrowBgColor = $r('sys.color.ohos_id_color_hover')
+            this.textArrowBgColor = $r('sys.color.interactive_hover');
           } else {
-            this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent')
+            this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+          }
+        })
+        .onTouch((event) => {
+          if (event.type === TouchType.Down) {
+            if (textArrow.action) {
+              textArrow.action();
+            }
+            this.textArrowBgColor = $r('sys.color.interactive_pressed');
+          }
+          if (event.type === TouchType.Up) {
+            this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
           }
         })
         .onKeyEvent((event) => {
           if (event.keyCode === KeyCode.KEYCODE_ENTER || event.keyCode === KeyCode.KEYCODE_SPACE) {
-            textArrow.action && textArrow.action()
+            if (textArrow.action) {
+              textArrow.action();
+            }
           }
         })
         .onAreaChange((oldValue: Area, newValue: Area) => {
-          this.arrowWidth = Number(parseInt(newValue.width.toString(), 0))
+          this.arrowWidth = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
+          hilog.debug(122, 'tytyty ', `arrowWidth ${this.arrowWidth}`);
         })
         .stateStyles({
           focused: {
             .border({
-              radius: MARGIN_NUM,
-              width: BORDER_WIDTH,
-              color: $r('sys.color.ohos_id_color_focused_outline'),
-              style: BorderStyle.Solid
+              radius: $r('sys.float.corner_radius_level4'),
+              width: this.arrowWidth,
+              color: $r('sys.color.interactive_focus'),
+              style: BorderStyle.Solid,
             })
+            .backgroundColor($r('sys.color.interactive_focus'))
           },
-          normal: {
-            .border({
-              radius: MARGIN_NUM,
-              width: BORDER_WIDTH,
-              color: Color.Transparent
-            })
-          }
-        })
-      }
-    }
-    .onAreaChange((oldValue: Area, newValue: Area) => {
-      this.textArrowWidth = Number(parseInt(newValue.width.toString(), 0))
-    })
-    .constraintSize({ minWidth: this.flexWidth / DIVIDEND_WIDTH })
-    .justifyContent(FlexAlign.End)
-    .margin({ left: SPACE_MARGIN })
-  }
-
-  @Builder ButtonStyle(button: OperationOption) {
-    Row() {
-      Stack() {
-        Row() {
-          if (button != null) {
-            Text(button.value)
-              .maxLines(1)
-              .fontColor($r('sys.color.ohos_id_color_text_primary_activated'))
-              .fontSize($r('sys.float.ohos_id_text_size_button2'))
-              .fontWeight(FontWeight.Medium)
-              .margin({ left: SPACE_MARGIN, right: SPACE_MARGIN })
-              .focusable(true)
-          }
-        }
-        .justifyContent(FlexAlign.End)
-        .alignItems(VerticalAlign.Center)
-        .focusable(true)
-        .height(BUTTON_HEIGHT)
-        .margin({ left: SPACE_MARGIN, right: SPACE_MARGIN })
-        .borderRadius(IMAGE_WIDTH_NUM)
-        .backgroundColor(this.buttonBgColor)
-        .onFocus(() => {
-          this.buttonFocus = true
-        })
-        .onBlur(() => {
-          this.buttonFocus = false
-        })
-        .onTouch((event) => {
-          if (event.type === TouchType.Down) {
-            if (button.action) {
-              button.action()
-            }
-            this.buttonBgColor = $r('sys.color.ohos_id_color_click_effect')
-          }
-          if (event.type === TouchType.Up) {
-            this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent')
-          }
-        })
-        .onHover((isHover: boolean) => {
-          if (isHover) {
-            this.buttonBgColor = $r('sys.color.ohos_id_color_hover')
-          } else {
-            this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent')
-          }
-        })
-        .onKeyEvent((event) => {
-          if (event.keyCode === KeyCode.KEYCODE_ENTER || event.keyCode === KeyCode.KEYCODE_SPACE) {
-            button.action && button.action()
-          }
-        })
-        .onAreaChange((oldValue: Area, newValue: Area) => {
-          let flexWidth = Number(parseInt(newValue.width.toString(), 0))
-          this.buttonWidth = flexWidth
+          pressed: pressedStyle,
+          disabled: disabledStyle,
         })
 
-        if (this.buttonFocus) {
+        if (this.textArrowFocus) {
           Row()
-            .height(BUTTON_HEIGHT)
-            .width(this.buttonWidth)
+            .height(BUTTON_SIZE)
+            .width(this.arrowWidth)
             .hitTestBehavior(HitTestMode.None)
             .border({
-              width: BORDER_WIDTH,
-              color: $r('sys.color.ohos_id_color_focused_outline')
+              width: $r('sys.float.outline_extra_larger'),
+              color: $r('sys.color.interactive_focus'),
             })
-            .borderRadius(IMAGE_WIDTH_NUM)
+            .borderRadius($r('sys.float.corner_radius_level4'))
         }
       }
-    }
-    .constraintSize({ minWidth: this.flexWidth / DIVIDEND_WIDTH })
-    .justifyContent(FlexAlign.End)
-    .focusable(true)
-    .margin({ left: SPACE_MARGIN })
-  }
-
-  build() {
-    Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.End }) {
-      if (this.secondaryTitle != null && this.icon != null) {
-        Row() {
-          this.ListIconStyle({ content: this.secondaryTitle }, this.icon)
-        }.margin({ right: SPACE_MARGIN })
-      } else if (this.secondaryTitle != null && this.primaryTitle != null) {
-        this.SubTextStyle({ content: this.primaryTitle, subContent: this.secondaryTitle })
-      } else if (this.secondaryTitle != null) {
-        this.ListTextStyle({ content: this.secondaryTitle })
-      } else if (this.select != null) {
-        this.SelectStyle(this.select)
-      } else if (this.primaryTitle != null) {
-        this.ContentTextStyle({ content: this.primaryTitle })
-      }
-
-      Row() {
-        if (this.operationType === OperationType.BUTTON && this.operationItem != null) {
-          this.ButtonStyle(this.operationItem[0])
-        }
-        if (this.operationType === OperationType.ICON_GROUP && this.operationItem != null) {
-          Row() {
-            ForEach(this.operationItem, (item, index?: number) => {
-              if (index == 0) {
-                IconGroup({ item: item })
-              }
-              if (index == 1) {
-                IconGroup({ item: item })
-              }
-              if (index == 2) { // Image count
-                IconGroup({ item: item })
-              }
-            })
-          }
-        }
-        if (this.operationType === OperationType.TEXT_ARROW && this.operationItem != null) {
-          this.TextArrowStyle(this.operationItem[0])
-        }
-        if (this.operationType === OperationType.LOADING) {
-          this.LoadingProcessStyle()
-        }
-      }
+      .focusable(true)
     }
     .focusable(true)
     .onAreaChange((oldValue: Area, newValue: Area) => {
-      let flexWidth = Number(parseInt(newValue.width.toString(), 0))
-      this.flexWidth = flexWidth - CONSTRAINT_NUM
+      this.textArrowWidth = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
+      hilog.debug(122, 'tytyty ', `textArrowWidth ${this.textArrowWidth}`);
     })
-    .padding({ right: $r('sys.float.ohos_id_default_padding_end') })
-    .height(this.isDuplicateLine ? DOUBLE_LINE_HEIGHT : SINGLE_LINE_HEIGHT)
+    .constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM })
+    .justifyContent(FlexAlign.End)
+    .margin({
+      left: $r('sys.float.padding_level4'),
+      right: $r('sys.float.margin_right'),
+    })
+  }
+
+  @Builder
+  LoadingProcessStyle(): void {
+    Row() {
+      LoadingProgress()
+        .width(IMAGE_HEIGHT_NUM)
+        .height(IMAGE_HEIGHT_NUM)
+        .color($r('sys.color.icon_secondary'))
+        .focusable(true)
+        .onAppear(() => {
+          this.isDuplicateLine = false;
+        })
+    }
+    .focusable(true)
+    .constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM })
+    .justifyContent(FlexAlign.End)
+    .padding({
+      top: $r('sys.float.padding_level2'),
+      bottom: $r('sys.float.padding_level2'),
+    })
+    .margin({
+      left: $r('sys.float.padding_level4'),
+      right: $r('sys.float.margin_right'),
+    })
+  }
+
+  @Builder
+  dummyFunction(): void {
+    Row() {
+    }.onAppear(() => {
+      this.changeFlexAlign(FlexAlign.End);
+    });
+  }
+
+  log(ss: string): boolean {
+    hilog.debug(111, 'tytyty ', ss);
+    return true;
+  }
+
+  private changeFlexAlign(flex: FlexAlign): void {
+    if (this.flexAlign === flex) {
+      return;
+    }
+    this.flexAlign = flex;
+  }
+}
+
+@Component
+struct SingleIconStyle {
+  @State bgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
+  @State isFocus: boolean = false;
+  item: ContentIconOption | null = null;
+  focusBorderWidth: number = BORDER_WIDTH;
+
+  build() {
+    if (this.item && this.item.iconOptions) {
+      Row() {
+        if (Util.isSymbolicResource(this.item.iconOptions.icon)) {
+          SymbolGlyph(this.item.iconOptions?.icon)
+            .focusable(true)
+            .fontSize(this.item.iconOptions?.symbolicIconOption?.fontSize ?? IMAGE_HEIGHT_NUM)
+            .fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_primary')])
+            .fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight)
+            .renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy)
+            .effectStrategy(this.item.iconOptions?.symbolicIconOption?.effectStrategy)
+        } else {
+          Image(this.item?.iconOptions?.icon)
+            .fillColor($r('sys.color.icon_primary'))
+            .width(IMAGE_HEIGHT_NUM)
+            .height(IMAGE_HEIGHT_NUM)
+            .focusable(true)
+        }
+      }
+      .focusable(true)
+      .width(BUTTON_SIZE)
+      .height(BUTTON_SIZE)
+      .margin({
+        bottom: $r('sys.float.padding_level2'),
+      })
+      .justifyContent(FlexAlign.Center)
+      .borderRadius($r('sys.float.corner_radius_level4'))
+      .backgroundColor(this.bgColor)
+      .stateStyles({
+        focused: {
+          .border({
+            radius: $r('sys.float.corner_radius_level4'),
+            width: this.focusBorderWidth,
+            color: $r('sys.color.interactive_focus'),
+            style: BorderStyle.Solid,
+          })
+          .backgroundColor($r('sys.color.interactive_focus'))
+        },
+        pressed: pressedStyle,
+        disabled: disabledStyle,
+      })
+      .onTouch((event) => {
+        if (event.type === TouchType.Down) {
+          if (this.item?.action) {
+            this.item?.action();
+          }
+          this.bgColor = $r('sys.color.interactive_pressed');
+        }
+        if (event.type === TouchType.Up) {
+          this.bgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+        }
+      })
+      .onHover((isHover: boolean) => {
+        if (isHover) {
+          this.bgColor = $r('sys.color.interactive_hover');
+        } else {
+          this.bgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+        }
+      })
+      .onKeyEvent((event) => {
+        if (event.keyCode === KeyCode.KEYCODE_ENTER || event.keyCode === KeyCode.KEYCODE_SPACE) {
+          if (this.item?.action) {
+            this.item?.action();
+          }
+        }
+      })
+    }
+  }
+}
+
+class Util {
+  public static isSymbolicResource(resourceStr: ResourceStr | Resource | undefined): boolean {
+    if (!Util.isResourceType(resourceStr)) {
+      hilog.error(122, 'tytyty ', `isResourceType false`);
+      return false;
+    }
+    let resource = resourceStr as Resource;
+    hilog.error(122, 'tytyty ', `resource.type ${resource.type}  `);
+    return resource.type === RESOURCE_TYPE_SYMBOL;
+  }
+
+  public static isResourceType(resource: ResourceStr | Resource | undefined): boolean {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    hilog.error(122, 'tytyty ', `isResourceType true  `);
+    return true;
   }
 }
