@@ -52,6 +52,7 @@ constexpr float MAX_OFFSET = 100000.0f;
 constexpr float HALF = 0.5f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
 constexpr Dimension TRIGGER_LOADING_DISTANCE = 16.0_vp;
+constexpr Dimension TRIGGER_REFRESH_WITH_TEXT_DISTANCE = 114.0_vp;
 constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
 constexpr Dimension MAX_SCROLL_DISTANCE = 128.0_vp;
 constexpr Dimension LOADING_PROGRESS_SIZE = 32.0_vp;
@@ -63,6 +64,16 @@ constexpr double DARK_MODE_LOADING_PROGRESS_BORDER_WIDTH = 2.4f;
 constexpr double DARK_MODE_LOADING_PROGRESS_BACKGROUND_ALPHA = 0.53f;
 constexpr Dimension LOADING_TEXT_TOP_MARGIN = 16.0_vp;
 } // namespace
+
+
+Dimension RefreshPattern::GetTriggerRefreshDisTance()
+{
+    if (HasLoadingText()) {
+        return TRIGGER_REFRESH_WITH_TEXT_DISTANCE;
+    } else {
+        return TRIGGER_REFRESH_DISTANCE;
+    }
+}
 
 void RefreshPattern::OnAttachToFrameNode()
 {
@@ -83,8 +94,8 @@ void RefreshPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    refreshOffset_ = layoutProperty->GetRefreshOffset().value_or(TRIGGER_REFRESH_DISTANCE).Value() > 0 ?
-        layoutProperty->GetRefreshOffset().value_or(TRIGGER_REFRESH_DISTANCE) : TRIGGER_REFRESH_DISTANCE;
+    refreshOffset_ = layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance()).Value() > 0 ?
+        layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance()) : GetTriggerRefreshDisTance();
     pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
@@ -94,7 +105,7 @@ void RefreshPattern::OnModifyDone()
     } else {
         triggerLoadingDistance_ = static_cast<float>(
             std::clamp(layoutProperty->GetIndicatorOffset().value_or(TRIGGER_LOADING_DISTANCE).ConvertToPx(),
-                -1.0f * TRIGGER_LOADING_DISTANCE.ConvertToPx(), TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
+                -1.0f * TRIGGER_LOADING_DISTANCE.ConvertToPx(), GetTriggerRefreshDisTance().ConvertToPx()));
         InitLowVersionOffset();
     }
     RefreshStatusChangeEffect();
@@ -229,6 +240,7 @@ void RefreshPattern::UpdateLoadTextScale(float ratio)
     auto loadingTextRenderContext = loadingTextNode_->GetRenderContext();
     CHECK_NULL_VOID(loadingTextRenderContext);
     loadingTextRenderContext->UpdateTransformScale(VectorF(ratio, ratio));
+    columnNode_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void RefreshPattern::UpdateRefreshBorderWidth(float ratio)
@@ -732,9 +744,9 @@ void RefreshPattern::UpdateLoadingProgressTranslate(float scrollOffset)
     CHECK_NULL_VOID(renderContext);
     auto loadingVisibleHeight = GetLoadingVisibleHeight();
     if (GreatOrEqual(scrollOffset, loadingVisibleHeight) &&
-        !NearEqual(loadingVisibleHeight, static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
+        !NearEqual(loadingVisibleHeight, static_cast<float>(GetTriggerRefreshDisTance().ConvertToPx()))) {
         auto ratio = static_cast<float>(
-            (scrollOffset - loadingVisibleHeight) / (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - loadingVisibleHeight));
+            (scrollOffset - loadingVisibleHeight) / (GetTriggerRefreshDisTance().ConvertToPx() - loadingVisibleHeight));
         renderContext->UpdateOpacity(std::clamp(ratio, 0.0f, 1.0f));
         renderContext->UpdateTransformTranslate({ 0.0f, (scrollOffset - loadingVisibleHeight) * HALF, 0.0f });
         if (loadingTextNode_) {
@@ -922,7 +934,7 @@ void RefreshPattern::HandleDragUpdateLowVersion(float delta)
         return;
     }
     scrollOffset_ = GetScrollOffset(delta);
-    if (LessNotEqual(scrollOffset_, static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
+    if (LessNotEqual(scrollOffset_, static_cast<float>(GetTriggerRefreshDisTance().ConvertToPx()))) {
         UpdateRefreshStatus(RefreshStatus::DRAG);
     } else {
         UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
@@ -936,7 +948,7 @@ void RefreshPattern::HandleDragUpdateLowVersion(float delta)
         CHECK_NULL_VOID(progressChild_);
         auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
         CHECK_NULL_VOID(progressPaintProperty);
-        float triggerRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+        float triggerRefreshDistance = GetTriggerRefreshDisTance().ConvertToPx();
         float ratio =
             NearEqual(triggerRefreshDistance, triggerLoadingDistance_)
                 ? 1.0f
@@ -979,7 +991,7 @@ void RefreshPattern::LoadingProgressRefreshingAnimation(bool isDrag)
         option.SetDuration(LOADING_ANIMATION_DURATION);
     }
     animation_ = AnimationUtils::StartAnimation(
-        option, [&]() { lowVersionOffset_->Set(TRIGGER_REFRESH_DISTANCE.ConvertToPx()); });
+        option, [&]() { lowVersionOffset_->Set(GetTriggerRefreshDisTance().ConvertToPx()); });
 }
 
 void RefreshPattern::LoadingProgressExit()
@@ -1002,12 +1014,11 @@ void RefreshPattern::UpdateLoadingProgress()
     float loadingProgressOffset =
         std::clamp(scrollOffset_, triggerLoadingDistance_, static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx()));
     UpdateLoadingMarginTop(loadingProgressOffset);
-    float triggerRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+    float triggerRefreshDistance = GetTriggerRefreshDisTance().ConvertToPx();
     float ratio = NearEqual(triggerRefreshDistance, triggerLoadingDistance_)
                       ? 1.0f
                       : (loadingProgressOffset - triggerLoadingDistance_) /
-                            (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - triggerLoadingDistance_);
-    CHECK_NULL_VOID(progressChild_);
+                            (GetTriggerRefreshDisTance().ConvertToPx() - triggerLoadingDistance_);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateRefreshSizeScaleRatio(ratio);
@@ -1032,7 +1043,7 @@ void RefreshPattern::CustomBuilderRefreshingAnimation(bool isDrag)
         option.SetDuration(CUSTOM_BUILDER_ANIMATION_DURATION);
     }
     animation_ = AnimationUtils::StartAnimation(
-        option, [&]() { lowVersionOffset_->Set(TRIGGER_REFRESH_DISTANCE.ConvertToPx()); });
+        option, [&]() { lowVersionOffset_->Set(GetTriggerRefreshDisTance().ConvertToPx()); });
 }
 
 void RefreshPattern::CustomBuilderExit()
@@ -1049,11 +1060,11 @@ void RefreshPattern::UpdateCustomBuilderProperty()
     auto customBuilderSize = customBuilder_->GetGeometryNode()->GetFrameSize();
     auto maxScroll = static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx());
     customBuilderOffset_ = std::clamp(scrollOffset_, triggerLoadingDistance_, maxScroll - customBuilderSize.Height());
-    float triggerRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+    float triggerRefreshDistance = GetTriggerRefreshDisTance().ConvertToPx();
     float ratio = NearEqual(triggerRefreshDistance, triggerLoadingDistance_)
                       ? 1.0f
                       : (customBuilderOffset_ - triggerLoadingDistance_) /
-                            (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - triggerLoadingDistance_);
+                            (GetTriggerRefreshDisTance().ConvertToPx() - triggerLoadingDistance_);
     auto customBuilderContext = customBuilder_->GetRenderContext();
     CHECK_NULL_VOID(customBuilderContext);
     customBuilderContext->UpdateOpacity(std::clamp(ratio, 0.0f, 1.0f));

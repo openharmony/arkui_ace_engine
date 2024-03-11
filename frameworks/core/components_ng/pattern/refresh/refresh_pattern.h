@@ -175,6 +175,7 @@ private:
     void HandleCustomBuilderDragEndStage();
     void UpdateLoadingMarginTop(float top);
     float GetScrollOffset(float delta);
+    Dimension GetTriggerRefreshDisTance();
 
     float triggerLoadingDistance_ = 0.0f;
     float customBuilderOffset_ = 0.0f;
