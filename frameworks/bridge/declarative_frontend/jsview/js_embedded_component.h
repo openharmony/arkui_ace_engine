@@ -27,6 +27,8 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void OnTerminated(const JSCallbackInfo& info);
     static void OnError(const JSCallbackInfo& info);
+    static void JsWidth(const JSCallbackInfo& info);
+    static void JsHeight(const JSCallbackInfo& info);
     static void JsConstraintSize(const JSCallbackInfo& /* info */) {};
     static void JsAspectRatio(const JSCallbackInfo& /* info */) {};
     static void JsLayoutWeight(const JSCallbackInfo& /* info */) {};
