@@ -21,12 +21,9 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-enum class SessionTye { UI_EXTENSION_ABILITY, UNKNOWN };
-
 class SessionWrapperFactory {
 public:
-    static RefPtr<SessionWrapper> CreateSessionWrapper(SessionTye sessionType,
+    static RefPtr<SessionWrapper> CreateSessionWrapper(SessionType sessionType,
         const WeakPtr<UIExtensionPattern>& hostPattern, int32_t instanceId, bool isTransferringCaller);
 };
 } // namespace OHOS::Ace::NG

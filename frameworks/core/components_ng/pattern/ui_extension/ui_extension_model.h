@@ -23,6 +23,7 @@
 #include "base/utils/macros.h"
 #include "base/want/want_wrap.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 
 namespace OHOS::AAFwk {
 class Want;
@@ -41,7 +42,7 @@ public:
 
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller = false);
     // for Embedded Component
-    virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, int32_t embeddedType);
+    virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, NG::SessionType sessionType);
     // for DynamicComponent
     virtual void Create();
     virtual void InitializeDynamicComponent(const RefPtr<NG::FrameNode>& frameNode, const std::string& hapPath,
@@ -51,6 +52,7 @@ public:
     virtual void SetOnRemoteReady(std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onRemoteReady);
     virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);
     virtual void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult);
+    virtual void SetOnTerminated(std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>&)>&& onTerminated);
     virtual void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive);
     virtual void SetOnError(
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);

@@ -1321,7 +1321,7 @@ void PipelineContext::UpdateSizeChangeReason(
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(uiExtensionManager_);
-    uiExtensionManager_->OnSizeChanged(type, rsTransaction);
+    uiExtensionManager_->NotifySizeChangeReason(type, rsTransaction);
 #endif
 }
 
