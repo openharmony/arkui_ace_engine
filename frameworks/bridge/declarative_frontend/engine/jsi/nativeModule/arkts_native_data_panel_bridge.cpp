@@ -203,7 +203,9 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
 
     auto colors = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "colors"));
     std::vector<OHOS::Ace::NG::Gradient> shadowColors;
+    ConvertThemeColor(shadowColors);
     if (!colors.IsEmpty() && colors->IsArray(vm)) {
+        shadowColors.clear();
         auto colorsArray = panda::CopyableGlobal<panda::ArrayRef>(vm, colors);
         for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
             auto item = colorsArray->GetValueAt(vm, colors, i);
