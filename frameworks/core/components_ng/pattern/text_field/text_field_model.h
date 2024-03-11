@@ -58,6 +58,13 @@ struct PasswordIcon {
     std::string hideModuleName;
 };
 
+struct UserUnderlineColor {
+    std::optional<Color> typing = std::nullopt;
+    std::optional<Color> normal = std::nullopt;
+    std::optional<Color> error = std::nullopt;
+    std::optional<Color> disable = std::nullopt;
+};
+
 enum class InputStyle {
     DEFAULT,
     INLINE,
@@ -226,6 +233,8 @@ public:
     virtual void SetMaxViewLines(uint32_t value) {};
 
     virtual void SetShowUnderline(bool showUnderLine) {};
+    virtual void SetNormalUnderlineColor(const Color& normalColor) {};
+    virtual void SetUserUnderlineColor(UserUnderlineColor userColor) {};
     virtual void SetShowCounter(bool value) {};
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetFocusableAndFocusNode() {};

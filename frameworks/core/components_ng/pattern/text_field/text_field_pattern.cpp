@@ -695,7 +695,7 @@ void TextFieldPattern::HandleFocusEvent()
         auto textFieldTheme = GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
         auto radius = textFieldTheme->GetBorderRadiusSize();
-        underlineColor_ = textFieldTheme->GetUnderlineTypingColor();
+        underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
         renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
     }
@@ -860,7 +860,12 @@ void TextFieldPattern::InitDisableColor()
     CHECK_NULL_VOID(theme);
     if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         underlineWidth_ = UNDERLINE_WIDTH;
-        underlineColor_ = IsDisabled() ? theme->GetDisableUnderlineColor() : theme->GetUnderlineColor();
+        Color underlineColor = userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
+        if (userUnderlineColor_.disable) {
+            underlineColor_ = IsDisabled() ? userUnderlineColor_.disable.value() : underlineColor;
+        } else {
+            underlineColor_ = IsDisabled() ? theme->GetDisableUnderlineColor() : underlineColor;
+        }
         SaveUnderlineStates();
     }
     layoutProperty->UpdateIsDisabled(IsDisabled());
@@ -967,7 +972,7 @@ void TextFieldPattern::HandleBlurEvent()
     if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         auto renderContext = host->GetRenderContext();
         renderContext->UpdateBorderRadius(borderRadius_);
-        underlineColor_ = textFieldTheme->GetUnderlineColor();
+        underlineColor_ = userUnderlineColor_.normal.value_or(textFieldTheme->GetUnderlineColor());
         underlineWidth_ = UNDERLINE_WIDTH;
     }
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
@@ -1316,7 +1321,7 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
     CHECK_NULL_VOID(textFieldTheme);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
     if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
-        underlineColor_ = textFieldTheme->GetUnderlineTypingColor();
+        underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
     }
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
@@ -3453,7 +3458,7 @@ void TextFieldPattern::UpdateOverCounterColor()
     if (IsTextArea() && showBorder == true) {
         HandleCounterBorder();
     } else if (!IsTextArea() && showBorder == true) {
-        underlineColor_ = theme->GetErrorUnderlineColor();
+        underlineColor_ = userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor());
     }
     context->UpdateForegroundColor(countTextStyle.GetTextColor());
     host->MarkDirtyNode();
@@ -4362,7 +4367,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         if (layoutProperty->GetShowUnderlineValue(false) && !IsTextArea()) {
             auto textFieldTheme = GetTheme();
             CHECK_NULL_VOID(textFieldTheme);
-            underlineColor_ = textFieldTheme->GetUnderlineColor();
+            underlineColor_ = userUnderlineColor_.normal.value_or(textFieldTheme->GetUnderlineColor());
         }
         counterChange_ = false;
         HandleCounterBorder();
@@ -5139,7 +5144,7 @@ void TextFieldPattern::SetShowError()
                         && !IsNormalInlineState();
     if (preErrorState_) { // update error state
         if (isUnderLine) {
-            underlineColor_ = textFieldTheme->GetErrorUnderlineColor();
+            underlineColor_ = userUnderlineColor_.error.value_or(textFieldTheme->GetErrorUnderlineColor());
             underlineWidth_ = ERROR_UNDERLINE_WIDTH;
         } else if (passWordMode) {
             BorderWidthProperty borderWidth;
@@ -5157,7 +5162,7 @@ void TextFieldPattern::SetShowError()
             layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
         }
     } else if (preErrorState) { // need to clean error state
-        underlineColor_ = textFieldTheme->GetUnderlineColor();
+        underlineColor_ = userUnderlineColor_.normal.value_or(textFieldTheme->GetUnderlineColor());
         underlineWidth_ = UNDERLINE_WIDTH;
         layoutProperty->UpdateBorderWidth(passwordModeStyle_.borderwidth);
         renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);

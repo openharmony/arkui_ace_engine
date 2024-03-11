@@ -87,6 +87,7 @@ public:
     static void SetMaxLines(const JSCallbackInfo& info);
 
     static void SetShowUnderline(const JSCallbackInfo& info);
+    static void SetUnderlineColor(const JSCallbackInfo& info);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);
     static bool ParseJsCustomKeyboardBuilder(

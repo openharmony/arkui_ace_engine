@@ -863,6 +863,21 @@ public:
         underlineColor_ = underlineColor;
     }
 
+    void SetNormalUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.normal = normalColor;
+    }
+
+    void SetUserUnderlineColor(UserUnderlineColor userUnderlineColor)
+    {
+        userUnderlineColor_ = userUnderlineColor;
+    }
+
+    UserUnderlineColor GetUserUnderlineColor()
+    {
+        return userUnderlineColor_;
+    }
+
     void SetUnderlineWidth(Dimension underlineWidth)
     {
         underlineWidth_ = underlineWidth;
@@ -1337,6 +1352,7 @@ private:
     float countHeight_ = 0.0f;
     Dimension underlineWidth_ = 1.0_px;
     Color underlineColor_;
+    UserUnderlineColor userUnderlineColor_ = UserUnderlineColor();
     bool scrollBarVisible_ = false;
     bool isCounterIdealheight_ = false;
     float maxFrameOffsetY_ = 0.0f;

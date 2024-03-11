@@ -941,6 +941,43 @@ void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetShowUnderline(info[0]->ToBoolean());
 }
 
+void JSTextField::SetUnderlineColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color underlineColor;
+    if (ParseJsColor(info[0], underlineColor)) {
+        TextFieldModel::GetInstance()->SetNormalUnderlineColor(underlineColor);
+    } else if (info[0]->IsObject()) {
+        auto param = JSRef<JSObject>::Cast(info[0]);
+        UserUnderlineColor userColor = UserUnderlineColor();
+        auto typingColorProp = param->GetProperty("typing");
+        Color typing;
+        if (ParseJsColor(typingColorProp, typing)) {
+            userColor.typing = typing;
+        }
+        auto normalColorProp = param->GetProperty("normal");
+        Color normal;
+        if (ParseJsColor(normalColorProp, normal)) {
+            userColor.normal = normal;
+        }
+        auto errorColorProp = param->GetProperty("error");
+        Color error;
+        if (ParseJsColor(errorColorProp, error)) {
+            userColor.error = error;
+        }
+        auto disableColorProp = param->GetProperty("disable");
+        Color disable;
+        if (ParseJsColor(disableColorProp, disable)) {
+            userColor.disable = disable;
+        }
+        TextFieldModel::GetInstance()->SetUserUnderlineColor(userColor);
+    } else {
+        TextFieldModel::GetInstance()->SetUserUnderlineColor(UserUnderlineColor());
+    }
+}
+
 void JSTextField::SetPasswordIcon(const JSCallbackInfo& info)
 {
     if (!Container::IsCurrentUseNewPipeline()) {
