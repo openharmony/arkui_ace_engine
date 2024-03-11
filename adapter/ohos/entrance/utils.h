@@ -31,6 +31,7 @@ namespace OHOS::Ace {
 
 std::string GetStringFromFile(const std::string& packagePathStr, const std::string& fileName);
 std::string GetStringFromHap(const std::string& hapPath, const std::string& fileName);
+bool CheckUrlValid(const std::string& url, const std::string& hapPath);
 
 RefPtr<AssetProviderImpl> CreateAssetProviderImpl(
     const std::string& packagePath, const std::vector<std::string>& assetBasePaths, bool useCache = true);

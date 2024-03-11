@@ -85,6 +85,34 @@ std::string GetStringFromHap(const std::string& hapPath, const std::string& file
     return osstream.str();
 }
 
+bool CheckUrlValid(const std::string& url, const std::string& hapPath)
+{
+    std::string bundleNameFlag = "@bundle:";
+    if (url.find(bundleNameFlag) == 0) {
+        return true;
+    }
+    
+    auto moduleContent = GetStringFromHap(hapPath, "module.json");
+    auto moduleValue = JsonUtil::ParseJsonString(moduleContent);
+    auto pagesValue = moduleValue->GetValue("module")->GetString("pages");
+    std::string profileMark = "$profile:";
+    auto jsonPath = pagesValue.replace(0, profileMark.size(), "resources/base/profile/") + ".json";
+
+    auto jsonContent = GetStringFromHap(hapPath, jsonPath);
+    auto jsonValue = JsonUtil::ParseJsonString(jsonContent);
+    auto srcValue = jsonValue->GetValue("src");
+    auto arrSize = srcValue->GetArraySize();
+
+    for (int32_t i = 0; i < arrSize; i++) {
+        auto urlPath = srcValue->GetArrayItem(i)->GetString();
+        if (urlPath == url) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 RefPtr<AssetProviderImpl> CreateAssetProviderImpl(
     const std::string& packagePath, const std::vector<std::string>& assetBasePaths, bool useCache)
 {
