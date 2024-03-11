@@ -265,7 +265,8 @@ class HyperlinkModifier extends ArkHyperlinkComponent {
   }
 }
 function copyImageAnimatorModifierWithKey(obj) {
-  var _a, _b;
+  let _a;
+  let _b;
   let newObj = { ...obj };
   if (obj.convertImageFrames !== undefined) {
     newObj.convertImageFrames = (_a = obj) === null || _a === void 0 ? void 0 : _a.convertImageFrames;

@@ -343,7 +343,7 @@ ArkUINativeModuleValue SideBarContainerBridge::SetDivider(ArkUIRuntimeCallInfo* 
     CalcDimension endMargin;
     ArkUI_Float32 values[NUM_3] = { 1.0, 0.0, 0.0 };
     int32_t units[NUM_3] = { static_cast<int32_t>(DimensionUnit::VP) };
-    if (ArkTSUtils::ParseJsDimensionNG(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP, false) &&
+    if (ArkTSUtils::ParseJsDimensionNG(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP, true) &&
         strokeWidth.Value() >= 0) {
         values[NUM_0] = strokeWidth.Value();
         units[NUM_0] = static_cast<int32_t>(strokeWidth.Unit());
@@ -351,7 +351,7 @@ ArkUINativeModuleValue SideBarContainerBridge::SetDivider(ArkUIRuntimeCallInfo* 
         strokeWidth.SetValue(1.0);
         strokeWidth.SetUnit(DimensionUnit::VP);
     }
-    if (ArkTSUtils::ParseJsDimensionNG(vm, startMarginArg, startMargin, DimensionUnit::VP, false) &&
+    if (ArkTSUtils::ParseJsDimensionNG(vm, startMarginArg, startMargin, DimensionUnit::VP, true) &&
         startMargin.Value() >= 0) {
         values[NUM_1] = startMargin.Value();
         units[NUM_1] = static_cast<int32_t>(startMargin.Unit());
@@ -359,7 +359,7 @@ ArkUINativeModuleValue SideBarContainerBridge::SetDivider(ArkUIRuntimeCallInfo* 
         startMargin.SetValue(0.0);
         startMargin.SetUnit(DimensionUnit::VP);
     }
-    if (ArkTSUtils::ParseJsDimensionNG(vm, endMarginArg, endMargin, DimensionUnit::VP, false) &&
+    if (ArkTSUtils::ParseJsDimensionNG(vm, endMarginArg, endMargin, DimensionUnit::VP, true) &&
         endMargin.Value() >= 0) {
         values[NUM_2] = endMargin.Value();
         units[NUM_2] = static_cast<int32_t>(endMargin.Unit());

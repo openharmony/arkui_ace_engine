@@ -890,11 +890,11 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLineHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetLineHeight));
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ReSetLineHeight));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetLineHeight));
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetFontStyle));
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ReSetFontStyle));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetFontStyle));
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetFontSize));
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
