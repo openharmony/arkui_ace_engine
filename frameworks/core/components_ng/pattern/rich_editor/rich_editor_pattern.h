@@ -645,7 +645,6 @@ private:
     int32_t caretPosition_ = 0;
     int32_t caretSpanIndex_ = -1;
     long long timestamp_ = 0;
-    OffsetF parentGlobalOffset_;
     OffsetF selectionMenuOffsetByMouse_;
     OffsetF lastClickOffset_;
     std::string pasteStr_;
