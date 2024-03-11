@@ -1854,6 +1854,31 @@ bool RichEditorPattern::JudgeDraggable(GestureEvent& info)
     return false;
 }
 
+void RichEditorPattern::CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight)
+{
+    auto caretPosition = GetCaretPosition();
+    if (GetTextContentLength() <= 0 && !IsShowPlaceholder()) {
+        auto rect = GetTextContentRect();
+        constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
+        caretOffset = OffsetF(rect.GetX(), rect.GetY());
+        caretHeight = Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx();
+        return;
+    }
+    float caretHeightUp = 0.0f;
+    float caretHeightDown = 0.0f;
+    OffsetF caretOffsetUp = CalcCursorOffsetByPosition(caretPosition, caretHeightUp, false, false);
+    OffsetF caretOffsetDown = CalcCursorOffsetByPosition(caretPosition, caretHeightDown, true, false);
+    bool isShowCaretDown = true;
+    if (lastClickOffset_.NonNegative()) {
+        // show caret by click
+        isShowCaretDown = !NearEqual(lastClickOffset_.GetX(), caretOffsetUp.GetX());
+    } else {
+        isShowCaretDown = GreatNotEqual(caretOffsetDown.GetY() + 0.5f, caretOffsetUp.GetY() + caretHeightUp);
+    }
+    caretOffset = isShowCaretDown ? caretOffsetDown : caretOffsetUp;
+    caretHeight = isShowCaretDown ? caretHeightDown : caretHeightUp;
+}
+
 void RichEditorPattern::HandleLongPress(GestureEvent& info)
 {
     auto focusHub = GetFocusHub();
@@ -4517,22 +4542,19 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
     OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
     if (GetTextContentLength() == 0) {
-        float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
-        secondHandlePaintSize.SetHeight(caretHeight);
+        OffsetF caretOffset;
+        float caretHeight = 0.0f;
+        CalculateCaretOffsetAndHeight(caretOffset, caretHeight);
+        secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight };
+        secondHandleOffset = caretOffset + textPaintOffset - rootOffset;
         // only show the second handle.
         firstHandlePaintSize = SizeF{};
         firstHandleOffset = OffsetF{};
     }
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
-    RectF firstHandle;
-    firstHandle.SetOffset(firstHandleOffset);
-    firstHandle.SetSize(firstHandlePaintSize);
-    textSelector_.firstHandle = firstHandle;
-    RectF secondHandle;
-    secondHandle.SetOffset(secondHandleOffset);
-    secondHandle.SetSize(secondHandlePaintSize);
-    textSelector_.secondHandle = secondHandle;
+    textSelector_.firstHandle = RectF{ firstHandleOffset, firstHandlePaintSize };
+    textSelector_.secondHandle = RectF{ secondHandleOffset, secondHandlePaintSize };
 }
 
 void RichEditorPattern::ResetSelection()

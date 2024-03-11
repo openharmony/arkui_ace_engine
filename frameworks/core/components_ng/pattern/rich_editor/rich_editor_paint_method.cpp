@@ -74,35 +74,10 @@ void RichEditorPaintMethod::SetCaretOffsetAndHeight(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(richEditorPattern);
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
     CHECK_NULL_VOID(overlayMod);
-    auto caretPosition = richEditorPattern->GetCaretPosition();
-    if (richEditorPattern->GetTextContentLength() <= 0 && !richEditorPattern->IsShowPlaceholder()) {
-        auto rect = richEditorPattern->GetTextContentRect();
-        constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
-        overlayMod->SetCaretOffsetAndHeight(
-            OffsetF(rect.GetX(), rect.GetY()), Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx());
-        return;
-    }
-    float caretHeightUp = 0.0f;
-    float caretHeightDown = 0.0f;
-    OffsetF caretOffsetUp =
-        richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeightUp, false, false);
-    OffsetF caretOffsetDown =
-        richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeightDown, true, false);
-    OffsetF lastClickOffset = richEditorPattern->GetLastClickOffset();
-    if (lastClickOffset.NonNegative()) {
-        // set caret position by click
-        if (NearEqual(lastClickOffset.GetX(), caretOffsetUp.GetX())) {
-            overlayMod->SetCaretOffsetAndHeight(caretOffsetUp, caretHeightUp);
-        } else {
-            overlayMod->SetCaretOffsetAndHeight(caretOffsetDown, caretHeightDown);
-        }
-    } else {
-        if (GreatNotEqual(caretOffsetDown.GetY() + 0.5f, caretOffsetUp.GetY() + caretHeightUp)) {
-            overlayMod->SetCaretOffsetAndHeight(caretOffsetDown, caretHeightDown);
-        } else {
-            overlayMod->SetCaretOffsetAndHeight(caretOffsetUp, caretHeightUp);
-        }
-    }
+    OffsetF caretOffset;
+    float caretHeight = 0.0f;
+    richEditorPattern->CalculateCaretOffsetAndHeight(caretOffset, caretHeight);
+    overlayMod->SetCaretOffsetAndHeight(caretOffset, caretHeight);
 }
 
 void RichEditorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
