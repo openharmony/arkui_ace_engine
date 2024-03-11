@@ -78,6 +78,29 @@ ohos_shared_library("ace_ndk") {
   part_name = ace_engine_part
 }
 
+if (is_arkui_x) {
+  ohos_source_set("ace_static_ndk") {
+    include_dirs = [
+      "$ace_root",
+      "$ace_root/frameworks",
+      "$ace_root/interfaces/native",
+    ]
+
+    sources = [
+      "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
+      "native_interface_xcomponent.cpp",
+    ]
+
+    deps = [ "$checking_function_root:libsec_static" ]
+
+    cflags_cc = [ "-Wno-missing-braces" ]
+
+    print("ace_static_ndk build.")
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  }
+}
+
 group("ace_packages_ndk") {
   deps = [ ":ace_ndk" ]
 }

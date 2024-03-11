@@ -70,6 +70,7 @@ protected:
     void GetFloatArrayParam(const std::string& param, const std::string& name, std::vector<float>& matrix) const;
     double GetDoubleParam(const std::string& param, const std::string& name) const;
     int32_t GetIntParam(const std::string& param, const std::string& name) const;
+    int64_t GetInt64Param(const std::string& param, const std::string& name) const;
     std::string MakeResourceHash() const;
     std::string MakeEventHash(const std::string& event) const;
     std::string MakeMethodHash(const std::string& method) const;
