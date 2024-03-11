@@ -468,7 +468,7 @@ HWTEST_F(StepperTestNg, StepperPatternCreateArrowlessRightButtonNode001, TestSiz
     frameNode->AddChild(swiperNode);
     swiperNode->AddChild(stepperItemNode);
     stepperPattern->CreateArrowlessRightButtonNode(
-        INDEX, Localization::GetInstance()->GetEntryLetters("stepper.start"));
+        INDEX, false, Localization::GetInstance()->GetEntryLetters("stepper.start"));
     auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
     ASSERT_NE(hostNode, nullptr);
     auto buttonId = hostNode->GetRightButtonId();
