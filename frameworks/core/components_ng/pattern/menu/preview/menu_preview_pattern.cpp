@@ -55,7 +55,9 @@ void ShowScaleAnimation(
     AnimationOption scaleOption;
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
     scaleOption.SetCurve(motion);
-
+    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
+    scaleOption.SetOnFinishEvent(
+        []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
     context->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
     AnimationUtils::Animate(
         scaleOption,

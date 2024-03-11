@@ -2630,3 +2630,14 @@ let ButtonRole;
   ButtonRole['NORMAL'] = 0;
   ButtonRole['ERROR'] = 1;
 })(ButtonRole || (ButtonRole = {}));
+
+let PreDragStatus;
+(function (PreDragStatus) {
+  PreDragStatus['ACTION_DETECTING_STATUS'] = 0;
+  PreDragStatus['READY_TO_TRIGGER_DRAG_ACTION'] = 1;
+  PreDragStatus['PREVIEW_LIFT_STARTED'] = 2;
+  PreDragStatus['PREVIEW_LIFT_FINISHED'] = 3;
+  PreDragStatus['PREVIEW_LANDING_STARTED'] = 4;
+  PreDragStatus['PREVIEW_LANDING_FINISHED'] = 5;
+  PreDragStatus['ACTION_CANCELED_BEFORE_DRAG'] = 6;
+})(PreDragStatus || (PreDragStatus = {}));

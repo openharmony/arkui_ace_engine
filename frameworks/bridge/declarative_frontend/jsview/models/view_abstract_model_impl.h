@@ -177,6 +177,7 @@ public:
     void SetDraggable(bool draggable) override {}
     void SetDragPreviewOptions(const NG::DragPreviewOption& previewOption) override {};
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
+    void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) override;
     void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;

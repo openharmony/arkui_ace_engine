@@ -1070,6 +1070,13 @@ void ViewAbstract::SetOnDragStart(
     eventHub->SetOnDragStart(std::move(onDragStart));
 }
 
+void ViewAbstract::SetOnPreDrag(std::function<void(const PreDragStatus)> &&onPreDragFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPreDrag(std::move(onPreDragFunc));
+}
+
 void ViewAbstract::SetOnDragEnter(
     std::function<void(const RefPtr<OHOS::Ace::DragEvent> &, const std::string &)> &&onDragEnter)
 {
