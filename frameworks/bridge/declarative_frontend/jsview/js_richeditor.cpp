@@ -851,6 +851,42 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     return imageStyle;
 }
 
+void JSRichEditorController::ParseJsLineHeightTextStyle(
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
+    JSRef<JSVal> lineHeight = styleObject->GetProperty("lineHeight");
+    CalcDimension lineHigh; 
+    if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, lineHigh) &&
+        !lineHigh.IsNegative() && lineHigh.Unit() != DimensionUnit::PERCENT) {
+        updateSpanStyle.updateLineHeight = lineHigh;
+        style.SetLineHeight(lineHigh);
+    } else if (lineHigh.IsNegative() || lineHigh.Unit() == DimensionUnit::PERCENT) {
+        auto theme = JSContainerBase::GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        lineHigh = theme->GetTextStyle().GetLineHeight();
+        updateSpanStyle.updateLineHeight = lineHigh;
+        style.SetLineHeight(lineHigh);
+    }
+}
+
+void JSRichEditorController::ParseJsLetterSpacingTextStyle(
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
+    JSRef<JSVal> letterSpacing = styleObject->GetProperty("letterSpacing");
+    CalcDimension letters;
+    if (JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters, false) &&
+         letters.Unit() != DimensionUnit::PERCENT) {
+        updateSpanStyle.updateLetterSpacing = letters;
+        style.SetLetterSpacing(letters);
+    } else if (letters.Unit() == DimensionUnit::PERCENT) {
+        auto theme = JSContainerBase::GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        letters = theme->GetTextStyle().GetLetterSpacing();
+        updateSpanStyle.updateLetterSpacing = letters;
+        style.SetLetterSpacing(letters);
+    }
+}
+
 void JSRichEditorController::ParseJsTextStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
@@ -875,32 +911,8 @@ void JSRichEditorController::ParseJsTextStyle(
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
-    JSRef<JSVal> lineHeight = styleObject->GetProperty("lineHeight");
-    CalcDimension lineHigh;
-    if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, lineHigh) &&
-        !lineHigh.IsNegative() && lineHigh.Unit() != DimensionUnit::PERCENT) {
-        updateSpanStyle.updateLineHeight = lineHigh;
-        style.SetLineHeight(lineHigh);
-    } else if (lineHigh.IsNegative() || lineHigh.Unit() == DimensionUnit::PERCENT) {
-        auto theme = JSContainerBase::GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        lineHigh = theme->GetTextStyle().GetLineHeight();
-        updateSpanStyle.updateLineHeight = lineHigh;
-        style.SetLineHeight(lineHigh);
-    }
-    JSRef<JSVal> letterSpacing = styleObject->GetProperty("letterSpacing");
-    CalcDimension letters;
-    if (!letterSpacing->IsNull() && JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters) &&
-        letters.Unit() != DimensionUnit::PERCENT) {
-        updateSpanStyle.updateLetterSpacing = letters;
-        style.SetLetterSpacing(letters);
-    } else if (letters.Unit() == DimensionUnit::PERCENT) {
-        auto theme = JSContainerBase::GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        letters = theme->GetTextStyle().GetLetterSpacing();
-        updateSpanStyle.updateLetterSpacing = letters;
-        style.SetLetterSpacing(letters);
-    }
+    ParseJsLineHeightTextStyle(styleObject, style, updateSpanStyle);
+    ParseJsLetterSpacingTextStyle(styleObject, style, updateSpanStyle, false);	
     JSRef<JSVal> fontStyle = styleObject->GetProperty("fontStyle");
     if (!fontStyle->IsNull() && fontStyle->IsNumber()) {
         updateSpanStyle.updateItalicFontStyle = static_cast<FontStyle>(fontStyle->ToNumber<int32_t>());
@@ -950,32 +962,8 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }	
-    JSRef<JSVal> lineHeight = styleObject->GetProperty("lineHeight");
-    CalcDimension lineHigh;
-    if (!lineHeight->IsNull() && JSContainerBase::ParseJsDimensionFpNG(lineHeight, lineHigh, false) &&
-        !lineHigh.IsNegative() && lineHigh.Unit() != DimensionUnit::PERCENT) {
-        updateSpanStyle.updateLineHeight = lineHigh;
-        style.SetLineHeight(lineHigh);
-    } else if (lineHigh.IsNegative() || lineHigh.Unit() == DimensionUnit::PERCENT) {
-        auto theme = JSContainerBase::GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        lineHigh = theme->GetTextStyle().GetLineHeight();
-        updateSpanStyle.updateLineHeight = lineHigh;
-        style.SetLineHeight(lineHigh);
-    }
-    JSRef<JSVal> letterSpacing = styleObject->GetProperty("letterSpacing");
-    CalcDimension letters;
-    if (!letterSpacing->IsNull() && JSContainerBase::ParseJsDimensionFpNG(letterSpacing, letters, false) &&
-        letters.Unit() != DimensionUnit::PERCENT) {
-        updateSpanStyle.updateLetterSpacing = letters;
-        style.SetLetterSpacing(letters);
-    } else if (letters.Unit() == DimensionUnit::PERCENT) {
-        auto theme = JSContainerBase::GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        letters = theme->GetTextStyle().GetLetterSpacing();
-        updateSpanStyle.updateLetterSpacing = letters;
-        style.SetLetterSpacing(letters);
-    }
+    ParseJsLineHeightTextStyle(styleObject, style, updateSpanStyle);
+    ParseJsLetterSpacingTextStyle(styleObject, style, updateSpanStyle, false);
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
     if (!fontWeight->IsNull() && (fontWeight->IsNumber() || JSContainerBase::ParseJsString(fontWeight, weight))) {
@@ -1682,10 +1670,10 @@ JSRef<JSObject> JSRichEditorController::CreateTypingStyleResult(const struct Upd
     if (typingStyle.updateFontSize.has_value()) {
         tyingStyleObj->SetProperty<double>("fontSize", typingStyle.updateFontSize.value().ConvertToVp());
     }
-    if(typingStyle.updateLineHeight.has_value()){
+    if(typingStyle.updateLineHeight.has_value()) {
         tyingStyleObj->SetProperty<double>("lineHeight", typingStyle.updateLineHeight.value().ConvertToVp());
     }
-    if(typingStyle.updateLetterSpacing.has_value()){
+    if(typingStyle.updateLetterSpacing.has_value()) {
         tyingStyleObj->SetProperty<double>("letterSpacing", typingStyle.updateLetterSpacing.value().ConvertToVp());
     }
     if (typingStyle.updateTextColor.has_value()) {

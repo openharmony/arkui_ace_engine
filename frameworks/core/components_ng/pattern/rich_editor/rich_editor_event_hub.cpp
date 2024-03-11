@@ -121,7 +121,7 @@ void RichEditorAbstractSpanResult::SetTextStyle(TextStyleResult textStyle)
 TextStyleResult RichEditorAbstractSpanResult::GetTextStyle() const
 {
     return textStyle_;
-} 
+}
 
 void RichEditorAbstractSpanResult::SetLineHeight(double lineHeight)
 {
