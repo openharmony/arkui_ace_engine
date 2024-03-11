@@ -15,7 +15,16 @@
 
 #include "refresh_test_ng.h"
 
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+
 namespace OHOS::Ace::NG {
+
+constexpr float WIDTH = 480.f;
+constexpr float SWIPER_HEIGHT = 400.f;
+constexpr float SCROLL_HEIGHT = 400.f;
+constexpr float TEXT_HEIGHT = 200.f;
+constexpr int32_t TEXT_NUMBER = 5;
+
 void RefreshTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
@@ -39,11 +48,15 @@ void RefreshTestNg::TearDown()
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
+    swiper_ = nullptr;
+    swiperPattern_ = nullptr;
+    scroll_ = nullptr;
+    scrollPattern_ = nullptr;
 }
 
 void RefreshTestNg::GetInstance()
 {
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<RefreshPattern>();
     eventHub_ = frameNode_->GetEventHub<RefreshEventHub>();
@@ -60,7 +73,63 @@ void RefreshTestNg::Create(const std::function<void(RefreshModelNG)>& callback)
         callback(model);
     }
     GetInstance();
+    ViewStackProcessor::GetInstance()->Finish();
     FlushLayoutTask(frameNode_);
+}
+
+void RefreshTestNg::CreateRefresh(const std::function<void(RefreshModelNG)>& callback)
+{
+    RefreshModelNG model;
+    model.Create();
+    ViewAbstract::SetHeight(CalcLength(REFRESH_HEIGHT));
+    if (callback) {
+        callback(model);
+    }
+    GetInstance();
+    ViewStackProcessor::GetInstance()->Pop();
+}
+
+void RefreshTestNg::CreateScroll()
+{
+    ScrollModelNG scrollModel;
+    scrollModel.Create();
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    ColumnModelNG colModel;
+    colModel.Create(Dimension(0), nullptr, "");
+    TextModelNG model;
+    model.Create("text");
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(TEXT_HEIGHT));
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateRefresh([this](RefreshModelNG model) { CreateNestedSwiper(); });
+    ViewStackProcessor::GetInstance()->Pop();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    scroll_ = AceType::DynamicCast<FrameNode>(element);
+    scrollPattern_ = scroll_->GetPattern<ScrollPattern>();
+    ViewStackProcessor::GetInstance()->Finish();
+    FlushLayoutTask(scroll_);
+}
+
+void RefreshTestNg::CreateNestedSwiper()
+{
+    SwiperModelNG model;
+    model.Create();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetLoop(false);
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    for (int32_t index = 0; index < TEXT_NUMBER; index++) {
+        TextModelNG model;
+        model.Create("text");
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    swiper_ = AceType::DynamicCast<FrameNode>(element);
+    swiperPattern_ = swiper_->GetPattern<SwiperPattern>();
+    ViewStackProcessor::GetInstance()->Pop();
+    FlushLayoutTask(swiper_);
+    auto children = swiper_->GetChildren();
 }
 
 RefPtr<FrameNode> RefreshTestNg::CreateCustomNode()
@@ -69,6 +138,129 @@ RefPtr<FrameNode> RefreshTestNg::CreateCustomNode()
     auto layoutProperty = frameNode->GetLayoutProperty();
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CUSTOM_NODE_WIDTH), CalcLength(CUSTOM_NODE_HEIGHT)));
     return frameNode;
+}
+
+/**
+ * @tc.name: RefreshNestedSwiper001
+ * @tc.desc: Test Refresh nested Swiper with selfOnly mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, RefreshNestedSwiper001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the structure of Refresh and Swiper.
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    Create([this](RefreshModelNG model) { CreateNestedSwiper(); });
+
+    /**
+     * @tc.steps: step2. Test OnScrollStartRecursive.
+     * @tc.expected: isSourceFromAnimation_ of refresh  is false, the nestedOption of swiper is PARENT_FIRST and SELF_FIRST.
+     */
+    swiperPattern_->OnScrollStartRecursive(0.f, 0.f);
+    EXPECT_FALSE(pattern_->isSourceFromAnimation_);
+    auto swiperNestedOption = swiperPattern_->GetNestedScroll();
+    EXPECT_EQ(swiperNestedOption.forward, NestedScrollMode::PARENT_FIRST);
+    EXPECT_EQ(swiperNestedOption.backward, NestedScrollMode::SELF_FIRST);
+
+    /**
+     * @tc.steps: step3. Test HandleScrollVelocity.
+     * @tc.expected: The result of swiper is TRUE, the result of refresh is FALSE.
+     */
+    auto result = swiperPattern_->HandleScrollVelocity(5.f);
+    EXPECT_TRUE(result);
+    result = pattern_->HandleScrollVelocity(5.f);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step4. Test HandleScroll, the offset is 20.f.
+     * @tc.expected: The scrollOffset_ of refresh is the sum of lastScrollOffset and 20.f * friction.
+     */
+    auto lastScrollOffset = pattern_->scrollOffset_;
+    auto friction = pattern_->CalculateFriction();
+    swiperPattern_->HandleScroll(static_cast<float>(20.f), SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
+    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 20.f * friction);
+
+    /**
+     * @tc.steps: step5. Test HandleScrollVelocity, offset is 20.f and the scrollOffset_ of refresh is positive.
+     * @tc.expected: The result of swiper is TRUE, the result of refresh is TRUE.
+     */
+    result = swiperPattern_->HandleScrollVelocity(0.f);
+    EXPECT_TRUE(result);
+    result = pattern_->HandleScrollVelocity(0.f);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step6. Test HandleScroll, the offset is 40.f.
+     * @tc.expected: The scrollOffset_ of refresh is 0.f,
+     *               and the currentDelta_ of swiper is lastDelta - (-40.f + lastScrollOffset / friction).
+     */
+    lastScrollOffset = pattern_->scrollOffset_;
+    auto lastDelta = swiperPattern_->currentDelta_;
+    friction = pattern_->CalculateFriction();
+    swiperPattern_->HandleScroll(static_cast<float>(-40.f), SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+    EXPECT_EQ(swiperPattern_->currentDelta_, lastDelta - (-40.f + lastScrollOffset / friction));
+}
+
+/**
+ * @tc.name: RefreshNestedSwiper002
+ * @tc.desc: Test Refresh nested Swiper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, RefreshNestedSwiper002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the structure of Refresh and Swiper, and set SELF_FIRST to the nested mode of swiper.
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateScroll();
+    swiperPattern_->SetNestedScroll(NestedScrollOptions({
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    }));
+
+    /**
+     * @tc.steps: step2. Test OnScrollStartRecursive.
+     * @tc.expected: isSourceFromAnimation_ of refresh  is false,
+     *               the nestedOption of swiper is PARENT_FIRST and SELF_FIRST,
+     *               the nestedOption of refresh is SELF_FIRST.
+     */
+    swiperPattern_->OnScrollStartRecursive(0.f, 0.f);
+    EXPECT_FALSE(pattern_->isSourceFromAnimation_);
+    auto swiperNestedOption = swiperPattern_->GetNestedScroll();
+    EXPECT_EQ(swiperNestedOption.forward, NestedScrollMode::PARENT_FIRST);
+    EXPECT_EQ(swiperNestedOption.backward, NestedScrollMode::SELF_FIRST);
+    auto refreshNestedOption = pattern_->GetNestedScroll();
+    EXPECT_EQ(refreshNestedOption.forward, NestedScrollMode::SELF_FIRST);
+    EXPECT_EQ(refreshNestedOption.backward, NestedScrollMode::SELF_FIRST);
+
+    /**
+     * @tc.steps: step3. Test HandleScrollVelocity.
+     * @tc.expected: The result of swiper is TRUE, the result of refresh is FALSE.
+     */
+    auto result = swiperPattern_->HandleScrollVelocity(0.f);
+    EXPECT_TRUE(result);
+    result = pattern_->HandleScrollVelocity(0.f);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step4. Test HandleScroll, the offset is -20.f.
+     * @tc.expected: The currentOffset_ of scroll is -20.f.
+     */
+    swiperPattern_->HandleScroll(static_cast<float>(-20.f), SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
+    EXPECT_EQ(scrollPattern_->currentOffset_, -20.f);
+
+    /**
+     * @tc.steps: step5. Test HandleScroll, the offset is 40.f.
+     * @tc.expected: The scrollOffset_ of refresh is the sum of lastScrollOffset and 20.f * friction.
+     */
+    auto lastScrollOffset = pattern_->scrollOffset_;
+    auto friction = pattern_->CalculateFriction();
+    swiperPattern_->HandleScroll(static_cast<float>(40.f), SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
+    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 20.f * friction);
 }
 
 /**

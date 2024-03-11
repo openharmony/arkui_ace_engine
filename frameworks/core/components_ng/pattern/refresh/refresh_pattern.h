@@ -30,14 +30,15 @@
 #include "frameworks/core/components_ng/pattern/refresh/refresh_event_hub.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
+#include "frameworks/core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "frameworks/core/components_ng/pattern/text/text_layout_property.h"
 #include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
-class RefreshPattern : public Pattern {
-    DECLARE_ACE_TYPE(RefreshPattern, Pattern);
+class RefreshPattern : public NestableScrollContainer {
+    DECLARE_ACE_TYPE(RefreshPattern, NestableScrollContainer);
 
 public:
     RefreshPattern() = default;
@@ -84,10 +85,24 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    Axis GetAxis() const override
+    {
+        return Axis::VERTICAL;
+    }
+
+    ScrollResult HandleScroll(
+        float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
+
+    bool HandleScrollVelocity(float velocity) override;
+
+    void OnScrollEndRecursive(const std::optional<float>& velocity) override;
+
+    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+
 private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(bool isDrag = true, float mainSpeed = 0.0f);
-    void HandleDragUpdate(float delta, float mainSpeed = 0.0f);
+    ScrollResult HandleDragUpdate(float delta, float mainSpeed = 0.0f);
     void HandleDragEnd(float speed);
     void HandleDragCancel();
     float CalculateFriction();

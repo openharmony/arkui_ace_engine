@@ -46,6 +46,14 @@ void RefreshModelNG::Create()
         V2::REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto pattern = frameNode->GetPattern<RefreshPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateNestedModeForChildren(NestedScrollOptions({
+            .forward = NestedScrollMode::PARENT_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        }));
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(
         RefreshLayoutProperty, IndicatorOffset, Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, DEFAULT_FRICTION_RATIO);
