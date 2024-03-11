@@ -109,10 +109,10 @@ void ViewAbstractModelNG::BindMenu(
     CHECK_NULL_VOID(overlayManager);
     auto menuNode = overlayManager->GetMenuNode(targetId);
     if (menuNode) {
-        auto pattern = menuNode->GetPattern<MenuWrapperPattern>();
-        if (!pattern->GetShow() && menuParam.isShow) {
+        auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+        if (!wrapperPattern->IsShow() && menuParam.isShow) {
             overlayManager->ShowMenu(targetId, menuParam.positionOffset, menuNode);
-        } else if (pattern->GetShow() && menuParam.setShow && !menuParam.isShow) {
+        } else if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
             overlayManager->HideMenu(menuNode, targetId, false);
         }
     } else if (menuParam.isShow) {
@@ -195,10 +195,10 @@ void BindContextMenuSingle(
         CHECK_NULL_VOID(overlayManager);
         auto menuNode = overlayManager->GetMenuNode(targetId);
         if (menuNode) {
-            auto pattern = menuNode->GetPattern<MenuWrapperPattern>();
-            if (pattern->GetShow() && !menuParam.isShow) {
+            auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+            if (wrapperPattern->IsShow() && !menuParam.isShow) {
                 SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
-            } else if (!pattern->GetShow() && menuParam.isShow) {
+            } else if (!wrapperPattern->IsShow() && menuParam.isShow) {
                 CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
             }
         } else if (menuParam.isShow && buildFunc) {
