@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components/scroll/scroll_controller_base.h"
@@ -82,6 +83,10 @@ void WaterFlowTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+#ifndef TEST_SEGMENTED_WATER_FLOW
+    g_segmentedWaterflow = false;
+#endif
 }
 
 void WaterFlowTestNg::TearDownTestSuite()

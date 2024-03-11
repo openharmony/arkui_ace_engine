@@ -356,8 +356,11 @@ void JSTextField::SetCaretPosition(const JSCallbackInfo& info)
     }
 
     int32_t caretPosition = 0;
-    if (!ParseJsInt32(info[0], caretPosition) || caretPosition < 0) {
-        caretPosition = 0;
+    if (!ParseJsInt32(info[0], caretPosition)) {
+        return;
+    }
+    if (caretPosition < 0) {
+        return;
     }
     TextFieldModel::GetInstance()->SetCaretPosition(caretPosition);
 }
@@ -1220,7 +1223,7 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     if (iconJsVal->IsUndefined() || iconJsVal->IsNull() || !iconJsVal->IsObject()) {
         TextFieldModel::GetInstance()->SetCancelIconColor(Color());
         TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
-        TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string());
+        TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
         return;
     }
     auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
@@ -1237,19 +1240,21 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     // set icon src
     std::string iconSrc;
+    std::string bundleName;
+    std::string moduleName;
     auto iconSrcProp = iconParam->GetProperty("src");
     if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() || !ParseJsMedia(iconSrcProp, iconSrc)) {
         iconSrc = "";
     }
-    TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc);
+    GetJsMediaBundleInfo(iconSrcProp, bundleName, moduleName);
+    TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc, bundleName, moduleName);
     // set icon color
     Color iconColor;
     auto iconColorProp = iconParam->GetProperty("color");
-    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
-        TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
-    } else {
-        TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull()) {
+        ParseJsColor(iconColorProp, iconColor);
     }
+    TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
 }
 
 void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)

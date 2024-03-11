@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5293,6 +5293,23 @@ globalThis.PatternLock.attributeModifier = function (modifier) {
 };
 
 /// <reference path='./import.ts' />
+class RichEditorEnableDataDetectorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnableDataDetector(node);
+    }
+    else {
+      getUINativeModule().richEditor.setEnableDataDetector(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorEnableDataDetectorModifier.identity = Symbol('richEditorEnableDataDetector');
 class RichEditorCopyOptionsModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5314,8 +5331,9 @@ class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
-  enableDataDetector(enable) {
-    throw new Error('Method not implemented.');
+  enableDataDetector(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnableDataDetectorModifier.identity, RichEditorEnableDataDetectorModifier, value);
+    return this;
   }
   dataDetectorConfig(config) {
     throw new Error('Method not implemented.');
@@ -6798,6 +6816,23 @@ globalThis.Stack.attributeModifier = function (modifier) {
 };
 
 /// <reference path='./import.ts' />
+class TextEnableDataDetectorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetEnableDataDetector(node);
+    }
+    else {
+      getUINativeModule().text.setEnableDataDetector(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextEnableDataDetectorModifier.identity = Symbol('textEnableDataDetector');
 class FontColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7279,8 +7314,9 @@ class ArkTextComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
-  enableDataDetector(enable) {
-    throw new Error('Method not implemented.');
+  enableDataDetector(value) {
+    modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
+    return this;
   }
   dataDetectorConfig(config) {
     throw new Error('Method not implemented.');
@@ -9912,7 +9948,43 @@ class ArkRefreshComponent extends ArkComponent {
   onRefreshing(callback) {
     throw new Error('Method not implemented.');
   }
+  refreshOffset(value) {
+    modifierWithKey(this._modifiersWithKeys, RefreshOffsetModifier.identity, RefreshOffsetModifier, value);
+    return this;
+  }
+  pullToRefresh(value) {
+    modifierWithKey(this._modifiersWithKeys, PullToRefreshModifier.identity, PullToRefreshModifier, value);
+    return this;
+  }
 }
+class RefreshOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetRefreshOffset(node);
+    }
+    else {
+      getUINativeModule().refresh.setRefreshOffset(node, this.value);
+    }
+  }
+}
+RefreshOffsetModifier.identity = Symbol('refreshOffset');
+class PullToRefreshModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetPullToRefresh(node);
+    }
+    else {
+      getUINativeModule().refresh.setPullToRefresh(node, this.value);
+    }
+  }
+}
+PullToRefreshModifier.identity = Symbol('pullToRefresh');
 // @ts-ignore
 globalThis.Refresh.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -13347,6 +13419,22 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, PopupPositionModifier.identity, PopupPositionModifier, value);
     return this;
   }
+  popupItemBorderRadius(value) {
+    modifierWithKey(this._modifiersWithKeys, PopupItemBorderRadiusModifier.identity, PopupItemBorderRadiusModifier, value);
+    return this;
+  }
+  itemBorderRadius(value) {
+    modifierWithKey(this._modifiersWithKeys, ItemBorderRadiusModifier.identity, ItemBorderRadiusModifier, value);
+    return this;
+  }
+  popupBackgroundBlurStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, PopupBackgroundBlurStyleModifier.identity, PopupBackgroundBlurStyleModifier, value);
+    return this;
+  }
+  popupTitleBackground(value) {
+    modifierWithKey(this._modifiersWithKeys, PopupTitleBackgroundModifier.identity, PopupTitleBackgroundModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 globalThis.AlphabetIndexer.attributeModifier = function (modifier) {
@@ -13658,6 +13746,59 @@ class PopupPositionModifier extends ModifierWithKey {
   }
 }
 PopupPositionModifier.identity = Symbol('popupPosition');
+class PopupItemBorderRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetPopupItemBorderRadius(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setPopupItemBorderRadius(node, this.value);
+    }
+  }
+}
+PopupItemBorderRadiusModifier.identity = Symbol('popupItemBorderRadius');
+class ItemBorderRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetItemBorderRadius(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setItemBorderRadius(node, this.value);
+    }
+  }
+}
+ItemBorderRadiusModifier.identity = Symbol('itemBorderRadius');
+class PopupBackgroundBlurStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetPopupBackgroundBlurStyle(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setPopupBackgroundBlurStyle(node, this.value);
+    }
+  }
+}
+ItemBorderRadiusModifier.identity = Symbol('popupBackgroundBlurStyle');
+
+class PopupTitleBackgroundModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetPopupTitleBackground(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setPopupTitleBackground(node, this.value);
+    }
+  }
+}
+PopupTitleBackgroundModifier.identity = Symbol('popupTitleBackground');
 
 /// <reference path='./import.ts' />
 class TextStyleModifier extends ModifierWithKey {

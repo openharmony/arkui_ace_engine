@@ -21,6 +21,9 @@ void UIDisplaySync::CheckRate(int32_t vsyncRate, int32_t refreshRateMode)
     SetVsyncRate(vsyncRate);
     SetRefreshRateMode(refreshRateMode);
 
+    CHECK_NULL_VOID(data_);
+    CHECK_NULL_VOID(data_->rate_);
+    CHECK_NULL_VOID(data_->rateRange_);
     if (IsCommonDivisor(data_->rateRange_->preferred_, vsyncRate)) {
         int32_t curRate = vsyncRate / data_->rateRange_->preferred_;
         if (data_->rate_ != curRate) {
@@ -82,7 +85,10 @@ void UIDisplaySync::AddToPipeline(WeakPtr<PipelineBase>& pipelineContext)
 {
     auto context = pipelineContext.Upgrade();
     if (!context) {
-        return;
+        context = PipelineBase::GetCurrentContextSafely();
+        if (!context) {
+            return;
+        }
     }
 
     RefPtr<UIDisplaySyncManager> dsm = context->GetOrCreateUIDisplaySyncManager();
@@ -96,7 +102,10 @@ void UIDisplaySync::DelFromPipeline(WeakPtr<PipelineBase>& pipelineContext)
 {
     auto context = pipelineContext.Upgrade();
     if (!context) {
-        return;
+        context = PipelineBase::GetCurrentContextSafely();
+        if (!context) {
+            return;
+        }
     }
 
     RefPtr<UIDisplaySyncManager> dsm = context->GetOrCreateUIDisplaySyncManager();
@@ -235,7 +244,7 @@ UIDisplaySync::UIDisplaySync() {}
 
 UIDisplaySync::~UIDisplaySync() noexcept {}
 
-void UIDisplaySync::SetExpectedFrameRateRange(FrameRateRange&& range)
+void UIDisplaySync::SetExpectedFrameRateRange(const FrameRateRange& range)
 {
     data_->rateRange_->Set(range.min_, range.max_, range.preferred_);
 }

@@ -95,6 +95,12 @@ const OPERATEITEM_IMAGE_SIZE = 48;
 const HOVERING_COLOR = '#0d000000';
 const TOUCH_DOWN_COLOR = '#1a000000';
 const ACTIVED_COLOR = '#1a0a59f7';
+const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
+const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
+const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
+const RIGHT_PART_WIDTH = '34%';
+const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - 40vp)';
+const RIGHT_ONLY_ARROW_WIDTH = '24vp';
 const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.BADGE, BADGE_SIZE],
   [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
@@ -114,6 +120,7 @@ struct ContentItemStruct {
   secondaryText: string = null
   description: string = null
   private itemRowSpace: number = NORMAL_ITEM_ROW_SPACE
+  @State leftWidth: string = LEFT_PART_WIDTH
 
   aboutToAppear() {
     if (this.icon == null && this.iconStyle == null) {
@@ -196,7 +203,7 @@ struct ContentItemStruct {
     }
     .margin({ right: 16 })
     .padding({ left: LISTITEM_PADDING })
-    .width('calc(66% - 16vp)')
+    .width(this.leftWidth)
     .flexShrink(1)
   }
 }
@@ -215,6 +222,7 @@ struct OperateItemStruct {
   @State switchState: boolean = false
   @State radioState: boolean = false
   @State checkBoxState: boolean = false
+  @State rightWidth: string = RIGHT_PART_WIDTH
   @Link parentCanFocus: boolean
   @Link parentCanTouch: boolean
   @Link parentIsHover: boolean
@@ -592,7 +600,7 @@ struct OperateItemStruct {
         }
       }
     }
-    .width('34%')
+    .width(this.rightWidth)
     .flexShrink(1)
     .justifyContent(FlexAlign.End)
   }
@@ -644,6 +652,26 @@ export struct ComposeListItem {
     }
   }
 
+  calculatedLeftWidth(): string {
+    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
+      return RIGHT_CONTENT_NULL_LEFTWIDTH
+    } else if (this.operateItem.arrow != null && this.operateItem.text == null) {
+      return LEFT_ONLY_ARROW_WIDTH
+    } else {
+      return LEFT_PART_WIDTH
+    }
+  }
+
+  calculatedRightWidth(): string {
+    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
+      return RIGHT_CONTENT_NULL_RIGHTWIDTH
+    } else if (this.operateItem.arrow != null && this.operateItem.text == null) {
+      return RIGHT_ONLY_ARROW_WIDTH
+    } else {
+      return RIGHT_PART_WIDTH
+    }
+  }
+
   build() {
     Stack() {
       Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
@@ -656,7 +684,8 @@ export struct ComposeListItem {
             iconStyle: this.contentItem.iconStyle,
             primaryText: typeof this.contentItem.primaryText === 'string' ? this.contentItem.primaryText : null,
             secondaryText: typeof this.contentItem.secondaryText === 'string' ? this.contentItem.secondaryText : null,
-            description: typeof this.contentItem.description === 'string' ? this.contentItem.description : null
+            description: typeof this.contentItem.description === 'string' ? this.contentItem.description : null,
+            leftWidth: this.calculatedLeftWidth()
           })
         }
         if (this.operateItem !== null) {
@@ -675,7 +704,8 @@ export struct ComposeListItem {
             parentIsHover: this.isHover,
             parentFrontColor: this.frontColor,
             parentIsActive: this.isActive,
-            parentCanHover: this.canHover
+            parentCanHover: this.canHover,
+            rightWidth: this.calculatedRightWidth()
           })
             .onFocus(() => {
               this.canFocus = false

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,6 +100,22 @@ struct NestedScrollOptions {
     bool NeedParent(bool forward) const
     {
         return forward ? this->forward != NestedScrollMode::SELF_ONLY : backward != NestedScrollMode::SELF_ONLY;
+    }
+
+    bool operator==(const NestedScrollOptions& other) const
+    {
+        return forward == other.forward && backward == other.backward;
+    }
+
+    bool operator!=(const NestedScrollOptions& other) const
+    {
+        return !(*this == other);
+    }
+
+    std::string ToString() const
+    {
+        return "NestedScrollOptions forward: " + std::to_string(static_cast<int32_t>(forward)) +
+               ", backward: " + std::to_string(static_cast<int32_t>(backward));
     }
 };
 

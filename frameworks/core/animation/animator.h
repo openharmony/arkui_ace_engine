@@ -104,7 +104,7 @@ public:
     void AttachScheduler(const WeakPtr<PipelineBase>& context);
     bool AttachSchedulerOnContainer();
     bool HasScheduler() const;
-    bool SetExpectedFrameRateRange(FrameRateRange& frameRateRange);
+    bool SetExpectedFrameRateRange(const FrameRateRange& frameRateRange);
 
     // Every interpolate animation needs to add itself into animator and use the controller to drive.
     void AddInterpolator(const RefPtr<Interpolator>& animation);

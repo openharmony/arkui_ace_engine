@@ -126,7 +126,39 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     AvoidAiBar();
     UpdateInteractive();
     ClipSheetNode();
+    CheckBuilderChange();
     return true;
+}
+
+void SheetPresentationPattern::CheckBuilderChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(scrollNode);
+    auto builderNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(builderNode);
+    auto eventHub = builderNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    OnAreaChangedFunc onBuilderAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                                     const OffsetF& /* oldOrigin */, const RectF& /* rect */,
+                                                     const OffsetF& /* origin */) {
+        auto sheetNode = sheetNodeWk.Upgrade();
+        CHECK_NULL_VOID(sheetNode);
+        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
+        auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto sheetStyle = layoutProperty->GetSheetStyleValue();
+        if (sheetStyle.sheetMode == SheetMode::AUTO) {
+            auto height = sheetPattern->GetFitContentHeight();
+            sheetPattern->HandleFitContontChange(height);
+            sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    eventHub->AddInnerOnAreaChangedCallback(builderNode->GetId(), std::move(onBuilderAreaChangedFunc));
 }
 
 void SheetPresentationPattern::AvoidAiBar()
@@ -580,12 +612,13 @@ void SheetPresentationPattern::DismissTransition(bool isTransitionIn, float drag
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->ModalPageLostFocus(GetHost());
-
+    if (!isTransitionIn) {
+        OnWillDisappear();
+    }
     auto sheetType = GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP) {
         BubbleStyleSheetTransition(isTransitionIn);
     } else {
-        OnWillDisappear();
         SheetTransition(isTransitionIn, dragVelocity);
     }
 }

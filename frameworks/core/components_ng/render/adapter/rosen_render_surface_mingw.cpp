@@ -85,4 +85,6 @@ void RosenRenderSurface::DrawBufferForXComponent(
     RSCanvas& canvas, float width, float height, float offsetX, float offsetY)
 {}
 
+void RosenRenderSurface::releaseSurfaceBuffers() {}
+
 } // namespace OHOS::Ace::NG

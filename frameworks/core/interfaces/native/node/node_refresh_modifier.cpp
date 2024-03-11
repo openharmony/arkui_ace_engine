@@ -42,6 +42,28 @@ ArkUI_Bool GetRefreshing(ArkUINodeHandle node)
     return static_cast<ArkUI_Bool>(RefreshModelNG::GetRefreshing(frameNode));
 }
 
+void SetRefreshOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetRefreshOffset(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+}
+void ResetRefreshOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetRefreshOffset(frameNode, Dimension(0.0f, DimensionUnit::VP));
+}
+
+void SetPullToRefresh(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetPullToRefresh(frameNode, value);
+}
+
+void ResetPullToRefresh(ArkUINodeHandle node) {}
+
 void SetRefreshContent(ArkUINodeHandle node, ArkUINodeHandle content)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -50,12 +72,13 @@ void SetRefreshContent(ArkUINodeHandle node, ArkUINodeHandle content)
     CHECK_NULL_VOID(contentNode);
     RefreshModelNG::SetCustomBuilder(frameNode, contentNode);
 }
-}
+} // namespace
 namespace NodeModifier {
 
 const ArkUIRefreshModifier* GetRefreshModifier()
 {
-    static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshContent };
+    static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshOffset, ResetRefreshOffset,
+        SetPullToRefresh, ResetPullToRefresh, SetRefreshContent };
     return &modifier;
 }
 

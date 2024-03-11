@@ -188,6 +188,8 @@ private:
     RefPtr<FrameNode> cleanNode_;
     CalcDimension iconSize_ = 0.0_px;
     std::string iconSrc_;
+    std::string bundleName_;
+    std::string moduleName_;
     Color iconColor_;
     bool isShow_ = false;
 };

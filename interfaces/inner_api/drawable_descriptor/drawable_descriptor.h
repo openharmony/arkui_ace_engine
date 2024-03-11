@@ -46,9 +46,6 @@
 
 namespace OHOS::Ace::Napi {
 using OptionalPixelMap = std::optional<std::shared_ptr<Media::PixelMap>>;
-#ifdef USE_ROSEN_DRAWING
-using OptionalBitMap = std::optional<std::shared_ptr<Rosen::Drawing::Bitmap>>;
-#endif
 struct DrawableItem {
     using RState = Global::Resource::RState;
     std::unique_ptr<uint8_t[]> data_;
@@ -84,7 +81,6 @@ public:
         : jsonBuf_(std::move(jsonBuf)), len_(len)
     {
         InitialResource(resourceMgr);
-        InitialSVGResource(resourceMgr);
     };
     LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, std::string path, uint32_t iconType,
@@ -92,7 +88,6 @@ public:
         : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType), density_(density)
     {
         InitialResource(resourceMgr);
-        InitialSVGResource(resourceMgr);
     };
     LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, std::string path, uint32_t iconType,
@@ -102,7 +97,6 @@ public:
     {
         InitLayeredParam(foregroundInfo, backgroundInfo);
         InitialResource(resourceMgr);
-        InitialSVGResource(resourceMgr);
     };
 
     ~LayeredDrawableDescriptor() override = default;
@@ -117,7 +111,6 @@ public:
 private:
     friend class ImageConverter;
     void InitialResource(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
-    void InitialSVGResource(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
     bool PreGetPixelMapFromJsonBuf(
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, bool isBackground);
     DrawableItem PreGetDrawableItem(
@@ -138,8 +131,6 @@ private:
 
     std::unique_ptr<uint8_t[]> defaultMaskData_;
     size_t defaultMaskDataLength_ = 0;
-    std::unique_ptr<uint8_t[]> defaultSVGMaskData_;
-    size_t defaultSVGMaskDataLength_ = 0;
     DrawableItem backgroundItem_;
     DrawableItem foregroundItem_;
     std::unique_ptr<uint8_t[]> jsonBuf_;
@@ -151,9 +142,6 @@ private:
     OptionalPixelMap background_;
     OptionalPixelMap mask_;
     OptionalPixelMap layeredPixelMap_;
-#ifdef USE_ROSEN_DRAWING
-    OptionalBitMap svgMaskBitMap_;
-#endif
 };
 
 class DrawableDescriptorFactory {

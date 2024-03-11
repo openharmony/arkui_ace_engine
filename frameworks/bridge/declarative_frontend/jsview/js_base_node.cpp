@@ -61,6 +61,18 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     }
     auto parent = viewNode_ ? viewNode_->GetParent() : nullptr;
     auto newNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    // If the node is a UINode, amount it to a BuilderProxyNode.
+    // Let the returned node be a FrameNode.
+    auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
+    if (!flag) {
+        auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
+            "BuilderProxyNode", nodeId, []() { return AceType::MakeRefPtr<NG::StackPattern>(); });
+        auto stackLayoutAlgorithm = proxyNode->GetLayoutProperty<NG::LayoutProperty>();
+        stackLayoutAlgorithm->UpdateAlignment(Alignment::TOP_LEFT);
+        proxyNode->AddChild(newNode);
+        newNode = proxyNode;
+    }
     if (parent) {
         parent->ReplaceChild(viewNode_, newNode);
         newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);

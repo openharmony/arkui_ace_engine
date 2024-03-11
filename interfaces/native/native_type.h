@@ -1257,7 +1257,7 @@ typedef enum {
      *  lines at appropriate characters (for example, spaces) whenever possible.
         CJK text behavior is the same as for <b>NORMAL</b>. */
     ARKUI_WORD_BREAK_BREAK_WORD,
-}ArkUI_WordBreak;
+} ArkUI_WordBreak;
 
 /**
  * @brief Enumerates the ellipsis positions.
@@ -1271,7 +1271,7 @@ typedef enum {
     ARKUI_ELLIPSIS_MODE_CENTER,
     /** An ellipsis is used at the end of the line of text. */
     ARKUI_ELLIPSIS_MODE_END,
-}ArkUI_EllipsisMode;
+} ArkUI_EllipsisMode;
 
 /**
  * @brief Enumerates the image rendering modes.
@@ -1283,7 +1283,7 @@ typedef enum {
     ARKUI_IMAGE_RENDER_MODE_ORIGINAL = 0,
     /** Render image pixels to create a monochrome template image. */
     ARKUI_IMAGE_RENDER_MODE_TEMPLATE,
-}ArkUI_ImageRenderMode;
+} ArkUI_ImageRenderMode;
 
 /**
  * @brief Enumerates the slide-in and slide-out positions of the component from the screen edge during transition.
@@ -1299,7 +1299,7 @@ typedef enum {
     ARKUI_TRANSITION_EDGE_START,
     /** Right edge of the window. */
     ARKUI_TRANSITION_EDGE_END,
-}ArkUI_TransitionEdge;
+} ArkUI_TransitionEdge;
 
 #ifdef __cplusplus
 };

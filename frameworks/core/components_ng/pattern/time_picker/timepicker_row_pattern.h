@@ -200,8 +200,7 @@ public:
     void SetSelectedTime(const PickerTime& value)
     {
         selectedTime_ = value;
-        isFiredTimeChange_ = firedTimeStr_.has_value() && firedTimeStr_.value() == value.ToString(true, hasSecond_);
-        firedTimeStr_.reset();
+        isContentUpdateOnly_ = !isFirstUpdate_;
     }
 
     const PickerTime& GetSelectedTime()
@@ -419,8 +418,8 @@ private:
     WeakPtr<FrameNode> buttonTitleNode_;
     WeakPtr<FrameNode> contentRowNode_;
     bool isPicker_ = false;
-    bool isFiredTimeChange_ = false;
-    std::optional<std::string> firedTimeStr_;
+    bool isFirstUpdate_ = true;
+    bool isContentUpdateOnly_ = false;
 };
 } // namespace OHOS::Ace::NG
 

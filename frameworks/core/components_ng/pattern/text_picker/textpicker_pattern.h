@@ -192,6 +192,7 @@ public:
     void SetCascadeOptions(const std::vector<NG::TextCascadePickerOptions>& options,
         const std::vector<NG::TextCascadePickerOptions>& cascadeOptions)
     {
+        isContentUpdateOnly_ = !isFirstUpdate_;
         cascadeOptions_.clear();
         cascadeOriginptions_.clear();
         for (auto& option : cascadeOptions) {
@@ -240,6 +241,7 @@ public:
 
     void SetValues(const std::vector<std::string>& values)
     {
+        isContentUpdateOnly_ = !isFirstUpdate_;
         values_.clear();
         for (auto& value : values) {
             values_.emplace_back(value);
@@ -369,8 +371,8 @@ private:
 
     WeakPtr<NG::FrameNode> contentRowNode_;
     bool isPicker_ = true;
-    bool isFiredSelectsChange_ = false;
-    std::optional<std::string> firedSelectsStr_;
+    bool isFirstUpdate_ = true;
+    bool isContentUpdateOnly_ = false;
 };
 } // namespace OHOS::Ace::NG
 

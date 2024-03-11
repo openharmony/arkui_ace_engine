@@ -695,7 +695,8 @@ void TextFieldModelNG::SetCancelIconSize(const CalcDimension& iconSize)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize);
 }
 
-void TextFieldModelNG::SetCanacelIconSrc(const std::string& iconSrc)
+void TextFieldModelNG::SetCanacelIconSrc(
+    const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc);
 }

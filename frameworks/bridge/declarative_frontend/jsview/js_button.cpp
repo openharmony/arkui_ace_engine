@@ -96,6 +96,9 @@ void JSButton::SetFontFamily(const JSCallbackInfo& info)
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
         return;
     }
+    if (fontFamilies.empty()) {
+        return;
+    }
 
     ButtonModel::GetInstance()->SetFontFamily(fontFamilies);
 }

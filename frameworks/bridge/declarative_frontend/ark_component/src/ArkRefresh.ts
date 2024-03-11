@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,41 @@ class ArkRefreshComponent extends ArkComponent implements RefreshAttribute {
   }
   onRefreshing(callback: () => void): this {
     throw new Error('Method not implemented.');
+  }
+  refreshOffset(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, RefreshOffsetModifier.identity, RefreshOffsetModifier, value);
+    return this;
+  }
+  pullToRefresh(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, PullToRefreshModifier.identity, PullToRefreshModifier, value);
+    return this;
+  }
+}
+
+class RefreshOffsetModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('refreshOffset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().refresh.resetRefreshOffset(node);
+    } else {
+      getUINativeModule().refresh.setRefreshOffset(node, this.value);
+    }
+  }
+}
+class PullToRefreshModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('pullToRefresh');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().refresh.resetPullToRefresh(node);
+    } else {
+      getUINativeModule().refresh.setPullToRefresh(node, this.value);
+    }
   }
 }
 // @ts-ignore

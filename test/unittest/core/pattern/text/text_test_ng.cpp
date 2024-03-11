@@ -5678,7 +5678,7 @@ HWTEST_F(TextTestNg, HandleDragEvent002, TestSize.Level1)
      * @tc.steps: step3. test get text onDragMove.
      */
     eventHub->FireOnDragMove(dragEvent, "");
-    EXPECT_EQ(pattern->showSelect_, true);
+    EXPECT_EQ(pattern->showSelect_, false);
 
     /**
      * @tc.steps: step4. test textPattern onDragMove.
@@ -5872,8 +5872,9 @@ HWTEST_F(TextTestNg, GetImageResultObject001, TestSize.Level1)
     auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(pattern->dragResultObjects_.size(), 2); // 2 means result list size.
-    EXPECT_EQ(pattern->dragResultObjects_.front().imageStyle.verticalAlign, static_cast<int32_t>(ImageFit::FILL));
-    EXPECT_EQ(pattern->dragResultObjects_.front().imageStyle.objectFit, static_cast<int32_t>(VerticalAlign::CENTER));
+    EXPECT_EQ(
+        pattern->dragResultObjects_.front().imageStyle.verticalAlign, static_cast<int32_t>(VerticalAlign::CENTER));
+    EXPECT_EQ(pattern->dragResultObjects_.front().imageStyle.objectFit, static_cast<int32_t>(ImageFit::FILL));
     for (auto obj : pattern->dragResultObjects_) {
         EXPECT_EQ(obj.type, SelectSpanType::TYPEIMAGE);
     }

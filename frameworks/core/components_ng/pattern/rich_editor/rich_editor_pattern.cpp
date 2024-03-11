@@ -1045,10 +1045,10 @@ bool RichEditorPattern::SetCaretPosition(int32_t pos)
 {
     auto correctPos = std::clamp(pos, 0, GetTextContentLength());
     ResetLastClickOffset();
-    UpdateCaretInfoToController();
     if (pos == correctPos) {
         FireOnSelectionChange(correctPos);
         caretPosition_ = correctPos;
+        UpdateCaretInfoToController();
         return true;
     }
     return false;
@@ -4679,7 +4679,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
         if (selectedNextRects.size() == 1) {
             bool isInRange = pos.GetX() >= selectedNextRects[0].Left() && pos.GetX() <= selectedNextRects[0].Right() &&
                              pos.GetY() >= selectedNextRects[0].Top() && pos.GetY() <= selectedNextRects[0].Bottom();
-            if (isInRange || (!selectedLast && selectedRects[0].Top() != selectedNextRects[0].Top())) {
+            if (isInRange) {
                 textSelector_.Update(currentPosition - 1, nextPosition - 1);
             }
         }
@@ -5331,9 +5331,9 @@ void RichEditorPattern::AdjustPlaceholderSelection(int32_t& start, int32_t& end,
 {
     CHECK_NULL_VOID(!spans_.empty());
     float selectLineHeight = 0.0f;
-    auto clickPositionOffset = paragraphs_.ComputeCursorInfoByClick(start, selectLineHeight,
-        OffsetF(static_cast<float>(touchPos.GetX()), static_cast<float>(touchPos.GetY())));
-    if (touchPos.GetX() > clickPositionOffset.GetX()) {
+    OffsetF caretOffsetUp = paragraphs_.ComputeCursorOffset(start, selectLineHeight);
+    auto needAdjustRect = RectF{ 0, caretOffsetUp.GetY(), caretOffsetUp.GetX(), selectLineHeight };
+    if (!needAdjustRect.IsInRegion(PointF{ touchPos.GetX(), touchPos.GetY() })) {
         return;
     }
     auto it = std::find_if(spans_.begin(), spans_.end(), [start](const RefPtr<SpanItem>& spanItem) {

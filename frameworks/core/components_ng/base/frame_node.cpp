@@ -104,6 +104,7 @@ public:
         int32_t count = 0;
         for (const auto& child : children) {
             count = child->FrameCount();
+            child->SetNodeIndexOffset(startIndex, count);
             children_.push_back({ child, startIndex, count });
             startIndex += count;
             totalCount_ += count;
@@ -1448,7 +1449,10 @@ void FrameNode::RebuildRenderContextTree()
     // generate full children list, including disappear children.
     GenerateOneDepthVisibleFrameWithTransition(children);
     if (overlayNode_) {
-        children.push_back(overlayNode_);
+        auto property = overlayNode_->GetLayoutProperty();
+        if (property && property->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+            children.push_back(overlayNode_);
+        }
     }
     for (const auto& child : children) {
         frameChildren_.emplace(child);
@@ -1751,7 +1755,7 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     bool isDispatch)
 {
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
@@ -1851,6 +1855,10 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
                 childNode->GetInspectorId()->c_str());
             auto hitResult = childNode->TouchTest(
                 globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId, true);
+            if (touchRes.strategy == TouchTestStrategy::FORWARD ||
+                touchRes.strategy == TouchTestStrategy::FORWARD_COMPETITION) {
+                touchRestrict.childTouchTestList.emplace_back(touchRes.id);
+            }
             if (hitResult == HitTestResult::STOP_BUBBLING) {
                 preventBubbling = true;
                 consumed = true;
@@ -3076,6 +3084,11 @@ int32_t FrameNode::GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const
     return frameProxy_->GetChildIndex(child);
 }
 
+uint32_t FrameNode::GetChildTrueTotalCount() const
+{
+    return frameProxy_->GetTotalCount();
+}
+
 const std::list<RefPtr<LayoutWrapper>>& FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
 {
     const auto& children = frameProxy_->GetAllFrameChildren();
@@ -3240,7 +3253,13 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end)
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
     renderContext_->UpdateNodeName(id);
-    RecordExposureIfNeed(id);
+    PostTask(
+        [weak = WeakClaim(this), inspectorId = id]() {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            host->RecordExposureIfNeed(inspectorId);
+        },
+        TaskExecutor::TaskType::UI);
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     if (parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {

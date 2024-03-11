@@ -107,6 +107,8 @@ typedef enum {
     ARKUI_NODE_FLEX,
     /** Refresh component. */
     ARKUI_NODE_REFRESH,
+    /** 瀑布流容器。 */
+    ARKUI_NODE_WATER_FLOW,
 } ArkUI_NodeType;
 
 /**
@@ -1840,6 +1842,17 @@ typedef enum {
      *
      */
     NODE_TOGGLE_SWITCH_POINT_COLOR,
+    /**
+     * @brief Switch类型的开关值，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：设置开关的值，true表示开启。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：设置开关的值。\n
+     *
+     */
+    NODE_TOGGLE_VALUE,
 
     /**
      * @brief Defines the foreground color of the loading progress bar.
@@ -3446,6 +3459,19 @@ typedef enum {
     NODE_SWIPER_SHOW_DISPLAY_ARROW,
 
     /**
+     * @brief 设置Swiper的边缘滑动效果，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32: 边缘滑动效果，参数类型{@link ArkUI_EdgeEffect}， \n
+     * 默认值为ARKUI_EDGE_EFFECT_SPRING。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32: 边缘滑动效果，参数类型{@link ArkUI_EdgeEffect}， \n
+     *
+     */
+    NODE_SWIPER_EFFECT_MODE,
+
+    /**
      * @brief Defines the header of the list item group.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3585,6 +3611,23 @@ typedef enum {
      *
      */
     NODE_REFRESH_REFRESHING = MAX_NODE_SCOPE_NUM * ARKUI_NODE_REFRESH,
+    /**
+     * @brief 设置下拉区域的自定义内容，支持属性设置和重置。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .object：参数类型{@Link ArkUI_NodeHandle}。
+     *
+     */
+    NODE_REFRESH_CONTENT,
+
+    /**
+     * @brief 定义瀑布流组件布局主轴方向，支持属性设置、重置和获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[0].i32 主轴方向，参数类型{@Link ArkUI_FlexDirection}。
+     *
+     */
+    NODE_WATER_FLOW_LAYOUT_DIRECTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -3815,13 +3858,13 @@ typedef enum {
      */
     NODE_TEXT_INPUT_ON_PASTE,
     /**
-     * @brief 文本选择的位置发生变化时，触发该回调。
+     * @brief Defines the event triggered when the text selection position changes.
      *
-     * 触发该事件的条件：文本选择的位置发生变化时。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示所选文本的起始位置。\n
-     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示所选文本的结束位置。\n
+      \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: start position of the text selection area. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: end position of the text selection area. \n
      *
      */
     NODE_TEXT_INPUT_ON_TEXT_SELECTION_CHANGE,
@@ -3837,26 +3880,30 @@ typedef enum {
      */
     NODE_TEXT_AREA_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_AREA,
     /**
-     * @brief 长按输入框内部区域弹出剪贴板后，点击剪切板粘贴按钮，触发该回调。
+     * @brief Defines the event triggered when the paste button on the pasteboard, which displays when the text box is
+     * long pressed, is clicked.
      *
-     * 触发该事件的条件：长按输入框内部区域弹出剪贴板后，点击剪切板粘贴按钮。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
-     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
-     * <b>ArkUI_StringAsyncEvent.pStr</b>：粘贴的文本内容。
+      \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: text that is pasted
      *
      */
     NODE_TEXT_AREA_ON_PASTE,
     /**
-     * @brief 文本选择的位置发生变化时，触发该回调。
+     * @brief Defines the event triggered when the text selection position changes.
      *
-     * 触发该事件的条件：文本选择的位置发生变化时。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示所选文本的起始位置。\n
-     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示所选文本的结束位置。\n
+      \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: start position of the text selection area. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: end position of the text selection area. \n
      *
      */
     NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE,
+
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
      *
@@ -3923,6 +3970,48 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: state triggered by the event.\n
      */
     NODE_SLIDER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SLIDER,
+
+    /**
+     * @brief 定义ARKUI_NODE_SWIPER当前元素索引变化时触发事件回调。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvetn}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示当前显示元素的索引。\n
+     */
+    NODE_SWIPER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SWIPER,
+
+    /**
+     * @brief 定义ARKUI_NODE_SWIPER切换动画开始时触发回调。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含5个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示当前显示元素的索引。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示切换动画目标元素的索引。\n
+     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>：表示主轴方向上当前显示元素相对Swiper起始位置的位移。\n
+     * <b>ArkUI_NodeComponentEvent.data[3].f32</b>：表示主轴方向上目标元素相对Swiper起始位置的位移。\n
+     * <b>ArkUI_NodeComponentEvent.data[4].f32</b>：表示离手速度。\n
+     */
+    NODE_SWIPER_EVENT_ON_ANIMATION_START,
+
+    /**
+     * @brief 定义ARKUI_NODE_SWIPER切换动画结束是触发回调。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示当前显示元素的索引。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：表示主轴方向上当前显示元素相对Swiper起始位置的位移。\n
+     */
+    NODE_SWIPER_EVENT_ON_ANIMATION_END,
+
+    /**
+     * @brief 定义ARKUI_NODE_SWIPER在页面跟手滑动过程中，逐帧触发该回调。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示当前显示元素的索引。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：表示主轴方向上当前显示元素相对Swiper起始位置的位移。\n
+     */
+    NODE_SWIPER_EVENT_GESTURE_SWIPE,
 
     /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component scrolls.

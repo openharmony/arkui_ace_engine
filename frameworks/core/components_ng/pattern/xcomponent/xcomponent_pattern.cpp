@@ -243,6 +243,12 @@ void XComponentPattern::OnAttachToFrameNode()
 {
     instanceId_ = Container::CurrentIdSafely();
     Initialize(instanceId_);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
 }
 
 void XComponentPattern::OnModifyDone()
@@ -309,6 +315,11 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         }
 #endif
     }
+
+    auto id = frameNode->GetId();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
 }
 
 void XComponentPattern::SetMethodCall()
@@ -979,10 +990,8 @@ void XComponentPattern::HandleSetExpectedRateRangeEvent()
     OH_NativeXComponent_ExpectedRateRange* range = nativeXComponentImpl_->GetRateRange();
     CHECK_NULL_VOID(range);
     FrameRateRange frameRateRange;
-    frameRateRange.preferred_ = range->expected;
-    frameRateRange.max_ = range->max;
-    frameRateRange.min_ = range->min;
-    displaySync_->SetExpectedFrameRateRange(std::move(frameRateRange));
+    frameRateRange.Set(range->min, range->max, range->expected);
+    displaySync_->SetExpectedFrameRateRange(frameRateRange);
 }
 
 void XComponentPattern::HandleOnFrameEvent()
@@ -1165,5 +1174,53 @@ void XComponentPattern::UpdateSurfaceBounds(bool needForceRender)
         CHECK_NULL_VOID(host);
         host->MarkNeedRenderOnly();
     }
+}
+
+void XComponentPattern::NativeSurfaceHide()
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto surfaceHideCallback = nativeXComponentImpl_->GetSurfaceHideCallback();
+    CHECK_NULL_VOID(surfaceHideCallback);
+    surfaceHideCallback(nativeXComponent_.get(), surface);
+}
+
+void XComponentPattern::NativeSurfaceShow()
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    CHECK_NULL_VOID(nativeXComponent_);
+    auto width = initSize_.Width();
+    auto height = initSize_.Height();
+    nativeXComponentImpl_->SetXComponentWidth(static_cast<uint32_t>(width));
+    nativeXComponentImpl_->SetXComponentHeight(static_cast<uint32_t>(height));
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto surfaceShowCallback = nativeXComponentImpl_->GetSurfaceShowCallback();
+    CHECK_NULL_VOID(surfaceShowCallback);
+    surfaceShowCallback(nativeXComponent_.get(), surface);
+}
+
+void XComponentPattern::OnWindowHide()
+{
+    if (!hasXComponentInit_ || hasReleasedSurface_
+        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
+        return;
+    }
+    CHECK_NULL_VOID(renderSurface_);
+    NativeSurfaceHide();
+    renderSurface_->releaseSurfaceBuffers();
+    hasReleasedSurface_ = true;
+}
+
+void XComponentPattern::OnWindowShow()
+{
+    if (!hasXComponentInit_ || !hasReleasedSurface_
+        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
+        return;
+    }
+    NativeSurfaceShow();
+    hasReleasedSurface_ = false;
 }
 } // namespace OHOS::Ace::NG

@@ -50,6 +50,8 @@ void JSEmbeddedComponent::JSBind(BindingTarget globalObj)
     JSClass<JSEmbeddedComponent>::StaticMethod("create", &JSEmbeddedComponent::Create, opt);
     JSClass<JSEmbeddedComponent>::StaticMethod("onTerminated", &JSEmbeddedComponent::OnTerminated);
     JSClass<JSEmbeddedComponent>::StaticMethod("onError", &JSEmbeddedComponent::OnError);
+    JSClass<JSEmbeddedComponent>::StaticMethod("width", &JSEmbeddedComponent::JsWidth);
+    JSClass<JSEmbeddedComponent>::StaticMethod("height", &JSEmbeddedComponent::JsHeight);
     JSClass<JSEmbeddedComponent>::StaticMethod("constraintSize", &JSEmbeddedComponent::JsConstraintSize);
     JSClass<JSEmbeddedComponent>::StaticMethod("aspectRatio", &JSEmbeddedComponent::JsAspectRatio);
     JSClass<JSEmbeddedComponent>::StaticMethod("layoutWeight", &JSEmbeddedComponent::JsLayoutWeight);
@@ -141,5 +143,21 @@ void JSEmbeddedComponent::OnError(const JSCallbackInfo& info)
             func->ExecuteJS(FUNC_ARGC_1, &returnValue);
         };
     UIExtensionModel::GetInstance()->SetOnError(std::move(onError));
+}
+
+void JSEmbeddedComponent::JsWidth(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined()) {
+        return;
+    }
+    JSViewAbstract::JsWidth(info);
+}
+
+void JSEmbeddedComponent::JsHeight(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined()) {
+        return;
+    }
+    JSViewAbstract::JsHeight(info);
 }
 } // namespace OHOS::Ace::Framework

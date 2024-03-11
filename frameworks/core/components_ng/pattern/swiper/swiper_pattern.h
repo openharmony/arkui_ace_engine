@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -475,11 +475,6 @@ public:
         indicatorIsBoolean_ = isBoolean;
     }
 
-    void SetNestedScroll(const NestedScrollOptions& nestedOpt)
-    {
-        enableNestedScroll_ = nestedOpt.NeedParent();
-    }
-
     bool GetIsAtHotRegion() const
     {
         return isAtHotRegion_;
@@ -663,6 +658,8 @@ private:
     void StopFadeAnimation();
 
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
+    bool IsOutOfStart(float mainOffset = 0.0f) const;
+    bool IsOutOfEnd(float mainOffset = 0.0f) const;
     bool AutoLinearIsOutOfBoundary(float mainOffset) const;
     float GetDistanceToEdge() const;
     float MainSize() const;
@@ -778,14 +775,18 @@ private:
      *
      * @param offset The scroll offset from DragUpdate.
      */
-    void CloseTheGap(float offset);
+    void CloseTheGap(float& offset);
 
-    ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
-    ScrollResult HandleScrollSelfFirst(float offset, int32_t source, NestedState state);
+    ScrollResult HandleScroll(
+        float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
+
+    ScrollResult HandleScrollSelfFirst(float offset, int32_t source, NestedState state, float velocity = 0.f);
+
+    ScrollResult HandleScrollParentFirst(float offset, int32_t source, NestedState state, float velocity = 0.f);
 
     bool HandleScrollVelocity(float velocity) override;
 
-    void OnScrollStartRecursive(float position) override;
+    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
     /**
@@ -806,6 +807,7 @@ private:
     RefPtr<FrameNode> GetCurrentFrameNode(int32_t currentIndex) const;
     bool FadeOverScroll(float offset);
     int32_t ComputeSwipePageNextIndex(float velocity, bool onlyDistance = false) const;
+    int32_t ComputeNextIndexInSinglePage(float velocity, bool onlyDistance) const;
     int32_t ComputePageIndex(int32_t index) const;
     void UpdateIndexOnAnimationStop();
     void UpdateIndexOnSwipePageStop(int32_t pauseTargetIndex);
@@ -861,12 +863,6 @@ private:
     void UpdateTargetCapture(bool forceUpdate);
     void CreateCaptureCallback(int32_t targetIndex, int32_t captureId, bool forceUpdate);
     void UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId, int32_t targetIndex);
-    // capture node end
-    WeakPtr<NestableScrollContainer> parent_;
-    /**
-     *  ============================================================
-     *  End of NestableScrollContainer implementations
-     */
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -895,7 +891,6 @@ private:
     RefPtr<SwiperController> swiperController_;
     RefPtr<InputEvent> mouseEvent_;
 
-    bool enableNestedScroll_ = false;
     bool isLastIndicatorFocused_ = false;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;

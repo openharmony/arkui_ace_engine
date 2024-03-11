@@ -31,6 +31,7 @@ public:
     MOCK_METHOD1(GetPointWithTransform, void(PointF&));
     MOCK_METHOD1(AnimateHoverEffectScale, void(bool));
     MOCK_METHOD1(SetVisible, void(bool));
+    MOCK_METHOD4(SetBounds, void(float, float, float, float));
 
     void ResetBlendBgColor() override
     {

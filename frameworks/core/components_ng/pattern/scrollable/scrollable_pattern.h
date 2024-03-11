@@ -239,8 +239,6 @@ public:
         isCoordEventNeedSpring_ = IsCoordEventNeedSpring;
     }
 
-    void SetNestedScroll(const NestedScrollOptions& nestedOpt);
-    NestedScrollOptions GetNestedScroll();
     void GetParentNavigation();
     void GetParentModalSheet();
 
@@ -556,12 +554,11 @@ private:
 
     void RegisterScrollBarEventTask();
     bool OnScrollPosition(double& offset, int32_t source);
-    void SetParentScrollable();
     void ProcessNavBarReactOnStart();
     float ProcessNavBarReactOnUpdate(float offset);
     void ProcessNavBarReactOnEnd();
     void InitSpringOffsetProperty();
-    void InitCurveOffsetProperty(float position);
+    void InitCurveOffsetProperty();
     void StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void InitOption(AnimationOption &option, float duration, const RefPtr<Curve>& curve);
@@ -593,11 +590,12 @@ private:
     /******************************************************************************
      * NestableScrollContainer implementations
      */
-    ScrollResult HandleScroll(float offset, int32_t source, NestedState state = NestedState::GESTURE) override;
+    ScrollResult HandleScroll(
+        float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
     bool HandleScrollVelocity(float velocity) override;
 
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
-    void OnScrollStartRecursive(float position) override;
+    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
 
     ScrollResult HandleScrollParentFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfFirst(float& offset, int32_t source, NestedState state);
@@ -617,7 +615,6 @@ private:
     bool HandleScrollImpl(float offset, int32_t source);
     void NotifyMoved(bool value);
 
-    WeakPtr<NestableScrollContainer> parent_;
     ScrollFrameBeginCallback scrollFrameBeginCallback_;
     /*
      *  End of NestableScrollContainer implementations
@@ -666,11 +663,6 @@ private:
     bool animateOverScroll_ = false;
     bool isAnimateOverScroll_ = false;
     bool animateCanOverScroll_ = false;
-
-    NestedScrollOptions nestedScroll_ = {
-        .forward = NestedScrollMode::SELF_ONLY,
-        .backward = NestedScrollMode::SELF_ONLY,
-    };
 
     // select with mouse
     enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };

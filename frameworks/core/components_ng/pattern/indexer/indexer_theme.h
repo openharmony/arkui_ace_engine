@@ -84,6 +84,19 @@ inline constexpr uint32_t INDEXER_ACTIVE_BG_COLOR = 0x1F0A59F7;
 inline constexpr float TEXTVIEW_MIN_SIZE = 42.0f;
 inline constexpr float INDEXER_PADDING_TOP = 2.0f;
 inline constexpr float INDEXER_PADDING_LEFT = 4.0f;
+inline constexpr double BUBBLE_RADIUS = 28.0;
+inline constexpr double BUBBLE_ITEM_SIZE = 48.0;
+inline constexpr double BUBBLE_ITEM_RADIUS = 24.0;
+inline constexpr double INDEXER_DEFAULT_RADIUS = 12.0;
+inline constexpr double INDEXER_ITEM_DEFAULT_RADIUS = 8.0;
+inline constexpr float BUBBLE_DIVIDER_SIZE = 4.0f;
+inline constexpr float BUBBLE_COLUMN_MAX_SIZE = 342.0f;
+inline constexpr float BUBBLE_COLLAPSE_COLUMN_MAX_SIZE = 186.0f;
+inline constexpr float BUBBLE_LIST_MAX_SIZE = 282.0f;
+inline constexpr float BUBBLE_COLLAPSE_LIST_MAX_SIZE = 178.0f;
+inline constexpr double GRADIENT_COVER_HEIGHT = 16.0;
+inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE_COLLAPSED_API_TWELVE = 3; // 2 items + 1 letter
+inline constexpr float INDEXER_PADDING_TOP_API_TWELVE = 4.0f;
 
 enum class AlignStyle {
     LEFT = 0,

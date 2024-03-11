@@ -826,14 +826,25 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (IsPixelMapNeedScale()) {
         RefPtr<FrameNode> imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
+        auto frameTag = frameNode->GetTag();
+        if (GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
+            auto textDragPattern = frameNode->GetPattern<TextDragBase>();
+            CHECK_NULL_VOID(textDragPattern);
+            auto dragNode = textDragPattern->MoveDragNode();
+            if (dragNode) {
+                auto dragNodeOffset = dragNode->GetOffsetInScreen();
+                DragEventActuator::UpdatePreviewPositionAndScale(imageNode, dragNodeOffset);
+            }
+        }
         CHECK_NULL_VOID(imageNode);
         scale = static_cast<float>(imageNode->GetPreviewScaleVal());
         auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
         if (window) {
-            overlayManager = window->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            DragEventActuator::MountPixelMap(overlayManager, eventHub->GetGestureEventHub(), imageNode);
-            dragDropManager->DoDragStartAnimation(overlayManager, info);
+            auto subWindowOverlayManager = window->GetOverlayManager();
+            CHECK_NULL_VOID(subWindowOverlayManager);
+            DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode);
+            dragDropManager->DoDragStartAnimation(subWindowOverlayManager, info);
+            overlayManager->RemovePixelMap();
             if (pixelMap_ != nullptr) {
                 pixelMap = pixelMap_;
             }

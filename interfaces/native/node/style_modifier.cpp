@@ -130,9 +130,8 @@ const std::vector<int32_t> SPAN_ATTRIBUTES = { static_cast<int32_t>(NODE_SPAN_CO
     static_cast<int32_t>(NODE_TEXT_DECORATION), static_cast<int32_t>(NODE_FONT_COLOR),
     static_cast<int32_t>(NODE_FONT_SIZE), static_cast<int32_t>(NODE_FONT_STYLE), static_cast<int32_t>(NODE_FONT_WEIGHT),
     static_cast<int32_t>(NODE_TEXT_LINE_HEIGHT), static_cast<int32_t>(NODE_TEXT_CASE),
-    static_cast<int32_t>(NODE_TEXT_LETTER_SPACING), static_cast<int32_t>(NODE_SPAN_CONTENT),
-    static_cast<int32_t>(NODE_FONT_FAMILY), static_cast<int32_t>(NODE_TEXT_TEXT_SHADOW),
-    static_cast<int32_t>(NODE_SPAN_TEXT_BACKGROUND_STYLE) };
+    static_cast<int32_t>(NODE_TEXT_LETTER_SPACING), static_cast<int32_t>(NODE_FONT_FAMILY),
+    static_cast<int32_t>(NODE_TEXT_TEXT_SHADOW), static_cast<int32_t>(NODE_SPAN_TEXT_BACKGROUND_STYLE) };
 constexpr int32_t ANIMATION_DURATION_INDEX = 0;
 constexpr int32_t ANIMATION_CURVE_INDEX = 1;
 constexpr int32_t ANIMATION_DELAY_INDEX = 2;
@@ -8408,7 +8407,7 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
-    static Setter* setters[] = { SetSpanContent, SetSpanTextBackgroundStyle, SetTextShadow };
+    static Setter* setters[] = { SetSpanContent, SetSpanTextBackgroundStyle };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -8418,7 +8417,7 @@ int32_t SetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
 
 const ArkUI_AttributeItem* GetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetSpanContent, GetSpanTextBackgroundStyle, GetTextShadow };
+    static Getter* getters[] = { GetSpanContent, GetSpanTextBackgroundStyle };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -8428,7 +8427,7 @@ const ArkUI_AttributeItem* GetSpanAttribute(ArkUI_NodeHandle node, int32_t subTy
 
 void ResetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetSpanContent, ResetSpanTextBackgroundStyle, ResetTextShadow };
+    static Resetter* resetters[] = { ResetSpanContent, ResetSpanTextBackgroundStyle};
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

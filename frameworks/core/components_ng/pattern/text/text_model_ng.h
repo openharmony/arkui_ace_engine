@@ -98,6 +98,7 @@ public:
     static void SetFont(FrameNode* frameNode, const Font& value);
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
+    static void SetTextDetectEnable(FrameNode* frameNode, bool value);
 
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);

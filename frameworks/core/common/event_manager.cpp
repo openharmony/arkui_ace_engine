@@ -52,7 +52,7 @@ enum class CtrlKeysBit {
 };
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
-    const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
+    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
     ContainerScope scope(instanceId_);
 
@@ -80,7 +80,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
 }
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
-    const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
+    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
     ContainerScope scope(instanceId_);
 
@@ -220,7 +220,7 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result)
 }
 
 bool EventManager::PostEventTouchTest(
-    const TouchEvent& touchPoint, const RefPtr<NG::UINode>& uiNode, const TouchRestrict& touchRestrict)
+    const TouchEvent& touchPoint, const RefPtr<NG::UINode>& uiNode, TouchRestrict& touchRestrict)
 {
     ContainerScope scope(instanceId_);
     ACE_FUNCTION_TRACE();
@@ -250,7 +250,7 @@ bool EventManager::PostEventTouchTest(
 }
 
 void EventManager::TouchTest(
-    const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
+    const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
     ContainerScope scope(instanceId_);
 
@@ -424,7 +424,7 @@ void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectC
 }
 
 void EventManager::TouchTest(
-    const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict)
+    const AxisEvent& event, const RefPtr<RenderNode>& renderNode, TouchRestrict& touchRestrict)
 {
     ContainerScope scope(instanceId_);
 
@@ -875,7 +875,7 @@ void EventManager::LogPrintMouseTest()
 }
 
 void EventManager::MouseTest(
-    const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
+    const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
     TAG_LOGD(AceLogTag::ACE_MOUSE,
         "Mouse test start. Event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x, event.y,

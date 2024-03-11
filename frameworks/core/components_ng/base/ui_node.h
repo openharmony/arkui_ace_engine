@@ -256,7 +256,7 @@ public:
     void SetChildrenInDestroying();
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-        const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
+        const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
         bool isDispatch = false);
     virtual HitTestMode GetHitTestMode() const
     {
@@ -528,6 +528,8 @@ public:
     bool IsNeedExportTexture() const;
 
     virtual bool SetParentLayoutConstraint(const SizeF& size) const;
+
+    virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
     void PaintDebugBoundaryTreeAll(bool flag);
 

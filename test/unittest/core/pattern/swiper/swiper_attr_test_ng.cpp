@@ -609,7 +609,9 @@ HWTEST_F(SwiperAttrTestNg, AttrNestedScroll001, TestSize.Level1)
      */
     CreateWithItem([](SwiperModelNG model) { model.SetLoop(false); });
     EXPECT_FALSE(pattern_->IsLoop());
-    EXPECT_FALSE(pattern_->enableNestedScroll_);
+    auto nestedScroll = pattern_->GetNestedScroll();
+    EXPECT_EQ(nestedScroll.forward, NestedScrollMode::SELF_ONLY);
+    EXPECT_EQ(nestedScroll.backward, NestedScrollMode::SELF_ONLY);
 }
 
 /**
@@ -632,7 +634,9 @@ HWTEST_F(SwiperAttrTestNg, AttrNestedScroll002, TestSize.Level1)
         model.SetNestedScroll(nestedOpt);
     });
     EXPECT_FALSE(pattern_->IsLoop());
-    EXPECT_TRUE(pattern_->enableNestedScroll_);
+    auto nestedScroll = pattern_->GetNestedScroll();
+    EXPECT_EQ(nestedScroll.forward, NestedScrollMode::SELF_FIRST);
+    EXPECT_EQ(nestedScroll.backward, NestedScrollMode::SELF_FIRST);
 }
 
 /**

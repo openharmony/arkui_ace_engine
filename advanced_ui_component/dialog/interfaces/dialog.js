@@ -15,6 +15,7 @@
 
 const hilog = requireNapi('hilog');
 const resourceManager = requireNapi('resourceManager');
+const measure = requireNapi('measure');
 
 const TITLE_MAX_LINES = 2;
 const HORIZON_BUTTON_MAX_COUNT = 2;
@@ -33,6 +34,8 @@ const LOADING_MAX_LINES = 10;
 const LOADING_TEXT_LAYOUT_WEIGHT = 1;
 const LOADING_TEXT_MARGIN_LEFT = 12;
 const LOADING_MIN_HEIGHT = 48;
+const LIST_MIN_HEIGHT = 48;
+const CHECKBOX_CONTAINER_LENGTH = 20;
 
 export class TipsDialog extends ViewPU {
   constructor(e, o, t, r = -1) {
@@ -448,412 +451,298 @@ export class TipsDialog extends ViewPU {
 }
 
 export class SelectDialog extends ViewPU {
-  constructor(e, o, t, r = -1) {
-    super(e, t, r);
-    this.controller = void 0;
+  constructor(e15, f15, g15, h15 = -1, i15 = undefined, j15) {
+    super(e15, g15, h15, j15);
+    if (typeof i15 === 'function') {
+      this.paramsGenerator_ = i15;
+    }
     this.title = '';
     this.content = '';
     this.selectedIndex = -1;
     this.confirm = { value: '' };
     this.radioContent = [];
-    this.setInitiallyProvidedValue(o);
+    this.contentBuilder = this.buildContent;
+    this.controller = new CustomDialogController({
+      builder: () => {
+        var k15;
+        let l15 = new CustomContentDialog(this, {
+          primaryTitle: this.title,
+          contentBuilder: () => {
+            this.contentBuilder();
+          },
+          buttons: (this.confirm === undefined || ((k15 = this.confirm) === null || k15 === void 0 ? void 0 : k15.value) === '') ? [] : [this.confirm],
+        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 166 });
+        l15.setController(this.controller);
+        ViewPU.create(l15);
+        let m15 = () => {
+          var p15;
+          return {
+            primaryTitle: this.title,
+            contentBuilder: () => {
+              this.contentBuilder();
+            },
+            buttons: (this.confirm === undefined || ((p15 = this.confirm) === null || p15 === void 0 ? void 0 : p15.value) === '') ? [] : [this.confirm]
+          };
+        };
+        l15.paramsGenerator_ = m15;
+      }
+    }, this);
+    this.setInitiallyProvidedValue(f15);
+    this.finalizeConstruction();
   }
-
-  setInitiallyProvidedValue(e) {
-    void 0 !== e.controller && (this.controller = e.controller);
-    void 0 !== e.title && (this.title = e.title);
-    void 0 !== e.content && (this.content = e.content);
-    void 0 !== e.selectedIndex && (this.selectedIndex = e.selectedIndex);
-    void 0 !== e.confirm && (this.confirm = e.confirm);
-    void 0 !== e.radioContent && (this.radioContent = e.radioContent);
+  setInitiallyProvidedValue(d15) {
+    if (d15.title !== undefined) {
+      this.title = d15.title;
+    }
+    if (d15.content !== undefined) {
+      this.content = d15.content;
+    }
+    if (d15.selectedIndex !== undefined) {
+      this.selectedIndex = d15.selectedIndex;
+    }
+    if (d15.confirm !== undefined) {
+      this.confirm = d15.confirm;
+    }
+    if (d15.radioContent !== undefined) {
+      this.radioContent = d15.radioContent;
+    }
+    if (d15.contentBuilder !== undefined) {
+      this.contentBuilder = d15.contentBuilder;
+    }
+    if (d15.controller !== undefined) {
+      this.controller = d15.controller;
+    }
   }
-
-  updateStateVars(e) {
+  updateStateVars(c15) {
   }
-
-  purgeVariableDependenciesOnElmtId(e) {
+  purgeVariableDependenciesOnElmtId(b15) {
   }
-
   aboutToBeDeleted() {
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
-
-  setController(e) {
-    this.controller = e;
+  setController(a15) {
+    this.controller = a15;
   }
-
-  initialRender() {
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+  buildContent(p12 = null) {
+    this.observeComponentCreation((y14, z14) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(y14);
+      Scroll.create();
+      Scroll.margin({ right: -getNumberByResource('padding_level8') });
+      Scroll.scrollBar(BarState.Auto);
+      if (!z14) {
+        Scroll.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((w14, x14) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(w14);
       Column.create();
-      Column.backgroundBlurStyle(BlurStyle.Thick);
-      Column.borderRadius({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_corner_radius_dialog'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Column.margin({
-        left: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_start'],
-          bundleName: '',
-          moduleName: ''
-        },
-        right: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_end'],
-          bundleName: '',
-          moduleName: ''
-        },
-        bottom: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_bottom'],
-          bundleName: '',
-          moduleName: ''
-        }
-      });
-      Column.backgroundColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_dialog_bg'],
-        bundleName: '',
-        moduleName: ''
-      });
-      o || Column.pop();
+      Column.padding({ right: { id: -1, type: 10002, params: ['sys.float.padding_level8'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' } });
+      if (!x14) {
+        Column.pop();
+      }
       ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.padding({ left: 24, right: 24, top: 24 });
-      Row.constraintSize({ minHeight: 56 });
-      o || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Text.create(this.title);
-      Text.fontSize({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_dialog_tittle'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Text.fontWeight(FontWeight.Medium);
-      Text.maxLines(CONTENT_MAX_LINES);
-      Text.minFontSize(15);
-      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.fontColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_text_primary'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Text.textAlign(TextAlign.Start);
-      Text.width('100%');
-      o || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    Text.pop();
-    Row.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    });
+    this.observeComponentCreation((m14, n14) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(m14);
       If.create();
-      this.content ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Row.create();
-          Row.padding({ left: 24, right: 24, top: 8, bottom: 8 });
-          Row.width('100%');
-          o || Row.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Text.create(this.content);
-          Text.fontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_body2'],
-            bundleName: '',
-            moduleName: ''
+      if (this.content) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation((u14, v14) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(u14);
+            Row.create();
+            Row.padding({ bottom: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' } });
+            Row.width('100%');
+            if (!v14) {
+              Row.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
           });
-          Text.fontWeight(FontWeight.Medium);
-          Text.fontColor({
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_text_primary'],
-            bundleName: '',
-            moduleName: ''
+          this.observeComponentCreation((s14, t14) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(s14);
+            Text.create(this.content);
+            Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_M'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' });
+            Text.fontWeight(FontWeight.Regular);
+            Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' });
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            if (!t14) {
+              Text.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
           });
-          Text.maxLines(CONTENT_MAX_LINES);
-          Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-          Text.minFontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_body3'],
-            bundleName: '',
-            moduleName: ''
-          });
-          o || Text.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        Text.pop();
-        Row.pop();
-      })) : If.branchId(1);
-      o || If.pop();
+          Text.pop();
+          Row.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+        });
+      }
+      if (!n14) {
+        If.pop();
+      }
       ViewStackProcessor.StopGetAccessRecording();
-    }));
+    });
     If.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    this.observeComponentCreation((k14, l14) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(k14);
       List.create({ space: 1 });
       List.width('100%');
-      List.padding({ left: 24, right: 24, top: 8, bottom: 8 });
-      List.clip(!1);
-      o || List.pop();
+      List.clip(false);
+      if (!l14) {
+        List.pop();
+      }
       ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    });
+    this.observeComponentCreation((v12, w12) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(v12);
       ForEach.create();
-      this.forEachUpdateFunction(e, this.radioContent, ((e, o) => {
-        const t = e;
+      const x12 = (z12, a13) => {
+        const b13 = z12;
         {
-          const e = !0;
-          const r = (o, t) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(o);
-            ListItem.create(i, e);
-            t || ListItem.pop();
+          const c13 = (i14, j14) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(i14);
+            d13(i14, j14);
+            if (!j14) {
+              ListItem.pop();
+            }
             ViewStackProcessor.StopGetAccessRecording();
           };
-          const s = () => {
-            this.observeComponentCreation(r);
-            this.observeComponentCreation(((e, o) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
+          const d13 = (g14, h14) => {
+            ListItem.create(e13, true);
+          };
+          const e13 = (i13, j13) => {
+            c13(i13, j13);
+            this.updateFuncByElmtId.set(i13, c13);
+            this.observeComponentCreation((e14, f14) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(e14);
               Column.create();
-              o || Column.pop();
+              if (!f14) {
+                Column.pop();
+              }
               ViewStackProcessor.StopGetAccessRecording();
-            }));
-            this.observeComponentCreation(((e, o) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
+            });
+            this.observeComponentCreation((b14, c14) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(b14);
               Row.create();
-              Row.constraintSize({ minHeight: 48 });
-              Row.clip(!1);
-              Row.onClick((() => {
-                t.action && t.action();
+              Row.constraintSize({ minHeight: LIST_MIN_HEIGHT });
+              Row.clip(false);
+              Row.padding({ top: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' }, bottom: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' } });
+              Row.onClick(() => {
+                b13.action && b13.action();
                 this.controller.close();
-              }));
-              o || Row.pop();
+              });
+              if (!c14) {
+                Row.pop();
+              }
               ViewStackProcessor.StopGetAccessRecording();
-            }));
-            this.observeComponentCreation(((e, o) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              Text.create(t.title);
-              Text.fontSize(ITEM_TEXT_SIZE);
+            });
+            this.observeComponentCreation((z13, a14) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(z13);
+              Text.create(b13.title);
+              Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' });
               Text.fontWeight(FontWeight.Medium);
-              Text.maxLines(CONTENT_MAX_LINES);
-              Text.fontColor({
-                id: -1,
-                type: 10001,
-                params: ['sys.color.ohos_id_color_text_primary'],
-                bundleName: '',
-                moduleName: ''
-              });
+              Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' });
               Text.layoutWeight(1);
-              o || Text.pop();
+              if (!a14) {
+                Text.pop();
+              }
               ViewStackProcessor.StopGetAccessRecording();
-            }));
+            });
             Text.pop();
-            this.observeComponentCreation(((e, r) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
+            this.observeComponentCreation((w13, x13) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(w13);
               Radio.create({ value: 'item.title', group: 'radioGroup' });
-              Radio.size({ width: 20, height:20});
-              Radio.checked(this.selectedIndex === o);
-              Radio.onClick((() => {
-                t.action && t.action();
+              Radio.size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH });
+              Radio.checked(this.selectedIndex == a13);
+              Radio.onClick(() => {
+                b13.action && b13.action();
                 this.controller.close();
-              }));
-              r || Radio.pop();
+              });
+              if (!x13) {
+                Radio.pop();
+              }
               ViewStackProcessor.StopGetAccessRecording();
-            }));
+            });
             Row.pop();
-            this.observeComponentCreation(((e, t) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
+            this.observeComponentCreation((p13, q13) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(p13);
               If.create();
-              o < this.radioContent.length - 1 ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation(((e, o) => {
-                  ViewStackProcessor.StartGetAccessRecordingFor(e);
-                  Divider.create();
-                  Divider.color({
-                    id: -1,
-                    type: 10001,
-                    params: ['sys.color.ohos_id_color_list_separator'],
-                    bundleName: '',
-                    moduleName: ''
+              if (a13 < this.radioContent.length - 1) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                  this.observeComponentCreation((u13, v13) => {
+                    ViewStackProcessor.StartGetAccessRecordingFor(u13);
+                    Divider.create();
+                    Divider.color({ id: -1, type: 10001, params: ['sys.color.comp_divider'], bundleName: '__harDefaultBundleName__', moduleName: '__harDefaultModuleName__' });
+                    if (!v13) {
+                      Divider.pop();
+                    }
+                    ViewStackProcessor.StopGetAccessRecording();
                   });
-                  o || Divider.pop();
-                  ViewStackProcessor.StopGetAccessRecording();
-                }));
-              })) : If.branchId(1);
-              t || If.pop();
+                });
+              }
+              else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+              }
+              if (!q13) {
+                If.pop();
+              }
               ViewStackProcessor.StopGetAccessRecording();
-            }));
+            });
             If.pop();
             Column.pop();
             ListItem.pop();
           };
-          const i = (e, s) => {
-            r(e, s);
-            this.updateFuncByElmtId.set(e, r);
-            this.observeComponentCreation(((e, o) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              Column.create();
-                o || Column.pop();
-                ViewStackProcessor.StopGetAccessRecording();
-            }));
-            this.observeComponentCreation(((e, o) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              Row.create();
-              Row.constraintSize({ minHeight: 48 });
-              Row.clip(!1);
-              Row.onClick((() => {
-                t.action && t.action();
-                this.controller.close();
-              }));
-              o || Row.pop();
-              ViewStackProcessor.StopGetAccessRecording();
-            }));
-            this.observeComponentCreation(((e, o) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              Text.create(t.title);
-              Text.fontSize(ITEM_TEXT_SIZE);
-              Text.fontWeight(FontWeight.Regular);
-              Text.maxLines(CONTENT_MAX_LINES);
-              Text.fontColor({
-                id: -1,
-                type: 10001,
-                params: ['sys.color.ohos_id_color_text_primary'],
-                bundleName: '',
-                moduleName: ''
-              });
-              Text.layoutWeight(1);
-              o || Text.pop();
-              ViewStackProcessor.StopGetAccessRecording();
-            }));
-            Text.pop();
-            this.observeComponentCreation(((e, r) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              Radio.create({ value: 'item.title', group: 'radioGroup' });
-              Radio.size({ width: 20, height: 20 });
-              Radio.checked(this.selectedIndex === o);
-              Radio.onClick((() => {
-                t.action && t.action();
-                this.controller.close();
-              }));
-              r || Radio.pop();
-              ViewStackProcessor.StopGetAccessRecording();
-            }));
-            Row.pop();
-            this.observeComponentCreation(((e, t) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              If.create();
-              o < this.radioContent.length - 1 ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation(((e, o) => {
-                  ViewStackProcessor.StartGetAccessRecordingFor(e);
-                  Divider.create();
-                  Divider.color({
-                    id: -1,
-                    type: 10001,
-                    params: ['sys.color.ohos_id_color_list_separator'],
-                    bundleName: '',
-                    moduleName: ''
-                  });
-                  o || Divider.pop();
-                  ViewStackProcessor.StopGetAccessRecording();
-                }));
-              })) : If.branchId(1);
-              t || If.pop();
-              ViewStackProcessor.StopGetAccessRecording();
-            }));
-            If.pop();
-            Column.pop();
-            ListItem.pop();
-          };
-          e ? (() => {
-            this.observeComponentCreation(r);
-            ListItem.pop();
-          })() : s();
+          this.observeComponentCreation(c13);
+          ListItem.pop();
         }
-      }), void 0, !0, !1);
-      o || ForEach.pop();
+      };
+      this.forEachUpdateFunction(v12, this.radioContent, x12, undefined, true, false);
+      if (!w12) {
+        ForEach.pop();
+      }
       ViewStackProcessor.StopGetAccessRecording();
-    }));
+    });
     ForEach.pop();
     List.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.width('100%');
-      Row.padding({ left: 16, right: 16, top: 16, bottom: 16 });
-      o || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.confirm.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Button.createWithLabel(this.confirm.value);
-          Button.fontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_button1'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontWeight(FontWeight.Medium);
-          Button.layoutWeight(1);
-          Button.backgroundColor(this.confirm.background ? this.confirm.background : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_background_transparent'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontColor(this.confirm.fontColor ? this.confirm.fontColor : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_text_primary_activated'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.onClick((() => {
-            this.confirm.action && this.confirm.action();
-            this.controller.close();
-          }));
-          o || Button.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        Button.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    Row.pop();
     Column.pop();
+    Scroll.pop();
   }
-
+  initialRender() {
+    {
+      this.observeComponentCreation((j12, k12) => {
+        ViewStackProcessor.StartGetAccessRecordingFor(j12);
+        if (k12) {
+          let l12 = new CustomDialogContentComponent(this, {
+            controller: this.controller,
+            primaryTitle: this.title,
+            contentBuilder: () => {
+              this.contentBuilder();
+            },
+            buttons: (this.confirm === undefined || this.confirm.value === '') ? [] : [this.confirm],
+          }, undefined, j12, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 225 });
+          ViewPU.create(l12);
+          let m12 = () => {
+            return {
+              controller: this.controller,
+              primaryTitle: this.title,
+              contentBuilder: () => {
+                this.contentBuilder();
+              },
+              buttons: (this.confirm === undefined || this.confirm.value === '') ? [] : [this.confirm]
+            };
+          };
+          l12.paramsGenerator_ = m12;
+        }
+        else {
+          this.updateStateVarsOfChildByElmtId(j12, {});
+        }
+        ViewStackProcessor.StopGetAccessRecording();
+      });
+    }
+  }
   rerender() {
     this.updateDirtyElements();
   }
@@ -1235,260 +1124,155 @@ export class ConfirmDialog extends ViewPU {
 }
 
 export class AlertDialog extends ViewPU {
-  constructor(e, o, t, r = -1) {
-    super(e, t, r);
-    this.controller = void 0;
-    this.content = '';
-    this.primaryButton = { value: '' };
-    this.secondaryButton = { value: '' };
-    this.setInitiallyProvidedValue(o);
+  constructor(a8, b8, c8, d8 = -1, e8 = undefined, f8) {
+      super(a8, c8, d8, f8);
+      if (typeof e8 === 'function') {
+          this.paramsGenerator_ = e8;
+      }
+      this.controller = undefined;
+      this.content = '';
+      this.primaryButton = null;
+      this.secondaryButton = null;
+      this.buttons = undefined;
+      this.setInitiallyProvidedValue(b8);
+      this.finalizeConstruction();
   }
-
-  setInitiallyProvidedValue(e) {
-    void 0 !== e.controller && (this.controller = e.controller);
-    void 0 !== e.content && (this.content = e.content);
-    void 0 !== e.primaryButton && (this.primaryButton = e.primaryButton);
-    void 0 !== e.secondaryButton && (this.secondaryButton = e.secondaryButton);
+  setInitiallyProvidedValue(z7) {
+      if (z7.controller !== undefined) {
+          this.controller = z7.controller;
+      }
+      if (z7.content !== undefined) {
+          this.content = z7.content;
+      }
+      if (z7.primaryButton !== undefined) {
+          this.primaryButton = z7.primaryButton;
+      }
+      if (z7.secondaryButton !== undefined) {
+          this.secondaryButton = z7.secondaryButton;
+      }
+      if (z7.buttons !== undefined) {
+          this.buttons = z7.buttons;
+      }
   }
-
-  updateStateVars(e) {
+  updateStateVars(y7) {
   }
-
-  purgeVariableDependenciesOnElmtId(e) {
+  purgeVariableDependenciesOnElmtId(x7) {
   }
-
   aboutToBeDeleted() {
-    SubscriberManager.Get().delete(this.id__());
-    this.aboutToBeDeletedInternal();
+      SubscriberManager.Get().delete(this.id__());
+      this.aboutToBeDeletedInternal();
   }
-
-  setController(e) {
-    this.controller = e;
+  setController(w7) {
+      this.controller = w7;
   }
-
   initialRender() {
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Column.create();
-      Column.backgroundBlurStyle(BlurStyle.Thick);
-      Column.borderRadius({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_corner_radius_dialog'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Column.margin({
-        left: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_start'],
-          bundleName: '',
-          moduleName: ''
-        },
-        right: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_end'],
-          bundleName: '',
-          moduleName: ''
-        },
-        bottom: {
-          id: -1,
-          type: 10002,
-          params: ['sys.float.ohos_id_dialog_margin_bottom'],
-          bundleName: '',
-          moduleName: ''
-        }
-      });
-      Column.backgroundColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_dialog_bg'],
-        bundleName: '',
-        moduleName: ''
-      });
-      o || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.padding({
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: this.secondaryButton.value || this.primaryButton.value ? 0 : 24
-      });
-      o || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Text.create(this.content);
-      Text.fontSize({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_body1'],
-        bundleName: '',
-        moduleName: ''
-      });
-      Text.fontWeight(FontWeight.Medium);
-      Text.fontColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_text_primary'],
-        bundleName: '',
-        moduleName: ''
-      });
-      o || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    Text.pop();
-    Row.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      Row.create();
-      Row.width('100%');
-      Row.padding({ left: 16, right: 16, top: 16, bottom: 16 });
-      o || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.primaryButton.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Button.createWithLabel(this.primaryButton.value);
-          Button.fontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_button1'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontWeight(FontWeight.Medium);
-          Button.layoutWeight(1);
-          Button.backgroundColor(this.primaryButton.background ? this.primaryButton.background : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_background_transparent'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_text_primary_activated'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.onClick((() => {
-            this.primaryButton.action && this.primaryButton.action();
-            this.controller.close();
-          }));
-          o || Button.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        Button.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.secondaryButton.value && this.primaryButton.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Column.create();
-          Column.width(DIVIDER_CONTAINER_WIDTH);
-          Column.alignItems(HorizontalAlign.Center);
-          o || Column.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          If.create();
-          this.secondaryButton.background ? If.branchId(1) : this.ifElseBranchUpdateFunction(0, (() => {
-            this.observeComponentCreation(((e, o) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              Divider.create();
-              Divider.width(DIVIDER_WIDTH);
-              Divider.height(DIVIDER_HEIGHT);
-              Divider.color({
-                id: -1,
-                type: 10001,
-                params: ['sys.color.ohos_id_color_list_separator'],
-                bundleName: '',
-                moduleName: ''
-              });
-              Divider.vertical(!0);
-              o || Divider.pop();
+      {
+          this.observeComponentCreation((q7, r7) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(q7);
+              if (r7) {
+                  let s7 = new CustomDialogContentComponent(this, {
+                      controller: this.controller,
+                      contentBuilder: () => {
+                          this.AlertDialogContentBuilder();
+                      },
+                      buttons: this.buttons,
+                  }, undefined, q7, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 375 });
+                  ViewPU.create(s7);
+                  let t7 = () => {
+                      return {
+                          controller: this.controller,
+                          contentBuilder: () => {
+                              this.AlertDialogContentBuilder();
+                          },
+                          buttons: this.buttons
+                      };
+                  };
+                  s7.paramsGenerator_ = t7;
+              }
+              else {
+                  this.updateStateVarsOfChildByElmtId(q7, {});
+              }
               ViewStackProcessor.StopGetAccessRecording();
-            }));
-          }));
-          o || If.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        If.pop();
-        Column.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    this.observeComponentCreation(((e, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
-      If.create();
-      this.secondaryButton.value ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          Button.createWithLabel(this.secondaryButton.value);
-          Button.fontSize({
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_size_button1'],
-            bundleName: '',
-            moduleName: ''
           });
-          Button.fontWeight(FontWeight.Medium);
-          Button.layoutWeight(1);
-          Button.backgroundColor(this.secondaryButton.background ? this.secondaryButton.background : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_background_transparent'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.fontColor(this.secondaryButton.fontColor ? this.secondaryButton.fontColor : {
-            id: -1,
-            type: 10001,
-            params: ['sys.color.ohos_id_color_text_primary_activated'],
-            bundleName: '',
-            moduleName: ''
-          });
-          Button.onClick((() => {
-            this.secondaryButton.action && this.secondaryButton.action();
-            this.controller.close();
-          }));
-          o || Button.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        Button.pop();
-      })) : If.branchId(1);
-      o || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    If.pop();
-    Row.pop();
-    Column.pop();
+      }
   }
-
+  AlertDialogContentBuilder(f7 = null) {
+      this.observeComponentCreation((n7, o7) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(n7);
+          Column.create();
+          Column.margin({ right: `${this.getMargin()}vp`, });
+          if (!o7) {
+              Column.pop();
+          }
+          ViewStackProcessor.StopGetAccessRecording();
+      });
+      this.observeComponentCreation((l7, m7) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(l7);
+          Scroll.create();
+          Scroll.width('100%');
+          if (!m7) {
+              Scroll.pop();
+          }
+          ViewStackProcessor.StopGetAccessRecording();
+      });
+      this.observeComponentCreation((j7, k7) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(j7);
+          Text.create(this.content);
+          Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' });
+          Text.fontWeight(FontWeight.Medium);
+          Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
+          Text.margin({ right: { id: -1, type: 10002, params: ['sys.float.padding_level8'], bundleName: '', moduleName: '' }, });
+          Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
+          Text.textAlign(this.getTextAlign());
+          if (!k7) {
+              Text.pop();
+          }
+          ViewStackProcessor.StopGetAccessRecording();
+      });
+      Text.pop();
+      Scroll.pop();
+      Column.pop();
+  }
+  aboutToAppear() {
+      this.initButtons();
+  }
+  getTextAlign() {
+      let d7 = measure.measureTextSize({
+          textContent: this.content,
+          fontSize: { id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' },
+      });
+      let e7 = measure.measureTextSize({
+          textContent: '1',
+          fontSize: { id: -1, type: 10002, params: ['sys.float.Body_L'], bundleName: '', moduleName: '' },
+      });
+      if (this.getTextHeight(d7) <= this.getTextHeight(e7)) {
+          return TextAlign.Center;
+      }
+      return TextAlign.Start;
+  }
+  getTextHeight(c7) {
+      if (c7 && c7.height !== null && c7.height !== undefined) {
+          return Number(c7.height);
+      }
+      return 0;
+  }
+  initButtons() {
+      if (!this.primaryButton && !this.secondaryButton) {
+          return;
+      }
+      this.buttons = [];
+      if (this.primaryButton) {
+          this.buttons.push(this.primaryButton);
+      }
+      if (this.secondaryButton) {
+          this.buttons.push(this.secondaryButton);
+      }
+  }
+  getMargin() {
+      return 0 - getNumberByResource('padding_level8');
+  }
   rerender() {
-    this.updateDirtyElements();
+      this.updateDirtyElements();
   }
 }
 

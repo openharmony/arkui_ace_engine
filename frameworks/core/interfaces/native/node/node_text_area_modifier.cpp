@@ -337,7 +337,7 @@ void ResetTextAreaFontColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t textColor = 0;
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
     textColor = static_cast<int32_t>(theme->GetTextColor().GetValue());

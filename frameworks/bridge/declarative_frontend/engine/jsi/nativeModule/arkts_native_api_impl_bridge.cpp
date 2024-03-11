@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,6 +89,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_refresh_bridge.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h"
 #endif
@@ -787,6 +788,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetEllipsisMode));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEllipsisMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetEllipsisMode));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDataDetector"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetEnableDataDetector));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDataDetector"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetEnableDataDetector));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 
     auto search = panda::ObjectRef::New(vm);
@@ -950,6 +955,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridRow"), gridRow);
 
     auto richEditor = panda::ObjectRef::New(vm);
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDataDetector"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEnableDataDetector));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDataDetector"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEnableDataDetector));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCopyOptions));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOptions"),
@@ -1297,6 +1306,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterTextClockAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
+    RegisterRefreshAttributes(object, vm);
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     RegisterPluginAttributes(object, vm);
 #endif
@@ -2374,6 +2384,20 @@ void ArkUINativeModule::RegisterTabContentAttributes(Local<panda::ObjectRef> obj
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabContent"), tabContent);
 }
 
+void ArkUINativeModule::RegisterRefreshAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto refresh = panda::ObjectRef::New(vm);
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRefreshOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetRefreshOffset));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRefreshOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetRefreshOffset));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPullToRefresh"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetPullToRefresh));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPullToRefresh"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetPullToRefresh));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "refresh"), refresh);
+}
+
 void ArkUINativeModule::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto hyperlink = panda::ObjectRef::New(vm);
@@ -2555,6 +2579,22 @@ void ArkUINativeModule::RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupPosition));
     alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupPosition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupPosition));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupItemBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupItemBorderRadius));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupItemBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupItemBorderRadius));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setItemBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetItemBorderRadius));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetItemBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetItemBorderRadius));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupBackgroundBlurStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupBackgroundBlurStyle));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupBackgroundBlurStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupBackgroundBlurStyle));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupTitleBackground"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupTitleBackground));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupTitleBackground"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupTitleBackground));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "alphabetIndexer"), alphabetIndexer);
 }
 

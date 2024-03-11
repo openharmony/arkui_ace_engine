@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 72
+#define ARKUI_FULL_API_VERSION 73
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 72
+#define ARKUI_NODE_API_VERSION 73
 
 #define ARKUI_BASIC_API_VERSION 6
 #define ARKUI_EXTENDED_API_VERSION 6
@@ -655,14 +655,13 @@ enum ArkUINodeType {
     ARKUI_REFRESH,
     ARKUI_ROOT,
     ARKUI_COMPONENT_ROOT,
-    ARKUI_CUSTOM,
-    ARKUI_CUSTOM_CONTAINER,
     ARKUI_LIST_ITEM_GROUP,
     ARKUI_DATE_PICKER,
     ARKUI_TIME_PICKER,
     ARKUI_TEXT_PICKER,
     ARKUI_CALENDAR_PICKER,
     ARKUI_GRID_ITEM,
+    ARKUI_CUSTOM,
 };
 
 enum ArkUIEventCategory {
@@ -1397,6 +1396,8 @@ struct ArkUITextModifier {
     ArkUI_Int32 (*getItalicFontStyle)(ArkUINodeHandle node);
     void (*setEllipsisMode)(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode);
     void (*resetEllipsisMode)(ArkUINodeHandle node);
+    void (*setEnableDataDetector)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
+    void (*resetEnableDataDetector)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextContent)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextLineHeight)(ArkUINodeHandle node);
     void (*getTextDecoration)(ArkUINodeHandle node, ArkUITextDecorationType* decoration);
@@ -1411,7 +1412,7 @@ struct ArkUITextModifier {
     ArkUI_Uint32 (*getTextShadowsCount)(ArkUINodeHandle node);
     void (*getTextShadows)(ArkUINodeHandle node, ArkUITextShadowStruct* textShadow, ArkUI_Uint32 size);
     ArkUI_Int32 (*getTextWordBreak)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getTextEllipsisMode)(ArkUINodeHandle node);    
+    ArkUI_Int32 (*getTextEllipsisMode)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -2401,6 +2402,10 @@ struct ArkUIBadgeModifier {
 struct ArkUIRefreshModifier {
     void (*setRefreshing)(ArkUINodeHandle node, ArkUI_Bool value);
     ArkUI_Bool (*getRefreshing)(ArkUINodeHandle node);
+    void (*setRefreshOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetRefreshOffset)(ArkUINodeHandle node);
+    void (*setPullToRefresh)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetPullToRefresh)(ArkUINodeHandle node);
     void (*setRefreshContent)(ArkUINodeHandle node, ArkUINodeHandle content);
 };
 
@@ -2449,6 +2454,16 @@ struct ArkUIAlphabetIndexerModifier {
     void (*setPopupPosition)(
         ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue, ArkUI_Int32 yUnit);
     void (*resetPopupPosition)(ArkUINodeHandle node);
+    void (*setPopupItemBorderRadius)(ArkUINodeHandle node, ArkUI_Float32 radiusValue, ArkUI_Int32 radiusUnit,
+        ArkUI_Float32 popupValue, ArkUI_Int32 popupUnit);
+    void (*resetPopupItemBorderRadius)(ArkUINodeHandle node);
+    void (*setItemBorderRadius)(ArkUINodeHandle node, ArkUI_Float32 radiusValue, ArkUI_Int32 radiusUnit,
+        ArkUI_Float32 indexerValue, ArkUI_Int32 indexerUnit);
+    void (*resetItemBorderRadius)(ArkUINodeHandle node);
+    void (*setPopupBackgroundBlurStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetPopupBackgroundBlurStyle)(ArkUINodeHandle node);
+    void (*setPopupTitleBackground)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetPopupTitleBackground)(ArkUINodeHandle node);
 };
 
 struct ArkUILoadingProgressModifier {
@@ -2874,6 +2889,8 @@ struct ArkUIColumnSplitModifier {
 };
 
 struct ArkUIRichEditorModifier {
+    void (*setRichEditorEnableDataDetector)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
+    void (*resetRichEditorEnableDataDetector)(ArkUINodeHandle node);
     void (*setRichEditorCopyOptions)(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue);
     void (*resetRichEditorCopyOptions)(ArkUINodeHandle node);
 };
@@ -3042,7 +3059,7 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Bool (*insertChildAfter)(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling);
     void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*clearChildren)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getChildrenNumber)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getChildrenNumber)(ArkUINodeHandle node);
     ArkUINodeHandle (*getChild)(ArkUINodeHandle node, ArkUI_Int32 index);
     ArkUINodeHandle (*getFirst)(ArkUINodeHandle node);
     ArkUINodeHandle (*getNextSibling)(ArkUINodeHandle node);

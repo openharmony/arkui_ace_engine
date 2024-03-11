@@ -330,7 +330,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     gridLayoutInfo_.endIndex_ = itemIndex - 1;
     gridLayoutInfo_.startMainLineIndex_ = 0;
-    gridLayoutInfo_.endMainLineIndex_ = gridLayoutInfo_.hasBigItem_ ? gridLayoutInfo_.gridMatrix_.size() - 1 : rowIndex;
+    gridLayoutInfo_.endMainLineIndex_ = gridLayoutInfo_.gridMatrix_.size() - 1 ;
 }
 
 void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

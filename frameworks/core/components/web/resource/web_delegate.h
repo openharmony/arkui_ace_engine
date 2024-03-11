@@ -662,6 +662,8 @@ public:
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
     void OnAudioStateChanged(bool audible);
     void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs);
+    void OnFirstMeaningfulPaint(std::shared_ptr<OHOS::NWeb::NWebFirstMeaningfulPaintDetails> details);
+    void OnLargestContentfulPaint(std::shared_ptr<OHOS::NWeb::NWebLargestContentfulPaintDetails> details);
     void OnSafeBrowsingCheckResult(int threat_type);
     void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
     void OnOverScroll(float xOffset, float yOffset);
@@ -855,6 +857,8 @@ private:
     EventCallbackV2 onTouchIconUrlV2_;
     EventCallbackV2 onAudioStateChangedV2_;
     EventCallbackV2 onFirstContentfulPaintV2_;
+    EventCallbackV2 OnFirstMeaningfulPaintV2_;
+    EventCallbackV2 OnLargestContentfulPaintV2_;
     EventCallbackV2 onOverScrollV2_;
     EventCallbackV2 onScreenCaptureRequestV2_;
     EventCallbackV2 onNavigationEntryCommittedV2_;

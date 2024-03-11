@@ -131,4 +131,9 @@ void FrameReport::FlushEnd()
 {
     flushEndFunc_ = nullptr;
 }
+
+void FrameReport::SetFrameParam(int requestId, int load, int schedFrameNum, int value)
+{
+    setFrameParamFunc_ = nullptr;
+}
 } // namespace OHOS::Ace
