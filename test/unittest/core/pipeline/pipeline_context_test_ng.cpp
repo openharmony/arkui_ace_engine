@@ -3140,5 +3140,38 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg072, TestSize.Level1)
     TouchEvent result = context_->GetLatestPoint(events, nanoTimeStamp);
     ASSERT_LT(static_cast<uint64_t>(result.time.time_since_epoch().count()), nanoTimeStamp);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg073
+ * @tc.desc: Test the function GetSafeArea and GetSafeAreaWithoutProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg073, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    /**
+     * @tc.steps2: call UpdateSystemSafeArea and SetIgnoreViewSafeArea, then check the value of GetSafeArea
+                and GetSafeAreaWithoutProcess.
+     * @tc.expected: The GetSafeArea is empty, and the GetSafeAreaWithoutProcess is systemSafeArea.
+     */
+    SafeAreaInsets::Inset left { 0, 1 };
+    SafeAreaInsets::Inset top { 0, 2 };
+    SafeAreaInsets::Inset right { 0, 3 };
+    SafeAreaInsets::Inset bottom { 0, 4 };
+    SafeAreaInsets safeAreaInsets(left, top, right, bottom);
+
+    SafeAreaInsets::Inset inset {};
+    SafeAreaInsets emptySafeAreaInsets(inset, inset, inset, inset);
+
+    context_->UpdateSystemSafeArea(safeAreaInsets);
+    context_->SetIgnoreViewSafeArea(true);
+
+    EXPECT_EQ(context_->safeAreaManager_->GetSafeArea(), emptySafeAreaInsets);
+    EXPECT_EQ(context_->safeAreaManager_->GetSafeAreaWithoutProcess(), safeAreaInsets);
+}
 } // namespace NG
 } // namespace OHOS::Ace
