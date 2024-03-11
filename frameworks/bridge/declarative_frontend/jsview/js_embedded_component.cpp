@@ -30,11 +30,12 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_ref.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
-#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_ui_extension.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "frameworks/core/components_ng/base/view_abstract_model.h"
@@ -64,22 +65,17 @@ void JSEmbeddedComponent::JSBind(BindingTarget globalObj)
 void JSEmbeddedComponent::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        TAG_LOGW(AceLogTag::ACE_EMBEDDED_COMPONENT, "EmbeddedComponent argument is invalid.");
         return;
     }
     auto wantObj = JSRef<JSObject>::Cast(info[0]);
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
 
-    int32_t embeddedType = OHOS::Ace::NG::EmbeddedType::DEFAULT_TYPE;
+    NG::SessionType sessionType = NG::SessionType::EMBEDDED_UI_EXTENSION;
     if (info.Length() > 1 && info[1]->IsNumber()) {
-        int32_t type = info[1]->ToNumber<int32_t>();
-        if (type >= OHOS::Ace::NG::EmbeddedType::DEFAULT_TYPE &&
-            type <= OHOS::Ace::NG::EmbeddedType::UI_EXTENSION) {
-            embeddedType = type;
-        }
+        sessionType = static_cast<NG::SessionType>(info[1]->ToNumber<int32_t>());
     }
 
-    UIExtensionModel::GetInstance()->Create(want, embeddedType);
+    UIExtensionModel::GetInstance()->Create(want, sessionType);
     ViewAbstractModel::GetInstance()->SetWidth(EMBEDDED_COMPONENT_MIN_WIDTH);
     ViewAbstractModel::GetInstance()->SetHeight(EMBEDDED_COMPONENT_MIN_HEIGHT);
     ViewAbstractModel::GetInstance()->SetMinWidth(EMBEDDED_COMPONENT_MIN_WIDTH);
@@ -89,59 +85,64 @@ void JSEmbeddedComponent::Create(const JSCallbackInfo& info)
 void JSEmbeddedComponent::OnTerminated(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        TAG_LOGW(AceLogTag::ACE_EMBEDDED_COMPONENT, "OnTerminated argument is invalid.");
         return;
     }
     WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
-    auto onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
-        (int32_t code, const AAFwk::Want& want) {
-            ContainerScope scope(instanceId);
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("EmbeddedComponent.onTerminated");
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateCurrentActiveNode(node);
-            auto engine = EngineHelper::GetCurrentEngine();
-            CHECK_NULL_VOID(engine);
-            NativeEngine* nativeEngine = engine->GetNativeEngine();
-            CHECK_NULL_VOID(nativeEngine);
-            auto nativeWant = WantWrap::ConvertToNativeValue(want, reinterpret_cast<napi_env>(nativeEngine));
+    auto onTerminated = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                            std::optional<int32_t> code, const RefPtr<WantWrap>& wantWrap) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("EmbeddedComponent.onTerminated");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
+        if (!code.has_value()) {
+            func->ExecuteJS();
+            return;
+        }
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        obj->SetProperty<int32_t>("code", code.value());
+        if (wantWrap) {
+            auto nativeWant =
+                WantWrap::ConvertToNativeValue(wantWrap->GetWant(), reinterpret_cast<napi_env>(nativeEngine));
             auto wantJSVal = JsConverter::ConvertNapiValueToJsVal(nativeWant);
-            JSRef<JSObject> obj = JSRef<JSObject>::New();
-            obj->SetProperty<int32_t>("code", code);
             obj->SetPropertyObject("want", wantJSVal);
-            auto returnValue = JSRef<JSVal>::Cast(obj);
-            func->ExecuteJS(1, &returnValue);
-        };
-    UIExtensionModel::GetInstance()->SetOnResult(std::move(onResult));
+        }
+        auto returnValue = JSRef<JSVal>::Cast(obj);
+        func->ExecuteJS(1, &returnValue);
+    };
+    UIExtensionModel::GetInstance()->SetOnTerminated(std::move(onTerminated));
 }
 
 void JSEmbeddedComponent::OnError(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        TAG_LOGW(AceLogTag::ACE_EMBEDDED_COMPONENT, "OnError argument is invalid.");
         return;
     }
     WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
-    auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
-        (int32_t code, const std::string& name, const std::string& message) {
-            ContainerScope scope(instanceId);
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("EmbeddedComponent.onError");
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateCurrentActiveNode(node);
-            JSRef<JSObject> obj = JSRef<JSObject>::New();
-            obj->SetProperty<int32_t>("code", code);
-            obj->SetProperty<std::string>("name", name);
-            obj->SetProperty<std::string>("message", message);
-            auto returnValue = JSRef<JSVal>::Cast(obj);
-            func->ExecuteJS(FUNC_ARGC_1, &returnValue);
-        };
+    auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                       int32_t code, const std::string& name, const std::string& message) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("EmbeddedComponent.onError");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        obj->SetProperty<int32_t>("code", code);
+        obj->SetProperty<std::string>("name", name);
+        obj->SetProperty<std::string>("message", message);
+        auto returnValue = JSRef<JSVal>::Cast(obj);
+        func->ExecuteJS(FUNC_ARGC_1, &returnValue);
+    };
     UIExtensionModel::GetInstance()->SetOnError(std::move(onError));
 }
 
