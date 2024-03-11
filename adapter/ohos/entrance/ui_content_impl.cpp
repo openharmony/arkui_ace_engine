@@ -1198,6 +1198,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto useNewPipe =
         AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
             apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
+    AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: "
          "%{public}d, and apiReleaseType: %{public}s, "
          "useNewPipe: %{public}d",

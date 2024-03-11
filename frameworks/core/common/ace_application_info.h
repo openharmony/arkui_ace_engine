@@ -26,6 +26,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/string_utils.h"
+#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 
 namespace OHOS::Ace {
 
@@ -209,6 +210,16 @@ public:
         return missionId_;
     }
 
+    bool IsUseNewPipeline()
+    {
+        return useNewPipeline_.value_or(AceForwardCompatibility::IsUseNG());
+    }
+
+    void SetIsUseNewPipeline(bool useNewPipeline)
+    {
+        useNewPipeline_.emplace(useNewPipeline);
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -227,6 +238,7 @@ protected:
     bool isRightToLeft_ = false;
     bool isDebugVersion_ = false;
     bool needDebugBreakpoint_ = false;
+    std::optional<bool> useNewPipeline_;
 
     bool isCardType_ = false;
 
