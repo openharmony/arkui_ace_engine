@@ -916,9 +916,9 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
      */
     bool isSurfaceShow = true;
     nativeXComponent->RegisterSurfaceShowCallback(
-        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = true; });
+        [&isSurfaceShow](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = true; });
     nativeXComponent->RegisterSurfaceHideCallback(
-        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = false; });
+        [&isSurfaceShow](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = false; });
     EXPECT_TRUE(isSurfaceShow);
 
     /**
