@@ -73,6 +73,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -80,6 +81,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension DEFAULT_NAVBAR_WIDTH = 240.0_vp;
 constexpr int32_t TEST_DATA = 10;
+constexpr int32_t STANDARD_INDEX = -1;
 const std::string NAVIGATION_TITLE = "NavigationTestNg";
 const std::string TEST_TAG = "test";
 constexpr Dimension SPLIT_WIDTH = 520.0_vp;
@@ -109,11 +111,13 @@ public:
 void NavigationTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
 }
 
 void NavigationTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 void NavigationTestNg::RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& layoutWrapper, float width)
@@ -3492,7 +3496,7 @@ HWTEST_F(NavigationTestNg, NestedNavigationTest001, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
 }
 
-/**
+/*
  * @tc.name: NavigationInterceptionTest001
  * @tc.desc: Test navigation interception
  * @tc.type: FUNC
@@ -3820,5 +3824,1126 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest005, TestSize.Level1)
     });
     const int32_t stackWidth = 500;
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper, stackWidth);
+}
+
+/*
+ * @tc.name: NavigationPatternTest017
+ * @tc.desc: Test DumpInfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest017, TestSize.Level1)
+{
+    NavigationPattern navigationPattern;
+    navigationPattern.navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern.navigationStack_, nullptr);
+    navigationPattern.DumpInfo();
+}
+
+/**
+ * @tc.name: NavigationPatternTest018
+ * @tc.desc: Test DumpInfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest018, TestSize.Level1)
+{
+    NavigationPattern navigationPattern;
+    navigationPattern.navigationStack_ = nullptr;
+    ASSERT_EQ(navigationPattern.navigationStack_, nullptr);
+    navigationPattern.DumpInfo();
+}
+
+/**
+ * @tc.name: NavigationPatternTest019
+ * @tc.desc: Test NotifyDialogChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest019, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    NavPathList cacheNodes;
+    cacheNodes.emplace_back(std::make_pair("pageOne", nullptr));
+    navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
+
+    bool isShow = true;
+    bool isNavigationChanged = false;
+    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+}
+
+/**
+ * @tc.name: NavigationPatternTest020
+ * @tc.desc: Test NotifyDialogChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest020, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    auto navDestinationPattern = tempNode->GetPattern<NavDestinationPattern>();
+    EXPECT_NE(navDestinationPattern, nullptr);
+    bool isOnShow = true;
+    navDestinationPattern->SetIsOnShow(isOnShow);
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
+
+    bool isShow = true;
+    bool isNavigationChanged = false;
+    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+}
+
+/**
+ * @tc.name: NavigationPatternTest021
+ * @tc.desc: Test NotifyDialogChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest021, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    auto navDestinationPattern = tempNode->GetPattern<NavDestinationPattern>();
+    EXPECT_NE(navDestinationPattern, nullptr);
+    bool isOnShow = false;
+    navDestinationPattern->SetIsOnShow(isOnShow);
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
+
+    bool isShow = true;
+    bool isNavigationChanged = true;
+    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+}
+
+/**
+ * @tc.name: NavigationPatternTest022
+ * @tc.desc: Test NotifyDialogChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest022, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    auto navDestinationPattern = tempNode->GetPattern<NavDestinationPattern>();
+    EXPECT_NE(navDestinationPattern, nullptr);
+    bool isOnShow = false;
+    navDestinationPattern->SetIsOnShow(isOnShow);
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
+
+    bool isShow = true;
+    bool isNavigationChanged = false;
+    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+}
+
+/**
+ * @tc.name: NavigationPatternTest023
+ * @tc.desc: Test NotifyDialogChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest023, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    NavPathList cacheNodes;
+    cacheNodes.emplace_back(std::make_pair("pageOne", nullptr));
+    navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
+
+    bool isShow = false;
+    bool isNavigationChanged = false;
+    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+}
+
+/**
+ * @tc.name: NavigationPatternTest024
+ * @tc.desc: Test NotifyDialogChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest024, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    auto navDestinationPattern = tempNode->GetPattern<NavDestinationPattern>();
+    EXPECT_NE(navDestinationPattern, nullptr);
+    bool isOnShow = false;
+    navDestinationPattern->SetIsOnShow(isOnShow);
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
+
+    bool isShow = false;
+    bool isNavigationChanged = false;
+    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+}
+
+/**
+ * @tc.name: NavigationPatternTest025
+ * @tc.desc: Test NotifyDialogChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest025, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    auto navDestinationPattern = tempNode->GetPattern<NavDestinationPattern>();
+    EXPECT_NE(navDestinationPattern, nullptr);
+    bool isOnShow = true;
+    navDestinationPattern->SetIsOnShow(isOnShow);
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
+
+    bool isShow = false;
+    bool isNavigationChanged = true;
+    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+}
+
+/**
+ * @tc.name: NavigationPatternTest026
+ * @tc.desc: Test NotifyDialogChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest026, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    auto navDestinationPattern = tempNode->GetPattern<NavDestinationPattern>();
+    EXPECT_NE(navDestinationPattern, nullptr);
+    bool isOnShow = true;
+    navDestinationPattern->SetIsOnShow(isOnShow);
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
+
+    bool isShow = false;
+    bool isNavigationChanged = false;
+    navigationPattern->NotifyDialogChange(isShow, isNavigationChanged);
+}
+
+/**
+ * @tc.name: NavigationPatternTest027
+ * @tc.desc: Test TriggerCustomAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest027, TestSize.Level1)
+{
+    NavigationPattern navigationPattern;
+    bool isPopPage = true;
+    EXPECT_EQ(navigationPattern.TriggerCustomAnimation(nullptr, nullptr, isPopPage), false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest028
+ * @tc.desc: Test OnCustomAnimationFinish function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest028, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    bool isPopPage = false;
+    navigationPattern->OnCustomAnimationFinish(nullptr, nullptr, isPopPage);
+}
+
+/**
+ * @tc.name: NavigationPatternTest029
+ * @tc.desc: Test OnCustomAnimationFinish function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest029, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+    PageTransitionType type = PageTransitionType::NONE;
+    preTopNavDestination->SetTransitionType(type);
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTopNavDestination, nullptr);
+    bool isPopPage = true;
+    navigationPattern->OnCustomAnimationFinish(preTopNavDestination, newTopNavDestination, isPopPage);
+}
+
+/**
+ * @tc.name: NavigationPatternTest030
+ * @tc.desc: Test OnCustomAnimationFinish function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest030, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+    auto preDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(preDestinationPattern, nullptr);
+    preDestinationPattern->shallowBuilder_ = nullptr;
+    PageTransitionType type = PageTransitionType::EXIT_POP;
+    preTopNavDestination->SetTransitionType(type);
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTopNavDestination, nullptr);
+    bool isPopPage = true;
+    navigationPattern->OnCustomAnimationFinish(preTopNavDestination, newTopNavDestination, isPopPage);
+}
+
+/**
+ * @tc.name: NavigationPatternTest031
+ * @tc.desc: Test OnCustomAnimationFinish function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest031, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+    auto preDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(preDestinationPattern, nullptr);
+    preDestinationPattern->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
+        []() { return FrameNode::CreateFrameNode("temp", 234, AceType::MakeRefPtr<ButtonPattern>()); });
+    PageTransitionType type = PageTransitionType::EXIT_POP;
+    preTopNavDestination->SetTransitionType(type);
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTopNavDestination, nullptr);
+    bool isPopPage = true;
+    navigationPattern->OnCustomAnimationFinish(preTopNavDestination, newTopNavDestination, isPopPage);
+}
+
+/**
+ * @tc.name: NavigationPatternTest032
+ * @tc.desc: Test OnCustomAnimationFinish function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest032, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+    PageTransitionType type = PageTransitionType::EXIT_POP;
+    preTopNavDestination->SetTransitionType(type);
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTopNavDestination, nullptr);
+    bool isPopPage = false;
+    navigationPattern->OnCustomAnimationFinish(preTopNavDestination, newTopNavDestination, isPopPage);
+}
+
+/**
+ * @tc.name: NavigationPatternTest033
+ * @tc.desc: Test OnCustomAnimationFinish function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest033, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+    PageTransitionType type = PageTransitionType::EXIT_PUSH;
+    preTopNavDestination->SetTransitionType(type);
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTopNavDestination, nullptr);
+    bool isPopPage = false;
+    navigationPattern->OnCustomAnimationFinish(preTopNavDestination, newTopNavDestination, isPopPage);
+}
+
+/**
+ * @tc.name: NavigationPatternTest034
+ * @tc.desc: Test UpdatePreNavDesZIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest034, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = nullptr;
+    auto newTopNavDestination = nullptr;
+    navigationPattern->UpdatePreNavDesZIndex(preTopNavDestination, newTopNavDestination);
+}
+
+/**
+ * @tc.name: NavigationPatternTest035
+ * @tc.desc: Test UpdatePreNavDesZIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest035, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(preTopNavDestination, nullptr);
+    auto newTopNavDestination = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(newTopNavDestination, nullptr);
+    navigationPattern->UpdatePreNavDesZIndex(preTopNavDestination, newTopNavDestination);
+}
+
+/**
+ * @tc.name: NavigationPatternTest036
+ * @tc.desc: Test SyncWithJsStackIfNeeded function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest036, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->needSyncWithJsStack_ = false;
+    navigationPattern->SyncWithJsStackIfNeeded();
+}
+
+/**
+ * @tc.name: NavigationPatternTest037
+ * @tc.desc: Test TransitionWithOutAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest037, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTopNavDestination, nullptr);
+    bool isPopPage = false;
+    bool needVisible = false;
+    navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, needVisible);
+}
+
+/**
+ * @tc.name: NavigationPatternTest038
+ * @tc.desc: Test TransitionWithOutAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest038, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+
+    auto frameNode_test = AceType::MakeRefPtr<FrameNode>(V2::ROW_COMPONENT_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto parent = AceType::WeakClaim(AceType::RawPtr(frameNode_test));
+    preTopNavDestination->SetParent(parent);
+    auto navigationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, 12,
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    preTopNavDestination->SetContentNode(navigationContentNode);
+
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTopNavDestination, nullptr);
+    bool isPopPage = true;
+    bool needVisible = false;
+    navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, needVisible);
+}
+
+/**
+ * @tc.name: NavigationPatternTest039
+ * @tc.desc: Test TransitionWithOutAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest039, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+
+    auto frameNode_test = AceType::MakeRefPtr<FrameNode>(V2::ROW_COMPONENT_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto parent = AceType::WeakClaim(AceType::RawPtr(frameNode_test));
+    preTopNavDestination->SetParent(parent);
+    auto navigationContentNode = nullptr;
+    preTopNavDestination->SetContentNode(navigationContentNode);
+
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTopNavDestination, nullptr);
+    bool isPopPage = true;
+    bool needVisible = false;
+    navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, needVisible);
+}
+
+/**
+ * @tc.name: NavigationPatternTest040
+ * @tc.desc: Test TransitionWithOutAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest040, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    auto preTopNavDestination = nullptr;
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTopNavDestination, nullptr);
+    NavDestinationMode mode = NavDestinationMode::STANDARD;
+    newTopNavDestination->SetNavDestinationMode(mode);
+    bool isPopPage = false;
+    bool needVisible = false;
+    navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, needVisible);
+}
+
+/**
+ * @tc.name: NavigationPatternTest041
+ * @tc.desc: Test TransitionWithOutAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest041, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    auto preTopNavDestination = nullptr;
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTopNavDestination, nullptr);
+    NavDestinationMode mode = NavDestinationMode::DIALOG;
+    newTopNavDestination->SetNavDestinationMode(mode);
+    bool isPopPage = false;
+    bool needVisible = false;
+    navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, needVisible);
+}
+
+/**
+ * @tc.name: NavigationPatternTest042
+ * @tc.desc: Test TransitionWithOutAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest042, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+    auto frameNode_test = AceType::MakeRefPtr<FrameNode>(V2::ROW_COMPONENT_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto parent = AceType::WeakClaim(AceType::RawPtr(frameNode_test));
+    preTopNavDestination->SetParent(parent);
+    auto navigationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, 12,
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    preTopNavDestination->SetContentNode(navigationContentNode);
+    auto newTopNavDestination = nullptr;
+    bool isPopPage = false;
+    bool needVisible = false;
+    navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, needVisible);
+}
+
+/**
+ * @tc.name: NavigationPatternTest043
+ * @tc.desc: Test TransitionWithOutAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest043, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+    auto frameNode_test = AceType::MakeRefPtr<FrameNode>(V2::ROW_COMPONENT_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto parent = AceType::WeakClaim(AceType::RawPtr(frameNode_test));
+    preTopNavDestination->SetParent(parent);
+    preTopNavDestination->SetContentNode(nullptr);
+    auto newTopNavDestination = nullptr;
+    bool isPopPage = false;
+    bool needVisible = false;
+    navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, needVisible);
+}
+
+/**
+ * @tc.name: NavigationPatternTest044
+ * @tc.desc: Test TransitionWithOutAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest044, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto preTopNavDestination = nullptr;
+    auto newTopNavDestination = nullptr;
+    bool isPopPage = false;
+    bool needVisible = false;
+    navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, needVisible);
+}
+
+/**
+ * @tc.name: NavigationPatternTest045
+ * @tc.desc: Test FireNavDestinationStateChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest045, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = tempNode->GetPattern<NavDestinationPattern>();
+    navDestinationPattern->SetIsOnShow(false);
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
+
+    bool isShow = false;
+    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(isShow), STANDARD_INDEX);
+}
+
+/**
+ * @tc.name: NavigationPatternTest046
+ * @tc.desc: Test FireNavDestinationStateChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest046, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = nullptr;
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
+
+    bool isShow = true;
+    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(isShow), STANDARD_INDEX);
+}
+
+/**
+ * @tc.name: NavigationPatternTest047
+ * @tc.desc: Test FireNavDestinationStateChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest047, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = tempNode->GetPattern<NavDestinationPattern>();
+    navDestinationPattern->SetIsOnShow(false);
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
+
+    bool isShow = true;
+    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(isShow), STANDARD_INDEX);
+}
+
+/**
+ * @tc.name: NavigationPatternTest048
+ * @tc.desc: Test FireNavDestinationStateChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest048, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    NavPathList cacheNodes;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = tempNode->GetPattern<NavDestinationPattern>();
+    navDestinationPattern->SetIsOnShow(true);
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationPattern->navigationStack_->SetNavPathList(cacheNodes);
+
+    bool isShow = false;
+    EXPECT_EQ(navigationPattern->FireNavDestinationStateChange(isShow), STANDARD_INDEX);
+}
+
+/**
+ * @tc.name: NavigationPatternTest049
+ * @tc.desc: Test TransitionWithAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest049, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    auto preTopNavDestination = nullptr;
+    auto newTopNavDestination = nullptr;
+    bool isPopPage = false;
+    navigationPattern->TransitionWithAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+}
+
+/**
+ * @tc.name: NavigationPatternTest050
+ * @tc.desc: Test TransitionWithAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest050, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTopNavDestination, nullptr);
+    navigationPattern->isCustomAnimation_ = true;
+    bool isPopPage = false;
+    navigationPattern->TransitionWithAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+}
+
+/**
+ * @tc.name: NavigationPatternTest051
+ * @tc.desc: Test TransitionWithAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest051, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    auto preTopNavDestination = nullptr;
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(newTopNavDestination, nullptr);
+    navigationPattern->isCustomAnimation_ = true;
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    bool isPopPage = false;
+    navigationPattern->TransitionWithAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+}
+
+/**
+ * @tc.name: NavigationPatternTest052
+ * @tc.desc: Test TransitionWithAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest052, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+    auto newTopNavDestination = nullptr;
+    navigationPattern->isCustomAnimation_ = true;
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    bool isPopPage = false;
+    navigationPattern->TransitionWithAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+}
+
+/**
+ * @tc.name: NavigationPatternTest053
+ * @tc.desc: Test TransitionWithAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest053, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    int32_t nodeId = TEST_DATA;
+    auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::NavigationPattern>();
+    RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
+    navigation->SetNavBarNode(navBarNode);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preTopNavDestination, nullptr);
+    auto newTopNavDestination = nullptr;
+    navigationPattern->isCustomAnimation_ = true;
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    bool isPopPage = false;
+    navigationPattern->TransitionWithAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+}
+
+/**
+ * @tc.name: NavigationPatternTest054
+ * @tc.desc: Test OnHover function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest054, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->isInDividerDrag_ = true;
+    bool isHover = false;
+    navigationPattern->OnHover(isHover);
+}
+
+/**
+ * @tc.name: NavigationPatternTest055
+ * @tc.desc: Test OnHover function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest055, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->isInDividerDrag_ = false;
+    navigationPattern->userSetNavBarWidthFlag_ = true;
+    navigationPattern->userSetNavBarRangeFlag_ = true;
+    bool isHover = false;
+    navigationPattern->OnHover(isHover);
+}
+
+/**
+ * @tc.name: NavigationPatternTest056
+ * @tc.desc: Test OnHover function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest056, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->isInDividerDrag_ = false;
+    navigationPattern->userSetNavBarWidthFlag_ = false;
+    navigationPattern->userSetNavBarRangeFlag_ = false;
+    bool isHover = false;
+    navigationPattern->OnHover(isHover);
+}
+
+/**
+ * @tc.name: NavigationPatternTest057
+ * @tc.desc: Test AddDividerHotZoneRect function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest057, TestSize.Level1)
+{
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    navigationPattern->realDividerWidth_ = 0.0f;
+    navigationPattern->AddDividerHotZoneRect();
 }
 } // namespace OHOS::Ace::NG

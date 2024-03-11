@@ -477,6 +477,13 @@ void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value, frameNode);
 }
 
+void TextModelNG::SetTextDetectEnable(FrameNode* frameNode, bool value)
+{
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextDetectEnable(value);
+}
+
 void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType,
     std::function<void()>& buildFunc, SelectMenuParam& menuParam)
 {

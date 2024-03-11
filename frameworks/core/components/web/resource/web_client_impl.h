@@ -201,6 +201,8 @@ public:
                            std::shared_ptr<NWeb::NWebSelectPopupMenuCallback> callback) override;
     void OnAudioStateChanged(bool playing) override;
     void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs) override;
+    void OnFirstMeaningfulPaint(std::shared_ptr<NWeb::NWebFirstMeaningfulPaintDetails> details) override;
+    void OnLargestContentfulPaint(std::shared_ptr<NWeb::NWebLargestContentfulPaintDetails> details) override;
     void OnSafeBrowsingCheckResult(int threat_type) override;
     void OnCompleteSwapWithNewSize() override;
     void OnResizeNotWork() override;

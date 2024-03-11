@@ -676,6 +676,10 @@ private:
 
     void ResetDraggingStatus(const TouchEvent& touchPoint);
 
+    void CompensateTouchMoveEvent(const TouchEvent& event);
+    
+    bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
+
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     void AnimateOnSafeAreaUpdate();
@@ -815,6 +819,9 @@ private:
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;
     RefPtr<PostEventManager> postEventManager_;
+
+    std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
+    std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
 
     VsyncCallbackFun vsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);

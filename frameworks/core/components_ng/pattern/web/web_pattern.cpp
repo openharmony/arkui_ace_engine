@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
@@ -285,9 +286,13 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        // Determine if there is already a fixed nested scroll mode.
+        if (!pattern->GetIsFixedNestedScrollMode()) {
+            pattern->SetParentScrollable();
+        }
         pattern->OnScrollStartRecursive(pattern->GetParentAxis() == Axis::HORIZONTAL
-                                    ? event.GetGlobalLocation().GetX()
-                                    : event.GetGlobalLocation().GetY());
+                                            ? event.GetGlobalLocation().GetX()
+                                            : event.GetGlobalLocation().GetY());
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
@@ -2821,25 +2826,25 @@ int WebPattern::GetWebId()
     return -1;
 }
 
-ScrollResult WebPattern::HandleScroll(float offset, int32_t source, NestedState state)
+ScrollResult WebPattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
 {
-    auto parent = parent_.Upgrade();
+    auto parent = GetNestedScrollParent();
     if (parent) {
         source = isMouseEvent_ ? SCROLL_FROM_AXIS : source;
-        return parent->HandleScroll(offset, source, state);
+        return parent->HandleScroll(offset, source, state, velocity);
     }
     return { 0.0f, false };
 }
 
 bool WebPattern::HandleScrollVelocity(float velocity)
 {
-    auto parent = parent_.Upgrade();
+    auto parent = GetNestedScrollParent();
     CHECK_NULL_RETURN(parent, false);
     if (InstanceOf<SwiperPattern>(parent)) {
         // When scrolling to the previous SwiperItem, that item needs to be visible. Update the offset slightly to make
         // it visible before calling HandleScrollVelocity.
         float tweak = (velocity > 0.0f) ? 1.0f : -1.0f;
-        parent->HandleScroll(tweak, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        parent->HandleScroll(tweak, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
     }
     if (parent->HandleScrollVelocity(velocity)) {
         return true;
@@ -2847,10 +2852,10 @@ bool WebPattern::HandleScrollVelocity(float velocity)
     return false;
 }
 
-void WebPattern::OnScrollStartRecursive(float position)
+void WebPattern::OnScrollStartRecursive(float position, float velocity)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStartRecursive");
-    auto parent = parent_.Upgrade();
+    auto parent = GetNestedScrollParent();
     if (parent) {
         parent->OnScrollStartRecursive(position);
     }
@@ -2869,7 +2874,7 @@ void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
 void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive");
-    auto parent = parent_.Upgrade();
+    auto parent = GetNestedScrollParent();
     if (parent) {
         parent->OnScrollEndRecursive(std::nullopt);
     }
@@ -2878,14 +2883,17 @@ void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
 {
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
+    auto nestedScroll = GetNestedScroll();
     if (!isFling) {
-        if (scrollState_ && ((velocity < 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST) ||
-                                (velocity > 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST))) {
-            HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        if (scrollState_) {
+            if (((velocity < 0 && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
+                    (velocity > 0 && nestedScroll.forward == NestedScrollMode::SELF_FIRST))) {
+                HandleScroll(-velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
+            }
         }
     } else {
-        if (((velocity > 0 && nestedScrollBackwardMode_ == NestedScrollMode::SELF_FIRST) ||
-                (velocity < 0 && nestedScrollForwardMode_ == NestedScrollMode::SELF_FIRST))) {
+        if (((velocity > 0 && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
+                (velocity < 0 && nestedScroll.forward == NestedScrollMode::SELF_FIRST))) {
             if (isFirstFlingScrollVelocity_) {
                 HandleScrollVelocity(velocity);
                 isFirstFlingScrollVelocity_ = false;
@@ -2904,14 +2912,13 @@ void WebPattern::OnScrollState(bool scrollState)
 
 Axis WebPattern::GetParentAxis()
 {
-    auto parent = WebSearchParent();
-    parent_ = parent;
+    auto parent = GetNestedScrollParent();
     CHECK_NULL_RETURN(parent, Axis::HORIZONTAL);
     axis_ = parent->GetAxis();
     return axis_;
 }
 
-RefPtr<NestableScrollContainer> WebPattern::WebSearchParent()
+RefPtr<NestableScrollContainer> WebPattern::SearchParent()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
@@ -2921,7 +2928,9 @@ RefPtr<NestableScrollContainer> WebPattern::WebSearchParent()
             continue;
         }
         auto pattern = frameNode->GetPattern<NestableScrollContainer>();
-        if (!pattern) {
+        if (!pattern ||
+            (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+                InstanceOf<RefreshPattern>(pattern))) {
             continue;
         }
         return pattern;
@@ -2947,20 +2956,15 @@ void WebPattern::OnRootLayerChanged(int width, int height)
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
-{
-    nestedScrollForwardMode_ = nestedOpt.forward;
-    nestedScrollBackwardMode_ = nestedOpt.backward;
-}
-
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
     float offset = GetAxis() == Axis::HORIZONTAL ? x : y;
     float velocity = GetAxis() == Axis::HORIZONTAL ? xVelocity : yVelocity;
-    if (((offset > 0 || velocity > 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARENT_FIRST) ||
-        ((offset < 0 || velocity < 0) && nestedScrollForwardMode_ == NestedScrollMode::PARENT_FIRST)) {
+    auto nestedScroll = GetNestedScroll();
+    if (((offset > 0 || velocity > 0) && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
+        ((offset < 0 || velocity < 0) && nestedScroll.forward == NestedScrollMode::PARENT_FIRST)) {
         if (offset != 0) {
-            auto result = HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+            auto result = HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, velocity);
             CHECK_NULL_RETURN(delegate_, false);
             GetAxis() == Axis::HORIZONTAL ? delegate_->ScrollBy(-result.remain, 0)
                                           : delegate_->ScrollBy(0, -result.remain);
@@ -2968,10 +2972,10 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
         } else {
             return HandleScrollVelocity(velocity);
         }
-    } else if (((offset > 0 || velocity > 0) && nestedScrollBackwardMode_ == NestedScrollMode::PARALLEL) ||
-               ((offset < 0 || velocity < 0) && nestedScrollForwardMode_ == NestedScrollMode::PARALLEL)) {
+    } else if (((offset > 0 || velocity > 0) && nestedScroll.backward == NestedScrollMode::PARALLEL) ||
+               ((offset < 0 || velocity < 0) && nestedScroll.forward == NestedScrollMode::PARALLEL)) {
         if (offset != 0) {
-            HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+            HandleScroll(offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, velocity);
         } else {
             HandleScrollVelocity(velocity);
         }

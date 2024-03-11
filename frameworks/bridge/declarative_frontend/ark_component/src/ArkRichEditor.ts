@@ -14,6 +14,22 @@
  */
 
 /// <reference path='./import.ts' />
+class RichEditorEnableDataDetectorModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorEnableDataDetector');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnableDataDetector(node);
+    } else {
+      getUINativeModule().richEditor.setEnableDataDetector(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 
 class RichEditorCopyOptionsModifier extends ModifierWithKey<CopyOptions> {
   constructor(value: CopyOptions) {
@@ -36,8 +52,9 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
-  enableDataDetector(enable: boolean): RichEditorAttribute {
-    throw new Error('Method not implemented.');
+  enableDataDetector(value: boolean): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnableDataDetectorModifier.identity, RichEditorEnableDataDetectorModifier, value);
+    return this;
   }
 
   dataDetectorConfig(config: any): RichEditorAttribute {

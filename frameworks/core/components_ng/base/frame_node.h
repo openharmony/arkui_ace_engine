@@ -599,6 +599,7 @@ public:
      * @return index of Child, or -1 if not found.
      */
     int32_t GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const;
+    uint32_t GetChildTrueTotalCount() const;
     const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) override;
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;

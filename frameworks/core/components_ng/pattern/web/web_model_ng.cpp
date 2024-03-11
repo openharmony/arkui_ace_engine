@@ -45,6 +45,10 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
 
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
+    webPattern->SetNestedScroll(NestedScrollOptions({
+            .forward = NestedScrollMode::SELF_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        }));
     webPattern->SetWebSrc(src);
     webPattern->SetWebController(webController);
     webPattern->SetRenderMode(renderMode);
@@ -793,6 +797,22 @@ void WebModelNG::SetFirstContentfulPaintId(
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnFirstContentfulPaintEvent(std::move(firstContentfulPaintId));
+}
+
+void WebModelNG::SetFirstMeaningfulPaintId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstMeaningfulPaintId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFirstMeaningfulPaintEvent(std::move(firstMeaningfulPaintId));
+}
+
+void WebModelNG::SetLargestContentfulPaintId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& largestContentfulPaintId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLargestContentfulPaintEvent(std::move(largestContentfulPaintId));
 }
 
 void WebModelNG::SetNavigationEntryCommittedId(

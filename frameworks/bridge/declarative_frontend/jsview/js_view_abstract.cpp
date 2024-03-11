@@ -1059,18 +1059,18 @@ void ParseCustomPopupParam(
     if (!builderValue->IsObject()) {
         return;
     }
-
-    JSRef<JSObject> builderObj;
-    builderObj = JSRef<JSObject>::Cast(builderValue);
-    auto builder = builderObj->GetProperty("builder");
-    if (!builder->IsFunction()) {
-        return;
+    if (!builderValue->IsFunction()) {
+        JSRef<JSObject> builderObj;
+        builderObj = JSRef<JSObject>::Cast(builderValue);
+        auto builder = builderObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            return;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        if (!builderFunc) {
+            return;
+        }
     }
-    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-    if (!builderFunc) {
-        return;
-    }
-
     if (popupParam) {
         popupParam->SetUseCustomComponent(true);
     }
@@ -4871,7 +4871,6 @@ std::pair<CalcDimension, CalcDimension> JSViewAbstract::ParseSize(const JSCallba
         !ParseJsDimensionVp(jsObj->GetProperty("height"), height)) {
         return std::pair<CalcDimension, CalcDimension>();
     }
-    info.SetReturnValue(info.This());
     return std::pair<CalcDimension, CalcDimension>(width, height);
 }
 
@@ -5225,10 +5224,7 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     if (info.Length() < 2) {
         return;
     }
-    if (!info[0]->IsBoolean() && !info[0]->IsObject()) {
-        return;
-    }
-    if (!info[1]->IsObject()) {
+    if ((!info[0]->IsBoolean() && !info[0]->IsObject()) || !info[1]->IsObject()) {
         return;
     }
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
@@ -5250,14 +5246,17 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     } else if (!popupObj->GetProperty("builder").IsEmpty()) {
         ParseCustomPopupParam(info, popupObj, popupParam); // Parse CustomPopupOptions param
         auto builderValue = popupObj->GetProperty("builder");
+        auto builder = builderValue;
         if (!builderValue->IsObject()) {
             return;
         }
-        JSRef<JSObject> builderObj;
-        builderObj = JSRef<JSObject>::Cast(builderValue);
-        auto builder = builderObj->GetProperty("builder");
-        if (!builder->IsFunction()) {
-            return;
+        if (!builderValue->IsFunction()) {
+            JSRef<JSObject> builderObj;
+            builderObj = JSRef<JSObject>::Cast(builderValue);
+            builder = builderObj->GetProperty("builder");
+            if (!builder->IsFunction()) {
+                return;
+            }
         }
         if (popupParam->IsShow()) {
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));

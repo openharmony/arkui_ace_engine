@@ -30,6 +30,15 @@ public:
     void UpdateTitleInTargetPos(bool isShow, int32_t height);
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
     void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
+    VisibleType GetControlButtonVisibleBeforeAnim()
+    {
+        return controlButtonVisibleBeforeAnim_;
+    }
+
+    void SetControlButtonVisibleBeforeAnim(VisibleType visibleType)
+    {
+        controlButtonVisibleBeforeAnim_ = visibleType;
+    }
 
 protected:
     RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex) override;
@@ -41,6 +50,9 @@ protected:
 
     void ChangeTitleButtonIcon(
         const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus) override;
+
+private:
+    VisibleType controlButtonVisibleBeforeAnim_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H

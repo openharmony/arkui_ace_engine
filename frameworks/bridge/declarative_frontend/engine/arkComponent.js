@@ -5293,6 +5293,23 @@ globalThis.PatternLock.attributeModifier = function (modifier) {
 };
 
 /// <reference path='./import.ts' />
+class RichEditorEnableDataDetectorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnableDataDetector(node);
+    }
+    else {
+      getUINativeModule().richEditor.setEnableDataDetector(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorEnableDataDetectorModifier.identity = Symbol('richEditorEnableDataDetector');
 class RichEditorCopyOptionsModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5314,8 +5331,9 @@ class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
-  enableDataDetector(enable) {
-    throw new Error('Method not implemented.');
+  enableDataDetector(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnableDataDetectorModifier.identity, RichEditorEnableDataDetectorModifier, value);
+    return this;
   }
   dataDetectorConfig(config) {
     throw new Error('Method not implemented.');
@@ -6798,6 +6816,23 @@ globalThis.Stack.attributeModifier = function (modifier) {
 };
 
 /// <reference path='./import.ts' />
+class TextEnableDataDetectorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetEnableDataDetector(node);
+    }
+    else {
+      getUINativeModule().text.setEnableDataDetector(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextEnableDataDetectorModifier.identity = Symbol('textEnableDataDetector');
 class FontColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7279,8 +7314,9 @@ class ArkTextComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
-  enableDataDetector(enable) {
-    throw new Error('Method not implemented.');
+  enableDataDetector(value) {
+    modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
+    return this;
   }
   dataDetectorConfig(config) {
     throw new Error('Method not implemented.');

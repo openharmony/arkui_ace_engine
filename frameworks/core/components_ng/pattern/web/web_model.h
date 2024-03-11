@@ -124,6 +124,10 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged) {};
     virtual void SetFirstContentfulPaintId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId) {};
+    virtual void SetFirstMeaningfulPaintId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstMeaningfulPaintId) {};
+    virtual void SetLargestContentfulPaintId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& largestContentfulPaintId) {};
     virtual void SetSafeBrowsingCheckResultId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResultId) {};
     virtual void SetNavigationEntryCommittedId(

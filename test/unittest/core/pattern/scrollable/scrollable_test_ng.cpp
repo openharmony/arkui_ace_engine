@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,15 +127,15 @@ HWTEST_F(ScrollableTestNg, HandleSelf001, TestSize.Level1)
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
 
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 5.0f);
 
-    result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 5);
 
-    result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+    result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 0);
 }
@@ -167,13 +167,13 @@ HWTEST_F(ScrollableTestNg, HandleParallel001, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 5.0f);
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
-    result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+    result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -205,7 +205,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel002, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -237,7 +237,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel003, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 5.0f);
 }
@@ -269,7 +269,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel004, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -301,7 +301,7 @@ HWTEST_F(ScrollableTestNg, HandleParallel005, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_FALSE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -333,7 +333,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst001, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
     EXPECT_FALSE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -365,7 +365,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst002, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
     EXPECT_FALSE(result.reachEdge);
     EXPECT_EQ(result.remain, 5.0f);
 }
@@ -397,7 +397,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst003, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -424,7 +424,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst004, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_FALSE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -456,7 +456,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst005, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_FALSE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -488,7 +488,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst006, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_FALSE(result.reachEdge);
     EXPECT_EQ(result.remain, 5.0f);
 }
@@ -520,7 +520,7 @@ HWTEST_F(ScrollableTestNg, HandleSelfFirst007, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -552,7 +552,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent001, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 5.0f);
 }
@@ -579,7 +579,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent002, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -611,7 +611,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent003, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_FALSE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -643,7 +643,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent004, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_FALSE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -675,7 +675,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent005, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 5.0f);
 }
@@ -707,7 +707,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent006, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_TRUE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -739,7 +739,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent007, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
-    auto result = scrollPn->HandleScroll(20, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_FALSE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
@@ -766,7 +766,7 @@ HWTEST_F(ScrollableTestNg, HandleScroll002, TestSize.Level1)
 
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     scrollPn->edgeEffect_ = EdgeEffect::SPRING;
-    auto result = scrollPn->HandleScroll(0, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    auto result = scrollPn->HandleScroll(0.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_FALSE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }

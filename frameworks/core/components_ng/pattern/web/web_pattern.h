@@ -309,14 +309,14 @@ public:
     {
         return axis_;
     }
-    ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
+    ScrollResult HandleScroll(
+        float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
     bool HandleScrollVelocity(float velocity) override;
-    void OnScrollStartRecursive(float position) override;
+    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
     Axis GetParentAxis();
-    RefPtr<NestableScrollContainer> WebSearchParent();
-    void SetNestedScroll(const NestedScrollOptions& nestedOpt);
+    RefPtr<NestableScrollContainer> SearchParent() override;
     /**
      *  End of NestableScrollContainer implementations
      */
@@ -690,14 +690,11 @@ private:
     bool isFirstFlingScrollVelocity_ = true;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
-    NestedScrollMode nestedScrollForwardMode_ = NestedScrollMode::SELF_FIRST;
-    NestedScrollMode nestedScrollBackwardMode_ = NestedScrollMode::SELF_FIRST;
     Axis axis_ = Axis::NONE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
     int32_t drawRectWidth_ = 0;
     int32_t drawRectHeight_ = 0;
-    WeakPtr<NestableScrollContainer> parent_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;

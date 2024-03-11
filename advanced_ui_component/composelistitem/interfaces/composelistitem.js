@@ -61,6 +61,12 @@ const OPERATEITEM_IMAGE_SIZE = 48;
 const HOVERING_COLOR = "#0d000000";
 const TOUCH_DOWN_COLOR = "#1a000000";
 const ACTIVED_COLOR = "#1a0a59f7";
+const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
+const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
+const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
+const RIGHT_PART_WIDTH = '34%';
+const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - 40vp)';
+const RIGHT_ONLY_ARROW_WIDTH = '24vp';
 const ICON_SIZE_MAP = new Map([[IconType.BADGE, 8], [IconType.NORMAL_ICON, 16], [IconType.SYSTEM_ICON, 24], [IconType.HEAD_SCULPTURE, 40], [IconType.APP_ICON, 64], [IconType.PREVIEW, 96], [IconType.LONGITUDINAL, 96], [IconType.VERTICAL, 96]]);
 
 class ContentItemStruct extends ViewPU {
@@ -72,6 +78,7 @@ class ContentItemStruct extends ViewPU {
     this.secondaryText = null;
     this.description = null;
     this.itemRowSpace = 16;
+    this.__leftWidth = new ObservedPropertySimplePU('calc(66% - 16vp)', this, 'leftWidth');;
     this.setInitiallyProvidedValue(t)
   }
 
@@ -81,18 +88,29 @@ class ContentItemStruct extends ViewPU {
     void 0 !== e.primaryText && (this.primaryText = e.primaryText);
     void 0 !== e.secondaryText && (this.secondaryText = e.secondaryText);
     void 0 !== e.description && (this.description = e.description);
-    void 0 !== e.itemRowSpace && (this.itemRowSpace = e.itemRowSpace)
+    void 0 !== e.itemRowSpace && (this.itemRowSpace = e.itemRowSpace);
+    void 0 !== e.leftWidth && (this.leftWidth = e.leftWidth)
   }
 
   updateStateVars(e) {
   }
 
   purgeVariableDependenciesOnElmtId(e) {
+    this.__leftWidth.purgeDependencyOnElmtId(e)
   }
 
   aboutToBeDeleted() {
+    this.__leftWidth.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal()
+  }
+
+  get leftWidth() {
+    return this.__leftWidth.get()
+  }
+
+  set leftWidth(e) {
+    this.__leftWidth.set(e)
   }
 
   aboutToAppear() {
@@ -288,7 +306,7 @@ class ContentItemStruct extends ViewPU {
       Row.create({ space: this.itemRowSpace });
       Row.margin({ right: 16 });
       Row.padding({ left: 8 });
-      Row.width("calc(66% - 16vp)");
+      Row.width(this.leftWidth);
       Row.flexShrink(1);
       t || Row.pop();
       ViewStackProcessor.StopGetAccessRecording()
@@ -318,6 +336,7 @@ class OperateItemStruct extends ViewPU {
     this.__switchState = new ObservedPropertySimplePU(!1, this, "switchState");
     this.__radioState = new ObservedPropertySimplePU(!1, this, "radioState");
     this.__checkBoxState = new ObservedPropertySimplePU(!1, this, "checkBoxState");
+    this.__rightWidth = new ObservedPropertySimplePU('34%', this, 'rightWidth');
     this.__parentCanFocus = new SynchedPropertySimpleTwoWayPU(t.parentCanFocus, this, "parentCanFocus");
     this.__parentCanTouch = new SynchedPropertySimpleTwoWayPU(t.parentCanTouch, this, "parentCanTouch");
     this.__parentIsHover = new SynchedPropertySimpleTwoWayPU(t.parentIsHover, this, "parentIsHover");
@@ -341,6 +360,7 @@ class OperateItemStruct extends ViewPU {
     void 0 !== e.switchState && (this.switchState = e.switchState);
     void 0 !== e.radioState && (this.radioState = e.radioState);
     void 0 !== e.checkBoxState && (this.checkBoxState = e.checkBoxState);
+    void 0 !== e.rightWidth && (this.rightWidth = e.rightWidth);
     void 0 !== e.rowSpace && (this.rowSpace = e.rowSpace)
   }
 
@@ -351,6 +371,7 @@ class OperateItemStruct extends ViewPU {
     this.__switchState.purgeDependencyOnElmtId(e);
     this.__radioState.purgeDependencyOnElmtId(e);
     this.__checkBoxState.purgeDependencyOnElmtId(e);
+    this.__rightWidth.purgeDependencyOnElmtId(e);
     this.__parentCanFocus.purgeDependencyOnElmtId(e);
     this.__parentCanTouch.purgeDependencyOnElmtId(e);
     this.__parentIsHover.purgeDependencyOnElmtId(e);
@@ -363,6 +384,7 @@ class OperateItemStruct extends ViewPU {
     this.__switchState.aboutToBeDeleted();
     this.__radioState.aboutToBeDeleted();
     this.__checkBoxState.aboutToBeDeleted();
+    this.__rightWidth.aboutToBeDeleted();
     this.__parentCanFocus.aboutToBeDeleted();
     this.__parentCanTouch.aboutToBeDeleted();
     this.__parentIsHover.aboutToBeDeleted();
@@ -395,6 +417,14 @@ class OperateItemStruct extends ViewPU {
 
   set checkBoxState(e) {
     this.__checkBoxState.set(e)
+  }
+
+  get rightWidth() {
+    return this.__rightWidth.get()
+  }
+
+  set rightWidth(e) {
+    this.__rightWidth.set(e)
   }
 
   get parentCanFocus() {
@@ -853,7 +883,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Row.create({ space: this.rowSpace });
-      Row.width("34%");
+      Row.width(this.rightWidth);
       Row.flexShrink(1);
       Row.justifyContent(FlexAlign.End);
       t || Row.pop();
@@ -1055,6 +1085,14 @@ export class ComposeListItem extends ViewPU {
     } else undefined === this.operateItem.image && undefined === this.operateItem.icon && undefined === this.operateItem.subIcon || (this.itemHeight = 80)
   }
 
+  calculatedLeftWidth() {
+    null === this.operateItem || '{}' === JSON.stringify(this.operateItem)? '100%' : null != this.operateItem.arrow && null == this.operateItem.text? 'calc(100% - 40vp)' : 'calc(66% - 16vp)';
+  }
+
+  calculatedRightWidth() {
+    null === this.operateItem || '{}' === JSON.stringify(this.operateItem)? '0vp' : null != this.operateItem.arrow && null == this.operateItem.text? '24vp' : '34%';
+  }
+
   initialRender() {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
@@ -1165,7 +1203,8 @@ export class ComposeListItem extends ViewPU {
             iconStyle: this.contentItem.iconStyle,
             primaryText: "string" == typeof this.contentItem.primaryText ? this.contentItem.primaryText : null,
             secondaryText: "string" == typeof this.contentItem.secondaryText ? this.contentItem.secondaryText : null,
-            description: "string" == typeof this.contentItem.description ? this.contentItem.description : null
+            description: "string" == typeof this.contentItem.description ? this.contentItem.description : null,
+            leftWidth: this.calculatedLeftWidth()
           }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
           ViewStackProcessor.StopGetAccessRecording()
         }))
@@ -1207,7 +1246,8 @@ export class ComposeListItem extends ViewPU {
             parentIsHover: this.__isHover,
             parentFrontColor: this.__frontColor,
             parentIsActive: this.__isActive,
-            parentCanHover: this.__canHover
+            parentCanHover: this.__canHover,
+            rightWidth: this.calculatedRightWidth()
           }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
           ViewStackProcessor.StopGetAccessRecording()
         }));
