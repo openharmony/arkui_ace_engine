@@ -185,7 +185,7 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
 
 bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 {
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
     if (context && context->GetIsFocusingByTab()) {
         if (!IsFocusableByTab()) {
             return false;
@@ -272,7 +272,7 @@ RefPtr<FocusHub> FocusHub::GetChildMainView()
 
 RefPtr<FocusHub> FocusHub::GetCurrentMainView()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto screenNode = pipeline->GetScreenNode();
     if (screenNode) {
@@ -799,7 +799,7 @@ void FocusHub::RequestFocus() const
     if (IsCurrentFocus()) {
         return;
     }
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     context->AddDirtyFocus(GetFrameNode());
 }
@@ -808,7 +808,7 @@ void FocusHub::RequestFocusWithDefaultFocusFirstly()
 {
     TAG_LOGD(AceLogTag::ACE_FOCUS, "Request focus with default focus on node: %{public}s/%{public}d.",
         GetFrameName().c_str(), GetFrameId());
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
 
     RefPtr<FocusHub> viewScope;
@@ -1096,7 +1096,7 @@ void FocusHub::OnFocus()
     auto curPattern = frameNode->GetPattern<NG::Pattern>();
     CHECK_NULL_VOID(curPattern);
     bool isNeedKeyboard = curPattern->NeedSoftKeyboard();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetNeedSoftKeyboard(isNeedKeyboard);
 }
@@ -1169,7 +1169,7 @@ void FocusHub::OnFocusNode()
     if (onFocusInternal_) {
         onFocusInternal_();
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto focusHub = weak.Upgrade();
@@ -1316,7 +1316,7 @@ void FocusHub::OnBlurScope()
 
 bool FocusHub::PaintFocusState(bool isNeedStateStyles, bool forceUpdate)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
@@ -1409,7 +1409,7 @@ bool FocusHub::PaintAllFocusState()
 
 bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
@@ -1849,7 +1849,7 @@ bool FocusHub::RequestFocusImmediatelyById(const std::string& id)
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus immediately by id: %{public}s. The node is %{public}s/%{public}d.",
         id.c_str(), focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     pipeline->AddDirtyRequestFocus(focusNode->GetFrameNode());
     return result;
@@ -1876,7 +1876,7 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)
     if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
         return false;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     if (pipeline && pipeline->IsTabJustTriggerOnKeyEvent()) {
         return false;
     }

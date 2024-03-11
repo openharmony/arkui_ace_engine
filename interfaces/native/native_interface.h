@@ -73,7 +73,7 @@ typedef enum {
  */
 typedef enum {
     /** The ARKUI_NATIVE_NODE type supports the structure {@link ArkUI_NativeNodeAPI_1} of version 1. */
-    ARKUI_NATIVE_NODE_VERSION_1,
+    ARKUI_NATIVE_NODE_VERSION_1 = 1,
 } ArkUI_NativeNodeAPIVersion;
 
 /**
