@@ -313,6 +313,16 @@ public:
 
     void CheckAndUpdateColumnSize(SizeF& size);
 
+    void SetDivider(const ItemDivider& divider)
+    {
+        divider_ = divider;
+    }
+  
+    ItemDivider GetDivider()
+    {
+        return divider_;
+    }
+    
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -373,6 +383,8 @@ private:
     bool isPicker_ = true;
     bool isFirstUpdate_ = true;
     bool isContentUpdateOnly_ = false;
+
+    ItemDivider divider_;
 };
 } // namespace OHOS::Ace::NG
 

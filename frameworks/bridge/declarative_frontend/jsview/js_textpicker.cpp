@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -40,6 +41,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
 }
 
 std::unique_ptr<TextPickerModel> TextPickerModel::textPickerInstance_ = nullptr;
@@ -98,6 +100,8 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("textStyle", &JSTextPicker::SetTextStyle);
     JSClass<JSTextPicker>::StaticMethod("selectedTextStyle", &JSTextPicker::SetSelectedTextStyle);
     JSClass<JSTextPicker>::StaticMethod("selectedIndex", &JSTextPicker::SetSelectedIndex);
+    JSClass<JSTextPicker>::StaticMethod("divider", &JSTextPicker::SetDivider);
+
     JSClass<JSTextPicker>::StaticMethod("onAccept", &JSTextPicker::OnAccept);
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
     JSClass<JSTextPicker>::StaticMethod("onChange", &JSTextPicker::OnChange);
@@ -991,6 +995,41 @@ void JSTextPicker::SetSelectedIndex(const JSCallbackInfo& info)
             SetSelectedIndexMulti(jsSelectedValue);
         }
     }
+}
+
+void JSTextPicker::SetDivider(const JSCallbackInfo& info)
+{
+    NG::ItemDivider divider;
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        auto pickerTheme = GetTheme<PickerTheme>();
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        bool needReset = obj->GetProperty("strokeWidth")->IsString() &&
+            !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
+            divider.strokeWidth = 0.0_vp;
+        }
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            // Failed to get color from param, using default color defined in theme
+            if (pickerTheme) {
+                divider.color = pickerTheme->GetDividerColor();
+            } else {
+                divider.color = Color::TRANSPARENT;
+            }
+        }
+        
+        needReset = obj->GetProperty("startMargin")->IsString() &&
+            !std::regex_match(obj->GetProperty("startMargin")->ToString(), DIMENSION_REGEX);
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin)) {
+            divider.startMargin = 0.0_vp;
+        }
+        needReset = obj->GetProperty("endMargin")->IsString() &&
+            !std::regex_match(obj->GetProperty("endMargin")->ToString(), DIMENSION_REGEX);
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin)) {
+            divider.endMargin = 0.0_vp;
+        }
+    }
+    TextPickerModel::GetInstance()->SetDivider(divider);
+    info.ReturnSelf();
 }
 
 void JSTextPicker::OnAccept(const JSCallbackInfo& info) {}
