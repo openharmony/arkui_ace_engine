@@ -194,4 +194,11 @@ void RichEditorModelNG::SetTextDetectConfig(const std::string& value,
     pattern->SetTextDetectTypes(value);
     pattern->SetOnResult(std::move(onResult));
 }
+
+void RichEditorModelNG::SetTextDetectEnable(FrameNode* frameNode, bool value)
+{
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetTextDetectEnable(value);
+}
 } // namespace OHOS::Ace::NG

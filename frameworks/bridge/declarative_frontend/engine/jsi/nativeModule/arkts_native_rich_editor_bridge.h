@@ -21,6 +21,8 @@
 namespace OHOS::Ace::NG {
 class RichEditorBridge {
 public:
+    static ArkUINativeModuleValue SetEnableDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetEnableDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCopyOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCopyOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };

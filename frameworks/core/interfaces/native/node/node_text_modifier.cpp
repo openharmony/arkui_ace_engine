@@ -48,6 +48,7 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeigh
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
 
 std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = { { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
                                                                                 0 },
@@ -624,6 +625,20 @@ void ResetEllipsisMode(ArkUINodeHandle node)
     TextModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[2]); // 2 is the default value of EllipsisMode::TAIL
 }
 
+void SetTextDetectEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextDetectEnable(frameNode, static_cast<bool>(value));
+}
+
+void ResetTextDetectEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextDetectEnable(frameNode, DEFAULT_ENABLE_TEXT_DETECTOR);
+}
+
 ArkUI_CharPtr GetFontFamily(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -784,6 +799,8 @@ const ArkUITextModifier* GetTextModifier()
         GetItalicFontStyle,
         SetEllipsisMode,
         ResetEllipsisMode,
+        SetTextDetectEnable,
+        ResetTextDetectEnable,
         GetTextContent,
         GetTextLineHeight,
         GetTextDecoration,
