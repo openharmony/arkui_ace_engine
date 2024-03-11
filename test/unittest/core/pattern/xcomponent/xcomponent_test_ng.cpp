@@ -75,6 +75,7 @@ const float SURFACE_WIDTH = 250.0f;
 const float SURFACE_HEIGHT = 150.0f;
 const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
+bool isAxis = false;
 
 TouchType ConvertXComponentTouchType(const OH_NativeXComponent_TouchEventType& type)
 {
@@ -865,5 +866,48 @@ HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
         SetBounds(newSurfaceOffsetX, newSurfaceOffsetY, SURFACE_WIDTH, SURFACE_HEIGHT))
         .WillOnce(Return());
     xcomponentController->UpdateSurfaceBounds();
+}
+
+/**
+ * @tc.name: XComponentAxisEventTest012
+ * @tc.desc: Test AxisEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentAxisEventTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. create nativeXComponent instance
+     * @tc.expected: focusHub & nativeXComponent instance create successfully
+     */
+    auto pair = pattern->GetNativeXComponent();
+    auto weakNativeXComponent = pair.second;
+    auto nativeXComponent = weakNativeXComponent.lock();
+    auto nativeXComponentImpl = pair.first;
+    ASSERT_TRUE(nativeXComponent);
+    ASSERT_TRUE(nativeXComponentImpl);
+
+    /**
+     * @tc.steps: step3. register axis event for nativeXComponent instance
+     */
+    auto callback = [](OH_NativeXComponent* /* nativeXComponent */, ArkUI_UIInputEvent* event,
+                        ArkUI_UIInputEvent_Type type) { isAxis = true; };
+    nativeXComponent->RegisterUIAxisEventCallback(callback);
+
+    /**
+     * @tc.steps: step4. call HandleAxisEvent
+     */
+    AxisInfo event;
+    pattern->HandleAxisEvent(event);
+    EXPECT_TRUE(isAxis);
 }
 } // namespace OHOS::Ace::NG
