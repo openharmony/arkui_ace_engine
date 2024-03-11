@@ -513,6 +513,13 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
         styleOption.colorMode = static_cast<ThemeColorMode>(static_cast<int32_t>(ThemeColorMode::SYSTEM));
         option.SetDuration(FILTER_TIMES);
         option.SetCurve(Curves::SHARP);
+        option.SetOnFinishEvent([pipelineWeak = WeakClaim(RawPtr(pipelineContext))] {
+            auto pipelineContext = pipelineWeak.Upgrade();
+            CHECK_NULL_VOID(pipelineContext);
+            auto manager = pipelineContext->GetOverlayManager();
+            CHECK_NULL_VOID(manager);
+            manager->SetFilterActive(false);
+        });
         columnNode->GetRenderContext()->UpdateBackBlurRadius(FILTER_VALUE);
         AnimationUtils::Animate(
             option, [columnNode, styleOption]() { columnNode->GetRenderContext()->UpdateBackBlurStyle(styleOption); },
