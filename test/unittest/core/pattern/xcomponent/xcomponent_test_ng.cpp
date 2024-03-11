@@ -866,4 +866,75 @@ HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
         .WillOnce(Return());
     xcomponentController->UpdateSurfaceBounds();
 }
+
+/**
+ * @tc.name: XComponentSurfaceTestTypeSurface
+ * @tc.desc: Test SurfaceHide/SurfaceShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. create nativeXComponent instance
+     * @tc.expected: nativeXComponent instance create successfully
+     */
+    auto host = pattern->GetHost();
+    ASSERT_TRUE(host);
+    auto pair = pattern->GetNativeXComponent();
+    auto weakNativeXComponent = pair.second;
+    auto nativeXComponent = weakNativeXComponent.lock();
+    auto nativeXComponentImpl = pair.first;
+    ASSERT_TRUE(nativeXComponent);
+    ASSERT_TRUE(nativeXComponentImpl);
+
+    /**
+     * @tc.steps: step3. call surfaceHide and surfaceShow event without register callbacks
+     * @tc.expected: no error happens
+     */
+    pattern->OnWindowHide();
+    pattern->OnWindowShow();
+
+    /**
+     * @tc.steps: step4. call NativeSurfaceHide and NativeSurfaceShow without register callbacks
+     * @tc.expected: no error happens
+     */
+    pattern->NativeSurfaceHide();
+    pattern->NativeSurfaceShow();
+
+    /**
+     * @tc.steps: step5. register surfaceHide and surfaceShow event for nativeXComponent instance
+     */
+    bool isSurfaceShow = true;
+    nativeXComponent->RegisterSurfaceShowCallback(
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = true; });
+    nativeXComponent->RegisterSurfaceHideCallback(
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = false; });
+    EXPECT_TRUE(isSurfaceShow);
+
+    /**
+     * @tc.steps: step6. call surfaceHide and surfaceShow event
+     * @tc.expected: the callbacks registered in step3 are called
+     */
+    pattern->OnWindowHide();
+    EXPECT_FALSE(isSurfaceShow);
+    pattern->OnWindowShow();
+    EXPECT_TRUE(isSurfaceShow);
+
+    /**
+     * @tc.steps: step7. call NativeSurfaceHide and NativeSurfaceShow
+     * @tc.expected: no error happens
+     */
+    pattern->NativeSurfaceHide();
+    pattern->NativeSurfaceShow();
+}
 } // namespace OHOS::Ace::NG
