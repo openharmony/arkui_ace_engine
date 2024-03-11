@@ -630,6 +630,11 @@ public:
 
     void SetActive(bool active = true) override;
 
+    bool GetBypass() const
+    {
+        return bypass_;
+    }
+
     bool IsOutOfLayout() const override
     {
         return renderContext_->HasPosition();

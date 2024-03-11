@@ -54,6 +54,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/base/mock_socperf_client_impl.cpp",
     "$ace_root/test/mock/base/mock_subwindow.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/accessibility/accessibility_manager_ng.cpp",
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
     "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
     "$ace_root/test/mock/core/common/mock_ace_engine_ext.cpp",
