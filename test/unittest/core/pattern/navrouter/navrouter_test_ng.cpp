@@ -1225,7 +1225,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
     ASSERT_FALSE(layoutProperty->propHideTitleBar_.value());
     ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->HasTitleHeight());
 
-    titleBarNode->GetPattern<TitleBarPattern>()->tempTitleBarHeight_ = 5.0f;
+    titleBarNode->GetPattern<TitleBarPattern>()->SetTempTitleBarHeightVp(5.0f);
     layoutProperty->propHideTitleBar_ = false;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = std::nullopt;
     layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
@@ -1233,7 +1233,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
     ASSERT_FALSE(layoutProperty->propHideTitleBar_.value());
     ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->HasTitleHeight());
 
-    titleBarNode->GetPattern<TitleBarPattern>()->tempTitleBarHeight_ = 5.0f;
+    titleBarNode->GetPattern<TitleBarPattern>()->SetTempTitleBarHeightVp(5.0f);
     layoutProperty->propHideTitleBar_ = false;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = std::nullopt;
     layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
@@ -1241,7 +1241,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
     ASSERT_FALSE(layoutProperty->propHideTitleBar_.value());
     ASSERT_FALSE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->HasTitleHeight());
 
-    titleBarNode->GetPattern<TitleBarPattern>()->tempTitleBarHeight_ = 0.0f;
+    titleBarNode->GetPattern<TitleBarPattern>()->SetTempTitleBarHeightVp(5.0f);
     layoutProperty->propHideTitleBar_ = false;
     titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleHeight_ = std::nullopt;
     layoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
@@ -2899,7 +2899,7 @@ HWTEST_F(NavrouterTestNg, GetBackButtonState006, TestSize.Level1)
     navDestinationNode->titleBarNode_ = titleBarNode;
     // Make isCustomTitle false
     navDestinationNode->propPrevTitleIsCustom_ = false;
-    
+
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
     ASSERT_TRUE(hostNode);
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
