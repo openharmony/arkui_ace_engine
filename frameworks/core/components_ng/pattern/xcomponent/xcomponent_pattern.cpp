@@ -286,6 +286,12 @@ void XComponentPattern::OnAreaChangedInner()
 void XComponentPattern::SetSurfaceNodeToGraphic()
 {
 #ifdef ENABLE_ROSEN_BACKEND
+    if (type_ != XComponentType::SURFACE) {
+        return;
+    }
+    if (!Rosen::RSExtNodeOperation::GetInstance().CheckNeedToProcess(GetId())) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
