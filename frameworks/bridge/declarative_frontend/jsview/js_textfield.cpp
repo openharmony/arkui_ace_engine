@@ -113,6 +113,7 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             if (changeEventVal->IsFunction()) {
                 textValue = valueObj->GetProperty("value");
             }
+            value = "";
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
