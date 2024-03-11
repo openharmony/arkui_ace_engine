@@ -28,6 +28,7 @@ class JsTouchFunction : public virtual JsFunction {
 
 public:
     explicit JsTouchFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
+    JsTouchFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction) : JsFunction(jsObject, jsFunction) {}
     ~JsTouchFunction() override {};
 
     void Execute() override
