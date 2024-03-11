@@ -545,11 +545,10 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
     JumpToPosition(position);
 }
 
-bool ScrollPattern::ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish)
+void ScrollPattern::ScrollPage(bool reverse, bool smooth)
 {
     float distance = reverse ? viewPortLength_ : -viewPortLength_;
-    ScrollBy(distance, distance, smooth, onFinish);
-    return true;
+    ScrollBy(distance, distance, smooth);
 }
 
 void ScrollPattern::JumpToPosition(float position, int32_t source)

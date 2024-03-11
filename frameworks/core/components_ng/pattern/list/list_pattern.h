@@ -147,7 +147,7 @@ public:
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::START);
     bool CheckTargetValid(int32_t index, int32_t indexInGroup);
-    bool ScrollPage(bool reverse);
+    void ScrollPage(bool reverse, bool smooth = false) override;
     void ScrollBy(float offset);
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;

@@ -279,6 +279,14 @@ public:
         clickEventActuator_->RemoveClickEvent(clickEvent);
     }
 
+    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& longPressEvent)
+    {
+        if (!longPressEventActuator_) {
+            return;
+        }
+        longPressEventActuator_->RemoveLongPressEvent(longPressEvent);
+    }
+
     bool IsClickEventsEmpty() const
     {
         if (!clickEventActuator_) {

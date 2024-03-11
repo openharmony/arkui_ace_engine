@@ -1506,13 +1506,17 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
     return true;
 }
 
-bool ListPattern::ScrollPage(bool reverse)
+void ListPattern::ScrollPage(bool reverse, bool smooth)
 {
-    StopAnimate();
     float distance = reverse ? contentMainSize_ : -contentMainSize_;
-    UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
-    isScrollEnd_ = true;
-    return true;
+    if (smooth) {
+        float position = -GetCurrentOffset().GetY() + distance;
+        AnimateTo(-position, -1, nullptr, true);
+    } else {
+        StopAnimate();
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+        isScrollEnd_ = true;
+    }
 }
 
 void ListPattern::ScrollBy(float offset)

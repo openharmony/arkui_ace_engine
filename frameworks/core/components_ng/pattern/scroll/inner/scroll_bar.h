@@ -34,6 +34,8 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/event/click_event.h"
+#include "core/components_ng/event/long_press_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -45,6 +47,12 @@ constexpr double STRAIGHT_ANGLE = 180.0;
 constexpr double BAR_FRICTION = 0.9;
 constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
+
+enum class BarDirection {
+    BAR_NONE = 0,
+    PAGE_UP,
+    PAGE_DOWN,
+};
 
 class ScrollBar final : public AceType {
     DECLARE_ACE_TYPE(ScrollBar, AceType);
@@ -503,6 +511,24 @@ public:
         return isReverse_;
     }
 
+    Rect GetTouchRegion() const
+    {
+        return touchRegion_;
+    }
+    BarDirection CheckBarDirection(const Point& point, const Axis& axis);
+    RefPtr<ClickEvent> GetClickEvent()
+    {
+        return clickevent_;
+    }
+    RefPtr<LongPressEvent> GetLongPressEvent()
+    {
+        return longPressEvent_;
+    }
+    RefPtr<TouchEventImpl> GetScrollBarTouchEvent()
+    {
+        return scrollBarTouchEvent_;
+    }
+
 protected:
     void InitTheme();
 
@@ -589,6 +615,9 @@ private:
     CancelableCallback<void()> disappearDelayTask_;
 
     DragFRCSceneCallback dragFRCSceneCallback_;
+    RefPtr<ClickEvent> clickevent_;
+    RefPtr<TouchEventImpl> scrollBarTouchEvent_;
+    RefPtr<LongPressEvent> longPressEvent_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -1096,6 +1096,13 @@ public:
     void CleanNodeResponseKeyEvent();
 
     void OnVirtualKeyboardAreaChanged() override;
+    void ScrollPage(bool reverse, bool smooth = false) override;
+    void LongScrollPage();
+    void ScheduleCaretLongPress();
+    void StartLongPressEventTimer();
+    void InitScrollBarClickEvent() override {}
+    void InitScrollBarLongPressEvent() override {}
+    void InitScrollBarTouchEvent() override {}
 
 protected:
     virtual void InitDragEvent();
@@ -1238,6 +1245,9 @@ private:
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
     void ProcNormalInlineStateInBlurEvent();
+    bool IsMouseOverScrollBar(const GestureEvent& info);
+    bool IsLongMouseOverScrollBar(GestureEvent& info);
+    
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1424,6 +1434,9 @@ private:
     Offset clickLocation_;
     bool isKeyboardClosedByUser_ = false;
     bool lockRecord_ = false;
+    bool hasMousePressed_ = false;
+    bool isLongPressPage_ = false;
+    Offset locationInfo_;
 };
 } // namespace OHOS::Ace::NG
 
