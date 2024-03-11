@@ -412,37 +412,40 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 
 void JSText::SetDecoration(const JSCallbackInfo& info)
 {
-    do {
-        auto tmpInfo = info[0];
-        if (!tmpInfo->IsObject()) {
-            break;
-        }
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
-        JSRef<JSVal> typeValue = obj->GetProperty("type");
-        JSRef<JSVal> colorValue = obj->GetProperty("color");
-        JSRef<JSVal> styleValue = obj->GetProperty("style");
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsObject()) {
+        info.ReturnSelf();
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
+    JSRef<JSVal> typeValue = obj->GetProperty("type");
+    JSRef<JSVal> colorValue = obj->GetProperty("color");
+    JSRef<JSVal> styleValue = obj->GetProperty("style");
 
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
+    TextDecoration textDecoration;
+    if (typeValue->IsNumber()) {
+        textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+    } else {
+        auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        TextDecoration textDecoration = theme->GetTextStyle().GetTextDecoration();
-        if (typeValue->IsNumber()) {
-            textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
-        }
-        Color result = theme->GetTextStyle().GetTextDecorationColor();
-        ParseJsColor(colorValue, result);
-        std::optional<TextDecorationStyle> textDecorationStyle;
-        if (styleValue->IsNumber()) {
-            textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
-        }
-        TextModel::GetInstance()->SetTextDecoration(textDecoration);
-        TextModel::GetInstance()->SetTextDecorationColor(result);
-        if (textDecorationStyle) {
-            TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
-        }
-    } while (false);
-    info.SetReturnValue(info.This());
+        textDecoration = theme->GetTextStyle().GetTextDecoration();
+    }
+    Color result;
+    if (!ParseJsColor(colorValue, result)) {
+        auto theme = GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        result = theme->GetTextStyle().GetTextDecorationColor();
+    }
+    std::optional<TextDecorationStyle> textDecorationStyle;
+    if (styleValue->IsNumber()) {
+        textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    }
+    TextModel::GetInstance()->SetTextDecoration(textDecoration);
+    TextModel::GetInstance()->SetTextDecorationColor(result);
+    if (textDecorationStyle) {
+        TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    }
+    info.ReturnSelf();
 }
 
 void JSText::SetHeightAdaptivePolicy(int32_t value)
