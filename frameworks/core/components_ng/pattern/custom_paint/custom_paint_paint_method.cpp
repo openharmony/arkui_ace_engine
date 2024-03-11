@@ -179,6 +179,14 @@ void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
     RSCanvas* rsCanvas = GetRawPtrOfRSCanvas();
     CHECK_NULL_VOID(rsCanvas);
     rsCanvas->Save();
+    if (canvasCallback_) {
+        canvasCallback_(rsCanvas_.get(), width, height);
+    }
+}
+
+void CustomPaintPaintMethod::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
+{
+    canvasCallback_ = callback;
 }
 
 bool CustomPaintPaintMethod::HasShadow() const

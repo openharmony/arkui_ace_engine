@@ -112,6 +112,8 @@ public:
     void UpdateFillRuleForPath2D(const CanvasFillRule rule);
     double GetWidth();
     double GetHeight();
+    void SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback);
+    void SetInvalidate();
 
     LineDashParam GetLineDash() const;
     void UpdateLineDash(const std::vector<double>& segments);
