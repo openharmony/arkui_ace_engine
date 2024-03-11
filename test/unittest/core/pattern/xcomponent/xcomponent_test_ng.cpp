@@ -75,6 +75,7 @@ const float SURFACE_WIDTH = 250.0f;
 const float SURFACE_HEIGHT = 150.0f;
 const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
+bool isSurfaceShow = true;
 
 TouchType ConvertXComponentTouchType(const OH_NativeXComponent_TouchEventType& type)
 {
@@ -914,11 +915,10 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTestTypeSurface, TestSize.Level1)
     /**
      * @tc.steps: step5. register surfaceHide and surfaceShow event for nativeXComponent instance
      */
-    bool isSurfaceShow = true;
     nativeXComponent->RegisterSurfaceShowCallback(
-        [&isSurfaceShow](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = true; });
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = true; });
     nativeXComponent->RegisterSurfaceHideCallback(
-        [&isSurfaceShow](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = false; });
+        [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { isSurfaceShow = false; });
     EXPECT_TRUE(isSurfaceShow);
 
     /**
