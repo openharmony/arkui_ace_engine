@@ -20,6 +20,8 @@ class FrameNode {
   protected uiContext_: UIContext | undefined | null;
   private nodeId_: number;
   private type_: string;
+  private instance_ : ArkComponent;
+  private _commonAttributes: CommonModifier;
   constructor(uiContext: UIContext, type: string) {
     this.uiContext_ = uiContext;
     this.nodeId_ = -1;
@@ -36,6 +38,7 @@ class FrameNode {
     FrameNodeFinalizationRegisterProxy.register(this, this.nodeId_);
     this.renderNode_.setNodePtr(this.nodePtr_);
     this.renderNode_.setBaseNode(this.baseNode_);
+    this.instance_ = new ArkComponent(this.nodePtr_);
   }
   getRenderNode(): RenderNode | null {
     if (
@@ -219,6 +222,21 @@ class FrameNode {
   getPositionToWindow(): Position {
     const position = getUINativeModule().frameNode.getPositionToWindow(this.nodePtr_);
     return {x: position[0], y: position[1]};
+  }
+
+  get commonAttributes(): CommonModifier {
+    if (this._commonAttributes === undefined) {
+      this._commonAttributes = new CommonModifier();
+    }
+    return this._commonAttributes;
+  }
+
+  flushAttribute(): void {
+    if (this.type_ === "BuilderNode" || this.type_ === "ArkTsNode" || this._commonAttributes == undefined) {
+      return;
+    }
+    applyUIAttributes(this._commonAttributes, this.nodePtr_, this.instance_);
+    this.instance_.applyModifierPatch();
   }
 }
 
