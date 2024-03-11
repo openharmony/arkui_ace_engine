@@ -23,6 +23,7 @@ const BUTTON_HEIGHT = 28;
 const IMAGE_WIDTH = 12;
 const BORDER_WIDTH = 2;
 const DIVIDEND_NUM = 3;
+const DIVIDEND_NUM_TWO = 2;
 const SINGLE_LINE_NUM = 1;
 const DOUBLE_LINE_NUM = 2;
 const INDEX_ZERO = 0;
@@ -30,6 +31,7 @@ const INDEX_ONE = 1;
 const INDEX_TWO = 2;
 const RESOURCE_TYPE_SYMBOL = 40000;
 const DEFAULT_VALUE = 0;
+
 export var OperationType;
 (function (z12) {
   z12[z12['TEXT_ARROW'] = 0] = 'TEXT_ARROW';
@@ -37,16 +39,20 @@ export var OperationType;
   z12[z12['ICON_GROUP'] = 2] = 'ICON_GROUP';
   z12[z12['LOADING'] = 3] = 'LOADING';
 })(OperationType || (OperationType = {}));
+
 class IconOptions {
 }
+
 class ContentIconOption {
 }
+
 class FontStyle {
   constructor() {
     this.maxLines = 0;
     this.fontWeight = 0;
   }
 }
+
 function __Text__secondaryTitleStyles(x12) {
   var y12;
   Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Subtitle_S'], bundleName: '', moduleName: '' });
@@ -56,6 +62,7 @@ function __Text__secondaryTitleStyles(x12) {
   Text.textOverflow({ overflow: TextOverflow.Ellipsis });
   Text.align(x12 === null || x12 === void 0 ? void 0 : x12.alignment);
 }
+
 function __Text__primaryTitleStyles(w12) {
   Text.fontSize({ id: -1, type: 10002, params: ['sys.float.Subtitle_L'], bundleName: '', moduleName: '' });
   Text.fontColor({ id: -1, type: 10001, params: ['sys.color.font_primary'], bundleName: '', moduleName: '' });
@@ -64,6 +71,7 @@ function __Text__primaryTitleStyles(w12) {
   Text.textOverflow({ overflow: TextOverflow.Ellipsis });
   Text.align(w12 === null || w12 === void 0 ? void 0 : w12.alignment);
 }
+
 export class SubHeader extends ViewPU {
   constructor(q12, r12, s12, t12 = -1, u12 = undefined, v12) {
     super(q12, s12, t12, v12);
@@ -91,6 +99,7 @@ export class SubHeader extends ViewPU {
     this.__flexAlign = new ObservedPropertySimplePU(FlexAlign.SpaceBetween, this, 'flexAlign');
     this.setInitiallyProvidedValue(r12);
   }
+
   setInitiallyProvidedValue(p12) {
     if (p12.icon === undefined) {
       this.__icon.set(null);
@@ -150,6 +159,7 @@ export class SubHeader extends ViewPU {
       this.flexAlign = p12.flexAlign;
     }
   }
+
   updateStateVars(o12) {
     this.__icon.reset(o12.icon);
     this.__primaryTitle.reset(o12.primaryTitle);
@@ -157,6 +167,7 @@ export class SubHeader extends ViewPU {
     this.__select.reset(o12.select);
     this.__operationType.reset(o12.operationType);
   }
+
   purgeVariableDependenciesOnElmtId(n12) {
     this.__icon.purgeDependencyOnElmtId(n12);
     this.__primaryTitle.purgeDependencyOnElmtId(n12);
@@ -174,6 +185,7 @@ export class SubHeader extends ViewPU {
     this.__buttonWidth.purgeDependencyOnElmtId(n12);
     this.__flexAlign.purgeDependencyOnElmtId(n12);
   }
+
   aboutToBeDeleted() {
     this.__icon.aboutToBeDeleted();
     this.__primaryTitle.aboutToBeDeleted();
@@ -193,96 +205,127 @@ export class SubHeader extends ViewPU {
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
+
   get icon() {
     return this.__icon.get();
   }
+
   set icon(m12) {
     this.__icon.set(m12);
   }
+
   get primaryTitle() {
     return this.__primaryTitle.get();
   }
+
   set primaryTitle(l12) {
     this.__primaryTitle.set(l12);
   }
+
   get secondaryTitle() {
     return this.__secondaryTitle.get();
   }
+  
   set secondaryTitle(k12) {
     this.__secondaryTitle.set(k12);
   }
+
   get select() {
     return this.__select.get();
   }
+
   set select(j12) {
     this.__select.set(j12);
   }
+
   get operationType() {
     return this.__operationType.get();
   }
+
   set operationType(i12) {
     this.__operationType.set(i12);
   }
+
   get isDuplicateLine() {
     return this.__isDuplicateLine.get();
   }
+
   set isDuplicateLine(h12) {
     this.__isDuplicateLine.set(h12);
   }
+
   get textArrowBgColor() {
     return this.__textArrowBgColor.get();
   }
+
   set textArrowBgColor(g12) {
     this.__textArrowBgColor.set(g12);
   }
+
   get buttonBgColor() {
     return this.__buttonBgColor.get();
   }
+
   set buttonBgColor(f12) {
     this.__buttonBgColor.set(f12);
   }
+
   get flexWidth() {
     return this.__flexWidth.get();
   }
+
   set flexWidth(e12) {
     this.__flexWidth.set(e12);
   }
+
   get textArrowWidth() {
     return this.__textArrowWidth.get();
   }
+
   set textArrowWidth(d12) {
     this.__textArrowWidth.set(d12);
   }
+
   get textArrowFocus() {
     return this.__textArrowFocus.get();
   }
+
   set textArrowFocus(c12) {
     this.__textArrowFocus.set(c12);
   }
+
   get buttonFocus() {
     return this.__buttonFocus.get();
   }
+
   set buttonFocus(b12) {
     this.__buttonFocus.set(b12);
   }
+
   get arrowWidth() {
     return this.__arrowWidth.get();
   }
+
   set arrowWidth(a12) {
     this.__arrowWidth.set(a12);
   }
+
   get buttonWidth() {
     return this.__buttonWidth.get();
   }
+
   set buttonWidth(z11) {
     this.__buttonWidth.set(z11);
   }
+
   get flexAlign() {
     return this.__flexAlign.get();
   }
+
   set flexAlign(y11) {
     this.__flexAlign.set(y11);
   }
+
   initialRender() {
     this.observeComponentCreation2((s11, t11) => {
       Flex.create({ justifyContent: this.flexAlign, alignItems: ItemAlign.End });
@@ -297,6 +340,7 @@ export class SubHeader extends ViewPU {
     this.rightArea.bind(this)();
     Flex.pop();
   }
+
   leftArea(h11 = null) {
     this.observeComponentCreation2((j11, k11) => {
       If.create();
@@ -338,6 +382,7 @@ export class SubHeader extends ViewPU {
     }, If);
     If.pop();
   }
+
   rightArea(m10 = null) {
     this.observeComponentCreation2((d11, e11) => {
       If.create();
@@ -392,9 +437,11 @@ export class SubHeader extends ViewPU {
     }, If);
     If.pop();
   }
+
   IconSecondTitleStyle(d9, e9 = null) {
     this.observeComponentCreation2((j10, k10) => {
       Row.create();
+      Row.width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO);
       Row.padding({
         left: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' },
         right: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' },
@@ -464,9 +511,11 @@ export class SubHeader extends ViewPU {
     Text.pop();
     Row.pop();
   }
+
   SubTitleStyle(r8, s8 = null) {
     this.observeComponentCreation2((a9, b9) => {
       Column.create();
+      Column.width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO);
       Column.margin({
         left: { id: -1, type: 10002, params: ['sys.float.margin_left'], bundleName: '', moduleName: '' },
         right: { id: -1, type: 10002, params: ['sys.float.margin_right'], bundleName: '', moduleName: '' },
@@ -506,9 +555,12 @@ export class SubHeader extends ViewPU {
     Text.pop();
     Column.pop();
   }
+
   SecondTitleStyle(i8, j8 = null) {
     this.observeComponentCreation2((p8, q8) => {
       Column.create();
+      Column.alignItems(HorizontalAlign.Start);
+      Column.width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO);
       Column.padding({
         left: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' },
         right: { id: -1, type: 10002, params: ['sys.float.padding_level6'], bundleName: '', moduleName: '' },
@@ -535,18 +587,21 @@ export class SubHeader extends ViewPU {
     Text.pop();
     Column.pop();
   }
+
   SelectStyle(w7, x7 = null) {
     this.observeComponentCreation2((f8, g8) => {
-      Row.create();
-      Row.margin({
+      Column.create();
+      Column.width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO);
+      Column.alignItems(HorizontalAlign.Start);
+      Column.margin({
         left: { id: -1, type: 10002, params: ['sys.float.margin_left'], bundleName: '', moduleName: '' },
         right: { id: -1, type: 10002, params: ['sys.float.margin_right'], bundleName: '', moduleName: '' },
       });
-      Row.onAppear(() => {
+      Column.onAppear(() => {
         this.isDuplicateLine = false;
         this.changeFlexAlign(FlexAlign.SpaceBetween);
       });
-    }, Row);
+    }, Column);
     this.observeComponentCreation2((a8, b8) => {
       Select.create(w7.options);
       Select.selected(w7.selected);
@@ -562,11 +617,14 @@ export class SubHeader extends ViewPU {
       });
     }, Select);
     Select.pop();
-    Row.pop();
+    Column.pop();
   }
+
   PrimaryTitleStyle(n7, o7 = null) {
     this.observeComponentCreation2((u7, v7) => {
       Column.create();
+      Column.width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO);
+      Column.alignItems(HorizontalAlign.Start);
       Column.margin({
         left: { id: -1, type: 10002, params: ['sys.float.margin_left'], bundleName: '', moduleName: '' },
         right: { id: -1, type: 10002, params: ['sys.float.margin_right'], bundleName: '', moduleName: '' },
@@ -593,6 +651,7 @@ export class SubHeader extends ViewPU {
     Text.pop();
     Column.pop();
   }
+
   ButtonStyle(a6, b6 = null) {
     this.observeComponentCreation2((l7, m7) => {
       Row.create();
@@ -600,7 +659,7 @@ export class SubHeader extends ViewPU {
         left: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' },
         right: { id: -1, type: 10002, params: ['sys.float.margin_right'], bundleName: '', moduleName: '' },
       });
-      Row.constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM });
+      Row.width(this.flexWidth / DIVIDEND_NUM);
       Row.justifyContent(FlexAlign.End);
       Row.focusable(true);
     }, Row);
@@ -716,11 +775,12 @@ export class SubHeader extends ViewPU {
     Stack.pop();
     Row.pop();
   }
+
   IconGroupStyle(p4, q4 = null) {
     this.observeComponentCreation2((y5, z5) => {
       Row.create();
       Row.justifyContent(FlexAlign.End);
-      Row.constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM });
+      Row.width(this.flexWidth / DIVIDEND_NUM);
       Row.focusable(true);
       Row.margin({
         left: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' },
@@ -763,7 +823,7 @@ export class SubHeader extends ViewPU {
                               },
                               action: z4.action,
                             }
-                          }, undefined, u5, w5, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 436 }));
+                          }, undefined, u5, w5, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 445 }));
                         }
                         else {
                           this.updateStateVarsOfChildByElmtId(u5, {});
@@ -804,7 +864,7 @@ export class SubHeader extends ViewPU {
                                   this.operationSymbolOptions[y4] : null,
                               },
                             }
-                          }, undefined, m5, o5, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 447 }));
+                          }, undefined, m5, o5, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 456 }));
                         }
                         else {
                           this.updateStateVarsOfChildByElmtId(m5, {});
@@ -834,6 +894,7 @@ export class SubHeader extends ViewPU {
     ForEach.pop();
     Row.pop();
   }
+
   TextArrowStyle(u2, v2 = null) {
     this.observeComponentCreation2((k4, l4) => {
       Row.create();
@@ -841,7 +902,7 @@ export class SubHeader extends ViewPU {
       Row.onAreaChange((n4, o4) => {
         this.textArrowWidth = Number(parseInt(o4.width.toString(), DEFAULT_VALUE));
       });
-      Row.constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM });
+      Row.width(this.flexWidth / DIVIDEND_NUM);
       Row.justifyContent(FlexAlign.End);
       Row.margin({
         left: { id: -1, type: 10002, params: ['sys.float.padding_level4'], bundleName: '', moduleName: '' },
@@ -979,11 +1040,12 @@ export class SubHeader extends ViewPU {
     Stack.pop();
     Row.pop();
   }
+
   LoadingProcessStyle(m2 = null) {
     this.observeComponentCreation2((s2, t2) => {
       Row.create();
       Row.focusable(true);
-      Row.constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM });
+      Row.width(this.flexWidth / DIVIDEND_NUM);
       Row.justifyContent(FlexAlign.End);
       Row.padding({
         top: { id: -1, type: 10002, params: ['sys.float.padding_level2'], bundleName: '', moduleName: '' },
@@ -1006,6 +1068,7 @@ export class SubHeader extends ViewPU {
     }, LoadingProgress);
     Row.pop();
   }
+
   dummyFunction(h2 = null) {
     this.observeComponentCreation2((j2, k2) => {
       Row.create();
@@ -1015,12 +1078,14 @@ export class SubHeader extends ViewPU {
     }, Row);
     Row.pop();
   }
+
   changeFlexAlign(g2) {
     if (this.flexAlign === g2) {
       return;
     }
     this.flexAlign = g2;
   }
+
   rerender() {
     this.updateDirtyElements();
   }
@@ -1037,6 +1102,7 @@ class SingleIconStyle extends ViewPU {
     this.focusBorderWidth = BORDER_WIDTH;
     this.setInitiallyProvidedValue(b2);
   }
+
   setInitiallyProvidedValue(z1) {
     if (z1.bgColor !== undefined) {
       this.bgColor = z1.bgColor;
@@ -1051,30 +1117,38 @@ class SingleIconStyle extends ViewPU {
       this.focusBorderWidth = z1.focusBorderWidth;
     }
   }
+
   updateStateVars(y1) {
   }
+  
   purgeVariableDependenciesOnElmtId(x1) {
     this.__bgColor.purgeDependencyOnElmtId(x1);
     this.__isFocus.purgeDependencyOnElmtId(x1);
   }
+
   aboutToBeDeleted() {
     this.__bgColor.aboutToBeDeleted();
     this.__isFocus.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
+
   get bgColor() {
     return this.__bgColor.get();
   }
+
   set bgColor(w1) {
     this.__bgColor.set(w1);
   }
+
   get isFocus() {
     return this.__isFocus.get();
   }
+
   set isFocus(v1) {
     this.__isFocus.set(v1);
   }
+
   initialRender() {
     this.observeComponentCreation2((e, f) => {
       If.create();
@@ -1188,10 +1262,12 @@ class SingleIconStyle extends ViewPU {
     }, If);
     If.pop();
   }
+
   rerender() {
     this.updateDirtyElements();
   }
 }
+
 class Util {
   static isSymbolicResource(b) {
     if (!Util.isResourceType(b)) {
@@ -1200,6 +1276,7 @@ class Util {
     let c = b;
     return c.type === RESOURCE_TYPE_SYMBOL;
   }
+  
   static isResourceType(a) {
     if (!a) {
       return false;

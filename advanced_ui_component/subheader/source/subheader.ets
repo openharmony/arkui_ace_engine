@@ -24,6 +24,7 @@ const BUTTON_HEIGHT: number = 28;
 const IMAGE_WIDTH: number = 12;
 const BORDER_WIDTH: number = 2;
 const DIVIDEND_NUM: number = 3;
+const DIVIDEND_NUM_TWO: number = 2;
 const SINGLE_LINE_NUM: number = 1;
 const DOUBLE_LINE_NUM: number = 2;
 const INDEX_ZERO: number = 0;
@@ -236,6 +237,7 @@ export struct SubHeader {
           alignment: Alignment.Start,
         })
     }
+    .width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO)
     .commonListPadding()
     .commonMargin()
     .onAppear(() => {
@@ -263,6 +265,7 @@ export struct SubHeader {
           top: $r('sys.float.padding_level1'),
         })
     }
+    .width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO)
     .commonMargin()
     .commonContentPadding()
     .alignItems(HorizontalAlign.Start)
@@ -286,13 +289,15 @@ export struct SubHeader {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
     }
+    .alignItems(HorizontalAlign.Start)
+    .width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO)
     .commonListPadding()
     .commonMargin()
   }
 
   @Builder
   SelectStyle(selectParam: SelectOptions): void {
-    Row() {
+    Column() {
       Select(selectParam.options)
         .selected(selectParam.selected)
         .value(selectParam.value)
@@ -306,6 +311,8 @@ export struct SubHeader {
           weight: FontWeight.Medium,
         })
     }
+    .width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO)
+    .alignItems(HorizontalAlign.Start)
     .margin({
       left: $r('sys.float.margin_left'),
       right: $r('sys.float.margin_right'),
@@ -330,6 +337,8 @@ export struct SubHeader {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
     }
+    .width(this.flexWidth / DIVIDEND_NUM * DIVIDEND_NUM_TWO)
+    .alignItems(HorizontalAlign.Start)
     .commonMargin()
     .commonContentPadding()
   }
@@ -422,7 +431,7 @@ export struct SubHeader {
       left: $r('sys.float.padding_level4'),
       right: $r('sys.float.margin_right'),
     })
-    .constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM })
+    .width(this.flexWidth / DIVIDEND_NUM)
     .justifyContent(FlexAlign.End)
     .focusable(true)
   }
@@ -464,7 +473,7 @@ export struct SubHeader {
       });
     }
     .justifyContent(FlexAlign.End)
-    .constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM })
+    .width(this.flexWidth / DIVIDEND_NUM)
     .focusable(true)
     .margin({
       left: $r('sys.float.padding_level4'),
@@ -575,7 +584,7 @@ export struct SubHeader {
     .onAreaChange((oldValue: Area, newValue: Area) => {
       this.textArrowWidth = Number(parseInt(newValue.width.toString(), DEFAULT_VALUE));
     })
-    .constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM })
+    .width(this.flexWidth / DIVIDEND_NUM)
     .justifyContent(FlexAlign.End)
     .margin({
       left: $r('sys.float.padding_level4'),
@@ -596,7 +605,7 @@ export struct SubHeader {
         })
     }
     .focusable(true)
-    .constraintSize({ minWidth: this.flexWidth / DIVIDEND_NUM })
+    .width(this.flexWidth / DIVIDEND_NUM)
     .justifyContent(FlexAlign.End)
     .padding({
       top: $r('sys.float.padding_level2'),
