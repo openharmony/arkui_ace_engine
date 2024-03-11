@@ -309,14 +309,17 @@ public:
     {
         return axis_;
     }
-    ScrollResult HandleScroll(
-        float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
+    ScrollResult HandleScroll(float offset, int32_t source, NestedState state, float velocity = 0.f) override;
+    ScrollResult HandleScroll(RefPtr<NestableScrollContainer> parent, float offset, int32_t source, NestedState state);
     bool HandleScrollVelocity(float velocity) override;
+    bool HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity);
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    void OnScrollStartRecursive(std::vector<float> positions);
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
     Axis GetParentAxis();
     RefPtr<NestableScrollContainer> SearchParent() override;
+    RefPtr<NestableScrollContainer> SearchParent(Axis scrollAxis);
     /**
      *  End of NestableScrollContainer implementations
      */
@@ -628,6 +631,7 @@ private:
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task) const;
     void OfflineMode();
+    bool FilterScrollEventHandler(const float offset, const float velocity);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -688,13 +692,18 @@ private:
     bool isParentHasScroll_ = false;
     OffsetF relativeOffsetOfScroll_;
     bool isFirstFlingScrollVelocity_ = true;
+    bool isNeedUpdateScrollAxis_ = true;
+    bool isNeedUpdateFilterScrolAxis_ = true;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
     Axis axis_ = Axis::NONE;
+    Axis expectedScrollAxis_ = Axis::FREE;
+    Axis expectedFilterScrollAxis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
     int32_t drawRectWidth_ = 0;
     int32_t drawRectHeight_ = 0;
+    std::unordered_map<Axis, WeakPtr<NestableScrollContainer>> parentsMap_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
