@@ -955,15 +955,6 @@ void TextFieldPattern::HandleBlurEvent()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     UpdateBlurReason();
-    if (!context->GetOnFoucs()) {
-        needToRequestKeyboardInner_ = false;
-        if ((customKeyboardBuilder_ && isCustomKeyboardAttached_)) {
-            CloseKeyboard(true);
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFieldPattern Blur, Close Keyboard.");
-        }
-        StopTwinkling();
-        return;
-    }
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField();
@@ -6181,7 +6172,7 @@ void TextFieldPattern::OnObscuredChanged(bool isObscured)
 
 void TextFieldPattern::CreateHandles()
 {
-    if (IsDragging()) {
+    if (IsDragging() || !HasFocus()) {
         return;
     }
     auto host = GetHost();
