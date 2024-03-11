@@ -70,7 +70,10 @@ bool NavDestinationModelNG::ParseCommonTitle(
             auto theme = NavigationGetTheme();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
             textLayoutProperty->UpdateContent(title);
-            textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
+            //max title font size should be 20.0 vp, because of backbutton
+            textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
+            //min title font size should be 14.0 vp
+            textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
             textLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
             textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
             textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -101,7 +104,10 @@ bool NavDestinationModelNG::ParseCommonTitle(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
-        textLayoutProperty->UpdateFontSize(SUBTITLE_FONT_SIZE);
+        //max title font size shoule be 14.0 vp
+        textLayoutProperty->UpdateAdaptMaxFontSize(NavigationGetTheme()->GetSubTitleFontSize());
+        //min title font size should be 10.0 vp
+        textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
         textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
         textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
         textLayoutProperty->UpdateMaxLines(1);
