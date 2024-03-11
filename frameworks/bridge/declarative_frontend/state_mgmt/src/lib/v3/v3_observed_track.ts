@@ -233,8 +233,12 @@ class ObserveV3 {
       throw new Error(error);
     }
 
+    // enable this trace marker for more fine grained tracing of the update pipeline
+    // note: two (!) end markers need to be enabled
+    // aceTrace.begin("fireChange");
     let changedIdSet = target[ObserveV3.SYMBOL_REFS][attrName];
     if (!changedIdSet || !(changedIdSet instanceof Set)) {
+      // aceTrace.end();
       return;
     }
 
@@ -264,6 +268,8 @@ class ObserveV3 {
         this.monitorIdsChanged_.add(id);
       }
     } // for
+
+    // aceTrace.end();
   }
 
   private updateDirty(): void {
@@ -273,6 +279,7 @@ class ObserveV3 {
   }
 
   private updateDirty2(): void {
+    aceTrace.begin("updateDirty2")
     stateMgmtConsole.debug(`ObservedV3.updateDirty2 ... `);
     // obtain and unregister the removed elmtIds 
     UINodeRegisterProxy.obtainDeletedElmtIds();
@@ -307,11 +314,12 @@ class ObserveV3 {
         this.updateUINodes(elmtIds);
       }
     } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0)
+    aceTrace.end();
   }
 
   private updateDirtyComputedProps(computed: Array<number>): void {
     stateMgmtConsole.debug(`ObservedV3.updateDirtyComputedProps ${computed.length} props: ${JSON.stringify(computed)} ...`);
-    stateMgmtProfiler.begin(`ObservedV3.updateDirtyComputedProps ${computed.length} @computed`);
+    aceTrace.begin(`ObservedV3.updateDirtyComputedProps ${computed.length} @computed`);
     computed.forEach((id) => {
       let comp: ComputedV3 | undefined = this.id2cmp_[id];
       if (comp instanceof ComputedV3) {
@@ -324,13 +332,13 @@ class ObserveV3 {
         }
       }
     });
-    stateMgmtProfiler.end();
+    aceTrace.end();
   }
 
 
   private updateDirtyMonitors(monitors: Set<number>): void {
     stateMgmtConsole.debug(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
-    stateMgmtProfiler.begin(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor`);
+    aceTrace.begin(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor`);
     let monitor : MonitorV3 | undefined;
     let monitorTarget : Object;
     monitors.forEach((watchId) => {
@@ -345,13 +353,19 @@ class ObserveV3 {
         }
       }
     });
-    stateMgmtProfiler.end();
+    aceTrace.end();
   }
 
-
-  private updateUINodes(elmtIds: Array<number>): void {
+  /**
+   * This version of UpdateUINodes does not wait for VSYNC, violates rules
+   * calls UpdateElement, thereby avoids the long and frequent code path from 
+   * FlushDirtyNodesUpdate to CustomNode to ViewPU.updateDirtyElements to UpdateElement
+   * Code left here to reproduce benchmark measurements, compare with future optimisation
+   * @param elmtIds 
+   */
+  private updateUINodesWithoutVSync(elmtIds: Array<number>): void {
     stateMgmtConsole.debug(`ObserveV3.updateUINodes: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
-    stateMgmtProfiler.begin(`ObserveV3.updateUINodes: ${elmtIds.length} elmtId`)
+    aceTrace.begin(`ObserveV3.updateUINodes: ${elmtIds.length} elmtId`)
     elmtIds.forEach((elmtId) => {
       const view = this.id2cmp_[elmtId];
       if (view && view instanceof ViewPU) {
@@ -364,9 +378,26 @@ class ObserveV3 {
         }
       }
     });
-    stateMgmtProfiler.end();
+    aceTrace.end();
   }
 
+  // This is the code path similar to V2, follows the rule that UI updates on VSYNC.
+  // ViewPU queues the elmtId that need update, marks the CustomNode dirty in RenderContext
+  // On next VSYNC runs FlushDirtyNodesUpdate to call rerender to call UpdateElement. Much longer code path
+  // much slower
+  private updateUINodes(elmtIds: Array<number>): void {
+    stateMgmtConsole.debug(`ObserveV3.updateUINodesSlow: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
+    aceTrace.begin(`ObserveV3.updateUINodesSlow: ${elmtIds.length} elmtId`)
+    elmtIds.forEach((elmtId) => {
+      const view = this.id2cmp_[elmtId];
+      if (view && view instanceof ViewPU) {
+        if (view.isViewActive()) {
+          view.uiNodeNeedUpdateV3(elmtId);
+        } 
+      }
+    });
+    aceTrace.end();
+  }
 
   public constructMonitor(target: Object, name: string): void {
     let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + name)
