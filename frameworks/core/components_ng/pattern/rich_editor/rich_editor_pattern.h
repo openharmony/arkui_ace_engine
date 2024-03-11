@@ -257,6 +257,7 @@ public:
     void HandleOnSelectAll() override;
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     bool JudgeDraggable(GestureEvent& info);
+    void CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight);
 
     bool IsUsingMouse() const
     {
@@ -271,11 +272,6 @@ public:
     OffsetF GetSelectionMenuOffset() const
     {
         return selectionMenuOffsetByMouse_;
-    }
-
-    OffsetF GetLastClickOffset() const
-    {
-        return lastClickOffset_;
     }
 
     void SetLastClickOffset(const OffsetF& lastClickOffset)
