@@ -795,6 +795,22 @@ void WebModelNG::SetFirstContentfulPaintId(
     webEventHub->SetOnFirstContentfulPaintEvent(std::move(firstContentfulPaintId));
 }
 
+void WebModelNG::SetFirstMeaningfulPaintId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstMeaningfulPaintId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFirstMeaningfulPaintEvent(std::move(firstMeaningfulPaintId));
+}
+
+void WebModelNG::SetLargestContentfulPaintId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& largestContentfulPaintId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLargestContentfulPaintEvent(std::move(largestContentfulPaintId));
+}
+
 void WebModelNG::SetNavigationEntryCommittedId(
     std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommittedId)
 {

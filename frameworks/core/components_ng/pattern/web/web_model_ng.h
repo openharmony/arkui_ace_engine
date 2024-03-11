@@ -138,6 +138,10 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged) override;
     void SetFirstContentfulPaintId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId) override;
+    void SetFirstMeaningfulPaintId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstMeaningfulPaintId) override;
+    void SetLargestContentfulPaintId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& largestContentfulPaintId) override;
     void SetSafeBrowsingCheckResultId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResultId) override;
     void SetNavigationEntryCommittedId(
