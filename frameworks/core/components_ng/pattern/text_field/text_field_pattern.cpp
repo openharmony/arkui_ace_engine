@@ -1496,6 +1496,7 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
         std::string beforeStr = contentController->GetValueBeforeIndex(selectController->GetStartIndex());
         std::string selectedStr =
             contentController->GetSelectedValue(selectController->GetStartIndex(), selectController->GetEndIndex());
+        pattern->dragValue_ = selectedStr;
         std::string afterStr = contentController->GetValueAfterIndex(selectController->GetEndIndex());
         pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
         itemInfo.extraInfo = selectedStr;
@@ -1575,11 +1576,13 @@ void TextFieldPattern::ShowSelectAfterDragEvent()
 {
     selectController_->UpdateHandleIndex(dragTextStart_, dragTextEnd_);
     showSelect_ = true;
-    processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->ProcessOverlay(false, false, false, false);
-    };
+    if (!isUsingMouse_) {
+        processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ProcessOverlay(false, false, false, false);
+        };
+    }
 }
 
 void TextFieldPattern::InitDragDropEventWithOutDragStart()
@@ -1671,12 +1674,16 @@ void TextFieldPattern::InitDragDropCallBack()
             // Except for DRAG_SUCCESS, all of rest need to show
             auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
             CHECK_NULL_VOID(paintProperty);
+            auto newDragValue =
+                pattern->contentController_->GetSelectedValue(pattern->dragTextStart_, pattern->dragTextEnd_);
             if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS &&
+                newDragValue == pattern->dragValue_ &&
                 paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE) {
                 pattern->ShowSelectAfterDragEvent();
+                auto focusHub = host->GetOrCreateFocusHub();
+                CHECK_NULL_VOID(focusHub);
+                focusHub->RequestFocusImmediately();
             }
-            auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
     };
