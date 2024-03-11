@@ -274,6 +274,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
             floatingContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
         });
         buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
+        SetControlButtonVisibleBeforeAnim(controlButtonsLayoutProperty->GetVisibilityValue());
         controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         AnimationUtils::Animate(option, [buttonsContext, height]() {
             buttonsContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
@@ -288,8 +289,10 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                     0.0f });
                 buttonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
             },
-            [floatingLayoutProperty]() {
+            [floatingLayoutProperty, controlButtonsLayoutProperty, weak = WeakClaim(this)]() {
+                auto enhancePattern = weak.Upgrade();
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
+                controlButtonsLayoutProperty->UpdateVisibility(enhancePattern->GetControlButtonVisibleBeforeAnim());
             });
     }
 }
