@@ -17,6 +17,7 @@
 #include "native_node.h"
 #include "node/dialog_model.h"
 #include "node/node_model.h"
+#include "node/gesture_impl.h"
 
 #include "base/log/log_wrapper.h"
 
@@ -63,6 +64,27 @@ ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
     OHOS::Ace::DialogModel::Show,
     OHOS::Ace::DialogModel::Close,
 };
+
+constexpr int32_t CURRENT_NATIVE_GESTURE_API_VERSION = 1;
+ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
+    CURRENT_NATIVE_GESTURE_API_VERSION,
+    nullptr,
+    nullptr,
+    OHOS::Ace::GestureModel::CreatePanGesture,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    OHOS::Ace::GestureModel::DisposeGesture,
+    nullptr,
+    nullptr,
+    OHOS::Ace::GestureModel::SetGestureEventTarget,
+    OHOS::Ace::GestureModel::AddGestureToNode,
+    nullptr,
+    nullptr,
+    nullptr,
+};
+
 } // namespace
 
 #ifdef __cplusplus
@@ -74,8 +96,7 @@ ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32
     return OH_ArkUI_QueryModuleInterface(type, version);
 }
 
-ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t version)
-{
+ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t version) {
     if (!OHOS::Ace::NodeModel::GetFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
             "fail to get %{public}d node api family of %{public}d version, impl library is not found", type, version);
@@ -105,6 +126,17 @@ ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind typ
                     return nullptr;
                 }
             }
+        case ARKUI_NATIVE_GESTURE: {
+            switch (version) {
+                case CURRENT_NATIVE_GESTURE_API_VERSION:
+                    return reinterpret_cast<ArkUI_AnyNativeAPI*>(&gestureImpl_1);
+                default: {
+                    TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                        "fail to get gesture api family, version is incorrect: %{public}d", version);
+                    return nullptr;
+                }
+            }
+            break;
         }
         default: {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
@@ -112,7 +144,9 @@ ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind typ
             return nullptr;
         }
     }
+
 }
+
 
 #ifdef __cplusplus
 };

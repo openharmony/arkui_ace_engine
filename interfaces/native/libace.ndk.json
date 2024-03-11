@@ -105,7 +105,15 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_QueryModuleInterface"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_GetNodeHandleFromNapiValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GestureEvent_GetActionType"
     },
     {
         "first_introduced": "12",

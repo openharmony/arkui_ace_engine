@@ -31,4 +31,6 @@ bool IsTouchEvent(ArkUI_Int32 type);
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event);
 bool ConvertEventResult(ArkUI_NodeEvent* event, ArkUINodeEvent* origin);
 
+void HandleInnerEvent(ArkUINodeEvent* innerEvent);
+
 }; // namespace OHOS::Ace::NodeModel

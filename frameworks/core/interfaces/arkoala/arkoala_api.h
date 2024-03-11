@@ -254,6 +254,27 @@ enum ArkUITouchEventAction {
     ACTION_CANCEL,
 };
 
+/**
+ * @brief 定义手势事件类型。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 手势事件触发。 */
+    ARKUI_GESTURE_EVENT_ACTION_ACCEPT = 0x01,
+
+    /** 手势事件更新。 */
+    ARKUI_GESTURE_EVENT_ACTION_UPDATE = 0x02,
+
+    /** 手势事件结束。 */
+    ARKUI_GESTURE_EVENT_ACTION_END = 0x04,
+
+    /** 手势事件取消。 */
+    ARKUI_GESTURE_EVENT_ACTION_CANCEL = 0x08,
+
+} ArkUIGestureEventActionType;
+
+
 struct ArkUIHistoricalTouchPoint {
     /**
      * Touch action
@@ -803,6 +824,17 @@ enum ArkUIAPINodeFlags {
     CUSTOM_MEASURE = 1 << 0,
     CUSTOM_LAYOUT = 1 << 1,
     CUSTOM_DRAW = 1 << 2,
+};
+
+enum ArkUIGestureDirection {
+    ArkUI_GESTURE_DIRECTION_NONE = 0,
+    ArkUI_GESTURE_DIRECTION_LEFT = 1,
+    ArkUI_GESTURE_DIRECTION_RIGHT = 2,
+    ArkUI_GESTURE_DIRECTION_HORIZONTAL = 3,
+    ArkUI_GESTURE_DIRECTION_UP = 4,
+    ArkUI_GESTURE_DIRECTION_DOWN = 5,
+    ArkUI_GESTURE_DIRECTION_VERTICAL = 12,
+    ArkUI_GESTURE_DIRECTION_ALL = 15,
 };
 
 enum ArkUIAPICustomOp { MEASURE = 1, LAYOUT = 2, DRAW = 3 };
@@ -1920,17 +1952,15 @@ struct ArkUITabsControllerModifier {
     ArkUINodeHandle (*getTabsController)(ArkUINodeHandle node);
 };
 
+struct ArkUIGesture;
+
 struct ArkUIGestureModifier {
-    void (*tapGestureAsyncEvent)(
-        ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority, ArkUI_Int32 count, ArkUI_Int32 fingers);
-    void (*longPressGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority,
-        ArkUI_Int32 fingers, ArkUI_Int32 repeat, ArkUI_Int32 duration, ArkUI_Int32* event);
-    void (*panGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority, ArkUI_Int32 fingers,
-        ArkUI_Int32 direction, ArkUI_Int32 distance, ArkUI_Int32* event);
-    void (*pinchGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mask, ArkUI_Int32 priority, ArkUI_Int32 fingers,
-        ArkUI_Int32 distance, ArkUI_Int32* event);
-    void (*groupGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 mode, ArkUI_Int32* event);
-    void (*notifyResetGestureAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 subKind);
+    ArkUIGesture* (*createPanGesture)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance);
+    void (*dispose)(ArkUIGesture* recognizer);
+    // gesture event will received in common async event queue.
+    void (*registerGestureEvent)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam);
+    void (*addGestureToNode)(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Uint32 mask);
+    void (*removeGestureFromNode)(ArkUINodeHandle node, ArkUIGesture* recognizer);
 };
 
 struct ArkUISliderModifier {

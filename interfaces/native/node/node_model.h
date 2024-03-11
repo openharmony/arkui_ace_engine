@@ -62,6 +62,7 @@ void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event));
 void UnregisterOnEvent();
 int32_t CheckEvent(ArkUI_NodeEvent* event);
+void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent);
 
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr);
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
