@@ -150,15 +150,8 @@ void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const
 {
     uint32_t hilogDomain = LOG_DOMAINS[static_cast<uint32_t>(domain)] + static_cast<uint32_t>(tag);
     const char* domainContent = domain == LogDomain::FRAMEWORK ? DOMAIN_CONTENTS_MAP.at(tag) : APP_DOMAIN_CONTENT;
-#ifdef ACE_PRIVATE_LOG
-    std::string newFmt(fmt);
-    ReplaceFormatString("{private}", "{public}", newFmt);
-    HiLogPrintArgs(LOG_TYPES[static_cast<uint32_t>(domain)], LOG_LEVELS[static_cast<uint32_t>(level)],
-        hilogDomain, domainContent, newFmt.c_str(), args);
-#else
     HiLogPrintArgs(LOG_TYPES[static_cast<uint32_t>(domain)], LOG_LEVELS[static_cast<uint32_t>(level)],
         hilogDomain, domainContent, fmt, args);
-#endif
 }
 
 #ifdef ACE_INSTANCE_LOG
