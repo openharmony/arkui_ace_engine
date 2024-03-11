@@ -473,6 +473,68 @@ bool SpanItem::IsDragging()
     return selectedStart >= 0 && selectedEnd >= 0;
 }
 
+#define COPY_TEXT_STYLE(group, name, func)                          \
+    do {                                                            \
+        if ((group)->Has##name()) {                                 \
+            sameSpan->group->func((group)->prop##name.value());     \
+        }                                                           \
+    } while (false)
+
+RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
+{
+    auto sameSpan = MakeRefPtr<SpanItem>();
+    COPY_TEXT_STYLE(fontStyle, FontSize, UpdateFontSize);
+    COPY_TEXT_STYLE(fontStyle, TextColor, UpdateTextColor);
+    COPY_TEXT_STYLE(fontStyle, TextShadow, UpdateTextShadow);
+    COPY_TEXT_STYLE(fontStyle, ItalicFontStyle, UpdateItalicFontStyle);
+    COPY_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
+    COPY_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
+    COPY_TEXT_STYLE(fontStyle, FontFeature, UpdateFontFeature);
+    COPY_TEXT_STYLE(fontStyle, TextDecoration, UpdateTextDecoration);
+    COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
+    COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
+    COPY_TEXT_STYLE(fontStyle, TextCase, UpdateTextCase);
+    COPY_TEXT_STYLE(fontStyle, AdaptMinFontSize, UpdateAdaptMinFontSize);
+    COPY_TEXT_STYLE(fontStyle, AdaptMaxFontSize, UpdateAdaptMaxFontSize);
+    COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
+
+    COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
+    COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
+    COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
+    COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
+    COPY_TEXT_STYLE(textLineStyle, TextAlign, UpdateTextAlign);
+    COPY_TEXT_STYLE(textLineStyle, MaxLength, UpdateMaxLength);
+    COPY_TEXT_STYLE(textLineStyle, MaxLines, UpdateMaxLines);
+    COPY_TEXT_STYLE(textLineStyle, HeightAdaptivePolicy, UpdateHeightAdaptivePolicy);
+    COPY_TEXT_STYLE(textLineStyle, TextIndent, UpdateTextIndent);
+    COPY_TEXT_STYLE(textLineStyle, LeadingMargin, UpdateLeadingMargin);
+    COPY_TEXT_STYLE(textLineStyle, WordBreak, UpdateWordBreak);
+    COPY_TEXT_STYLE(textLineStyle, EllipsisMode, UpdateEllipsisMode);
+
+    if (backgroundStyle.has_value()) {
+        sameSpan->backgroundStyle->backgroundColor = backgroundStyle->backgroundColor;
+        sameSpan->backgroundStyle->backgroundRadius = backgroundStyle->backgroundRadius;
+        sameSpan->backgroundStyle->groupId = backgroundStyle->groupId;
+    }
+
+    sameSpan->onClick = onClick;
+    sameSpan->onLongPress = onLongPress;
+    return sameSpan;
+}
+
+std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const
+{
+    // Check the intersection
+    if (this->interval.second <= interval.first || interval.second <= this->interval.first) {
+        return std::nullopt;
+    }
+
+    // Calculate the intersection interval
+    int start = std::max(this->interval.first, interval.first);
+    int end = std::min(this->interval.second, interval.second);
+    return std::make_optional<std::pair<int32_t, int32_t>>(std::make_pair(start, end));
+}
+
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
     double width, double height, VerticalAlign verticalAlign)
 {

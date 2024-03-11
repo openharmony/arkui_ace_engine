@@ -28,7 +28,7 @@
 namespace OHOS::Ace {
 
 class ACE_EXPORT SpanString : public SpanStringBase {
-    DECLARE_ACE_TYPE(SpanString, AceType);
+    DECLARE_ACE_TYPE(SpanString, SpanStringBase);
 
 public:
     SpanString(const SpanString& other);
@@ -50,11 +50,17 @@ public:
     void NotifySpanWatcher();
     const std::list<RefPtr<NG::SpanItem>>& GetSpanItems() const;
     static RefPtr<NG::SpanItem> GetDefaultSpanItem(const std::string& text);
+    void AddSpan(const RefPtr<SpanBase>& span);
 
 protected:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     void BindWithSpans(std::vector<RefPtr<SpanBase>> spans);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
+    void MergeIntervals(std::list<RefPtr<SpanBase>>& spans);
+    void SplitInterval(std::list<RefPtr<SpanBase>>& spans, std::pair<int32_t, int32_t> interval);
+    void ApplyToSpans(const RefPtr<SpanBase>& spans, std::pair<int32_t, int32_t> interval);
+    void SortSpans(std::list<RefPtr<SpanBase>>& spans);
+    bool CanMerge(const RefPtr<SpanBase>& a, const RefPtr<SpanBase>& b);
 
     std::string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;

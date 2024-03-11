@@ -156,6 +156,7 @@ public:
     std::string description;
     std::string content;
     uint32_t unicode = 0;
+    std::pair<int32_t, int32_t> interval;
     std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
     std::unique_ptr<TextLineStyle> textLineStyle = std::make_unique<TextLineStyle>();
     // for text background style
@@ -189,6 +190,8 @@ public:
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
     virtual bool IsDragging();
+    RefPtr<SpanItem> GetSameStyleSpanItem() const;
+    std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::optional<TextStyle> GetTextStyle() const
     {
         return textStyle_;
