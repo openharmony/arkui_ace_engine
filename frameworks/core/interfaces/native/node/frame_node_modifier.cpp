@@ -35,7 +35,9 @@ RefPtr<FrameNode> GetParentNode(UINode* node)
     while (parent != nullptr && !AceType::InstanceOf<FrameNode>(parent)) {
         parent = parent->GetParent();
     }
-    return AceType::DynamicCast<FrameNode>(parent);
+    return (parent == nullptr || parent->GetTag() == "page" || parent->GetTag() == "stage")
+               ? nullptr
+               : AceType::DynamicCast<FrameNode>(parent);
 }
 
 ArkUI_Bool AppendChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
