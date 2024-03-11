@@ -27,6 +27,7 @@
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/frontend.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -299,6 +300,8 @@ public:
     virtual SafeAreaInsets GetSafeAreaWithoutProcess() const;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
+
+    RefPtr<AccessibilityManagerNG> GetAccessibilityManagerNG();
 
     const RefPtr<StageManager>& GetStageManager();
 
@@ -677,7 +680,7 @@ private:
     void ResetDraggingStatus(const TouchEvent& touchPoint);
 
     void CompensateTouchMoveEvent(const TouchEvent& event);
-    
+
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
@@ -759,6 +762,7 @@ private:
     std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnShowMap_;
     std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnHideMap_;
 
+    RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
     RefPtr<FullScreenManager> fullScreenManager_;

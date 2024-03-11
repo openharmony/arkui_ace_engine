@@ -945,6 +945,7 @@ void PipelineContext::SetupRootElement()
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
+    accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     overlayManager_ = MakeRefPtr<OverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
@@ -1002,6 +1003,7 @@ void PipelineContext::SetupSubRootElement()
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
+    accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
     // the subwindow for overlay not need stage
     stageManager_ = MakeRefPtr<StageManager>(nullptr);
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
@@ -1009,6 +1011,11 @@ void PipelineContext::SetupSubRootElement()
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     postEventManager_ = MakeRefPtr<PostEventManager>();
+}
+
+RefPtr<AccessibilityManagerNG> PipelineContext::GetAccessibilityManagerNG()
+{
+    return accessibilityManagerNG_;
 }
 
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
@@ -1740,7 +1747,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
-    if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE) {
+    if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
+        scalePoint.type != TouchType::HOVER_MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
             "TouchEvent Process in ace_container: "
@@ -1825,6 +1833,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
     if (isSubPipe) {
         return;
+    }
+
+    // Currently, SetupRootElement is executed later than InitializeCallback in AceContainer.
+    // We need to check whether accessibilityManagerNG_ is created.
+    if (accessibilityManagerNG_ != nullptr) {
+        accessibilityManagerNG_->HandleAccessibilityHoverEvent(node, scalePoint);
     }
 
     if (scalePoint.type == TouchType::MOVE) {
@@ -2037,7 +2051,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
         auto accessibilityManager = GetAccessibilityManager();
         if (accessibilityManager) {
-            accessibilityManager->OnDumpInfo(params);
+            accessibilityManager->OnDumpInfoNG(params, windowId_);
         }
     } else if (params[0] == "-rotation" && params.size() >= 2) {
     } else if (params[0] == "-animationscale" && params.size() >= 2) {
@@ -2230,6 +2244,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     eventManager_->DispatchMouseEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
+    accessibilityManagerNG_->HandleAccessibilityHoverEvent(node, scaleEvent);
     RequestFrame();
 }
 
@@ -2743,6 +2758,7 @@ void PipelineContext::Destroy()
     scheduleTasks_.clear();
     dirtyNodes_.clear();
     rootNode_.Reset();
+    accessibilityManagerNG_.Reset();
     stageManager_.Reset();
     overlayManager_.Reset();
     sharedTransitionManager_.Reset();
