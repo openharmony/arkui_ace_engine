@@ -22,6 +22,7 @@
 #include "core/common/interaction/interaction_interface.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
@@ -413,7 +414,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             auto dragPreviewInfo = frameNode->GetDragPreview();
-            if (dragPreviewInfo.pixelMap != nullptr) {
+            if (dragPreviewInfo.inspectorId != "") {
+                auto previewPixelMap = GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
+                gestureHub->SetPixelMap(previewPixelMap);
+                gestureHub->SetDragPreviewPixelMap(previewPixelMap);
+            } else if (dragPreviewInfo.pixelMap != nullptr) {
                 gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
                 gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
             } else if (dragPreviewInfo.customNode != nullptr) {
@@ -636,6 +641,71 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     columnNode->SetActive(true);
     columnNode->CreateLayoutTask();
     FlushSyncGeometryNodeTasks();
+}
+
+/* Retrieves a preview PixelMap for a given drag event action.
+ * This function attempts to obtain a screenshot of a frameNode associated with an inspector ID.
+ * If the frameNode with the given ID does not exist or hasn't been rendered,
+ * it falls back to taking a screenshot of the provided frame node.
+ *
+ * @param inspectorId A string representing the unique identifier for the frameNode's ID.
+ * @param selfFrameNode A RefPtr to the frame node associated with the drag event.
+ * @return A RefPtr to a PixelMap containing the preview image, or nullptr if not found.
+ */
+RefPtr<PixelMap> DragEventActuator::GetPreviewPixelMap(
+    const std::string& inspectorId, const RefPtr<FrameNode>& selfFrameNode)
+{
+    // Attempt to retrieve the PixelMap using the inspector ID.
+    auto previewPixelMap = GetPreviewPixelMapByInspectorId(inspectorId);
+
+    // If a preview PixelMap was found, return it.
+    if (previewPixelMap != nullptr) {
+        return previewPixelMap;
+    }
+
+    // If not found by inspector ID, attempt to get a screenshot of the frame node.
+    return GetScreenShotPixelMap(selfFrameNode);
+}
+
+/* Retrieves a preview PixelMap based on an inspector ID.
+ * This function attempts to find a frame node associated with the given inspector ID and then takes a screenshot of it.
+ *
+ * @param inspectorId The unique identifier for a frameNode.
+ * @return A RefPtr to a PixelMap containing the preview image, or nullptr if not found or the ID is empty.
+ */
+RefPtr<PixelMap> DragEventActuator::GetPreviewPixelMapByInspectorId(const std::string& inspectorId)
+{
+    // Check for an empty inspector ID and return nullptr if it is empty.
+    if (inspectorId == "") {
+        return nullptr;
+    }
+
+    // Retrieve the frame node using the inspector's ID.
+    auto dragPreviewFrameNode = Inspector::GetFrameNodeByKey(inspectorId);
+
+    // Take a screenshot of the frame node and return it as a PixelMap.
+    return GetScreenShotPixelMap(dragPreviewFrameNode);
+}
+
+
+/* Captures a screenshot of the specified frame node and encapsulates it in a PixelMap.
+ *
+ * @param frameNode A RefPtr reference to the frame node from which to capture the screenshot.
+ * @return A RefPtr to a PixelMap containing the screenshot.
+ */
+RefPtr<PixelMap> DragEventActuator::GetScreenShotPixelMap(const RefPtr<FrameNode>& frameNode)
+{
+    // Ensure the frame node is not nulls before proceeding.
+    CHECK_NULL_RETURN(frameNode, nullptr);
+
+    // Obtain the rendering context from the frame node.
+    auto context = frameNode->GetRenderContext();
+
+    // If the rendering context is not available, return nullptr.
+    CHECK_NULL_RETURN(context, nullptr);
+
+    // Capture and return the thumbnail PixelMap from the rendering context.
+    return context->GetThumbnailPixelMap(true);
 }
 
 void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)

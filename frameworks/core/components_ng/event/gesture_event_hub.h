@@ -127,6 +127,9 @@ struct DragDropInfo {
     RefPtr<UINode> customNode;
     RefPtr<PixelMap> pixelMap;
     std::string extraInfo;
+    // The inspectorId acts as a preview surrogate identifier which is used
+    // to retrieve a preview image for the item being dragged.
+    std::string inspectorId;
 };
 
 using DragNotifyMsgCore = OHOS::Ace::DragNotifyMsg;
