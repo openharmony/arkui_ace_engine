@@ -20,6 +20,8 @@ declare class UIContext {
 declare interface TouchEvent {
 }
 
+declare interface Position {  x?: number;   y?: number;}
+
 declare type UpdateFunc = (elmtId: number, isFirstRender: boolean, param?: Object) => void;
 
 interface UpdateFuncRecord {
@@ -94,3 +96,19 @@ declare class FinalizationRegistry {
 }
 
 declare function getUINativeModule(): any;
+declare function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: NodePtr, component: ArkComponent): void
+
+declare interface CommonAttribute { }
+
+declare interface AttributeModifier<T> { }
+
+declare class ArkComponent {
+  nativePtr: NodePtr;
+  constructor(nativePtr: NodePtr);
+  applyModifierPatch(): void;
+}
+
+declare class CommonModifier extends ArkComponent implements AttributeModifier<CommonAttribute> {
+  constructor();
+  applyNormalAttribute(instance: CommonAttribute): void;
+}
