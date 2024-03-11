@@ -30,6 +30,7 @@
 #include "core/components/counter/counter_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
@@ -74,6 +75,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    void MockPipelineContextGetTheme();
 
 protected:
     static RefPtr<FrameNode> CreateSlidingPanel(const TestProperty& testProperty);
@@ -90,6 +92,14 @@ void NavrouterTestNg::TearDownTestCase()
 
 void NavrouterTestNg::SetUp() {}
 void NavrouterTestNg::TearDown() {}
+
+void NavrouterTestNg::MockPipelineContextGetTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+}
+
 /**
  * @tc.name: NavrouterTestNg001
  * @tc.desc: Test NavRouterGroupNode::AddChildToGroup.
@@ -3043,5 +3053,846 @@ HWTEST_F(NavrouterTestNg, OnAttachToMainTree003, TestSize.Level1)
     ASSERT_TRUE(node);
     ASSERT_EQ(node->GetTag(), V2::NAVIGATION_VIEW_ETS_TAG);
     navDestinationPattern->OnAttachToMainTree();
+}
+
+/**
+ * @tc.name: ParseCommonTitle001
+ * @tc.desc: Test NavrouterTestNg and cover all conditions of hasSubTitle and hasMainTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, ParseCommonTitle001, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    bool hasSubTitle = true, hasMainTitle = true;
+    ASSERT_FALSE(!hasSubTitle && !hasMainTitle);
+    navDestinationModel.ParseCommonTitle(hasSubTitle, hasMainTitle, "", "");
+
+    hasSubTitle = false;
+    ASSERT_FALSE(!hasSubTitle && !hasMainTitle);
+    navDestinationModel.ParseCommonTitle(hasSubTitle, hasMainTitle, "", "");
+
+    hasMainTitle = false;
+    ASSERT_TRUE(!hasSubTitle && !hasMainTitle);
+    navDestinationModel.ParseCommonTitle(hasSubTitle, hasMainTitle, "", "");
+}
+
+/**
+ * @tc.name: ParseCommonTitle002
+ * @tc.desc: Test NavrouterTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return false
+ *               hasMainTitle is false
+ *               !hasSubTitle is false
+ *               subTitle is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, ParseCommonTitle002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    // Make GetPrevTitleIsCustomValue return false
+    navDestinationNode->propPrevTitleIsCustom_ = false;
+    stack->Push(navDestinationNode);
+
+    // Make sure hasMainTitle is false and !hasSubTitle is false
+    bool hasSubTitle = true, hasMainTitle = false;
+    ASSERT_FALSE(!hasSubTitle);
+    ASSERT_FALSE(hasMainTitle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_TRUE(navDestinationNodeTest);
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNodeTest->GetTitleBarNode());
+    ASSERT_TRUE(titleBarNodeTest);
+    // Make sure GetPrevTitleIsCustomValue return false
+    ASSERT_FALSE(navDestinationNodeTest->GetPrevTitleIsCustomValue(false));
+    auto subTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    ASSERT_FALSE(subTitle);
+    bool ret = navDestinationModel.ParseCommonTitle(hasSubTitle, hasMainTitle, "", "");
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ParseCommonTitle003
+ * @tc.desc: Test NavrouterTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return true
+ *               HasTitleHeight return false
+ *               hasMainTitle is true
+ *               mainTitle is false
+ *               !hasSubTitle is false
+ *               subTitle is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, ParseCommonTitle003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto subTitle = FrameNode::CreateFrameNode("SubTitle", 36, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->subtitle_ = subTitle;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    // Make GetPrevTitleIsCustomValue return true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+    stack->Push(navDestinationNode);
+
+    // Make sure hasMainTitle is true and !hasSubTitle is false
+    bool hasSubTitle = true, hasMainTitle = true;
+    ASSERT_FALSE(!hasSubTitle);
+    ASSERT_TRUE(hasMainTitle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_TRUE(navDestinationNodeTest);
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNodeTest->GetTitleBarNode());
+    ASSERT_TRUE(titleBarNodeTest);
+    // Make sure GetPrevTitleIsCustomValue return true
+    ASSERT_TRUE(navDestinationNodeTest->GetPrevTitleIsCustomValue(false));
+    // Make sure HasTitleHeight return false
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_FALSE(titleBarLayoutProperty->HasTitleHeight());
+    auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    // Make sure mainTitle is false
+    ASSERT_FALSE(mainTitle);
+    // subTitle is true
+    auto subTitleTest = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    ASSERT_TRUE(subTitleTest);
+    bool ret = navDestinationModel.ParseCommonTitle(hasSubTitle, hasMainTitle, "", "");
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ParseCommonTitle004
+ * @tc.desc: Test NavrouterTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return true
+ *               HasTitleHeight return true
+ *               hasMainTitle is true
+ *               mainTitle is true
+ *               !hasSubTitle is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, ParseCommonTitle004, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto title = FrameNode::CreateFrameNode("SubTitle", 36, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->title_ = title;
+    // Make HasTitleHeight return true
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    titleBarLayoutProperty->propTitleHeight_ = NG::DOUBLE_LINE_TITLEBAR_HEIGHT;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    // Make GetPrevTitleIsCustomValue return true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+    stack->Push(navDestinationNode);
+
+    // Make sure hasMainTitle is true and !hasSubTitle is true
+    bool hasSubTitle = false, hasMainTitle = true;
+    ASSERT_TRUE(!hasSubTitle);
+    ASSERT_TRUE(hasMainTitle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_TRUE(navDestinationNodeTest);
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNodeTest->GetTitleBarNode());
+    ASSERT_TRUE(titleBarNodeTest);
+    // Make sure GetPrevTitleIsCustomValue return true
+    ASSERT_TRUE(navDestinationNodeTest->GetPrevTitleIsCustomValue(false));
+    // Make sure HasTitleHeight return true
+    auto titleBarLayoutPropertyTest = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_TRUE(titleBarLayoutPropertyTest->HasTitleHeight());
+    auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    // Make sure mainTitle is true
+    ASSERT_TRUE(mainTitle);
+    bool ret = navDestinationModel.ParseCommonTitle(hasSubTitle, hasMainTitle, "", "");
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: Create001
+ * @tc.desc: Test NavrouterTestNg and make navDestinationNode false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, Create001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(ElementRegister::GetInstance()->MakeUniqueId());
+
+    NavDestinationModelNG navDestinationModel;
+    bool deepRenderCalled = false;
+    auto deepRenderFunc = [&deepRenderCalled]() { deepRenderCalled = true; };
+    navDestinationModel.Create(std::move(deepRenderFunc), AceType::MakeRefPtr<NavDestinationContext>());
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(navDestinationNode);
+    // Make navDestinationNode false
+    int32_t originNodeId = navDestinationNode->nodeId_;
+    navDestinationNode->nodeId_ = originNodeId + 1;
+
+    // Make sure navDestinationNodeTest is false
+    auto parent = AceType::DynamicCast<UINode>(
+        FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, navDestinationNode->nodeId_));
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(parent);
+    ASSERT_FALSE(navDestinationNodeTest);
+    // Prepare for calling the deepRender defined in NavDestinationModelNG::Create()
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+    ASSERT_TRUE(shallowBuilder);
+    ASSERT_FALSE(shallowBuilder->IsExecuteDeepRenderDone());
+    shallowBuilder->ExecuteDeepRender();
+    ASSERT_TRUE(deepRenderCalled);
+}
+
+/**
+ * @tc.name: Create002
+ * @tc.desc: Test NavrouterTestNg and make navDestinationNode true and GetContentNode return false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, Create002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(ElementRegister::GetInstance()->MakeUniqueId());
+
+    NavDestinationModelNG navDestinationModel;
+    bool deepRenderCalled = false;
+    auto deepRenderFunc = [&deepRenderCalled]() { deepRenderCalled = true; };
+    navDestinationModel.Create(std::move(deepRenderFunc), AceType::MakeRefPtr<NavDestinationContext>());
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(navDestinationNode);
+    // Make GetContentNode return false
+    navDestinationNode->contentNode_ = nullptr;
+
+    // Make sure navDestinationNodeTest is true
+    auto parent = AceType::DynamicCast<UINode>(
+        FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, navDestinationNode->nodeId_));
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(parent);
+    ASSERT_TRUE(navDestinationNodeTest);
+    ASSERT_FALSE(navDestinationNodeTest->GetContentNode());
+    // Prepare for calling the deepRender defined in NavDestinationModelNG::Create()
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+    ASSERT_TRUE(shallowBuilder);
+    ASSERT_FALSE(shallowBuilder->IsExecuteDeepRenderDone());
+    shallowBuilder->ExecuteDeepRender();
+    ASSERT_TRUE(deepRenderCalled);
+}
+
+/**
+ * @tc.name: Create003
+ * @tc.desc: Test NavrouterTestNg and make navDestinationNode true and GetContentNode return true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, Create003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(ElementRegister::GetInstance()->MakeUniqueId());
+    
+    NavDestinationModelNG navDestinationModel;
+    bool deepRenderCalled = false;
+    auto deepRenderFunc = [&deepRenderCalled]() { deepRenderCalled = true; };
+    navDestinationModel.Create(std::move(deepRenderFunc), AceType::MakeRefPtr<NavDestinationContext>());
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(navDestinationNode);
+
+    // Make sure navDestinationNodeTest is true
+    auto parent = AceType::DynamicCast<UINode>(
+        FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, navDestinationNode->nodeId_));
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(parent);
+    ASSERT_TRUE(navDestinationNodeTest);
+    ASSERT_TRUE(navDestinationNodeTest->GetContentNode());
+    // Prepare for calling the deepRender defined in NavDestinationModelNG::Create()
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+    ASSERT_TRUE(shallowBuilder);
+    ASSERT_FALSE(shallowBuilder->IsExecuteDeepRenderDone());
+    shallowBuilder->ExecuteDeepRender();
+    ASSERT_TRUE(deepRenderCalled);
+}
+
+/**
+ * @tc.name: SetCustomTitle001
+ * @tc.desc: Test NavrouterTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return false
+ *               currentTitle is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, SetCustomTitle001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_TRUE(navDestinationNode);
+    // Make GetPrevTitleIsCustomValue return false
+    navDestinationNode->propPrevTitleIsCustom_ = false;
+
+    auto customNode = FrameNode::CreateFrameNode("Title", 99, AceType::MakeRefPtr<CustomNodePattern>());
+    ASSERT_TRUE(customNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_TRUE(titleBarNode);
+    // Make sure GetPrevTitleIsCustomValue return false
+    ASSERT_FALSE(navDestinationNode->GetPrevTitleIsCustomValue(false));
+    // Make sure currentTitle is false
+    ASSERT_FALSE(titleBarNode->GetTitle());
+    navDestinationModel.SetCustomTitle(customNode);
+}
+
+/**
+ * @tc.name: SetCustomTitle002
+ * @tc.desc: Test NavrouterTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return true
+ *               currentTitle is true
+ *               GetId is not GetId
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, SetCustomTitle002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_TRUE(navDestinationNode);
+    // Make GetPrevTitleIsCustomValue return true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+    // Make currentTitle true
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto title = FrameNode::CreateFrameNode("Title", 36, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->title_ = title;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+
+    auto customNode = FrameNode::CreateFrameNode("Title", 99, AceType::MakeRefPtr<CustomNodePattern>());
+    ASSERT_TRUE(customNode);
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_TRUE(titleBarNodeTest);
+    // Make sure GetPrevTitleIsCustomValue return true
+    ASSERT_TRUE(navDestinationNode->GetPrevTitleIsCustomValue(false));
+    // Make sure currentTitle is true
+    auto currentTitle = titleBarNodeTest->GetTitle();
+    ASSERT_TRUE(currentTitle);
+    // Make sure GetId is not GetId
+    ASSERT_NE(currentTitle->GetId(), customNode->GetId());
+    navDestinationModel.SetCustomTitle(customNode);
+}
+
+/**
+ * @tc.name: SetCustomTitle003
+ * @tc.desc: Test NavrouterTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return true
+ *               currentTitle is true
+ *               GetId is GetId
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, SetCustomTitle003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_TRUE(navDestinationNode);
+    // Make GetPrevTitleIsCustomValue return true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+    // Make currentTitle true
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto title = FrameNode::CreateFrameNode("Title", 36, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->title_ = title;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_TRUE(titleBarNodeTest);
+    // Make sure GetPrevTitleIsCustomValue return true
+    ASSERT_TRUE(navDestinationNode->GetPrevTitleIsCustomValue(false));
+    // Make sure currentTitle is true
+    auto currentTitle = titleBarNodeTest->GetTitle();
+    ASSERT_TRUE(currentTitle);
+    // Make sure GetId is GetId
+    ASSERT_EQ(currentTitle->GetId(), title->GetId());
+    navDestinationModel.SetCustomTitle(title);
+}
+
+/**
+ * @tc.name: SetTitleHeight001
+ * @tc.desc: Test NavrouterTestNg and cover all conditions of isValid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, SetTitleHeight001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_TRUE(navDestinationGroupNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_TRUE(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_TRUE(titleBarLayoutProperty);
+
+    // Make sure isValid is true
+    bool isValid = true;
+    ASSERT_TRUE(isValid);
+    navDestinationModel.SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT, isValid);
+    // Make sure isValid is false
+    isValid = false;
+    ASSERT_FALSE(isValid);
+    navDestinationModel.SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT, isValid);
+}
+
+/**
+ * @tc.name: ProcessShallowBuilder001
+ * @tc.desc: Test NavrouterTestNg and make isCacheNode_ true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, ProcessShallowBuilder001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->isCacheNode_ = true;
+    
+    ASSERT_TRUE(navDestinationNode->isCacheNode_);
+    navDestinationNode->ProcessShallowBuilder();
+}
+
+/**
+ * @tc.name: GetNavDestinationCustomNode001
+ * @tc.desc: Test NavrouterTestNg and make child false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, GetNavDestinationCustomNode001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    auto customNode = FrameNode::CreateFrameNode("Title", 99, AceType::MakeRefPtr<CustomNodePattern>());
+    navDestinationPattern->customNode_ = customNode;
+
+    ASSERT_TRUE(navDestinationPattern->GetCustomNode());
+    ASSERT_FALSE(navDestinationNode->GetFirstChild());
+    navDestinationNode->GetNavDestinationCustomNode();
+}
+
+/**
+ * @tc.name: GetNavDestinationCustomNode002
+ * @tc.desc: Test NavrouterTestNg and make child true and two InstanceOfs false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, GetNavDestinationCustomNode002, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    // Make child true
+    auto customNode = FrameNode::CreateFrameNode("Custom", 99, AceType::MakeRefPtr<CustomNodePattern>());
+    navDestinationNode->children_.emplace_back(customNode);
+    navDestinationPattern->customNode_ = navDestinationNode;
+
+    auto navDestinationNodeTest = navDestinationPattern->GetCustomNode();
+    ASSERT_TRUE(navDestinationNodeTest);
+    auto child = navDestinationNodeTest->GetFirstChild();
+    ASSERT_TRUE(child);
+    ASSERT_FALSE(AceType::InstanceOf<NavDestinationGroupNode>(child));
+    ASSERT_FALSE(AceType::InstanceOf<CustomNodeBase>(child));
+    navDestinationNode->GetNavDestinationCustomNode();
+}
+
+/**
+ * @tc.name: GetNavDestinationCustomNode003
+ * @tc.desc: Test NavrouterTestNg and make child true and the first InstanceOf true
+ *               and the second InstanceOf false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, GetNavDestinationCustomNode003, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    // Make child true and InstanceOf<NavDestinationGroupNode> true
+    auto navDestinationChildNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        102, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->children_.emplace_front(navDestinationChildNode);
+    navDestinationPattern->customNode_ = navDestinationNode;
+
+    auto navDestinationNodeTest = navDestinationPattern->GetCustomNode();
+    ASSERT_TRUE(navDestinationNodeTest);
+    auto child = navDestinationNodeTest->GetFirstChild();
+    ASSERT_TRUE(child);
+    ASSERT_TRUE(AceType::InstanceOf<NavDestinationGroupNode>(child));
+    ASSERT_FALSE(AceType::InstanceOf<CustomNodeBase>(child));
+    navDestinationNode->GetNavDestinationCustomNode();
+}
+
+/**
+ * @tc.name: GetNavDestinationCustomNode004
+ * @tc.desc: Test NavrouterTestNg and make child true and the first InstanceOf false
+ *               and the second InstanceOf true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, GetNavDestinationCustomNode004, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_TRUE(navDestinationPattern);
+    // Make child true and InstanceOf<NavDestinationGroupNode> true
+    auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(201, "Custom");
+    navDestinationNode->children_.emplace_front(customNode);
+    navDestinationPattern->customNode_ = navDestinationNode;
+
+    auto navDestinationNodeTest = navDestinationPattern->GetCustomNode();
+    ASSERT_TRUE(navDestinationNodeTest);
+    auto child = navDestinationNodeTest->GetFirstChild();
+    ASSERT_TRUE(child);
+    ASSERT_FALSE(AceType::InstanceOf<NavDestinationGroupNode>(child));
+    ASSERT_TRUE(AceType::InstanceOf<CustomNodeBase>(child));
+    navDestinationNode->GetNavDestinationCustomNode();
+}
+
+/**
+ * @tc.name: MeasureContentChild001
+ * @tc.desc: Test NavrouterTestNg and cover all conditions of IsAutoHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, MeasureContentChild001, TestSize.Level1)
+{
+    auto algorithm = AceType::MakeRefPtr<NavDestinationLayoutAlgorithm>();
+    auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
+    // Make hostNode not NULL
+    auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>("navDestinationNode", 11, pattern);
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    navDestinationNode->children_.push_back(titleBarNode);
+    // Make contentNode not NULL
+    navDestinationNode->contentNode_ = titleBarNode;
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    // Make navDestinationLayoutProperty not NULL
+    auto navDestinationLayoutProperty = AceType::MakeRefPtr<NavDestinationLayoutProperty>();
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize.width_ = 20.0f;
+    constraint.selfIdealSize.height_ = 30.0f;
+    // Make constraint not NULL
+    navDestinationLayoutProperty->layoutConstraint_ = constraint;
+    navDestinationLayoutProperty->contentConstraint_ = constraint;
+
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(
+        AceType::WeakClaim(AceType::RawPtr(navDestinationNode)), geometryNode, navDestinationLayoutProperty);
+    RefPtr<LayoutWrapperNode> titleBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(titleBarNode, geometryNode, titleBarNode->GetLayoutProperty());
+    layoutWrapper->currentChildCount_ = 0;
+    layoutWrapper->childrenMap_.try_emplace(layoutWrapper->currentChildCount_++, titleBarLayoutWrapper);
+    // Make sure IsAutoHeight is false
+    auto contentNode = navDestinationNode->GetContentNode();
+    ASSERT_TRUE(contentNode);
+    auto index = navDestinationNode->GetChildIndexById(contentNode->GetId());
+    ASSERT_TRUE(layoutWrapper->GetOrCreateChildByIndex(index));
+    ASSERT_FALSE(NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty));
+    algorithm->Measure(layoutWrapper);
+
+    // Make IsAutoHeight true
+    navDestinationLayoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    auto& calcLayoutConstraint = navDestinationLayoutProperty->GetCalcLayoutConstraint();
+    ASSERT_TRUE(calcLayoutConstraint);
+    auto calcSize = CalcSize();
+    calcSize.height_ = CalcLength("auto");
+    calcLayoutConstraint->selfIdealSize = calcSize;
+    // Make sure IsAutoHeight is true
+    ASSERT_TRUE(NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty));
+    algorithm->Measure(layoutWrapper);
+}
+
+/*
+ * @tc.name: OnDetachFromMainTree001
+ * @tc.desc: Test NavrouterTestNg and cover all conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, OnDetachFromMainTree001, TestSize.Level1)
+{
+    auto navRouterNode = NavRouterGroupNode::GetOrCreateGroupNode(
+        "navRouterNode", 11, []() { return AceType::MakeRefPtr<NavRouterPattern>(); });
+
+    // Make sure navDestinationNode_ is false
+    ASSERT_FALSE(navRouterNode->navDestinationNode_);
+    navRouterNode->OnDetachFromMainTree(false);
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navRouterNode->navDestinationNode_ = navDestinationNode;
+
+    ASSERT_TRUE(navRouterNode->navDestinationNode_);
+    // Make sure Upgrade return false
+    ASSERT_FALSE(navRouterNode->weakNavigation_.Upgrade());
+    navRouterNode->OnDetachFromMainTree(false);
+
+    // Make Upgrade return true
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navRouterNode->weakNavigation_ = WeakPtr<NavigationGroupNode>(navigationNode);
+
+    ASSERT_TRUE(navRouterNode->navDestinationNode_);
+    ASSERT_TRUE(navRouterNode->weakNavigation_.Upgrade());
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_FALSE(navigationPattern->GetNavigationStack());
+    // Make sure stack is false
+    navRouterNode->OnDetachFromMainTree(false);
+
+    // Make stack true
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    
+    ASSERT_TRUE(navRouterNode->navDestinationNode_);
+    ASSERT_TRUE(navRouterNode->weakNavigation_.Upgrade());
+    ASSERT_TRUE(navigationPattern->GetNavigationStack());
+    navRouterNode->OnDetachFromMainTree(false);
+}
+
+/*
+ * @tc.name: AddNavDestinationToNavigation001
+ * @tc.desc: Test AddNavDestinationToNavigation and cover all conditions of
+ *               GetNavigationMode and GetNavigationStackProvided.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, AddNavDestinationToNavigation001, TestSize.Level1)
+{
+    auto navRouterNode = NavRouterGroupNode::GetOrCreateGroupNode(
+        "navRouterNode", 11, []() { return AceType::MakeRefPtr<NavRouterPattern>(); });
+    // Make navigationNode not NULL
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navRouterNode->weakNavigation_ = WeakPtr<NavigationGroupNode>(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_TRUE(navigationPattern);
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    // Make GetNavigationMode not NavigationMode::SPLIT
+    navigationPattern->navigationMode_ = NavigationMode::AUTO;
+
+    ASSERT_TRUE(navRouterNode->weakNavigation_.Upgrade());
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navRouterNode->GetNavDestinationNode());
+    ASSERT_FALSE(navDestinationNode);
+    ASSERT_FALSE(navigationPattern->GetNavigationMode() == NavigationMode::SPLIT);
+    navRouterNode->AddNavDestinationToNavigation();
+
+    // Make GetNavigationMode NavigationMode::SPLIT
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    // Make GetNavigationStackProvided return true
+    navigationPattern->navigationStackProvided_ = true;
+
+    ASSERT_TRUE(navRouterNode->weakNavigation_.Upgrade());
+    ASSERT_FALSE(navDestinationNode);
+    ASSERT_TRUE(navigationPattern->GetNavigationMode() == NavigationMode::SPLIT);
+    ASSERT_FALSE(!navigationPattern->GetNavigationStackProvided());
+    navRouterNode->AddNavDestinationToNavigation();
+
+    // Make GetNavigationStackProvided return false
+    navigationPattern->navigationStackProvided_ = false;
+
+    ASSERT_TRUE(navRouterNode->weakNavigation_.Upgrade());
+    ASSERT_FALSE(navDestinationNode);
+    ASSERT_TRUE(navigationPattern->GetNavigationMode() == NavigationMode::SPLIT);
+    ASSERT_TRUE(!navigationPattern->GetNavigationStackProvided());
+    navRouterNode->AddNavDestinationToNavigation();
+}
+
+/*
+ * @tc.name: AddNavDestinationToNavigation002
+ * @tc.desc: Test AddNavDestinationToNavigation and make the logic as follows:
+ *               routeInfo is false
+ *               navDestination is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, AddNavDestinationToNavigation002, TestSize.Level1)
+{
+    auto navRouterNode = NavRouterGroupNode::GetOrCreateGroupNode(
+        "navRouterNode", 11, []() { return AceType::MakeRefPtr<NavRouterPattern>(); });
+    // Make navigationNode not NULL
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navRouterNode->weakNavigation_ = WeakPtr<NavigationGroupNode>(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_TRUE(navigationPattern);
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    ASSERT_TRUE(navRouterNode->weakNavigation_.Upgrade());
+    // Make sure navDestination is false
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navRouterNode->GetNavDestinationNode());
+    ASSERT_FALSE(navDestinationNode);
+    // Make sure routeInfo is false
+    auto navRouterPattern = navRouterNode->GetPattern<NavRouterPattern>();
+    auto routeInfo = navRouterPattern->GetRouteInfo();
+    ASSERT_FALSE(routeInfo);
+    navRouterNode->AddNavDestinationToNavigation();
+}
+
+/*
+ * @tc.name: AddNavDestinationToNavigation003
+ * @tc.desc: Test AddNavDestinationToNavigation and make the logic as follows:
+ *               routeInfo is false
+ *               navDestination is true
+ *               shallowBuilder is false
+ *               destinationContent is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, AddNavDestinationToNavigation003, TestSize.Level1)
+{
+    auto navRouterNode = NavRouterGroupNode::GetOrCreateGroupNode(
+        "navRouterNode", 11, []() { return AceType::MakeRefPtr<NavRouterPattern>(); });
+    // Make navigationNode not NULL
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navRouterNode->weakNavigation_ = WeakPtr<NavigationGroupNode>(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_TRUE(navigationPattern);
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    // Make navDestination true
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navRouterNode->navDestinationNode_ = navDestinationNode;
+    
+    ASSERT_TRUE(navRouterNode->weakNavigation_.Upgrade());
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(navRouterNode->GetNavDestinationNode());
+    ASSERT_TRUE(navDestinationNodeTest);
+    auto currentNavDestination =
+        AceType::DynamicCast<NavDestinationGroupNode>(navigationPattern->GetNavDestinationNode());
+    ASSERT_NE(currentNavDestination, navDestinationNodeTest);
+    auto navRouterPattern = navRouterNode->GetPattern<NavRouterPattern>();
+    auto routeInfo = navRouterPattern->GetRouteInfo();
+    ASSERT_FALSE(routeInfo);
+    // Make sure shallowBuilder is false
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_FALSE(navDestinationPattern->GetShallowBuilder());
+    // Make sure destinationContent is false
+    ASSERT_FALSE(navDestinationNode->GetContentNode());
+    navRouterNode->AddNavDestinationToNavigation();
+}
+
+/*
+ * @tc.name: AddNavDestinationToNavigation004
+ * @tc.desc: Test AddNavDestinationToNavigation and make the logic as follows:
+ *               routeInfo is false
+ *               navDestination is true
+ *               shallowBuilder is true
+ *               navRouteMode is NavRouteMode::PUSH
+ *               destinationContent is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, AddNavDestinationToNavigation004, TestSize.Level1)
+{
+    auto navRouterNode = NavRouterGroupNode::GetOrCreateGroupNode(
+        "navRouterNode", 11, []() { return AceType::MakeRefPtr<NavRouterPattern>(); });
+    // Make navigationNode not NULL
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navRouterNode->weakNavigation_ = WeakPtr<NavigationGroupNode>(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_TRUE(navigationPattern);
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    // Make navDestination true
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navRouterNode->navDestinationNode_ = navDestinationNode;
+    // Make shallowBuilder true
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    auto deepRender = []() -> RefPtr<UINode> {
+        return ViewStackProcessor::GetInstance()->Finish();
+    };
+    navDestinationPattern->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender));
+    auto navRouterPattern = navRouterNode->GetPattern<NavRouterPattern>();
+    // Make navRouteMode NavRouteMode::PUSH
+    navRouterPattern->mode_ = NavRouteMode::PUSH;
+    // Make destinationContent true
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    navDestinationNode->contentNode_ = titleBarNode;
+    
+    ASSERT_TRUE(navRouterNode->weakNavigation_.Upgrade());
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(navRouterNode->GetNavDestinationNode());
+    ASSERT_TRUE(navDestinationNodeTest);
+    auto currentNavDestination =
+        AceType::DynamicCast<NavDestinationGroupNode>(navigationPattern->GetNavDestinationNode());
+    ASSERT_NE(currentNavDestination, navDestinationNodeTest);
+    auto routeInfo = navRouterPattern->GetRouteInfo();
+    ASSERT_FALSE(routeInfo);
+    // Make sure shallowBuilder is true
+    ASSERT_TRUE(navDestinationPattern->GetShallowBuilder());
+    // Make sure navRouteMode is NavRouteMode::PUSH
+    ASSERT_EQ(navRouterPattern->GetNavRouteMode(), NavRouteMode::PUSH);
+    // Make sure destinationContent is true
+    ASSERT_TRUE(navDestinationNode->GetContentNode());
+    navRouterNode->AddNavDestinationToNavigation();
+}
+
+/*
+ * @tc.name: AddNavDestinationToNavigation005
+ * @tc.desc: Test AddNavDestinationToNavigation and make the logic as follows:
+ *               routeInfo is false
+ *               navDestination is true
+ *               shallowBuilder is true
+ *               navRouteMode is not NavRouteMode::PUSH
+ *               destinationContent is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, AddNavDestinationToNavigation005, TestSize.Level1)
+{
+    auto navRouterNode = NavRouterGroupNode::GetOrCreateGroupNode(
+        "navRouterNode", 11, []() { return AceType::MakeRefPtr<NavRouterPattern>(); });
+    // Make navigationNode not NULL
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navRouterNode->weakNavigation_ = WeakPtr<NavigationGroupNode>(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_TRUE(navigationPattern);
+    RefPtr<NavigationStack> navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    // Make navDestination true
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navRouterNode->navDestinationNode_ = navDestinationNode;
+    // Make shallowBuilder true
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    auto deepRender = []() -> RefPtr<UINode> {
+        return ViewStackProcessor::GetInstance()->Finish();
+    };
+    navDestinationPattern->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender));
+    // Make destinationContent true
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    navDestinationNode->contentNode_ = titleBarNode;
+
+    ASSERT_TRUE(navRouterNode->weakNavigation_.Upgrade());
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(navRouterNode->GetNavDestinationNode());
+    ASSERT_TRUE(navDestinationNodeTest);
+    auto currentNavDestination =
+        AceType::DynamicCast<NavDestinationGroupNode>(navigationPattern->GetNavDestinationNode());
+    ASSERT_NE(currentNavDestination, navDestinationNodeTest);
+    auto navRouterPattern = navRouterNode->GetPattern<NavRouterPattern>();
+    auto routeInfo = navRouterPattern->GetRouteInfo();
+    ASSERT_FALSE(routeInfo);
+    // Make sure shallowBuilder is true
+    ASSERT_TRUE(navDestinationPattern->GetShallowBuilder());
+    // Make sure navRouteMode is not NavRouteMode::PUSH
+    ASSERT_NE(navRouterPattern->GetNavRouteMode(), NavRouteMode::PUSH);
+    // Make sure destinationContent is true
+    ASSERT_TRUE(navDestinationNode->GetContentNode());
+    navRouterNode->AddNavDestinationToNavigation();
 }
 } // namespace OHOS::Ace::NG
