@@ -55,6 +55,9 @@ public:
     virtual void ClearPopupNG() = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
+    virtual void ShowDialogNGPrepare() = 0;
+    virtual RefPtr<NG::FrameNode> ShowDialogNGWithNode(
+        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) = 0;
     virtual void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) = 0;
     virtual void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) = 0;
     virtual void CloseCustomDialogNG(int32_t dialogId) = 0;

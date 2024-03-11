@@ -1535,12 +1535,24 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     RefPtr<UINode> customNode;
     // create custom builder content
     if (buildFunc) {
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        buildFunc();
-        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        CHECK_NULL_RETURN(customNode, nullptr);
+        customNode = BuildFrameNode(buildFunc);
     }
+    return ShowDialogWithNode(dialogProps, customNode, isRightToLeft);
+}
 
+RefPtr<UINode> OverlayManager::BuildFrameNode(std::function<void()>& buildFunc)
+{
+    RefPtr<UINode> customNode;
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    buildFunc();
+    customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_RETURN(customNode, nullptr);
+    return customNode;
+}
+
+RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(
+    const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
+{
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
     BeforeShowDialog(dialog);
