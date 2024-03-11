@@ -1724,7 +1724,15 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
         .isSysBlurStyle = false,
         .customBuilder = dialogAttr.customBuilder,
         .maskRect = dialogAttr.maskRect,
-        .onWillDismiss = dialogAttr.customOnWillDismiss
+        .onWillDismiss = dialogAttr.customOnWillDismiss,
+        .borderWidth = dialogAttr.borderWidth,
+        .borderColor = dialogAttr.borderColor,
+        .borderStyle = dialogAttr.borderStyle,
+        .borderRadius = dialogAttr.borderRadius,
+        .shadow = dialogAttr.shadow,
+        .backgroundColor = dialogAttr.backgroundColor,
+        .width = dialogAttr.width,
+        .height = dialogAttr.height,
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();

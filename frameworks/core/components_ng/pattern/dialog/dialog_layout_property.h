@@ -43,6 +43,8 @@ public:
         props->propShowInSubWindow_ = CloneShowInSubWindow();
         props->propIsModal_ = CloneIsModal();
         props->propDialogButtonDirection_ = CloneDialogButtonDirection();
+        props->propWidth_ = CloneWidth();
+        props->propHeight_ = CloneHeight();
         return props;
     }
 
@@ -56,6 +58,8 @@ public:
         ResetAutoCancel();
         ResetShowInSubWindow();
         ResetIsModal();
+        ResetWidth();
+        ResetHeight();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DialogAlignment, DialogAlignment, PROPERTY_UPDATE_MEASURE);
@@ -68,6 +72,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsScenceBoardDialog, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DialogButtonDirection, DialogButtonDirection, PROPERTY_UPDATE_MEASURE);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Width, CalcDimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Height, CalcDimension, PROPERTY_UPDATE_MEASURE);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
@@ -89,6 +95,8 @@ public:
         json->Put("buttonDirection", DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(
                                          propDialogButtonDirection_.value_or(DialogButtonDirection::AUTO))
                                          .c_str());
+        json->Put("width", propWidth_.value_or(CalcDimension(Dimension(-1))).Value());
+        json->Put("height", propHeight_.value_or(CalcDimension(Dimension(-1))).Value());
     }
 
 private:
