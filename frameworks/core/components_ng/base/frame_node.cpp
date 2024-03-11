@@ -1493,7 +1493,7 @@ void FrameNode::FlushUpdateAndMarkDirty()
     MarkDirtyNode();
 }
 
-void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
 {
     if (CheckNeedMakePropertyDiff(extraFlag)) {
         if (isPropertyDiffMarked_) {
@@ -1505,7 +1505,7 @@ void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
         isPropertyDiffMarked_ = true;
         return;
     }
-    MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
+    MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag, childExpansiveAndMark);
 }
 
 RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame(bool checkBoundary) const
@@ -1574,15 +1574,16 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
     }
 }
 
-bool FrameNode::RequestParentDirty()
+bool FrameNode::RequestParentDirty(bool childExpansiveAndMark)
 {
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_RETURN(parent, false);
-    parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST, childExpansiveAndMark);
     return true;
 }
 
-void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag)
+void FrameNode::MarkDirtyNode(
+    bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
 {
     if (CheckNeedRender(extraFlag)) {
         paintProperty_->UpdatePropertyChangeFlag(extraFlag);
@@ -1599,8 +1600,20 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
 
     if (CheckNeedRequestMeasureAndLayout(layoutFlag)) {
         auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-        if ((!isMeasureBoundary && IsNeedRequestParentMeasure()) || (opts && opts->ExpansiveToMark())) {
-            if (RequestParentDirty()) {
+        auto selfExpansiveToMark = opts && opts->ExpansiveToMark();
+        if ((!isMeasureBoundary && IsNeedRequestParentMeasure()) || selfExpansiveToMark) {
+            bool parentStopMark = false;
+            auto parent = GetAncestorNodeOfFrame();
+            if (parent) {
+                auto parentPattern = parent->GetPattern();
+                parentStopMark = parentPattern && parentPattern->StopExpandMark();
+            }
+            // case 1: child not expand and mark, but self expand, need to check if parent stop expand mark
+            // case 2: child and self not expand, regular mark parent
+            // case 3: child expand and mark, need to check parent stop expand
+            bool needMarkParent =
+                !childExpansiveAndMark || ((childExpansiveAndMark || selfExpansiveToMark) && !parentStopMark);
+            if (needMarkParent && RequestParentDirty(selfExpansiveToMark)) {
                 return;
             }
         }

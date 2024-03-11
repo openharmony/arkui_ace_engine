@@ -81,6 +81,11 @@ public:
         return true;
     }
 
+    virtual bool StopExpandMark()
+    {
+        return false;
+    }
+
     // The pattern needs softkeyboard is like search, rich editor, text area, text field pattern.
     virtual bool NeedSoftKeyboard() const
     {
